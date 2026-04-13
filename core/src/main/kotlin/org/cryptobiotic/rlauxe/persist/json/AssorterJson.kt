@@ -129,7 +129,7 @@ fun AssorterIF.publishJson() : AssorterIFJson {
             AssorterIFJson(
                 "AboveThreshold",
                 reportedMean = this.dilutedMean(),
-                winner = this.winner,
+                winner = this.candId,
                 minFraction = this.t,
             )
         is BelowThreshold ->

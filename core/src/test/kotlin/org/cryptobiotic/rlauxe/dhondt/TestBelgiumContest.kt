@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.dhondt
 
+import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.BelowThreshold
@@ -15,21 +16,32 @@ import kotlin.test.assertEquals
 class TestBelgiumContest {
     val config: Config
     val contests: List<ContestWithAssertions>
+    val rounds: List<AuditRound>
     val infos: Map<Int, ContestInfo>
     val cardManifest: CardManifest
 
     init {
-        val auditdir = "$testdataDir/cases/belgium/2024/Anvers/audit"
+        val auditdir = "$testdataDir/cases/belgium/2024limited/Anvers/audit"
         val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
         cardManifest = auditRecord.readSortedManifest()
         config = auditRecord.config
         contests = auditRecord.contests
+        rounds = auditRecord.rounds
         infos = contests.map{ it.contest.info() }.associateBy { it.id }
     }
 
     @Test
     fun testAssorters() {
         testAssorters(contests.first())
+    }
+
+    @Test
+    fun testShowDhondtAssertions() {
+        contests.forEach{ contestUA ->
+            println("${contestUA.contest}\n")
+            val result = (contestUA.contest as DHondtContest).showAssertions(rounds)
+            println(result)
+        }
     }
 
     fun testAssorters(contestUA: ContestWithAssertions) {

@@ -1,10 +1,9 @@
 package org.cryptobiotic.rlauxe.belgium
 
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
-import org.cryptobiotic.rlauxe.dhondt.ProtoContest
+import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.DhondtScore
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
@@ -58,7 +57,7 @@ class TestBelgiumElection {
     }
 }
 
-fun testCvrs(dcontest: ProtoContest, contestd: DHondtContest) {
+fun testCvrs(dcontest: DhondtBuilder, contestd: DHondtContest) {
 
     println("testCvrs2 ----------------------------------------")
     val cvrs = contestd.createSimulatedCvrs()

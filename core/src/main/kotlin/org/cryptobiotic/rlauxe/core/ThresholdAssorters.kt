@@ -227,8 +227,8 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
  this seems to give slightly bigger margins, so is preferrable
 */
 
-data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double): AssorterIF  {
-    val id = info.id
+data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double): AssorterIF  {
+    val id = info.id // contest id !!
     val lowerg = -t
     val upperg = (1.0 - t)
     val c = -1.0 / (2 * lowerg)  // = 1/(2t)
@@ -240,7 +240,7 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
     }
 
     fun g(vote: Int): Double {
-        return if (vote == winner) (1.0 - t) else -t
+        return if (vote == candId) (1.0 - t) else -t
     }
 
     fun h(cand: Int): Double {
@@ -273,7 +273,7 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
 
     override fun hashcodeDesc() = "AboveThreshold ${winLose()} ${info.name}" // must be unique for serialization
 
-    override fun winner() = winner
+    override fun winner() = candId
     override fun loser() = -1
 
     override fun dilutedMean() = dilutedMean

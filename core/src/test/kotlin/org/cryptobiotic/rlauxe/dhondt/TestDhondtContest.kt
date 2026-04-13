@@ -39,7 +39,7 @@ class TestDhondtContest {
     fun testCvrs() {
         val undervotes = 200
         val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
-        val dcontest: ProtoContest = makeProtoContest("contest1", 1, parties, 8, undervotes, minPct)
+        val dcontest: DhondtBuilder = makeProtoContest("contest1", 1, parties, 8, undervotes, minPct)
 
         println("\nContestDHondt.cvrs, AssorterIF")
         val nvotes = dcontest.validVotes

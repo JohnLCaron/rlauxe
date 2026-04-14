@@ -21,7 +21,7 @@ class TestBelgiumContest {
     val cardManifest: CardManifest
 
     init {
-        val auditdir = "$testdataDir/cases/belgium/2024limited/Anvers/audit"
+        val auditdir = "$testdataDir/cases/belgium/2024limited/Bruxelles/audit"
         val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
         cardManifest = auditRecord.readSortedManifest()
         config = auditRecord.config

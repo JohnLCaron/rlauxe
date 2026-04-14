@@ -72,9 +72,10 @@ class DHondtContest(
     val winnerSeats : Map<Int, Int> // cand, nseats
 
     // dhondts and threshold assorters; these are set at creation, but not serialized, so cant assume they exist
+    // can we put the generation of these inside? problem is ContestUA is serialized seperately, would have to rejigger that
     val assorters = mutableListOf<AssorterIF>()
 
-    val dhondtCandidates = mutableMapOf<String, DhondtCandidate>()
+    val parties: List<DhondtCandidate>
     val sortedScores = mutableListOf<DhondtScore>()
     val sortedRawScores = mutableListOf<DhondtScore>()
 
@@ -90,11 +91,12 @@ class DHondtContest(
         belowMinPct = belowMinPctM.toSet()
 
         // recreate the parties
-        val parties = info.candidateIds.map { id ->
+        parties = info.candidateIds.map { id ->
             DhondtCandidate(info.candidateIdToName[id]!!, id, votes[id]!!)
         }
         // could use belowMinPct; these dont gave first/last yet
-        parties.forEach { if (it.votes/nvotes.toDouble() < info.minFraction) it.belowMinPct = true }
+        // parties.forEach { if (it.votes/nvotes.toDouble() < info.minFraction) it.belowMinPct = true }
+        parties.forEach { it.belowMinPct = belowMinPct.contains( it.id)  }
 
         // recreate the winners and losers
         val nseats = info.nwinners
@@ -132,6 +134,8 @@ class DHondtContest(
             winnerSeatsM[it.candidate] = count + 1
         }
         winnerSeats = winnerSeatsM.toMap()
+
+        // fields in superclass
         winners = winnerSeats.keys.toList()
         losers = info.candidateIds.filter { !winners.contains(it) }
         winnerNames = winners.map { info.candidateIdToName[it]!! }
@@ -316,11 +320,12 @@ class DHondtContest(
             appendLine("------------------------------------------------------------------------------")
             append(showAssertionThrashers(thrashers, candNameWidth))
             val thrasherIds = thrashers.map { it.assorter.winner() }.toSet()
-            val alt = AltDhondt(info, votes, belowMinPct - thrasherIds)
+            // increase nwinners
+            val infoPlus = info.copy(nwinners = info.nwinners + thrashers.size)
+            val alt = AltDhondt(infoPlus, votes, belowMinPct - thrasherIds)
             append(alt.showAssertions(lastAssertionRounds))
         }
     }
-
 
     data class AssertionRiskGroup(val loserId: Int) {
         val arms = mutableListOf<AssertionRiskMargin>()
@@ -331,7 +336,12 @@ class DHondtContest(
         fun sortedArms() = arms.sortedBy { it.nomargin }
     }
 
-    data class AssertionRiskMargin(val ar: AssertionRound, val assorter: DHondtAssorter, val loserScore: DhondtScore, val auditResult: AuditRoundResult?) {
+    data class AssertionRiskMargin(
+        val ar: AssertionRound,
+        val assorter: DHondtAssorter,
+        val loserScore: DhondtScore,
+        val auditResult: AuditRoundResult?
+    ) {
         val nomargin = 2.0 * assorter.noerror() - 1.0
         val risk = ar.auditResult?.pmin ?: Double.NaN
         val nmvrs = ar.auditResult?.samplesUsed ?: 0
@@ -453,6 +463,10 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         return this
     }
 
+    // Proportional p.15
+    // gA,B (b) := bA /d(WA ) − bB /d(LB )
+    // where bA (resp. bB ) is 1 if there is a vote for party A (resp. B), 0 otherwise.
+
     fun g(partyVote: Int): Double {
         return if (partyVote == winner) upperg
             else if (partyVote == loser) lowerg
@@ -487,7 +501,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
 
     override fun desc() = buildString {
         append("${shortName()}: winner '${info.candidateIdToName[winner()]}'/$firstSeatLost")
-        append(" loser '${info.candidateIdToName[loser()]}/$lastSeatWon' upperBound=${df(upperBound())}")
+        append(" loser ${info.candidateIdToName[loser()]}/$lastSeatWon upperBound=${df(upperBound())}")
     }
     override fun shortName() = "DHondt w/l='${info.candidateIdToName[winner()]}'/'${info.candidateIdToName[loser()]}'"
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization

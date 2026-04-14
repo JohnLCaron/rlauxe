@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.math.ln
 
@@ -240,7 +241,7 @@ open class ClcaAssorter(
         appendLine("  assorter=${assorter.desc()}")
         append("  dilutedMargin=${dfn(assorterMargin, 8)} dilutedMean=${dfn(margin2mean(assorterMargin), 8)}")
         append(" assortUpper=${dfn(assorter.upperBound(), 8)}")
-        append(" noerror=${dfn(noerror, 8)}")
+        append(" noerror=${dfn(noerror, 8)}  nomargin=${dfn(mean2margin(noerror), 8)}")
     }
 
     fun shortName() = assorter.shortName()

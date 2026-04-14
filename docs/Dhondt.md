@@ -186,7 +186,6 @@ Presume this subsumes BettingMarts.
 
 /////////////////////////////////////////////////////////////////////
 
-/usr/lib/jvm/jdk-21-oracle-x64/bin/java -javaagent:/home/stormy/.local/share/JetBrains/Toolbox/apps/intellij-idea-ultimate/plugins/java/lib/rt/debugger-agent.jar=file:///tmp/capture12483755947381890058.props -ea -Didea.test.cyclic.buffer.size=1048576 -javaagent:/home/stormy/.local/share/JetBrains/Toolbox/apps/intellij-idea-ultimate/lib/idea_rt.jar=35521 -Dkotlinx.coroutines.debug.enable.creation.stack.trace=false -Ddebugger.agent.enable.coroutines=true -Dkotlinx.coroutines.debug.enable.flows.stack.trace=true -Dkotlinx.coroutines.debug.enable.mutable.state.flows.stack.trace=true -Ddebugger.async.stack.trace.for.all.threads=true -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 @/tmp/idea_arg_file1598434137 com.intellij.rt.junit.JUnitStarter -ideVersion5 -junit5 org.cryptobiotic.rlauxe.dhondt.TestBelgiumContest,testShowDhondtAssertions
 Anvers (1) Nc=1235587 Nphantoms=0 votes={6=368877, 1=249826, 5=127973, 8=125894, 4=125257, 7=90370, 2=70890, 10=10341, 9=8639, 11=7221, 3=4213, 12=1686} undervotes=44400, voteForN=1
 
 seat             party/round     nvotes,  score, voteDiff,  

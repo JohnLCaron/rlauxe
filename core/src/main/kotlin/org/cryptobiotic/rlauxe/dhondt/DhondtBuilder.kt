@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.estSamples
 import org.cryptobiotic.rlauxe.util.nfn
@@ -34,7 +33,7 @@ fun makeDhondtBuilder(
 ): DhondtBuilder {
     // have to do this before winners are assigned
     val nvotes = parties.sumOf { it.votes }
-    parties.forEach { if (it.votes / nvotes.toDouble() < minFraction) it.belowMinPct = true }
+    parties.forEach { if (it.votes / nvotes.toDouble() < minFraction) it.isBelowMin = true }
 
     if (showDetails) println("makeDhondtElection")
     val dHondtContest = assignWinners(name, id, parties, nseats = nseats, undervotes = undervotes, minFraction = minFraction)
@@ -56,7 +55,7 @@ private fun assignWinners(
     minFraction: Double,
 ): DhondtBuilder {
     val scores = mutableListOf<DhondtScore>()
-    parties.filter { !it.belowMinPct }.forEach { party ->
+    parties.filter { !it.isBelowMin }.forEach { party ->
         repeat(nseats) { idx ->
             val seatno = idx + 1
             val divisor = seatno.toDouble()
@@ -106,7 +105,7 @@ data class DhondtBuilder(
 
     init {
         // isnt this already done?
-        parties.forEach { if (it.votes / validVotes.toDouble() < minFraction) it.belowMinPct = true }
+        parties.forEach { if (it.votes / validVotes.toDouble() < minFraction) it.isBelowMin = true }
     }
 
     fun makeProtoAssorters() {
@@ -146,13 +145,14 @@ data class DhondtBuilder(
             votes,
             useNc,
             Ncast ?: this.validVotes,
+            null,
         )
         result.assorters.addAll(assorters.map { it.makeAssorter() })
         val lastWinningScore = winners.last()
         val lastWinner = parties.find { it.id == lastWinningScore.candidate }!!
 
         parties.forEach { party ->
-            if (party.belowMinPct) {
+            if (party.isBelowMin) {
                 // decide which is cheaper
                 val bt = BelowThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc)
 
@@ -227,11 +227,11 @@ class AltDhondt(
             DhondtCandidate(info.candidateIdToName[id]!!, id, votes[id]!!)
         }
         // could use belowMinPct; these dont have first/last yet
-        parties.forEach { it.belowMinPct = belowMinPct.contains( it.id)  }
+        parties.forEach { it.isBelowMin = belowMinPct.contains( it.id)  }
 
         // recreate the winners and losers
         val nseats = info.nwinners
-        parties.filter { !it.belowMinPct }.forEach { party ->
+        parties.filter { !it.isBelowMin }.forEach { party ->
             repeat(nseats) { idx ->
                 val seatno = idx + 1
                 val divisor = seatno.toDouble()

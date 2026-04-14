@@ -107,11 +107,11 @@ interface ContestIF {
  * @parameter Ncast: number of cards cast for this contest: Nphantoms() = Nc - Ncast
  */
 open class Contest(
-        val info: ContestInfo,
-        voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-        val Nc: Int,               // trusted maximum ballots/cards that contain this contest
-        val Ncast: Int,            // number of cast ballots containing this Contest, including undervotes
-    ): ContestIF {
+    val info: ContestInfo,
+    voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
+    val Nc: Int,               // trusted maximum ballots/cards that contain this contest
+    val Ncast: Int,            // number of cast ballots containing this Contest, including undervotes
+): ContestIF {
 
     override fun Nc() = Nc
     override fun Nphantoms() = Nc - Ncast
@@ -233,17 +233,16 @@ open class Contest(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Contest
+        if (other !is Contest) return false
 
         if (Nc != other.Nc) return false
         if (Ncast != other.Ncast) return false
+        if (undervotes != other.undervotes) return false
         if (info != other.info) return false
+        if (votes != other.votes) return false
         if (winnerNames != other.winnerNames) return false
         if (winners != other.winners) return false
         if (losers != other.losers) return false
-        if (votes != other.votes) return false
 
         return true
     }
@@ -251,11 +250,12 @@ open class Contest(
     override fun hashCode(): Int {
         var result = Nc
         result = 31 * result + Ncast
+        result = 31 * result + undervotes
         result = 31 * result + info.hashCode()
+        result = 31 * result + votes.hashCode()
         result = 31 * result + winnerNames.hashCode()
         result = 31 * result + winners.hashCode()
         result = 31 * result + losers.hashCode()
-        result = 31 * result + votes.hashCode()
         return result
     }
 

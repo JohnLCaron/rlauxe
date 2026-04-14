@@ -37,10 +37,11 @@ data class DhondtScore(val candidate: Int, val score: Double, val divisor: Int) 
 data class DhondtCandidate(val name: String, val id: Int, val votes: Int) {
     var lastSeatWon: Int? = null // We
     var firstSeatLost: Int? = null // Le
-    var belowMinPct = false
+    var isBelowMin = false
 
     constructor(id: Int, votes: Int) : this("party-$id", id, votes)
 
+    // TODO remove
     fun setResults(results: DhondtBuilder) {
         if (showDetails) results.sortedScores.filter { it.candidate == this.id }.forEach { println(" ${it}") }
 
@@ -67,10 +68,10 @@ fun makeDhondtContest(
     */
 
     val builder = DhondtBuilder2(name, id, parties, nseats, Nc, undervotes, minFraction)
-    builder.makeProtoAssorters()
     return builder.build()
 }
 
+// side effect is to set party.lastSeatWon,firstSeatLost: could move that to  assignWinners2()
 data class DhondtBuilder2(
     val name: String,
     val id: Int,
@@ -92,21 +93,11 @@ data class DhondtBuilder2(
     val validVotes: Int = parties.sumOf { it.votes } // denominator of minFraction
     val winnerScores: List<DhondtScore>
 
-    // just the dhondts
-    val assorters = mutableListOf<AssorterBuilder2>()
-
     init {
-        if (Nc != validVotes + undervotes)
-            print("DhondtBuilder2 $Nc != ${validVotes + undervotes}")
-        // private fun assignWinners2(
-        //    name: String,
-        //    id: Int,
-        //    parties: List<DhondtCandidate>,
-        //    nseats: Int,
-        //    undervotes: Int,
-        //    minFraction: Double,
-        //)
-        val (sortedScores, sortedRawScores) = assignWinners2(parties, nseats, validVotes, minFraction)
+        val totalVotes = validVotes + undervotes
+        require (Nc != totalVotes) { "DhondtBuilder2 $Nc != $totalVotes" }
+
+        val (sortedScores, belowMinPctIn) = assignWinners2(parties, nseats, validVotes, minFraction, null)
 
         winnerScores = sortedScores.subList(0, nseats)
         val loserScores = sortedScores.subList(nseats, sortedScores.size)
@@ -114,39 +105,6 @@ data class DhondtBuilder2(
         parties.forEach { party ->
             party.lastSeatWon = winnerScores.filter { it.candidate == party.id }.maxOfOrNull { it.divisor }
             party.firstSeatLost = loserScores.filter { it.candidate == party.id }.minOfOrNull { it.divisor }
-        }
-
-        //// where do these go ?? probably DhondtContest
-        val winnerSeatsM = mutableMapOf<Int, Int>()
-        sortedScores.filter { it.winningSeat != null }.forEach {
-            val count = winnerSeatsM.getOrPut(it.candidate) { 0 }
-            winnerSeatsM[it.candidate] = count + 1
-        }
-        val winnerSeats = winnerSeatsM.toMap()
-        val winners = winnerSeats.keys.toList()
-        val losers = info.candidateIds.filter { !winners.contains(it) }
-        val winnerNames = winners.map { info.candidateIdToName[it]!! }
-    }
-
-    fun makeProtoAssorters() {
-        // Let f_e,s = Te /d(s) for entity e and seat s
-        // f_A,WA > f_B,LB, so e = A and s = Wa
-
-        // Section 5.2 eq (4)
-        // Converting this into the notation of Section 3, expressing Equation 4 as a linear
-        // assertion gives us, ∀A s.t. WA !=⊥, ∀B 6= A s.t. LB !=⊥,
-        //   TA /d(WA ) − TB /d(LB ) > 0.
-
-        // This is O(n^2)
-        parties.forEach { winner ->
-            if (winner.lastSeatWon != null) {
-                parties.filter { it.id != winner.id }.forEach { loser ->
-                    if (loser.firstSeatLost != null) {
-                        val passorter = AssorterBuilder2(this, winner, loser)
-                        assorters.add(passorter)
-                    }
-                }
-            }
         }
     }
 
@@ -159,22 +117,25 @@ data class DhondtBuilder2(
             votes,
             this.Nc,
             this.validVotes + this.undervotes,
+            null,
         )
 
         // TODO why do we add the assorters after the constructor? probably not needed anymore
+        //      or for serialization perhapes?
 
-        contest.assorters.addAll(assorters.map { it.makeAssorter(info) })
+        contest.assorters.addAll(DHondtAssorter.makeDhondtAssorters(info, Nc, parties))
         val lastWinningScore = winnerScores.last()
         val lastWinner = parties.find { it.id == lastWinningScore.candidate }!!
 
+        // each party gets a Below or Above assertion
         parties.forEach { party ->
-            if (party.belowMinPct) {
+            if (party.isBelowMin) {
                 // decide which is cheaper
                 val bt = BelowThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, this.Nc)
 
                 val partyCopy = party.copy()
                 partyCopy.firstSeatLost = 1
-                val dh = AssorterBuilder2(this, lastWinner, partyCopy).makeAssorter(info)
+                val dh = DHondtAssorter.makeFrom(info, Nc, winner = lastWinner, loser = partyCopy)
 
                 val useAssorter = if (useBt || (bt.noerror() > dh.noerror())) bt else dh
                 contest.assorters.add(useAssorter)
@@ -187,26 +148,29 @@ data class DhondtBuilder2(
     }
 }
 
-
-private fun assignWinners2(
+// side effect is to set party.isBelowMin
+fun assignWinners2(
     parties: List<DhondtCandidate>,
     nseats: Int,
-    validVotes: Int, // denominator for minFraction
-    minFraction: Double, // TODO else pass in candId set
-): Pair<List<DhondtScore>, List<DhondtScore>> {
+    validVotes: Int,        // denominator for minFraction
+    minFraction: Double,
+    belowMinPctIn: Set<Int>?,  // candidateIds under minFraction, if null then calculate
+): Pair<List<DhondtScore>, Set<Int>> {
 
     val sortedScores = mutableListOf<DhondtScore>()
-    val sortedRawScores = mutableListOf<DhondtScore>()
+    val sortedRawScores = mutableListOf<DhondtScore>() // ??
 
+    val belowMinPct = belowMinPctIn ?:
+                      parties.filter { it.votes / validVotes.toDouble() < minFraction }.map { it.id }.toSet()
     // have to do this before winners are assigned
-    parties.forEach { if (it.votes / validVotes.toDouble() < minFraction) it.belowMinPct = true }
+    parties.forEach { it.isBelowMin = belowMinPct.contains( it.id)  }
 
     // recreate the winners and losers
-    parties.filter { !it.belowMinPct }.forEach { party ->
+    parties.filter { !it.isBelowMin }.forEach { party ->
         repeat(nseats) { idx ->
             val seatno = idx + 1
             val divisor = seatno.toDouble()
-            sortedScores.add(DhondtScore(party.id, party.votes / divisor, seatno))
+            sortedScores.add( DhondtScore(party.id, party.votes / divisor, seatno) )
         }
     }
     sortedScores.sortByDescending { it.score }
@@ -218,50 +182,15 @@ private fun assignWinners2(
         maxRound = max(maxRound, idx + 1)
     }
 
-    // recreate the raw scores
+    // recreate the raw scores TODO why ?
     parties.forEach { party ->
         repeat(maxRound) { idx ->
             val seatno = idx + 1
             val divisor = seatno.toDouble()
-            sortedRawScores.add(DhondtScore(party.id, party.votes / divisor, seatno))
+            sortedRawScores.add( DhondtScore(party.id, party.votes / divisor, seatno) )
         }
     }
     sortedRawScores.sortByDescending { it.score }
 
-    val winnerSeatsM = mutableMapOf<Int, Int>()
-    sortedScores.filter { it.winningSeat != null }.forEach {
-        val count = winnerSeatsM.getOrPut(it.candidate) { 0 }
-        winnerSeatsM[it.candidate] = count + 1
-    }
-
-    return Pair(sortedScores, sortedRawScores)
-}
-
-
-data class AssorterBuilder2(
-    val contest: DhondtBuilder2,
-    val winner: DhondtCandidate,
-    val loser: DhondtCandidate,
-) {
-    // Let f_e,s = Te/d(s) for entity e and seat s
-    // f_A,WA > f_B,LB, so e = A and s = Wa
-
-    val fw = winner.votes / winner.lastSeatWon!!.toDouble()
-    val fl = loser.votes / loser.firstSeatLost!!.toDouble()
-    val gmean = (fw - fl) / contest.Nc
-
-    val lower = -1.0 / loser.firstSeatLost!!  // lower bound of g
-    val upper = 1.0 / winner.lastSeatWon!!  // upper bound of g
-    val c = -1.0 / (2 * lower)  // affine transform h = c * g + 1/2
-    val hmean = h(gmean)
-
-    fun h(g: Double): Double = c * g + 0.5
-
-    fun makeAssorter(info: ContestInfo) = DHondtAssorter(
-        info,
-        winner.id,
-        loser.id,
-        lastSeatWon = winner.lastSeatWon!!,
-        firstSeatLost = loser.firstSeatLost!!
-    ).setDilutedMean(hmean)
+    return Pair(sortedScores, belowMinPct)
 }

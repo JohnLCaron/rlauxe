@@ -48,7 +48,6 @@ class TestBelgiumElection {
             println("  ${it}")
         }
         println()
-        builder.makeProtoAssorters()
 
         val contestd = builder.build()
         println(contestd)

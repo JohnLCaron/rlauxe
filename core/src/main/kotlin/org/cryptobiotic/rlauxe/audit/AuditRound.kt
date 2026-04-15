@@ -67,6 +67,7 @@ fun List<AuditRoundIF>.previousSamplePrns(currentRoundIdx: Int): Set<Long> {
 }
 
 // Note: mutable
+// TODO so what happens if we add new AssertionRound at round > 1 (Dhondt) ?
 data class ContestRound(val contestUA: ContestWithAssertions, val assertionRounds: List<AssertionRound>, val roundIdx: Int) {
     val id = contestUA.id
 
@@ -197,15 +198,6 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     var auditResult: AuditRoundResult? = null
     var status = TestH0Status.InProgress
     var roundProved = 0           // round when proved or disproved
-
-    /* we get the results from the audit, not the estimation
-    fun previousErrorCounts(): ClcaErrorCounts? {
-        require(assertion is ClcaAssertion)
-        if (roundIdx == 1 || prevAuditResult == null)
-            return null
-
-        return ClcaErrorCounts(prevAuditResult.clcaErrorTracker.errorCounts, prevAuditResult.samplesUsed, noerror, upper)
-    } */
 
     fun previousErrorTracker(): ClcaErrorTracker {
         require(assertion is ClcaAssertion)

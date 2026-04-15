@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
-import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
+import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.persist.AuditRecord
@@ -254,9 +254,8 @@ class TestAuditRoundJson {
     @Test
     fun testRoundtripWithDHondt() {
         val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
-        val dcontest = makeProtoContest("contest1", 1, parties, 8, 0, 0.01)
-        val info = dcontest.createInfo()
-        val contestd = dcontest.createContest(dcontest.validVotes, dcontest.validVotes)
+        val nvotes = parties.sumOf{ it.votes }
+        val contestd = makeDhondtContest("contest1", 1, parties, 8, nvotes, 0, 0.01)
         val contests = listOf(contestd)
 
         val fuzzMvrs = .01
@@ -264,7 +263,7 @@ class TestAuditRoundJson {
 
         val testCvrs = contestd.createSimulatedCvrs()
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
-            else makeFuzzedCvrsForClca(listOf(info), testCvrs, fuzzMvrs)
+            else makeFuzzedCvrsForClca(listOf(contestd.info), testCvrs, fuzzMvrs)
 
         val clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))
@@ -385,7 +384,6 @@ fun check(a1: AssertionRound, a2: AssertionRound): Boolean {
     if (a1.auditResult != null )
         check(a1.auditResult!!, a2.auditResult!!)
 
-    println(a1.prevAuditResult)
     if ((a1.prevAuditResult == null) != (a2.prevAuditResult == null))
         print("")
     assertEquals(a1.prevAuditResult == null, a2.prevAuditResult == null)

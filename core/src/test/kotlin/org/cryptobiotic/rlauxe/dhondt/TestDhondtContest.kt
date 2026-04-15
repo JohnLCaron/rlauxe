@@ -13,9 +13,12 @@ class TestDhondtContest {
     val minPct = 0.05
 
     @Test
-    fun testMakeDhondtContest() {
-        val dcontest = makeProtoContest("contest1", 1, listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500)), 8, 0, minPct)
-        val contestd = dcontest.createContest()
+    fun testMakeDhondtContest2() {
+        val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
+        val nvotes = parties.sumOf { it.votes }
+        val contestd = makeDhondtContest("contest1", 1,
+            parties,
+            8, nvotes, 0, minPct)
         println(contestd.show())
         println(contestd.showCandidates())
 
@@ -25,8 +28,11 @@ class TestDhondtContest {
         assertEquals(mapOf(1 to 5, 2 to 3), contestd.winnerSeats)
         assertEquals(8, contestd.winnerSeats.map { it.value }.sum())
 
-        val dcontest2 = makeProtoContest("contest2", 2, listOf(DhondtCandidate(1, 11000), DhondtCandidate(2, 7000), DhondtCandidate(3, 2500)), 11, 0, minPct)
-        val contestd2 = dcontest2.createContest()
+        val parties2 = listOf(DhondtCandidate(1, 11000), DhondtCandidate(2, 7000), DhondtCandidate(3, 2500))
+        val nvotes2 = parties2.sumOf { it.votes }
+        val contestd2 = makeDhondtContest("contest2", 2,
+            parties2,
+            11, nvotes2, 0, minPct)
         println(contestd.show())
 
         assertEquals(contestd, contestd)
@@ -38,14 +44,13 @@ class TestDhondtContest {
     @Test
     fun testCvrs() {
         val undervotes = 200
+        val Ncast = 17500
+        val Nc = Ncast + undervotes
         val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
-        val dcontest: DhondtBuilder = makeProtoContest("contest1", 1, parties, 8, undervotes, minPct)
+        val contestd: DHondtContest = makeDhondtContest("contest1", 1, parties, 8, Nc, undervotes, minPct)
 
         println("\nContestDHondt.cvrs, AssorterIF")
-        val nvotes = dcontest.validVotes
-        val Ncast = nvotes + undervotes
-        val contestd: DHondtContest = dcontest.createContest(Ncast, Ncast)
-        val cvrsIF = contestd.createSimulatedCvrs()
+        val cvrsIF = contestd.createSimulatedCvrs() // TODO failing on undervotes != 0
         println("validVotes = ${contestd.votes.values.sum()} undervotes=${contestd.undervotes} ncvrsIF = ${cvrsIF.size}")
 
         contestd.assorters.forEach { assorter ->
@@ -68,8 +73,8 @@ class TestDhondtContest {
     }
 
     fun testAssorters(parties: List<DhondtCandidate>, nseats: Int, minPct: Double) {
-        val dcontest = makeProtoContest("contest1", 1, parties, nseats, 0, minPct)
-        val contestd = dcontest.createContest()
+        val Nc = parties.sumOf { it.votes }
+        val contestd = makeDhondtContest("contest1", 1, parties, nseats, Nc, 0, minPct)
 
         contestd.assorters.forEach {
             println(it)

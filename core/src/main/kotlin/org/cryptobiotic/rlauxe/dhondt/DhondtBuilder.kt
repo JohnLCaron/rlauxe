@@ -5,10 +5,8 @@ import org.cryptobiotic.rlauxe.audit.AuditRoundResult
 import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.BelowThreshold
-import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.estSamples
 import org.cryptobiotic.rlauxe.util.nfn
@@ -25,7 +23,7 @@ import kotlin.math.max
 private val showDetails = false
 private val useBt = true // always use Bt
 
-fun makeProtoContest(
+fun makeDhondtBuilder(
     name: String,
     id: Int,
     parties: List<DhondtCandidate>,
@@ -35,11 +33,10 @@ fun makeProtoContest(
 ): DhondtBuilder {
     // have to do this before winners are assigned
     val nvotes = parties.sumOf { it.votes }
-    parties.forEach { if (it.votes / nvotes.toDouble() < minFraction) it.belowMinPct = true }
+    parties.forEach { if (it.votes / nvotes.toDouble() < minFraction) it.isBelowMin = true }
 
     if (showDetails) println("makeDhondtElection")
-    val dHondtContest =
-        assignWinners(name, id, parties, nseats = nseats, undervotes = undervotes, minFraction = minFraction)
+    val dHondtContest = assignWinners(name, id, parties, nseats = nseats, undervotes = undervotes, minFraction = minFraction)
     parties.forEach {
         it.setResults(dHondtContest)
         if (showDetails) println()
@@ -49,7 +46,7 @@ fun makeProtoContest(
     return dHondtContest
 }
 
-fun assignWinners(
+private fun assignWinners(
     name: String,
     id: Int,
     parties: List<DhondtCandidate>,
@@ -58,7 +55,7 @@ fun assignWinners(
     minFraction: Double,
 ): DhondtBuilder {
     val scores = mutableListOf<DhondtScore>()
-    parties.filter { !it.belowMinPct }.forEach { party ->
+    parties.filter { !it.isBelowMin }.forEach { party ->
         repeat(nseats) { idx ->
             val seatno = idx + 1
             val divisor = seatno.toDouble()
@@ -89,42 +86,6 @@ fun assignWinners(
     return DhondtBuilder(name, id, parties, scores, nseats, undervotes, minFraction, rawscores)
 }
 
-// f_e,s = Te /d(s)
-// e = partyId, s = seatno, score = Te /d(s)
-data class DhondtScore(val candidate: Int, val score: Double, val divisor: Int) {
-    var winningSeat: Int? = null
-    fun setWinningSeat(ws: Int?): DhondtScore {
-        this.winningSeat = ws; return this
-    }
-
-    override fun toString() = buildString {
-        append("DhondtScore(candidate=$candidate, divisor=$divisor, score=${df(score)}")
-        if (winningSeat != null) append(", winningSeat=$winningSeat")
-        append(")")
-    }
-
-    fun showLoser(name: String, votes: Int) = buildString {
-        append(" ${name}")
-        append("/${nfn(divisor, 2)}, ")
-        append(" ${nfn(votes, 6)}, ${nfn(score.toInt(), 6)}, ")
-    }
-}
-
-data class DhondtCandidate(val name: String, val id: Int, val votes: Int) {
-    var lastSeatWon: Int? = null // We
-    var firstSeatLost: Int? = null // Le
-    var belowMinPct = false
-
-    constructor(id: Int, votes: Int) : this("party-$id", id, votes)
-
-    fun setResults(results: DhondtBuilder) {
-        if (showDetails) results.sortedScores.filter { it.candidate == this.id }.forEach { println(" ${it}") }
-
-        lastSeatWon = results.winners.filter { it.candidate == this.id }.maxOfOrNull { it.divisor }
-        firstSeatLost = results.losers.filter { it.candidate == this.id }.minOfOrNull { it.divisor }
-    }
-}
-
 data class DhondtBuilder(
     val name: String,
     val id: Int,
@@ -144,7 +105,7 @@ data class DhondtBuilder(
 
     init {
         // isnt this already done?
-        parties.forEach { if (it.votes / validVotes.toDouble() < minFraction) it.belowMinPct = true }
+        parties.forEach { if (it.votes / validVotes.toDouble() < minFraction) it.isBelowMin = true }
     }
 
     fun makeProtoAssorters() {
@@ -184,13 +145,14 @@ data class DhondtBuilder(
             votes,
             useNc,
             Ncast ?: this.validVotes,
+            null,
         )
         result.assorters.addAll(assorters.map { it.makeAssorter() })
         val lastWinningScore = winners.last()
         val lastWinner = parties.find { it.id == lastWinningScore.candidate }!!
 
         parties.forEach { party ->
-            if (party.belowMinPct) {
+            if (party.isBelowMin) {
                 // decide which is cheaper
                 val bt = BelowThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc)
 
@@ -209,7 +171,7 @@ data class DhondtBuilder(
     }
 }
 
-private data class AssorterBuilder(
+data class AssorterBuilder(
     val contest: DhondtBuilder,
     val winner: DhondtCandidate,
     val loser: DhondtCandidate,
@@ -240,6 +202,8 @@ private data class AssorterBuilder(
 
 //////////////////////////////////////
 
+// this could be the base, and DhondtContest subclasses it.
+// or just turn this into DhondtContest
 class AltDhondt(
     val info: ContestInfo,
     val votes: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
@@ -257,16 +221,17 @@ class AltDhondt(
     val sortedRawScores = mutableListOf<DhondtScore>()
 
     init {
+        //// duplicate in DHondtContest
         // recreate the parties
         parties = info.candidateIds.map { id ->
             DhondtCandidate(info.candidateIdToName[id]!!, id, votes[id]!!)
         }
-        // could use belowMinPct; these dont gave first/last yet
-        parties.forEach { it.belowMinPct = belowMinPct.contains( it.id)  }
+        // could use belowMinPct; these dont have first/last yet
+        parties.forEach { it.isBelowMin = belowMinPct.contains( it.id)  }
 
         // recreate the winners and losers
         val nseats = info.nwinners
-        parties.filter { !it.belowMinPct }.forEach { party ->
+        parties.filter { !it.isBelowMin }.forEach { party ->
             repeat(nseats) { idx ->
                 val seatno = idx + 1
                 val divisor = seatno.toDouble()
@@ -306,6 +271,7 @@ class AltDhondt(
         val winnerNames = winners.map { info.candidateIdToName[it]!! }
     }
 
+    // duplicate with DhondtContest
     fun marginInVotes(assorter: AssorterIF): Int {
         return when (assorter) {
             is DHondtAssorter -> {
@@ -324,6 +290,7 @@ class AltDhondt(
         }
     }
 
+    // duplicate with DhondtContest
     fun showAssertions(lastAssertionRounds: Map<String, AssertionRound>) = buildString {
         val candNameWidth = 20
         val width = 12
@@ -382,13 +349,14 @@ class AltDhondt(
         } */
     }
 
+    // duplicate with DhondtContest
+
     data class AssertionRiskGroup(val loserId: Int) {
         val arms = mutableListOf<AssertionRiskMargin>()
         fun highScore(): Double {
             val wtf = arms.maxOfOrNull { it.loserScore.score }
             return wtf ?: 0.0
         }
-
         fun sortedArms() = arms.sortedBy { it.nomargin }
     }
 
@@ -430,38 +398,6 @@ class AltDhondt(
                 append(" winner ${assorter.winnerNameRound()} loser ${assorter.loserNameRound()}")
                 appendLine()
             }
-        }
-    }
-
-    inner class AssertionThrasher(
-        val ar: AssertionRound,
-        val assorter: AssorterIF,
-        val auditResult: AuditRoundResult?,
-    ) {
-        val nomargin = 2.0 * assorter.noerror() - 1.0
-        val risk = ar.auditResult?.pmin ?: Double.NaN
-        val nmvrs = ar.auditResult?.samplesUsed ?: 0
-        fun estMvrs(): Int {
-            // payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (µ_i is approximately 1/2)
-            // payoff_noerror^n > 1/alpha
-            // n = 1/ln(alpha) / ln(λ * (noerror − 1/2)); noerror − 1/2 = nomargin/2
-            // TODO
-            val maxLoss: Double = 1.0 / 1.03905
-            return roundUp(estSamples(2 * maxLoss, nomargin, .05)) // =  -ln(alpha) / ln(1.0 + bet * nomargin/2)
-        }
-
-        override fun toString() = buildString {
-            append("${assorter.shortName()}: ")
-            append(" ${nfn(marginInVotes(assorter), 7)}, ${dfn(nomargin, 6)}, ")
-            append(" ${nfn(estMvrs(), 8)}, ${nfn(nmvrs, 8)},    ${dfn(risk, 4)},")
-        }
-
-    }
-
-    fun showAssertionThrashers(thrashers: List<AssertionThrasher>, candNameWidth: Int) = buildString {
-        appendLine("Thrashers              marginInVotes, nomargin, estSamples, actSamples,   risk")
-        thrashers.forEach { thrasher ->
-            appendLine(thrasher)
         }
     }
 

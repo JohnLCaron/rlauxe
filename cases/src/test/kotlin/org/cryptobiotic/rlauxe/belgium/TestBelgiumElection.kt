@@ -3,10 +3,9 @@ package org.cryptobiotic.rlauxe.belgium
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
-import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder
+import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder2
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.DhondtScore
-import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.abs
@@ -41,29 +40,30 @@ class TestBelgiumElection {
         // use infoA parties, because they are complete
         val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, idx+1, it.NrOfVotes) }
         val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
-        val dcontest = makeProtoContest(electionName, 1, dhondtParties, nwinners, 0,.05)
+        val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes
+
+        val builder = DhondtBuilder2(electionName, 1, dhondtParties, nwinners, totalVotes, 0,.05)
         println("Calculated Winners")
-        dcontest.winners.sortedBy { it.winningSeat }.forEach {
+        builder.winnerScores.sortedBy { it.winningSeat }.forEach {
             println("  ${it}")
         }
         println()
 
-        val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes
-        val contestd = dcontest.createContest(Nc = totalVotes, Ncast = totalVotes)
+        val contestd = builder.build()
         println(contestd)
         println(contestd.show())
 
-        testCvrs(dcontest, contestd)
+        testCvrs(contestd)
     }
 }
 
-fun testCvrs(dcontest: DhondtBuilder, contestd: DHondtContest) {
+fun testCvrs(contestd: DHondtContest) {
 
     println("testCvrs2 ----------------------------------------")
     val cvrs = contestd.createSimulatedCvrs()
     assertEquals(contestd.Nc, cvrs.size)
 
-    dcontest.makeAssorters().forEach { assorter ->
+    contestd.assorters.forEach { assorter ->
         val welford = Welford()
         cvrs.forEach { cvr ->
             welford.update(assorter.assort(cvr, usePhantoms = false))

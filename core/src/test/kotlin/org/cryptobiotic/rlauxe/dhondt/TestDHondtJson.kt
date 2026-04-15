@@ -14,24 +14,24 @@ class TestDHondtJson {
     @Test
     fun testContestRoundtrip() {
         val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
-        val dcontest = makeProtoContest("contest1", 1, parties, 8, 0, 0.01)
-        val info = dcontest.createInfo()
-        val target = dcontest.createContest(dcontest.validVotes, dcontest.validVotes)
+        val Nc = parties.sumOf { it.votes }
+        val dcontest = makeDhondtContest("contest1", 1, parties, 8, Nc, 0, 0.01)
+        val info = dcontest.info
 
-        val json = target.publishJson()
+        val json = dcontest.publishJson()
         val roundtrip = json.import(info)
         assertNotNull(roundtrip)
-        assertEquals(target, roundtrip)
-        assertTrue(roundtrip.equals(target))
+        assertEquals(dcontest, roundtrip)
+        assertTrue(roundtrip.equals(dcontest))
     }
 
     @Test
     fun testContestUARoundtrip() {
         val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
-        val dcontest = makeProtoContest("contest1", 1, parties, 8, 0, 0.01)
-        val contest = dcontest.createContest(dcontest.validVotes, dcontest.validVotes)
+        val Nc = parties.sumOf { it.votes }
 
-        val contestUA = ContestWithAssertions(contest, isClca=true).addAssertionsFromAssorters(dcontest.makeAssorters())
+        val contest = makeDhondtContest("contest1", 1, parties, 8, Nc, 0, 0.01)
+        val contestUA = ContestWithAssertions(contest, isClca=true).addAssertionsFromAssorters(contest.assorters)
 
         val json = contestUA.publishJson()
         val roundtrip = json.import()
@@ -43,9 +43,10 @@ class TestDHondtJson {
     @Test
     fun testAssortorRoundtrip() {
         val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
-        val dcontest = makeProtoContest("contest1", 1, parties, 8, 0, 0.01)
-        val contest = dcontest.createContest(dcontest.validVotes, dcontest.validVotes)
-        val contestUA = ContestWithAssertions(contest, isClca=true).addAssertionsFromAssorters(dcontest.makeAssorters())
+        val Nc = parties.sumOf { it.votes }
+
+        val contest = makeDhondtContest("contest1", 1, parties, 8, Nc, 0, 0.01)
+        val contestUA = ContestWithAssertions(contest, isClca=true).addAssertionsFromAssorters(contest.assorters)
 
         val target = contestUA.minPollingAssertion()!!.assorter
 

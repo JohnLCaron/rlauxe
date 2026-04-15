@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
-import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
+import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
 
@@ -90,10 +90,15 @@ fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdi
 
     val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, idx+1, it.NrOfVotes) }
     val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
-    val pcontest = makeProtoContest(electionName, contestId, dhondtParties, nwinners, 0,.05)
+    val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes // TODO undervotes = belgiumElection.NrOfBlankVotes
 
-    val totalVotes = belgiumElection.NrOfValidVotes // + belgiumElection.NrOfBlankVotes TODO undervotes = belgiumElection.NrOfBlankVotes
-    val contest = pcontest.createContest(Nc = totalVotes, Ncast = totalVotes)
+    //     name: String,
+    //    id: Int,
+    //    parties: List<DhondtCandidate>,
+    //    nseats: Int,
+    //    undervotes: Int,
+    //    minFraction: Double,
+    val contest = makeDhondtContest(electionName, contestId, dhondtParties, nwinners, totalVotes, belgiumElection.NrOfBlankVotes,.05)
 
     val topdir = "$toptopdir/$electionName"
     val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, riskMeasuringSampleLimit=riskMeasuringSampleLimit)

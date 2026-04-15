@@ -46,7 +46,6 @@ fun estRisk(bet:Double, nomargin:Double, nsamples: Int): Double {
     return result
 }
 
-
 fun calcReportedMargin(useVotes: Map<Int, Int>, Nc: Int, winner: Int, loser: Int): Double {
     val winnerVotes = useVotes[winner] ?: 0
     val loserVotes = useVotes[loser] ?: 0

@@ -150,7 +150,7 @@ class RelaxedAssertions(val dc: DHondtContest) {
     // thrashers are the thresholds (only Below?)  that dodnt make their risk limit
     fun showAlternate(thrashers: List<AssertionThrasher>, rounds: List<AuditRoundIF>) = buildString {
         appendLine("------------------------------------------------------------------------------")
-        appendLine("Thresholds                        marginInVotes, nomargin, estSamples, actSamples,   risk")
+        appendLine("Thresholds             marginInVotes, nomargin, estSamples, actSamples,   risk")
         thrashers.forEach {  thrasher ->
             appendLine(thrasher)
         }
@@ -288,7 +288,7 @@ class RelaxedAssertions(val dc: DHondtContest) {
 
     fun showAssortersAtRisk(sortedGroups: List<AssorterRiskGroup>, candNameWidth: Int) = buildString {
 
-        appendLine("Contested          loser/round  nvotes,  score, voteDiff,  noerror, nomargin, estSamples, actSamples, estRisk, assertion")
+        appendLine("Contested          loser/round  nvotes,  score, voteDiff,  noerror, nomargin, estSamples, estRisk, assertion")
 
         sortedGroups.forEach {  group ->
             group.sortedArms().forEachIndexed { idx, arm ->
@@ -302,7 +302,7 @@ class RelaxedAssertions(val dc: DHondtContest) {
                     append("                                           ")
                 }
                 append(" ${nfn(dc.marginInVotes(assorter), 7)}, ${dfn(assorter.noerror(), 6)},   ${dfn(arm.nomargin, 4)}, ")
-                append(" ${nfn(arm.estMvrs(), 8)}, ${nfn(arm.nmvrs, 8)},    ${dfn(arm.risk, 4)},")
+                append(" ${nfn(arm.estMvrs(), 8)},   ${dfn(arm.risk, 4)},")
                 append("    winner ${assorter.winnerNameRound()} loser ${assorter.loserNameRound()}")
                 appendLine()
             }

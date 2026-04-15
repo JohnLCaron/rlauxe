@@ -1,5 +1,5 @@
 # D'Hondt Notes
-_last changed 02/05/2026_
+_last changed 02/15/2026_
 
 <!-- TOC -->
 * [D'Hondt Notes](#dhondt-notes)
@@ -15,7 +15,7 @@ _last changed 02/05/2026_
       * [AboveThreshold](#abovethreshold)
       * [BelowThreshold](#belowthreshold)
     * [3.1 Check margins](#31-check-margins)
-    * [3.2 Compare expectaions using ALPHA martingales.](#32-compare-expectaions-using-alpha-martingales)
+    * [3.2 Compare expectations using ALPHA martingales.](#32-compare-expectations-using-alpha-martingales)
   * [Notes From Proportional paper 02/05/2026](#notes-from-proportional-paper-02052026)
     * [Section 3. Creating assorters from assertions](#section-3-creating-assorters-from-assertions)
     * [Above Assertion](#above-assertion)
@@ -138,7 +138,7 @@ candidate          Round:           1 |           2 |           3 |           4 
 
 
 ------------------------------------------------------------------------------
-Thresholds                        marginInVotes, nomargin, estSamples, actSamples,   risk
+Thresholds             marginInVotes, nomargin, estSamples, actSamples,   risk
 BelowThreshold for 'ECOLO':      243, 0.000296,     10517,     1000,    0.7520,
 
  seat            winner/round     nvotes,  score,  voteDiff, 
@@ -160,9 +160,9 @@ BelowThreshold for 'ECOLO':      243, 0.000296,     10517,     1000,    0.7520,
  (16)                 ECOLO / 1,   36750,  36750,    1436,
  (17)                    PS / 6,  213501,  35583,    1167,
 
-Contested          loser/round  nvotes,  score, voteDiff,  noerror, nomargin, estSamples, actSamples, estRisk, assertion
- (16)                  PTB/ 3,  103339,  34446,     2304, 0.501056,   0.0021,      1475,        0,    0.1312,    winner ECOLO/1 loser PTB/3
- (17)                                               1137, 0.501391,   0.0028,      1121,        0,    0.0689,    winner PS/6 loser PTB/3
+Contested          loser/round  nvotes,  score, voteDiff,  noerror, nomargin, estSamples, estRisk, assertion
+ (16)                  PTB/ 3,  103339,  34446,     2304, 0.501056,   0.0021,      1475,   0.1312,    winner ECOLO/1 loser PTB/3
+ (17)                                               1137, 0.501391,   0.0028,      1121,   0.0689,    winner PS/6 loser PTB/3
 
 ````
 
@@ -242,11 +242,11 @@ BelowThreshold for 'Team Fouad Ahidar':     1120, 0.002039,      1528,     1000,
  (15)     Team Fouad Ahidar / 1,   24826,  24826,    4149,
  (16)           LES ENGAGÉS / 2,   49425,  24712,     114,
 
-Contested          loser/round  nvotes,  score, voteDiff,  noerror, nomargin, estSamples, actSamples, estRisk, assertion
- (15)                   PS/ 4,   96516,  24129,      697, 0.500507,   0.0010,      3072,        0,    0.3771,    winner Team Fouad Ahidar/1 loser PS/4
- (16)                                                584, 0.500708,   0.0014,      2201,        0,    0.2564,    winner LES ENGAGÉS/2 loser PS/4
- (15)                   MR/ 5,  120155,  24031,      795, 0.500602,   0.0012,      2585,        0,    0.3138,    winner Team Fouad Ahidar/1 loser MR/5
- (16)                                                682, 0.500886,   0.0018,      1759,        0,    0.1820,    winner LES ENGAGÉS/2 loser MR/5
+Contested          loser/round  nvotes,  score, voteDiff,  noerror, nomargin, estSamples, estRisk, assertion
+ (15)                   PS/ 4,   96516,  24129,      697, 0.500507,   0.0010,      3072,   0.3771,    winner Team Fouad Ahidar/1 loser PS/4
+ (16)                                                584, 0.500708,   0.0014,      2201,   0.2564,    winner LES ENGAGÉS/2 loser PS/4
+ (15)                   MR/ 5,  120155,  24031,      795, 0.500602,   0.0012,      2585,   0.3138,    winner Team Fouad Ahidar/1 loser MR/5
+ (16)                                                682, 0.500886,   0.0018,      1759,   0.1820,    winner LES ENGAGÉS/2 loser MR/5
 
 
 ````
@@ -369,64 +369,50 @@ Formulate using using "b(p) = 1 if the ballot b is a vote for p, and set to 0 ot
 
 "estimate (the difficulty) using the reported margins".
 
-Instead of margins, better to use noerror, which takes into account the upper limit of the assorter, which != 1 for DH, AT, BT.
+Using the smallest margin wont give you the highest difficulty solving, one needs to use noerror, which takes into account the upper limit of the assorter, which != 1 for all the assorters (DH, AT, BT).
 
-noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())
+    noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())
 
 when you get a noerror sample, your payoff is
 
-payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (taking µ_i approximately 1/2)
+    payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (taking µ_i approximately 1/2)
 
 where 
 * taking µ_i approximately 1/2
 * can take λ as constant
 * noerror always > 1/2
 
-large noerror is, the larger the payoff is.
+the large noerror is, the larger the payoff is.
 
-and you need N of these to get over the risk limit
+You need N of these to get over the risk limit
 
-payoff_noerror^N > 1/risk
+    payoff_noerror^nsamples > 1/risk
 
-N = ln(1/risk / ln(payoff_noerror))
+    nsamples = ln(1/risk / ln(payoff_noerror))
 
-The large the payoff is, the smaller N is.
+The larger the payoff is, the smaller N is.
 
 This is "Betting martingale" specific, but I cant imagine how it could be different for another risk function.
 
-It could be that the margin should be defined differently, in order to make margin the correct measure of difficulty ?? 
-Perhaps assorterMargin / assorter.upperBound() ??
-Probably not, we need mean = assorter mean, margin = 2.0 * mean - 1.0
+This quantity is nice to work with:
 
-how about noerrorMargin = 2.0 * noerror - 1.0  = 2 * (noerror - 1/2) 
+    noerrorMargin = 2.0 * noerror - 1.0  
+                  = 2 * (noerror - 1/2) 
 
-noerror = 1.0 / (2.0 - margin / upper)
+    where noerror = 1.0 / (2.0 - margin / upper)
 
-noerrorMargin = 2.0 * noerror - 1.0 = 2/(2 - margin/upper) - 1 = (2 - (2 - margin/upper)) /(2 - margin/upper) = (margin/upper) / (2 - margin/upper) = margin/(2 - margin) when upper = 1
+then the payoff can be expressed as 
 
-mean = (margin + 1.0) / 2.0
-
-  margin = 2 * mean - 1
-nomargin = 2 * noerror - 1
-
-noerror = 1 / (2 - margin/upper) = 1 / (2 - (2 * mean - 1)/upper)
-
-1/noerror = (2 - (2 * mean - 1)/upper)  = 2 - 2*mean/upper - 1/upper
-upper/noerror = 2*upper - 2 * mean - 1
+    payoff_noerror = (1 + λ * (noerror − 1/2))  
+                   = (1 + λ * noerrorMargin/2)
 
 
 
-nomargin = (margin/upper) / (2 - margin/upper)
-
-
-= maru / (2 - maru) = margin/(2 - margin) when u = 1
-
-### 3.2 Compare expectaions using ALPHA martingales.
+### 3.2 Compare expectations using ALPHA martingales.
 
 Presume this subsumes BettingMarts.
 
 
-/////////////////////////////////////////////////
 ## Notes From Proportional paper 02/05/2026
 
 Notes From [Assertion-Based Approaches to Auditing Complex Elections, with Application to Party-List Proportional Elections](http://arxiv.org/abs/2107.11903v2)

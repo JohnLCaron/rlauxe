@@ -91,6 +91,14 @@ Contested            loser/round   nvotes,  score, voteDiff,  noerror, nomargin,
  (23)                                                 1671, 0.501526,   0.0031,      1022,     1000,    0.0531, winner Vooruit/3 loser N-VA/9
 ````
 
+| party         | min | reported | max |
+|---------------|-----|----------|-----|
+| CD&V          | 2   | 3        | 3   |
+| Vooruit       | 2   | 3        | 3   |
+| PVDA          | 2   | 2        | 3   |
+| VLAAMS BELANG | 5   | 5        | 6   |
+| N-VA          | 8   | 8        | 9   |
+
 ### Threshold assertion doesnt meet risk limit
 
 ````
@@ -165,6 +173,12 @@ Contested          loser/round  nvotes,  score, voteDiff,  noerror, nomargin, es
  (17)                                               1137, 0.501391,   0.0028,      1121,   0.0689,    winner PS/6 loser PTB/3
 
 ````
+
+| party         | min | reported | max |
+|---------------|-----|----------|-----|
+| ECOLO         | 0   | 0        | 1   |
+| PS            | 5   | 6        | 6   |
+| PTB           | 2   | 3        | 3   |
 
 ### Dhondt and Threshold assertion dont meet risk limit
 
@@ -247,9 +261,15 @@ Contested          loser/round  nvotes,  score, voteDiff,  noerror, nomargin, es
  (16)                                                584, 0.500708,   0.0014,      2201,   0.2564,    winner LES ENGAGÉS/2 loser PS/4
  (15)                   MR/ 5,  120155,  24031,      795, 0.500602,   0.0012,      2585,   0.3138,    winner Team Fouad Ahidar/1 loser MR/5
  (16)                                                682, 0.500886,   0.0018,      1759,   0.1820,    winner LES ENGAGÉS/2 loser MR/5
-
-
 ````
+
+| party             | min | reported | max |
+|-------------------|-----|----------|-----|
+| Team Fouad Ahidar | 0   | 0        | 1   |
+| PS                | 3   | 4        | 4   |
+| LES ENGAGÉS       | 1   | 2        | 2   |
+| MR                | 4   | 4        | 5   |
+
 
 ## Notes From Bounding paper 04/12/2026
 
@@ -382,7 +402,7 @@ where
 * can take λ as constant
 * noerror always > 1/2
 
-the large noerror is, the larger the payoff is.
+the larger noerror is, the larger the payoff is.
 
 You need N of these to get over the risk limit
 

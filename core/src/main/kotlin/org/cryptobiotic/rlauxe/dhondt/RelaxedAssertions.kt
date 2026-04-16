@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.dhondt
 import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.core.AssorterIF
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.estRisk
 import org.cryptobiotic.rlauxe.util.estSamplesFromNomargin
@@ -36,12 +37,11 @@ data class CandSeatRanges(val ranges: List<CandSeatRange>) {
     }
 
     companion object {
-
         fun sumRanges(candRanges: List<CandSeatRanges>): CandSeatRanges {
             val sum = mutableMapOf<String, CandSeatRange>()
             candRanges.forEach { candRange ->
                 candRange.ranges.forEach { range ->
-                    val sumRange = sum.getOrPut(range.candName) { CandSeatRange(range.candName)}
+                    val sumRange = sum.getOrPut(range.candName) { CandSeatRange(range.candName) }
                     sumRange.minSeats += range.minSeats
                     sumRange.reportedSeats += range.reportedSeats
                     sumRange.maxSeats += range.maxSeats
@@ -49,8 +49,23 @@ data class CandSeatRanges(val ranges: List<CandSeatRange>) {
             }
             return CandSeatRanges(sum.values.toList())
         }
-    }
 
+        fun showSeatRanges(topdirLimited: String) = buildString {
+            if (topdirLimited.contains("2024limited")) { // kludge for viewer
+                val compositeDir = topdirLimited
+                val compositeRecord = AuditRecord.readFrom(compositeDir)!!
+                val candRanges = mutableListOf<CandSeatRanges>()
+                compositeRecord.contests.forEach { contestUA ->
+                    val dcontest = contestUA.contest as DHondtContest
+                    candRanges.add(dcontest.makeSeatRanges(compositeRecord.rounds))
+                }
+                println("Sum of candidate ranges across all contests")
+                val sum = CandSeatRanges.sumRanges(candRanges)
+                appendLine()
+                append(sum.showSeatRanges())
+            }
+        }
+    }
 }
 
 class RelaxedAssertions(val org: DHondtContest) {

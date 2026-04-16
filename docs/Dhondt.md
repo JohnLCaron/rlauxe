@@ -91,13 +91,20 @@ Contested            loser/round   nvotes,  score, voteDiff,  noerror, nomargin,
  (23)                                                 1671, 0.501526,   0.0031,      1022,     1000,    0.0531, winner Vooruit/3 loser N-VA/9
 ````
 
-| party         | min | reported | max |
-|---------------|-----|----------|-----|
-| CD&V          | 2   | 3        | 3   |
-| Vooruit       | 2   | 3        | 3   |
-| PVDA          | 2   | 2        | 3   |
-| VLAAMS BELANG | 5   | 5        | 6   |
-| N-VA          | 8   | 8        | 9   |
+|                party   | min | reported | max |
+|------------------------|-----|----------|-----|
+|                  N-VA  |  8  |     8    |  9  |
+|         VLAAMS BELANG  |  5  |     5    |  6  |
+|               Vooruit  |  2  |     3    |  3  |
+|                  CD&V  |  2  |     3    |  3  |
+|                  PVDA  |  2  |     2    |  3  |
+|                 GROEN  |  2  |     2    |  2  |
+|              open vld  |  1  |     1    |  1  |
+|           Volt Europa  |  0  |     0    |  0  |
+|                Voor U  |  0  |     0    |  0  |
+|            DierAnimal  |  0  |     0    |  0  |
+|         Partij BLANCO  |  0  |     0    |  0  |
+|         BELG.UNIE-BUB  |  0  |     0    |  0  |
 
 ### Threshold assertion doesnt meet risk limit
 
@@ -174,11 +181,20 @@ Contested          loser/round  nvotes,  score, voteDiff,  noerror, nomargin, es
 
 ````
 
-| party         | min | reported | max |
-|---------------|-----|----------|-----|
-| ECOLO         | 0   | 0        | 1   |
-| PS            | 5   | 6        | 6   |
-| PTB           | 2   | 3        | 3   |
+|                party   | min | reported | max |
+|------------------------|-----|----------|-----|
+|                    PS  |  5  |     6    |  6  |
+|                    MR  |  5  |     5    |  5  |
+|           LES ENGAGÉS  |  3  |     3    |  3  |
+|                   PTB  |  2  |     3    |  3  |
+|                  N-VA  |  0  |     0    |  0  |
+|                  DéFI  |  0  |     0    |  0  |
+|                 ECOLO  |  0  |     0    |  1  |
+|         BELG.UNIE-BUB  |  0  |     0    |  0  |
+|     COLLECTIF CITOYEN  |  0  |     0    |  0  |
+|        LUTTE OUVRIERE  |  0  |     0    |  0  |
+|             CHEZ NOUS  |  0  |     0    |  0  |
+|                BLANCO  |  0  |     0    |  0  |
 
 ### Dhondt and Threshold assertion dont meet risk limit
 
@@ -263,12 +279,61 @@ Contested          loser/round  nvotes,  score, voteDiff,  noerror, nomargin, es
  (16)                                                682, 0.500886,   0.0018,      1759,   0.1820,    winner LES ENGAGÉS/2 loser MR/5
 ````
 
-| party             | min | reported | max |
-|-------------------|-----|----------|-----|
-| Team Fouad Ahidar | 0   | 0        | 1   |
-| PS                | 3   | 4        | 4   |
-| LES ENGAGÉS       | 1   | 2        | 2   |
-| MR                | 4   | 4        | 5   |
+|                party   | min | reported | max |
+|------------------------|-----|----------|-----|
+|                    MR  |  4  |     4    |  5  |
+|                    PS  |  3  |     4    |  4  |
+|              PTB-PVDA  |  3  |     3    |  3  |
+|           LES ENGAGÉS  |  1  |     2    |  2  |
+|                 ECOLO  |  2  |     2    |  2  |
+|                  DéFI  |  1  |     1    |  1  |
+|         VLAAMS BELANG  |  0  |     0    |  0  |
+|           Volt Europa  |  0  |     0    |  0  |
+|                 Agora  |  0  |     0    |  0  |
+|                  N-VA  |  0  |     0    |  0  |
+|    Voor U / Pour Vous  |  0  |     0    |  0  |
+|     Team Fouad Ahidar  |  0  |     0    |  1  |
+|     COLLECTIF CITOYEN  |  0  |     0    |  0  |
+|        Parti.j BLANCO  |  0  |     0    |  0  |
+|         BELG.UNIE-BUB  |  0  |     0    |  0  |
+|                l'Unie  |  0  |     0    |  0  |
+|        LUTTE OUVRIERE  |  0  |     0    |  0  |
+
+
+### Sum of candidate ranges across all contests
+
+|                party   | min | reported | max |
+|------------------------|-----|----------|-----|
+|                  N-VA  | 24  |    24    | 25  |
+|         VLAAMS BELANG  | 20  |    20    | 21  |
+|                    MR  | 20  |    20    | 21  |
+|                    PS  | 14  |    16    | 17  |
+|           LES ENGAGÉS  | 12  |    14    | 14  |
+|               Vooruit  | 11  |    13    | 13  |
+|                  CD&V  | 10  |    11    | 12  |
+|              open vld  |  7  |     7    |  7  |
+|                  PVDA  |  6  |     6    |  7  |
+|                 GROEN  |  6  |     6    |  6  |
+|                   PTB  |  5  |     6    |  6  |
+|                 ECOLO  |  3  |     3    |  4  |
+|              PTB-PVDA  |  3  |     3    |  3  |
+|                  DéFI  |  1  |     1    |  1  |
+|     Team Fouad Ahidar  |  0  |     0    |  1  |
+|           Volt Europa  |  0  |     0    |  0  |
+|                Voor U  |  0  |     0    |  0  |
+|            DierAnimal  |  0  |     0    |  0  |
+|         Partij BLANCO  |  0  |     0    |  0  |
+|         BELG.UNIE-BUB  |  0  |     0    |  0  |
+|                l'Unie  |  0  |     0    |  0  |
+|                 Agora  |  0  |     0    |  0  |
+|     COLLECTIF CITOYEN  |  0  |     0    |  0  |
+|             CHEZ NOUS  |  0  |     0    |  0  |
+|                   RMC  |  0  |     0    |  0  |
+|                BLANCO  |  0  |     0    |  0  |
+|    Voor U / Pour Vous  |  0  |     0    |  0  |
+|        Parti.j BLANCO  |  0  |     0    |  0  |
+|        LUTTE OUVRIERE  |  0  |     0    |  0  |
+|    GV-GEZOND VERSTAND  |  0  |     0    |  0  |
 
 
 ## Notes From Bounding paper 04/12/2026

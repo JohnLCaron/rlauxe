@@ -24,6 +24,7 @@ import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.persist.CardManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
+import org.cryptobiotic.rlauxe.util.estSamplesFromNomargin
 import kotlin.Double
 import kotlin.Int
 import kotlin.math.abs
@@ -131,10 +132,23 @@ class EstimateAudit(
                     simNewMvrsNeeded = newMvrs,
                     simMvrsNeeded = estMvrs,
                 )
+                useAssertionRound.estimationResult = estimationResult
 
-                // attach estimationResult to all the assertions still to be done
-                contestRound.assertionRounds.forEach { assertion ->
-                    assertion.estimationResult = estimationResult
+                val fakeEst = estimationResult.copy(
+                    strategy = "estSamples",
+                    estimatedDistribution=emptyList(),
+                )
+
+                // attach estimationResult to all the other assertions still to be done
+                // TODO kludge
+                contestRound.assertionRounds.filter { it != useAssertionRound}.forEach { round ->
+                    val nomargin = 2.0 * round.assertion.assorter.noerror() - 1.0
+                    val estMvrs = roundUp(estSamplesFromNomargin(2.0 / 1.03905, nomargin, config.creation.riskLimit))
+                    val prevNmrs = round.prevAssertionRound?.auditResult?.samplesUsed ?: 0
+                    val newMvrs = estMvrs - prevNmrs
+                    round.estMvrs = estMvrs
+                    round.estNewMvrs = newMvrs
+                    round.estimationResult = fakeEst.copy(simNewMvrsNeeded=newMvrs, simMvrsNeeded=estMvrs)
                 }
             }
 

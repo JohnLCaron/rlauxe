@@ -22,7 +22,7 @@ data class ContestInfo(
     val id: Int,
     val candidateNames: Map<String, Int>, // candidate name -> candidate id
     val choiceFunction: SocialChoiceFunction,  // electionguard has "VoteVariationType"
-    val nwinners: Int = 1,              // aka "numberElected"
+    val nwinners: Int = 1,              // aka "numberElected"; for Dhondt, its nseats
     val voteForN: Int = nwinners,       // aka "contestSelectionLimit" or "optionSelectionLimit"
     val minFraction: Double? = null,    // threshold and Dhondt assorters only.
 ) {

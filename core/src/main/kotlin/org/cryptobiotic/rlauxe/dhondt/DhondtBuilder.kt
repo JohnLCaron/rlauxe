@@ -11,7 +11,7 @@ import kotlin.math.max
 
 
 private val showDetails = false
-private val useBt = true // always use Bt
+private val useBt = false // always use Bt; why?
 
 // f_e,s = Te /d(s)
 // e = partyId, s = seatno, score = Te /d(s)
@@ -59,12 +59,12 @@ fun makeDhondtContest(
     val contest = pcontest.createContest(Nc = totalVotes, Ncast = totalVotes)
     */
 
-    val builder = DhondtBuilder2(name, id, parties, nseats, Nc, undervotes, minFraction)
+    val builder = DhondtBuilder(name, id, parties, nseats, Nc, undervotes, minFraction)
     return builder.build()
 }
 
 // side effect is to set party.lastSeatWon,firstSeatLost: could move that to  assignWinners2()
-data class DhondtBuilder2(
+data class DhondtBuilder(
     val name: String,
     val id: Int,
     val parties: List<DhondtCandidate>,
@@ -87,7 +87,7 @@ data class DhondtBuilder2(
 
     init {
         val totalVotes = validVotes + undervotes
-        require (Nc != totalVotes) { "DhondtBuilder2 $Nc != $totalVotes" }
+        require (Nc == totalVotes) { "DhondtBuilder2 $Nc != $totalVotes" }
 
         val (sortedScores, belowMinPctIn) = assignWinners(parties, nseats, validVotes, minFraction, null)
 

@@ -21,7 +21,7 @@ class TestBelgiumContest {
     val cardManifest: CardManifest
 
     init {
-        val auditdir = "$testdataDir/cases/belgium/2024limited/Hainaut/audit"
+        val auditdir = "$testdataDir/cases/belgium/2024limited/Anvers/audit"
         val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
         cardManifest = auditRecord.readSortedManifest()
         config = auditRecord.config
@@ -36,10 +36,10 @@ class TestBelgiumContest {
     }
 
     @Test
-    fun testShowDhondtAssertions() {
+    fun testShowRelaxedAssertions() {
         contests.forEach{ contestUA ->
             println("${contestUA.contest}\n")
-            val result = (contestUA.contest as DHondtContest).showAssertions(rounds)
+            val result = (contestUA.contest as DHondtContest).showRelaxedAssertions(rounds)
             println(result)
         }
     }

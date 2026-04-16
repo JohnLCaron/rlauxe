@@ -66,7 +66,7 @@ class DHondtContest(
     override fun winners() = winners
     override fun losers() = losers
 
-    val winnerSeats : Map<Int, Int> // cand, nseats
+    val winnerSeats : Map<Int, Int> // candId -> nseats
 
     // dhondts and threshold assorters; these are set at creation, but not serialized, so cant assume they exist
     // can we put the generation of these inside? problem is ContestUA is serialized seperately, would have to rejigger that
@@ -225,9 +225,14 @@ class DHondtContest(
 
     data class Dround(val candId: Int, val score: Double, val round: Int, val winningSeat: Int?)
 
-    fun showAssertions(rounds: List<AuditRoundIF>): String {
+    fun showRelaxedAssertions(rounds: List<AuditRoundIF>): String {
         val relax = RelaxedAssertions(this)
         return relax.showAssertions(rounds)
+    }
+
+    fun makeSeatRanges(rounds: List<AuditRoundIF>): CandSeatRanges {
+        val relax = RelaxedAssertions(this)
+        return relax.makeSeatRanges(rounds)
     }
 
     // create a cvr for each vote

@@ -132,6 +132,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
 
     companion object {
 
+        // parties that passed threshold
         fun makeDhondtAssorters(info: ContestInfo, Nc: Int, parties: List<DhondtCandidate>): List<DHondtAssorter> {
             // Let f_e,s = Te /d(s) for entity e and seat s
             // f_A,WA > f_B,LB, so e = A and s = Wa

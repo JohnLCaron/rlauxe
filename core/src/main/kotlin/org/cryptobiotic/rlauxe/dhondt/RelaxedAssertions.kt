@@ -2,30 +2,67 @@ package org.cryptobiotic.rlauxe.dhondt
 
 import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
-import org.cryptobiotic.rlauxe.audit.AuditRoundResult
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.estRisk
-import org.cryptobiotic.rlauxe.util.estSamples
+import org.cryptobiotic.rlauxe.util.estSamplesFromNomargin
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.text.appendLine
 
-class RelaxedAssertions(val dc: DHondtContest) {
-    val info = dc.info
-    val belowMinPct = dc.belowMinPct
-    val sortedScores = dc.sortedScores
-    val winnerSeats = dc.winnerSeats
-    val votes = dc.votes
+private val candNameWidth = 20
 
-    fun showAssertions(rounds: List<AuditRoundIF>, recurse: Boolean = false): String = buildString {
+data class CandSeatRange(val candName: String) {
+    var minSeats = 0
+    var reportedSeats = 0
+    var maxSeats = 0
+}
+
+data class CandSeatRanges(val ranges: List<CandSeatRange>) {
+
+    fun showSeatRanges() = buildString {
+        appendLine("|                party   | min | reported | max |")
+        appendLine("|------------------------|-----|----------|-----|")
+        ranges.sortedByDescending { it.maxSeats }.forEach {
+            appendLine("|  ${trunc(it.candName, candNameWidth) }  | ${nfn(it.minSeats, 2)}  |    ${nfn(it.reportedSeats, 2)}    | ${nfn(it.maxSeats, 2)}  |")
+        }
+    }
+
+    companion object {
+
+        fun sumRanges(candRanges: List<CandSeatRanges>): CandSeatRanges {
+            val sum = mutableMapOf<String, CandSeatRange>()
+            candRanges.forEach { candRange ->
+                candRange.ranges.forEach { range ->
+                    val sumRange = sum.getOrPut(range.candName) { CandSeatRange(range.candName)}
+                    sumRange.minSeats += range.minSeats
+                    sumRange.reportedSeats += range.reportedSeats
+                    sumRange.maxSeats += range.maxSeats
+                }
+            }
+            return CandSeatRanges(sum.values.toList())
+        }
+    }
+
+}
+
+class RelaxedAssertions(val org: DHondtContest) {
+    val orgInfo = org.info
+    val belowMinPct = org.belowMinPct
+    val votes = org.votes
+    val nseats = org.winnerSeats.values.sum()
+
+    fun makeSeatRanges(rounds: List<AuditRoundIF>): CandSeatRanges  {
         val lastAssertionRounds = mutableMapOf<String, AssertionRound>()
-        rounds.filter{ it.auditWasDone }.map {
-            val contestRound = it.contestRounds.find { cr -> cr.id == info.id }
+        rounds.map {
+            val contestRound = it.contestRounds.find { cr -> cr.id == orgInfo.id }
             if (contestRound != null) {
                 contestRound.assertionRounds.forEach { ar ->
                     lastAssertionRounds[ar.assertion.assorter.hashcodeDesc()] = ar
@@ -33,24 +70,72 @@ class RelaxedAssertions(val dc: DHondtContest) {
             }
         }
 
-        val candNameWidth = 20
-        val width = 12
-        val maxRound = sortedScores.filter { it.winningSeat != null }.maxOfOrNull { it.divisor }!! + 1
-        val nseats = winnerSeats.values.sum()
+        //// dhondt failures = contested seats
+        val dhondtFailures = mutableMapOf<Int, DhondtLoserGroup>()
+        lastAssertionRounds.forEach { (key, ar) ->
+            val assorter = ar.assertion.assorter
+            val risk = if (ar.auditResult != null) ar.auditResult!!.pmin else {
+                estRisk(2/1.03905, mean2margin(assorter.noerror()), 1000) // TODO how many samples ??
+            }
+            if (risk > .05 && assorter is DHondtAssorter) {
+                val winnerId = assorter.winner()
+                val loserId = assorter.loser()
+                val winnerScore = org.sortedScores.find { it.divisor == assorter.lastSeatWon && it.candidate == winnerId }!!
+                val loserScore = org.sortedScores.find { it.divisor == assorter.firstSeatLost && it.candidate == loserId }!!
+                val group = dhondtFailures.getOrPut(loserId) { DhondtLoserGroup(loserId) }
+                group.arms.add(DhondtRiskFailure(assorter, winnerScore, loserScore, risk, ar.auditResult?.nmvrs))
+            }
+        }
+        val orgRanges = makeCandSeatRanges(org, dhondtFailures.values.flatMap { it.arms })
 
+        //// threshold assertion failures -> alternate scores
+        val thrashers = mutableListOf<ThresholdRiskFailure>()
+        lastAssertionRounds.forEach { (key, ar) ->
+            val assorter = ar.assertion.assorter
+            val risk = if (ar.auditResult != null) ar.auditResult!!.pmin else {
+                estRisk(2/1.03905, mean2margin(assorter.noerror()), 1000) // TODO how many samples ??
+            }
+            if (risk > .05 && assorter !is DHondtAssorter) {
+                thrashers.add(ThresholdRiskFailure(assorter, risk, ar.auditResult?.nmvrs))
+            }
+        }
+
+        // TODO: if there are n thrashers, there are 2^n possible alternative scores. Generate each and take the min and max over all
+        val threshRanges = mutableListOf<CandSeatRanges>()
+        if (thrashers.isNotEmpty()) {
+            val alt = makeAltContest(thrashers)
+            val altFailures = makeAltRiskFailures(alt)
+            threshRanges.add(makeCandSeatRanges(alt, altFailures.values.flatMap { it.arms }))
+        }
+
+        return mergeCandSeatRanges(orgRanges, threshRanges)
+    }
+
+    fun showAssertions(rounds: List<AuditRoundIF>): String = buildString {
+        val lastAssertionRounds = mutableMapOf<String, AssertionRound>()
+        rounds.map {
+            val contestRound = it.contestRounds.find { cr -> cr.id == orgInfo.id }
+            if (contestRound != null) {
+                contestRound.assertionRounds.forEach { ar ->
+                    lastAssertionRounds[ar.assertion.assorter.hashcodeDesc()] = ar
+                }
+            }
+        }
+
+        //// reported winners
+        appendLine("reported winners")
         append(" seat ${sfn("winner", candNameWidth - 3)}/round     ${sfn("nvotes", 6)}, ")
         append("${sfn(" score", 6)},  ${sfn("voteDiff", 6)}, ")
         appendLine()
-
         // sorted scores
         var prev: Int? = null
         repeat(nseats) { idx ->
-            val score = sortedScores[idx]
+            val score = org.sortedScores[idx]
             // sortedRawScores.filter{ it.divisor <= maxRound }.forEachIndexed { idx, score ->
             val candId = score.candidate
             if (idx < nseats) append(" (${nfn(idx + 1, 2)}) ") else append("      ")
             val below = if (belowMinPct.contains(candId)) "*" else " "
-            append(" ${trunc(info.candidateIdToName[candId]!!, candNameWidth)}$below")
+            append(" ${trunc(orgInfo.candidateIdToName[candId]!!, candNameWidth)}$below")
             append("/${nfn(score.divisor, 2)}, ")
             append(" ${nfn(votes[candId]!!, 6)}, ${nfn(score.score.toInt(), 6)}, ")
 
@@ -58,45 +143,106 @@ class RelaxedAssertions(val dc: DHondtContest) {
             prev = score.score.toInt()
             appendLine()
         }
-        // appendLine("winners=${winnerSeats}")
         appendLine()
 
-        // failed dhondt assertions -> "contested seats"
-        val armsMap = mutableMapOf<Int, AssertionRiskGroup>()
+        //// dhondt failures = contested seats
+        val dhondtFailures = mutableMapOf<Int, DhondtLoserGroup>()
         lastAssertionRounds.forEach { (key, ar) ->
             val assorter = ar.assertion.assorter
-            val risk = ar.auditResult?.pmin ?: Double.NaN
+            val risk = if (ar.auditResult != null) ar.auditResult!!.pmin else {
+                estRisk(2/1.03905, mean2margin(assorter.noerror()), 1000) // TODO how many samples ??
+            }
             if (risk > .05 && assorter is DHondtAssorter) {
                 val winnerId = assorter.winner()
                 val loserId = assorter.loser()
-                val winnerScore = sortedScores.find { it.divisor == assorter.lastSeatWon && it.candidate == winnerId }!!
-                val loserScore = sortedScores.find { it.divisor == assorter.firstSeatLost && it.candidate == loserId }!!
-                val group = armsMap.getOrPut(loserId) { AssertionRiskGroup(loserId) }
-                group.arms.add(AssertionRiskMargin(ar, ar.assertion.assorter, winnerScore, loserScore, ar.auditResult!!))
+                val winnerScore = org.sortedScores.find { it.divisor == assorter.lastSeatWon && it.candidate == winnerId }!!
+                val loserScore = org.sortedScores.find { it.divisor == assorter.firstSeatLost && it.candidate == loserId }!!
+                val group = dhondtFailures.getOrPut(loserId) { DhondtLoserGroup(loserId) }
+                group.arms.add(DhondtRiskFailure(assorter, winnerScore, loserScore, risk, ar.auditResult?.nmvrs))
             }
         }
-        if (armsMap.isNotEmpty()) {
-            val sortedGroups = armsMap.values.toList().sortedByDescending { it -> it.highScore() }
-            append(showAssertionsAtRisk(sortedGroups, candNameWidth))
+        if (dhondtFailures.isNotEmpty()) {
+            val sortedGroups = dhondtFailures.values.toList().sortedByDescending { it -> it.highScore() }
+            append(showDhondtRiskFailures(sortedGroups))
+        }
+        appendLine()
+        val orgRanges = makeCandSeatRanges(org, dhondtFailures.values.flatMap { it.arms })
+
+        //// threshold assertion failures -> alternate scores
+        val thrashers = mutableListOf<ThresholdRiskFailure>()
+        lastAssertionRounds.forEach { (key, ar) ->
+            val assorter = ar.assertion.assorter
+            val risk = if (ar.auditResult != null) ar.auditResult!!.pmin else {
+                estRisk(2/1.03905, mean2margin(assorter.noerror()), 1000) // TODO how many samples ??
+            }
+            if (risk > .05 && assorter !is DHondtAssorter) {
+                thrashers.add(ThresholdRiskFailure(assorter, risk, ar.auditResult?.nmvrs))
+            }
+        }
+
+        // TODO: if there are n thrashers, there are 2^n possible alternative scores. Generate each and take the min and max over all
+        val threshRanges = mutableListOf<CandSeatRanges>()
+        if (thrashers.isNotEmpty()) {
+            val alt = makeAltContest(thrashers)
+            val altFailures = makeAltRiskFailures(alt)
+            append(showAltFailures(thrashers, alt, altFailures))
+            threshRanges.add(makeCandSeatRanges(alt, altFailures.values.flatMap { it.arms }))
         }
         appendLine()
 
-        // failed threshold assertions -> alternate scores
-        val thrashers = mutableListOf<AssertionThrasher>()
-        lastAssertionRounds.forEach { (key, ar) ->
-            val assorter = ar.assertion.assorter
-            val risk = ar.auditResult?.pmin ?: Double.NaN
-            if (risk > .05 && assorter !is DHondtAssorter) {
-                thrashers.add(AssertionThrasher(ar, ar.assertion.assorter, ar.auditResult))
-            }
-        }
-        if (!recurse && thrashers.isNotEmpty()) {
-            append(showAlternate(thrashers, rounds))
-        }
+        val merged = mergeCandSeatRanges(orgRanges, threshRanges)
+        append(merged.showSeatRanges())
     }
 
-    data class AssertionRiskGroup(val loserId: Int) {
-        val arms = mutableListOf<AssertionRiskMargin>()
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+    fun makeCandSeatRanges(dc: DHondtContest, failures: List<DhondtRiskFailure>): CandSeatRanges {
+        val candSeats = mutableMapOf<Int, CandSeatRange>()
+        dc.info.candidateIdToName.forEach { (candId, name) ->
+            candSeats[candId] = CandSeatRange(name)
+        }
+        dc.winnerSeats.forEach { (candId, nseats) ->
+            candSeats[candId]!!.reportedSeats = nseats
+            candSeats[candId]!!.minSeats = nseats
+            candSeats[candId]!!.maxSeats = nseats
+        }
+
+        // can only win 1 or lose 1
+        val winners = mutableSetOf<Int>()
+        val losers = mutableSetOf<Int>()
+        failures.forEach { arm ->
+            winners.add( arm.winnerScore.candidate)
+            losers.add( arm.loserScore.candidate)
+        }
+        winners.forEach {
+            val win = candSeats[it]!!
+            win.minSeats--
+        }
+        losers.forEach {
+            val lose = candSeats[it]!!
+            lose.maxSeats++
+        }
+        return CandSeatRanges(candSeats.values.toList())
+    }
+
+    // union of threshRanges into orgRanges
+    fun mergeCandSeatRanges(orgRanges: CandSeatRanges, threshRanges: List<CandSeatRanges>): CandSeatRanges {
+        if (threshRanges.isEmpty()) return orgRanges
+
+        orgRanges.ranges.forEach { mergeRange ->
+            threshRanges.forEach { threshRange ->
+                val trange = threshRange.ranges.find{ it.candName == mergeRange.candName }!!
+                mergeRange.minSeats = min(mergeRange.minSeats, trange.minSeats)
+                mergeRange.maxSeats = max(mergeRange.maxSeats, trange.maxSeats)
+            }
+        }
+
+        return orgRanges
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    data class DhondtLoserGroup(val loserId: Int) {
+        val arms = mutableListOf<DhondtRiskFailure>()
         fun highScore(): Double {
             val wtf = arms.maxOfOrNull { it.loserScore.score }
             return wtf ?: 0.0
@@ -104,29 +250,28 @@ class RelaxedAssertions(val dc: DHondtContest) {
         fun sortedArms() = arms.sortedBy { it.nomargin }
     }
 
-    data class AssertionRiskMargin(
-        val ar: AssertionRound,
+    data class DhondtRiskFailure(
         val assorter: DHondtAssorter,
         val winnerScore: DhondtScore,
         val loserScore: DhondtScore,
-        val auditResult: AuditRoundResult?
+        val risk: Double,
+        val samplesUsed: Int?
     ) {
         val nomargin = 2.0 * assorter.noerror() - 1.0
-        val risk = ar.auditResult?.pmin ?: Double.NaN
-        val nmvrs = ar.auditResult?.samplesUsed ?: 0
+        val nmvrs = samplesUsed ?: 0
         fun estMvrs(): Int  {
             // payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (µ_i is approximately 1/2)
             // payoff_noerror^n > 1/alpha
             // n = 1/ln(alpha) / ln(λ * (noerror − 1/2)); noerror − 1/2 = nomargin/2
             // TODO
             val maxLoss: Double = 1.0 / 1.03905
-            return roundUp(estSamples(2*maxLoss, nomargin, .05)) // =  -ln(alpha) / ln(1.0 + bet * nomargin/2)
+            return roundUp(estSamplesFromNomargin(2*maxLoss, nomargin, .05)) // =  -ln(alpha) / ln(1.0 + bet * nomargin/2)
         }
     }
 
-    fun showAssertionsAtRisk(sortedGroups: List<AssertionRiskGroup>, candNameWidth: Int) = buildString {
+    fun showDhondtRiskFailures(sortedGroups: List<DhondtLoserGroup>) = buildString {
 
-        appendLine("Contested            loser/round   nvotes,  score, voteDiff,  noerror, nomargin, estSamples, actSamples,   risk, assertion")
+        appendLine("Contested           loser/round   nvotes,  score, voteDiff,  noerror, nomargin, estSamples, actSamples, estRisk, assertion")
 
         sortedGroups.forEach {  group ->
             group.sortedArms().forEachIndexed { idx, arm ->
@@ -134,12 +279,12 @@ class RelaxedAssertions(val dc: DHondtContest) {
                 val candId = assorter.loser()
                 if (idx == 0) {
                     append(" (${nfn(arm.winnerScore.winningSeat!!, 2)})  ")
-                    append(arm.loserScore.showLoser(trunc(info.candidateIdToName[candId]!!, candNameWidth), votes[candId]!!))
+                    append(arm.loserScore.showLoser(trunc(orgInfo.candidateIdToName[candId]!!, candNameWidth), votes[candId]!!))
                 } else {
                     append(" (${nfn(arm.winnerScore.winningSeat!!, 2)})  ")
                     append("                                           ")
                 }
-                append(" ${nfn(dc.marginInVotes(assorter), 7)}, ${dfn(assorter.noerror(), 6)},   ${dfn(arm.nomargin, 4)}, ")
+                append(" ${nfn(org.marginInVotes(assorter), 7)}, ${dfn(assorter.noerror(), 6)},   ${dfn(arm.nomargin, 4)}, ")
                 append(" ${nfn(arm.estMvrs(), 8)}, ${nfn(arm.nmvrs, 8)},    ${dfn(arm.risk, 4)},")
                 append(" winner ${assorter.winnerNameRound()} loser ${assorter.loserNameRound()}")
                 appendLine()
@@ -147,18 +292,34 @@ class RelaxedAssertions(val dc: DHondtContest) {
         }
     }
 
-    // thrashers are the thresholds (only Below?)  that dodnt make their risk limit
-    fun showAlternate(thrashers: List<AssertionThrasher>, rounds: List<AuditRoundIF>) = buildString {
-        appendLine("------------------------------------------------------------------------------")
-        appendLine("Thresholds             marginInVotes, nomargin, estSamples, actSamples,   risk")
-        thrashers.forEach {  thrasher ->
-            appendLine(thrasher)
-        }
-        appendLine()
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // threshold
 
+    inner class ThresholdRiskFailure(val assorter: AssorterIF, val risk: Double, val samplesUsed: Int?) {
+        val nomargin = 2.0 * assorter.noerror() - 1.0
+        val nmvrs = samplesUsed ?: 0
+        fun estMvrs(): Int  {
+            // payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (µ_i is approximately 1/2)
+            // payoff_noerror^n > 1/alpha
+            // n = 1/ln(alpha) / ln(λ * (noerror − 1/2)); noerror − 1/2 = nomargin/2
+            // TODO
+            val maxLoss: Double = 1.0 / 1.03905
+            return roundUp(estSamplesFromNomargin(2*maxLoss, nomargin, .05)) // =  -ln(alpha) / ln(1.0 + bet * nomargin/2)
+        }
+
+        override fun toString() = buildString {
+            append("${assorter.shortName()}: ")
+            append(" ${nfn(org.marginInVotes(assorter), 7)}, ${dfn(nomargin, 6)}, ")
+            append(" ${nfn(estMvrs(), 8)}, ${nfn(nmvrs, 8)},    ${dfn(risk, 4)},")
+        }
+    }
+
+    // do we have to do this for each or all ?
+    // thrashers are the thresholds that dodnt make their risk limit
+    fun makeAltContest(thrashers: List<ThresholdRiskFailure>): DHondtContest  {
         val thrasherIds = thrashers.map { it.assorter.winner() }.toSet()
         // increase nwinners
-        val infoPlus = info.copy(nwinners = info.nwinners + thrashers.size)
+        // val infoPlus = orgInfo.copy(nwinners = nseats + thrashers.size) // TODO do we need this?
         //     info: ContestInfo,
         //    voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
         //    Nc: Int,                // trusted maximum ballots/cards that contain this contest
@@ -166,44 +327,46 @@ class RelaxedAssertions(val dc: DHondtContest) {
         //    belowMinPctIn: Set<Int>?  // candidateIds under minFraction
 
         // TODO not going through the builder, so parties arent complete
-        val alt = DHondtContest(info, votes, dc.Nc, dc.Ncast, belowMinPct - thrasherIds)
+        val alt = DHondtContest(orgInfo, votes, org.Nc, org.Ncast, belowMinPct - thrasherIds)
 
         // recalc assorters
-        val org = DHondtAssorter.makeDhondtAssorters(dc.info, dc.Nc, dc.parties)
-        //appendLine("org has ${org.size} Dhondt assertions")
-        alt.assorters.addAll(DHondtAssorter.makeDhondtAssorters(infoPlus, alt.Nc, alt.parties))
-        //appendLine("alt has ${alt.assorters.size} ")
-        /* alt.assorters.sortedBy { it.noerror() }. forEach {
-            appendLine("   ${it.shortName()} ${it.upperBound()} ${it.noerror()}")
-        } */
+        alt.assorters.addAll(DHondtAssorter.makeDhondtAssorters(orgInfo, alt.Nc, alt.parties))
+
+        return alt // Pair(alt, makeAltRiskFailures(alt))
+    }
+
+    // these are not dhondts ??
+    fun makeAltRiskFailures(alt: DHondtContest): Map<Int, DhondtLoserGroup> {
+        val altFailures = mutableMapOf<Int, DhondtLoserGroup>()
+        alt.assorters.forEach { assorter ->
+            require(assorter is DHondtAssorter)
+            val winnerId = assorter.winner()
+            val loserId = assorter.loser()
+            val winnerScore = alt.sortedScores.find { it.divisor == assorter.lastSeatWon && it.candidate == winnerId }!!
+            val loserScore = alt.sortedScores.find { it.divisor == assorter.firstSeatLost && it.candidate == loserId }
+            if (loserScore == null)
+                print("")
+            val nomargin = 2.0 * assorter.noerror() - 1.0
+            val risk = estRisk(2 / 1.03905, nomargin, 1000) // TODO get actual nsamples
+            val arm = DhondtRiskFailure(assorter, winnerScore, loserScore!!, risk, null)
+            if (arm.risk > .05) {
+                val armGroup = altFailures.getOrPut(loserId) { DhondtLoserGroup(loserId) }
+                armGroup.arms.add(arm)
+            }
+        }
+        return altFailures
+    }
+
+
+    fun showAltFailures(thrashers: List<ThresholdRiskFailure>, alt: DHondtContest, altFailures: Map<Int, DhondtLoserGroup>) = buildString {
+        appendLine("------------------------------------------------------------------------------")
+        appendLine("Thresholds             marginInVotes, nomargin, estSamples, actSamples,   risk")
+        thrashers.forEach {  thrasher ->
+            appendLine(thrasher)
+        }
+        appendLine()
 
         // use new assorters as proxy for audit
-        append( showFromAssorters(alt) )
-    }
-
-    inner class AssertionThrasher(val ar: AssertionRound, val assorter: AssorterIF, val auditResult: AuditRoundResult?) {
-        val nomargin = 2.0 * assorter.noerror() - 1.0
-        val risk = ar.auditResult?.pmin ?: Double.NaN
-        val nmvrs = ar.auditResult?.samplesUsed ?: 0
-        fun estMvrs(): Int  {
-            // payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (µ_i is approximately 1/2)
-            // payoff_noerror^n > 1/alpha
-            // n = 1/ln(alpha) / ln(λ * (noerror − 1/2)); noerror − 1/2 = nomargin/2
-            // TODO
-            val maxLoss: Double = 1.0 / 1.03905
-            return roundUp(estSamples(2*maxLoss, nomargin, .05)) // =  -ln(alpha) / ln(1.0 + bet * nomargin/2)
-        }
-
-        override fun toString() = buildString {
-            append("${assorter.shortName()}: ")
-            append(" ${nfn(dc.marginInVotes(assorter), 7)}, ${dfn(nomargin, 6)}, ")
-            append(" ${nfn(estMvrs(), 8)}, ${nfn(nmvrs, 8)},    ${dfn(risk, 4)},")
-        }
-
-    }
-
-    fun showFromAssorters(alt: DHondtContest): String = buildString {
-        val candNameWidth = 20
         val nseats = alt.winnerSeats.values.sum()
         val sortedScores = alt.sortedScores
         val belowMinPct = alt.belowMinPct
@@ -233,75 +396,29 @@ class RelaxedAssertions(val dc: DHondtContest) {
         appendLine()
 
         // failed dhondt assertions -> "contested seats"
-        val armsMap = mutableMapOf<Int, AssorterRiskGroup>()
-        alt.assorters.forEach { assorter ->
-            require(assorter is DHondtAssorter)
-            val winnerId = assorter.winner()
-            val loserId = assorter.loser()
-            val winnerScore = sortedScores.find { it.divisor == assorter.lastSeatWon && it.candidate == winnerId }!!
-            val loserScore = sortedScores.find { it.divisor == assorter.firstSeatLost && it.candidate == loserId }!!
-            val arm = AssorterRiskMargin(assorter, winnerScore, loserScore)
-            if (arm.risk > .05) {
-                val armGroup = armsMap.getOrPut(loserId) { AssorterRiskGroup(loserId) }
-                armGroup.arms.add(AssorterRiskMargin(assorter, winnerScore, loserScore))
-            }
-        }
-
-        if (armsMap.isNotEmpty()) {
-            val sortedGroups = armsMap.values.toList().sortedByDescending { it -> it.highScore() }
-            append(showAssortersAtRisk(sortedGroups, candNameWidth))
+        if (altFailures.isNotEmpty()) {
+            val sortedGroups = altFailures.values.toList().sortedByDescending { it -> it.highScore() }
+            append(showAltDhondtRiskFailures(sortedGroups))
         }
         appendLine()
     }
 
-    data class AssorterRiskGroup(val loserId: Int) {
-        val arms = mutableListOf<AssorterRiskMargin>()
-        fun highScore(): Double {
-            val wtf = arms.maxOfOrNull { it.loserScore.score }
-            return wtf ?: 0.0
-        }
-        fun sortedArms() = arms.sortedBy { it.nomargin }
-    }
+    fun showAltDhondtRiskFailures(altFailures: List<DhondtLoserGroup>) = buildString {
 
-    data class AssorterRiskMargin(
-        // val ar: AssertionRound,
-        val assorter: DHondtAssorter,
-        val winnerScore: DhondtScore,
-        val loserScore: DhondtScore,
-        // val auditResult: AuditRoundResult?
-    ) {
-        val nomargin = 2.0 * assorter.noerror() - 1.0
+        appendLine("Contested         loser/round     nvotes,  score, voteDiff,  noerror, nomargin, estSamples, estRisk, assertion")
 
-        val maxLoss: Double = 1.0 / 1.03905
-        val nmvrs = 0 // roundUp(estSamples(2*maxLoss, nomargin, .05) )
-        val risk =  estRisk(2*maxLoss, nomargin, 1000) // TODO get actual nsamples
-
-        fun estMvrs(): Int  {
-            // payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (µ_i is approximately 1/2)
-            // payoff_noerror^n > 1/alpha
-            // n = 1/ln(alpha) / ln(λ * (noerror − 1/2)); noerror − 1/2 = nomargin/2
-            // TODO
-            val maxLoss: Double = 1.0 / 1.03905
-            return roundUp(estSamples(2*maxLoss, nomargin, .05)) // =  -ln(alpha) / ln(1.0 + bet * nomargin/2)
-        }
-    }
-
-    fun showAssortersAtRisk(sortedGroups: List<AssorterRiskGroup>, candNameWidth: Int) = buildString {
-
-        appendLine("Contested          loser/round  nvotes,  score, voteDiff,  noerror, nomargin, estSamples, estRisk, assertion")
-
-        sortedGroups.forEach {  group ->
+        altFailures.forEach {  group ->
             group.sortedArms().forEachIndexed { idx, arm ->
                 val assorter = arm.assorter
                 val candId = assorter.loser()
                 if (idx == 0) {
-                    append(" (${nfn(arm.winnerScore.winningSeat!!, 2)})")
-                    append(arm.loserScore.showLoser(trunc(info.candidateIdToName[candId]!!, candNameWidth), votes[candId]!!))
+                    append(" (${nfn(arm.winnerScore.winningSeat!!, 2)})  ")
+                    append(arm.loserScore.showLoser(trunc(orgInfo.candidateIdToName[candId]!!, candNameWidth), votes[candId]!!))
                 } else {
-                    append(" (${nfn(arm.winnerScore.winningSeat!!, 2)})")
+                    append(" (${nfn(arm.winnerScore.winningSeat!!, 2)})  ")
                     append("                                           ")
                 }
-                append(" ${nfn(dc.marginInVotes(assorter), 7)}, ${dfn(assorter.noerror(), 6)},   ${dfn(arm.nomargin, 4)}, ")
+                append(" ${nfn(org.marginInVotes(assorter), 7)}, ${dfn(assorter.noerror(), 6)},   ${dfn(arm.nomargin, 4)}, ")
                 append(" ${nfn(arm.estMvrs(), 8)},   ${dfn(arm.risk, 4)},")
                 append("    winner ${assorter.winnerNameRound()} loser ${assorter.loserNameRound()}")
                 appendLine()

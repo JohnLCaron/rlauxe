@@ -33,10 +33,15 @@ fun listToMap(names: List<String>): Map<String, Int> {
 }
 
 fun margin2mean(margin: Double) = (margin + 1.0) / 2.0
+
 fun mean2margin(mean: Double) = 2.0 * mean - 1.0
 fun noerror(margin: Double, upper: Double) = 1.0 / (2.0 - margin / upper)
 
-fun estSamples(bet:Double, nomargin:Double, alpha: Double) =  -ln(alpha) / ln(1.0 + bet * nomargin/2)
+fun estSamplesFromNomargin(bet:Double, nomargin:Double, alpha: Double) =  -ln(alpha) / ln(1.0 + bet * nomargin/2)
+fun estSamplesFromNoerror(bet:Double, noerror:Double, alpha: Double): Double {
+    val nomargin = 2.0 * noerror - 1.0
+    return -ln(alpha) / ln(1.0 + bet * nomargin / 2)
+}
 
 // payoff^n = 1/risk; risk = 1/(payoff^n)
 fun estRisk(bet:Double, nomargin:Double, nsamples: Int): Double {

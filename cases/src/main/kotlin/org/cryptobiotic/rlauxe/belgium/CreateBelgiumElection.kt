@@ -80,6 +80,7 @@ fun createBelgiumElection(
 // return ntotalVotes from Json and finalRound.nmvrs
 fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdir: String, contestId: Int,
                           riskMeasuringSampleLimit: Int? = null,
+                          runRounds:Boolean = true,
                           stopRound:Int=0,
                           showVerify:Boolean = false): Pair<Int, Int> {
     println("======================================================")
@@ -114,6 +115,8 @@ fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdi
     println()
     print(results)
     if (results.hasErrors) throw RuntimeException("createBelgiumElection failed to verify")
+
+    if (runRounds == false) return Pair(0, 0)
 
     println("============================================================")
     var done = false

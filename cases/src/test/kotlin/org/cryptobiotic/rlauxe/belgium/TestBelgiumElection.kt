@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.belgium
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
-import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder2
+import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.DhondtScore
 import org.cryptobiotic.rlauxe.util.ErrorMessages
@@ -42,7 +42,7 @@ class TestBelgiumElection {
         val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
         val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes
 
-        val builder = DhondtBuilder2(electionName, 1, dhondtParties, nwinners, totalVotes, 0,.05)
+        val builder = DhondtBuilder(electionName, 1, dhondtParties, nwinners, totalVotes, 0,.05)
         println("Calculated Winners")
         builder.winnerScores.sortedBy { it.winningSeat }.forEach {
             println("  ${it}")

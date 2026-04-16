@@ -37,16 +37,7 @@ class MakeBelgiumAuditSampleLimit {
 
     @Test
     fun showCandRangeAcrossContests() {
-        val compositeDir = topdirLimited
-        val compositeRecord = AuditRecord.readFrom(compositeDir)!!
-        val candRanges = mutableListOf<CandSeatRanges>()
-        compositeRecord.contests.forEach { contestUA ->
-            val dcontest = contestUA.contest as DHondtContest
-            candRanges.add(dcontest.makeSeatRanges(compositeRecord.rounds))
-        }
-        println("Sum of candidate ranges across all contests")
-        val sum = CandSeatRanges.sumRanges(candRanges)
-        print(sum.showSeatRanges())
+        print(CandSeatRanges.showSeatRanges(topdirLimited))
     }
 }
 

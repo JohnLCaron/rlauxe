@@ -1,5 +1,5 @@
 # D'Hondt Notes
-_last changed 02/15/2026_
+_last changed 04/16/2026_
 
 <!-- TOC -->
 * [D'Hondt Notes](#dhondt-notes)
@@ -7,8 +7,9 @@ _last changed 02/15/2026_
     * [Dhondt assertion doesnt meet risk limit](#dhondt-assertion-doesnt-meet-risk-limit)
     * [Threshold assertion doesnt meet risk limit](#threshold-assertion-doesnt-meet-risk-limit)
     * [Dhondt and Threshold assertion dont meet risk limit](#dhondt-and-threshold-assertion-dont-meet-risk-limit)
+    * [Sum of candidate ranges across all contests](#sum-of-candidate-ranges-across-all-contests)
   * [Notes From Bounding paper 04/12/2026](#notes-from-bounding-paper-04122026)
-    * [2.1 Contest of the Audit](#21-contest-of-the-audit)
+    * [2.1 Context of the Audit](#21-context-of-the-audit)
     * [2.2 Election manifest](#22-election-manifest)
     * [2.3 Auditing D’Hondt Elections](#23-auditing-dhondt-elections)
     * [2.4 Adding a Threshold](#24-adding-a-threshold)
@@ -338,7 +339,9 @@ Contested          loser/round  nvotes,  score, voteDiff,  noerror, nomargin, es
 
 ## Notes From Bounding paper 04/12/2026
 
-### 2.1 Contest of the Audit
+"Ideas for bounding sample sizes for Belgian RLAs April 12, 2026"
+
+### 2.1 Context of the Audit
 
 Approximately half of the Belgian voters vote on hand-marked and hand-counted
 paper ballots. Voting happens on a Sunday morning, and counting offices op-

@@ -168,7 +168,7 @@ data class Contest(
 // CandidateId: indicates the candidate the mark is for (if a write-in position is resolved to a
 //   qualified write-in the candidate id will point to a qualified write-in).
 // PartyId: indicates party affiliation. If not party affiliation then this will be 0.
-// Rank: indicates rank; will be 1 by default, will only contain values higher than 1 if ranked choice voting is used.
+// Rank: indicates rank; will be 1 by default, will only contain values higher than 1 if ranked voting is used.
 // WriteinIndex: if mark is for write-in position (or qualified write-in) this attribute indicates which
 //   write-in position in the contest (0 means first, 1 means second position, etc.)
 // MarkDensity: percentage that voting box was filled.

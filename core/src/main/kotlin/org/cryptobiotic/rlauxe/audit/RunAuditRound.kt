@@ -5,9 +5,12 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.estimate.consistentSampling
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.verify.VerifyAuditRoundCommitment
@@ -92,7 +95,7 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRo
             // get matching mvrs if needed
             if (!nextRound.auditIsComplete && auditRecord.config.election.mvrSource == MvrSource.testPrivateMvrs) {
                 val publisher = Publisher(auditDir)
-                val ncards = workflow.mvrManager().writeMvrsForRound(roundIdx)
+                val ncards = workflow.writeMvrsForRound(roundIdx)
                 logger.info{"writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(roundIdx)}"}
             }
             logger.info { "End startNewRound $roundIdx took ${roundStopwatch}: ${nextRound.show()}" }
@@ -144,26 +147,24 @@ fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7, verify:Boolean = tr
     return true
 }
 
-// for viewer, esp when auditorWantNewMvrs is used
-fun runRoundOnly(auditDir: String, auditRound: AuditRound): Boolean {
-
+// for viewer
+fun resampleAndRun(auditdir: String, lastRound: AuditRound): Boolean {
     try {
-        if (notExists(Path.of(auditDir))) {
-            logger.error { "audit Directory $auditDir does not exist" }
-            return false
-        }
-        val auditRecord = AuditRecord.read(auditDir)
-        if (auditRecord == null) {
-            logger.error { "directory '$auditDir' does not contain an audit record" }
-            return false
-        }
-        require(auditRecord is AuditRecord)
+        val auditRecord = AuditRecord.read(auditdir)!!
+
+        // resample
+        val previousSamples = auditRecord.rounds.previousSamplePrns(lastRound.roundIdx)
+        // TODO removeContestsAndSample or consistentSampling??
+        // removeContestsAndSample(auditRecord.config.round.sampling, auditRecord.readSortedManifest(), lastRound, previousSamples)
+        consistentSampling(lastRound, auditRecord.readSortedManifest(), previousSamples)
+
+        // writeAuditState
+        val publisher = Publisher(auditdir)
+        writeAuditRoundJsonFile(lastRound, publisher.auditEstFile(lastRound.roundIdx))
+        writeSamplePrnsJsonFile(lastRound.samplePrns, publisher.samplePrnsFile(lastRound.roundIdx))
 
         val workflow = PersistedWorkflow(auditRecord)
-        val complete = workflow.runAuditRound(auditRound)
-
-        //// does not start the next round
-
+        workflow.runAuditRound(lastRound)
         return true
 
     } catch (t: Throwable) {

@@ -78,6 +78,10 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
     // 6. _Run the audit_
     abstract fun runAuditRound(auditRound: AuditRound, onlyTask: OnlyTask? = null, quiet: Boolean = true): Boolean  // return true if audit is complete
 
+    fun writeMvrsForRound(round: Int): Int {
+        return mvrManager().writeMvrsForRound(round)
+    }
+
     companion object {
         private val logger = KotlinLogging.logger("AuditWorkflow")
     }

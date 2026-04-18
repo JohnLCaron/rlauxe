@@ -158,13 +158,12 @@ fun consistentSampling(
     val contestsIncluded = auditRound.contestRounds.filter { !it.done && it.included}
     if (contestsIncluded.isEmpty()) return emptyList()
 
-    // how many samples are wanted for each contest.
+    // how many samples are wanted for each contest
+    contestsIncluded.forEach { if (it.auditorWantNewMvrs != null && it.auditorWantNewMvrs!! < 0) it.auditorWantNewMvrs = null } // TODO fix in viewerr
     val wantSampleSize = contestsIncluded.associate { it.id to (it.auditorWantNewMvrs ?: it.estMvrs) }
     require(wantSampleSize.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
 
     val skippedContests = mutableSetOf<Int>()
-    // val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> mvrs in sample
-    // val haveNewSamples = mutableMapOf<Int, Int>() // contestId -> new mvrs in sample
     var newMvrs = 0 // count when this card not in previous samples
     auditRound.contestRounds.forEach {
         it.haveSampleSize = 0
@@ -225,17 +224,15 @@ fun consistentSampling(
         cardIndex++
     }
 
-
-    /* TODO why would this happen ??
-    val wantMore = contestsIncluded.any { (haveSampleSize[it.id] ?: 0) < (wantSampleSize[it.id] ?: 0) }
+    // TODO why would this happen ??
+    val wantMore = contestsIncluded.any { it.haveSampleSize < (wantSampleSize[it.id] ?: 0) }
     if (wantMore) {
         contestsIncluded.forEach {
-            if ((haveSampleSize[it.id] ?: 0) < (wantSampleSize[it.id] ?: 0))
-                logger.warn { "contest ${it.id}:  (have) ${(haveSampleSize[it.id] ?: 0)} < ${(wantSampleSize[it.id] ?: 0)} (want)" }
+            if (it.haveSampleSize < (wantSampleSize[it.id] ?: 0))
+                logger.warn { "contest ${it.id}:  (have) ${it.haveSampleSize} < ${(wantSampleSize[it.id] ?: 0)} (want)" }
         }
     }
-    if (debugConsistent) logger.info{"**consistentSampling haveSampleSize = $haveSampleSize, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs"}
-    */
+    // if (debugConsistent) logger.info{"**consistentSampling haveSampleSize = $haveSampleSize, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs"}
 
     // set the results into the auditRound direclty
     auditRound.nmvrs = sampledCards.size

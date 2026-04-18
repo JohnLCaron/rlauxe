@@ -16,7 +16,7 @@ import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
 /** AuditWorkflow with persistent state. */
 class PersistedWorkflow(
     val auditRecord: AuditRecordIF,
-    val mvrWrite: Boolean = true,
+    val mvrWrite: Boolean = true, // skip writing when doing RunRoundAgain
 ): AuditWorkflow() {
     val auditDir = auditRecord.location
     val publisher = Publisher(auditDir)

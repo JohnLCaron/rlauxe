@@ -115,7 +115,7 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditR
         // get matching mvrs if needed
         if (auditRecord.config.mvrSource == MvrSource.testPrivateMvrs) {
             val publisher = Publisher(auditDir)
-            val ncards = workflow.mvrManager().writeMvrsForRound(roundIdx)
+            val ncards = workflow.writeMvrsForRound(roundIdx)
             logger.info{"writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(roundIdx)}"}
         }
 

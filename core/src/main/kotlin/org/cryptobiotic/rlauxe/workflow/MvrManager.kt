@@ -9,9 +9,11 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 
 // use MvrManager for auditing, not creating an audit
 interface MvrManager {
+    // TODO why does mvrManager manage these ?? maybe let AuditWorkflow ??
     fun sortedManifest(): CardManifest
     fun pools(): List<CardPool>?
     fun batches(): List<StyleIF>?
+
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  // Pair(mvr, cvr)
     fun writeMvrsForRound(round: Int): Int
     fun auditdir() = "none"

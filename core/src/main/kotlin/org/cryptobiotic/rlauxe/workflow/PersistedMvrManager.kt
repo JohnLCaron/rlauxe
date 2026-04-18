@@ -56,6 +56,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         return mvrCardPairs
     }
 
+    // TODO hide this: dont use this directly, use workflow.mvrManager().writeMvrsForRound(roundIdx)
     // uses private/sortedMvrsFile.cvs
     override fun writeMvrsForRound(round: Int): Int {
         val resultSamples = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))

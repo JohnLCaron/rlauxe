@@ -268,7 +268,7 @@ data class ClcaConfig(
     val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
     val d: Int = 100,  // shrinkTrunc weight for error rates
     val maxLoss: Double = 1.0 / 1.03905,  // max loss on any one bet, 0 < maxLoss < 1 //  = .9624 from Corla gamma = 1.03905;
-                                          // SHANGRLA has gamma = 1.1 which is ~ 1/.9
+                                          // SHANGRLA has gamma = 1.1 which gives .9 ~ 1/1.1
     val apriori: TausRates = TausRates(emptyMap()),
 )
 

@@ -95,7 +95,6 @@ data class GeneralAdaptiveBetting(
         val mui = populationMeanIfH0(Npop, withoutReplacement=true, prevSamples)
         val maxBet = maxLoss / mui
 
-
         allCount.fetchAndAdd(1)
 
         val errorRates = trackerErrors.errorRates()

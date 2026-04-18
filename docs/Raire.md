@@ -1,7 +1,7 @@
 # Instant Runoff Voting (IRV)
 02/21/2026
 
-Also known as Ranked Choice Voting, this allows voters to rank their choices by preference.
+Instant Runoff Voting (IRV) allows voters to rank their choices by preference.
 In each round, the candidate with the fewest first-preferences (among the remaining candidates) is eliminated.
 This continues until only one candidate is left. Only 1 winner is allowed.
 

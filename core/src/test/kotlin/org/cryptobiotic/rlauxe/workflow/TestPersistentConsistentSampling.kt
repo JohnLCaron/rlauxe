@@ -10,7 +10,7 @@ class TestPersistentConsistentSampling {
     @Test   //  TODO what the hell are we testing ??
     fun testPersistentConsistentSampling() {
         val auditDir = "../core/src/test/data/testRunCli/polling/audit"
-        val auditRecord = AuditRecord.readFrom(auditDir)
+        val auditRecord = AuditRecord.read(auditDir)
         if (auditRecord == null) {
             println("auditRecord not found at $auditDir")
             return

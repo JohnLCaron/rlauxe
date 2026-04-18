@@ -37,7 +37,7 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRo
         if (notExists(Path.of(auditDir))) {
             return errs.add( "audit Directory $auditDir does not exist" )
         }
-        val auditRecord = AuditRecord.readFrom(auditDir)
+        val auditRecord = AuditRecord.read(auditDir)
         if (auditRecord == null) {
             return errs.add("directory '$auditDir' does not contain an audit record")
         }
@@ -142,4 +142,32 @@ fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7, verify:Boolean = tr
         return (!verifyRound.hasErrors)
     }
     return true
+}
+
+// for viewer, esp when auditorWantNewMvrs is used
+fun runRoundOnly(auditDir: String, auditRound: AuditRound): Boolean {
+
+    try {
+        if (notExists(Path.of(auditDir))) {
+            logger.error { "audit Directory $auditDir does not exist" }
+            return false
+        }
+        val auditRecord = AuditRecord.read(auditDir)
+        if (auditRecord == null) {
+            logger.error { "directory '$auditDir' does not contain an audit record" }
+            return false
+        }
+        require(auditRecord is AuditRecord)
+
+        val workflow = PersistedWorkflow(auditRecord)
+        val complete = workflow.runAuditRound(auditRound)
+
+        //// does not start the next round
+
+        return true
+
+    } catch (t: Throwable) {
+        logger.error(t) { "runRoundResult Exception" }
+        return false
+    }
 }

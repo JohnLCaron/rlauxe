@@ -151,3 +151,7 @@ fun validateOutputDirOfFile(filename: String) {
 fun existsOrZip(filename: String) : Boolean {
     return (Files.exists(kotlin.io.path.Path("$filename.zip"))) || (Files.exists(kotlin.io.path.Path(filename)))
 }
+
+fun exists(filename: String) : Boolean {
+    return Files.exists(kotlin.io.path.Path(filename))
+}

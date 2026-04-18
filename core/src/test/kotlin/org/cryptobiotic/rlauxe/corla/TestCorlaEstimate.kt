@@ -26,7 +26,7 @@ class TestCorlaEstimate {
     @Test
     fun testCorlaCalc() {
         val auditdir = "$testdataDir/cases/corla/clca/audit"
-        val auditRecord = AuditRecord.readFrom(auditdir)!!
+        val auditRecord = AuditRecord.read(auditdir)!!
         val sorted = auditRecord.contests.sortedBy { it.Nphantoms }.reversed()
         auditRecord.contests.forEach { contestUA ->
             val corlaEst = contestUA.contest.info().metadata.get("CORLAsample")
@@ -43,7 +43,7 @@ class TestCorlaEstimate {
     @Test
     fun testCountPhantoms() {
         val auditdir = "$testdataDir/cases/corla/clca/audit"
-        val auditRecord = AuditRecord.readFrom(auditdir)!!
+        val auditRecord = AuditRecord.read(auditdir)!!
         val mvrManager = PersistedMvrManager(auditRecord as AuditRecord)
         countPhantoms(mvrManager.sortedManifest(), 116)
     }

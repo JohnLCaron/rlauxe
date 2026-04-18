@@ -15,7 +15,7 @@ import kotlin.math.max
 class OneShotAudit(
     val auditdir: String,
 ) {
-    val record = AuditRecord.readFrom(auditdir) as AuditRecord
+    val record = AuditRecord.read(auditdir) as AuditRecord
     val config = record.config
 
     val mvrManager = PersistedMvrManager(record, false)

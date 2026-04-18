@@ -53,7 +53,7 @@ data class CandSeatRanges(val ranges: List<CandSeatRange>) {
         fun showSeatRanges(topdirLimited: String) = buildString {
             if (topdirLimited.contains("2024limited")) { // kludge for viewer
                 val compositeDir = topdirLimited
-                val compositeRecord = AuditRecord.readFrom(compositeDir)!!
+                val compositeRecord = AuditRecord.read(compositeDir)!!
                 val candRanges = mutableListOf<CandSeatRanges>()
                 compositeRecord.contests.forEach { contestUA ->
                     val dcontest = contestUA.contest as DHondtContest

@@ -43,6 +43,10 @@ fun estSamplesFromNoerror(bet:Double, noerror:Double, alpha: Double): Double {
     return -ln(alpha) / ln(1.0 + bet * nomargin / 2)
 }
 
+fun estRisk(nomargin:Double, nsamples: Int): Double {
+    return estRisk(2.0 / 1.03905, nomargin, nsamples)
+}
+
 // payoff^n = 1/risk; risk = 1/(payoff^n)
 fun estRisk(bet:Double, nomargin:Double, nsamples: Int): Double {
     val payoff = 1.0 + bet * nomargin/2

@@ -28,7 +28,7 @@ class TestSf2024OneAuditIrv() {
 
     init {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
-        val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
+        val auditRecord = AuditRecord.read(auditdir) as AuditRecord
         // cardManifest = auditRecord.readCardManifest()
         config = auditRecord.config
         contests = auditRecord.contests

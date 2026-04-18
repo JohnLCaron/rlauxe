@@ -24,7 +24,7 @@ class TestAuditRoundJson {
     @Test
     fun testSf24oa() {
         val auditdir = "/home/stormy/rla/cases/sf2024/oa/audit"
-        val record = AuditRecord.readFrom(auditdir) as AuditRecord
+        val record = AuditRecord.read(auditdir) as AuditRecord
         val contestsUAs = record.contests
 
         val scratchFile = createTempFile().toFile()

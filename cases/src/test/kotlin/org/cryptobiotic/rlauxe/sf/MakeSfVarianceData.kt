@@ -215,7 +215,7 @@ class MakeSfVarianceData {
                 runAllRoundsAndVerify(auditDir, verify = false)
 
                 val contestState = mutableMapOf<Int, TestH0Status>()
-                val auditRecord = AuditRecord.readFrom(auditDir)!!
+                val auditRecord = AuditRecord.read(auditDir)!!
                 auditRecord.rounds.forEach { auditRound ->
                     auditRound.contestRounds.forEach { contestRound ->
                         contestState[contestRound.id] = contestRound.status
@@ -304,7 +304,7 @@ class MakeSfVarianceData {
                 runAllRoundsAndVerify(auditDir, verify=false)
 
                 val contestState = mutableMapOf<Int, TestH0Status>()
-                val auditRecord = AuditRecord.readFrom(auditDir)!!
+                val auditRecord = AuditRecord.read(auditDir)!!
                 auditRecord.rounds.forEach { auditRound ->
                     auditRound.contestRounds.forEach { contestRound ->
                         contestState[contestRound.id] = contestRound.status

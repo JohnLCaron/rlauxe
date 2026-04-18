@@ -44,6 +44,7 @@ data class AuditRoundJson(
     var newmvrs: Int,
     var mvrsUnused: Int,
     var mvrsUsed: Int,
+    var auditorWantNewMvrs: Int? = null,
 )
 
 fun AuditRoundIF.publishJson() : AuditRoundJson {
@@ -56,6 +57,7 @@ fun AuditRoundIF.publishJson() : AuditRoundJson {
         this.newmvrs,
         this.mvrsUsed,
         this.mvrsUnused,
+        this.auditorWantNewMvrs,
     )
 }
 
@@ -65,7 +67,7 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
     val contestRounds = this.contestRounds.map {
         it.import( contestUAmap[it.id]!!, prevContestMap[it.id])
     }
-    return AuditRound(
+    val auditRound = AuditRound(
         this.roundIdx,
         contestRounds,
         this.auditWasDone,
@@ -76,6 +78,8 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
         this.mvrsUsed,
         this.mvrsUnused,
     )
+    auditRound.auditorWantNewMvrs = this.auditorWantNewMvrs
+    return auditRound
 }
 
 // data class ContestRound(val contestUA: ContestWithAssertions, val assertionRounds: List<AssertionRound>, val roundIdx: Int) {
@@ -107,6 +111,10 @@ data class ContestRoundJson(
     val done: Boolean,
     val included: Boolean,
     val status: TestH0Status, // or its own enum ??
+
+    val haveSampleSize: Int = 0,
+    val haveNewSampleSize: Int = 0,
+    val auditorWantNewMvrs: Int? = null,
 )
 
 fun ContestRound.publishJson() : ContestRoundJson {
@@ -120,6 +128,9 @@ fun ContestRound.publishJson() : ContestRoundJson {
         this.done,
         this.included,
         this.status,
+        this.haveSampleSize,
+        this.haveNewSampleSize,
+        this.auditorWantNewMvrs,
     )
 }
 
@@ -143,6 +154,10 @@ fun ContestRoundJson.import(contestUA: ContestWithAssertions, prevContestRound: 
     contestRound.done = this.done
     contestRound.included = this.included
     contestRound.status = this.status
+
+    contestRound.haveSampleSize = this.haveSampleSize
+    contestRound.haveNewSampleSize = this.haveNewSampleSize
+    contestRound.auditorWantNewMvrs = this.auditorWantNewMvrs
 
     return contestRound
 }

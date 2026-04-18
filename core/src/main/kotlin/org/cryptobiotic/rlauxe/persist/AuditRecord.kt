@@ -120,11 +120,25 @@ class AuditRecord(
         private val logger = KotlinLogging.logger("AuditRecord")
 
         // used by viewer
-        fun readFrom(location: String): AuditRecordIF? {
-            val compositeRecord = CompositeRecord.readFrom(location)
-            if (compositeRecord != null) return compositeRecord
+        fun checkExists(location: String?): Boolean {
+            if (location == null) return false
+            if (CompositeRecord.checkExists(location)) return true
 
-            val auditRecordResult = readFromResult(location)
+            val publisher = Publisher(location)
+            if (!exists(publisher.electionInfoFile())) return false
+            if (!exists(publisher.cardManifestFile())) return false
+            if (!exists(publisher.contestsFile())) return false
+            return true
+        }
+
+        // used by viewer
+        fun read(location: String): AuditRecordIF? {
+            if (CompositeRecord.checkExists(location)) {
+                val compositeRecord = CompositeRecord.readFrom(location)
+                if (compositeRecord != null) return compositeRecord
+            }
+
+            val auditRecordResult = readWithResult(location)
             if (auditRecordResult.isOk) {
                 return auditRecordResult.unwrap()
             } else {
@@ -133,7 +147,7 @@ class AuditRecord(
             }
         }
 
-        fun readFromResult(location: String): Result<AuditRecordIF, ErrorMessages> {
+        fun readWithResult(location: String): Result<AuditRecordIF, ErrorMessages> {
             val errs = ErrorMessages("readAuditRecord from '${location}'")
 
             val publisher = Publisher(location)

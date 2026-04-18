@@ -106,7 +106,7 @@ object RunRoundAgainCli {
         try {
             parser.parse(args)
 
-            val auditRecord = AuditRecord.readFrom(auditDir)
+            val auditRecord = AuditRecord.read(auditDir)
             if (auditRecord == null) {
                 println("auditRecord not found at $auditDir")
                 return

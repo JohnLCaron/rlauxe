@@ -10,7 +10,7 @@ class TestOneShot {
     @Test
     fun testOneShot() {
         val auditdir = "$testdataDir/cases/sf2024oasp/audit20"
-        val record = AuditRecord.readFrom(auditdir)
+        val record = AuditRecord.read(auditdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)
 
@@ -25,7 +25,7 @@ class TestOneShot {
     // @Test dont use for unit tests
     fun testEstimatePollingAudit() {
         val auditdir = "/home/stormy/rla/cases/corla/polling/audit"
-        val record = AuditRecord.readFrom(auditdir)
+        val record = AuditRecord.read(auditdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)
 

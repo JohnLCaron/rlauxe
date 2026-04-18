@@ -32,7 +32,7 @@ class TestSfElection {
     fun testSFoaPopulations() {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
 
-        val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
+        val auditRecord = AuditRecord.read(auditdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord, false)
         val cardManifest = mvrManager.sortedManifest()
         val pools = mvrManager.pools()!!

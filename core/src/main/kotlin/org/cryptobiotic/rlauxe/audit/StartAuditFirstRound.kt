@@ -88,7 +88,7 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditR
                 println()
             }
 
-        val auditRecord = AuditRecord.readFrom(auditDir)
+        val auditRecord = AuditRecord.read(auditDir)
         if (auditRecord == null) {
             return errs.add("directory '$auditDir' does not contain an audit record")
         }

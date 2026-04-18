@@ -109,7 +109,7 @@ class PersistedWorkflow(
         private val logger = KotlinLogging.logger("PersistedWorkflow")
 
         fun readFrom(location: String): PersistedWorkflow? {
-            val auditRecord = AuditRecord.readFrom(location)
+            val auditRecord = AuditRecord.read(location)
             return if (auditRecord == null) null
             else PersistedWorkflow(auditRecord as AuditRecord) // TODO CompositeRecord
         }

@@ -1,5 +1,5 @@
 # Publicly Verifiable RLAs
-5/23/2026
+5/23/2025
 
 Paper Submission #929
 

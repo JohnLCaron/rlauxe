@@ -42,6 +42,6 @@ fun findSamples(samplePrns: List<Long>, sortedCards: CloseableIterator<Auditable
             }
         }
     }
-    require(result.size == samplePrns.size)
+    require(result.size == samplePrns.size) { "findSamples ${result.size} != ${samplePrns.size}" }
     return result
 }

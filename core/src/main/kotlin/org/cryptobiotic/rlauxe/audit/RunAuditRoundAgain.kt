@@ -40,7 +40,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         val taus = Taus(assertion.assorter.upperBound())
         val oaAssorter: OneAuditClcaAssorter? = if (cassertion?.cassorter is OneAuditClcaAssorter) cassertion.cassorter else null
 
-        val auditRecord = AuditRecord.readFrom(auditDir)
+        val auditRecord = AuditRecord.read(auditDir)
         if (auditRecord == null) {
             return "directory '$auditDir' does not contain an audit record"
         }

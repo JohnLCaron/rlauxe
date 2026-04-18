@@ -90,6 +90,23 @@ data class CompositeRecord(
         private val logger = KotlinLogging.logger("CompositeRecord")
 
         // used by viewer
+        fun checkExists(location: String): Boolean {
+            val path = Path(location)
+            if (path.isDirectory()) {
+                path.listDirectoryEntries().sorted().forEach { entry ->
+                    if (entry.isDirectory()) {
+                        val auditDir = "${entry.toAbsolutePath()}/audit"
+                        val publisher = Publisher(auditDir)
+                        if (exists(publisher.electionInfoFile()) &&
+                            exists(publisher.cardManifestFile()) &&
+                            exists(publisher.contestsFile())) return true
+                    }
+                }
+            }
+            return false
+        }
+
+        // used by viewer
         fun readFrom(location: String): CompositeRecord? {
             val components = mutableListOf<AuditRecord>()
             val contests = mutableListOf<ContestWithAssertions>()
@@ -104,9 +121,9 @@ data class CompositeRecord(
                     if (entry.isDirectory()) {
                         val auditDir = "${entry.toAbsolutePath()}/audit"
                         if (Path(auditDir).exists()) {
-                            val result: Result<AuditRecordIF, ErrorMessages> = AuditRecord.readFromResult(auditDir)
+                            val result: Result<AuditRecordIF, ErrorMessages> = AuditRecord.readWithResult(auditDir)
                             if (result.isErr) {
-                                println("  Error: ${result.component2()}")
+                                logger.warn {"  Error: ${result.component2()}" }
                             } else {
                                 val orgRecord: AuditRecord = result.unwrap() as AuditRecord
                                 components.add(orgRecord)
@@ -194,6 +211,7 @@ data class ProxyAuditRound(
     override var mvrsUsed: Int = 0,
     override var mvrsUnused: Int = 0,
 ) : AuditRoundIF {
+    override var auditorWantNewMvrs: Int? = null
 
     init {
         auditWasDone = auditRounds.all { it.auditWasDone }

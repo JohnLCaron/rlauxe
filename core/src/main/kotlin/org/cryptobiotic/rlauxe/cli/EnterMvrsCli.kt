@@ -54,7 +54,7 @@ fun enterMvrs(inputDir: String, mvrFile: String): Result<Boolean, ErrorMessages>
         return errs.add("EnterMvrsCli Mvrs file $mvrFile does not exist")
     }
 
-    val result = AuditRecord.readFromResult(inputDir)
+    val result = AuditRecord.readWithResult(inputDir)
     if (result.isErr) return Err(result.component2()!!) // TODO inelegant
 
     val auditRecord = result.unwrap() as AuditRecord

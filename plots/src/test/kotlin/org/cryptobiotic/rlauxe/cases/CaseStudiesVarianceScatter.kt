@@ -1,14 +1,12 @@
 package org.cryptobiotic.rlauxe.cases
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.estimate.OneShotAudit
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
 import org.cryptobiotic.rlauxe.estimateOld.makeDeciles
-import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
@@ -217,7 +215,7 @@ fun List<Int>.stddev(): Double {
 data class CatPoint(val cat: String, val samplesUsed: Int, val margin: Double)
 
 fun readAuditRecord(auditDir: String, cat: String, marginOverride:Map<Int, Double>? = null): Pair<Int, Map<String, CatPoint>>? {
-    val auditRecordResult = AuditRecord.readFromResult(auditDir)
+    val auditRecordResult = AuditRecord.readWithResult(auditDir)
     if (auditRecordResult.isErr) {
         println(auditRecordResult)
         return null

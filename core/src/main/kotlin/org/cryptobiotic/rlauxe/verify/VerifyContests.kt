@@ -39,7 +39,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
     val cardManifest: CardManifest
 
     init {
-        val result = AuditRecord.readFromResult(auditRecordLocation)
+        val result = AuditRecord.readWithResult(auditRecordLocation)
         auditRecord = if (result.isOk) result.unwrap() as AuditRecord else {
             println(result.unwrapError())
             throw RuntimeException(result.unwrapError().toString())

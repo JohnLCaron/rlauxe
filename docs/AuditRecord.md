@@ -4,10 +4,10 @@ _last changed 04/11/2026_
 An _Audit Record_ may have the following files in it:
 
     $auditdir/
-        // election record - output of createElectionRecord
+        // election record - output of createElectionRecord (prover)
         cardManifest.csv      // AuditableCardCsv, may be zipped
         cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool (optional)
-        cardStyles.json       // CardStylesJson: CardStyleIF -> CardStyle (optional) 
+        cardStyles.json       // CardStylesJson: CardStyleIF -> CardStyle (optional)  
         contests.json         // ContestsUnderAuditJson
         electionInfo.json     // ElectionInfoJson 
 

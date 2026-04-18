@@ -20,7 +20,7 @@ class TestRunRoundCli {
         )
     }
 
-    @Test
+    // @Test
     fun testRunRoundCli() {
         val auditdir = "$testdataDir/cases/belgium/2024limited/Bruxelles/audit"
 

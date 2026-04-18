@@ -1,5 +1,91 @@
 # Publicly Verifiable RLAs
-5/23/2026
+04/17/2026
+
+I think theres a problem with calling the Prover untrusted, and also giving it some trusted tasks.
+
+For an audit to be valid, we have to assume:
+
+1. The physical ballots cant be modified or manipulated.
+2. When a ballot is chosen for auditing, the correct ballot is found (or reported missing).
+3. The ballot must be read by humans and an MVR faithfully recorded in the audit record.
+
+If any of those are untrue, I dont think you can do an RLA that detects mistakes or cheating in the electronic record (reported results, CVRs).
+
+I would guess 1 and 3 are uncontroversial, so the sticking point is 2. 
+
+I think we need a third role that performs the above trusted actions.
+
+The Prover is the election software and the EA that runs it. They never have control over the physical ballots.
+
+The "Auditors" are trusted humans that dont rely on the prover. They keep control of the physical ballots. The Verifier queries are given to them. 
+
+
+Then the basic flow is:
+
+0. The electronic scanning and processing (including printing the id on the ballot) is part of the Prover, but the Auditors keep control of the ballots at all times.
+1. The Prover commits to the reported outcome and the card manifest (set of ballot-card identifiers), and auxiliary information (e.g., CVRs or batch subtotals),
+2. The Verifier requests some cards, addressing them by their identifier,
+3. The Auditors retrieve those cards, reports any that cant be found, audits and submits the mvrs to the Verifier.
+4. The Verifier decides whether to accept the reported outcome at risk limit α.
+5. Third-party observers can read the audit record and validate correctness, and should be able to catch any mistakes or cheating by the Verifier.
+
+
+What do you think?
+
+////////////////////////////////////////////////////////////////////
+
+
+I think this paragraph (in section 2.1) is more or less wrong:
+
+"Crucially, in an RLA,
+the physical ballots are stored in boxes, but are not organized
+or indexed in a way that the auditor can trust. The ballots
+might have IDs on them, but the auditor cannot assume these
+are unique. And, while an official might claim that some
+ballot is the ith (in some order), the auditor can not trust
+that claim. So, when an auditor receives a ballot, they do
+not know which ballot they’ve received. Fortunately, since
+they observe the retrieval process, they can assume that the
+ballot was not modified during retrieval."
+
+and in 2.2 "IHPs do not assume that P answers queries correctly"
+
+Because:
+
+
+I think theres a problem with calling the Prover untrusted, and also giving it some trusted tasks.
+
+For an audit to be valid, we have to assume:
+
+1. The physical ballots cant be modified or manipulated. 
+2. When a ballot is chosen for auditing, the correct ballot must be found (or reported missing). 
+3. The ballot must be read by humans and an MVR faithfully recorded in the audit record. 
+
+If any of those are untrue, I dont think you can do an RLA that detects mistakes or cheating in the electronic record (reported results, CVRs).
+
+So if the "Prover" is untrusted, then it cant manage the physical ballots or the fetching and auditing. It cannot intermediate.
+
+I think we need to be explicit about what has to be trusted. The clearest way is to create a trusted third role called the "Keeper" (or maybe the "Auditors"?), that performs the above trusted actions.
+
+Then the basic flow is:
+
+0. The electronic scanning and processing (including printing the id on the ballot) is part of the Prover, but the Keeper keeps control of the ballots at all times.
+1. The Prover commits to the reported outcome and the card manifest (set of ballot-card identifiers), and auxiliary information (e.g., CVRs or batch subtotals),
+2. The Verifier requests some cards, addressing them by their identifier,
+3. The Keeper retrieves those cards, reports any that cant be found, audits and submits the mvrs to the verifier.
+4. The Verifier decides whether to accept the reported outcome at risk limit α.
+5. Third-party observers can read the audit record and validate correctness, and should be able to catch any mistakes or cheating by the Verifier.
+
+I think this might bomb the "Interactive Proof" idea (I hope not), so Im hesitant to suggest it.
+
+But maybe (in 2.2 "Related Models") 
+
+"Generally, (oracular proofs) use cryptographic
+tools (like polynomial commitment schemes and Merkle trees) to force P to answer queries correctly"
+
+If we have a Keeper that answers queries correctly, it replaces these "crytographic tools". ???
+
+Am I off track??
 
 Paper Submission #147
 
@@ -35,6 +121,49 @@ on many questions in one election, so a ballot comprises multiple cards.
 * The _risk-limiting property_ is an upper bound on the probability that the verifier accepts an apparent outcome that
 is actually wrong. The risk-limiting property is a soundness property.
 
+"With an electoral authority or
+team of auditors taking the role of prover, and the public
+taking the role of verifier..."
+
+1. there is some election initialization and trusted setup,
+2. the prover commits to the reported outcome (a set of
+   reported winners), a set of ballot-card identifiers, and
+   auxiliary information (e.g., CVRs or batch subtotals),
+3. the verifier requests some cards, addressing them by
+   their identifier,
+4. **the prover retrieves some cards (possibly omitting some
+   requested cards and/or including unrequested cards)
+   and shows them to the verifier,**
+5. the verifier decides whether to accept the reported
+   outcome at risk limit α.
+
+### alternative
+
+The prover is the election software and the EA that runs it.
+
+The keeper are trusted humans that dont rely on the prover. Perhaps "auditors"?
+
+The keeper gives Nc.
+The keeper is entrusted with the physical ballots/cards, and retrieves the correct ballot by identifier if it exists or
+reports it as missing if it cant be found. 
+If the identifier is an index in a pile, ensures that the correct order is maintained.
+The keeper audits (all contests on ?) the ballot and faithfully transmits the mvr to the verifier.
+
+For style based auditing, the keeper reports if the ballot is in the referenced population. (?) 
+can model it as each card has a Style aka population possible contests (ppc).
+one thing to do is when a ballot is audited, check the accuracy of the ppc
+
+you could say that the prover constructs the card manifest (cardManifest which includes the CVR), and the reported results(contests). 
+the verifier does the prn, sorts it and runs the audit. The prover doesnt need the prn.
+
+1. the untrusted prover commits to the reported outcome (a set of
+   reported winners) (contests.json), and the card manifest (set of ballot-card identifiers, and
+   auxiliary information (e.g., CVRs or batch subtotals),
+2. the verifier requests some cards, addressing them by their identifier,
+3. the trusted keeper retrieves those cards, reports any that cant be found, audits and submits the mvrs to the verifier.
+4. the verifier decides whether to accept the reported outcome at risk limit α.
+5. observers can read the audit record and validate correctness.
+
 ## 2. Model
 
 **Interactive proofs**. 
@@ -54,7 +183,8 @@ is the auditor.
     The prover P and verifier V engage in a protocol
 that only requires V to check a few random ballots, yet does
 not require V to trust P .
-    The physical details of RLAs, however, mean that they
+
+The physical details of RLAs, however, mean that they
 must be modeled as a new kind of IP. Crucially, in an RLA,
 the physical ballots are stored in boxes, but are not organized
 or indexed in a way that the auditor can trust. The ballots
@@ -65,28 +195,32 @@ that claim. So, when an auditor receives a ballot, they do
 not know which ballot they’ve received. Fortunately, since
 they observe the retrieval process, they can assume that the
 ballot was not modified during retrieval.
-    Since the auditor cannot control which data they ex-
+
+Since the auditor cannot control which data they ex-
 amine, auditing is hard. Many recent RLAs deal with this
 difficulty using a clever observation: it helps to have some
 organization system for the ballots, even if the system’s
 consistency cannot be trusted. Thus, before the audit begins,
 the official labels each ballot with an ID. These are typically
 printed on all ballots before voting, or they might be written
-in red during the official tally.
-    When V gets a ballot xi , they also see its (possibly non-
+in red during the official tally. They do not affect the election
+(i.e., the social choice function), but they do assist the audit.
+
+When V gets a ballot x_i , they also see its (possibly non-
 unique) ID. IDs are fixed before the audit begins; during the
 audit, ballots and IDs cannot be modified.
-The two features above—V ’s indirect access to ballots
-and the use of (possibly duplicate) IDs—warrant a new kind
+The two features above - V ’s indirect access to ballots
+and the use of (possibly duplicate) IDs - warrant a new kind
 of IP, which we define below.
 
-**Intermediated holographic proof (IHP)**
+### 2.2 Intermediated holographic proof (IHP)
+
 An IHP comprises two randomized, polytime algorithms:
 the prover P and verifier V . The instance comprises a ballot
 array _x_ of size N . Initially, the prover P fixes an ID array _id_.
-⃗The verifier V cannot directly access x or id. Instead,
+⃗**The verifier V cannot directly access x or id. Instead,
 V asks for ballot i, P chooses i′ , and V receives (x_i′, id_i′),
-but not i′ . Additionally, P and V can exchange messages
+but not i′** . Additionally, P and V can exchange messages
 and flip coins.
     An IHP is _ϵ-computationally sound_ if for all instances
 (of size N) that are not in the language, for all efficient
@@ -110,6 +244,20 @@ we will focus on public-coin IHPs. Last, in RLAs, sampling
 randomness and retrieving ballots is typically the bottleneck;
 thus we will focus on IHPs with little randomness and few
 queries.
+
+## 3 Minimal example
+
+The prover P sets the ID committment _id_ to assign unique IDs to all ballots. Recall
+that _id_ cannot be directly accessed by the verifier V . Instead,
+V accesses id and the ballots  ⃗x together, though the help of
+P. After the ID commitment, the main protocol begins.
+
+V samples a sequence π of T ballots to examine. P sends these
+ballots to V. Verifier checks whether each ballot (1) agrees
+4 ⃗ and CVRs ⃗c,
+
+\JCNote{ I don't understand this. What is the significance that the verifier doesnt have "direct access" to \ids? Why does the prover return $(\id_{i'})$ and not $(\id_{i})$ ? You are saying that the prover could return the wrong ballot? Why would it do that if V checks the id (e.g. line 9) and marks it as bad? What prevents the prover from returning a doctored ballot but the correct $\id_{i}$ ?}
+
 
 ## 4. Main construction
 

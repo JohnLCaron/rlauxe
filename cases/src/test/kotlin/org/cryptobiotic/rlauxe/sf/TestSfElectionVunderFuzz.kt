@@ -31,7 +31,7 @@ class TestSfElectionVunderFuzz {
     val cardPools: List<CardPool>?
 
     init {
-        val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
+        val auditRecord = AuditRecord.read(auditdir) as AuditRecord
         mvrManager = PersistedMvrManager(auditRecord)
         cardManifest = auditRecord.readSortedManifest()
         config = auditRecord.config

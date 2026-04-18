@@ -171,7 +171,7 @@ private fun showBelgiumElection(electionName: String): Triple<Int, Int, Assorter
     val topdir = "$toptopdir/$electionName"
     val auditdir = "$topdir/audit"
 
-    val auditRecord = AuditRecord.readFrom(auditdir)
+    val auditRecord = AuditRecord.read(auditdir)
         ?: throw RuntimeException("directory '$auditdir' does not contain an audit record")
 
     val contestUA = auditRecord.contests.first()

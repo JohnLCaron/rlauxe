@@ -21,6 +21,7 @@ interface AuditRoundIF {
     var newmvrs: Int    // number of new mvrs in round
     var mvrsUsed: Int
     var mvrsUnused: Int
+    var auditorWantNewMvrs: Int?
 
     fun show(): String
     fun createNextRound(): AuditRound
@@ -40,6 +41,7 @@ data class AuditRound(
     override var mvrsUnused: Int = 0,
     override var mvrsUsed: Int = 0,
 ) : AuditRoundIF {
+    override var auditorWantNewMvrs: Int? = null
 
     override fun toString() = show()
 
@@ -75,12 +77,16 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     val Npop = contestUA.Npop
 
     var maxSampleAllowed: Int? = null // maximum index in this round's sample that you are allowed to use; only estMvrs are guarenteed to be there.
-    var estMvrs = 0 // Estimate of the mvrs required to confirm the contest
+    var estMvrs = 0    // Estimate of the mvrs required to confirm the contest
     var estNewMvrs = 0 // Estimate of the new mvrs required to confirm the contest
 
     var done = false
     var included = true
     var status = contestUA.preAuditStatus
+
+    var haveSampleSize: Int = 0
+    var haveNewSampleSize: Int = 0
+    var auditorWantNewMvrs: Int? = null
 
     init {
         if (status.complete) {

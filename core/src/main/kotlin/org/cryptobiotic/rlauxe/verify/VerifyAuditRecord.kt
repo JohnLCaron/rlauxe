@@ -20,7 +20,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
     val allInfos: Map<Int, ContestInfo>?
 
     init {
-        val auditRecordResult = AuditRecord.readFromResult(auditRecordLocation)
+        val auditRecordResult = AuditRecord.readWithResult(auditRecordLocation)
         if (auditRecordResult .isOk) {
             auditRecord = auditRecordResult.unwrap()
         } else {

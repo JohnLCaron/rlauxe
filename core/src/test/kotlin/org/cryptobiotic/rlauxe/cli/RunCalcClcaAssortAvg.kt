@@ -11,7 +11,6 @@ import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
@@ -50,7 +49,7 @@ object RunCalcAssortAvg {
         try {
             parser.parse(args)
 
-            val auditRecordResult = AuditRecord.readFromResult(auditDir)
+            val auditRecordResult = AuditRecord.readWithResult(auditDir)
             val auditRecord = if (auditRecordResult.isOk) auditRecordResult.unwrap() else {
                 println("auditRecord not found at $auditDir")
                 println(auditRecordResult.unwrapError())

@@ -145,7 +145,10 @@ private fun checkSampleLimits(
 //    auditRound.nmvrs = sampledCards.size
 //    auditRound.newmvrs = newMvrs
 //    auditRound.samplePrns = sampledCards.map { it.prn }
-//    contestRound.maxSampleAllowed = sampledCards.size
+//    contestRound.haveSampleSize = contest cards in sample
+//    contestRound.haveNewSampleSize = new contest cards in sample
+// does no disk writing
+
 fun consistentSampling(
     auditRound: AuditRoundIF,
     sortedManifest: CardManifest,
@@ -156,21 +159,29 @@ fun consistentSampling(
     if (contestsIncluded.isEmpty()) return emptyList()
 
     // how many samples are wanted for each contest.
-    val wantSampleSize = contestsIncluded.associate { it.id to it.estMvrs }
+    val wantSampleSize = contestsIncluded.associate { it.id to (it.auditorWantNewMvrs ?: it.estMvrs) }
     require(wantSampleSize.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
 
     val skippedContests = mutableSetOf<Int>()
-    val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
-    val haveNewSamples = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
+    // val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> mvrs in sample
+    // val haveNewSamples = mutableMapOf<Int, Int>() // contestId -> new mvrs in sample
     var newMvrs = 0 // count when this card not in previous samples
+    auditRound.contestRounds.forEach {
+        it.haveSampleSize = 0
+        it.haveNewSampleSize = 0
+    }
 
     val sampledCards = mutableListOf<AuditableCard>()
     var cardIndex = 0  // track maximum index (not done yet)
 
+    var totalSamples = auditRound.auditorWantNewMvrs
+    if (totalSamples == null || totalSamples < 0) totalSamples = Int.MAX_VALUE
+
     val sortedCardIter = sortedManifest.cards.iterator()
     while (
         sortedCardIter.hasNext() &&
-        contestsIncluded.any { (haveSampleSize[it.id] ?: 0) < (wantSampleSize[it.id] ?: 0) }
+        sampledCards.size < totalSamples &&
+        contestsIncluded.any { it.haveSampleSize < (wantSampleSize[it.id] ?: 0) }
     ) {
         // get the next card in sorted order
         val card = sortedCardIter.next()
@@ -180,7 +191,7 @@ fun consistentSampling(
         contestsIncluded.forEach { contest ->
             // does this contest want this card ?
             if (card.hasContest(contest.id)) {
-                if ((haveSampleSize[contest.id] ?: 0) < (wantSampleSize[contest.id] ?: 0)) {
+                if (contest.haveSampleSize < (wantSampleSize[contest.id] ?: 0)) {
                     include = true
                 }
             }
@@ -198,9 +209,9 @@ fun consistentSampling(
         contestsIncluded.forEach { contest ->
             if (card.hasContest(contest.id)) {
                 if (include && !skippedContests.contains(contest.id)) {
-                    haveSampleSize[contest.id] = haveSampleSize[contest.id]?.plus(1) ?: 1
+                    contest.haveSampleSize++
                     if (!previousSamples.contains(card.prn)) {
-                        haveNewSamples[contest.id] = haveNewSamples[contest.id]?.plus(1) ?: 1
+                        contest.haveNewSampleSize++
                     }
                     // ok to use if we havent skipped any cards for this contest in its sequence
                     contest.maxSampleAllowed = sampledCards.size
@@ -214,7 +225,8 @@ fun consistentSampling(
         cardIndex++
     }
 
-    // TODO why would this happen ??
+
+    /* TODO why would this happen ??
     val wantMore = contestsIncluded.any { (haveSampleSize[it.id] ?: 0) < (wantSampleSize[it.id] ?: 0) }
     if (wantMore) {
         contestsIncluded.forEach {
@@ -222,8 +234,8 @@ fun consistentSampling(
                 logger.warn { "contest ${it.id}:  (have) ${(haveSampleSize[it.id] ?: 0)} < ${(wantSampleSize[it.id] ?: 0)} (want)" }
         }
     }
-
     if (debugConsistent) logger.info{"**consistentSampling haveSampleSize = $haveSampleSize, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs"}
+    */
 
     // set the results into the auditRound direclty
     auditRound.nmvrs = sampledCards.size
@@ -231,4 +243,3 @@ fun consistentSampling(
     auditRound.samplePrns = sampledCards.map { it.prn }
     return sampledCards
 }
-

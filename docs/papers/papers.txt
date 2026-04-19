@@ -20,14 +20,14 @@ RLA papers
 2018	Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program		Mark Lindeman, Neal McBurnett, Kellie Ottoboni, Philip B. Stark. March 5, 2018
 
 2018    Consistent Sampling with Replacement        Ronald Rivest   August 31, 2018
+    https://arxiv.org/abs/1808.10016
 
 2018	Risk-Limiting Audits by Stratified Union-Intersection Tests of Elections (SUITE)	Kellie Ottoboni, Philip B. Stark, Mark Lindeman, and Neal McBurnett.  12 Sep 2018	
-	The key is to use stratified sampling with two strata: ballots cast in CVR counties and those cast in no-CVR counties.
-	Stratified audits, ties into CORLA paper and notebook https://notebooks.gesis.org/binder/jupyter/user/pbstark-corla18-xnwriml9/notebooks/code/fisher_combined_pvalue.ipynb
+	Stratified sampling with two strata: ballots cast in CVR counties and those cast in no-CVR counties.
 	https://github.com/pbstark/CORLA18
 
 2018	Bernoulli ballot polling: A manifest improvement for risk-limiting audits	Kellie Ottoboni, Matthew Bernhard, J. Alex Halderman, Ronald L. Rivest, Philip B. Stark. 15 Dec 2018
-	sampling for ballot polling - use
+	sampling for ballot polling
 	
 2019    VAULT: Verifiable Audits Using Limited Transparency		Benolah, Stark, Teague
 
@@ -67,6 +67,8 @@ RLA papers
 2022	Sweeter than SUITE: Supermartingale Stratified Union-Intersection Tests of Elections	Jacob V. Spertus and Philip B. Stark; 25 Jul 2022
 	combine the union-intersection tests in SUITE and the nonnegative supermartingale tests in ALPHA
 	show how to construct a stratified comparison audit using SHANGRLA
+	investigates sample sizes for a range of combining functions, TSMs, and selection strategies for stratified comparison audits.
+    https://arxiv.org/abs/2207.03379
 
 2022	PROVIDENCE: a Flexible Round-by-Round Risk-Limiting Audit	Oliver Broadrick, Poorvi L. Vora1, and Filip Zagórski; 17 Oct 2022
 	an audit with the efficiency of MINERVA and flexibility of BRAVO
@@ -92,6 +94,7 @@ RLA papers
 	
 2024	Sequential stratified inference for the mean		Jacob V. Spertus, Mayuri Sridhar, Philip B. Stark		September 11, 2024
 	https://github.com/spertus/UI-NNSMs
+	https://arxiv.org/abs/2409.06680        version 3 March 13, 2026
 
 2025    Dice, but don’t slice: Optimizing the efficiency of ONEAudit,   Spertus, Glazer and Stark,       July 25 2025
     https://arxiv.org/pdf/2507.22179; https://github.com/spertus/UI-TS

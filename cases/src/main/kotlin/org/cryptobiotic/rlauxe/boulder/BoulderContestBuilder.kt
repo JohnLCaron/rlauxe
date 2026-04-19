@@ -105,9 +105,8 @@ class BoulderContestBuilder(val info: ContestInfo,
 
     fun ncards(): Int {
         // for contest 20, correct the ncards, ignore undervote count
-        return if (info.id == 20)
-            8256
-        else return sumAllCards()
+        return if (info.name == "Town of Superior - Truste") 8256  // TODO fix this
+        else sumAllCards()
     }
 
     // total number of cards for this contest in the pools. this is dynamic because the pools get adjusted

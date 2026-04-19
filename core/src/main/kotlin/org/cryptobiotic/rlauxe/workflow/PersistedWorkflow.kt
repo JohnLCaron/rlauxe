@@ -68,7 +68,7 @@ class PersistedWorkflow(
             logger.info {"startNewRound writeAuditEstimation to ${publisher.auditEstFile(nextRound.roundIdx)}"}
 
             writeSamplePrnsJsonFile(nextRound.samplePrns, publisher.samplePrnsFile(nextRound.roundIdx))
-            logger.info {"startNewRound writeSamplePrns ${publisher.samplePrnsFile(nextRound.roundIdx)}"}
+            logger.info {"startNewRound ${nextRound.samplePrns.size} samplePrns written to ${publisher.samplePrnsFile(nextRound.roundIdx)}"}
         }
 
         return nextRound

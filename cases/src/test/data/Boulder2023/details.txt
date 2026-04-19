@@ -1,0 +1,47 @@
+boulder23
+Boulder Statement of Votes
+combined
+ncontests = 38
+
+id,                                    contestTitle     precinctCount, activeVoters, totalBallots,   totalVotes, totalUnderVotes, totalOverVotes
+ 1,                      City of Boulder Mayoral Candidates,       60,        68812,        34249,        32415,         1315,           44,
+ 2,                          Boulder County Ballot Issue 1A,      192,       228121,       119627,       117806,         1800,           21,
+ 3,                          Boulder County Ballot Issue 1B,      192,       228121,       119627,       116931,         2666,           30,
+ 4, Boulder Valley School District RE-2 Director District A,      124,       144274,        74839,        54788,        20021,           30,
+ 5, Boulder Valley School District RE-2 Director District C,      124,       144274,        74839,        54364,        20443,           32,
+ 6, Boulder Valley School District RE-2 Director District D,      124,       144274,        74839,        53940,        20882,           17,
+ 7, Boulder Valley School District RE-2 Director District G,      124,       144274,        74839,        54281,        20528,           30,
+ 8,                         City of Boulder Ballot Issue 2A,       60,        68812,        34249,        33283,          952,           14,
+ 9,                      City of Boulder Ballot Question 2B,       60,        68812,        34249,        30290,         3954,            5,
+10,                     City of Boulder Ballot Question 302,       60,        68812,        34249,        33234,          994,           21,
+11,                      City of Boulder Council Candidates,       60,        68812,        34249,       113379,        23345,           68,
+12,               City of Lafayette City Council Candidates,       17,        22347,        11357,        32124,        13272,            8,
+13,         City of Longmont - City Council Member At-Large,       52,        67951,        33607,        30379,         3223,            5,
+14,                City of Longmont - Council Member Ward 1,       16,        21811,        10473,         9138,         1334,            1,
+15,                City of Longmont - Council Member Ward 3,       20,        23404,        12203,        11093,         1109,            1,
+16,                                City of Longmont - Mayor,       52,        67951,        33607,        31303,         2299,            5,
+17,                        City of Longmont Ballot Issue 3C,       52,        67951,        33607,        33154,          447,            6,
+18,                        City of Longmont Ballot Issue 3D,       52,        67951,        33607,        33150,          445,           12,
+19,                        City of Longmont Ballot Issue 3E,       52,        67951,        33607,        33134,          468,            5,
+20,          City of Longmont Municipal Court Judge - Frick,       52,        67951,        33607,        28160,         5444,            3,
+21,                      City of Louisville Ballot Issue 2C,       13,        16225,         8871,         8680,          191,            0,
+22,    City of Louisville City Council Ward 1 (4-year term),        6,         7082,         2634,         1833,          801,            0,
+23,    City of Louisville City Council Ward 2 (4-year term),        7,         9543,         3451,         3043,          406,            2,
+24,                  City of Louisville City Council Ward 3,        7,         8250,         3243,         2967,         3519,            0,
+25,         City of Louisville Mayor At-Large (4 Year Term),       13,        16225,         8871,         8284,          577,           10,
+26, Estes Park School District R-3 School Board Director At,        2,          931,          267,          364,          170,            0,
+27, Nederland Eco Pass Public Improvement District Ballot I,        7,         5160,         1591,         1562,           29,            0,
+28,        North Metro Fire Rescue District Ballot Issue 7A,        2,         1938,           82,           81,            1,            0,
+29,                              Proposition HH (Statutory),      192,       228121,       119627,       117364,         2218,           45,
+30,                              Proposition II (Statutory),      192,       228121,       119627,       117453,         2158,           16,
+31, Thompson R2-J School District Board of Education Direct,        2,         1319,           86,           53,           33,            0,
+32, Thompson R2-J School District Board of Education Direct,        2,         1319,           86,           53,           33,            0,
+33, Thompson R2-J School District Board of Education Direct,        2,         1319,           86,           53,           33,            0,
+34, Thompson R2-J School District Board of Education Direct,        2,         1319,           86,           57,           29,            0,
+35,                         Town of Erie Ballot Question 3A,        8,        12659,         5377,         4861,          516,            0,
+36,                         Town of Erie Ballot Question 3B,        8,        12659,         5377,         5078,          299,            0,
+37,         Town of Superior - Home Rule Charter Commission,        7,         8810,         4165,        18487,        18953,            5,
+38,                    Town of Superior Ballot Question 301,        7,         8810,         4165,         3789,          376,            0,
+
+  read 100 RCV Redacted votes
+ncontests with info = 38

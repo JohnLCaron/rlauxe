@@ -30,10 +30,10 @@ class MakeBoulderElection {
             ContestSampleControl(
                 minRecountMargin = .005,
                 minMargin = 0.0,
-                contestSampleCutoff = 2500,
-                auditSampleCutoff = 5000
+                contestSampleCutoff = 5000,
+                auditSampleCutoff = 10000
             ),
-            ClcaConfig(fuzzMvrs = .001), null
+            ClcaConfig(), null
         )
 
         createBoulderElection(
@@ -62,7 +62,7 @@ class MakeBoulderElection {
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 20, estPercentile = listOf(42, 55, 67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 1000, auditSampleCutoff = 2000),
-            ClcaConfig(fuzzMvrs = .001), null
+            ClcaConfig(fuzzMvrs = .001), null // TOFO is fuzz implemented ??
         )
 
         createBoulderElection(
@@ -81,6 +81,55 @@ class MakeBoulderElection {
         println()
         print(results)
         if (results.hasErrors) fail()
+    }
+
+    @Test
+    fun createBoulder23oa() {
+        val sovo = readBoulderStatementOfVotes(
+            "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes.csv", "Boulder2023")
+        val sovoRcv = readBoulderStatementOfVotes(
+            "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes-RCV.csv", "Boulder2023Rcv")
+        val combined = BoulderStatementOfVotes.combine(listOf(sovoRcv, sovo))
+
+        println(combined.show())
+
+        val auditdir = "$testdataDir/cases/boulder23/oa/audit"
+
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05, )
+        val round = AuditRoundConfig(
+            SimulationControl(nsimTrials = 22),
+            ContestSampleControl(
+                minRecountMargin = .005,
+                minMargin = 0.0,
+                contestSampleCutoff = 5000,
+                auditSampleCutoff = 10000
+            ),
+            ClcaConfig(), null
+        )
+
+        // fun createBoulderElectionWithSovo(
+        //    cvrExportFile: String,
+        //    sovo: BoulderStatementOfVotes,
+        //    auditdir: String,
+        //    creation: AuditCreationConfig,
+        //    round: AuditRoundConfig,
+        //    mvrSource: MvrSource = MvrSource.testPrivateMvrs,
+        //)
+        createBoulderElectionWithSovo(
+            cvrExportFile = "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
+            sovo = combined,
+            auditdir = auditdir,
+            creation,
+            round,
+            distributeOvervotes = listOf(2),
+        )
+
+       /*
+        createBoulderElectionWithSov(
+            "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
+            "$testdataDir/cases/boulder23",
+            combined,
+        ) */
     }
 
     /*
@@ -104,21 +153,6 @@ class MakeBoulderElection {
          "src/test/data/Boulder2024/2024G-Boulder-County-Amended-Statement-of-Votes.csv",
          auditDir = "$testdataDir/cases/boulder24recount",
          minRecountMargin = 0.0,
-     )
- }
-
- @Test
- fun createBoulder23() {
-     val sovo = readBoulderStatementOfVotes(
-         "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes.csv", "Boulder2023")
-     val sovoRcv = readBoulderStatementOfVotes(
-         "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes-RCV.csv", "Boulder2023Rcv")
-     val combined = BoulderStatementOfVotes.combine(listOf(sovoRcv, sovo))
-
-     createBoulderElectionWithSov(
-         "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
-         "$testdataDir/cases/boulder23",
-         combined,
      )
  }
 

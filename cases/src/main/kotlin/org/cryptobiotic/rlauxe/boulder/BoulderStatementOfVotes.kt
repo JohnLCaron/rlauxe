@@ -3,6 +3,9 @@ package org.cryptobiotic.rlauxe.boulder
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.sfn
+import org.cryptobiotic.rlauxe.util.trunc
 import java.io.File
 import java.nio.charset.Charset
 import kotlin.text.appendLine
@@ -22,6 +25,10 @@ import kotlin.text.appendLine
 
 // replicate https://assets.bouldercounty.gov/wp-content/uploads/2024/11/2024G-Boulder-County-Official-Summary-of-Votes.pdf
 data class BoulderStatementOfVotes(val filename: String, val contests: List<BoulderContestVotes>) {
+    init {
+        contests.forEachIndexed{ idx, it -> it.id = idx+1 }
+    }
+
     fun show() = buildString{
         appendLine("Boulder Statement of Votes")
         appendLine(filename)
@@ -41,6 +48,8 @@ data class BoulderStatementOfVotes(val filename: String, val contests: List<Boul
     }
 }
 
+private val ContestNameWidth = 55
+
 data class BoulderContestVotes(
     val contestTitle: String,
 ) {
@@ -51,6 +60,7 @@ data class BoulderContestVotes(
     var totalUnderVotes: Int = 0  // undervotes
     var totalOverVotes: Int = 0     // hmmm
     val candidateVotes = mutableMapOf<String, Int>()  // candidateName -> number of votes
+    var id = 0
 
     fun addPrecinct(precinct: BoulderContestPrecinctVotes) {
         precinctCount++
@@ -67,12 +77,19 @@ data class BoulderContestVotes(
         candidateVotes[line.choiceName] = votes + line.totalVotes
     }
 
-    override fun toString(): String {
-        return "$contestTitle, $precinctCount, $activeVoters, $totalBallots, $totalVotes, $totalUnderVotes, $totalOverVotes"
+    override fun toString() = buildString {
+        append("${nfn(id,2)}, ")
+        append("${trunc(contestTitle, ContestNameWidth)}, ")
+        append("${nfn(precinctCount,8)}, ")
+        append("${nfn(activeVoters,12)}, ")
+        append("${nfn(totalBallots,12)}, ")
+        append("${nfn(totalVotes,12)}, ")
+        append("${nfn(totalUnderVotes,12)}, ")
+        append("${nfn(totalOverVotes,12)}, ")
     }
 
     companion object {
-        val header = "contestTitle, precinctCount, activeVoters, totalBallots, totalVotes, totalUnderVotes, totalOverVotes"
+        val header = "id, ${sfn("contestTitle", ContestNameWidth-8)}     precinctCount, activeVoters, totalBallots,   totalVotes, totalUnderVotes, totalOverVotes"
     }
 }
 
@@ -207,7 +224,7 @@ fun readBoulderStatementOfVotes(filename: String, variation: String): BoulderSta
     val contests = mutableMapOf<String, BoulderContestVotes>()
     precincts.values.forEach { precinct ->
         val key = precinct.contestTitle
-        val contest = contests.getOrPut(key) { BoulderContestVotes(key) }
+        val contest = contests.getOrPut(key) { BoulderContestVotes( key) }
         contest.addPrecinct(precinct)
     }
     return BoulderStatementOfVotes(filename, contests.toSortedMap().values.toList())

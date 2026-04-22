@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 fun contestNameCleanup(name: String): String {
     var working = name
     if (working.contains(" -")) working = working.replace(" -", "")
+    if (working.contains("Colorado Court of Appeals Judge - Román")) working = working.replace("Colorado Court of Appeals Judge - Román", "Colorado Court of Appeals Judge Roman")
     if (working.contains("County Court Judge Cheyenne")) working = working.replace("County Court Judge Cheyenne", "Cheyenne County Court Judge")
     if (working.contains("County Court Judge Denver")) working = working.replace("County Court Judge Denver", "Denver County Court Judge")
     if (working.contains("County Court Judge Jefferson")) working = working.replace("County Court Judge Jefferson", "Jefferson County Court Judge")

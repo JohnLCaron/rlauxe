@@ -32,8 +32,9 @@ class VunderPools(pools: List<CardPool>) {
 // for one pool, multiple contests
 // vunders: Contest id -> Vunder
 // set Vunder.missing to 0 for hasExactContests=true
-class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int, val hasExactContests: Boolean) {
-    val vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
+// create it for each use or reset something
+class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int, val hasExactContests: Boolean) {
+    var vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
 
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
         require (poolName == "all" || card.poolId() == poolId) // TODO
@@ -70,6 +71,10 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
 
     fun done() = vunderPickers.values.all { it.isEmpty() }
 
+    fun reset() {
+        vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
+    }
+
     companion object {
         fun fromContests(contests:List<ContestWithAssertions>, poolId: Int): VunderPool {
             val vunders = contests.associate { it.id to Vunder.fromContest(it, poolId) }
@@ -80,6 +85,7 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
 
 // for viewer
 fun makeCvrsForVunderPool(pool: CardPool, vunderpool: VunderPool): List<Cvr> {
+    vunderpool.reset()
     val rcvrs = mutableListOf<Cvr>()
     var count = 1
     while (!vunderpool.done()) {

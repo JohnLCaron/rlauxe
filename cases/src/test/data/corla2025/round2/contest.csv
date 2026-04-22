@@ -1,0 +1,661 @@
+contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,zero_discrepancy_count,one_vote_under_count,two_vote_under_count,disagreement_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
+Academy School District 20 Board of Directors - 4 Year Term,opportunistic_benefits,ended,3,189228,41419,"""Holly Tripp"",""Susan Payne"",""Eddie Waldrep""",2373,0.03000000,0,0,0,0,0,0,0,1.03905000,0,582,582
+Adams 12 Five Star School District Director - District No 3,opportunistic_benefits,in_progress,1,136149,62955,"""Ike Anyanwu-Ebo""",5228,0.03000000,0,0,0,0,0,0,0,1.03905000,0,190,190
+Adams 12 Five Star School District Director - District No 4,opportunistic_benefits,not_auditable,1,136149,62955,"""Amira Assad-Lucas""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+ADAMS 12 FIVE STAR SCHOOLS BALLOT ISSUE 5B,opportunistic_benefits,in_progress,1,136149,62955,"""Yes/For""",4327,0.03000000,0,0,0,0,0,0,0,1.03905000,0,230,230
+Adams-Arapahoe School District 28J Board of Directors,opportunistic_benefits,in_progress,4,280770,39836,"""Tramaine M. Duncan"",""Gayla Charrier"",""Anne R. Keke"",""Kristin Mallory ""Westerberg""""",4220,0.03000000,0,0,0,0,0,0,0,1.03905000,0,485,485
+Adams County School District 14 Board Of Education,opportunistic_benefits,ended,2,106471,3619,"""Janet Estrada"",""Maria D. Zubia""",220,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3527,3527
+"Additional Lodging Tax to Support, Sustain, and Enhance Gilpin County for Our Residents, Workforce, and Visitors Ballot Issue 1A",county_wide_contest,risk_limit_achieved,1,2532,2222,"""Yes/For""",215,0.03000000,87,0,0,0,1,0,0,1.03905000,0,77,77
+Aguilar School District RE-6,opportunistic_benefits,not_auditable,1,4561,405,"""Ashley Lisonbee""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Aguilar School District RE-6 Ballot Issue 4A,opportunistic_benefits,ended,1,4561,405,"""Yes/For""",74,0.03000000,0,0,0,0,0,0,0,1.03905000,0,450,450
+Akron School District R-1 School Board Director At-Large - 2 Year Term,opportunistic_benefits,not_auditable,1,1714,932,"""Corby Kneedler""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Akron School District R-1 School Board Director At-Large - 4 Year Term,county_wide_contest,risk_limit_achieved,2,1714,932,"""Fred Raish"",""Megan Bower""",103,0.03000000,123,0,0,0,0,0,0,1.03905000,0,122,122
+Alamosa School District RE-11J Ballot Issue 5A,opportunistic_benefits,in_progress,1,6137,3697,"""No/Against""",183,0.03000000,0,0,0,0,0,0,0,1.03905000,0,245,245
+Alamosa School District RE-11J Director District 3,opportunistic_benefits,not_auditable,1,6137,3697,"""Thomas Wisniewski""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Alamosa School District RE-11J Director District 6,opportunistic_benefits,not_auditable,1,6137,3697,"""Heidi Richardson""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Amendments to Section 16-3-303 of the City of Central Land Development Code Ballot Question 2A,opportunistic_benefits,ended,1,2532,269,"""No/Against""",41,0.03000000,0,0,0,0,0,0,0,1.03905000,0,451,451
+Arapahoe County School District #6 Littleton Public Schools School Director - At Large,opportunistic_benefits,ended,3,174299,39632,"""Andrew Graham"",""Sean O'Shea"",""Joan Anderssen""",6638,0.03000000,0,0,0,0,0,0,0,1.03905000,0,192,192
+Aspen Fire Protection District Ballot Issue 6A,opportunistic_benefits,ended,1,6134,3629,"""Yes/For""",1803,0.03000000,0,0,0,0,0,0,0,1.03905000,0,25,25
+Aspen Fire Protection District Ballot Issue 6B,opportunistic_benefits,ended,1,6134,3629,"""Yes/For""",2235,0.03000000,0,0,0,0,0,0,0,1.03905000,0,20,20
+Aspen School District No. 1 Ballot Issue 4A,opportunistic_benefits,ended,1,6134,4555,"""Yes/For""",1071,0.03000000,0,0,0,0,0,0,0,1.03905000,0,42,42
+Aspen School District No. 1 Ballot Issue 4B,opportunistic_benefits,ended,1,6134,4555,"""Yes/For""",1112,0.03000000,0,0,0,0,0,0,0,1.03905000,0,41,41
+Aspen School District No. 1 - Board of Directors,opportunistic_benefits,not_auditable,3,6134,4555,"""Christa Gieszl"",""William Wallace Burke Gilmore"",""Elizabeth Stewart-Severy""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Aspen Village Metropolitan District Ballot Issue 6D,opportunistic_benefits,ended,1,6134,135,"""Yes/For""",50,0.03000000,0,0,0,0,0,0,0,1.03905000,0,894,894
+Ballot Issue 2A,opportunistic_benefits,ended,1,385029,192662,"""YES/FOR""",49450,0.03000000,0,0,0,0,0,0,0,1.03905000,0,57,57
+Ballot Issue 2B,opportunistic_benefits,ended,1,385029,192662,"""YES/FOR""",64197,0.03000000,0,0,0,0,0,0,0,1.03905000,0,44,44
+Ballot Issue 2C,opportunistic_benefits,ended,1,385029,192367,"""YES/FOR""",78150,0.03000000,0,0,0,0,0,0,0,1.03905000,0,36,36
+Ballot Issue 2D,opportunistic_benefits,ended,1,385029,192367,"""YES/FOR""",53529,0.03000000,0,0,0,0,0,0,0,1.03905000,0,53,53
+Ballot Issue 2E,opportunistic_benefits,ended,1,385029,192367,"""YES/FOR""",65867,0.03000000,0,0,0,0,0,0,0,1.03905000,0,43,43
+Ballot Question No. 2C,opportunistic_benefits,ended,1,43583,26612,"""No/Against""",9477,0.03000000,0,0,0,0,0,0,0,1.03905000,0,34,34
+Ballot Question No. 2D,opportunistic_benefits,ended,1,43583,26612,"""No/Against""",2998,0.03000000,0,0,0,0,0,0,0,1.03905000,0,106,106
+Ballot Question No. 2E,opportunistic_benefits,ended,1,43583,26612,"""No/Against""",12460,0.03000000,0,0,0,0,0,0,0,1.03905000,0,26,26
+Ballot Question No. 2F,opportunistic_benefits,ended,1,43583,26612,"""Yes/For""",829,0.03000000,0,0,0,0,0,0,0,1.03905000,0,384,384
+Banning Lewis Ranch Metropolitan District No. 5 Ballot Issue 6B,opportunistic_benefits,ended,1,189228,561,"""Yes/For""",504,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2736,2736
+Basalt Regional Library District Ballot Issue 7B,opportunistic_benefits,in_progress,1,22533,3731,"""Yes/For""",2044,0.03000000,0,0,0,0,0,0,0,1.03905000,0,81,81
+Bayfield School District 10 Jt-R Board of Directors,opportunistic_benefits,in_progress,3,26718,3613,"""Rebecca Parnell"",""Matt Turner"",""Gary Maestas""",46,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4233,4233
+Bent - Proposition LL (Statutory),county_wide_contest,risk_limit_achieved,1,1152,1152,"""No/Against""",102,0.03000000,84,0,0,0,0,0,0,1.03905000,0,83,83
+Board of Education Director - D70 - District III,county_wide_contest,risk_limit_achieved,1,43583,16465,"""Michelle Erickson""",1533,0.03000000,209,0,0,0,0,0,0,1.03905000,0,208,208
+Board of Education Director - D70 - District IV,opportunistic_benefits,ended,1,43583,16465,"""Mark Emery""",547,0.03000000,0,0,0,0,0,0,0,1.03905000,0,581,581
+Board of Education Director - D70 - District V,opportunistic_benefits,ended,1,43583,16465,"""Ann Bennett""",1217,0.03000000,0,0,0,0,0,0,0,1.03905000,0,261,261
+Boulder County Ballot Issue 1A,opportunistic_benefits,ended,1,121584,121558,"""Yes/For""",57874,0.03000000,0,0,0,0,0,0,0,1.03905000,0,16,16
+Boulder County Ballot Issue 1B,opportunistic_benefits,ended,1,121584,121558,"""Yes/For""",34603,0.03000000,0,0,0,0,0,0,0,1.03905000,0,26,26
+Boulder Valley School District RE-2 Director District B (4 Years),opportunistic_benefits,not_auditable,1,153794,88599,"""Nicole Rajpal""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Boulder Valley School District RE-2 Director District E (4 Years),opportunistic_benefits,in_progress,1,153794,88599,"""Deann Bucher""",1810,0.03000000,0,0,0,0,0,0,0,1.03905000,0,620,620
+Boulder Valley School District RE-2 Director District F (4 Years),opportunistic_benefits,not_auditable,1,153794,88599,"""Ana Temu Otting""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Buena Vista School District R-31 Ballot Issue 4A,opportunistic_benefits,ended,1,10433,4556,"""Yes/For""",184,0.03000000,0,0,0,0,0,0,0,1.03905000,0,414,414
+Buena Vista School District R-31 Ballot Issue 4B,opportunistic_benefits,ended,1,10433,4556,"""Yes/For""",561,0.03000000,0,0,0,0,0,0,0,1.03905000,0,136,136
+Buena Vista School District R-31 Board of Education Director At Large - 4 Year Term,opportunistic_benefits,ended,1,10433,4556,"""Casey Martin""",466,0.03000000,0,0,0,0,0,0,0,1.03905000,0,164,164
+Buena Vista School District R-31 Board of Education District 10,opportunistic_benefits,ended,1,10433,4556,"""Jeremiah Johnson""",746,0.03000000,0,0,0,0,0,0,0,1.03905000,0,102,102
+Buena Vista School District R-31 Board of Education District 2,opportunistic_benefits,not_auditable,1,10433,4556,"""Laura Hansen""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Burlington School District RE-6J Board of Directors - 4 Year Term,county_wide_contest,risk_limit_achieved,4,2113,1130,"""George Homm"",""Craig Schaal"",""Darren Bennett"",""Tara Penny""",218,0.03000000,72,0,0,0,0,0,0,1.03905000,0,71,71
+Byers School District 32J School Board Director,opportunistic_benefits,in_progress,3,280770,819,"""Kres Ebert"",""Logan MacLennan"",""Jennifer Borders""",67,0.03000000,0,0,0,0,0,0,0,1.03905000,0,30537,30537
+Byers School District No. 32J Ballot Issue 5A,opportunistic_benefits,in_progress,1,280770,819,"""Yes/For""",136,0.03000000,0,0,0,0,0,0,0,1.03905000,0,15044,15044
+Calhan School District RJ1 Director - 4 Year Term,opportunistic_benefits,in_progress,3,200743,1008,"""Jim Elrick"",""Buckey Lobdell"",""Charlotte Trojanovich""",98,0.03000000,0,0,0,0,0,0,0,1.03905000,0,14927,14927
+Carbondale and Rural Fire Protection District Ballot Issue 7D,opportunistic_benefits,in_progress,1,28927,5638,"""Yes""",838,0.03000000,0,0,0,0,0,0,0,1.03905000,0,252,252
+Carbondale and Rural Fire Protection District Ballot Issue 7E,opportunistic_benefits,in_progress,1,28927,5638,"""Yes""",1077,0.03000000,0,0,0,0,0,0,0,1.03905000,0,196,196
+Cedar Hill Cemetery District Ballot Issue 6A,opportunistic_benefits,ended,1,2633,842,"""Yes/For""",94,0.03000000,0,0,0,0,0,0,0,1.03905000,0,205,205
+Center Consolidated School District 26 JT Ballot Question 5B,opportunistic_benefits,in_progress,1,7384,58,"""No/Against""",32,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1682,1682
+Center Consolidated School District 26 JT Director - District A,opportunistic_benefits,in_progress,1,9107,465,"""William Eddie Wilson""",134,0.03000000,0,0,0,0,0,0,0,1.03905000,0,496,496
+Center Consolidated School District 26 JT Director - District B,opportunistic_benefits,in_progress,1,9107,465,"""Amanda Garcia""",89,0.03000000,0,0,0,0,0,0,0,1.03905000,0,746,746
+Chaffee County Ballot Issue 1A,county_wide_contest,risk_limit_achieved,1,10433,10433,"""No/Against""",1669,0.03000000,47,0,0,0,0,0,0,1.03905000,0,46,46
+Cherry Creek School District No. 5 School Board Director - District D,opportunistic_benefits,ended,1,174299,87913,"""Terry Bates""",11643,0.03000000,0,0,0,0,0,0,0,1.03905000,0,110,110
+Cherry Creek School District No. 5 School Board Director - District E,opportunistic_benefits,ended,1,174299,87913,"""Mike Hamrick""",18319,0.03000000,0,0,0,0,0,0,0,1.03905000,0,70,70
+Cherry Park General Improvement District Ballot Question 6B,opportunistic_benefits,ended,1,174299,471,"""Yes/For""",248,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5122,5122
+Cherry Park General Improvement District Ballot Question 6C,opportunistic_benefits,ended,1,174299,471,"""Yes/For""",212,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5992,5992
+Cheyenne Mountain School District 12 Board of Directors - 4 Year Term,opportunistic_benefits,ended,2,189228,8274,"""Kara Mehall"",""Jessica Lehman""",1753,0.03000000,0,0,0,0,0,0,0,1.03905000,0,787,787
+Cheyenne - Proposition LL (Statutory),county_wide_contest,risk_limit_achieved,1,612,612,"""No/Against""",314,0.03000000,16,0,0,0,0,0,0,1.03905000,0,15,15
+Cimarron Hills Fire Protection District Ballot Issue 6A,opportunistic_benefits,ended,1,189228,2978,"""Yes/For""",754,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1829,1829
+City and County of Broomfield Councilmember Ward 1 (4 Years),opportunistic_benefits,ended,1,29678,5386,"""Julie Twiss""",1161,0.03000000,0,0,0,0,0,0,0,1.03905000,0,187,187
+City and County of Broomfield Councilmember Ward 2 (4 Years),opportunistic_benefits,ended,1,29678,3694,"""Austin Ward""",1289,0.03000000,0,0,0,0,0,0,0,1.03905000,0,168,168
+City and County of Broomfield Councilmember Ward 3 (4 Years),county_wide_contest,risk_limit_achieved,1,29678,6899,"""Sarah Braun""",1306,0.03000000,167,0,0,0,0,0,0,1.03905000,0,166,166
+City and County of Broomfield Councilmember Ward 4 (4 Years),opportunistic_benefits,ended,1,29678,7689,"""Sean McKenzie""",757,0.03000000,0,0,0,0,0,0,0,1.03905000,0,286,286
+City and County of Broomfield Councilmember Ward 5 (4 Years),opportunistic_benefits,ended,1,29678,6010,"""Todd Cohen""",1008,0.03000000,0,0,0,0,0,0,0,1.03905000,0,215,215
+City and County of Broomfield - Mayor (2 Years),county_wide_contest,risk_limit_achieved,1,29678,29678,"""Guyleen Castriotta""",5247,0.03000000,43,0,0,0,0,0,0,1.03905000,0,42,42
+City Council Member-At Large,opportunistic_benefits,ended,2,43583,26612,"""Brett Boston"",""Selena Ruiz Gomez""",2273,0.03000000,0,0,0,0,0,0,0,1.03905000,0,140,140
+City of Alamosa Councilor at Large,county_wide_contest,risk_limit_achieved,1,4082,2031,"""Jan Vigil""",865,0.03000000,36,0,0,0,0,0,0,1.03905000,0,35,35
+City of Alamosa Councilor Ward 2,opportunistic_benefits,not_auditable,1,4082,649,"""Dawn Krebs""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Alamosa Councilor Ward 4,opportunistic_benefits,ended,1,4082,370,"""Mark T. Martinez""",6,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4958,4958
+City of Alamosa Mayor,opportunistic_benefits,not_auditable,1,4082,2031,"""Ty Coleman""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Arvada Ballot Question 3G,opportunistic_benefits,in_progress,1,306392,45073,"""No/Against""",11656,0.03000000,0,0,0,0,0,0,0,1.03905000,0,192,192
+City of Arvada Council Member At-Large,opportunistic_benefits,in_progress,1,306392,45073,"""Michael P. Griffith""",8936,0.03000000,0,0,0,0,0,0,0,1.03905000,0,250,250
+City of Arvada Council Member District 1,county_wide_contest,risk_limit_achieved,1,199921,12103,"""Randy Moorman""",3888,0.03000000,376,0,0,0,0,0,0,1.03905000,0,375,375
+City of Arvada Council Member District 3,opportunistic_benefits,ended,1,199921,10259,"""Rebecka Lovisone""",3475,0.03000000,0,0,0,0,0,0,0,1.03905000,0,420,420
+City of Aspen Ballot Issue 2A,county_wide_contest,risk_limit_achieved,1,6134,2410,"""Yes/For""",322,0.03000000,140,0,0,0,0,0,0,1.03905000,0,139,139
+City of Aspen Ballot Issue 2B,opportunistic_benefits,ended,1,6134,2410,"""Yes/For""",545,0.03000000,0,0,0,0,0,0,0,1.03905000,0,83,83
+City of Aspen Ballot Question 2C,opportunistic_benefits,ended,1,6134,2410,"""Yes/For""",153,0.03000000,0,0,0,0,0,0,0,1.03905000,0,293,293
+City of Aurora Council Member - At Large,opportunistic_benefits,in_progress,2,412378,81071,"""Rob Andrews"",""Alli Jackson""",7494,0.03000000,0,0,0,0,0,0,0,1.03905000,0,401,401
+City of Aurora Council Member Ward I,opportunistic_benefits,in_progress,1,280770,6972,"""Gianina Horton""",2323,0.03000000,0,0,0,0,0,0,0,1.03905000,0,881,881
+City of Aurora Council Member Ward II,opportunistic_benefits,in_progress,1,280770,13255,"""Amy Wiles""",1389,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1473,1473
+City of Aurora Council Member Ward III,opportunistic_benefits,ended,1,174299,9839,"""Ruben L. Medina""",2851,0.03000000,0,0,0,0,0,0,0,1.03905000,0,446,446
+City of Aurora Question 3B,opportunistic_benefits,in_progress,1,412378,81071,"""Yes/For""",3369,0.03000000,0,0,0,0,0,0,0,1.03905000,0,892,892
+City of Aurora Question 3C,opportunistic_benefits,in_progress,1,412378,81071,"""Yes/For""",39234,0.03000000,0,0,0,0,0,0,0,1.03905000,0,77,77
+City of Aurora Question 3D,opportunistic_benefits,in_progress,1,412378,81071,"""No/Against""",50313,0.03000000,0,0,0,0,0,0,0,1.03905000,0,60,60
+City of Aurora Question 3E,opportunistic_benefits,in_progress,1,412378,81071,"""No/Against""",49826,0.03000000,0,0,0,0,0,0,0,1.03905000,0,61,61
+City of Aurora Question 3F,opportunistic_benefits,in_progress,1,412378,81071,"""Yes/For""",1115,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2696,2696
+City of Boulder Ballot Issue 2A,opportunistic_benefits,ended,1,121584,34109,"""For the Measure""",14848,0.03000000,0,0,0,0,0,0,0,1.03905000,0,60,60
+City of Boulder Ballot Issue 2B,county_wide_contest,risk_limit_achieved,1,121584,34109,"""For the Measure""",9647,0.03000000,93,0,0,0,0,0,0,1.03905000,0,92,92
+City of Boulder Council Candidates,opportunistic_benefits,ended,4,121584,34109,"""Nicole Speer"",""Matt Benjamin"",""Rob Kaplan"",""Mark Wallach""",1086,0.03000000,0,0,0,0,0,0,0,1.03905000,0,816,816
+City of Brighton Councilmember - Ward 1,opportunistic_benefits,in_progress,1,186946,2486,"""Rhianon Collins""",217,0.03000000,0,0,0,0,0,0,0,1.03905000,0,6278,6278
+City of Brighton Councilmember - Ward 2,opportunistic_benefits,not_auditable,1,186946,1442,"""Ann Taddeo""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Brighton Councilmember - Ward 3,opportunistic_benefits,ended,1,106471,1691,"""Melinda Carbajal""",108,0.03000000,0,0,0,0,0,0,0,1.03905000,0,7184,7184
+City of Brighton Councilmember - Ward 4,opportunistic_benefits,not_auditable,1,106471,2192,"""Peter Padilla""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Brighton Mayor,opportunistic_benefits,not_auditable,1,186946,7811,"""Gregory Mills""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Brush Councilor Ward 1,opportunistic_benefits,not_auditable,1,6956,438,"""Tyler Horton""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Brush Councilor Ward 2,opportunistic_benefits,not_auditable,1,6956,374,"""Whitney E. Machuca""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Brush Councilor Ward 3,opportunistic_benefits,not_auditable,1,6956,254,"""Nick Skiles""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Brush Mayor,opportunistic_benefits,ended,1,6956,1066,"""Dana Sherman""",229,0.03000000,0,0,0,0,0,0,0,1.03905000,0,222,222
+City of Canon City - City Council - At Large,opportunistic_benefits,ended,1,14829,5708,"""Freddie Toney""",138,0.03000000,0,0,0,0,0,0,0,1.03905000,0,784,784
+City of Canon City - City Council - District 1,opportunistic_benefits,ended,1,14829,5708,"""Jeremy Reeves""",647,0.03000000,0,0,0,0,0,0,0,1.03905000,0,168,168
+City of Canon City - City Council - District 3,opportunistic_benefits,ended,1,14829,5708,"""Pamela Simmons""",186,0.03000000,0,0,0,0,0,0,0,1.03905000,0,581,581
+CITY OF CANON CITY ISSUE 2A,opportunistic_benefits,ended,1,14829,5708,"""YES/FOR""",1886,0.03000000,0,0,0,0,0,0,0,1.03905000,0,58,58
+CITY OF CANON CITY ISSUE 2B,county_wide_contest,risk_limit_achieved,1,14829,5708,"""NO/AGAINST""",528,0.03000000,206,0,0,0,0,0,0,1.03905000,0,205,205
+City of Canon City - Mayor,opportunistic_benefits,not_auditable,1,14829,5708,"""Phil Lund""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Castle Pines - Council District 1,opportunistic_benefits,not_auditable,1,131608,2578,"""Chris Eubanks""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Castle Pines - Council District 2,opportunistic_benefits,ended,1,131608,2390,"""Kori Salazar""",33,0.03000000,0,0,0,0,0,0,0,1.03905000,0,29062,29062
+City of Castle Pines - Council District 3,opportunistic_benefits,not_auditable,1,131608,1290,"""Nate Winegar""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Castle Pines Mayor,opportunistic_benefits,ended,1,131608,6258,"""Tracy Engerman""",705,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1361,1361
+City of Centennial Council Member District 1,opportunistic_benefits,ended,1,174299,10598,"""Cindy Sandhu""",946,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1343,1343
+City of Centennial Council Member District 2,opportunistic_benefits,ended,1,174299,10610,"""Ashish Vaidya""",309,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4111,4111
+City of Centennial Council Member District 3,opportunistic_benefits,ended,1,174299,10607,"""Ryan Dwiggins""",2003,0.03000000,0,0,0,0,0,0,0,1.03905000,0,635,635
+City of Centennial Council Member District 4,opportunistic_benefits,ended,1,174299,8684,"""Durrell Middleton""",392,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3241,3241
+City of Centennial Mayor,county_wide_contest,risk_limit_achieved,1,174299,40499,"""Christine Sweetland""",6006,0.03000000,213,0,0,0,0,0,0,1.03905000,0,212,212
+City of Commerce City Councilmember - At Large,opportunistic_benefits,ended,2,106471,10854,"""Lori Young"",""Stefanie Trujillo""",317,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2448,2448
+City of Commerce City Councilmember - Ward 1,opportunistic_benefits,ended,1,106471,2044,"""Jose Guardiola""",294,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2639,2639
+City of Commerce City Councilmember - Ward 3,opportunistic_benefits,ended,1,106471,2910,"""Joanna Sandoval""",203,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3822,3822
+City of Craig Ballot Issue 2A,opportunistic_benefits,ended,1,3359,2018,"""Yes/For""",9,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2720,2720
+City of Craig Ballot Question 2B,opportunistic_benefits,ended,1,3359,2018,"""Yes/For""",733,0.03000000,0,0,0,0,0,0,0,1.03905000,0,34,34
+City of Craig City Council,opportunistic_benefits,ended,3,3359,2018,"""Jnl Linsacum"",""Michelle Gottschall"",""Joe Herod""",404,0.03000000,0,0,0,0,0,0,0,1.03905000,0,61,61
+City of Craig Mayor,opportunistic_benefits,not_auditable,1,3359,2018,"""Chris Nichols""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Cripple Creek Ballot Question 2B,opportunistic_benefits,ended,1,10151,271,"""Yes/For""",57,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1298,1298
+City of Cripple Creek Council - Ward 4,opportunistic_benefits,not_auditable,1,10151,145,"""Bruce Brown""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Cripple Creek Council - Ward 5,opportunistic_benefits,ended,1,10151,126,"""JR Gatlin""",10,0.03000000,0,0,0,0,0,0,0,1.03905000,0,7398,7398
+City of Cripple Creek Home Rule Charter Commission,opportunistic_benefits,not_auditable,8,10151,271,"""Bruce Brown"",""Kirk Pennock"",""Jonathon Smith"",""Kelly W. Turner"",""Shawn M. Naprawa"",""Steven DiCamillo"",""Zeb Pennock"",""Elwood Henson""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Dacono Ballot Question 2D,opportunistic_benefits,ended,1,80475,1125,"""Yes/For""",435,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1349,1349
+City of Dacono Ballot Question 2E,opportunistic_benefits,ended,1,80475,1125,"""Yes/For""",868,0.03000000,0,0,0,0,0,0,0,1.03905000,0,676,676
+City of Dacono Ballot Question 2F,opportunistic_benefits,ended,1,80475,1125,"""Yes/For""",214,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2741,2741
+City of Dacono Ballot Question 2G,opportunistic_benefits,ended,1,80475,1125,"""Yes/For""",571,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1028,1028
+City of Dacono Council Members,opportunistic_benefits,ended,2,80475,1125,"""Drew Martinez"",""Kevin Plain""",221,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2654,2654
+City of Delta Ballot Issue 2B,county_wide_contest,risk_limit_achieved,1,11092,2315,"""No/Against""",497,0.03000000,164,0,0,0,0,0,0,1.03905000,0,163,163
+City of Delta Ballot Question 2C,opportunistic_benefits,ended,1,11092,2315,"""No/Against""",608,0.03000000,0,0,0,0,0,0,0,1.03905000,0,133,133
+City of Delta Ballot Question 2D,opportunistic_benefits,ended,1,11092,2315,"""No/Against""",681,0.03000000,0,0,0,0,0,0,0,1.03905000,0,119,119
+City of Delta Ballot Question 2E,opportunistic_benefits,ended,1,11092,2315,"""No/Against""",1089,0.03000000,0,0,0,0,0,0,0,1.03905000,0,75,75
+City of delta Ballot Question 2F,opportunistic_benefits,ended,1,11092,2315,"""No/Against""",953,0.03000000,0,0,0,0,0,0,0,1.03905000,0,85,85
+City of Durango Ballot Issue 2A,opportunistic_benefits,ended,1,22019,6982,"""Yes/For""",804,0.03000000,0,0,0,0,0,0,0,1.03905000,0,200,200
+City of Edgewater Council Members,opportunistic_benefits,not_auditable,4,199921,1253,"""Hannah Gay Keao"",""Lilly Steirer"",""Joel Newton"",""Mark Stechschulte""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Edgewater Mayor,opportunistic_benefits,ended,1,199921,1253,"""Steve Conklin""",950,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1534,1534
+City of Englewood Ballot Question Number 2A,opportunistic_benefits,ended,1,174299,9685,"""Yes/For""",1950,0.03000000,0,0,0,0,0,0,0,1.03905000,0,652,652
+City of Englewood Office of Council Member District 2,opportunistic_benefits,ended,1,174299,2167,"""Jack Bethel""",353,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3599,3599
+City of Englewood Office of Council Member District 4,opportunistic_benefits,ended,1,174299,2396,"""Steve Ward""",447,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2842,2842
+City of Englewood Office of Mayor At-Large,opportunistic_benefits,ended,1,174299,9685,"""Othoniel Sierra""",3324,0.03000000,0,0,0,0,0,0,0,1.03905000,0,383,383
+City of Englewood Office of Municipal Judge,opportunistic_benefits,not_auditable,1,174299,9685,"""Joe Jefferson""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Evans Ballot Issue 2A,opportunistic_benefits,ended,1,80475,3265,"""Yes/For""",1300,0.03000000,0,0,0,0,0,0,0,1.03905000,0,452,452
+City of Federal Heights Council Member - Ward 1,opportunistic_benefits,not_auditable,1,106471,373,"""Mike Vallero""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Federal Heights Council Member - Ward 2,opportunistic_benefits,not_auditable,1,106471,492,"""Doris Peterson""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Federal Heights Council Member - Ward 3,opportunistic_benefits,ended,1,106471,449,"""Sonia Jensen""",69,0.03000000,0,0,0,0,0,0,0,1.03905000,0,11245,11245
+City of Florence - City Council - Ward 1,opportunistic_benefits,not_auditable,1,14829,315,"""Rudl Mergelman""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Florence - City Council - Ward 3,opportunistic_benefits,not_auditable,1,14829,407,"""Brenda Gardner""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+CITY OF FLORENCE ISSUE 2C,opportunistic_benefits,ended,1,14829,1089,"""YES/FOR""",562,0.03000000,0,0,0,0,0,0,0,1.03905000,0,193,193
+City of Florence - Mayor,opportunistic_benefits,ended,1,14829,1089,"""Steve Wolfe""",517,0.03000000,0,0,0,0,0,0,0,1.03905000,0,210,210
+City of Fort Collins Ballot Issue 2A,opportunistic_benefits,ended,1,191186,57101,"""Yes/For""",30707,0.03000000,0,0,0,0,0,0,0,1.03905000,0,46,46
+City of Fort Collins Ballot Issue 302,opportunistic_benefits,ended,1,191186,56984,"""Yes/For""",25091,0.03000000,0,0,0,0,0,0,0,1.03905000,0,56,56
+City of Fort Collins Ballot Question 2B,opportunistic_benefits,ended,1,191186,57101,"""Yes/For""",34526,0.03000000,0,0,0,0,0,0,0,1.03905000,0,41,41
+City of Fort Collins Ballot Question 2C,opportunistic_benefits,ended,1,191186,56984,"""Yes/For""",27387,0.03000000,0,0,0,0,0,0,0,1.03905000,0,51,51
+City of Fort Collins Ballot Question 2D,opportunistic_benefits,ended,1,191186,56984,"""Yes/For""",25482,0.03000000,0,0,0,0,0,0,0,1.03905000,0,55,55
+City of Fort Collins Ballot Question 2E,opportunistic_benefits,ended,1,191186,56984,"""Yes/For""",36143,0.03000000,0,0,0,0,0,0,0,1.03905000,0,39,39
+City of Fort Collins Ballot Question 2F,opportunistic_benefits,ended,1,191186,56984,"""No/Against""",8374,0.03000000,0,0,0,0,0,0,0,1.03905000,0,167,167
+City of Fort Collins Ballot Question 2G,opportunistic_benefits,ended,1,191186,56984,"""Yes/For""",30022,0.03000000,0,0,0,0,0,0,0,1.03905000,0,47,47
+City of Fort Collins Ballot Question 2H,opportunistic_benefits,ended,1,191186,56984,"""Yes/For""",19485,0.03000000,0,0,0,0,0,0,0,1.03905000,0,72,72
+City of Fort Collins Ballot Question 303,opportunistic_benefits,ended,1,191186,56984,"""No/Against""",4183,0.03000000,0,0,0,0,0,0,0,1.03905000,0,334,334
+City of Fort Collins Councilmember - District 1,opportunistic_benefits,ended,1,191186,9821,"""Chris Conway""",2079,0.03000000,0,0,0,0,0,0,0,1.03905000,0,671,671
+City of Fort Collins Councilmember - District 3,opportunistic_benefits,ended,1,191186,10360,"""Josh Fudge""",2279,0.03000000,0,0,0,0,0,0,0,1.03905000,0,612,612
+City of Fort Collins Councilmember - District 5,opportunistic_benefits,ended,1,191186,8148,"""Amy Hoeven""",991,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1406,1406
+City of Fort Collins Mayor,opportunistic_benefits,ended,1,191186,57101,"""Emily Francis""",5847,0.03000000,0,0,0,0,0,0,0,1.03905000,0,239,239
+City of Fort Lupton Ballot Issue 2C,opportunistic_benefits,ended,1,80475,1640,"""Yes/For""",865,0.03000000,0,0,0,0,0,0,0,1.03905000,0,678,678
+City of Fort Lupton Mayor,opportunistic_benefits,not_auditable,1,80475,1640,"""Chris Ceretto""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Fort Lupton Ward 1 Councilmember,opportunistic_benefits,ended,1,80475,376,"""Valerie Blackston""",33,0.03000000,0,0,0,0,0,0,0,1.03905000,0,17771,17771
+City of Fort Lupton Ward 2 Councilmember,opportunistic_benefits,ended,1,80475,704,"""Claud Hanes""",16,0.03000000,0,0,0,0,0,0,0,1.03905000,0,36652,36652
+City of Fort Lupton Ward 3 Councilmember,opportunistic_benefits,ended,1,80475,560,"""Michael Sanchez""",28,0.03000000,0,0,0,0,0,0,0,1.03905000,0,20944,20944
+CITY OF FORT MORGAN BALLOT ISSUE  2A,opportunistic_benefits,ended,1,6956,2234,"""Yes/For""",179,0.03000000,0,0,0,0,0,0,0,1.03905000,0,284,284
+City of Fort Morgan Councilmember Ward 1,opportunistic_benefits,ended,1,6956,791,"""Brian Urdiales""",77,0.03000000,0,0,0,0,0,0,0,1.03905000,0,659,659
+City of Fort Morgan Councilmember Ward 2,opportunistic_benefits,not_auditable,1,6956,525,"""R. Jon Kaper""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Fort Morgan Councilmember Ward 3,opportunistic_benefits,not_auditable,1,6956,918,"""James Parks""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Fort Morgan Mayor,county_wide_contest,risk_limit_achieved,1,6956,2234,"""Doug Schossow""",293,0.03000000,174,0,0,0,0,0,0,1.03905000,0,173,173
+City of Fountain Council Member - At Large,opportunistic_benefits,ended,1,189228,5068,"""Sean Verhoeff""",411,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3355,3355
+City of Fountain Council Member Ward 1 - 4 Year Term,opportunistic_benefits,not_auditable,1,189228,1536,"""Gordon Rick""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Fountain Council Member Ward 3 - 4 Year Term,opportunistic_benefits,not_auditable,1,189228,1422,"""Marcia Gieck""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Fountain Mayor,opportunistic_benefits,ended,1,189228,5068,"""Sharon Thompson""",2673,0.03000000,0,0,0,0,0,0,0,1.03905000,0,516,516
+City of Golden Council Member Ward 1,opportunistic_benefits,not_auditable,1,199921,1270,"""Emily Kurzinski""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Golden Council Member Ward 2,opportunistic_benefits,ended,1,199921,1773,"""Gerchard Pfau""",17,0.03000000,0,0,0,0,0,0,0,1.03905000,0,85696,85696
+City of Golden Council Member Ward 3,opportunistic_benefits,ended,1,199921,1968,"""Don Cameron""",263,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5540,5540
+City of Golden Council Member Ward 4,opportunistic_benefits,ended,1,199921,1568,"""Sandra Knecht""",754,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1933,1933
+City of Greeley Councilmember At-Large,opportunistic_benefits,ended,1,80475,22105,"""Ryan Roth""",4676,0.03000000,0,0,0,0,0,0,0,1.03905000,0,126,126
+City of Greeley Councilmember Ward 2,opportunistic_benefits,ended,1,80475,4200,"""Deborah DeBoutez""",831,0.03000000,0,0,0,0,0,0,0,1.03905000,0,706,706
+City of Greeley Councilmember Ward 3,opportunistic_benefits,ended,1,80475,6449,"""Johnny Olson""",591,0.03000000,0,0,0,0,0,0,0,1.03905000,0,993,993
+City of Greeley Councilmember Ward 4,opportunistic_benefits,ended,1,80475,7549,"""Brian Rudy""",1191,0.03000000,0,0,0,0,0,0,0,1.03905000,0,493,493
+City of Greeley Mayor,county_wide_contest,risk_limit_achieved,1,80475,22105,"""Dale Hall""",2495,0.03000000,237,0,0,0,0,0,0,1.03905000,0,236,236
+City of Greenwood Village Councilmember District 1,opportunistic_benefits,not_auditable,2,174299,1591,"""Paul Wiesner"",""Ann Nelson""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Greenwood Village Councilmember District 2,opportunistic_benefits,ended,2,174299,1155,"""Jay Schneiderman"",""Bob Doyle""",20,0.03000000,0,0,0,0,0,0,0,1.03905000,0,63506,63506
+City of Greenwood Village Councilmember District 3,opportunistic_benefits,ended,2,174299,1439,"""Donna Johnston"",""Libby Barnacle""",613,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2072,2072
+City of Greenwood Village Councilmember District 4,opportunistic_benefits,ended,2,174299,1241,"""Katrin Mezger"",""Tom Stahl""",55,0.03000000,0,0,0,0,0,0,0,1.03905000,0,23093,23093
+City of Gunnison Ballot Issue 2B,opportunistic_benefits,ended,1,6393,1874,"""Yes/For""",19,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2452,2452
+City of Gunnison City Council,opportunistic_benefits,ended,3,6393,1874,"""Matt Schwartz"",""Audrey Zahradka"",""Loren Ahonen""",55,0.03000000,0,0,0,0,0,0,0,1.03905000,0,848,848
+City of Idaho Springs Ballot Question 2A,opportunistic_benefits,ended,1,3273,478,"""No/Against""",7,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3408,3408
+City of Idaho Springs Ballot Question 2B,opportunistic_benefits,ended,1,3273,478,"""No/Against""",6,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3976,3976
+City of Idaho Springs Ballot Question 2C,opportunistic_benefits,ended,1,3273,478,"""Yes/For""",209,0.03000000,0,0,0,0,0,0,0,1.03905000,0,115,115
+"City of Idaho Springs City Council, Ward II",opportunistic_benefits,not_auditable,2,3273,227,"""Kathleen Collier"",""Janine Mariani""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+"City of Idaho Springs Mayor, At Large",opportunistic_benefits,not_auditable,1,3273,478,"""Charles Harmon""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Lafayette Ballot Issue 2C,opportunistic_benefits,ended,1,121584,12089,"""Yes/For""",993,0.03000000,0,0,0,0,0,0,0,1.03905000,0,893,893
+City of Lafayette City Council,opportunistic_benefits,ended,4,121584,12089,"""Crystal Gallegos"",""Annmarie Jensen"",""Saul Tapia Vega"",""Adam Gianola""",362,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2448,2448
+City of Lakewood Council Member Ward 1,opportunistic_benefits,not_auditable,1,199921,9335,"""Jeslin Shahrezaei """,0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Lakewood Council Member Ward 2,opportunistic_benefits,not_auditable,1,199921,6598,"""Liz Black""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Lakewood Council Member Ward 3,opportunistic_benefits,ended,1,199921,8750,"""Ken Cruz""",1933,0.03000000,0,0,0,0,0,0,0,1.03905000,0,754,754
+City of Lakewood Council Member Ward 4,opportunistic_benefits,ended,1,199921,11140,"""Bill Furman""",5820,0.03000000,0,0,0,0,0,0,0,1.03905000,0,251,251
+City of Lakewood Council Member Ward 5,opportunistic_benefits,ended,1,199921,9994,"""Paula Nystrom""",3154,0.03000000,0,0,0,0,0,0,0,1.03905000,0,462,462
+City of Lamar Council Member - Ward 1 - Four Year Term,opportunistic_benefits,not_auditable,1,2665,625,"""Brad Johnson""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Lamar Council Member - Ward 2 - Four Year Term,opportunistic_benefits,ended,1,2665,440,"""David Zavala""",57,0.03000000,0,0,0,0,0,0,0,1.03905000,0,341,341
+City of Lamar Council Member - Ward 3 - Four Year Term,opportunistic_benefits,ended,1,2665,422,"""Mark Headlee""",110,0.03000000,0,0,0,0,0,0,0,1.03905000,0,177,177
+City of Lamar Mayor At Large - Two Year Term,opportunistic_benefits,not_auditable,1,2665,1487,"""Kirk Crespin""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Leadville City Council Ward 1,county_wide_contest,risk_limit_achieved,1,1745,273,"""Gita Carey""",106,0.03000000,121,0,0,0,0,0,0,1.03905000,0,120,120
+City of Leadville City Council Ward 2,opportunistic_benefits,not_auditable,2,1745,226,"""Mitchell Dulleck"",""Shannon Grant""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Leadville City Council Ward 3,opportunistic_benefits,not_auditable,1,1745,250,"""Rebecca Thomas""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Littleton Ballot Question 3A,opportunistic_benefits,in_progress,1,505828,17810,"""Yes/For""",1504,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2451,2451
+City of Littleton Council Member At Large,opportunistic_benefits,ended,1,131608,96,"""Joel Zink""",33,0.03000000,0,0,0,0,0,0,0,1.03905000,0,29062,29062
+City of Littleton Council Member At-Large,opportunistic_benefits,in_progress,1,374220,17714,"""Joel Zink""",2071,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1317,1317
+City of Littleton Council Member District I,opportunistic_benefits,ended,1,174299,4233,"""Merrill Stillwell""",1145,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1110,1110
+City of Littleton Council Member District III,opportunistic_benefits,ended,1,174299,5241,"""Amanda Henderson""",654,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1943,1943
+City of Littleton Mayor,opportunistic_benefits,in_progress,1,505828,17810,"""Kyle Schlachter""",2639,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1397,1397
+City of Longmont City Council At Large,opportunistic_benefits,in_progress,2,202059,34071,"""Jake Marsing"",""Crystal Prieto""",5334,0.03000000,0,0,0,0,0,0,0,1.03905000,0,277,277
+City of Longmont City Council Ward 2,opportunistic_benefits,ended,1,121584,11352,"""Matthew Popkin""",815,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1088,1088
+City of Longmont Mayor,opportunistic_benefits,in_progress,1,202059,34071,"""Susie Hidalgo-Fahring""",4702,0.03000000,0,0,0,0,0,0,0,1.03905000,0,314,314
+City of Longmont Municipal Court Judge - Frick,opportunistic_benefits,in_progress,1,202059,34071,"""Yes/For""",12467,0.03000000,0,0,0,0,0,0,0,1.03905000,0,119,119
+City of Louisville Ballot Question 300,opportunistic_benefits,ended,1,121584,9627,"""No/Against""",5230,0.03000000,0,0,0,0,0,0,0,1.03905000,0,170,170
+City of Louisville Ballot Question 301,opportunistic_benefits,ended,1,121584,9627,"""No/Against""",4805,0.03000000,0,0,0,0,0,0,0,1.03905000,0,185,185
+City of Louisville City Council Ward 1 (4-year term),opportunistic_benefits,ended,1,121584,2910,"""Joshua H. Cooperman""",338,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2622,2622
+City of Louisville City Council Ward 2 (4-year term),opportunistic_benefits,not_auditable,1,121584,3290,"""Judi Kern""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Louisville City Council Ward 3 (4-year term),opportunistic_benefits,not_auditable,1,121584,3427,"""Dietrich Hoefner""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Loveland City Council - Ward 1,opportunistic_benefits,ended,1,191186,7745,"""Geoff Frahm""",773,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1803,1803
+City of Loveland City Council - Ward 2,opportunistic_benefits,ended,1,191186,9176,"""Sarah Rothberg""",172,0.03000000,0,0,0,0,0,0,0,1.03905000,0,8100,8100
+City of Loveland City Council - Ward 3,opportunistic_benefits,ended,2,191186,6291,"""Caitlin Wyrick"",""Kalina Middleton""",32,0.03000000,0,0,0,0,0,0,0,1.03905000,0,43537,43537
+City of Loveland City Council - Ward 4,opportunistic_benefits,ended,1,191186,7656,"""Zeke Cortez""",808,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1725,1725
+City of Loveland Mayor,opportunistic_benefits,ended,1,191186,30868,"""Patrick McFall""",193,0.03000000,0,0,0,0,0,0,0,1.03905000,0,7219,7219
+City of Manitou Springs Ballot Issue 2A,opportunistic_benefits,ended,1,189228,2230,"""No/Against""",279,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4943,4943
+City of Manitou Springs City Council - Ward 1 - 4 Year Term,opportunistic_benefits,not_auditable,1,189228,729,"""Nathan Nassif""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Manitou Springs City Council - Ward 2 - 4 Year Term,opportunistic_benefits,not_auditable,1,189228,802,"""Carey Storm""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Manitou Springs City Council - Ward 3 - 4 Year Term,opportunistic_benefits,ended,1,189228,699,"""Gloria Latimer""",261,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5284,5284
+City of Manitou Springs Mayor,opportunistic_benefits,not_auditable,1,189228,2230,"""Natalie Johnson""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Montrose - Amend City Charter,opportunistic_benefits,ended,1,16790,8006,"""No/Against""",336,0.03000000,0,0,0,0,0,0,0,1.03905000,0,365,365
+City of Northglenn Council Member - Ward 1,opportunistic_benefits,ended,1,106471,2009,"""Madison Leighty""",109,0.03000000,0,0,0,0,0,0,0,1.03905000,0,7118,7118
+City of Northglenn Council Member - Ward 2,opportunistic_benefits,in_progress,1,186946,1843,"""Joshua D. Sievers""",1025,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1330,1330
+City of Northglenn Council Member - Ward 3,opportunistic_benefits,ended,1,106471,1510,"""Richard Atsuhiko Kondo""",411,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1888,1888
+City of Northglenn Council Member - Ward 4,opportunistic_benefits,ended,1,106471,2212,"""Jody Roper""",561,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1383,1383
+City of Ouray Council Member - At Large,opportunistic_benefits,not_auditable,1,2633,540,"""Jenny Hart""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Ouray Mayor,opportunistic_benefits,ended,1,2633,540,"""Michael S. Underwood""",26,0.03000000,0,0,0,0,0,0,0,1.03905000,0,738,738
+City of Rifle Issue 2B,opportunistic_benefits,ended,1,16400,1732,"""No""",16,0.03000000,0,0,0,0,0,0,0,1.03905000,0,7470,7470
+City of Salida Mayor - Two Year Term,county_wide_contest,risk_limit_achieved,1,10433,3167,"""Justin Critelli""",387,0.03000000,198,0,0,0,0,0,0,1.03905000,0,197,197
+City of Salida Question 2A,opportunistic_benefits,ended,1,10433,3167,"""Yes/For""",805,0.03000000,0,0,0,0,0,0,0,1.03905000,0,95,95
+City of Sheridan City Council Member Ward I,opportunistic_benefits,ended,1,174299,249,"""Anthony Lopez""",26,0.03000000,0,0,0,0,0,0,0,1.03905000,0,48851,48851
+City of Sheridan City Council Member Ward II,opportunistic_benefits,not_auditable,2,174299,347,"""Michael Moreno"",""Jay Whittaker""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Sheridan City Council Member Ward III,opportunistic_benefits,ended,1,174299,399,"""CJ Clark""",107,0.03000000,0,0,0,0,0,0,0,1.03905000,0,11871,11871
+City of Sheridan Mayor,opportunistic_benefits,ended,1,174299,995,"""Sally Daigle""",93,0.03000000,0,0,0,0,0,0,0,1.03905000,0,13658,13658
+City of Steamboat Springs Ballot Question 2D,opportunistic_benefits,ended,1,10308,5486,"""Yes/For""",4185,0.03000000,0,0,0,0,0,0,0,1.03905000,0,18,18
+City of Steamboat Springs City Council - At Large,county_wide_contest,risk_limit_achieved,1,10308,5486,"""Dave Barnes""",608,0.03000000,125,0,0,0,0,0,0,1.03905000,0,124,124
+City of Steamboat Springs City Council - District I,opportunistic_benefits,ended,1,10308,5486,"""Gail Garey""",618,0.03000000,0,0,0,0,0,0,0,1.03905000,0,122,122
+City of Steamboat Springs City Council - District II,opportunistic_benefits,not_auditable,1,10308,5486,"""Steve Muntean""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Steamboat Springs City Council - District III,opportunistic_benefits,ended,1,10308,5486,"""John Agosta""",198,0.03000000,0,0,0,0,0,0,0,1.03905000,0,380,380
+City of Sterling Councilmember Ward 1,opportunistic_benefits,ended,1,6091,1272,"""Kristi Knowles""",169,0.03000000,0,0,0,0,0,0,0,1.03905000,0,263,263
+City of Sterling Councilmember Ward 2,opportunistic_benefits,not_auditable,1,6091,855,"""John Haynie""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Sterling Councilmember Ward 3,opportunistic_benefits,ended,1,6091,623,"""Steve Lively""",38,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1169,1169
+City of Sterling Mayor,opportunistic_benefits,ended,1,6091,2750,"""Mark Fuller""",160,0.03000000,0,0,0,0,0,0,0,1.03905000,0,278,278
+City of Sterling Referred Ballot Issue 2Y,opportunistic_benefits,ended,1,6091,2750,"""No/Against""",175,0.03000000,0,0,0,0,0,0,0,1.03905000,0,254,254
+City of Sterling Referred Ballot Question 2Z,opportunistic_benefits,ended,1,6091,2750,"""Yes/For""",903,0.03000000,0,0,0,0,0,0,0,1.03905000,0,50,50
+City of Thornton Ballot Question 2A,county_wide_contest,risk_limit_achieved,1,106471,33982,"""Yes/For""",2149,0.03000000,363,0,0,0,0,0,0,1.03905000,0,362,362
+City of Thornton Ballot Question 2B,opportunistic_benefits,ended,1,106471,33982,"""Yes/For""",20147,0.03000000,0,0,0,0,0,0,0,1.03905000,0,39,39
+City of Thornton Ballot Question 2C,opportunistic_benefits,ended,1,106471,33982,"""Yes/For""",7656,0.03000000,0,0,0,0,0,0,0,1.03905000,0,102,102
+City of Thornton Ballot Question 2D,opportunistic_benefits,ended,1,106471,33982,"""Yes/For""",17048,0.03000000,0,0,0,0,0,0,0,1.03905000,0,46,46
+City of Thornton Council Member - Ward 1,opportunistic_benefits,not_auditable,1,106471,3893,"""Cherish Salazar""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Thornton Council Member - Ward 2,opportunistic_benefits,ended,1,106471,6645,"""John Alge""",1127,0.03000000,0,0,0,0,0,0,0,1.03905000,0,689,689
+City of Thornton Council Member - Ward 3,opportunistic_benefits,ended,1,106471,12229,"""Devin Byrd""",311,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2495,2495
+City of Thornton Council Member - Ward 4,opportunistic_benefits,ended,1,106471,11215,"""Drew Morris""",9,0.03000000,0,0,0,0,0,0,0,1.03905000,0,86206,86206
+City of Trinidad Ballot Issue 2A,opportunistic_benefits,ended,1,4561,2608,"""Yes/For""",1239,0.03000000,0,0,0,0,0,0,0,1.03905000,0,27,27
+City of Trinidad Mayor - At Large,county_wide_contest,risk_limit_achieved,1,4561,2608,"""Cy Michaels""",517,0.03000000,66,0,0,0,0,1,0,1.03905000,0,52,52
+City of Victor Ballot Question 2A,opportunistic_benefits,ended,1,10151,129,"""No/Against""",11,0.03000000,0,0,0,0,0,0,0,1.03905000,0,6725,6725
+City of Victor Mayor,opportunistic_benefits,not_auditable,1,10151,129,"""Barbara Manning""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Walsenburg City Council Ward 1,opportunistic_benefits,not_auditable,1,2687,293,"""Veronica Maes""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Walsenburg City Council Ward 2,opportunistic_benefits,not_auditable,1,2687,324,"""Jennifer Novak""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Walsenburg City Council Ward 3,opportunistic_benefits,not_auditable,1,2687,307,"""Pamela Brietweiser""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Walsenburg Issue 300,county_wide_contest,risk_limit_achieved,1,2687,924,"""No/Against""",282,0.03000000,71,0,0,0,0,0,0,1.03905000,0,70,70
+City of Walsenburg Mayor,opportunistic_benefits,not_auditable,1,2687,924,"""Gary Vezzani""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Walsenburg Question 2A,opportunistic_benefits,ended,1,2687,924,"""No/Against""",151,0.03000000,0,0,0,0,0,0,0,1.03905000,0,130,130
+City of Westminster Ballot Issue 3H,opportunistic_benefits,in_progress,1,306392,34198,"""Yes/For""",1245,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1794,1794
+City of Westminster Council Members,opportunistic_benefits,in_progress,3,306392,34198,"""Obi Ezeadi"",""Jack Johnson"",""Sarah Nurmela""",2834,0.03000000,0,0,0,0,0,0,0,1.03905000,0,788,788
+City of Westminster Mayor,opportunistic_benefits,in_progress,1,306392,34198,"""Claire Carmelia""",8910,0.03000000,0,0,0,0,0,0,0,1.03905000,0,251,251
+City of Wheat Ridge Ballot Question 2B,opportunistic_benefits,ended,1,199921,10912,"""No/Against""",1074,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1357,1357
+City of Wheat Ridge Council Member District I,opportunistic_benefits,not_auditable,1,199921,2640,"""Kathleen Martell""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Wheat Ridge Council Member District II,opportunistic_benefits,ended,1,199921,2690,"""Scott Ohm""",404,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3606,3606
+City of Wheat Ridge Council Member District III,opportunistic_benefits,ended,1,199921,3419,"""Pat Quinn """,481,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3029,3029
+City of Wheat Ridge Council Member District IV,opportunistic_benefits,not_auditable,1,199921,2163,"""Mike Okada""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Wheat Ridge Mayor,opportunistic_benefits,not_auditable,1,199921,10912,"""Korey Stites""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+City of Woodland Park Ballot Question 2C,opportunistic_benefits,ended,1,10151,3368,"""Yes/For""",1540,0.03000000,0,0,0,0,0,0,0,1.03905000,0,49,49
+City of Woodland Park Ballot Question 2D,opportunistic_benefits,ended,1,10151,3368,"""Yes/For""",2241,0.03000000,0,0,0,0,0,0,0,1.03905000,0,34,34
+City of Woodland Park Ballot Question 2E,opportunistic_benefits,ended,1,10151,3368,"""Yes/For""",1948,0.03000000,0,0,0,0,0,0,0,1.03905000,0,38,38
+City of Yuma Ballot Issue 2A,opportunistic_benefits,ended,1,2750,822,"""Yes/For""",141,0.03000000,0,0,0,0,0,0,0,1.03905000,0,143,143
+City of Yuma Ballot Question 2B,county_wide_contest,risk_limit_achieved,1,2750,822,"""No/Against""",283,0.03000000,72,0,0,0,0,0,0,1.03905000,0,71,71
+City of Yuma City Council,opportunistic_benefits,ended,3,2750,822,"""Michael Fitzsimmons"",""Nathan O'Neal"",""Michael R Aagesen""",20,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1002,1002
+City of Yuma Mayor,opportunistic_benefits,ended,1,2750,822,"""Tim McClung""",187,0.03000000,0,0,0,0,0,0,0,1.03905000,0,108,108
+CLEAR CREEK COUNTY EMERGENCY SERVICES GENERAL IMPROVEMENT DISTRICT QUESTION 1A,county_wide_contest,risk_limit_achieved,1,3273,1036,"""Yes/For""",164,0.03000000,147,0,0,0,0,0,0,1.03905000,0,146,146
+Clifton Fire Protection District Ballot Issue 6B,opportunistic_benefits,ended,1,52437,7814,"""Yes/For""",2535,0.03000000,0,0,0,0,0,0,0,1.03905000,0,151,151
+Coal Creek Canyon Fire Protection District Ballot Issue 7B,opportunistic_benefits,in_progress,1,324037,1506,"""Yes/For""",763,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3095,3095
+Colorado Mountain College Ballot issue 7C,opportunistic_benefits,ended,1,6134,6093,"""Yes/For""",2918,0.03000000,0,0,0,0,0,0,0,1.03905000,0,16,16
+Colorado Mountain College Ballot Issue 7C,opportunistic_benefits,in_progress,1,79275,56371,"""Yes/For""",17732,0.03000000,0,0,0,0,0,0,0,1.03905000,0,33,33
+Colorado Mountain College Board of Trustees - At Large,opportunistic_benefits,not_auditable,2,85409,62464,"""Beth Helmke"",""Magda King""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Colorado Mountain College Board of Trustees - District 1,opportunistic_benefits,not_auditable,1,85409,62464,"""Markey Butler""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Colorado Mountain College Board of Trustees - District 3,opportunistic_benefits,not_auditable,1,85409,62464,"""Elizabeth Sass""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Colorado Mountain College Board of Trustees - District 7,opportunistic_benefits,not_auditable,1,85409,62464,"""Nico Brown""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Colorado Springs School District 11 Board of Directors - 4 Year Term,opportunistic_benefits,ended,3,189228,60966,"""LeAnn Baca Bartlett"",""Michelle Ruehl"",""Charles Johnson""",63,0.03000000,0,0,0,0,0,0,0,1.03905000,0,21888,21888
+Colorado's Timber Ridge Metropolitan District Ballot Question 6A,opportunistic_benefits,ended,1,4699,96,"""Yes/For""",41,0.03000000,0,0,0,0,0,0,0,1.03905000,0,836,836
+Conejos - Proposition LL (Statutory),county_wide_contest,risk_limit_achieved,1,2055,2055,"""Yes/For""",565,0.03000000,28,0,0,0,0,0,0,1.03905000,0,27,27
+Confluence Early Childhood Development Service District Ballot Issue 7A,opportunistic_benefits,in_progress,1,38933,24959,"""Yes""",1854,0.03000000,0,0,0,0,0,0,0,1.03905000,0,154,154
+Confluence Early Childhood Development Service District Board of Directors - District 1,opportunistic_benefits,ended,1,16400,3857,"""Amy Shipley""",430,0.03000000,0,0,0,0,0,0,0,1.03905000,0,278,278
+Confluence Early Childhood Development Service District Board of Directors - District 2,opportunistic_benefits,ended,1,16400,4929,"""Paul Stanley""",37,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3230,3230
+Confluence Early Childhood Development Service District Board of Directors - District 3,opportunistic_benefits,not_auditable,1,16400,5322,"""Adley Larimer""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Confluence Early Childhood Development Service District Board of Directors - District 4,opportunistic_benefits,in_progress,1,38933,5932,"""Carolynne Kraemer""",805,0.03000000,0,0,0,0,0,0,0,1.03905000,0,353,353
+Confluence Early Childhood Development Service District Board of Directors - District 5,opportunistic_benefits,not_auditable,1,6134,4919,"""Stefan Reveal""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Cortez Cemetery District Ballot Issue 6A,county_wide_contest,risk_limit_achieved,1,8403,4216,"""No/Against""",734,0.03000000,85,0,0,0,0,0,0,1.03905000,0,84,84
+Costilla County Ambulance District Ballot Issue 5A,opportunistic_benefits,ended,1,1168,1168,"""No/Against""",48,0.03000000,0,0,0,0,0,0,0,1.03905000,0,178,178
+Costilla County Ambulance District Ballot Issue 5B,opportunistic_benefits,ended,1,1168,1168,"""No/Against""",120,0.03000000,0,0,0,0,0,0,0,1.03905000,0,71,71
+Costilla County Referred Measure 1A,county_wide_contest,risk_limit_achieved,1,1168,1168,"""No/Against""",709,0.03000000,14,0,0,0,0,0,0,1.03905000,0,13,13
+Council Member - At Large,opportunistic_benefits,ended,3,4561,2608,"""Tim Peters"",""Carmela Vanore"",""Dan Ruscetti""",157,0.03000000,0,0,0,0,0,0,0,1.03905000,0,212,212
+Country Club Drive 6D,opportunistic_benefits,ended,1,131608,1,"""YES/FOR""",1,0.03000000,0,0,0,0,0,0,0,1.03905000,0,959025,959025
+County Commissioner District 1 - Recall Scott Mijares,county_wide_contest,risk_limit_achieved,1,16790,16741,"""Yes/For""",659,0.03000000,187,0,0,0,0,0,0,1.03905000,0,186,186
+Cripple Creek-Victor School District RE-1 Ballot Issue 4A,opportunistic_benefits,ended,1,10151,1765,"""Yes/For""",404,0.03000000,0,0,0,0,0,0,0,1.03905000,0,184,184
+Cripple Creek-Victor School District RE-1 Board of Directors - At-large,opportunistic_benefits,not_auditable,3,10151,1765,"""Kasie Hilfers"",""Donna Brazill"",""Amanda Marie Young""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+CROWLEY COUNTY SCHOOL DISTRICT RE 1-J BALLOT ISSUE 5A :  BONDS,opportunistic_benefits,ended,1,1411,23,"""No/Against""",16,0.03000000,0,0,0,0,0,0,0,1.03905000,0,643,643
+Crowley County School District RE 1-J Board of Directors - 4 Year Term,opportunistic_benefits,not_auditable,4,2447,989,"""James C. Watkins"",""Jordan King"",""Kaci L. Mason"",""Martin M. Martinez Jr""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Crowley - CROWLEY COUNTY SCHOOL DISTRICT RE 1-J BALLOT ISSUE 5A :  BONDS,county_wide_contest,risk_limit_achieved,1,1036,966,"""No/Against""",186,0.03000000,42,0,0,0,0,0,0,1.03905000,0,41,41
+Custer County Ballot Issue 1A,county_wide_contest,risk_limit_achieved,1,2291,2291,"""No/Against""",753,0.03000000,24,0,0,0,0,0,0,1.03905000,0,23,23
+DEER MOUNTAIN FIRE PROTECTION DISTRICT ISSUE 6A: MILL LEVY INCREASE,opportunistic_benefits,ended,1,14829,1285,"""NO/AGAINST""",5,0.03000000,0,0,0,0,0,0,0,1.03905000,0,21612,21612
+Deer Trail Rural Fire Protection District Ballot Issue 7B,opportunistic_benefits,in_progress,1,292285,449,"""No/Against""",90,0.03000000,0,0,0,0,0,0,0,1.03905000,0,23666,23666
+Denver Public Schools Director At-Large,county_wide_contest,risk_limit_achieved,1,385029,192662,"""Amy Klein Molk""",19094,0.03000000,148,0,0,0,0,0,0,1.03905000,0,147,147
+Denver Public Schools Director District 2,opportunistic_benefits,ended,1,385029,29396,"""Xochitl Gaytan""",4881,0.03000000,0,0,0,0,0,0,0,1.03905000,0,575,575
+Denver Public Schools Director District 3,opportunistic_benefits,ended,1,385029,47415,"""Donald ""DJ"" Torres""",3993,0.03000000,0,0,0,0,0,0,0,1.03905000,0,703,703
+Denver Public Schools Director District 4,opportunistic_benefits,ended,1,385029,33110,"""Monica Hunter""",4093,0.03000000,0,0,0,0,0,0,0,1.03905000,0,686,686
+Director for Montrose County Board of Education - District A,opportunistic_benefits,in_progress,1,25816,15974,"""Neisha Balleck""",2061,0.03000000,0,0,0,0,0,0,0,1.03905000,0,92,92
+Director for Montrose County Board of Education - District C,opportunistic_benefits,in_progress,1,25816,15974,"""Scott Scarborough""",1168,0.03000000,0,0,0,0,0,0,0,1.03905000,0,162,162
+Director for Montrose County Board of Education - District E,opportunistic_benefits,in_progress,1,25816,15974,"""Tiffany Vincent""",2803,0.03000000,0,0,0,0,0,0,0,1.03905000,0,68,68
+Director for Montrose County Board of Education - District G,opportunistic_benefits,in_progress,1,25816,15974,"""Shane Daly""",1701,0.03000000,0,0,0,0,0,0,0,1.03905000,0,111,111
+Director for the Delta County Board of Education - District 1,opportunistic_benefits,in_progress,1,34275,11197,"""Sheldon Kier""",908,0.03000000,0,0,0,0,0,0,0,1.03905000,0,276,276
+Director for the Delta County Board of Education - District 5,opportunistic_benefits,in_progress,1,34275,11197,"""Adena Kreutz""",987,0.03000000,0,0,0,0,0,0,0,1.03905000,0,254,254
+Dolores County School District RE-2J Board of Directors - District A,opportunistic_benefits,not_auditable,1,3784,709,"""Jason Gray""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Dolores County School District RE-2J Board of Directors - District B,opportunistic_benefits,in_progress,1,3017,39,"""Donella Fury""",5,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4397,4397
+Dolores County School District RE-2J Board of Directors - District E,opportunistic_benefits,not_auditable,1,3784,709,"""Denny Beanland""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+ Dolores - Dolores County School District RE-2J Board of Directors - District B,county_wide_contest,risk_limit_achieved,1,767,670,"""Donella Fury""",123,0.03000000,47,0,0,0,0,0,0,1.03905000,0,46,46
+"Douglas County School Board Director, District B",opportunistic_benefits,ended,1,11515,1076,"""Matthew Smith""",295,0.03000000,0,0,0,0,0,0,0,1.03905000,0,285,285
+"Douglas County School Board Director, District D",opportunistic_benefits,ended,1,11515,1076,"""Keaton Gambill""",227,0.03000000,0,0,0,0,0,0,0,1.03905000,0,370,370
+"Douglas County School Board Director, District E",opportunistic_benefits,ended,1,11515,1076,"""Deborah Kramer""",256,0.03000000,0,0,0,0,0,0,0,1.03905000,0,328,328
+"Douglas County School Board Director, District G",opportunistic_benefits,ended,1,11515,1076,"""Stephen Vail""",256,0.03000000,0,0,0,0,0,0,0,1.03905000,0,328,328
+"Douglas - Douglas County School Board Director, District B",county_wide_contest,risk_limit_achieved,1,131608,131595,"""Kyrzia Parker""",3754,0.03000000,257,0,0,0,0,0,0,1.03905000,0,256,256
+"Douglas - Douglas County School Board Director, District D",county_wide_contest,risk_limit_achieved,1,131608,131595,"""Tony Ryan""",8258,0.03000000,118,0,0,0,0,0,0,1.03905000,0,117,117
+"Douglas - Douglas County School Board Director, District E",county_wide_contest,risk_limit_achieved,1,131608,131595,"""Clark Callahan""",7196,0.03000000,135,0,0,0,0,0,0,1.03905000,0,134,134
+"Douglas - Douglas County School Board Director, District G",county_wide_contest,risk_limit_achieved,1,131608,131595,"""Kelly Denzler""",8197,0.03000000,118,0,0,0,0,1,0,1.03905000,0,95,95
+Durango Fire Protection District Ballot Issue 7A,opportunistic_benefits,ended,1,22019,8489,"""Yes/For""",241,0.03000000,0,0,0,0,0,0,0,1.03905000,0,666,666
+Durango Hills Road Improvement District No. 1 Ballot Issue 6A,opportunistic_benefits,ended,1,22019,119,"""Yes/For""",83,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1934,1934
+"Durango School District 9-R Board of Director, District A",opportunistic_benefits,ended,1,22019,16650,"""Erika Brown""",7131,0.03000000,0,0,0,0,0,0,0,1.03905000,0,23,23
+"Durango School District 9-R Board of Director, District C",opportunistic_benefits,ended,1,22019,16650,"""Rick Petersen""",6342,0.03000000,0,0,0,0,0,0,0,1.03905000,0,26,26
+"Durango School District 9-R Board of Director, District E",opportunistic_benefits,ended,1,22019,16650,"""Andrea Parmenter""",6258,0.03000000,0,0,0,0,0,0,0,1.03905000,0,26,26
+Eagle County Ballot Issue 1A,opportunistic_benefits,ended,1,16399,8372,"""Yes/For""",82,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1458,1458
+Eagle River Water And Sanitation District Ballot Issue 6A,opportunistic_benefits,ended,1,16399,7823,"""Yes/For""",3053,0.03000000,0,0,0,0,0,0,0,1.03905000,0,40,40
+East Grand School District No. 2 Director - District 1,opportunistic_benefits,not_auditable,1,6627,4848,"""Thomas Schnellinger""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+East Grand School District No. 2 Director - District 2,opportunistic_benefits,not_auditable,1,6627,4848,"""Christopher Raines""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+East Grand School District No. 2 Director - District 3,county_wide_contest,risk_limit_achieved,1,6627,4848,"""Karissa Gagnon""",874,0.03000000,57,0,0,0,0,0,0,1.03905000,0,56,56
+East Grand School District No. 2 Director - District 6,opportunistic_benefits,not_auditable,1,6627,4848,"""David Hickam""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+East Otero School District R-1 School Board Member At Large,opportunistic_benefits,ended,3,5173,2112,"""Rodney Bickel"",""Gregory Kolomitz"",""Cameron J. Salzbrenner""",7,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5386,5386
+Elbert County Ballot Question 1A,opportunistic_benefits,ended,1,11515,11515,"""YES/FOR""",5261,0.03000000,0,0,0,0,0,0,0,1.03905000,0,16,16
+Elbert County Ballot Question 1B,opportunistic_benefits,ended,1,11515,11515,"""YES/FOR""",5455,0.03000000,0,0,0,0,0,0,0,1.03905000,0,16,16
+Elizabeth School Board Education Director - 4 Year Term,county_wide_contest,risk_limit_achieved,3,11515,7338,"""Nicole Hunt"",""Mary Powell"",""David Fletcher""",1712,0.03000000,51,0,0,0,0,0,0,1.03905000,0,50,50
+Ellicott School District 22 Board of Directors - 4 Year Term,opportunistic_benefits,ended,3,189228,1279,"""Clinton Schubert"",""Amy Bautista"",""Michael Ferguson""",30,0.03000000,0,0,0,0,0,0,0,1.03905000,0,45964,45964
+El Paso County Colorado School District 49 Director District 1 - 4 Year Term,opportunistic_benefits,ended,1,189228,5523,"""Holly Withers""",17,0.03000000,0,0,0,0,0,0,0,1.03905000,0,81112,81112
+El Paso County Colorado School District 49 Director District 4 - 4 Year Term,opportunistic_benefits,ended,1,189228,4712,"""Lori Thompson""",60,0.03000000,0,0,0,0,0,0,0,1.03905000,0,22982,22982
+El Paso County Commissioner - District 5 - REP,opportunistic_benefits,ended,1,189228,18590,"""Lauren Nelson""",5753,0.03000000,0,0,0,0,0,0,0,1.03905000,0,240,240
+Englewood School District School Board Director,opportunistic_benefits,ended,3,174299,8348,"""Janee McConnell"",""Erica Elvove"",""Anna Whistler""",880,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1444,1444
+Evans Fire Protection District Ballot Issue 6A,opportunistic_benefits,ended,1,80475,3533,"""Yes/For""",667,0.03000000,0,0,0,0,0,0,0,1.03905000,0,880,880
+Florissant Fire Protection District Ballot Issue 6A,opportunistic_benefits,ended,1,10151,1789,"""No/Against""",232,0.03000000,0,0,0,0,0,0,0,1.03905000,0,319,319
+Frenchman RE-3 School District Board of Directors,opportunistic_benefits,ended,4,6091,383,"""Susanne Workman"",""Dave Etl"",""Kamie Lambrecht"",""Jeffery Harms""",9,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4932,4932
+Garfield School RE-2 Dist A,opportunistic_benefits,ended,1,16400,6052,"""Megan Heil""",243,0.03000000,0,0,0,0,0,0,0,1.03905000,0,492,492
+Garfield School RE-2 District E,opportunistic_benefits,not_auditable,1,16400,6052,"""Steven Beaulieu""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Gilpin County RE-1 School District Director At Large (2 years),opportunistic_benefits,ended,1,2532,1381,"""Jill Peterson""",219,0.03000000,0,0,0,0,0,0,0,1.03905000,0,85,85
+Gilpin County RE-1 School District Director At Large (4 years),opportunistic_benefits,ended,2,2532,1381,"""Victoria Edwards"",""Kirsten Goodlett""",150,0.03000000,0,0,0,0,0,0,0,1.03905000,0,124,124
+Glade Park Fire Protection District 2 year term,opportunistic_benefits,not_auditable,2,52437,650,"""Jeremy Edward Carns"",""Andy Jack Hanks""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Glade Park Fire Protection District 4 year term,opportunistic_benefits,not_auditable,3,52437,650,"""David F. Brach"",""Charles R. Novinski"",""Lance Kramer""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Granada School District RE-1 Director - District A - Four Year Term,opportunistic_benefits,not_auditable,1,2665,191,"""Elizabeth Hainer""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Granada School District RE-1 Director - District C - Four Year Term,opportunistic_benefits,ended,1,2665,191,"""Andria W. Riddle""",50,0.03000000,0,0,0,0,0,0,0,1.03905000,0,389,389
+Granada School District RE-1 Director - District D - Two Year Term,opportunistic_benefits,not_auditable,1,2665,191,"""Janet Alvarado Cano""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Grand Lake Fire Protection District Ballot Issue 6A,opportunistic_benefits,ended,1,6627,1623,"""Yes/For""",152,0.03000000,0,0,0,0,0,0,0,1.03905000,0,318,318
+Grand River Hospital District 7B,county_wide_contest,risk_limit_achieved,1,16400,5740,"""Yes""",631,0.03000000,191,0,0,0,0,0,0,1.03905000,0,190,190
+Gunnison County Fire Protection District Ballot Issue 7A,opportunistic_benefits,in_progress,1,8116,2390,"""No/Against""",341,0.03000000,0,0,0,0,0,0,0,1.03905000,0,174,174
+Hanover Fire Protection District Ballot Issue 7A,opportunistic_benefits,in_progress,1,232811,440,"""No/Against""",39,0.03000000,0,0,0,0,0,0,0,1.03905000,0,43500,43500
+Hanover Fire Protection District Ballot Issue 7B,opportunistic_benefits,in_progress,1,232811,440,"""Yes/For""",101,0.03000000,0,0,0,0,0,0,0,1.03905000,0,16797,16797
+Haxtun School District RE-2J Board of Directors,opportunistic_benefits,not_auditable,2,10977,539,"""Christi Anne Gibson"",""Amy Kilgour""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Haxtun School District RE-2J Referred Ballot Issue 5A,opportunistic_benefits,in_progress,1,10977,539,"""Yes/For""",176,0.03000000,0,0,0,0,0,0,0,1.03905000,0,455,455
+Hayden School District RE1 Director - At Large,opportunistic_benefits,ended,2,10308,856,"""Ericka Lucas"",""Tharles Da Silva""",121,0.03000000,0,0,0,0,0,0,0,1.03905000,0,621,621
+Hinsdale County Advisory Ballot Question 1B,opportunistic_benefits,ended,1,511,504,"""Yes/For""",22,0.03000000,0,0,0,0,0,0,0,1.03905000,0,170,170
+HINSDALE COUNTY BALLOT ISSUE 1A,county_wide_contest,risk_limit_achieved,1,511,504,"""Yes/For""",250,0.03000000,16,0,0,0,0,0,0,1.03905000,0,15,15
+Hudson Fire Protection District Ballot Issue 6B,opportunistic_benefits,ended,1,80475,1896,"""Yes/For""",273,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2149,2149
+Huerfano RE-1 School District School Board Director (4 year term),opportunistic_benefits,ended,3,2687,1916,"""Marcy R. Freeburg"",""Alyssa Sandoval"",""Debra Sporleder""",36,0.03000000,0,0,0,0,0,0,0,1.03905000,0,544,544
+Hygiene Fire Protection District Ballot Issue 6A,opportunistic_benefits,ended,1,121584,1264,"""Yes/For""",366,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2421,2421
+Ignacio School District 11JT Board of Directors,opportunistic_benefits,in_progress,2,26718,1605,"""Leila C. Baker"",""James P. Bulwan""",214,0.03000000,0,0,0,0,0,0,0,1.03905000,0,910,910
+Jefferson-Como Fire Protection District Ballot Issue 6B - Property Tax Limit Waiver,opportunistic_benefits,ended,1,7394,1545,"""No/Against""",422,0.03000000,0,0,0,0,0,0,0,1.03905000,0,128,128
+Jefferson County R-1 School District Director District 1,opportunistic_benefits,ended,1,199921,199828,"""Denine Echevarria""",47290,0.03000000,0,0,0,0,0,0,0,1.03905000,0,31,31
+Jefferson County R-1 School District Director District 2,opportunistic_benefits,ended,1,199921,199828,"""Peter Gibbins""",59641,0.03000000,0,0,0,0,0,0,0,1.03905000,0,25,25
+Jefferson County R-1 School District Director District 5,opportunistic_benefits,ended,1,199921,199828,"""Tina Moeinian""",16156,0.03000000,0,0,0,0,0,0,0,1.03905000,0,91,91
+Jefferson County School District R-1 Director District 1,opportunistic_benefits,ended,1,29678,2088,"""Denine Echevarria""",613,0.03000000,0,0,0,0,0,0,0,1.03905000,0,353,353
+Jefferson County School District R-1 Director District 2,opportunistic_benefits,ended,1,29678,2088,"""Peter Gibbins""",576,0.03000000,0,0,0,0,0,0,0,1.03905000,0,376,376
+Jefferson County School District R-1 Director District 5,opportunistic_benefits,ended,1,29678,2088,"""Tina Moeinian""",168,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1288,1288
+Julesburg RE-1 School District Director - 2 Year Term,opportunistic_benefits,ended,2,796,546,"""Kaleb Ray Lanckriet"",""Annie Josephine Lovenburg""",29,0.03000000,0,0,0,0,0,0,0,1.03905000,0,201,201
+Julesburg RE-1 School District Director - 4 Year Term,opportunistic_benefits,ended,3,796,546,"""Dawn Westerbuhr"",""Natalie Miller"",""Elyshia Renee Harris""",1,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5801,5801
+Kiowa County Ballot Issue 1A,opportunistic_benefits,ended,1,505,505,"""No/Against""",1,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3680,3680
+Kiowa - Proposition LL (Statutory),county_wide_contest,risk_limit_achieved,1,505,505,"""No/Against""",165,0.03000000,24,0,0,0,0,0,0,1.03905000,0,23,23
+Kiowa School C-2 Board Education Director - 4 Year Term,opportunistic_benefits,ended,2,11515,1515,"""Donald Gabehart"",""Tanner Carpenter""",99,0.03000000,0,0,0,0,0,0,0,1.03905000,0,848,848
+Kiowa School District C-2 Ballot Issue 4A,opportunistic_benefits,ended,1,11515,1515,"""NO/AGAINST""",55,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1526,1526
+La Junta Council Member at Large (Mayor),opportunistic_benefits,not_auditable,1,5173,1677,"""Joseph Ayala""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+La Junta Council Member Ward 1,opportunistic_benefits,not_auditable,1,5173,366,"""Damon R. Ramirez""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+La Junta Council Member Ward 2,opportunistic_benefits,not_auditable,1,5173,610,"""Carly Johnson""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+La Junta Council Member Ward 3,opportunistic_benefits,ended,1,5173,701,"""Lisa A. Pantoya""",96,0.03000000,0,0,0,0,0,0,0,1.03905000,0,393,393
+Lake City Area Fire Protection District Ballot Issue 6A,opportunistic_benefits,ended,1,511,448,"""Yes/For""",190,0.03000000,0,0,0,0,0,0,0,1.03905000,0,20,20
+Lake George Fire Protection District Ballot Issue 6A,opportunistic_benefits,ended,1,7394,511,"""Yes/For""",44,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1225,1225
+La Plata County Ballot Issue 1A,county_wide_contest,risk_limit_achieved,1,22019,21654,"""Yes/For""",2639,0.03000000,62,0,0,0,0,0,0,1.03905000,0,61,61
+Larimer County Ballot Issue 1A,county_wide_contest,risk_limit_achieved,1,191186,134140,"""No/Against""",6859,0.03000000,205,0,0,0,0,0,0,1.03905000,0,204,204
+Larimer County Ballot Issue 1B,opportunistic_benefits,ended,1,191186,134140,"""Yes/For""",3718,0.03000000,0,0,0,0,0,0,0,1.03905000,0,375,375
+Larimer County Nedrah Acres Public Improvement District No. 77 Ballot Issue 6B,opportunistic_benefits,ended,1,191186,107,"""Yes/For""",50,0.03000000,0,0,0,0,0,0,0,1.03905000,0,27864,27864
+Larimer County Rolling Hills Public Improvement District No. 78 Ballot Issue 6C,opportunistic_benefits,ended,1,191186,97,"""No/Against""",31,0.03000000,0,0,0,0,0,0,0,1.03905000,0,44941,44941
+Larimer County Thunder Mountain Public Improvement District No. 76 Ballot Issue 6A,opportunistic_benefits,ended,1,191186,45,"""Yes/For""",15,0.03000000,0,0,0,0,0,0,0,1.03905000,0,92878,92878
+La Veta Fire Protection Issue 600,opportunistic_benefits,ended,1,2687,771,"""Yes/For""",299,0.03000000,0,0,0,0,0,0,0,1.03905000,0,66,66
+La Veta RE-2 School District School Board Director (2 year term),opportunistic_benefits,ended,2,2687,647,"""Gerald Eugene Arnold"",""Kathy Jean Brown""",125,0.03000000,0,0,0,0,0,0,0,1.03905000,0,157,157
+La Veta RE-2 School District School Board Director (4 year term),opportunistic_benefits,not_auditable,2,2687,647,"""Carolyn Rominger"",""Charles Morris""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Lewis-Palmer School District 38 Board of Directors -  District 1 - 4 Year Term,opportunistic_benefits,not_auditable,1,189228,16610,"""Tim Bennett""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Lewis-Palmer School District 38 Board of Directors - District 3 - 4 Year Term,county_wide_contest,risk_limit_achieved,1,189228,16610,"""Ginger Schaaf""",3257,0.03000000,425,0,0,0,0,0,0,1.03905000,0,424,424
+LINCOLN COUNTY BALLOT ISSUE 1A: LODGING TAX,county_wide_contest,risk_limit_achieved,1,1411,1411,"""No/Against""",287,0.03000000,37,0,0,0,0,0,0,1.03905000,0,36,36
+Logan County Referred Ballot Issue 1F,county_wide_contest,risk_limit_achieved,1,6091,6091,"""Yes/For""",2009,0.03000000,24,0,0,0,0,0,0,1.03905000,0,23,23
+Lookout Mountain Water District Ballot Issue 6A,opportunistic_benefits,ended,1,199921,633,"""Yes/For""",399,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3652,3652
+Mancos School District RE-6 Ballot Issue 4A,opportunistic_benefits,ended,1,8403,1538,"""Yes/For""",332,0.03000000,0,0,0,0,0,0,0,1.03905000,0,185,185
+Mancos School District RE-6 Board of Directors  ,opportunistic_benefits,ended,2,8403,1538,"""Craig McClure"",""Kira Taylor""",114,0.03000000,0,0,0,0,0,0,0,1.03905000,0,538,538
+Manitou Springs School District 14 Board of Directors - 4 Year Term,opportunistic_benefits,not_auditable,2,189228,3634,"""Kimberly de La Harpe"",""Kelley Parker""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Manitou Springs School District No. 14 Ballot Issue 4C,opportunistic_benefits,ended,1,189228,3634,"""Yes/For""",258,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5345,5345
+Manzanola School District 3J Board of Directors,opportunistic_benefits,in_progress,2,6209,266,"""Harold Krieger"",""Linda Elaina Fief""",73,0.03000000,0,0,0,0,0,0,0,1.03905000,0,620,620
+Member Pueblo Board of Water Works,opportunistic_benefits,ended,2,43583,26612,"""Michael A. Cafasso"",""Chris Woodka""",3703,0.03000000,0,0,0,0,0,0,0,1.03905000,0,86,86
+Mesa County Valley School District 51 Director District C,county_wide_contest,risk_limit_achieved,1,52437,50551,"""Andrea Haitz""",1998,0.03000000,193,0,0,0,0,0,0,1.03905000,0,192,192
+Mesa County Valley School District 51 Director District D,opportunistic_benefits,ended,1,52437,50551,"""Kaci Cole""",3855,0.03000000,0,0,0,0,0,0,0,1.03905000,0,100,100
+Mesa County Valley School District 51 Director District E,opportunistic_benefits,ended,1,52437,50551,"""Vicki Woods""",6519,0.03000000,0,0,0,0,0,0,0,1.03905000,0,59,59
+Miami-Yoder Joint School District No. 60 Ballot Issue 5B,opportunistic_benefits,in_progress,1,202154,678,"""Yes/For""",56,0.03000000,0,0,0,0,0,0,0,1.03905000,0,26306,26306
+Miami Yoder School District JT60 Board of Directors - 4 Year Term,opportunistic_benefits,ended,3,1411,45,"""Daniel Carneal"",""Ronny Burr"",""Jon Hogeboom""",10,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1029,1029
+Miami-Yoder School District JT60 Board of Directors - 4 Year Term,opportunistic_benefits,in_progress,3,200743,633,"""Daniel Carneal"",""Ronny Burr"",""Jon Hogeboom""",11,0.03000000,0,0,0,0,0,0,0,1.03905000,0,132983,132983
+Mineral - Proposition LL (Statutory),county_wide_contest,risk_limit_achieved,1,469,469,"""Yes/For""",100,0.03000000,36,0,0,0,0,0,0,1.03905000,0,35,35
+Moffat County Affiliated Junior College Board of Control Member - Four Year Term,opportunistic_benefits,not_auditable,2,3359,3359,"""Kristin Skowronski"",""Christina Oxley""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Moffat County Affiliated Junior College Board of Control Member - Two Year Term,opportunistic_benefits,not_auditable,1,3359,3359,"""Nicole Zulian""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Moffat County Local Marketing District Ballot Issue 6A,county_wide_contest,risk_limit_achieved,1,3359,3359,"""No/Against""",408,0.03000000,61,0,0,0,0,0,0,1.03905000,0,60,60
+Montezuma-Cortez School District RE-1 Director - District A,opportunistic_benefits,ended,1,8403,4876,"""Lara Maria Blair""",403,0.03000000,0,0,0,0,0,0,0,1.03905000,0,152,152
+Montezuma-Cortez School District RE-1 Director - District B,opportunistic_benefits,not_auditable,1,8403,4876,"""Barbara Mate""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Montezuma-Cortez School District RE-1 Director - District D,opportunistic_benefits,ended,1,8403,394,"""Joshua Shumway""",41,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1494,1494
+Montezuma-Cortez School District RE-1 Director - District E,opportunistic_benefits,ended,1,8403,4876,"""Justine Bayles""",201,0.03000000,0,0,0,0,0,0,0,1.03905000,0,305,305
+Montezuma-Cortez School District RE-1 Director - District F,opportunistic_benefits,ended,1,8403,4876,"""Laura DeWitt""",291,0.03000000,0,0,0,0,0,0,0,1.03905000,0,211,211
+Montezuma County Water District No.1 Ballot Issue 6B,opportunistic_benefits,ended,1,8403,152,"""No/Against""",62,0.03000000,0,0,0,0,0,0,0,1.03905000,0,988,988
+Montrose County Commissioner - District 1,opportunistic_benefits,not_auditable,1,16790,16741,"""Kirstin Copeland""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Montrose Regional Library District Ballot Issue 6A,opportunistic_benefits,ended,1,16790,16493,"""No/Against""",4368,0.03000000,0,0,0,0,0,0,0,1.03905000,0,29,29
+Montrose Regional Library District Ballot Issue 6B,opportunistic_benefits,ended,1,16790,16493,"""No/Against""",4378,0.03000000,0,0,0,0,0,0,0,1.03905000,0,28,28
+Mountain Shadows Metropolitan District Ballot Issue 6B,opportunistic_benefits,ended,1,199921,803,"""Yes/For""",281,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5185,5185
+Mountain Shadows Metropolitan District Ballot Issue 6C,opportunistic_benefits,ended,1,199921,803,"""Yes/For""",99,0.03000000,0,0,0,0,0,0,0,1.03905000,0,14716,14716
+Northern Chaffee County Library District 6A,opportunistic_benefits,ended,1,10433,4556,"""Yes/For""",662,0.03000000,0,0,0,0,0,0,0,1.03905000,0,115,115
+North Park School District R-1 Director District 2,opportunistic_benefits,ended,1,578,578,"""Deborah Russell""",262,0.03000000,0,0,0,0,0,0,0,1.03905000,0,17,17
+North Park School District R-1 Issue 4A,county_wide_contest,risk_limit_achieved,1,578,578,"""No/Against""",158,0.03000000,28,0,0,0,0,0,0,1.03905000,0,27,27
+Norwood School District R-2J Ballot Issue 5A,opportunistic_benefits,in_progress,1,19807,852,"""Yes/For""",234,0.03000000,0,0,0,0,0,0,0,1.03905000,0,617,617
+Norwood School District R-2J Board of Directors,opportunistic_benefits,in_progress,2,19807,852,"""Randy L. Harris"",""Brandi Griffith""",176,0.03000000,0,0,0,0,0,0,0,1.03905000,0,821,821
+Ouray County Ballot Issue 1A,county_wide_contest,risk_limit_achieved,1,2633,1551,"""Yes/For""",227,0.03000000,86,0,0,0,0,0,0,1.03905000,0,85,85
+Ouray Fire Protection Distict Ballot Issue 6B,opportunistic_benefits,ended,1,2633,83,"""Yes/For""",16,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1200,1200
+Ouray School Board Director - At Large,opportunistic_benefits,ended,2,2633,894,"""Phylis Fagrelius"",""Andrea Calhoon Meruelo""",189,0.03000000,0,0,0,0,0,0,0,1.03905000,0,102,102
+Park County Ballot Issue 1A,county_wide_contest,risk_limit_achieved,1,7394,5903,"""Yes/For""",1592,0.03000000,35,0,0,0,0,0,0,1.03905000,0,34,34
+Peyton 23JT School District Ballot Issue 5C,opportunistic_benefits,in_progress,1,200743,1652,"""No/Against""",613,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2387,2387
+Peyton School District No. 23JT Board of Directors - 4 Year Term,opportunistic_benefits,in_progress,3,200743,1652,"""Buffi Cavanagh"",""Kelli Markus"",""Robert Christian""",117,0.03000000,0,0,0,0,0,0,0,1.03905000,0,12503,12503
+Phillips - Proposition LL (Statutory),county_wide_contest,risk_limit_achieved,1,1340,1340,"""No/Against""",249,0.03000000,41,0,0,0,0,0,0,1.03905000,0,40,40
+Pitkin County Ballot Issue 1A,county_wide_contest,risk_limit_achieved,1,6134,6093,"""Yes/For""",1519,0.03000000,31,0,0,0,0,0,0,1.03905000,0,30,30
+Plateau RE-5 School District Board of Directors,opportunistic_benefits,ended,2,6091,239,"""Jeff A. Long"",""Shauna M. Reker""",12,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3699,3699
+Plateau Valley Fire Protection District Ballot Issue 6C,opportunistic_benefits,ended,1,52437,1199,"""Yes/For""",160,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2389,2389
+Plateau Valley Fire Protection District Ballot Issue 6D,opportunistic_benefits,ended,1,52437,1199,"""Yes/For""",98,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3900,3900
+Plateau Valley School District 50 Director District B,opportunistic_benefits,ended,1,52437,978,"""Mark Lennon""",84,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4549,4549
+Plateau Valley School District 50 Director District D,opportunistic_benefits,ended,1,52437,978,"""Tilda Evans""",36,0.03000000,0,0,0,0,0,0,0,1.03905000,0,10615,10615
+Plateau Valley School District 50 Director District E,opportunistic_benefits,not_auditable,1,52437,978,"""Catherine ""Katy"" Sheffield""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Platte Canyon School District RE-1 Board of Directors - At Large,opportunistic_benefits,ended,3,7394,3417,"""Kathryn Puseman"",""Jillian Heisler"",""Heather Linne-Speidel""",291,0.03000000,0,0,0,0,0,0,0,1.03905000,0,186,186
+Polo Reserve Metropolitan District Ballot Issue 6A,opportunistic_benefits,ended,1,174299,66,"""Yes/For""",22,0.03000000,0,0,0,0,0,0,0,1.03905000,0,57733,57733
+Poudre School District R-1 Director District C,opportunistic_benefits,ended,1,191186,77309,"""Karla Baise""",21338,0.03000000,0,0,0,0,0,0,0,1.03905000,0,66,66
+Poudre School District R-1 Director District D,opportunistic_benefits,ended,1,191186,77309,"""Coronda Ziegler""",13558,0.03000000,0,0,0,0,0,0,0,1.03905000,0,103,103
+Poudre School District R-1 Director District E,opportunistic_benefits,not_auditable,1,191186,77309,"""Andrew E Spain""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Promenade at Castle Rock MetropolitanNo. 1 Ballot Issue #6B,opportunistic_benefits,ended,1,131608,50,"""NO/AGAINST""",19,0.03000000,0,0,0,0,0,0,0,1.03905000,0,50475,50475
+Promenade at Castle Rock MetropolitanNo. 3 Ballot Issue #6C,opportunistic_benefits,ended,1,131608,40,"""NO/AGAINST""",21,0.03000000,0,0,0,0,0,0,0,1.03905000,0,45668,45668
+Proposed Charter Amendment No.1A,opportunistic_benefits,ended,1,29678,29678,"""Yes/For""",22947,0.03000000,0,0,0,0,0,0,0,1.03905000,0,10,10
+Proposed Charter Amendment No. 1B,opportunistic_benefits,ended,1,29678,29678,"""Yes/For""",24932,0.03000000,0,0,0,0,0,0,0,1.03905000,0,9,9
+Proposed Charter Amendment No. 1C,opportunistic_benefits,ended,1,29678,29678,"""Yes/For""",17401,0.03000000,0,0,0,0,0,0,0,1.03905000,0,13,13
+Proposed Charter Amendment No. 1D,opportunistic_benefits,ended,1,29678,29678,"""Yes/For""",22985,0.03000000,0,0,0,0,0,0,0,1.03905000,0,10,10
+Proposed Charter Amendment No. 1E,opportunistic_benefits,ended,1,29678,29678,"""Yes/For""",8568,0.03000000,0,0,0,0,0,0,0,1.03905000,0,26,26
+Proposed Charter Amendment No. 1F,opportunistic_benefits,ended,1,29678,29678,"""Yes/For""",5720,0.03000000,0,0,0,0,0,0,0,1.03905000,0,38,38
+Proposed Glade Park Fire Protection District Ballot Issue 6A,opportunistic_benefits,ended,1,52437,650,"""Yes/For""",389,0.03000000,0,0,0,0,0,0,0,1.03905000,0,983,983
+Proposition LL (Statutory),opportunistic_benefits,in_progress,1,1963088,1706700,"""Yes/For""",410227,0.03000000,0,0,0,0,0,0,0,1.03905000,0,35,35
+Proposition MM (Statutory),state_wide_contest,risk_limit_achieved,1,1972682,1716294,"""Yes/For""",239387,0.03000000,62,0,0,0,0,0,0,1.03905000,0,61,61
+Prowers - Proposition LL (Statutory),county_wide_contest,risk_limit_achieved,1,2665,2665,"""No/Against""",210,0.03000000,94,0,0,0,0,0,0,1.03905000,0,93,93
+Pueblo City Council Member-District 1,opportunistic_benefits,ended,1,43583,6831,"""Dianne Danti""",71,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4474,4474
+Pueblo City Council Member-District 3,opportunistic_benefits,ended,1,43583,9459,"""Ted Hernandez""",768,0.03000000,0,0,0,0,0,0,0,1.03905000,0,414,414
+Pueblo Civil Service Commissioner,opportunistic_benefits,ended,1,43583,26612,"""Steven Rodriguez""",2437,0.03000000,0,0,0,0,0,0,0,1.03905000,0,131,131
+Pueblo Rural Fire Protection Ballot Issue 6A,opportunistic_benefits,ended,1,43583,4119,"""Yes/For""",470,0.03000000,0,0,0,0,0,0,0,1.03905000,0,676,676
+Pueblo School District No. 60 School Director At-Large Four Year Term,opportunistic_benefits,ended,2,43583,27018,"""Derion Michael Ibarra"",""Tommy Farrell""",125,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2541,2541
+QUESTION NO. 2A,opportunistic_benefits,ended,1,43583,26612,"""No/Against""",16132,0.03000000,0,0,0,0,0,0,0,1.03905000,0,20,20
+QUESTION NO. 2B,opportunistic_benefits,ended,1,43583,26612,"""Yes/For""",3591,0.03000000,0,0,0,0,0,0,0,1.03905000,0,89,89
+Rangely School District RE-4 - Director District At Large (2 Year Term),county_wide_contest,risk_limit_achieved,1,1982,793,"""Jerry LeBleu""",214,0.03000000,69,0,0,0,0,0,0,1.03905000,0,68,68
+Rangely School District RE-4 - Director District At Large (4 Year Term),opportunistic_benefits,ended,3,1982,793,"""Brad Casto"",""Lonnie Tolley"",""Kirstie Kilduff""",26,0.03000000,0,0,0,0,0,0,0,1.03905000,0,556,556
+RE-1 Valley School District Board of Directors District 1,opportunistic_benefits,ended,1,6091,5108,"""Cassandra Meisner""",2148,0.03000000,0,0,0,0,0,0,0,1.03905000,0,21,21
+RE-1 Valley School District Board of Directors District 2,opportunistic_benefits,not_auditable,1,6091,5108,"""Ronda Monheiser""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+RE-1 Valley School District Board of Directors District 5,opportunistic_benefits,not_auditable,1,6091,5108,"""Heather Harris""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+RE-1 Valley School District Board of Directors District 6,opportunistic_benefits,not_auditable,1,6091,5108,"""Rita Sonnenberg""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+RE-1 Valley School District Board of Directors District 7,opportunistic_benefits,ended,1,6091,5108,"""Lyndsay Weingardt""",325,0.03000000,0,0,0,0,0,0,0,1.03905000,0,137,137
+RE-1 Valley School District Referred Ballot Issue 4E,county_wide_contest,risk_limit_achieved,1,6091,5108,"""Yes/For""",669,0.03000000,68,0,0,0,0,0,0,1.03905000,0,67,67
+Referendum 310,county_wide_contest,risk_limit_achieved,1,385029,192367,"""YES/RETAIN""",75200,0.03000000,39,0,0,0,0,0,0,1.03905000,0,38,38
+Referred Question 2F,opportunistic_benefits,ended,1,385029,192367,"""YES/FOR""",91395,0.03000000,0,0,0,0,0,0,0,1.03905000,0,31,31
+Referred Question 2G,county_wide_contest,risk_limit_achieved,1,385029,192367,"""YES/FOR""",14114,0.03000000,200,0,0,0,0,0,0,1.03905000,0,199,199
+Rifle City Council,opportunistic_benefits,ended,5,16400,1732,"""Alicia Gresley"",""Jonathan Rice"",""Michael Clancy"",""Scott Marsh"",""Clint Hostettler""",75,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1594,1594
+Rio Grande County Expansion of Use of County Lodging Tax Ballot Issue 1A,county_wide_contest,risk_limit_achieved,1,3302,3302,"""Yes/For""",427,0.03000000,58,0,0,0,0,0,0,1.03905000,0,57,57
+River Park Metro District 6A,opportunistic_benefits,ended,1,16400,73,"""Yes""",24,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4980,4980
+Roaring Fork School District RE-1 Board of Directors - District A,opportunistic_benefits,in_progress,1,38933,12986,"""Tamara ""Tammy"" Nimmo""",4361,0.03000000,0,0,0,0,0,0,0,1.03905000,0,66,66
+Roaring Fork School District RE-1 Board of Directors - District E,opportunistic_benefits,in_progress,1,38933,12986,"""Kathryn Kuhlenberg""",4652,0.03000000,0,0,0,0,0,0,0,1.03905000,0,61,61
+Rocky Ford Council Member Ward 1,opportunistic_benefits,not_auditable,1,5173,371,"""Nanette Mosby""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Rocky Ford Mayor,county_wide_contest,risk_limit_achieved,1,5173,1110,"""Duane Gurule""",248,0.03000000,153,0,0,0,0,0,0,1.03905000,0,152,152
+Routt County Ballot Issue 1B,opportunistic_benefits,ended,1,10308,4003,"""Yes/For""",450,0.03000000,0,0,0,0,0,0,0,1.03905000,0,167,167
+Routt County Ballot Question 1A,opportunistic_benefits,ended,1,10308,3573,"""Yes/For""",1959,0.03000000,0,0,0,0,0,0,0,1.03905000,0,39,39
+Saguache - Center Consolidated School District 26 JT Ballot Question 5B,county_wide_contest,risk_limit_achieved,1,1723,407,"""No/Against""",198,0.03000000,65,0,0,0,0,0,0,1.03905000,0,64,64
+Salida City Council Ward 1 - Four Year Term,opportunistic_benefits,ended,1,10433,1128,"""Joseph Rovinsky""",291,0.03000000,0,0,0,0,0,0,0,1.03905000,0,262,262
+Salida City Council Ward 2 - Four Year Term,opportunistic_benefits,ended,1,10433,1072,"""Shelley Schreiner""",278,0.03000000,0,0,0,0,0,0,0,1.03905000,0,274,274
+Salida City Council Ward 3 - Four Year Term,opportunistic_benefits,ended,1,10433,967,"""Wayles Martin""",128,0.03000000,0,0,0,0,0,0,0,1.03905000,0,594,594
+Salida School District R-32-J Board of Directors - At Large 4 Year Term,opportunistic_benefits,in_progress,1,25262,5927,"""Tiffany L. Rhodes""",55,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3347,3347
+Salida School District R-32-J Board of Directors - District 3,opportunistic_benefits,not_auditable,1,25262,5927,"""Mandy Paschall""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Salida School District R-32-J Board of Directors - District 4,opportunistic_benefits,not_auditable,1,25262,5927,"""Ben Hill""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Salida School District R-32-J Board of Directors - District 5,opportunistic_benefits,not_auditable,1,25262,5927,"""Jenn Schuchman""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Sanford School District 6J - At Large Director,opportunistic_benefits,in_progress,2,6137,458,"""Tyler G. Woods"",""Jeff Peterson""",28,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1598,1598
+Sangre de Cristo School District RE-22J Director - At-Large,opportunistic_benefits,in_progress,2,5805,387,"""Lance Curtis"",""Michael Jones""",52,0.03000000,0,0,0,0,0,0,0,1.03905000,0,814,814
+Sangre de Cristo School District RE-22J Director - District South,opportunistic_benefits,in_progress,1,5805,387,"""Jess Freel""",36,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1176,1176
+San Miguel County Ballot Question 1A: Early Childhood Education Fund and Mental Health Services Fund,opportunistic_benefits,in_progress,1,3017,3016,"""Yes/For""",1329,0.03000000,0,0,0,0,0,0,0,1.03905000,0,17,17
+San Miguel County Ballot Question 1B: Road and Bridge Fund,opportunistic_benefits,in_progress,1,3017,3016,"""Yes/For""",1048,0.03000000,0,0,0,0,0,0,0,1.03905000,0,21,21
+School District 27J Board of Education Director District No. 2,opportunistic_benefits,not_auditable,1,216624,28059,"""Starr Trujillo""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+School District 27J Board of Education Director District No. 4,opportunistic_benefits,not_auditable,1,216624,28059,"""Ashley Conn""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+School District 27J Board of Education Director District No. 5,opportunistic_benefits,not_auditable,1,216624,28059,"""Ramon Alvarado""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+School District 27J Board of Education Director District No. 6,opportunistic_benefits,in_progress,1,216624,28059,"""Tracie Alvarado""",782,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2019,2019
+ Sedgwick - Proposition LL (Statutory),county_wide_contest,risk_limit_achieved,1,796,796,"""Yes/For""",76,0.03000000,78,0,0,0,0,0,0,1.03905000,0,77,77
+SOUTH ADAMS COUNTY FIRE PROTECTION DISTRICT 6A,opportunistic_benefits,ended,1,106471,11760,"""Yes/For""",1818,0.03000000,0,0,0,0,0,0,0,1.03905000,0,427,427
+South Metro Fire Rescue Fire Protection District Ballot Issue 7A,opportunistic_benefits,in_progress,1,505828,188252,"""Yes/For""",9634,0.03000000,0,0,0,0,0,0,0,1.03905000,0,383,383
+South Routt Medical Center Health Service District Ballot Issue 6A,opportunistic_benefits,ended,1,10308,1557,"""Yes/For""",361,0.03000000,0,0,0,0,0,0,0,1.03905000,0,209,209
+South Routt School District No. RE-3 Ballot Issue 5A,opportunistic_benefits,in_progress,1,12290,1258,"""Yes/For""",761,0.03000000,0,0,0,0,0,0,0,1.03905000,0,118,118
+South Routt School District RE3 Director - District 1,opportunistic_benefits,not_auditable,1,12290,1258,"""Nikki Knoebel""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+South Routt School District RE3 Director - District 3,opportunistic_benefits,not_auditable,1,12290,1258,"""James E Hoff""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+South Routt School District RE3 Director - District 4,opportunistic_benefits,not_auditable,1,12290,1258,"""Sunshine Harmon""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+South Routt School District RE3 Director - District 6,opportunistic_benefits,not_auditable,1,12290,1258,"""Jeffery T. Clyncke""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+South Routt School District RE3 Director - District 7,opportunistic_benefits,not_auditable,1,12290,1258,"""Jason Strahl""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Springfield School District RE-4 Board of Directors - Four Year Term,opportunistic_benefits,ended,2,1387,809,"""Larkin Smith"",""Elle Sikes""",42,0.03000000,0,0,0,0,0,0,0,1.03905000,0,241,241
+Springfield School District RE-4 Board of Directors - Two Year Term,opportunistic_benefits,ended,1,1387,809,"""Darrell Edward Mackey""",50,0.03000000,0,0,0,0,0,0,0,1.03905000,0,203,203
+Steamboat Springs School District RE2 Director - At Large,opportunistic_benefits,ended,2,10308,7876,"""Kim Lemmer"",""Jane Toothaker""",2369,0.03000000,0,0,0,0,0,0,0,1.03905000,0,32,32
+Strasburg School District 31J School Board Director,opportunistic_benefits,in_progress,2,280770,1905,"""Courtney Vance"",""Gema Gomez""",128,0.03000000,0,0,0,0,0,0,0,1.03905000,0,15985,15985
+Stratton School District R-4 Board of Directors - 4 Year Term,opportunistic_benefits,ended,2,2113,365,"""Cristina Stephens"",""Phillip Jostes""",39,0.03000000,0,0,0,0,0,0,0,1.03905000,0,395,395
+St. Vrain Valley School District RE-1J Board of Education Director in Director District B,opportunistic_benefits,in_progress,1,422923,65345,"""Hadley Solomon""",17189,0.03000000,0,0,0,0,0,0,0,1.03905000,0,180,180
+St. Vrain Valley School District RE-1J Board of Education Director in Director District D,opportunistic_benefits,in_progress,1,422923,65345,"""Meosha Babbs""",14087,0.03000000,0,0,0,0,0,0,0,1.03905000,0,219,219
+St. Vrain Valley School District RE-1J Board of Education Director in Director District E,opportunistic_benefits,not_auditable,1,422923,65345,"""Jocelyn Gilligan""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+St. Vrain Valley School District RE-1J Board of Education Director in Director District F,opportunistic_benefits,not_auditable,1,422923,65345,"""Sarah Hurianek""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Summit County Referred Measure 1A,county_wide_contest,risk_limit_achieved,1,9161,4327,"""Yes/For""",3360,0.03000000,21,0,0,0,0,0,0,1.03905000,0,20,20
+Summit School District RE-1 Board of Directors - At Large,opportunistic_benefits,ended,3,9161,9094,"""Whitney Horner"",""Kimberly Dyer"",""Jenniffer Gonzalez""",134,0.03000000,0,0,0,0,0,0,0,1.03905000,0,499,499
+Sundance Hills Metropolitan District Ballot Issue 6D,opportunistic_benefits,ended,1,174299,542,"""Yes/For""",44,0.03000000,0,0,0,0,0,0,0,1.03905000,0,28867,28867
+Sundance Hills Metropolitan District Ballot Issue 6E,opportunistic_benefits,ended,1,174299,542,"""Yes/For""",24,0.03000000,0,0,0,0,0,0,0,1.03905000,0,52922,52922
+Sundance Hills Metropolitan District Ballot Issue 6F,opportunistic_benefits,ended,1,174299,542,"""No/Against""",104,0.03000000,0,0,0,0,0,0,0,1.03905000,0,12213,12213
+Sunshine Fire Protection District Ballot Issue 6B,opportunistic_benefits,ended,1,121584,173,"""Yes/For""",80,0.03000000,0,0,0,0,0,0,0,1.03905000,0,11075,11075
+Swink School Board Member At Large - Swink 33 School District 2 year term,opportunistic_benefits,not_auditable,1,5173,484,"""Andrew Grover""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Swink School Board Member At Large - Swink 33 School District 4 year term,opportunistic_benefits,ended,2,5173,484,"""Hannah Muth"",""Eric Hanagan""",46,0.03000000,0,0,0,0,0,0,0,1.03905000,0,820,820
+Telluride School District R-1 Board of Directors,state_wide_contest,risk_limit_achieved,2,3784,3129,"""Kaylie Reed"",""Jessica James McTigue""",690,0.03000000,41,0,0,0,0,0,0,1.03905000,0,40,40
+Thompson School District R2-J Ballot Issue 5A,opportunistic_benefits,in_progress,1,393245,52214,"""Yes/For""",8575,0.03000000,0,0,0,0,0,0,0,1.03905000,0,335,335
+Thompson School District R2-J Board of Education Director District B,opportunistic_benefits,not_auditable,1,393245,52214,"""Mike Scholl""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Thompson School District R2-J Board of Education Director District E,opportunistic_benefits,in_progress,1,393245,52214,"""Alexandra Lessem""",807,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3551,3551
+Thompson School District R2-J Board of Education Director District F,opportunistic_benefits,in_progress,1,393245,52214,"""Lori Goebel""",1180,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2429,2429
+Thunderbird Water and Sanitation District Ballot Issue #6A,opportunistic_benefits,ended,1,131608,246,"""YES/FOR""",169,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5675,5675
+Town of Ault Ballot Issue 2H,opportunistic_benefits,ended,1,80475,547,"""No/Against""",118,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4970,4970
+Town of Basalt Ballot Issue 3A,opportunistic_benefits,in_progress,1,22533,1550,"""Yes/For""",565,0.03000000,0,0,0,0,0,0,0,1.03905000,0,291,291
+Town of Bayfield Ballot Issue 2B,opportunistic_benefits,ended,1,22019,931,"""No/Against""",144,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1115,1115
+Town of Bayfield Ballot Issue 2C,opportunistic_benefits,ended,1,22019,931,"""No/Against""",64,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2508,2508
+Town of Crested Butte Mayor,county_wide_contest,risk_limit_achieved,1,6393,651,"""Ian Billick""",176,0.03000000,266,0,0,0,0,0,0,1.03905000,0,265,265
+Town of Eagle - Council Member,opportunistic_benefits,ended,4,16399,2776,"""Casey Glowacki"",""Scott Schreiner"",""Geoffrey Grimmer"",""Gina McCrackin""",268,0.03000000,0,0,0,0,0,0,0,1.03905000,0,446,446
+Town of Eagle - Mayor,county_wide_contest,risk_limit_achieved,1,16399,2776,"""Bryan Woods""",587,0.03000000,205,0,0,0,0,0,0,1.03905000,0,204,204
+Town of Estes Park Ballot Question 300,opportunistic_benefits,ended,1,191186,2442,"""Yes/For""",152,0.03000000,0,0,0,0,0,0,0,1.03905000,0,9166,9166
+Town of Estes Park Ballot Question 301,opportunistic_benefits,ended,1,191186,2442,"""No/Against""",475,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2933,2933
+Town of Firestone Ballot Question 2J,opportunistic_benefits,ended,1,80475,4324,"""Yes/For""",1877,0.03000000,0,0,0,0,0,0,0,1.03905000,0,313,313
+Town of Firestone Special Vacancy Election Board of Trustees,opportunistic_benefits,ended,1,80475,4324,"""John Damsma""",395,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1485,1485
+Town of Hayden Ballot Question 2A,opportunistic_benefits,ended,1,10308,518,"""Yes/For""",219,0.03000000,0,0,0,0,0,0,0,1.03905000,0,343,343
+Town of Hot Sulphur Springs Ballot Issue 2A - Use Tax,opportunistic_benefits,ended,1,6627,263,"""No""",132,0.03000000,0,0,0,0,0,0,0,1.03905000,0,366,366
+Town of Hot Sulphur Springs Ballot Question 2B - Publication of Ordinances by Title Only,opportunistic_benefits,ended,1,6627,263,"""No""",74,0.03000000,0,0,0,0,0,0,0,1.03905000,0,653,653
+Town of Kiowa Ballot Issue 2A,opportunistic_benefits,ended,1,11515,265,"""YES/FOR""",9,0.03000000,0,0,0,0,0,0,0,1.03905000,0,9324,9324
+Town of Kiowa Ballot Issue 2B,opportunistic_benefits,ended,1,11515,265,"""NO/AGAINST""",61,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1376,1376
+Town of Kiowa Ballot Issue 2C,opportunistic_benefits,ended,1,11515,265,"""NO/AGAINST""",92,0.03000000,0,0,0,0,0,0,0,1.03905000,0,913,913
+Town of Kiowa Ballot Issue 2D,opportunistic_benefits,ended,1,11515,265,"""NO/AGAINST""",128,0.03000000,0,0,0,0,0,0,0,1.03905000,0,656,656
+Town of Mead Ballot Issue 2B,opportunistic_benefits,ended,1,80475,2135,"""No/Against""",495,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1185,1185
+Town of Merino Referred Ballot Issue 2X,opportunistic_benefits,ended,1,6091,101,"""Yes/For""",5,0.03000000,0,0,0,0,0,0,0,1.03905000,0,8877,8877
+Town of Mountain View Ballot Issue 2A,opportunistic_benefits,ended,1,199921,241,"""Yes/For""",28,0.03000000,0,0,0,0,0,0,0,1.03905000,0,52030,52030
+Town of Mountain View Council Members,opportunistic_benefits,ended,3,199921,241,"""Kathleen S Bailey"",""Janet Randolph"",""David ""Doc"" Davis""",5,0.03000000,0,0,0,0,0,0,0,1.03905000,0,291364,291364
+Town of Mountain View Mayor,opportunistic_benefits,ended,1,199921,241,"""Emilie Mitcham""",43,0.03000000,0,0,0,0,0,0,0,1.03905000,0,33880,33880
+Town of Mount Crested Butte Ballot Question 2A,opportunistic_benefits,ended,1,6393,347,"""Yes/For""",9,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5177,5177
+Town of Oak Creek Ballot Question 2B,opportunistic_benefits,ended,1,10308,277,"""Yes/For""",168,0.03000000,0,0,0,0,0,0,0,1.03905000,0,448,448
+Town of Pagosa Springs Ballot Issue 2A,county_wide_contest,risk_limit_achieved,1,4699,516,"""Yes/For""",270,0.03000000,128,0,0,0,0,0,0,1.03905000,0,127,127
+Town of Paonia Ballot Question 2A,opportunistic_benefits,ended,1,11092,622,"""Yes/For""",333,0.03000000,0,0,0,0,0,0,0,1.03905000,0,243,243
+Town of Parker Ballot Question 2A,opportunistic_benefits,ended,1,131608,16253,"""YES/FOR""",5546,0.03000000,0,0,0,0,0,0,0,1.03905000,0,173,173
+Town of Parker Ballot Question 2B,opportunistic_benefits,ended,1,131608,16253,"""YES/FOR""",10493,0.03000000,0,0,0,0,0,0,0,1.03905000,0,92,92
+Town of Parker Ballot Question 2C,opportunistic_benefits,ended,1,131608,16253,"""YES/FOR""",10620,0.03000000,0,0,0,0,0,0,0,1.03905000,0,91,91
+Town of Parker Ballot Question 2D,opportunistic_benefits,ended,1,131608,16253,"""YES/FOR""",2360,0.03000000,0,0,0,0,0,0,0,1.03905000,0,407,407
+Town of Parker Ballot Question 2E,opportunistic_benefits,ended,1,131608,16253,"""YES/FOR""",314,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3055,3055
+Town of Severance Ballot Issue 2I,opportunistic_benefits,ended,1,80475,2751,"""No/Against""",184,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3188,3188
+Town of Severance Council Members,opportunistic_benefits,ended,4,80475,2751,"""Stephen Gagliardi"",""Josh Ochs"",""Karen Hessler"",""Dave Bruen""",155,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3784,3784
+Town of Silt Board of Trustees,opportunistic_benefits,ended,4,16400,729,"""Derek Hanrahan"",""Kim Ingelhart"",""Justin Brintnall"",""Alex Sanchez""",37,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3230,3230
+Town of Silt Issue 2A,opportunistic_benefits,ended,1,16400,729,"""Yes""",22,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5433,5433
+Town of Snowmass Village Ballot Issue 2D,opportunistic_benefits,ended,1,6134,965,"""Yes/For""",119,0.03000000,0,0,0,0,0,0,0,1.03905000,0,376,376
+Town of Springfield Ballot Issue 2A,opportunistic_benefits,ended,1,1387,554,"""NO/AGAINST""",54,0.03000000,0,0,0,0,0,0,0,1.03905000,0,188,188
+Town of Springfield Ballot Question 2B,county_wide_contest,risk_limit_achieved,1,1387,554,"""NO/AGAINST""",146,0.03000000,71,0,0,0,0,1,0,1.03905000,0,56,56
+Town of Springfield Ballot Question 2C,county_wide_contest,risk_limit_achieved,1,1387,554,"""NO/AGAINST""",164,0.03000000,63,0,0,0,0,0,0,1.03905000,0,62,62
+Town of Telluride Ballot Issue 2A,opportunistic_benefits,in_progress,1,3017,1045,"""No/Against""",19,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1158,1158
+Town of Telluride Ballot Issue 2B,opportunistic_benefits,in_progress,1,3017,1045,"""No/Against""",116,0.03000000,0,0,0,0,0,0,0,1.03905000,0,190,190
+Town of Telluride Ballot Question 2C,opportunistic_benefits,in_progress,1,3017,1045,"""Yes/For""",783,0.03000000,0,0,0,0,0,0,0,1.03905000,0,29,29
+Town of Telluride Ballot Question 300,county_wide_contest,in_progress,1,3017,1045,"""No/Against""",266,0.03000000,84,1,0,0,0,0,0,1.03905000,1,160,162
+Town of Telluride Town Council,opportunistic_benefits,in_progress,4,3017,1045,"""Meehan Fee"",""Mindy J. Smith"",""Kristen Permakoff"",""Dan Enright""",24,0.03000000,0,0,0,0,0,0,0,1.03905000,0,917,917
+Town of Timnath Ballot Issue 3A,opportunistic_benefits,in_progress,1,271661,4062,"""Yes/For""",336,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5892,5892
+Town of Vail Ballot Issue 2A,opportunistic_benefits,ended,1,16399,1820,"""No/Against""",35,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3415,3415
+Town of Vail - Council Members At-Large,opportunistic_benefits,ended,4,16399,1820,"""Kevin R. Foley"",""Sam Biszantz"",""Kim Langmaid"",""Barry Davis""",108,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1107,1107
+Town of Winter Park Ballot Issue 2C,opportunistic_benefits,ended,1,6627,390,"""No""",15,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3220,3220
+Town of Winter Park Ballot Question 2D,opportunistic_benefits,ended,1,6627,390,"""Yes""",249,0.03000000,0,0,0,0,0,0,0,1.03905000,0,194,194
+Town of Yampa Ballot Question 2C,opportunistic_benefits,ended,1,10308,153,"""Yes/For""",20,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3756,3756
+Twining Flats Road Improvement District Ballot Issue 6C,opportunistic_benefits,ended,1,6134,22,"""Yes/For""",10,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4470,4470
+Upper Pine River Fire Protection District Ballot Issue 7B,opportunistic_benefits,in_progress,1,26718,4116,"""Yes/For""",605,0.03000000,0,0,0,0,0,0,0,1.03905000,0,322,322
+Upper Rio Grande School District C-7 Director-Four Year Term,opportunistic_benefits,ended,2,3302,1476,"""Jeremy Lee Gallegos"",""Jill A. Martinez""",127,0.03000000,0,0,0,0,0,0,0,1.03905000,0,190,190
+Victor Council Ward 1,opportunistic_benefits,not_auditable,1,10151,60,"""Steve Bracklein""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Victor Council Ward 2,opportunistic_benefits,not_auditable,1,10151,69,"""Nancy J. Hanks""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Walsh School District RE-1 Board of Directors - Four Year Term,opportunistic_benefits,ended,2,1387,323,"""Jessami Graham"",""Matt Tedder""",26,0.03000000,0,0,0,0,0,0,0,1.03905000,0,389,389
+Walsh School District RE-1 Board of Directors - Two Year Term,opportunistic_benefits,ended,2,1387,323,"""Joe G. Thompson"",""Marisela Calzada""",134,0.03000000,0,0,0,0,0,0,0,1.03905000,0,76,76
+Weld County School District 6 Board of Education School Director,opportunistic_benefits,ended,4,80475,24583,"""Kyle L Bentley"",""Weston Edmunds"",""Robyn Roggy"",""Deana Lemos-Garcia""",2566,0.03000000,0,0,0,0,0,0,0,1.03905000,0,229,229
+Weld County School District RE-10J Ballot Issue 5B,opportunistic_benefits,ended,1,80475,278,"""Yes/For""",25,0.03000000,0,0,0,0,0,0,0,1.03905000,0,23457,23457
+Weld County School District RE-10J Director District B,opportunistic_benefits,not_auditable,1,80475,278,"""Leonard Krise""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Weld County School District RE-10J Director District C,opportunistic_benefits,not_auditable,1,80475,278,"""Jessica M Francis""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Weld County School District RE-4 Director District A,opportunistic_benefits,ended,1,80475,14029,"""Raymond Ruth""",1130,0.03000000,0,0,0,0,0,0,0,1.03905000,0,519,519
+Weld County School District RE-4 Director District C,opportunistic_benefits,not_auditable,1,80475,14029,"""Lance Nichols""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Weldon Valley School District RE-20J Board of Education (2 year term),opportunistic_benefits,not_auditable,1,87431,322,"""Kyle Groves""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Weldon Valley School District RE-20J Board of Education (4 year term),opportunistic_benefits,in_progress,3,87431,322,"""Leigha Mertens"",""Dustin A. Heid"",""Mickaela Gronsten""",105,0.03000000,0,0,0,0,0,0,0,1.03905000,0,6068,6068
+Weld RE-8 School District Director District A,opportunistic_benefits,not_auditable,1,110153,3022,"""Brian Hardwick""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Weld RE-8 School District Director District F,opportunistic_benefits,not_auditable,1,110153,3022,"""Dez Packard""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+Weld RE-8 School District Director District G,opportunistic_benefits,in_progress,1,110153,3022,"""Erica Seegrist""",476,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1687,1687
+Wellington Fire Protection District Ballot Issue 6D,opportunistic_benefits,ended,1,191186,4472,"""No/Against""",583,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2390,2390
+West Grand School District 1-Jt Board of Directors - 2 year term,opportunistic_benefits,in_progress,1,32187,1059,"""Sheena Darland""",115,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2040,2040
+West Grand School District 1-Jt Board of Directors - 4 year term,opportunistic_benefits,in_progress,4,32187,1059,"""Harold Lee Bruchez"",""Bryan Klotz"",""Grover Pryor"",""Fletcher Flanigan""",47,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4991,4991
+Widefield School District 3 Board of Directors - 4 Year Term,opportunistic_benefits,ended,3,189228,11564,"""William ""Wen"" Dolphin"",""Luis Ybarra Jr."",""Michelle Hubbard""",2238,0.03000000,0,0,0,0,0,0,0,1.03905000,0,617,617
+Widefield School District No. 3 Ballot Issue 4A,opportunistic_benefits,ended,1,189228,11564,"""Yes/For""",387,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3564,3564
+Widefield School District No. 3 Ballot Issue 4B,opportunistic_benefits,ended,1,189228,11564,"""Yes/For""",833,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1656,1656
+Wiggins School District RE-50J Board of Education,opportunistic_benefits,ended,2,80475,58,"""Derek Pope"",""Jessica Musgrave""",18,0.03000000,0,0,0,0,0,0,0,1.03905000,0,32579,32579
+Wiggins School District RE-50J Board Of Education,opportunistic_benefits,in_progress,2,113427,980,"""Derek Pope"",""Jessica Musgrave""",244,0.03000000,0,0,0,0,0,0,0,1.03905000,0,3388,3388
+Willow Trace Metropolitan District Ballot Issue 6G,opportunistic_benefits,ended,1,174299,721,"""Yes/For""",256,0.03000000,0,0,0,0,0,0,0,1.03905000,0,4962,4962
+Woodland Park School District RE-2 Board of Directors - District B - At Large,opportunistic_benefits,ended,1,10151,8200,"""Laura Gordon""",1261,0.03000000,0,0,0,0,0,0,0,1.03905000,0,59,59
+Woodland Park School District RE-2 Board of Directors - District D,opportunistic_benefits,ended,1,10151,8200,"""Kassidi Gilgenast""",1661,0.03000000,0,0,0,0,0,0,0,1.03905000,0,45,45
+Woodland Park School District RE-2 Board of Directors - District E,county_wide_contest,risk_limit_achieved,1,10151,8200,"""Carol Greenstreet""",1195,0.03000000,63,0,0,0,0,0,0,1.03905000,0,62,62
+Wray School District RD-2 Board of Education Directors,opportunistic_benefits,ended,2,2750,1162,"""Jeffrey Wingfield"",""Maggie Bowman""",67,0.03000000,0,0,0,0,0,0,0,1.03905000,0,300,300
+Yuma School District-1 Board of Education Directors,opportunistic_benefits,not_auditable,3,2750,1275,"""Ronella M. Noble"",""John Deering"",""Jeff M. Ovalle""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0

@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 04/11/2026_
+_last changed: 04/19/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -21,7 +21,7 @@ See [Getting Started](docs/Developer.md#getting-started) if you are a developer 
 * [Rlauxe Workflow Overview](#rlauxe-workflow-overview)
 * [Audit Types](#audit-types)
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
-  * [OneAudit CLCA](#oneaudit-clca)
+  * [Overstatement Net Equivalent Audit (OneAudit)](#overstatement-net-equivalent-audit-oneaudit)
   * [Polling Audits](#polling-audits)
 * [Comparing Sample Sizes by Audit type](#comparing-sample-sizes-by-audit-type)
   * [Samples needed with no errors](#samples-needed-with-no-errors)
@@ -32,11 +32,11 @@ See [Getting Started](docs/Developer.md#getting-started) if you are a developer 
 * [Estimating Sample Batch sizes](#estimating-sample-batch-sizes)
   * [Simulating MVRs](#simulating-mvrs)
   * [Choosing ballots](#choosing-ballots)
-  * [Estmation extra mvrs and number of rounds](#estmation-extra-mvrs-and-number-of-rounds)
+  * [Estimating extra mvrs and number of rounds](#estimating-extra-mvrs-and-number-of-rounds)
 * [Multiple Contest Auditing](#multiple-contest-auditing)
   * [Efficiency](#efficiency)
   * [Deterministic sampling order for each Contest](#deterministic-sampling-order-for-each-contest)
-* [Reference Papers](#reference-papers)
+* [Primary Reference Papers](#primary-reference-papers)
 * [Appendices](#appendices)
   * [Extensions of SHANGRLA](#extensions-of-shangrla)
   * [Unanswered Questions](#unanswered-questions)
@@ -491,49 +491,63 @@ It may happen that after a contest's estimated sample size has been satisfied, f
 The set of contests that will continue to the next round is not known, so the set of ballots sampled at each round is not known in advance. Nonetheless, for each contest, and for each round, the sequence of ballots seen by the audit is fixed when the PRNG is chosen.
 
 
-# Reference Papers
+# Primary Reference Papers
 ````
-P2Z         Limiting Risk by Turning Manifest Phantoms into Evil Zombies. Banuelos and Stark. July 14, 2012
+P2Z   Limiting Risk by Turning Manifest Phantoms into Evil Zombies. 
+    Banuelos and Stark. July 14, 2012
     https://arxiv.org/pdf/1207.3413
     
-RAIRE        Risk-Limiting Audits for IRV Elections. Blom, Stucky, Teague 29 Oct 2019
+ConsistentSampling    Consistent Sampling with Replacement        
+    Ronald Rivest   August 31, 2018
+    https://arxiv.org/abs/1808.10016
+    
+RAIRE   Risk-Limiting Audits for IRV Elections
+    Blom, Stucky, Teague 29 Oct 2019
     https://arxiv.org/abs/1903.08804
 
-SHANGRLA     Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	Stark, 24 Mar 2020
-    https://arxiv.org/pdf/1911.10035, https://github.com/pbstark/SHANGRLA
+SHANGRLA     Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	
+    Stark, 24 Mar 2020
+    https://arxiv.org/pdf/1911.10035
+    https://github.com/pbstark/SHANGRLA
 
-MoreStyle	More style, less work: card-style data decrease risk-limiting audit sample sizes. Glazer, Spertus, Stark; 6 Dec 2020
+MoreStyle	More style, less work: card-style data decrease risk-limiting audit sample sizes. 
+    Glazer, Spertus, Stark; 6 Dec 2020
     https://arxiv.org/abs/2012.03371
     
-Proportional  Assertion-Based Approaches to Auditing Complex Elections, with Application to Party-List Proportional Elections; 2 Oct, 2021
-    Blom, Budurushi, Rivest, Stark, Stuckey, Teague, Vukcevic
+Proportional  Assertion-Based Approaches to Auditing Complex Elections, with Application to Party-List Proportional Elections
+    Blom, Budurushi, Rivest, Stark, Stuckey, Teague, Vukcevic, 2 Oct, 2021
     https://arxiv.org/abs/2107.11903v2
     
-ALPHA:      Audit that Learns from Previously Hand-Audited Ballots. Stark, Jan 7, 2022
+ALPHA   Audit that Learns from Previously Hand-Audited Ballots
+    Stark, Jan 7, 2022
     https://arxiv.org/pdf/2201.02707, https://github.com/pbstark/alpha.
 
-BETTING     Estimating means of bounded random variables by betting. Waudby-Smith and Ramdas, Aug 29, 2022
+BETTING   Estimating means of bounded random variables by betting
+    Waudby-Smith and Ramdas, Aug 29, 2022
     https://arxiv.org/pdf/2010.09686, https://github.com/WannabeSmith/betting-paper-simulations
 
-COBRA:      Comparison-Optimal Betting for Risk-limiting Audits. Jacob Spertus, 16 Mar 2023
+COBRA   Comparison-Optimal Betting for Risk-limiting Audits
+    Jacob Spertus, 16 Mar 2023
     https://arxiv.org/pdf/2304.01010, https://github.com/spertus/comparison-RLA-betting/tree/main
 
-ONEAudit:   Overstatement-Net-Equivalent Risk-Limiting Audit. Stark 6 Mar 2023.
-    https://arxiv.org/pdf/2303.03335, https://github.com/pbstark/ONEAudit
+ONEAudit  Overstatement-Net-Equivalent Risk-Limiting Audit
+    Stark, 6 Mar 2023.
+    https://arxiv.org/pdf/2303.03335
 
-STYLISH	    Stylish Risk-Limiting Audits in Practice. Glazer, Spertus, Stark  16 Sep 2023
-    https://arxiv.org/pdf/2309.09081, https://github.com/pbstark/SHANGRLA
+STYLISH   Stylish Risk-Limiting Audits in Practice
+    Glazer, Spertus, Stark  16 Sep 2023
+    https://arxiv.org/pdf/2309.09081
 
-SliceDice   Dice, but don’t slice: Optimizing the efficiency of ONEAudit. Spertus, Glazer and Stark, Aug 18 2025
-    https://arxiv.org/pdf/2507.22179; https://github.com/spertus/UI-TS
+Stratified	Sequential stratified inference for the mean		
+    Jacob V. Spertus, Mayuri Sridhar, Philip B. Stark;	September 11, 2024
+	https://github.com/spertus/UI-NNSMs (now redirects to https://github.com/spertus/UI-TS)
+	https://arxiv.org/abs/2409.06680        version 3 March 13, 2026    
+	
+SliceDice   Dice, but don’t slice: Optimizing the efficiency of ONEAudit
+    Spertus, Glazer and Stark, Aug 18 2025
+    https://arxiv.org/pdf/2507.22179
+    https://github.com/spertus/UI-TS
     
-Verifiable  Risk-Limiting Audits Are Interactive Proofs — How Do We Guarantee They Are Sound?
-    Blom, Caron, Ek, Ozdemir, Pereira, Stark, Teague, Vukcevic
-    submitted to IEEE Symposium on Security and Privacy (S&P 2026) 
-
-ConsistentSampling  Consistent Sampling with Replacement
-    Rivest
-    https://arxiv.org/abs/1808.10016
 ````
 Also see [complete list of references](docs/papers/papers.txt).
 

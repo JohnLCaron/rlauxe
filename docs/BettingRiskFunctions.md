@@ -7,7 +7,7 @@ _last changed 02/15/2026_
   * [Stalled audits and maximum bets](#stalled-audits-and-maximum-bets)
   * [Betting when there are CLCA errors](#betting-when-there-are-clca-errors)
   * [Betting with OneAudit pools](#betting-with-oneaudit-pools)
-    * [Estimating samples needed for OneAudit when there are no errors](#estimating-samples-needed-for-oneaudit-when-there-are-no-errors)
+    * [Calculating the payoff and samples needed for OneAudit, for each kind of overstatement value](#calculating-the-payoff-and-samples-needed-for-oneaudit-for-each-kind-of-overstatement-value)
   * [Choosing MaxLoss](#choosing-maxloss)
 <!-- TOC -->
 

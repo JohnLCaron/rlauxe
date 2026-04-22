@@ -1,0 +1,972 @@
+county_id,county_name,contest_name,contest_id
+1,Adams,City of Arvada Council Member At-Large,844092
+1,Adams,City of Aurora Council Member - At Large,844094
+1,Adams,City of Aurora Council Member Ward I,844096
+1,Adams,City of Aurora Council Member Ward II,844098
+1,Adams,City of Brighton Mayor,844100
+1,Adams,City of Brighton Councilmember - Ward 1,844102
+1,Adams,City of Brighton Councilmember - Ward 2,844104
+1,Adams,City of Brighton Councilmember - Ward 3,844107
+1,Adams,City of Brighton Councilmember - Ward 4,844109
+1,Adams,City of Commerce City Councilmember - Ward 1,844111
+1,Adams,City of Commerce City Councilmember - Ward 3,844113
+1,Adams,City of Commerce City Councilmember - At Large,844115
+1,Adams,City of Federal Heights Council Member - Ward 1,844117
+1,Adams,City of Federal Heights Council Member - Ward 2,844119
+1,Adams,City of Federal Heights Council Member - Ward 3,844121
+1,Adams,City of Northglenn Council Member - Ward 1,844123
+1,Adams,City of Northglenn Council Member - Ward 2,844125
+1,Adams,City of Northglenn Council Member - Ward 3,844127
+1,Adams,City of Northglenn Council Member - Ward 4,844129
+1,Adams,City of Thornton Council Member - Ward 1,844131
+1,Adams,City of Thornton Council Member - Ward 2,844133
+1,Adams,City of Thornton Council Member - Ward 3,844135
+1,Adams,City of Thornton Council Member - Ward 4,844137
+1,Adams,City of Westminster Mayor,844139
+1,Adams,City of Westminster Council Members,844141
+1,Adams,Adams 12 Five Star School District Director - District No 3,844143
+1,Adams,Adams 12 Five Star School District Director - District No 4,844145
+1,Adams,Adams County School District 14 Board Of Education,844147
+1,Adams,School District 27J Board of Education Director District No. 2,844149
+1,Adams,School District 27J Board of Education Director District No. 4,844151
+1,Adams,School District 27J Board of Education Director District No. 5,844153
+1,Adams,School District 27J Board of Education Director District No. 6,844155
+1,Adams,Adams-Arapahoe School District 28J Board of Directors,844157
+1,Adams,Strasburg School District 31J School Board Director,844159
+1,Adams,Byers School District 32J School Board Director,844161
+1,Adams,Wiggins School District RE-50J Board Of Education,844163
+1,Adams,Proposition LL (Statutory),844165
+1,Adams,Proposition MM (Statutory),844167
+1,Adams,City of Arvada Ballot Question 3G,844169
+1,Adams,City of Aurora Question 3B,844171
+1,Adams,City of Aurora Question 3C,844173
+1,Adams,City of Aurora Question 3D,844175
+1,Adams,City of Aurora Question 3E,844177
+1,Adams,City of Aurora Question 3F,844179
+1,Adams,City of Thornton Ballot Question 2A,844181
+1,Adams,City of Thornton Ballot Question 2B,844183
+1,Adams,City of Thornton Ballot Question 2C,844185
+1,Adams,City of Thornton Ballot Question 2D,844187
+1,Adams,City of Westminster Ballot Issue 3H,844189
+1,Adams,ADAMS 12 FIVE STAR SCHOOLS BALLOT ISSUE 5B,844191
+1,Adams,Byers School District No. 32J Ballot Issue 5A,844193
+1,Adams,Deer Trail Rural Fire Protection District Ballot Issue 7B,844195
+1,Adams,SOUTH ADAMS COUNTY FIRE PROTECTION DISTRICT 6A,844197
+2,Alamosa,City of Alamosa Mayor,950965
+2,Alamosa,City of Alamosa Councilor at Large,950967
+2,Alamosa,City of Alamosa Councilor Ward 2,950969
+2,Alamosa,City of Alamosa Councilor Ward 4,950971
+2,Alamosa,Alamosa School District RE-11J Director District 3,950973
+2,Alamosa,Alamosa School District RE-11J Director District 6,950975
+2,Alamosa,Center Consolidated School District 26 JT Director - District A,950977
+2,Alamosa,Center Consolidated School District 26 JT Director - District B,950979
+2,Alamosa,Sanford School District 6J - At Large Director,950981
+2,Alamosa,Sangre de Cristo School District RE-22J Director - At-Large,950983
+2,Alamosa,Sangre de Cristo School District RE-22J Director - District South,950985
+2,Alamosa,Proposition LL (Statutory),950987
+2,Alamosa,Proposition MM (Statutory),950989
+2,Alamosa,Alamosa School District RE-11J Ballot Issue 5A,950991
+2,Alamosa,Center Consolidated School District 26 JT Ballot Question 5B,950993
+3,Arapahoe,City of Aurora Council Member - At Large,1423928
+3,Arapahoe,City of Centennial Mayor,1423930
+3,Arapahoe,City of Englewood Office of Mayor At-Large,1423932
+3,Arapahoe,City of Englewood Office of Municipal Judge,1423934
+3,Arapahoe,City of Littleton Mayor,1423936
+3,Arapahoe,City of Littleton Council Member At-Large,1423938
+3,Arapahoe,City of Sheridan Mayor,1423940
+3,Arapahoe,City of Aurora Council Member Ward I,1423942
+3,Arapahoe,City of Aurora Council Member Ward II,1423944
+3,Arapahoe,City of Aurora Council Member Ward III,1423946
+3,Arapahoe,City of Centennial Council Member District 1,1423948
+3,Arapahoe,City of Centennial Council Member District 2,1423950
+3,Arapahoe,City of Centennial Council Member District 3,1423952
+3,Arapahoe,City of Centennial Council Member District 4,1423954
+3,Arapahoe,City of Englewood Office of Council Member District 2,1423956
+3,Arapahoe,City of Englewood Office of Council Member District 4,1423958
+3,Arapahoe,City of Greenwood Village Councilmember District 1,1423960
+3,Arapahoe,City of Greenwood Village Councilmember District 2,1423962
+3,Arapahoe,City of Greenwood Village Councilmember District 3,1423964
+3,Arapahoe,City of Greenwood Village Councilmember District 4,1423966
+3,Arapahoe,City of Littleton Council Member District I,1423968
+3,Arapahoe,City of Littleton Council Member District III,1423970
+3,Arapahoe,City of Sheridan City Council Member Ward I,1423972
+3,Arapahoe,City of Sheridan City Council Member Ward II,1423974
+3,Arapahoe,City of Sheridan City Council Member Ward III,1423976
+3,Arapahoe,Adams-Arapahoe School District 28J Board of Directors,1423978
+3,Arapahoe,Arapahoe County School District #6 Littleton Public Schools School Director - At Large,1423980
+3,Arapahoe,Byers School District 32J School Board Director,1423982
+3,Arapahoe,Cherry Creek School District No. 5 School Board Director - District D,1423984
+3,Arapahoe,Cherry Creek School District No. 5 School Board Director - District E,1423986
+3,Arapahoe,Englewood School District School Board Director,1423988
+3,Arapahoe,Strasburg School District 31J School Board Director,1423990
+3,Arapahoe,Proposition LL (Statutory),1423992
+3,Arapahoe,Proposition MM (Statutory),1423994
+3,Arapahoe,City of Aurora Question 3B,1423996
+3,Arapahoe,City of Aurora Question 3C,1423998
+3,Arapahoe,City of Aurora Question 3D,1424000
+3,Arapahoe,City of Aurora Question 3E,1424002
+3,Arapahoe,City of Aurora Question 3F,1424004
+3,Arapahoe,City of Englewood Ballot Question Number 2A,1424006
+3,Arapahoe,City of Littleton Ballot Question 3A,1424008
+3,Arapahoe,Byers School District No. 32J Ballot Issue 5A,1424010
+3,Arapahoe,Deer Trail Rural Fire Protection District Ballot Issue 7B,1424012
+3,Arapahoe,South Metro Fire Rescue Fire Protection District Ballot Issue 7A,1424014
+3,Arapahoe,Cherry Park General Improvement District Ballot Question 6B,1424016
+3,Arapahoe,Cherry Park General Improvement District Ballot Question 6C,1424018
+3,Arapahoe,Polo Reserve Metropolitan District Ballot Issue 6A,1424020
+3,Arapahoe,Sundance Hills Metropolitan District Ballot Issue 6D,1424022
+3,Arapahoe,Sundance Hills Metropolitan District Ballot Issue 6E,1424024
+3,Arapahoe,Sundance Hills Metropolitan District Ballot Issue 6F,1424026
+3,Arapahoe,Willow Trace Metropolitan District Ballot Issue 6G,1424028
+4,Archuleta,Bayfield School District 10 Jt-R Board of Directors,1732913
+4,Archuleta,Ignacio School District 11JT Board of Directors,1732915
+4,Archuleta,Proposition LL (Statutory),1732917
+4,Archuleta,Proposition MM (Statutory),1732919
+4,Archuleta,Town of Pagosa Springs Ballot Issue 2A,1732921
+4,Archuleta,Upper Pine River Fire Protection District Ballot Issue 7B,1732923
+4,Archuleta,Colorado's Timber Ridge Metropolitan District Ballot Question 6A,1732925
+5,Baca,Walsh School District RE-1 Board of Directors - Four Year Term,2016458
+5,Baca,Walsh School District RE-1 Board of Directors - Two Year Term,2016460
+5,Baca,Springfield School District RE-4 Board of Directors - Four Year Term,2016462
+5,Baca,Springfield School District RE-4 Board of Directors - Two Year Term,2016464
+5,Baca,Proposition LL (Statutory),2016466
+5,Baca,Proposition MM (Statutory),2016468
+5,Baca,Town of Springfield Ballot Issue 2A,2016470
+5,Baca,Town of Springfield Ballot Question 2B,2016472
+5,Baca,Town of Springfield Ballot Question 2C,2016474
+6,Bent,Bent - Proposition LL (Statutory),1156831
+6,Bent,Proposition MM (Statutory),1156833
+7,Boulder,City of Boulder Council Candidates,2018164
+7,Boulder,City of Lafayette City Council,2018166
+7,Boulder,City of Longmont Mayor,2018168
+7,Boulder,City of Longmont City Council At Large,2018170
+7,Boulder,City of Longmont City Council Ward 2,2018172
+7,Boulder,City of Louisville City Council Ward 1 (4-year term),2018174
+7,Boulder,City of Louisville City Council Ward 2 (4-year term),2018176
+7,Boulder,City of Louisville City Council Ward 3 (4-year term),2018178
+7,Boulder,Boulder Valley School District RE-2 Director District B (4 Years),2018180
+7,Boulder,Boulder Valley School District RE-2 Director District E (4 Years),2018182
+7,Boulder,Boulder Valley School District RE-2 Director District F (4 Years),2018184
+7,Boulder,St. Vrain Valley School District RE-1J Board of Education Director in Director District B,2018186
+7,Boulder,St. Vrain Valley School District RE-1J Board of Education Director in Director District D,2018188
+7,Boulder,St. Vrain Valley School District RE-1J Board of Education Director in Director District E,2018190
+7,Boulder,St. Vrain Valley School District RE-1J Board of Education Director in Director District F,2018192
+7,Boulder,Thompson School District R2-J Board of Education Director District B,2018194
+7,Boulder,Thompson School District R2-J Board of Education Director District E,2018196
+7,Boulder,Thompson School District R2-J Board of Education Director District F,2018198
+7,Boulder,City of Longmont Municipal Court Judge - Frick,2018200
+7,Boulder,Proposition LL (Statutory),2018202
+7,Boulder,Proposition MM (Statutory),2018204
+7,Boulder,Boulder County Ballot Issue 1A,2018206
+7,Boulder,Boulder County Ballot Issue 1B,2018208
+7,Boulder,City of Boulder Ballot Issue 2A,2018210
+7,Boulder,City of Boulder Ballot Issue 2B,2018212
+7,Boulder,City of Lafayette Ballot Issue 2C,2018214
+7,Boulder,City of Louisville Ballot Question 300,2018216
+7,Boulder,City of Louisville Ballot Question 301,2018218
+7,Boulder,Thompson School District R2-J Ballot Issue 5A,2018220
+7,Boulder,Hygiene Fire Protection District Ballot Issue 6A,2018222
+7,Boulder,Sunshine Fire Protection District Ballot Issue 6B,2018224
+7,Boulder,Coal Creek Canyon Fire Protection District Ballot Issue 7B,2018226
+8,Chaffee,City of Salida Mayor - Two Year Term,672274
+8,Chaffee,Salida City Council Ward 1 - Four Year Term,672276
+8,Chaffee,Salida City Council Ward 2 - Four Year Term,672278
+8,Chaffee,Salida City Council Ward 3 - Four Year Term,672280
+8,Chaffee,Buena Vista School District R-31 Board of Education District 2,672282
+8,Chaffee,Buena Vista School District R-31 Board of Education District 10,672284
+8,Chaffee,Buena Vista School District R-31 Board of Education Director At Large - 4 Year Term,672286
+8,Chaffee,Colorado Mountain College Board of Trustees - District 1,672288
+8,Chaffee,Colorado Mountain College Board of Trustees - District 3,672290
+8,Chaffee,Colorado Mountain College Board of Trustees - District 7,672292
+8,Chaffee,Colorado Mountain College Board of Trustees - At Large,672294
+8,Chaffee,Salida School District R-32-J Board of Directors - District 3,672296
+8,Chaffee,Salida School District R-32-J Board of Directors - District 4,672298
+8,Chaffee,Salida School District R-32-J Board of Directors - District 5,672300
+8,Chaffee,Salida School District R-32-J Board of Directors - At Large 4 Year Term,672302
+8,Chaffee,Proposition LL (Statutory),672304
+8,Chaffee,Proposition MM (Statutory),672306
+8,Chaffee,Chaffee County Ballot Issue 1A,672308
+8,Chaffee,City of Salida Question 2A,672310
+8,Chaffee,Buena Vista School District R-31 Ballot Issue 4A,672312
+8,Chaffee,Buena Vista School District R-31 Ballot Issue 4B,672314
+8,Chaffee,Colorado Mountain College Ballot Issue 7C,672316
+8,Chaffee,Northern Chaffee County Library District 6A,672318
+9,Cheyenne,Cheyenne - Proposition LL (Statutory),13124
+9,Cheyenne,Proposition MM (Statutory),13126
+10,Clear Creek,"City of Idaho Springs Mayor, At Large",126838
+10,Clear Creek,"City of Idaho Springs City Council, Ward II",126840
+10,Clear Creek,Proposition LL (Statutory),126842
+10,Clear Creek,Proposition MM (Statutory),126844
+10,Clear Creek,CLEAR CREEK COUNTY EMERGENCY SERVICES GENERAL IMPROVEMENT DISTRICT QUESTION 1A,126846
+10,Clear Creek,City of Idaho Springs Ballot Question 2A,126848
+10,Clear Creek,City of Idaho Springs Ballot Question 2B,126850
+10,Clear Creek,City of Idaho Springs Ballot Question 2C,126852
+11,Conejos,Alamosa School District RE-11J Director District 3,727860
+11,Conejos,Alamosa School District RE-11J Director District 6,727862
+11,Conejos,Sanford School District 6J - At Large Director,727864
+11,Conejos,Conejos - Proposition LL (Statutory),727866
+11,Conejos,Proposition MM (Statutory),727868
+11,Conejos,Alamosa School District RE-11J Ballot Issue 5A,727870
+12,Costilla,Proposition LL (Statutory),2516163
+12,Costilla,Proposition MM (Statutory),2516165
+12,Costilla,Costilla County Referred Measure 1A,2516167
+12,Costilla,Costilla County Ambulance District Ballot Issue 5A,2516169
+12,Costilla,Costilla County Ambulance District Ballot Issue 5B,2516171
+13,Crowley,Crowley County School District RE 1-J Board of Directors - 4 Year Term,653357
+13,Crowley,Manzanola School District 3J Board of Directors,653359
+13,Crowley,Proposition LL (Statutory),653361
+13,Crowley,Proposition MM (Statutory),653363
+13,Crowley,Crowley - CROWLEY COUNTY SCHOOL DISTRICT RE 1-J BALLOT ISSUE 5A :  BONDS,653365
+14,Custer,Proposition LL (Statutory),730837
+14,Custer,Proposition MM (Statutory),730839
+14,Custer,Custer County Ballot Issue 1A,730841
+15,Delta,Director for the Delta County Board of Education - District 1,44936
+15,Delta,Director for the Delta County Board of Education - District 5,44938
+15,Delta,Proposition LL (Statutory),44940
+15,Delta,Proposition MM (Statutory),44942
+15,Delta,City of Delta Ballot Issue 2B,44944
+15,Delta,City of Delta Ballot Question 2C,44946
+15,Delta,City of Delta Ballot Question 2D,44948
+15,Delta,City of Delta Ballot Question 2E,44950
+15,Delta,City of delta Ballot Question 2F,44952
+15,Delta,Town of Paonia Ballot Question 2A,44954
+16,Denver,Denver Public Schools Director At-Large,173322
+16,Denver,Denver Public Schools Director District 2,173324
+16,Denver,Denver Public Schools Director District 3,173326
+16,Denver,Denver Public Schools Director District 4,173328
+16,Denver,Proposition LL (Statutory),173331
+16,Denver,Proposition MM (Statutory),173333
+16,Denver,Ballot Issue 2A,173335
+16,Denver,Ballot Issue 2B,173337
+16,Denver,Ballot Issue 2C,173339
+16,Denver,Ballot Issue 2D,173341
+16,Denver,Ballot Issue 2E,173343
+16,Denver,Referred Question 2F,173345
+16,Denver,Referred Question 2G,173347
+16,Denver,Referendum 310,173349
+17,Dolores,Dolores County School District RE-2J Board of Directors - District A,2292198
+17,Dolores, Dolores - Dolores County School District RE-2J Board of Directors - District B,2292200
+17,Dolores,Dolores County School District RE-2J Board of Directors - District E,2292202
+17,Dolores,Telluride School District R-1 Board of Directors,2292204
+17,Dolores,Proposition LL (Statutory),2292206
+17,Dolores,Proposition MM (Statutory),2292208
+18,Douglas,City of Aurora Council Member - At Large,2146651
+18,Douglas,City of Castle Pines Mayor,2146653
+18,Douglas,City of Castle Pines - Council District 1,2146655
+18,Douglas,City of Castle Pines - Council District 2,2146657
+18,Douglas,City of Castle Pines - Council District 3,2146659
+18,Douglas,City of Littleton Mayor,2146661
+18,Douglas,City of Littleton Council Member At Large,2146663
+18,Douglas,"Douglas - Douglas County School Board Director, District B",2146665
+18,Douglas,"Douglas - Douglas County School Board Director, District D",2146667
+18,Douglas,"Douglas - Douglas County School Board Director, District E",2146669
+18,Douglas,"Douglas - Douglas County School Board Director, District G",2146671
+18,Douglas,Proposition LL (Statutory),2146673
+18,Douglas,Proposition MM (Statutory),2146675
+18,Douglas,Town of Parker Ballot Question 2A,2146677
+18,Douglas,Town of Parker Ballot Question 2B,2146679
+18,Douglas,Town of Parker Ballot Question 2C,2146681
+18,Douglas,Town of Parker Ballot Question 2D,2146683
+18,Douglas,Town of Parker Ballot Question 2E,2146685
+18,Douglas,City of Littleton Ballot Question 3A,2146687
+18,Douglas,City of Aurora Question 3B,2146689
+18,Douglas,City of Aurora Question 3C,2146691
+18,Douglas,City of Aurora Question 3D,2146693
+18,Douglas,City of Aurora Question 3E,2146695
+18,Douglas,City of Aurora Question 3F,2146697
+18,Douglas,South Metro Fire Rescue Fire Protection District Ballot Issue 7A,2146699
+18,Douglas,Thunderbird Water and Sanitation District Ballot Issue #6A,2146701
+18,Douglas,Promenade at Castle Rock MetropolitanNo. 1 Ballot Issue #6B,2146703
+18,Douglas,Promenade at Castle Rock MetropolitanNo. 3 Ballot Issue #6C,2146705
+18,Douglas,Country Club Drive 6D,2146707
+19,Eagle,Town of Eagle - Mayor,654783
+19,Eagle,Town of Eagle - Council Member,654785
+19,Eagle,Town of Vail - Council Members At-Large,654787
+19,Eagle,Roaring Fork School District RE-1 Board of Directors - District A,654789
+19,Eagle,Roaring Fork School District RE-1 Board of Directors - District E,654791
+19,Eagle,West Grand School District 1-Jt Board of Directors - 4 year term,654793
+19,Eagle,West Grand School District 1-Jt Board of Directors - 2 year term,654795
+19,Eagle,Colorado Mountain College Board of Trustees - District 1,654797
+19,Eagle,Colorado Mountain College Board of Trustees - District 3,654799
+19,Eagle,Colorado Mountain College Board of Trustees - District 7,654801
+19,Eagle,Colorado Mountain College Board of Trustees - At Large,654803
+19,Eagle,Confluence Early Childhood Development Service District Board of Directors - District 4,654805
+19,Eagle,Proposition LL (Statutory),654807
+19,Eagle,Proposition MM (Statutory),654809
+19,Eagle,Eagle County Ballot Issue 1A,654811
+19,Eagle,Town of Vail Ballot Issue 2A,654813
+19,Eagle,Town of Basalt Ballot Issue 3A,654815
+19,Eagle,Eagle River Water And Sanitation District Ballot Issue 6A,654817
+19,Eagle,Confluence Early Childhood Development Service District Ballot Issue 7A,654819
+19,Eagle,Basalt Regional Library District Ballot Issue 7B,654821
+19,Eagle,Colorado Mountain College Ballot Issue 7C,654823
+20,Elbert,Calhan School District RJ1 Director - 4 Year Term,115110
+20,Elbert,Miami-Yoder School District JT60 Board of Directors - 4 Year Term,115112
+20,Elbert,Elizabeth School Board Education Director - 4 Year Term,115114
+20,Elbert,Kiowa School C-2 Board Education Director - 4 Year Term,115116
+20,Elbert,"Douglas County School Board Director, District B",115118
+20,Elbert,"Douglas County School Board Director, District D",115120
+20,Elbert,"Douglas County School Board Director, District E",115122
+20,Elbert,"Douglas County School Board Director, District G",115124
+20,Elbert,Peyton School District No. 23JT Board of Directors - 4 Year Term,115126
+20,Elbert,Proposition LL (Statutory),115128
+20,Elbert,Proposition MM (Statutory),115130
+20,Elbert,Elbert County Ballot Question 1A,115132
+20,Elbert,Elbert County Ballot Question 1B,115134
+20,Elbert,Town of Kiowa Ballot Issue 2A,115136
+20,Elbert,Town of Kiowa Ballot Issue 2B,115138
+20,Elbert,Town of Kiowa Ballot Issue 2C,115140
+20,Elbert,Town of Kiowa Ballot Issue 2D,115142
+20,Elbert,Miami-Yoder Joint School District No. 60 Ballot Issue 5B,115144
+20,Elbert,Peyton 23JT School District Ballot Issue 5C,115146
+20,Elbert,Kiowa School District C-2 Ballot Issue 4A,115148
+20,Elbert,Deer Trail Rural Fire Protection District Ballot Issue 7B,115150
+21,El Paso,El Paso County Commissioner - District 5 - REP,2323008
+21,El Paso,City of Fountain Mayor,2323010
+21,El Paso,City of Fountain Council Member - At Large,2323012
+21,El Paso,City of Fountain Council Member Ward 1 - 4 Year Term,2323014
+21,El Paso,City of Fountain Council Member Ward 3 - 4 Year Term,2323016
+21,El Paso,City of Manitou Springs Mayor,2323018
+21,El Paso,City of Manitou Springs City Council - Ward 1 - 4 Year Term,2323020
+21,El Paso,City of Manitou Springs City Council - Ward 2 - 4 Year Term,2323022
+21,El Paso,City of Manitou Springs City Council - Ward 3 - 4 Year Term,2323024
+21,El Paso,Academy School District 20 Board of Directors - 4 Year Term,2323026
+21,El Paso,Calhan School District RJ1 Director - 4 Year Term,2323028
+21,El Paso,Cheyenne Mountain School District 12 Board of Directors - 4 Year Term,2323030
+21,El Paso,Colorado Springs School District 11 Board of Directors - 4 Year Term,2323032
+21,El Paso,Ellicott School District 22 Board of Directors - 4 Year Term,2323034
+21,El Paso,Lewis-Palmer School District 38 Board of Directors -  District 1 - 4 Year Term,2323036
+21,El Paso,Lewis-Palmer School District 38 Board of Directors - District 3 - 4 Year Term,2323038
+21,El Paso,Manitou Springs School District 14 Board of Directors - 4 Year Term,2323040
+21,El Paso,Miami-Yoder School District JT60 Board of Directors - 4 Year Term,2323042
+21,El Paso,Peyton School District No. 23JT Board of Directors - 4 Year Term,2323044
+21,El Paso,Widefield School District 3 Board of Directors - 4 Year Term,2323046
+21,El Paso,El Paso County Colorado School District 49 Director District 1 - 4 Year Term,2323048
+21,El Paso,El Paso County Colorado School District 49 Director District 4 - 4 Year Term,2323050
+21,El Paso,Proposition LL (Statutory),2323052
+21,El Paso,Proposition MM (Statutory),2323054
+21,El Paso,City of Manitou Springs Ballot Issue 2A,2323056
+21,El Paso,Widefield School District No. 3 Ballot Issue 4A,2323058
+21,El Paso,Widefield School District No. 3 Ballot Issue 4B,2323060
+21,El Paso,Manitou Springs School District No. 14 Ballot Issue 4C,2323062
+21,El Paso,Miami-Yoder Joint School District No. 60 Ballot Issue 5B,2323064
+21,El Paso,Peyton 23JT School District Ballot Issue 5C,2323066
+21,El Paso,Cimarron Hills Fire Protection District Ballot Issue 6A,2323068
+21,El Paso,Banning Lewis Ranch Metropolitan District No. 5 Ballot Issue 6B,2323070
+21,El Paso,Hanover Fire Protection District Ballot Issue 7A,2323072
+21,El Paso,Hanover Fire Protection District Ballot Issue 7B,2323074
+22,Fremont,City of Canon City - Mayor,29292
+22,Fremont,City of Canon City - City Council - District 1,29294
+22,Fremont,City of Canon City - City Council - District 3,29296
+22,Fremont,City of Canon City - City Council - At Large,29298
+22,Fremont,City of Florence - Mayor,29300
+22,Fremont,City of Florence - City Council - Ward 1,29302
+22,Fremont,City of Florence - City Council - Ward 3,29304
+22,Fremont,Colorado Mountain College Board of Trustees - District 1,29306
+22,Fremont,Colorado Mountain College Board of Trustees - District 3,29308
+22,Fremont,Colorado Mountain College Board of Trustees - District 7,29310
+22,Fremont,Colorado Mountain College Board of Trustees - At Large,29312
+22,Fremont,Salida School District R-32-J Board of Directors - District 3,29314
+22,Fremont,Salida School District R-32-J Board of Directors - District 4,29316
+22,Fremont,Salida School District R-32-J Board of Directors - District 5,29318
+22,Fremont,Salida School District R-32-J Board of Directors - At Large 4 Year Term,29320
+22,Fremont,Proposition LL (Statutory),29322
+22,Fremont,Proposition MM (Statutory),29324
+22,Fremont,CITY OF CANON CITY ISSUE 2A,29326
+22,Fremont,CITY OF CANON CITY ISSUE 2B,29328
+22,Fremont,CITY OF FLORENCE ISSUE 2C,29330
+22,Fremont,DEER MOUNTAIN FIRE PROTECTION DISTRICT ISSUE 6A: MILL LEVY INCREASE,29332
+22,Fremont,Colorado Mountain College Ballot Issue 7C,29334
+23,Garfield,Town of Silt Board of Trustees,566159
+23,Garfield,Rifle City Council,566161
+23,Garfield,Colorado Mountain College Board of Trustees - District 1,566163
+23,Garfield,Colorado Mountain College Board of Trustees - District 3,566165
+23,Garfield,Colorado Mountain College Board of Trustees - District 7,566167
+23,Garfield,Colorado Mountain College Board of Trustees - At Large,566169
+23,Garfield,Garfield School RE-2 Dist A,566171
+23,Garfield,Garfield School RE-2 District E,566173
+23,Garfield,Roaring Fork School District RE-1 Board of Directors - District A,566175
+23,Garfield,Roaring Fork School District RE-1 Board of Directors - District E,566177
+23,Garfield,Confluence Early Childhood Development Service District Board of Directors - District 1,566179
+23,Garfield,Confluence Early Childhood Development Service District Board of Directors - District 2,566181
+23,Garfield,Confluence Early Childhood Development Service District Board of Directors - District 3,566183
+23,Garfield,Confluence Early Childhood Development Service District Board of Directors - District 4,566185
+23,Garfield,Proposition LL (Statutory),566187
+23,Garfield,Proposition MM (Statutory),566189
+23,Garfield,Town of Silt Issue 2A,566191
+23,Garfield,City of Rifle Issue 2B,566193
+23,Garfield,River Park Metro District 6A,566195
+23,Garfield,Confluence Early Childhood Development Service District Ballot Issue 7A,566197
+23,Garfield,Grand River Hospital District 7B,566199
+23,Garfield,Colorado Mountain College Ballot Issue 7C,566201
+23,Garfield,Carbondale and Rural Fire Protection District Ballot Issue 7D,566203
+23,Garfield,Carbondale and Rural Fire Protection District Ballot Issue 7E,566205
+24,Gilpin,Gilpin County RE-1 School District Director At Large (2 years),1151863
+24,Gilpin,Gilpin County RE-1 School District Director At Large (4 years),1151865
+24,Gilpin,Boulder Valley School District RE-2 Director District B (4 Years),1151867
+24,Gilpin,Boulder Valley School District RE-2 Director District E (4 Years),1151869
+24,Gilpin,Boulder Valley School District RE-2 Director District F (4 Years),1151871
+24,Gilpin,Proposition LL (Statutory),1151873
+24,Gilpin,Proposition MM (Statutory),1151875
+24,Gilpin,"Additional Lodging Tax to Support, Sustain, and Enhance Gilpin County for Our Residents, Workforce, and Visitors Ballot Issue 1A",1151877
+24,Gilpin,Amendments to Section 16-3-303 of the City of Central Land Development Code Ballot Question 2A,1151879
+24,Gilpin,Coal Creek Canyon Fire Protection District Ballot Issue 7B,1151881
+25,Grand,East Grand School District No. 2 Director - District 1,2308072
+25,Grand,East Grand School District No. 2 Director - District 2,2308074
+25,Grand,East Grand School District No. 2 Director - District 3,2308076
+25,Grand,East Grand School District No. 2 Director - District 6,2308078
+25,Grand,West Grand School District 1-Jt Board of Directors - 4 year term,2308080
+25,Grand,West Grand School District 1-Jt Board of Directors - 2 year term,2308082
+25,Grand,Proposition LL (Statutory),2308084
+25,Grand,Proposition MM (Statutory),2308086
+25,Grand,Town of Hot Sulphur Springs Ballot Issue 2A - Use Tax,2308088
+25,Grand,Town of Hot Sulphur Springs Ballot Question 2B - Publication of Ordinances by Title Only,2308090
+25,Grand,Town of Winter Park Ballot Issue 2C,2308092
+25,Grand,Town of Winter Park Ballot Question 2D,2308094
+25,Grand,Grand Lake Fire Protection District Ballot Issue 6A,2308096
+26,Gunnison,City of Gunnison City Council,2293494
+26,Gunnison,Town of Crested Butte Mayor,2293496
+26,Gunnison,Director for the Delta County Board of Education - District 1,2293498
+26,Gunnison,Director for the Delta County Board of Education - District 5,2293500
+26,Gunnison,Director for Montrose County Board of Education - District A,2293502
+26,Gunnison,Director for Montrose County Board of Education - District C,2293504
+26,Gunnison,Director for Montrose County Board of Education - District E,2293506
+26,Gunnison,Director for Montrose County Board of Education - District G,2293508
+26,Gunnison,Proposition LL (Statutory),2293510
+26,Gunnison,Proposition MM (Statutory),2293512
+26,Gunnison,City of Gunnison Ballot Issue 2B,2293514
+26,Gunnison,Town of Mount Crested Butte Ballot Question 2A,2293516
+26,Gunnison,Carbondale and Rural Fire Protection District Ballot Issue 7D,2293518
+26,Gunnison,Carbondale and Rural Fire Protection District Ballot Issue 7E,2293520
+26,Gunnison,Gunnison County Fire Protection District Ballot Issue 7A,2293522
+27,Hinsdale,Proposition LL (Statutory),158531
+27,Hinsdale,Proposition MM (Statutory),158533
+27,Hinsdale,HINSDALE COUNTY BALLOT ISSUE 1A,158535
+27,Hinsdale,Hinsdale County Advisory Ballot Question 1B,158537
+27,Hinsdale,Lake City Area Fire Protection District Ballot Issue 6A,158539
+28,Huerfano,City of Walsenburg Mayor,9990
+28,Huerfano,City of Walsenburg City Council Ward 1,9992
+28,Huerfano,City of Walsenburg City Council Ward 2,9994
+28,Huerfano,City of Walsenburg City Council Ward 3,9996
+28,Huerfano,Huerfano RE-1 School District School Board Director (4 year term),9998
+28,Huerfano,La Veta RE-2 School District School Board Director (2 year term),10000
+28,Huerfano,La Veta RE-2 School District School Board Director (4 year term),10002
+28,Huerfano,Proposition LL (Statutory),10004
+28,Huerfano,Proposition MM (Statutory),10006
+28,Huerfano,City of Walsenburg Issue 300,10008
+28,Huerfano,City of Walsenburg Question 2A,10010
+28,Huerfano,La Veta Fire Protection Issue 600,10012
+29,Jackson,North Park School District R-1 Director District 2,546
+29,Jackson,Proposition LL (Statutory),548
+29,Jackson,Proposition MM (Statutory),550
+29,Jackson,North Park School District R-1 Issue 4A,552
+30,Jefferson,City of Arvada Council Member At-Large,1816288
+30,Jefferson,City of Arvada Council Member District 1,1816290
+30,Jefferson,City of Arvada Council Member District 3,1816292
+30,Jefferson,City of Edgewater Mayor,1816294
+30,Jefferson,City of Edgewater Council Members,1816296
+30,Jefferson,City of Golden Council Member Ward 1,1816298
+30,Jefferson,City of Golden Council Member Ward 2,1816300
+30,Jefferson,City of Golden Council Member Ward 3,1816302
+30,Jefferson,City of Golden Council Member Ward 4,1816304
+30,Jefferson,City of Lakewood Council Member Ward 1,1816306
+30,Jefferson,City of Lakewood Council Member Ward 2,1816308
+30,Jefferson,City of Lakewood Council Member Ward 3,1816310
+30,Jefferson,City of Lakewood Council Member Ward 4,1816312
+30,Jefferson,City of Lakewood Council Member Ward 5,1816314
+30,Jefferson,City of Littleton Mayor,1816316
+30,Jefferson,City of Littleton Council Member At-Large,1816318
+30,Jefferson,City of Westminster Mayor,1816320
+30,Jefferson,City of Westminster Council Members,1816322
+30,Jefferson,City of Wheat Ridge Mayor,1816324
+30,Jefferson,City of Wheat Ridge Council Member District I,1816326
+30,Jefferson,City of Wheat Ridge Council Member District II,1816328
+30,Jefferson,City of Wheat Ridge Council Member District III,1816330
+30,Jefferson,City of Wheat Ridge Council Member District IV,1816332
+30,Jefferson,Town of Mountain View Mayor,1816334
+30,Jefferson,Town of Mountain View Council Members,1816336
+30,Jefferson,Jefferson County R-1 School District Director District 1,1816338
+30,Jefferson,Jefferson County R-1 School District Director District 2,1816340
+30,Jefferson,Jefferson County R-1 School District Director District 5,1816342
+30,Jefferson,Proposition LL (Statutory),1816344
+30,Jefferson,Proposition MM (Statutory),1816346
+30,Jefferson,Town of Mountain View Ballot Issue 2A,1816348
+30,Jefferson,City of Wheat Ridge Ballot Question 2B,1816350
+30,Jefferson,City of Littleton Ballot Question 3A,1816352
+30,Jefferson,City of Arvada Ballot Question 3G,1816354
+30,Jefferson,City of Westminster Ballot Issue 3H,1816356
+30,Jefferson,Lookout Mountain Water District Ballot Issue 6A,1816358
+30,Jefferson,Mountain Shadows Metropolitan District Ballot Issue 6B,1816360
+30,Jefferson,Mountain Shadows Metropolitan District Ballot Issue 6C,1816362
+30,Jefferson,South Metro Fire Rescue Fire Protection District Ballot Issue 7A,1816364
+30,Jefferson,Coal Creek Canyon Fire Protection District Ballot Issue 7B,1816366
+31,Kiowa,Kiowa - Proposition LL (Statutory),3592
+31,Kiowa,Proposition MM (Statutory),3594
+31,Kiowa,Kiowa County Ballot Issue 1A,3596
+32,Kit Carson,Burlington School District RE-6J Board of Directors - 4 Year Term,51367
+32,Kit Carson,Stratton School District R-4 Board of Directors - 4 Year Term,51369
+32,Kit Carson,Proposition LL (Statutory),51371
+32,Kit Carson,Proposition MM (Statutory),51373
+33,Lake,City of Leadville City Council Ward 1,1154430
+33,Lake,City of Leadville City Council Ward 2,1154432
+33,Lake,City of Leadville City Council Ward 3,1154434
+33,Lake,Colorado Mountain College Board of Trustees - District 1,1154436
+33,Lake,Colorado Mountain College Board of Trustees - District 3,1154438
+33,Lake,Colorado Mountain College Board of Trustees - District 7,1154440
+33,Lake,Colorado Mountain College Board of Trustees - At Large,1154442
+33,Lake,Proposition LL (Statutory),1154444
+33,Lake,Proposition MM (Statutory),1154446
+33,Lake,Colorado Mountain College Ballot Issue 7C,1154448
+34,La Plata,Bayfield School District 10 Jt-R Board of Directors,1793111
+34,La Plata,"Durango School District 9-R Board of Director, District A",1793113
+34,La Plata,"Durango School District 9-R Board of Director, District C",1793115
+34,La Plata,"Durango School District 9-R Board of Director, District E",1793117
+34,La Plata,Ignacio School District 11JT Board of Directors,1793119
+34,La Plata,Proposition LL (Statutory),1793121
+34,La Plata,Proposition MM (Statutory),1793123
+34,La Plata,La Plata County Ballot Issue 1A,1793125
+34,La Plata,Town of Bayfield Ballot Issue 2B,1793127
+34,La Plata,Town of Bayfield Ballot Issue 2C,1793129
+34,La Plata,City of Durango Ballot Issue 2A,1793131
+34,La Plata,Upper Pine River Fire Protection District Ballot Issue 7B,1793133
+34,La Plata,Durango Fire Protection District Ballot Issue 7A,1793135
+34,La Plata,Durango Hills Road Improvement District No. 1 Ballot Issue 6A,1793137
+35,Larimer,City of Fort Collins Mayor,957520
+35,Larimer,City of Loveland Mayor,957522
+35,Larimer,City of Fort Collins Councilmember - District 1,957524
+35,Larimer,City of Fort Collins Councilmember - District 3,957526
+35,Larimer,City of Fort Collins Councilmember - District 5,957528
+35,Larimer,City of Loveland City Council - Ward 1,957530
+35,Larimer,City of Loveland City Council - Ward 2,957532
+35,Larimer,City of Loveland City Council - Ward 3,957534
+35,Larimer,City of Loveland City Council - Ward 4,957536
+35,Larimer,Poudre School District R-1 Director District C,957538
+35,Larimer,Poudre School District R-1 Director District D,957540
+35,Larimer,Poudre School District R-1 Director District E,957542
+35,Larimer,St. Vrain Valley School District RE-1J Board of Education Director in Director District B,957544
+35,Larimer,St. Vrain Valley School District RE-1J Board of Education Director in Director District D,957546
+35,Larimer,St. Vrain Valley School District RE-1J Board of Education Director in Director District E,957548
+35,Larimer,St. Vrain Valley School District RE-1J Board of Education Director in Director District F,957550
+35,Larimer,Thompson School District R2-J Board of Education Director District B,957552
+35,Larimer,Thompson School District R2-J Board of Education Director District E,957554
+35,Larimer,Thompson School District R2-J Board of Education Director District F,957556
+35,Larimer,Proposition LL (Statutory),957558
+35,Larimer,Proposition MM (Statutory),957560
+35,Larimer,Larimer County Ballot Issue 1A,957562
+35,Larimer,Larimer County Ballot Issue 1B,957564
+35,Larimer,Town of Estes Park Ballot Question 300,957566
+35,Larimer,Town of Estes Park Ballot Question 301,957568
+35,Larimer,Thompson School District R2-J Ballot Issue 5A,957570
+35,Larimer,City of Fort Collins Ballot Issue 2A,957572
+35,Larimer,City of Fort Collins Ballot Question 2B,957574
+35,Larimer,City of Fort Collins Ballot Question 2C,957576
+35,Larimer,City of Fort Collins Ballot Question 2D,957578
+35,Larimer,City of Fort Collins Ballot Question 2E,957580
+35,Larimer,City of Fort Collins Ballot Question 2F,957582
+35,Larimer,City of Fort Collins Ballot Question 2G,957584
+35,Larimer,City of Fort Collins Ballot Question 2H,957586
+35,Larimer,City of Fort Collins Ballot Issue 302,957588
+35,Larimer,City of Fort Collins Ballot Question 303,957590
+35,Larimer,Town of Timnath Ballot Issue 3A,957592
+35,Larimer,Larimer County Thunder Mountain Public Improvement District No. 76 Ballot Issue 6A,957594
+35,Larimer,Larimer County Nedrah Acres Public Improvement District No. 77 Ballot Issue 6B,957596
+35,Larimer,Larimer County Rolling Hills Public Improvement District No. 78 Ballot Issue 6C,957598
+35,Larimer,Wellington Fire Protection District Ballot Issue 6D,957600
+36,Las Animas,City of Trinidad Mayor - At Large,2316183
+36,Las Animas,Council Member - At Large,2316185
+36,Las Animas,Aguilar School District RE-6,2316187
+36,Las Animas,Proposition LL (Statutory),2316189
+36,Las Animas,Proposition MM (Statutory),2316191
+36,Las Animas,City of Trinidad Ballot Issue 2A,2316193
+36,Las Animas,Aguilar School District RE-6 Ballot Issue 4A,2316195
+37,Lincoln,Crowley County School District RE 1-J Board of Directors - 4 Year Term,2143680
+37,Lincoln,Miami Yoder School District JT60 Board of Directors - 4 Year Term,2143682
+37,Lincoln,Proposition LL (Statutory),2143684
+37,Lincoln,Proposition MM (Statutory),2143686
+37,Lincoln,LINCOLN COUNTY BALLOT ISSUE 1A: LODGING TAX,2143688
+37,Lincoln,CROWLEY COUNTY SCHOOL DISTRICT RE 1-J BALLOT ISSUE 5A :  BONDS,2143690
+37,Lincoln,Miami-Yoder Joint School District No. 60 Ballot Issue 5B,2143692
+38,Logan,City of Sterling Mayor,1161430
+38,Logan,City of Sterling Councilmember Ward 1,1161432
+38,Logan,City of Sterling Councilmember Ward 2,1161434
+38,Logan,City of Sterling Councilmember Ward 3,1161436
+38,Logan,Frenchman RE-3 School District Board of Directors,1161438
+38,Logan,Haxtun School District RE-2J Board of Directors,1161440
+38,Logan,Plateau RE-5 School District Board of Directors,1161442
+38,Logan,RE-1 Valley School District Board of Directors District 1,1161444
+38,Logan,RE-1 Valley School District Board of Directors District 2,1161446
+38,Logan,RE-1 Valley School District Board of Directors District 5,1161448
+38,Logan,RE-1 Valley School District Board of Directors District 6,1161450
+38,Logan,RE-1 Valley School District Board of Directors District 7,1161452
+38,Logan,Proposition LL (Statutory),1161454
+38,Logan,Proposition MM (Statutory),1161456
+38,Logan,Logan County Referred Ballot Issue 1F,1161458
+38,Logan,City of Sterling Referred Ballot Issue 2Y,1161460
+38,Logan,City of Sterling Referred Ballot Question 2Z,1161462
+38,Logan,Town of Merino Referred Ballot Issue 2X,1161464
+38,Logan,Haxtun School District RE-2J Referred Ballot Issue 5A,1161466
+38,Logan,RE-1 Valley School District Referred Ballot Issue 4E,1161468
+39,Mesa,Mesa County Valley School District 51 Director District C,590257
+39,Mesa,Mesa County Valley School District 51 Director District D,590259
+39,Mesa,Mesa County Valley School District 51 Director District E,590261
+39,Mesa,Plateau Valley School District 50 Director District B,590263
+39,Mesa,Plateau Valley School District 50 Director District D,590265
+39,Mesa,Plateau Valley School District 50 Director District E,590267
+39,Mesa,Glade Park Fire Protection District 2 year term,590269
+39,Mesa,Glade Park Fire Protection District 4 year term,590271
+39,Mesa,Proposition LL (Statutory),590273
+39,Mesa,Proposition MM (Statutory),590275
+39,Mesa,Clifton Fire Protection District Ballot Issue 6B,590277
+39,Mesa,Plateau Valley Fire Protection District Ballot Issue 6C,590279
+39,Mesa,Plateau Valley Fire Protection District Ballot Issue 6D,590281
+39,Mesa,Proposed Glade Park Fire Protection District Ballot Issue 6A,590283
+40,Mineral,Mineral - Proposition LL (Statutory),2513
+40,Mineral,Proposition MM (Statutory),2515
+41,Moffat,City of Craig Mayor,1757094
+41,Moffat,City of Craig City Council,1757096
+41,Moffat,Moffat County Affiliated Junior College Board of Control Member - Four Year Term,1757098
+41,Moffat,Moffat County Affiliated Junior College Board of Control Member - Two Year Term,1757100
+41,Moffat,Proposition LL (Statutory),1757102
+41,Moffat,Proposition MM (Statutory),1757104
+41,Moffat,City of Craig Ballot Issue 2A,1757106
+41,Moffat,City of Craig Ballot Question 2B,1757108
+41,Moffat,Moffat County Local Marketing District Ballot Issue 6A,1757110
+42,Montezuma,Mancos School District RE-6 Board of Directors  ,2517995
+42,Montezuma,Montezuma-Cortez School District RE-1 Director - District A,2517997
+42,Montezuma,Montezuma-Cortez School District RE-1 Director - District B,2517999
+42,Montezuma,Montezuma-Cortez School District RE-1 Director - District E,2518001
+42,Montezuma,Montezuma-Cortez School District RE-1 Director - District F,2518003
+42,Montezuma,Montezuma-Cortez School District RE-1 Director - District D,2518005
+42,Montezuma,Proposition LL (Statutory),2518007
+42,Montezuma,Proposition MM (Statutory),2518009
+42,Montezuma,Mancos School District RE-6 Ballot Issue 4A,2518011
+42,Montezuma,Cortez Cemetery District Ballot Issue 6A,2518013
+42,Montezuma,Montezuma County Water District No.1 Ballot Issue 6B,2518015
+43,Montrose,Director for the Delta County Board of Education - District 1,130696
+43,Montrose,Director for the Delta County Board of Education - District 5,130698
+43,Montrose,Director for Montrose County Board of Education - District A,130700
+43,Montrose,Director for Montrose County Board of Education - District C,130702
+43,Montrose,Director for Montrose County Board of Education - District E,130704
+43,Montrose,Director for Montrose County Board of Education - District G,130706
+43,Montrose,Norwood School District R-2J Board of Directors,130708
+43,Montrose,Proposition LL (Statutory),130710
+43,Montrose,Proposition MM (Statutory),130712
+43,Montrose,Norwood School District R-2J Ballot Issue 5A,130714
+43,Montrose,Montrose Regional Library District Ballot Issue 6A,130716
+43,Montrose,Montrose Regional Library District Ballot Issue 6B,130718
+43,Montrose,City of Montrose - Amend City Charter,130720
+43,Montrose,County Commissioner District 1 - Recall Scott Mijares,130722
+43,Montrose,Montrose County Commissioner - District 1,130724
+44,Morgan,City of Brush Mayor,2278673
+44,Morgan,City of Fort Morgan Mayor,2278675
+44,Morgan,City of Brush Councilor Ward 1,2278677
+44,Morgan,City of Brush Councilor Ward 2,2278679
+44,Morgan,City of Brush Councilor Ward 3,2278681
+44,Morgan,City of Fort Morgan Councilmember Ward 1,2278683
+44,Morgan,City of Fort Morgan Councilmember Ward 2,2278685
+44,Morgan,City of Fort Morgan Councilmember Ward 3,2278687
+44,Morgan,Weldon Valley School District RE-20J Board of Education (4 year term),2278689
+44,Morgan,Weldon Valley School District RE-20J Board of Education (2 year term),2278691
+44,Morgan,Wiggins School District RE-50J Board Of Education,2278693
+44,Morgan,Proposition LL (Statutory),2278695
+44,Morgan,Proposition MM (Statutory),2278697
+44,Morgan,CITY OF FORT MORGAN BALLOT ISSUE  2A,2278699
+45,Otero,Rocky Ford Mayor,2286321
+45,Otero,Rocky Ford Council Member Ward 1,2286323
+45,Otero,La Junta Council Member at Large (Mayor),2286325
+45,Otero,La Junta Council Member Ward 1,2286327
+45,Otero,La Junta Council Member Ward 2,2286329
+45,Otero,La Junta Council Member Ward 3,2286331
+45,Otero,Manzanola School District 3J Board of Directors,2286333
+45,Otero,Swink School Board Member At Large - Swink 33 School District 4 year term,2286335
+45,Otero,Swink School Board Member At Large - Swink 33 School District 2 year term,2286337
+45,Otero,East Otero School District R-1 School Board Member At Large,2286339
+45,Otero,Proposition LL (Statutory),2286341
+45,Otero,Proposition MM (Statutory),2286343
+46,Ouray,City of Ouray Mayor,585041
+46,Ouray,City of Ouray Council Member - At Large,585043
+46,Ouray,Director for Montrose County Board of Education - District A,585045
+46,Ouray,Director for Montrose County Board of Education - District C,585047
+46,Ouray,Director for Montrose County Board of Education - District E,585049
+46,Ouray,Director for Montrose County Board of Education - District G,585051
+46,Ouray,Ouray School Board Director - At Large,585053
+46,Ouray,Proposition LL (Statutory),585055
+46,Ouray,Proposition MM (Statutory),585057
+46,Ouray,Cedar Hill Cemetery District Ballot Issue 6A,585059
+46,Ouray,Ouray Fire Protection Distict Ballot Issue 6B,585061
+46,Ouray,Ouray County Ballot Issue 1A,585063
+47,Park,Platte Canyon School District RE-1 Board of Directors - At Large,2300210
+47,Park,Proposition LL (Statutory),2300212
+47,Park,Proposition MM (Statutory),2300214
+47,Park,Park County Ballot Issue 1A,2300216
+47,Park,Lake George Fire Protection District Ballot Issue 6A,2300218
+47,Park,Jefferson-Como Fire Protection District Ballot Issue 6B - Property Tax Limit Waiver,2300220
+48,Phillips,Haxtun School District RE-2J Board of Directors,642786
+48,Phillips,Phillips - Proposition LL (Statutory),642788
+48,Phillips,Proposition MM (Statutory),642790
+48,Phillips,Haxtun School District RE-2J Referred Ballot Issue 5A,642792
+49,Pitkin,Aspen School District No. 1 - Board of Directors,559393
+49,Pitkin,Roaring Fork School District RE-1 Board of Directors - District A,559395
+49,Pitkin,Roaring Fork School District RE-1 Board of Directors - District E,559397
+49,Pitkin,Colorado Mountain College Board of Trustees - District 1,559399
+49,Pitkin,Colorado Mountain College Board of Trustees - District 3,559401
+49,Pitkin,Colorado Mountain College Board of Trustees - District 7,559403
+49,Pitkin,Colorado Mountain College Board of Trustees - At Large,559405
+49,Pitkin,Confluence Early Childhood Development Service District Board of Directors - District 4,559407
+49,Pitkin,Confluence Early Childhood Development Service District Board of Directors - District 5,559409
+49,Pitkin,Proposition LL (Statutory),559411
+49,Pitkin,Proposition MM (Statutory),559413
+49,Pitkin,Pitkin County Ballot Issue 1A,559415
+49,Pitkin,City of Aspen Ballot Issue 2A,559417
+49,Pitkin,City of Aspen Ballot Issue 2B,559419
+49,Pitkin,City of Aspen Ballot Question 2C,559421
+49,Pitkin,Town of Snowmass Village Ballot Issue 2D,559423
+49,Pitkin,Town of Basalt Ballot Issue 3A,559425
+49,Pitkin,Aspen School District No. 1 Ballot Issue 4A,559427
+49,Pitkin,Aspen School District No. 1 Ballot Issue 4B,559429
+49,Pitkin,Aspen Fire Protection District Ballot Issue 6A,559431
+49,Pitkin,Aspen Fire Protection District Ballot Issue 6B,559433
+49,Pitkin,Twining Flats Road Improvement District Ballot Issue 6C,559435
+49,Pitkin,Aspen Village Metropolitan District Ballot Issue 6D,559437
+49,Pitkin,Confluence Early Childhood Development Service District Ballot Issue 7A,559439
+49,Pitkin,Basalt Regional Library District Ballot Issue 7B,559441
+49,Pitkin,Colorado Mountain College Ballot issue 7C,559443
+49,Pitkin,Carbondale and Rural Fire Protection District Ballot Issue 7D,559445
+49,Pitkin,Carbondale and Rural Fire Protection District Ballot Issue 7E,559447
+50,Prowers,City of Lamar Mayor At Large - Two Year Term,650416
+50,Prowers,City of Lamar Council Member - Ward 1 - Four Year Term,650418
+50,Prowers,City of Lamar Council Member - Ward 2 - Four Year Term,650420
+50,Prowers,City of Lamar Council Member - Ward 3 - Four Year Term,650422
+50,Prowers,Granada School District RE-1 Director - District A - Four Year Term,650424
+50,Prowers,Granada School District RE-1 Director - District C - Four Year Term,650426
+50,Prowers,Granada School District RE-1 Director - District D - Two Year Term,650428
+50,Prowers,Prowers - Proposition LL (Statutory),650430
+50,Prowers,Proposition MM (Statutory),650432
+51,Pueblo,City Council Member-At Large,684003
+51,Pueblo,Pueblo City Council Member-District 1,684005
+51,Pueblo,Pueblo City Council Member-District 3,684007
+51,Pueblo,Member Pueblo Board of Water Works,684009
+51,Pueblo,Pueblo Civil Service Commissioner,684011
+51,Pueblo,Board of Education Director - D70 - District III,684013
+51,Pueblo,Board of Education Director - D70 - District IV,684015
+51,Pueblo,Board of Education Director - D70 - District V,684017
+51,Pueblo,Pueblo School District No. 60 School Director At-Large Four Year Term,684019
+51,Pueblo,Proposition LL (Statutory),684021
+51,Pueblo,Proposition MM (Statutory),684023
+51,Pueblo,QUESTION NO. 2A,684025
+51,Pueblo,QUESTION NO. 2B,684027
+51,Pueblo,Ballot Question No. 2C,684029
+51,Pueblo,Ballot Question No. 2D,684031
+51,Pueblo,Ballot Question No. 2E,684033
+51,Pueblo,Ballot Question No. 2F,684035
+51,Pueblo,Hanover Fire Protection District Ballot Issue 7A,684037
+51,Pueblo,Hanover Fire Protection District Ballot Issue 7B,684039
+51,Pueblo,Pueblo Rural Fire Protection Ballot Issue 6A,684041
+52,Rio Blanco,South Routt School District RE3 Director - District 1,583020
+52,Rio Blanco,South Routt School District RE3 Director - District 3,583022
+52,Rio Blanco,South Routt School District RE3 Director - District 4,583024
+52,Rio Blanco,South Routt School District RE3 Director - District 6,583026
+52,Rio Blanco,South Routt School District RE3 Director - District 7,583028
+52,Rio Blanco,Rangely School District RE-4 - Director District At Large (4 Year Term),583030
+52,Rio Blanco,Rangely School District RE-4 - Director District At Large (2 Year Term),583032
+52,Rio Blanco,Proposition LL (Statutory),583034
+52,Rio Blanco,Proposition MM (Statutory),583036
+52,Rio Blanco,South Routt School District No. RE-3 Ballot Issue 5A,583038
+53,Rio Grande,Center Consolidated School District 26 JT Director - District A,4313
+53,Rio Grande,Center Consolidated School District 26 JT Director - District B,4315
+53,Rio Grande,Upper Rio Grande School District C-7 Director-Four Year Term,4317
+53,Rio Grande,Proposition LL (Statutory),4319
+53,Rio Grande,Proposition MM (Statutory),4321
+53,Rio Grande,Rio Grande County Expansion of Use of County Lodging Tax Ballot Issue 1A,4323
+53,Rio Grande,Center Consolidated School District 26 JT Ballot Question 5B,4325
+54,Routt,City of Steamboat Springs City Council - District I,148032
+54,Routt,City of Steamboat Springs City Council - District II,148034
+54,Routt,City of Steamboat Springs City Council - District III,148036
+54,Routt,City of Steamboat Springs City Council - At Large,148038
+54,Routt,Hayden School District RE1 Director - At Large,148040
+54,Routt,South Routt School District RE3 Director - District 1,148042
+54,Routt,South Routt School District RE3 Director - District 3,148044
+54,Routt,South Routt School District RE3 Director - District 4,148046
+54,Routt,South Routt School District RE3 Director - District 6,148048
+54,Routt,South Routt School District RE3 Director - District 7,148050
+54,Routt,Steamboat Springs School District RE2 Director - At Large,148052
+54,Routt,Colorado Mountain College Board of Trustees - District 1,148054
+54,Routt,Colorado Mountain College Board of Trustees - District 3,148056
+54,Routt,Colorado Mountain College Board of Trustees - District 7,148058
+54,Routt,Colorado Mountain College Board of Trustees - At Large,148060
+54,Routt,Proposition LL (Statutory),148062
+54,Routt,Proposition MM (Statutory),148064
+54,Routt,City of Steamboat Springs Ballot Question 2D,148066
+54,Routt,Town of Hayden Ballot Question 2A,148068
+54,Routt,Town of Oak Creek Ballot Question 2B,148070
+54,Routt,Town of Yampa Ballot Question 2C,148072
+54,Routt,South Routt School District No. RE-3 Ballot Issue 5A,148074
+54,Routt,Colorado Mountain College Ballot Issue 7C,148076
+54,Routt,South Routt Medical Center Health Service District Ballot Issue 6A,148078
+54,Routt,Routt County Ballot Issue 1B,148080
+54,Routt,Routt County Ballot Question 1A,148082
+55,Saguache,Center Consolidated School District 26 JT Director - District A,7911
+55,Saguache,Center Consolidated School District 26 JT Director - District B,7913
+55,Saguache,Sangre de Cristo School District RE-22J Director - District South,7915
+55,Saguache,Sangre de Cristo School District RE-22J Director - At-Large,7917
+55,Saguache,Proposition LL (Statutory),7919
+55,Saguache,Proposition MM (Statutory),7921
+55,Saguache,Saguache - Center Consolidated School District 26 JT Ballot Question 5B,7923
+55,Saguache,Gunnison County Fire Protection District Ballot Issue 7A,7925
+57,San Miguel,Town of Telluride Town Council,733689
+57,San Miguel,Dolores County School District RE-2J Board of Directors - District A,733691
+57,San Miguel,Dolores County School District RE-2J Board of Directors - District B,733693
+57,San Miguel,Dolores County School District RE-2J Board of Directors - District E,733695
+57,San Miguel,Norwood School District R-2J Board of Directors,733697
+57,San Miguel,Telluride School District R-1 Board of Directors,733699
+57,San Miguel,Proposition LL (Statutory),733701
+57,San Miguel,Proposition MM (Statutory),733703
+57,San Miguel,San Miguel County Ballot Question 1A: Early Childhood Education Fund and Mental Health Services Fund,733705
+57,San Miguel,San Miguel County Ballot Question 1B: Road and Bridge Fund,733707
+57,San Miguel,Town of Telluride Ballot Issue 2A,733709
+57,San Miguel,Town of Telluride Ballot Issue 2B,733711
+57,San Miguel,Town of Telluride Ballot Question 2C,733713
+57,San Miguel,Town of Telluride Ballot Question 300,733715
+57,San Miguel,Norwood School District R-2J Ballot Issue 5A,733717
+58,Sedgwick,Haxtun School District RE-2J Board of Directors,1249
+58,Sedgwick,Julesburg RE-1 School District Director - 2 Year Term,1251
+58,Sedgwick,Julesburg RE-1 School District Director - 4 Year Term,1253
+58,Sedgwick, Sedgwick - Proposition LL (Statutory),1255
+58,Sedgwick,Proposition MM (Statutory),1257
+58,Sedgwick,Haxtun School District RE-2J Referred Ballot Issue 5A,1259
+59,Summit,Summit School District RE-1 Board of Directors - At Large,1739833
+59,Summit,West Grand School District 1-Jt Board of Directors - 4 year term,1739835
+59,Summit,West Grand School District 1-Jt Board of Directors - 2 year term,1739837
+59,Summit,Colorado Mountain College Board of Trustees - District 1,1739839
+59,Summit,Colorado Mountain College Board of Trustees - District 3,1739841
+59,Summit,Colorado Mountain College Board of Trustees - District 7,1739843
+59,Summit,Colorado Mountain College Board of Trustees - At Large,1739845
+59,Summit,Proposition LL (Statutory),1739847
+59,Summit,Proposition MM (Statutory),1739849
+59,Summit,Summit County Referred Measure 1A,1739851
+59,Summit,Colorado Mountain College Ballot Issue 7C,1739853
+60,Teller,City of Victor Mayor,163111
+60,Teller,City of Cripple Creek Council - Ward 4,163113
+60,Teller,City of Cripple Creek Council - Ward 5,163115
+60,Teller,Victor Council Ward 1,163117
+60,Teller,Victor Council Ward 2,163119
+60,Teller,Cripple Creek-Victor School District RE-1 Board of Directors - At-large,163121
+60,Teller,Woodland Park School District RE-2 Board of Directors - District B - At Large,163123
+60,Teller,Woodland Park School District RE-2 Board of Directors - District D,163125
+60,Teller,Woodland Park School District RE-2 Board of Directors - District E,163127
+60,Teller,Proposition LL (Statutory),163129
+60,Teller,Proposition MM (Statutory),163131
+60,Teller,City of Cripple Creek Ballot Question 2B,163133
+60,Teller,City of Cripple Creek Home Rule Charter Commission,163135
+60,Teller,City of Victor Ballot Question 2A,163137
+60,Teller,City of Woodland Park Ballot Question 2C,163139
+60,Teller,City of Woodland Park Ballot Question 2D,163141
+60,Teller,City of Woodland Park Ballot Question 2E,163143
+60,Teller,Cripple Creek-Victor School District RE-1 Ballot Issue 4A,163145
+60,Teller,Florissant Fire Protection District Ballot Issue 6A,163147
+61,Washington,Akron School District R-1 School Board Director At-Large - 2 Year Term,1737698
+61,Washington,Akron School District R-1 School Board Director At-Large - 4 Year Term,1737700
+61,Washington,Proposition LL (Statutory),1737702
+61,Washington,Proposition MM (Statutory),1737704
+62,Weld,City of Brighton Mayor,1343275
+62,Weld,City of Brighton Councilmember - Ward 1,1343277
+62,Weld,City of Brighton Councilmember - Ward 2,1343279
+62,Weld,City of Dacono Council Members,1343281
+62,Weld,City of Fort Lupton Mayor,1343283
+62,Weld,City of Fort Lupton Ward 1 Councilmember,1343285
+62,Weld,City of Fort Lupton Ward 2 Councilmember,1343287
+62,Weld,City of Fort Lupton Ward 3 Councilmember,1343289
+62,Weld,City of Greeley Mayor,1343291
+62,Weld,City of Greeley Councilmember At-Large,1343293
+62,Weld,City of Greeley Councilmember Ward 2,1343295
+62,Weld,City of Greeley Councilmember Ward 3,1343297
+62,Weld,City of Greeley Councilmember Ward 4,1343299
+62,Weld,City of Longmont Mayor,1343301
+62,Weld,City of Longmont City Council At Large,1343303
+62,Weld,City of Northglenn Council Member - Ward 2,1343305
+62,Weld,Town of Firestone Special Vacancy Election Board of Trustees,1343307
+62,Weld,Town of Severance Council Members,1343309
+62,Weld,School District 27J Board of Education Director District No. 2,1343311
+62,Weld,School District 27J Board of Education Director District No. 4,1343313
+62,Weld,School District 27J Board of Education Director District No. 5,1343315
+62,Weld,School District 27J Board of Education Director District No. 6,1343317
+62,Weld,Weld County School District 6 Board of Education School Director,1343319
+62,Weld,St. Vrain Valley School District RE-1J Board of Education Director in Director District B,1343321
+62,Weld,St. Vrain Valley School District RE-1J Board of Education Director in Director District D,1343323
+62,Weld,St. Vrain Valley School District RE-1J Board of Education Director in Director District E,1343325
+62,Weld,St. Vrain Valley School District RE-1J Board of Education Director in Director District F,1343327
+62,Weld,City of Longmont Municipal Court Judge - Frick,1343329
+62,Weld,Thompson School District R2-J Board of Education Director District B,1343331
+62,Weld,Thompson School District R2-J Board of Education Director District E,1343333
+62,Weld,Thompson School District R2-J Board of Education Director District F,1343335
+62,Weld,Weld County School District RE-10J Director District B,1343337
+62,Weld,Weld County School District RE-10J Director District C,1343339
+62,Weld,Weld RE-8 School District Director District A,1343341
+62,Weld,Weld RE-8 School District Director District F,1343343
+62,Weld,Weld RE-8 School District Director District G,1343345
+62,Weld,Weldon Valley School District RE-20J Board of Education (4 year term),1343347
+62,Weld,Weldon Valley School District RE-20J Board of Education (2 year term),1343349
+62,Weld,Wiggins School District RE-50J Board of Education,1343351
+62,Weld,Weld County School District RE-4 Director District A,1343353
+62,Weld,Weld County School District RE-4 Director District C,1343355
+62,Weld,Proposition LL (Statutory),1343357
+62,Weld,Proposition MM (Statutory),1343359
+62,Weld,City of Evans Ballot Issue 2A,1343361
+62,Weld,Town of Mead Ballot Issue 2B,1343363
+62,Weld,City of Fort Lupton Ballot Issue 2C,1343365
+62,Weld,City of Dacono Ballot Question 2D,1343367
+62,Weld,City of Dacono Ballot Question 2E,1343369
+62,Weld,City of Dacono Ballot Question 2F,1343371
+62,Weld,City of Dacono Ballot Question 2G,1343373
+62,Weld,Town of Ault Ballot Issue 2H,1343375
+62,Weld,Town of Severance Ballot Issue 2I,1343377
+62,Weld,Town of Firestone Ballot Question 2J,1343379
+62,Weld,Town of Timnath Ballot Issue 3A,1343381
+62,Weld,Thompson School District R2-J Ballot Issue 5A,1343383
+62,Weld,Weld County School District RE-10J Ballot Issue 5B,1343385
+62,Weld,Evans Fire Protection District Ballot Issue 6A,1343387
+62,Weld,Hudson Fire Protection District Ballot Issue 6B,1343389
+63,Yuma,City of Yuma Mayor,111778
+63,Yuma,City of Yuma City Council,111780
+63,Yuma,Haxtun School District RE-2J Board of Directors,111782
+63,Yuma,Wray School District RD-2 Board of Education Directors,111784
+63,Yuma,Yuma School District-1 Board of Education Directors,111786
+63,Yuma,Proposition LL (Statutory),111788
+63,Yuma,Proposition MM (Statutory),111790
+63,Yuma,City of Yuma Ballot Issue 2A,111792
+63,Yuma,City of Yuma Ballot Question 2B,111794
+63,Yuma,Haxtun School District RE-2J Referred Ballot Issue 5A,111796
+64,Broomfield,City and County of Broomfield - Mayor (2 Years),1762360
+64,Broomfield,City and County of Broomfield Councilmember Ward 1 (4 Years),1762362
+64,Broomfield,City and County of Broomfield Councilmember Ward 2 (4 Years),1762364
+64,Broomfield,City and County of Broomfield Councilmember Ward 3 (4 Years),1762366
+64,Broomfield,City and County of Broomfield Councilmember Ward 4 (4 Years),1762368
+64,Broomfield,City and County of Broomfield Councilmember Ward 5 (4 Years),1762370
+64,Broomfield,Adams 12 Five Star School District Director - District No 3,1762372
+64,Broomfield,Adams 12 Five Star School District Director - District No 4,1762374
+64,Broomfield,Boulder Valley School District RE-2 Director District B (4 Years),1762376
+64,Broomfield,Boulder Valley School District RE-2 Director District E (4 Years),1762378
+64,Broomfield,Boulder Valley School District RE-2 Director District F (4 Years),1762380
+64,Broomfield,Jefferson County School District R-1 Director District 1,1762382
+64,Broomfield,Jefferson County School District R-1 Director District 2,1762384
+64,Broomfield,Jefferson County School District R-1 Director District 5,1762386
+64,Broomfield,School District 27J Board of Education Director District No. 2,1762388
+64,Broomfield,School District 27J Board of Education Director District No. 4,1762390
+64,Broomfield,School District 27J Board of Education Director District No. 5,1762392
+64,Broomfield,School District 27J Board of Education Director District No. 6,1762394
+64,Broomfield,St. Vrain Valley School District RE-1J Board of Education Director in Director District B,1762396
+64,Broomfield,St. Vrain Valley School District RE-1J Board of Education Director in Director District D,1762398
+64,Broomfield,St. Vrain Valley School District RE-1J Board of Education Director in Director District E,1762400
+64,Broomfield,St. Vrain Valley School District RE-1J Board of Education Director in Director District F,1762402
+64,Broomfield,Weld RE-8 School District Director District A,1762404
+64,Broomfield,Weld RE-8 School District Director District F,1762406
+64,Broomfield,Weld RE-8 School District Director District G,1762408
+64,Broomfield,Proposition LL (Statutory),1762410
+64,Broomfield,Proposition MM (Statutory),1762412
+64,Broomfield,Proposed Charter Amendment No.1A,1762414
+64,Broomfield,Proposed Charter Amendment No. 1B,1762416
+64,Broomfield,Proposed Charter Amendment No. 1C,1762418
+64,Broomfield,Proposed Charter Amendment No. 1D,1762420
+64,Broomfield,Proposed Charter Amendment No. 1E,1762422
+64,Broomfield,Proposed Charter Amendment No. 1F,1762424
+64,Broomfield,ADAMS 12 FIVE STAR SCHOOLS BALLOT ISSUE 5B,1762426

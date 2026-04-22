@@ -14,7 +14,7 @@ import kotlin.collections.forEach
 import kotlin.collections.get
 import kotlin.random.Random
 
-private val logger = KotlinLogging.logger("OneAuditContestBoulder")
+private val logger = KotlinLogging.logger("BoulderContestBuilder")
 
 class BoulderContestBuilder(val info: ContestInfo,
                             val sovoContest: BoulderContestVotes,

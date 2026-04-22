@@ -26,13 +26,12 @@ See [references](papers/papers.txt) for reference papers.
   * [CLCA Audits](#clca-audits)
     * [The CLCA betting function](#the-clca-betting-function)
   * [OneAudit](#oneaudit-1)
-    * [OneAudit](#oneaudit-)
-* [Attacks](#attacks)
-  * [Category A. CLCA with styles](#category-a-clca-with-styles)
-    * [Case 1. Prover changes CVR votes for A to B.](#case-1-prover-changes-cvr-votes-for-a-to-b)
-    * [Case 2. Prover changes CVR votes for A to undervotes.](#case-2-prover-changes-cvr-votes-for-a-to-undervotes)
-    * [Case 3. Prover removes CVR ballots.](#case-3-prover-removes-cvr-ballots)
-    * [Case 4. Prover removes CVR ballots and modifies Nc.](#case-4-prover-removes-cvr-ballots-and-modifies-nc)
+  * [Cast Vote Records](#cast-vote-records)
+  * [MVRs](#mvrs)
+  * [Audit Workflow](#audit-workflow)
+  * [Audit details](#audit-details)
+* [Real vs Simulation](#real-vs-simulation)
+  * [The Card Manifest](#the-card-manifest)
 <!-- TOC -->
 
 # Missing Ballots

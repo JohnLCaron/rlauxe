@@ -1,41 +1,56 @@
 RLA papers
 
-2010	Super-Simple Simultaneous Single-Ballot Risk-Limiting Audits	Stark
+2010	Super-Simple Simultaneous Single-Ballot Risk-Limiting Audits
+    Stark
 	Used by Colorado RLA, see Audit.pValueApproximation().
 
-2011	SOBA: Secrecy-preserving Observable Ballot-level Audit 	Benolah, Jones, Lazerath,  Lindeman, Stark,.2 July, 2011
+2011	SOBA: Secrecy-preserving Observable Ballot-level Audit
+    Benolah, Jones, Lazerath,  Lindeman, Stark,.2 July, 2011
 
-2012	A gentle introduction to risk-limiting audits			Mark Lindeman and Philip B. Stark
+2012	A gentle introduction to risk-limiting audits
+    Mark Lindeman and Philip B. Stark
 
-2012	Limiting Risk by Turning Manifest Phantoms into Evil Zombies	Jorge H. Banuelos, Philip B. Stark. July 14, 2012
+2012	Limiting Risk by Turning Manifest Phantoms into Evil Zombies
+    Jorge H. Banuelos, Philip B. Stark. July 14, 2012
 
-2012	BRAVO: Ballot-polling Risk-limiting Audits to Verify Outcomes	Mark Lindeman, Philip B. Stark, Vincent S. Yates; Aug 2012
+2012	BRAVO: Ballot-polling Risk-limiting Audits to Verify Outcomes
+    Mark Lindeman, Philip B. Stark, Vincent S. Yates; Aug 2012
 	BRAVO, a flexible protocol for risk-limiting ballot-polling audits
 
-2012	Risk-Limiting Post-Election Audits: Why and How	(v 1.1)		Risk-Limiting Audits Working Group
+2012	Risk-Limiting Post-Election Audits: Why and How	(v 1.1)
+    Risk-Limiting Audits Working Group
 
-2014	Verifiable European Elections: Risk-limiting Audits for D’Hondt and its relatives	Stark and Teague
+2014	Verifiable European Elections: Risk-limiting Audits for D’Hondt and its relatives
+    Stark and Teague
 	proportional representation election systems
 
-2018	Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program		Mark Lindeman, Neal McBurnett, Kellie Ottoboni, Philip B. Stark. March 5, 2018
+2018	Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program
+    Mark Lindeman, Neal McBurnett, Kellie Ottoboni, Philip B. Stark. March 5, 2018
 
-2018    Consistent Sampling with Replacement        Ronald Rivest   August 31, 2018
+2018    Consistent Sampling with Replacement
+    Ronald Rivest   August 31, 2018
     https://arxiv.org/abs/1808.10016
 
-2018	Risk-Limiting Audits by Stratified Union-Intersection Tests of Elections (SUITE)	Kellie Ottoboni, Philip B. Stark, Mark Lindeman, and Neal McBurnett.  12 Sep 2018	
+2018	Risk-Limiting Audits by Stratified Union-Intersection Tests of Elections (SUITE)
+    Kellie Ottoboni, Philip B. Stark, Mark Lindeman, and Neal McBurnett.  12 Sep 2018
 	Stratified sampling with two strata: ballots cast in CVR counties and those cast in no-CVR counties.
 	https://github.com/pbstark/CORLA18
 
-2018	Bernoulli ballot polling: A manifest improvement for risk-limiting audits	Kellie Ottoboni, Matthew Bernhard, J. Alex Halderman, Ronald L. Rivest, Philip B. Stark. 15 Dec 2018
+2018	Bernoulli ballot polling: A manifest improvement for risk-limiting audits
+    Kellie Ottoboni, Matthew Bernhard, J. Alex Halderman, Ronald L. Rivest, Philip B. Stark. 15 Dec 2018
 	sampling for ballot polling
 	
-2019    VAULT: Verifiable Audits Using Limited Transparency		Benolah, Stark, Teague
+2019    VAULT: Verifiable Audits Using Limited Transparency
+    Benolah, Stark, Teague
 
-2019	RAIRE: Risk-Limiting Audits for IRV Elections			Blom, Stucky, Teague,  29 Oct 2019
+2019	RAIRE: Risk-Limiting Audits for IRV Elections
+    Blom, Stucky, Teague,  29 Oct 2019
 
-2020	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA	Stark; 24 Mar 2020
+2020	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA
+    Stark; 24 Mar 2020
 
-2020  	Estimating means of bounded random variables by betting. 	WAUDBY-SMITH and RAMDAS; Submitted on 19 Oct 2020, Aug 29, 2022 (revised)
+2020  	Estimating means of bounded random variables by betting.
+    WAUDBY-SMITH and RAMDAS; Submitted on 19 Oct 2020, Aug 29, 2022 (revised)
 	https://arxiv.org/abs/2010.09686.
 
 2020	More style, less work: card-style data decrease risk-limiting audit sample sizes	Amanda K. Glazer, Jacob V. Spertus, and Philip B. Stark; 6 Dec 2020
@@ -43,60 +58,76 @@ RLA papers
 	see chapter 7 "Implementation"
 	MoreStyle.pdf
 
-2021	Risk-limiting Audits: A Practical Systematization of Knowledge  Matt Bernhard
+2021	Risk-limiting Audits: A Practical Systematization of Knowledge
+    Matt Bernhard
 
-2021	A Unified Evaluation of Two-Candidate Ballot-Polling Election Auditing Methods	Huang; 12 May 2021
+2021	A Unified Evaluation of Two-Candidate Ballot-Polling Election Auditing Methods
+    Huang; 12 May 2021
 	unify ‘ballot-polling’ RLAs and Baysian Audits.
 
-2021	The ATHENA Class of Risk-Limiting Ballot Polling Audits		Filip Zagórski, Grant McClearn, Sarah Morin, Neal McBurnett, and Poorvi L. Vora. February 23, 2021
+2021	The ATHENA Class of Risk-Limiting Ballot Polling Audits
+    Filip Zagórski, Grant McClearn, Sarah Morin, Neal McBurnett, and Poorvi L. Vora. February 23, 2021
 	ATHENA class of R2 (round by round) stopping rules
 
-2021	RiLACS: Risk-Limiting Audits via Confidence Sequences		Ian Waudby-Smith, Philip B. Stark, Aaditya Ramdas; Jul 23, 2021
+2021	RiLACS: Risk-Limiting Audits via Confidence Sequences
+    Ian Waudby-Smith, Philip B. Stark, Aaditya Ramdas; Jul 23, 2021
 	RLAs using confidence sequences
 
-2021    Assertion-Based Approaches to Auditing Complex Elections, with Application to Party-List Proportional Elections; 2 Oct, 2021
-    Blom, Budurushi, Rivest, Stark, Stuckey, Teague, Vukcevic
+2021    Assertion-Based Approaches to Auditing Complex Elections, with Application to Party-List Proportional Elections
+    Blom, Budurushi, Rivest, Stark, Stuckey, Teague, Vukcevic, 2 Oct, 2021
     http://arxiv.org/abs/2107.11903v2
 
-2022	ALPHA: Audit that Learns from Previously Hand-Audited Ballots	Stark; Jan 7, 2022
+2022	ALPHA: Audit that Learns from Previously Hand-Audited Ballots
+    Stark; Jan 7, 2022
 	http://arxiv.org/abs/2201.02707v9  https://github.com/pbstark/alpha
 
-2022	Simulations of Ballot Polling Risk-Limiting Audits		Oliver Broadrick, Sarah Morin, Grant McClearn, Neal McBurnett, Poorvi L. Vora, and Filip Zagórski
+2022	Simulations of Ballot Polling Risk-Limiting Audits
+    Oliver Broadrick, Sarah Morin, Grant McClearn, Neal McBurnett, Poorvi L. Vora, and Filip Zagórski
 	Compare Minerva and Bravo
 
-2022	Sweeter than SUITE: Supermartingale Stratified Union-Intersection Tests of Elections	Jacob V. Spertus and Philip B. Stark; 25 Jul 2022
+2022	Sweeter than SUITE: Supermartingale Stratified Union-Intersection Tests of Elections
+    Jacob V. Spertus and Philip B. Stark; 25 Jul 2022
 	combine the union-intersection tests in SUITE and the nonnegative supermartingale tests in ALPHA
 	show how to construct a stratified comparison audit using SHANGRLA
 	investigates sample sizes for a range of combining functions, TSMs, and selection strategies for stratified comparison audits.
     https://arxiv.org/abs/2207.03379
 
-2022	PROVIDENCE: a Flexible Round-by-Round Risk-Limiting Audit	Oliver Broadrick, Poorvi L. Vora1, and Filip Zagórski; 17 Oct 2022
+2022	PROVIDENCE: a Flexible Round-by-Round Risk-Limiting Audit
+    Oliver Broadrick, Poorvi L. Vora1, and Filip Zagórski; 17 Oct 2022
 	an audit with the efficiency of MINERVA and flexibility of BRAVO
 
-2023	ONEAudit: Overstatement-Net-Equivalent Risk-Limiting Audit	Stark, P.B., 6 Mar 2023. 
+2023	ONEAudit: Overstatement-Net-Equivalent Risk-Limiting Audit
+    Stark, P.B., 6 Mar 2023.
 	CLCA can use CVRs from the voting system for any number of cards and ONE CVRs created ad lib for the rest.
 	https://github.com/pbstark/ONEAudit
 
-2023 	COBRA: Comparison-Optimal Betting for Risk-limiting Audits, Jacob Spertus, 16 Mar 2023
+2023 	COBRA: Comparison-Optimal Betting for Risk-limiting Audits
+    Jacob Spertus, 16 Mar 2023
 	construct highly efficient RLAs by optimizing super-martingale tuning parameters—bets—for ballot-level comparison audits.
 
-2023 	Non(c)esuch Card-Level Comparison Risk-Limiting Audits		Philip B. Stark		30 Aug 2023
+2023 	Non(c)esuch Card-Level Comparison Risk-Limiting Audits
+    Philip B. Stark		30 Aug 2023
 	a method for conducting CLCAs that maintains the risk limit even if the system does not print a genuine nonce on each ballot or misreports the identifiers it used.
 
-2023	Stylish Risk-Limiting Audits in Practice		Amanda K. Glazer, Jacob V. Spertus, Philip B. Stark		16 Sep 2023
+2023	Stylish Risk-Limiting Audits in Practice
+    Amanda K. Glazer, Jacob V. Spertus, Philip B. Stark		16 Sep 2023
 	Code that produced our results is available at https://github.com/pbstark/SHANGRLA.
 
-2023 	Adaptively Weighted Audits of Instant-Runoff Voting Elections: AWAIRE	Ek, Stark, Stuckey, Vukcevic; 5 Oct 2023
+2023 	Adaptively Weighted Audits of Instant-Runoff Voting Elections: AWAIRE
+    Ek, Stark, Stuckey, Vukcevic; 5 Oct 2023
 	efficiently audit IRV elections when CVRs are not available.
 	
-2024	Efficient Weighting Schemes for Auditing Instant-Runoff Voting Elections	Ek, Stark, Stuckey, Vukcevic	6 May 2024
+2024	Efficient Weighting Schemes for Auditing Instant-Runoff Voting Elections
+    Ek, Stark, Stuckey, Vukcevic	6 May 2024
 	more advanced stuff on AWAIRE
 	
-2024	Sequential stratified inference for the mean		Jacob V. Spertus, Mayuri Sridhar, Philip B. Stark		September 11, 2024
+2024	Sequential stratified inference for the mean
+    Jacob V. Spertus, Mayuri Sridhar, Philip B. Stark		September 11, 2024
 	https://github.com/spertus/UI-NNSMs
 	https://arxiv.org/abs/2409.06680        version 3 March 13, 2026
 
-2025    Dice, but don’t slice: Optimizing the efficiency of ONEAudit,   Spertus, Glazer and Stark,       July 25 2025
+2025    Dice, but don’t slice: Optimizing the efficiency of ONEAudit,
+    Spertus, Glazer and Stark,       July 25 2025
     https://arxiv.org/pdf/2507.22179; https://github.com/spertus/UI-TS
 
 2026    Risk-Limiting Audits Are Interactive Proofs — How Do We Guarantee They Are Sound?

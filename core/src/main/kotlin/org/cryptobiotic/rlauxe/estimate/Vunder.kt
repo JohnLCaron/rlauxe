@@ -64,7 +64,7 @@ data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pai
     }
 }
 
-data class Choice(val vunderIdx: Int, val cands: IntArray, var remaining: Int)
+class Choice(val vunderIdx: Int, val cands: IntArray, var remaining: Int)
 
 // call this to create a new set of cvrs
 class VunderPicker(val vunder: Vunder) {

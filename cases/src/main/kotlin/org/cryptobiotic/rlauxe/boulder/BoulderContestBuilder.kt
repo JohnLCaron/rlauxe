@@ -14,7 +14,7 @@ import kotlin.collections.forEach
 import kotlin.collections.get
 import kotlin.random.Random
 
-private val logger = KotlinLogging.logger("OneAuditContestBoulder")
+private val logger = KotlinLogging.logger("BoulderContestBuilder")
 
 class BoulderContestBuilder(val info: ContestInfo,
                             val sovoContest: BoulderContestVotes,
@@ -105,9 +105,8 @@ class BoulderContestBuilder(val info: ContestInfo,
 
     fun ncards(): Int {
         // for contest 20, correct the ncards, ignore undervote count
-        return if (info.id == 20)
-            8256
-        else return sumAllCards()
+        return if (info.name == "Town of Superior - Truste") 8256  // TODO fix this
+        else sumAllCards()
     }
 
     // total number of cards for this contest in the pools. this is dynamic because the pools get adjusted

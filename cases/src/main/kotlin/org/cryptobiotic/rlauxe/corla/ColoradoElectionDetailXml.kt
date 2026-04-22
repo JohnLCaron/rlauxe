@@ -25,16 +25,22 @@ import java.io.File
 //            <County name="Adams" totalVoters="320225" ballotsCast="236899" voterTurnout="73.98" precinctsParticipating="283" precinctsReported="283" precinctsReportingPercent="100.00" />
 //            <County name="Alamosa" totalVoters="10321" ballotsCast="7671" voterTurnout="74.32" precinctsParticipating="8" precinctsReported="8" precinctsReportingPercent="100.00" />
 // ...
+//    <Contest ...>
+//       <ParticipatingCounties ...>
+//           <County>
+//       <Choice test="candidate">
+//           <VoteType>
+//               <County name="countyName" votes = "voteCount">
 
 @Serializable
 @XmlSerialName(value = "ElectionResult")
-data class ElectionDetailXml(
+data class ElectionResult(
     @XmlElement val Timestamp: String,
     @XmlElement val ElectionName: String,
     @XmlElement val ElectionDate: String,
     @XmlElement val Region: String,
     @XmlElement val ElectionVoterTurnout: ElectionVoterTurnout,
-    @XmlElement val contests: List<ElectionDetailContest>,
+    @XmlElement val contests: List<CorlaXmlContest>,
 ) {
     override fun toString() = buildString {
         appendLine("ElectionResult(Timestamp='$Timestamp', ElectionName='$ElectionName', ElectionDate='$ElectionDate', Region='$Region'")
@@ -85,7 +91,7 @@ data class County(
 
 @Serializable
 @XmlSerialName(value = "Contest")
-data class ElectionDetailContest(
+data class CorlaXmlContest(
     val key: Int,
     val text: String,
     val voteFor: Int,
@@ -99,7 +105,7 @@ data class ElectionDetailContest(
     val choices: List<Choice>,
 ) {
     override fun toString() = buildString {
-        appendLine("Contest(key=$key, text='$text', voteFor=$voteFor, isQuestion=$isQuestion, countiesParticipating=$countiesParticipating, countiesReported=$countiesReported, precinctsParticipating=$precinctsParticipating, precinctsReported=$precinctsReported, precinctsReportingPercent=$precinctsReportingPercent")
+        appendLine("CorlaXmlContest(key=$key, name='$text', voteFor=$voteFor, isQuestion=$isQuestion, countiesParticipating=$countiesParticipating, countiesReported=$countiesReported, precinctsParticipating=$precinctsParticipating, precinctsReported=$precinctsReported, precinctsReportingPercent=$precinctsReportingPercent")
         pcounties.participatingCounties.forEach { appendLine("      $it")}
         appendLine()
         choices.forEach { appendLine("      $it")}
@@ -143,6 +149,14 @@ data class Choice(
     override fun toString() = buildString {
         append("Choice(key=$key, text='$text', party='$party', totalVotes=$totalVotes, voteTypes=$voteTypes)")
     }
+
+    fun id(): Int {
+        when {
+            key == "Yes" -> return 1
+            key == "No" -> return 2
+            else -> return key.toInt()
+        }
+    }
 }
 
 @Serializable
@@ -165,16 +179,16 @@ data class CountyVote(
     val votes: Int,
 )
 
-fun readColoradoElectionDetail(filename : String) : ElectionDetailXml {
+fun readColoradoElectionDetail(filename : String) : ElectionResult {
     println("readColoradoElectionDetail filename = ${filename}")
 
     // gulp the entire file to a string
     val file = File(filename)
     val text = file.readText(Charsets.UTF_8)
 
-    val serializer = serializer<ElectionDetailXml>() // use the default serializer
+    val serializer = serializer<ElectionResult>() // use the default serializer
     val xml = XML { indent = 2 } // Create the configuration for (de)serialization
-    val result : ElectionDetailXml = xml.decodeFromString(serializer, text)
+    val result : ElectionResult = xml.decodeFromString(serializer, text)
 
     return result
 }

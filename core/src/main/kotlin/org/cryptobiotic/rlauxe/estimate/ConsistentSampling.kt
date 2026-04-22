@@ -47,6 +47,9 @@ fun removeContestsAndSample(
         // do it again
     }
 
+    // debug
+    // lastCardsUsed = consistentSampling( auditRound, sortedManifest, previousSamples)
+
     if (verifyMaxIndex) { // debugging, probably dont need this anymore
         val countSamples = mutableMapOf<Int, Int>()
         contestsNotDone.forEach { countSamples[it.id] = 0}
@@ -173,13 +176,13 @@ fun consistentSampling(
     val sampledCards = mutableListOf<AuditableCard>()
     var cardIndex = 0  // track maximum index (not done yet)
 
-    var totalSamples = auditRound.auditorWantNewMvrs
-    if (totalSamples == null || totalSamples < 0) totalSamples = Int.MAX_VALUE
+    var maxNewSamples = auditRound.auditorWantNewMvrs
+    if (maxNewSamples == null || maxNewSamples < 0) maxNewSamples = Int.MAX_VALUE
 
     val sortedCardIter = sortedManifest.cards.iterator()
     while (
         sortedCardIter.hasNext() &&
-        sampledCards.size < totalSamples &&
+        sampledCards.size < maxNewSamples &&
         contestsIncluded.any { it.haveSampleSize < (wantSampleSize[it.id] ?: 0) }
     ) {
         // get the next card in sorted order
@@ -223,7 +226,18 @@ fun consistentSampling(
 
         cardIndex++
     }
-
+    /*
+    logger.info{"consistent sampling read $cardIndex cards"}
+    val contest19 = contestsIncluded.find { it.id == 19 }!!
+    logger.info { "contest ${contest19.id}:  (have) ${contest19.haveSampleSize} ${(wantSampleSize[contest19.id] ?: 0)} (want) maxSampleAllowed=${contest19.maxSampleAllowed}" }
+    val extract = mutableListOf<AuditableCard>()
+    sampledCards.forEachIndexed { idx, card ->
+        if (card.hasContest(19) && idx < contest19.maxSampleAllowed!!) {
+            extract.add(card)
+        }
+    }
+    println("extract 19 = ${extract.size}")
+    print("")
     // TODO why would this happen ??
     val wantMore = contestsIncluded.any { it.haveSampleSize < (wantSampleSize[it.id] ?: 0) }
     if (wantMore) {
@@ -231,7 +245,7 @@ fun consistentSampling(
             if (it.haveSampleSize < (wantSampleSize[it.id] ?: 0))
                 logger.warn { "contest ${it.id}:  (have) ${it.haveSampleSize} < ${(wantSampleSize[it.id] ?: 0)} (want)" }
         }
-    }
+    } */
     // if (debugConsistent) logger.info{"**consistentSampling haveSampleSize = $haveSampleSize, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs"}
 
     // set the results into the auditRound direclty

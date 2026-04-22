@@ -36,9 +36,9 @@ open class CreateColoradoElection (
     val pollingMode: PollingMode?,
 ): ElectionBuilder {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
-    val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
+    val electionDetailXml: ElectionResult = readColoradoElectionDetail(electionDetailXmlFile)
 
-    val corlaContestBuilders = makeOneAuditBuilders(electionDetailXml, roundContests)
+    val corlaContestBuilders = makeContestBuilders(electionDetailXml, roundContests)
     val infoMap = corlaContestBuilders.associate { it.info.id to it.info }
 
     val cardPools: List<OneAuditPoolFromBallotStyle>
@@ -50,7 +50,7 @@ open class CreateColoradoElection (
     val publisher = Publisher(auditdir)
 
     init {
-        cardPools = convertPrecinctsToCardPools(precinctFile, infoMap)
+        cardPools = convertPrecinctsToCardPools(precinctFile, infoMap, hasExactContests)
 
         // set contest total cards as sum over pools
         corlaContestBuilders.forEach { it.adjustPoolInfo(cardPools) }
@@ -95,8 +95,8 @@ open class CreateColoradoElection (
                      else ContestWithAssertions.make(contests, npopMap, isClca = auditType.isClca(),)
     }
 
-    private fun makeOneAuditBuilders(
-        electionDetailXml: ElectionDetailXml,
+    private fun makeContestBuilders(
+        electionDetailXml: ElectionResult,
         roundContests: List<CorlaContestRoundCsv>
     ): List<CorlaContestBuilder> {
         val roundContestMap = roundContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
@@ -138,42 +138,6 @@ open class CreateColoradoElection (
         }
 
         return contests
-    }
-
-    // we create the simulated mvrs from the pools; used for both CLCA and Polling; OA is not feasible
-    private fun convertPrecinctsToCardPools(
-        precinctFile: String,
-        infoMap: Map<Int, ContestInfo>
-    ): List<OneAuditPoolFromBallotStyle> {
-        val reader = ZipReader(precinctFile)
-        val input = reader.inputStream("2024GeneralPrecinctLevelResults.csv")
-        val precincts = readColoradoPrecinctLevelResults(input)
-        println("precincts = ${precincts.size}")
-
-        return precincts.mapIndexed { idx, precinct ->
-            val contestTabs = mutableMapOf<Int, ContestTabulation>()
-            precinct.contestChoices.forEach { (name, choices) ->
-                val contestName = mutatisMutandi(contestNameCleanup(name))
-                val info = infoMap.values.find { it.name == contestName }
-                if (info != null) {
-                    val contestTab = ContestTabulation(info)
-                    contestTabs[info.id] = contestTab
-                    choices.forEach { choice ->
-                        val choiceName = candidateNameCleanup(choice.choice)
-                        val candId = info.candidateNames[choiceName]
-                        if (candId == null) {
-                            // logger.warn{"*** precinct ${precinct} candidate ${choiceName} writein missing in info ${info.id} $contestName infoNames= ${info.candidateNames}"}
-                        } else {
-                            contestTab.addVote(candId, choice.totalVotes) // cant use addVotes
-                        }
-                    }
-                }
-            }
-            OneAuditPoolFromBallotStyle(
-                "${precinct.county}-${precinct.precinct}", idx+1,
-                hasExactContests = hasExactContests, contestTabs, infoMap
-            )
-        }
     }
 
     fun makeContests(): List<ContestIF> {
@@ -297,14 +261,14 @@ open class CreateColoradoElection (
 
 }
 
-class CorlaContestBuilder(val info: ContestInfo, detailContest: ElectionDetailContest, contestRound: CorlaContestRoundCsv): OneAuditContestBuilderIF {
+class CorlaContestBuilder(val info: ContestInfo, corlaXmlContest: CorlaXmlContest, contestRound: CorlaContestRoundCsv): OneAuditContestBuilderIF {
     override val contestId = info.id
     val Nc: Int
     val candidateVotes: Map<Int, Int>
     var poolTotalCards: Int = 0
 
     init {
-        val candidates = detailContest.choices
+        val candidates = corlaXmlContest.choices
         candidateVotes = candidates.mapIndexed { idx, choice -> Pair(idx, choice.totalVotes) }.toMap()
 
         val totalVotes = candidateVotes.map { it.value }.sum() / info.voteForN
@@ -330,6 +294,42 @@ class CorlaContestBuilder(val info: ContestInfo, detailContest: ElectionDetailCo
 
     // expected total poolcards for this contest, making assumptions about missing undervotes
     override fun expectedPoolNCards() = Nc
+}
+
+fun convertPrecinctsToCardPools(
+    precinctFile: String,
+    infoMap: Map<Int, ContestInfo>,
+    hasExactContests: Boolean,
+): List<OneAuditPoolFromBallotStyle> {
+    val reader = ZipReader(precinctFile)
+    val input = reader.inputStream("2024GeneralPrecinctLevelResults.csv")
+    val precincts = readColoradoPrecinctLevelResults(input)
+    println("precincts = ${precincts.size}")
+
+    return precincts.mapIndexed { idx, precinct ->
+        val contestTabs = mutableMapOf<Int, ContestTabulation>()
+        precinct.contestChoices.forEach { (name, choices) ->
+            val contestName = mutatisMutandi(contestNameCleanup(name))
+            val info = infoMap.values.find { it.name == contestName }
+            if (info != null) {
+                val contestTab = ContestTabulation(info)
+                contestTabs[info.id] = contestTab
+                choices.forEach { choice ->
+                    val choiceName = candidateNameCleanup(choice.choice)
+                    val candId = info.candidateNames[choiceName]
+                    if (candId == null) {
+                        // logger.warn{"*** precinct ${precinct} candidate ${choiceName} writein missing in info ${info.id} $contestName infoNames= ${info.candidateNames}"}
+                    } else {
+                        contestTab.addVote(candId, choice.totalVotes) // cant use addVotes
+                    }
+                }
+            }
+        }
+        OneAuditPoolFromBallotStyle(
+            "${precinct.county}-${precinct.precinct}", idx+1,
+            hasExactContests = hasExactContests, contestTabs, infoMap
+        )
+    }
 }
 
 

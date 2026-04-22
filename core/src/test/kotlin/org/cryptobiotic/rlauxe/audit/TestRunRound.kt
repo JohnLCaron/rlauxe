@@ -21,16 +21,15 @@ class TestRunRound {
 
     @Test
     fun testResampleAndRun() {
-        val auditdir = "$testdataDir/cases/corla/clca/audit"
+        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
         val auditRecord = AuditRecord.read(auditdir)!!
         val lastRound = auditRecord.rounds.last()
-        val removeContests = listOf(52, 8, 106)
+        val removeContests = listOf(16,17)
         removeContests.forEach {
             val contestRound = lastRound.contestRounds.find { contest -> contest.id == it }!!
-            contestRound.auditorWantNewMvrs = 0
+            contestRound.included = false
         }
 
         resampleAndRun(auditdir, lastRound as AuditRound)
     }
-
 }

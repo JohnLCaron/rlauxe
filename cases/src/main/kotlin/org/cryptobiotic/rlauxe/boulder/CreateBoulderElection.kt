@@ -32,7 +32,7 @@ class CreateBoulderElection(
     val auditType: AuditType,
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
-    val distributeOvervotes: List<Int> = listOf(0, 63),
+    val distributeOvervotes: List<Int> = listOf(0, 63), // maybe no default,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
 ): ElectionBuilder {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
@@ -321,6 +321,7 @@ fun createBoulderElection(
     auditdir: String,
     creation: AuditCreationConfig,
     round: AuditRoundConfig,
+    distributeOvervotes: List<Int> = listOf(0, 63), // maybe no default
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
 ): Result<AuditRoundIF, ErrorMessages> {
 
@@ -330,7 +331,35 @@ fun createBoulderElection(
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
     val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
 
-    val election = CreateBoulderElection(creation.auditType, export, sovo, mvrSource = mvrSource)
+    val election = CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource)
+    createElectionRecord(election, auditDir = auditdir)
+    println("CreateBoulderElection took $stopwatch")
+
+    val config = Config(election.electionInfo(), creation, round)
+    createAuditRecord(config, election, auditDir = auditdir)
+
+    val result = startFirstRound(auditdir)
+    if (result.isErr) logger.error{ result.toString() }
+    logger.info{"startFirstBoulderRound took $stopwatch"}
+
+    return result
+}
+
+fun createBoulderElectionWithSovo(
+    cvrExportFile: String,
+    sovo: BoulderStatementOfVotes,
+    auditdir: String,
+    creation: AuditCreationConfig,
+    round: AuditRoundConfig,
+    distributeOvervotes: List<Int>,
+    mvrSource: MvrSource = MvrSource.testPrivateMvrs,
+): Result<AuditRoundIF, ErrorMessages> {
+
+    val stopwatch = Stopwatch()
+
+    val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
+
+    val election = CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource)
     createElectionRecord(election, auditDir = auditdir)
     println("CreateBoulderElection took $stopwatch")
 

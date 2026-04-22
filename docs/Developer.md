@@ -17,9 +17,9 @@ _03/27/2026_
 * [Notes and stats](#notes-and-stats)
   * [Code Coverage (Lines of Codes)](#code-coverage-lines-of-codes)
   * [UML](#uml)
-  * [Persistence](#persistence)
-  * [Documents](#documents)
-  * [Fuzzing notes](#fuzzing-notes)
+  * [Miscellaneous Notes](#miscellaneous-notes)
+    * [Documents](#documents)
+    * [Fuzzing notes](#fuzzing-notes)
 * [TODO](#todo)
 <!-- TOC -->
 

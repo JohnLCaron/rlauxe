@@ -161,9 +161,19 @@ fun resampleAndRun(auditdir: String, lastRound: AuditRound): Boolean {
         // writeAuditState
         val publisher = Publisher(auditdir)
         writeAuditRoundJsonFile(lastRound, publisher.auditEstFile(lastRound.roundIdx))
+        logger.info {"resampleAndRun writeAuditEstimation to ${publisher.auditEstFile(lastRound.roundIdx)}"}
+
         writeSamplePrnsJsonFile(lastRound.samplePrns, publisher.samplePrnsFile(lastRound.roundIdx))
+        logger.info {"resampleAndRun ${lastRound.samplePrns.size} samplePrns written to ${publisher.samplePrnsFile(lastRound.roundIdx)}"}
 
         val workflow = PersistedWorkflow(auditRecord)
+
+        // write matching mvrs if needed
+        if (auditRecord.config.election.mvrSource == MvrSource.testPrivateMvrs) {
+            val ncards = workflow.writeMvrsForRound(lastRound.roundIdx)
+            logger.info{"resampleAndRun writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(lastRound.roundIdx)}"}
+        }
+
         workflow.runAuditRound(lastRound)
         return true
 

@@ -1,20 +1,111 @@
 # CORLA notes
-_last changed 03/25/2025_
+_last changed 04/20/2026_
 
-The report [Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program](papers/Corla.pdf) (2018) suggest the following
-issues should be addressed:
+# Colorado County Audit
+
+La Plata, Weld, Boulder and El Paso.
+
+
+
+# Corla 2022 Coordinated election 
+
+Neal McBurnett 2023-12-15 "Corla Accomplishments" slidedeck
+https://neal.mcburnett.org/elections/corla-beac/
+
+Summarize Audit of 2022 Coordinated election in Colorado
+also see slide 12 for # Cvrs audited in "single county audit"
+
+* > 2,508,830 ballots cast statewide (undervotes make exact number hard to find)
+* 3,526,411 ballot cards in the state (multiple cards per ballot in some counties)
+* 6,454 ballot cards selected (based on margin, 0.2% overall)
+* 233,223 votes compared! (36 per card on average) (public data from Audit Center)
+* 186 discrepancies - 0.08%, apparently mostly wrong ballot or entry error
+  * 116 Wrong Ballot
+  *  44 Audit Board Error
+  *  16 Adjudication Error
+  *  6 Voting System Limitation
+  *  3 Voter Mistake
+  *  1 Ambiguous Voter Intent
+* Audit data for 981 contests
+* RLAs of 68 contests (some partial and thus artificial...)
+* Many more opportunistic contest audits, below risk limit. 
+* Opportunistic sampling across counties is not uniformly random, so very tricky to calculate rigorous risk levels for those.
+
+* 2023 AuditData for Arvada Mayor contest
+  * About a 1% margin of victory, small subset of the county, thus quite hard to audit
+  * 98.4% in Jefferson county, where 46 ballots for mayor were audited
+  * Audit found zero discrepancies - 46 for 46!
+  * Measured risk of about 80% (disappointing, but less scary than it seems)
+  
+* Boulder did style based sampling for their 2023 IRV (mayor) audit, with new software
+* better to audit close contests, even if manageable sample size requires large risk limit
+* We should really design districting and election to avoid need for redaction
+* Improvements
+  * Now typically picking just one local contest per county
+  * Before contest selection, publish data on potential contests to audit to help public provide input
+  * Best to guarantee a risk limit for all contests
+  * Better to audit a close contest at a 50% risk limit, than a landslide one at 3%
+  * Explore recent auditing innovations like Non(c)euch and ONEAudit
+* Improvement 5: Minimum BallotCount to Audit perCounty
+  * Often there is no suitable county-level contest with a contest close enough to drive a good audit
+  * SoS often audits statewide contests using county margin
+  * should establish minimum ballot count to audit per county for opportunistic audits, quality control
+* Improvement 6: Avoid Needfor ExtraRounds
+  * Audit sometimes has a single discrepancy, and requires whole audit team to return to audit just a few more ballots
+  * Avoid those extra rounds via a small amount of oversampling
+* Improvement 8: LeverageBallot Images
+  * Publish hashes of each image ASAP after scanning
+* [Principles and Best Practices for Post-Election Audits 2018](https://electionaudits.org/principles/)
+
+Probably refering to 2023 Coordinated Election, 5.17.17.1
+
+# Next Steps paper
+
+The report [Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program](papers/Corla.pdf) (2018) 
+
+Counties that have CVRS: "CVR Counties" can perform CLCA.
+Counties that do not have CVRS: "no-CVR Counties" or "legacy". Assume can perform Polling audits.
+
+The following issues should be addressed:
 
 1. The current version (1.1.0) of RLATool needs to be modified to
   recognize and group together contests that cross jurisdictional boundaries.
   Currently, it treats every contest as if it were entirely contained in a single county. 
-  It does not allow the user to select the sample size, nor directly allow an unstratified random sample to be drawn across counties.
-2. New statistical methods are needed to deal with contests that include both CVR counties and no-CVR counties.
-3. Auditing contests that appear only on a subset of ballots can be made much more efficient if the sample can be drawn from
+2. It does not allow the user to select the sample size
+3. It does not allow an unstratified random sample to be drawn across counties.
+4. New statistical methods are needed to deal with contests that include both CVR counties and no-CVR counties. (I think this would be OneAudit)
+5. Auditing contests that appear only on a subset of ballots can be made much more efficient if the sample can be drawn from
   just those ballots that contain the contest.
 
-Its not clear what the current version of colorado-rla is, or if any of these issues have been addressed.
+Its not clear if any of these issues have been addressed.
+
+## Remarks
+
+**Need to find out what the Corla sampling strategy is**. Apparently not "Consistent Sampling".
+
+The paper predates OneAudit. I think that OneAudit would allow auditing both CVR and non-CVR together, but the OneAudit paper
+doesnt mention Colorado, so theres a big if. 
+But "All counties participating in the RLA have CVRs. San Juan County does a hand count and is exempted from the RLA."
+So apparently unecessary.
+
+SHANGRLA doesnt yet support stratified audits ("This is still a research project"), so theres a bigger IF. 
+
+Philip says:
+
+"I think Colorado doesn't need ONEAudit, since it has CVRs linked to each ballot sheet/card (if I understand correctly). The latest work on stratified sequential tests for the mean is here: https://arxiv.org/abs/2409.06680 (revised last month, 3/2026). The underlying calculations are in Python here: https://github.com/spertus/UI-TS
+
+Some work would need to be done to integrate it into the NonnegMean class in SHANGRLA, track sample sizes by stratum, select sample sizes by stratum, etc.
+
+The optimization over the composite null can't in general be done with methods in scipy.optimize: see the paper linked above. 
+For some betting strategies the optimization is much simpler than for others. 
+
+If this is only going to be used in "risk-measuring" mode (what's the attained risk for this particular combination of sample sizes and observed votes?) 
+rather than "risk-limiting" mode (including estimating sample sizes needed to attain the risk limit, subject to assumptions about the true votes), 
+there's a lot less to do."
 
 # Notes on CORLA implementation
+
+IntelliJ "Vulnerabile Dependencies" Code Analysys a few dozens of Security issues, many high severity. (4/19/2026)
 
 Everything revolves around the database as global, mutable shared state. No real separation of business logic
 from the persistence layer. So, difficult to evolve separately.
@@ -33,6 +124,7 @@ from the persistence layer. So, difficult to evolve separately.
 
 Other issues that are not clear to me:
 
+* **How is Sampling done?**
 * Can CORLA efficiently do multiple contests at once?
 * How does CORLA handle phantom records?
 * How is batching of ballots for auditing done?

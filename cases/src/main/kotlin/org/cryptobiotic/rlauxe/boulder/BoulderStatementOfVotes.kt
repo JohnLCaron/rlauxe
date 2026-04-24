@@ -58,7 +58,7 @@ data class BoulderContestVotes(
     var totalBallots: Int = 0  // Nc
     var totalVotes: Int = 0     // sum of votes
     var totalUnderVotes: Int = 0  // undervotes
-    var totalOverVotes: Int = 0     // hmmm
+    var totalOverVotes: Int = 0     // undervotes = voteForN * Ncast - nvotes = boulderUndervotes + voteForN * boulderOvervotes
     val candidateVotes = mutableMapOf<String, Int>()  // candidateName -> number of votes
     var id = 0
 

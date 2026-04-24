@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.dominion
 
+import org.cryptobiotic.rlauxe.boulder.CastVoteRecord
+import org.cryptobiotic.rlauxe.boulder.BoulderCvrExportCsv
+import org.cryptobiotic.rlauxe.boulder.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -12,7 +15,7 @@ class TestDominionCvrReader {
     @Test
     fun parseThreeCandidatesTenVotesSucceeds() {
         val filename = "src/test/data/corla/ThreeCandidatesTenVotes.csv"
-        val result: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Saguache")
+        val result: BoulderCvrExportCsv = readDominionCvrExportCsv(filename, "Saguache")
         println(result.show())
 
         // There should be one contest, the one we just read in.
@@ -69,7 +72,7 @@ class TestDominionCvrReader {
     @Test
     fun test4CvrsWithIRV() {
         val filename = "src/test/data/Boulder2023/Test4CvrsWithIRV.csv"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
         println(export.summary())
 
         assertEquals("Boulder", export.countyId)
@@ -152,7 +155,7 @@ class TestDominionCvrReader {
     @Test
     fun testWithRedactions() {
         val filename = "src/test/data/Boulder2024/TestWithRedactions.csv"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
         // println(export.summary())
 
         assertEquals("Boulder", export.countyId)
@@ -373,7 +376,7 @@ class TestDominionCvrReader {
     fun parseBoulder24Recount() {
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder County")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder County")
         println(export.summary())
 
         assertEquals("Boulder County", export.countyId)

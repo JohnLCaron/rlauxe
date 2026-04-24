@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.util.ZipReader
 import kotlin.test.Test
 
-class TestColoradoPrecinctLevelResults {
+class TestReadColoradoPrecinctLevelResults {
 
     @Test
     fun testRead() {
@@ -27,6 +27,7 @@ class TestColoradoPrecinctLevelResults {
         val scontestMap = scontests.associateBy {
             removeCruft(it.contestName)
         }
+        println("${scontests.size} contests in $precinctFile")
 
         /* make sure we match the contest
         var ok = true

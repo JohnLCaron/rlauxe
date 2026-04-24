@@ -2,12 +2,8 @@ package org.cryptobiotic.rlauxe.boulder
 
 import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.RedactedGroup
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dominion.ContestVotes
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
@@ -23,14 +19,14 @@ import kotlin.collections.plus
 import kotlin.collections.set
 import kotlin.math.max
 
-private val logger = KotlinLogging.logger("BoulderElectionOA")
+private val logger = KotlinLogging.logger("CreateBoulderElection")
 private val debugUndervotes = false
 
-// Use OneAudit; redacted ballots are in pools. Cant do IRV.
-// specific to 2024 election. TODO: generalize
+// Use OneAudit; redacted ballots are in pools. Cant do IRV because we dont have VoteConsolidators
+// this version does a bunch of baloney to estimate the redacted undervotes
 class CreateBoulderElection(
     val auditType: AuditType,
-    val export: DominionCvrExportCsv,
+    val export: BoulderCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val distributeOvervotes: List<Int> = listOf(0, 63), // maybe no default,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
@@ -60,7 +56,7 @@ class CreateBoulderElection(
             undervotesByContest[it] = it.poolTotalCards() - it.expectedPoolNCards()
         }
 
-        // 2024
+        // TODO used by 2024; do we need it for 2025 ?
         // first even up with contest 0, since it has the fewest undervotes
         // then contest 63 has fewest undervotes for card Bs
         distributeOvervotes.forEach { contestId ->
@@ -127,7 +123,7 @@ class CreateBoulderElection(
             }
 
             val choiceFunction = if (exportContest.isIRV) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY
-            val (name, nwinners) = if (exportContest.isIRV) parseIrvContestName(exportContest.contestName) else parseContestName(exportContest.contestName)
+            val (name, nwinners) = if (exportContest.isIRV) parseIrvContestName(exportContest.contestName) else parseContestNameAndVoteFor(exportContest.contestName)
             ContestInfo( name, exportContest.contestIdx, candidateMap, choiceFunction, nwinners)
         }
     }
@@ -240,6 +236,7 @@ class CreateBoulderElection(
         return oa2Contests
     }
 
+    // TODO move to test
     fun countVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
         val cvrVotes =  countCvrVotes()
         val redVotes =  countRedactedVotes()
@@ -278,8 +275,6 @@ class CreateBoulderElection(
     }
 
     fun makeContests(): List<ContestIF> {
-        println("ncontests with info = ${infoList.size}")
-
         return infoList.filter { !it.isIrv }.map { info ->
             val oaContest = boulderContestBuilders[info.id]!!
             val candVotes = oaContest.candVoteTotals().filter { info.candidateIds.contains(it.key) } // remove Write-Ins
@@ -316,36 +311,43 @@ class CreateBoulderElection(
 // Clca: create simulated cvrs for the redacted groups, for a full CLCA audit with hasStyles=true.
 // OA: Create a OneAudit where pools are from the redacted cvrs.
 fun createBoulderElection(
+    version: String,
     cvrExportFile: String,
     sovoFile: String,
     auditdir: String,
     creation: AuditCreationConfig,
     round: AuditRoundConfig,
-    distributeOvervotes: List<Int> = listOf(0, 63), // maybe no default
+    distributeOvervotes: List<Int>, // maybe no default
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
-): Result<AuditRoundIF, ErrorMessages> {
+    startFirstRound: Boolean = true,
+) {
 
     val stopwatch = Stopwatch()
 
-    val variation = if (sovoFile.contains("2025") || sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
+    val variation = if (version == "2023") "Boulder2023" else "Boulder2024"
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
-    val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
+    val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
 
-    val election = CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource)
+    val election = if (version == "2025")
+        CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource)
+    else
+        CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource)
+
     createElectionRecord(election, auditDir = auditdir)
     println("CreateBoulderElection took $stopwatch")
 
     val config = Config(election.electionInfo(), creation, round)
     createAuditRecord(config, election, auditDir = auditdir)
 
-    val result = startFirstRound(auditdir)
-    if (result.isErr) logger.error{ result.toString() }
+    if (startFirstRound) {
+        val result = startFirstRound(auditdir)
+        if (result.isErr) logger.error { result.toString() }
+    }
     logger.info{"startFirstBoulderRound took $stopwatch"}
-
-    return result
 }
 
 fun createBoulderElectionWithSovo(
+    version: String,
     cvrExportFile: String,
     sovo: BoulderStatementOfVotes,
     auditdir: String,
@@ -357,9 +359,13 @@ fun createBoulderElectionWithSovo(
 
     val stopwatch = Stopwatch()
 
-    val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
+    val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
 
-    val election = CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource)
+    val election = if (version == "2025")
+        CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource)
+    else
+        CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource)
+
     createElectionRecord(election, auditDir = auditdir)
     println("CreateBoulderElection took $stopwatch")
 
@@ -401,7 +407,7 @@ fun checkVotesVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes, mus
     }
 }
 
-fun parseContestName(name: String) : Pair<String, Int> {
+fun parseContestNameAndVoteFor(name: String) : Pair<String, Int> {
     if (!name.contains("(Vote For=")) return Pair(name.trim(), 1)
 
     val tokens = name.split("(Vote For=")

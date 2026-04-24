@@ -69,7 +69,7 @@ class CreateCountyAudits(
             val countyCardPools = allCardPools.filter { it.poolName.lowercase().startsWith(countyName.lowercase()) }
 
             // set contest total cards as sum over pools
-            builders.forEach { it.adjustPoolInfo(countyCardPools) }
+            builders.forEach { it.setTotalCardsFromPools(countyCardPools) }
 
             // estimate undervotes based on each precinct having a single ballot style
 
@@ -166,8 +166,9 @@ fun makeContests(builders: List<CountyContestBuilder>): List<ContestIF> {
         val candVotes = builder.candVotes.filter { info.candidateNames.contains(it.candName) } // remove Write-Ins
         val votes = candVotes.map { Pair(it.candId, it.vote) }.toMap()
         val totalVotes = votes.map {it.value}.sum()
-        val ncards = max(builder.poolTotalCards(), totalVotes)
+        val ncards = max(builder.totalCards, totalVotes)
         // info.metadata["PoolPct"] = (100.0 * builder.poolTotalCards() / ncards).toInt()
+        // TODO is there an Nc foreach county ??
         Contest(info, votes, ncards, ncards)
     }
 }
@@ -179,7 +180,7 @@ fun makeCountyContestBuilders(
 ): Map<String, List<CountyContestBuilder>> {
     val roundContestMap = roundContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
 
-    // change electionDetailXml to County -> Contest
+    // change ElectionResult to County name -> CountyContests
     val countyMap = mutableMapOf<String, CountyContests>()
     wantCounties.forEach { countyMap[it] = CountyContests(it) }
     electionResult.contests.forEachIndexed { idx, corlaXmlContest ->
@@ -252,7 +253,7 @@ class CountyContestBuilder(val info: ContestInfo, val candVotes: List<CountyCand
     val contestId = info.id
     // val Nc: Int
     // val candidateVotes: Map<Int, Int>
-    var poolTotalCards: Int = 0
+    var totalCards: Int = 0
 
     /* init {
         // val candidates = corlaXmlContest.choices
@@ -267,20 +268,9 @@ class CountyContestBuilder(val info: ContestInfo, val candVotes: List<CountyCand
         Nc = useNc
     } */
 
-    // total cards in all pools for this contest
-    fun poolTotalCards(): Int  = poolTotalCards
-
-    fun adjustPoolInfo(cardPools: List<CardPoolIF>){
-        poolTotalCards = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.ncards() }
+    fun setTotalCardsFromPools(cardPools: List<CardPoolIF>){
+        totalCards = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.ncards() }
     }
-
-    // this maximizes undervotes, assumes missing = 0
-    fun oapoolUndervote(cardPools: List<OneAuditPoolFromBallotStyle>): Int {
-        return cardPools.sumOf { it.undervoteForContest(contestId) }
-    }
-
-    // expected total poolcards for this contest, making assumptions about missing undervotes
-    // override fun expectedPoolNCards() = Nc
 }
 
 fun createAndSaveUnsortedMvrs(contests: List<ContestIF>, cardPools: List<OneAuditPoolFromBallotStyle>, publisher: Publisher): Int {

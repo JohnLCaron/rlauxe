@@ -4,6 +4,7 @@ import java.security.SecureRandom
 import kotlin.enums.EnumEntries
 import kotlin.math.abs
 import kotlin.math.ceil
+import kotlin.math.exp
 import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.pow
@@ -41,6 +42,38 @@ fun estSamplesFromNomargin(bet:Double, nomargin:Double, alpha: Double) =  -ln(al
 fun estSamplesFromNoerror(bet:Double, noerror:Double, alpha: Double): Double {
     val nomargin = 2.0 * noerror - 1.0
     return -ln(alpha) / ln(1.0 + bet * nomargin / 2)
+}
+// marginUpper = margin/upper
+fun estSamplesFromMarginUpper(bet:Double, marginUpper:Double, alpha: Double): Double {
+    val noerror = 1.0 / (2.0 - marginUpper)
+    val nomargin = 2.0 * noerror - 1.0
+    return -ln(alpha) / ln(1.0 + bet * nomargin / 2)
+}
+
+fun estMarginUpperFromSamples(bet:Double, samples:Int, alpha: Double): Double {
+
+    // payoff^n = 1/alpha
+    // ln(payoff) * n = -ln(alpha)
+    // ln(1.0 + bet * nomargin / 2) = -ln(alpha) / n
+    // ln(1.0 + bet * nomargin / 2) = -ln(alpha) / n
+    // 1.0 + bet * nomargin / 2 = e^(-ln(alpha) / n)
+    // 1.0 + bet * (noerror - 1/2) = e^(-ln(alpha) / n)
+
+    // let term = e^(-ln(alpha) / n)
+    // 1.0 + bet * (noerror - 1/2) = term
+    // (noerror - 1/2) = (term - 1)/bet
+    // noerror = (term - 1)/bet + 1/2
+    // substitute noerror = 1/(2 - marginUpper)
+
+    // 1/(2 - marginUpper) = (term - 1)/bet + 1/2
+    // 1/(2 - marginUpper) = 2(term - 1)/2bet + bet/2bet
+    // 1/(2 - marginUpper) = (2term - 2 + bet)/2bet
+    // (2 - marginUpper) = 2bet/(2term - 2 + bet)
+    // marginUpper = 2 - 2bet/(2term - 2 + bet)
+
+    val term = exp(-ln(alpha) / samples)
+    val den = (2.0*term - 2.0 + bet)
+    return 2.0 - 2.0 * bet / den
 }
 
 fun estRisk(nomargin:Double, nsamples: Int): Double {

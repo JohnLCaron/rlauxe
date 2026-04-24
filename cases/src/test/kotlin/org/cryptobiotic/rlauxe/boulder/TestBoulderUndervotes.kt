@@ -2,9 +2,6 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromBallotStyle
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.mergeReduce
@@ -28,7 +25,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun testBoulderBallotType() {
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         // println(export.summary())
 
         var count = 0
@@ -99,7 +96,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showSovoContestDetail2() {
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
 
         val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
         println()
@@ -111,7 +108,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showPoolVotes() {
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
 
         println("votes, undervotes")
 
@@ -133,7 +130,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showRedactedUndervotes2() {
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         // val election1 = BoulderElectionOAsim(export, sovo)
         val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
 
@@ -198,7 +195,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showRedactedNcards() {
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
@@ -267,7 +264,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showNcards() {
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }

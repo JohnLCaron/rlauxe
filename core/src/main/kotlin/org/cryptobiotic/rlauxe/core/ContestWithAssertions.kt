@@ -21,7 +21,7 @@ open class ContestWithAssertions(
     val ncandidates = contest.ncandidates
     val Nc = contest.Nc()
     val Nphantoms = contest.Nphantoms()
-    val Npop: Int = NpopIn ?: Nc // "sample population size" for this contest, used to make diluted margins
+    val Npop: Int = if (NpopIn == null || NpopIn < Nc) Nc else NpopIn // or barf?
     val isIrv = contest.info().isIrv
 
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms

@@ -157,6 +157,17 @@ open class Contest(
         require(nvotes <= info.voteForN * Ncast) {
             "contest $id nvotes= $nvotes must be <= voteForN=${info.voteForN} * Ncast=$Ncast = ${info.voteForN * Ncast}"
         }
+
+        // SHANGRLA section 2, both undervotes and overvotes are given assort values of 0.5.
+        // So in setting up the contest we can add the undervotes and overvotes together like this:
+        // Boulder for example has
+        //           voteForN * (Ncast - boulderOvervotes) - nvotes = boulderUndervotes
+        //           voteForN * Ncast - nvotes = boulderUndervotes + voteForN * boulderOvervotes
+        // so
+        //       undervotes = voteForN * Ncast - nvotes = boulderUndervotes + voteForN * boulderOvervotes
+        //
+        // (well that should confuse everyone)
+
         undervotes = info.voteForN * Ncast - nvotes   // C1
 
         //// find winners, check that the minimum value is satisfied

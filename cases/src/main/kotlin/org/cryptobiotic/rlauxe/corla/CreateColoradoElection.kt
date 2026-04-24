@@ -55,17 +55,26 @@ open class CreateColoradoElection (
         // set contest total cards as sum over pools
         corlaContestBuilders.forEach { it.adjustPoolInfo(cardPools) }
 
-        // estimate undervotes based on each precinct having a single ballot style
-        val undervotesByContest = mutableMapOf<CorlaContestBuilder, Int>() // contestId ->
-        corlaContestBuilders.forEach {
-            undervotesByContest[it] = it.expectedPoolNCards() - it.poolTotalCards()
-        }
-
         // adjust so contest 0 has 0 undervotes. needed since we dont know number of cards in precincts or missing
-        distributeExpectedOvervotes(corlaContestBuilders[0], cardPools)
-        corlaContestBuilders.forEach { it.adjustPoolInfo(cardPools) }
+        var countZero = 0
+        val contest0 = corlaContestBuilders.find { it.contestId == 10 }!!
+        distributeExpectedOvervotes(contest0, cardPools)
+        corlaContestBuilders.forEach {
+            it.adjustPoolInfo(cardPools)
+            if (it.poolTotalCards == 0) {
+                countZero++
+                println(it)
+            }
+        }
+        println("contests with no precinct data = $countZero")
 
         if (debugUndervotes) {
+            // estimate undervotes based on each precinct having a single ballot style
+            val undervotesByContest = mutableMapOf<CorlaContestBuilder, Int>() // contestId ->
+            corlaContestBuilders.forEach {
+                undervotesByContest[it] = it.expectedPoolNCards() - it.poolTotalCards()
+            }
+
             undervotesByContest.forEach { (cb, before) ->
                 val needAfter = cb.expectedPoolNCards() - cb.poolTotalCards()
                 println("  ${cb.contestId} $before $needAfter ")
@@ -75,9 +84,11 @@ open class CreateColoradoElection (
         batches = cardPools
         contests = makeContests()
 
-        // have to save the mvrs and generate the cardManifest from them
+        // have to save the mvrs and generate the cardManifest from them.
+        // TODO have to generate non-pool cvrs before this step.
         ncards = createAndSaveUnsortedMvrs()
 
+        // TODO Npop >= Nc
         val npopMap: Map<Int, Int> = if ((auditType.isPolling() && pollingMode!!.withoutBatches())) {
             contests.associate { it.id to ncards } // then the population is the entire set of cards. (wont go well)
         } else {
@@ -101,9 +112,16 @@ open class CreateColoradoElection (
     ): List<CorlaContestBuilder> {
         val roundContestMap = roundContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
 
+        // apparently detail.xml does not have all contests; not sure which it skips
+        // eg "City of Lafayette Ballot Question 2A" and many more in round/contest 2A. that file lists 726 contests
+        // 295 contests in src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip
+        // 295 contests in src/test/data/corla/2024election/summary.csv
+        // ~725 contests in src/test/data/corla/2024audit/round1/contestSelection.csv
+        // "targeted contests.csv" has one for each county +2 statewide. many/most are not in detail.xml.
+
         val contests = mutableListOf<CorlaContestBuilder>()
-        electionDetailXml.contests.forEachIndexed { detailIdx, detailContest ->
-            val contestName = contestNameCleanup(detailContest.text)
+        electionDetailXml.contests.forEachIndexed { detailIdx, corlaXmlContest ->
+            val contestName = contestNameCleanup(corlaXmlContest.text)
             var roundContest = roundContestMap[contestName]
             if (roundContest == null) {
                 roundContest = roundContestMap[mutatisMutandi(contestName)]
@@ -112,28 +130,28 @@ open class CreateColoradoElection (
                     println("*** Cant find ContestRoundCsv $mname")
                 }
             } else {
-                val candidates = detailContest.choices
+                val candidates = corlaXmlContest.choices
                 val candidateNames =
                     candidates.mapIndexed { idx, choice -> Pair(candidateNameCleanup(choice.text), idx) }.toMap()
 
                 val info = ContestInfo(
                     contestName,
-                    detailIdx,
+                    corlaXmlContest.key,
                     candidateNames,
                     SocialChoiceFunction.PLURALITY,
-                    detailContest.voteFor
+                    corlaXmlContest.voteFor
                 )
                 info.metadata["CORLAsample"] = roundContest.optimisticSamplesToAudit
 
                 // they dont have precinct data for contest >= 260, so we'll just skip them
-                if (info.id < 260) {
+               //  if (info.id < 260) {
                     val contest = CorlaContestBuilder(
                         info,
-                        detailContest,
+                        corlaXmlContest,
                         roundContest,
                     )
                     contests.add(contest)
-                }
+                // }
             }
         }
 
@@ -146,12 +164,14 @@ open class CreateColoradoElection (
         println("ncontests with info = ${infoList.size}")
 
         return infoList.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
-            val oaContest = contestMap[info.id]!!
-            val candVotes = oaContest.candidateVotes.filter { info.candidateIds.contains(it.key) } // remove Write-Ins
-            val ncards = oaContest.poolTotalCards()
-            val useNc = max(ncards, oaContest.Nc)
-            info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            Contest(info, candVotes, useNc, ncards)
+            val corlaContest = contestMap[info.id]!!
+            val candVotes = corlaContest.candidateVotes.filter { info.candidateIds.contains(it.key) }
+            val totalVotes = candVotes.map {it.value}.sum()
+            val ncards = max(corlaContest.poolTotalCards(), totalVotes)
+            val useNc = max(ncards, corlaContest.Nc)
+            info.metadata["PoolPct"] = (100.0 * corlaContest.poolTotalCards() / useNc).toInt()
+            // TODO we dont know the undervotes, so we assume Ncast = Nc
+            Contest(info, candVotes, useNc, useNc)
         }
     }
 
@@ -159,7 +179,8 @@ open class CreateColoradoElection (
         ElectionInfo("Corla24$auditType$pollingMode", auditType, ncards(), contestsUA.size, pollingMode = pollingMode)
 
     override fun cardStyles() = if (auditType.isPolling() && pollingMode!!.withBatches()) batches else null // TODO !cvrsHaveUndervotes need batches
-    override fun cardPools() = if (auditType.isPolling() && pollingMode!!.withPools()) cardPools.map { it.toOneAuditPool() } else null
+    // override fun cardPools() = if (auditType.isPolling() && pollingMode!!.withPools()) cardPools.map { it.toOneAuditPool() } else null
+    override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
 
@@ -294,6 +315,11 @@ class CorlaContestBuilder(val info: ContestInfo, corlaXmlContest: CorlaXmlContes
 
     // expected total poolcards for this contest, making assumptions about missing undervotes
     override fun expectedPoolNCards() = Nc
+    override fun toString(): String {
+        return "CorlaContestBuilder(info=$info, contestId=$contestId, Nc=$Nc, candidateVotes=$candidateVotes, poolTotalCards=$poolTotalCards)"
+    }
+
+
 }
 
 fun convertPrecinctsToCardPools(

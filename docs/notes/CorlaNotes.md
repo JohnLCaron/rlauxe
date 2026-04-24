@@ -1,5 +1,7 @@
 # CORLA notes
-_last changed 04/20/2026_
+
+
+_last changed 04/24/2026_
 
 # County Support for Public Election Verification
 
@@ -15,52 +17,55 @@ La Plata, Weld, Boulder and El Paso.
     * the ballot manifest
     * the summary results file that was uploaded to the SoS at the same time that the unredacted CVR file and the ballot manifest was uploaded.
 
-I think "ballot sheet" = card in SHANGRLA terminology?
-Does each CVR = 1 ballot sheet ? Even when there are multiple "sheets" per ballot?
-What does the redaction of the CVR file do? Are they aggregating ballots in some way (like Boulder County) or is there one line per CVR ?
-What does the ballot manifest look like? Does each sheet have their own entry?
-Is there a seperate "trusted maximum" number of cards for each contest? Or do we just use the CVR count?
+Questions:
+* I think "ballot sheet" = card in SHANGRLA terminology?
+* Does each CVR = 1 ballot sheet ? Even when there are multiple "sheets" per ballot?
+* What does the redaction of the CVR file do? Are they aggregating ballots in some way (like Boulder County) or is there one line per CVR ?
+* What does the ballot manifest look like? Does each sheet have their own entry?
+* Is there a seperate "trusted maximum" number of cards for each contest? Or do we just use the CVR count?
 
 # Corla Auditing
 
 ## How does Corla do their county-level sampling?
 
-There is one "target" contest for each county. I assume its contained in a single county.
+There is one "target" contest for each county. Its probably contained in a single county. If not, then the audit only measures the contest in that county.
 
 All of the cards in the county constitute the population (ie the denominator of the fully diluted margin calculation).
 The sampling is uniform across all cards in the county.
 The number of cards needed for the target contest are estimated at each round.
-Because of the randomness of the sequence of samples, there is variance in the actual number of cards with the target contest on it in the sample.
+Because of the randomness of the sequence of samples, there is variance in the actual number of cards that contain the target contest in the sample.
 The variance can be estimated, and a quantile of the distribution can be selected as the "estimated sample size". I dont know what quantile Corla uses.
+This only affects the number of rounds needed, not the rresult.
 
 The selected cards are found and an audit of all contests on the card is done.
 Because the sampling is uniform for all contests, we can use the results to measure the risk of all the contests, not just the target contest.
 
 ## How does Corla do their state-level sampling?
 
-There is also one or more statewide contests selected to sample.
+There are also one or more statewide contests selected to sample.
 
 Vanessa thinks they do an independent sampling for this, but use the same seed.
 Presumably the sampling is uniform across all cards in the state.
 The number of cards needed for the target statewide contest(s) are estimated at each round.
 If more than one statewide contest, presumably the larger of the estimates is used.
-Presumably the selected cards are divided into the counties where the cards are, and that list is given to the county (along with the selected ballots for the target county contest) to audit.
 
-Each county returns their audit results. The card id can be used to determine whether the card is used for the count-level and/or statewide contest risk calculation. 
+Presumably the selected cards are divided into the counties where the cards live, and sample list is given to the county (along with the selected ballots for the target county contest) to audit. Each county returns their audit results. The card id can be used to determine whether the card is used for the county-level and/or the statewide contest risk calculations. 
 
 # Simulation of Corla auditing
 
-I propose to try to simulate Corla auditing in rlauxe. The simulation strongly depends on accurately modeling what actual CVRS look like, eg are there multiple cards per ballot, are there multiple ballot styles per precinct or county, how many of each card/ballot style there are, and what the undervote count is on each card style.
+I propose to try to simulate Corla auditing in rlauxe. The simulation strongly depends on accurately modeling what actual CVRS look like, eg are there multiple cards per ballot, are there multiple ballot styles per precinct or county, how many of each card/ballot style there are, and the undervote count for each card style.
 
-If there are CVRS, then all those questions are answered. With just subtotals by precinct or county the simulation wont be particularly accurate, unless you also know the count of card styles and undervotes. That would allow quite accurate simulation.
+If there are CVRS, then all those questions are answered. With just subtotals by precinct or county, the simulation wont be that accurate, unless you also know the card styles. That would allow quite accurate simulation.
+
+Smaller populations (like precincts) are preferable because the card styles within the population are likely to more uniform.
 
 ## 2024 General Election
 
-I have the 2024 Coordinated Election files downloaded from https://www.coloradosos.gov/pubs/elections/auditCenter.html in March 2025. This data is no longer on the website, though there is a notice "For historical audit data email public.elections@coloradosos.gov". This contains precinct level subtotals by candidate. However there is no information on card styles.
+I have the 2024 Coordinated Election files downloaded from https://www.coloradosos.gov/pubs/elections/auditCenter.html in March 2025. This data is no longer on the website, though there is a notice "For historical audit data email public.elections@coloradosos.gov". There are precinct level subtotals by candidate. However there is no information on card styles.
 
 ## 2025  Coordinated Election
 
-I have the 2025 Coordinated Election files downloaded from https://www.coloradosos.gov/pubs/elections/auditCenter.html on 4/22/2026. This does not contain precinct level data, only county level subtotals. Again, this would be adequate if there was also card style information.
+I have the 2025 Coordinated Election files downloaded from https://www.coloradosos.gov/pubs/elections/auditCenter.html on 4/22/2026. There is no precinct level data, only county level subtotals. Again, this would be adequate if there was also card style information.
 
 ## Risk measurements 
 

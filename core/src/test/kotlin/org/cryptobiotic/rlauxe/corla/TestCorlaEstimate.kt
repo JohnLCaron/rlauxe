@@ -30,7 +30,7 @@ class TestCorlaEstimate {
         val sorted = auditRecord.contests.sortedBy { it.Nphantoms }.reversed()
         auditRecord.contests.forEach { contestUA ->
             val corlaEst = contestUA.contest.info().metadata.get("CORLAsample")
-            println("contest ${contestUA.id}  corlaEst= $corlaEst nphantoms=${contestUA.Nphantoms}")
+            println("contest ${contestUA.id}  ${contestUA.name}  corlaEst= $corlaEst nphantoms=${contestUA.Nphantoms}")
             auditRecord.rounds.forEach { round ->
                 round.contestRounds.filter { it.contestUA.id == contestUA.id }.forEach { contestRound ->
                     val corlaCalc = corlaCalc(auditRecord.config, contestRound)

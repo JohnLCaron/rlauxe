@@ -11,20 +11,18 @@ import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.audit.runAllRoundsAndVerify
+import kotlin.Int
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
 class MakeBoulderElection {
 
-    // looks like the 2024-Boulder-County-General-Redacted-Cast-Vote-Record.xlsx got saved with incorrect character encoding (?).
-    // hand corrected "Claudia De la Cruz / Karina García"
-
     @Test
-    fun createBoulder24oa() {
-        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
+    fun createBoulder25oa() { // simulate CVRs
+        val auditdir = "$testdataDir/cases/boulder2025/oa/audit"
 
-        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05, )
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 22),
             ContestSampleControl(
@@ -37,11 +35,44 @@ class MakeBoulderElection {
         )
 
         createBoulderElection(
+            "2025",
+            "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv",
+            "src/test/data/Boulder2025/2025C-Boulder-County-Official-Statement-of-Votes.csv",
+            auditdir = auditdir,
+            creation,
+            round,
+            distributeOvervotes = listOf(),
+            startFirstRound = false
+        )
+    }
+
+    // looks like the 2024-Boulder-County-General-Redacted-Cast-Vote-Record.xlsx got saved with incorrect character encoding (?).
+    // hand corrected "Claudia De la Cruz / Karina García"
+
+    @Test
+    fun createBoulder24oa() {
+        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
+
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03, )
+        val round = AuditRoundConfig(
+            SimulationControl(nsimTrials = 22),
+            ContestSampleControl(
+                minRecountMargin = .005,
+                minMargin = 0.0,
+                contestSampleCutoff = 5000,
+                auditSampleCutoff = 10000
+            ),
+            ClcaConfig(), null
+        )
+
+        createBoulderElection(
+            "2024",
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             creation,
-            round
+            round,
+            distributeOvervotes = listOf(0, 63)
         )
     }
 
@@ -58,7 +89,7 @@ class MakeBoulderElection {
     fun createBoulder24clca() { // simulate CVRs
         val auditdir = "$testdataDir/cases/boulder24/clca/audit"
 
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .05, )
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 20, estPercentile = listOf(42, 55, 67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 1000, auditSampleCutoff = 2000),
@@ -66,11 +97,13 @@ class MakeBoulderElection {
         )
 
         createBoulderElection(
+            "2024",
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             creation,
             round,
+            distributeOvervotes = listOf(0, 63)
         )
     }
 
@@ -95,7 +128,7 @@ class MakeBoulderElection {
 
         val auditdir = "$testdataDir/cases/boulder23/oa/audit"
 
-        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05, )
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 22),
             ContestSampleControl(
@@ -116,6 +149,7 @@ class MakeBoulderElection {
         //    mvrSource: MvrSource = MvrSource.testPrivateMvrs,
         //)
         createBoulderElectionWithSovo(
+            "2023",
             cvrExportFile = "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
             sovo = combined,
             auditdir = auditdir,
@@ -133,19 +167,7 @@ class MakeBoulderElection {
     }
 
     /*
-    @Test
-    fun createBoulder25clca() { // simulate CVRs
-        val datadir = "$testdataDir/cases/boulder2025"
-        val auditdir = "$testdataDir/cases/boulder2025/clca/audit"
-        createBoulderElection(
-            "$datadir/Redacted-CVR-PUBLIC.utf8.csv",
-            "$datadir/2025C-Boulder-County-Official-Statement-of-Votes.utf8.csv",
-            auditdir = auditdir,
-            auditType = AuditType.CLCA,
-            contestSampleCutoff = 1000,
-            auditSampleCutoff = 2000,
-        )
-    }
+
  @Test
  fun createBoulder24recount() {
      createBoulderElection(
@@ -172,12 +194,12 @@ class MakeBoulderElection {
 
     @Test
     fun testParseContestName() {
-        assertEquals(Pair("Frankenfurter", 11), parseContestName("Frankenfurter (Vote For=11)"))
-        assertEquals(Pair("Frankenfurter", 11), parseContestName("Frankenfurter(Vote For=11)"))
-        assertEquals(Pair("Frankenfurter", 11), parseContestName("Frankenfurter(Vote For=11"))
-        assertEquals(Pair("Frankenfurter", 11), parseContestName("Frankenfurter(Vote For=11) but wait theres more"))
-        assertEquals(Pair("Heather (Bob) Morrisson", 11), parseContestName("Heather (Bob) Morrisson (Vote For=11)"))
-        assertEquals(Pair("Stereoscopic", 1), parseContestName("Stereoscopic    "))
+        assertEquals(Pair("Frankenfurter", 11), parseContestNameAndVoteFor("Frankenfurter (Vote For=11)"))
+        assertEquals(Pair("Frankenfurter", 11), parseContestNameAndVoteFor("Frankenfurter(Vote For=11)"))
+        assertEquals(Pair("Frankenfurter", 11), parseContestNameAndVoteFor("Frankenfurter(Vote For=11"))
+        assertEquals(Pair("Frankenfurter", 11), parseContestNameAndVoteFor("Frankenfurter(Vote For=11) but wait theres more"))
+        assertEquals(Pair("Heather (Bob) Morrisson", 11), parseContestNameAndVoteFor("Heather (Bob) Morrisson (Vote For=11)"))
+        assertEquals(Pair("Stereoscopic", 1), parseContestNameAndVoteFor("Stereoscopic    "))
     }
 
     @Test
@@ -222,7 +244,7 @@ class MakeBoulderElection {
 
         override fun run(): Boolean {
             val creation =
-                AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05, )
+                AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03, )
             val round = AuditRoundConfig(
                 SimulationControl(nsimTrials = 22),
                 ContestSampleControl(
@@ -235,11 +257,13 @@ class MakeBoulderElection {
             )
 
             createBoulderElection(
+                "2024",
                 "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
                 "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
                 auditdir = auditdir,
                 creation,
-                round
+                round,
+                distributeOvervotes = listOf(0, 63)
             )
             return runAllRoundsAndVerify(auditdir, verify = false)
         }

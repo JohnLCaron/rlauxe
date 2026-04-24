@@ -9,12 +9,13 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.test.Test
 
-class TestColoradoElectionCsv {
+class TestReadColoradoElectionSummaryCsv {
 
     @Test
     fun testColoradoElectionSummary() {
         val filename = "src/test/data/corla/2024election/summary.csv"
         val contests = readColoradoElectionSummaryCsv(filename)
+        println("${contests.size} contests in $filename")
         contests.forEach { it.complete() }
         println("--------------------------------------------------------------")
         println("contest sort by reversed underVote percentage\n")

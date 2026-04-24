@@ -25,7 +25,7 @@ data class CardStyle(
     val name: String,
     val id: Int,
     val possibleContests: IntArray,      // the list of possible contests.
-    val hasExactContests: Boolean,       // aka hasStyle: if all cards have exactly the contests in possibleContests
+    val hasExactContests: Boolean,       // aka hasStyle: if all cards have exactly the contests in possibleContests; TODO why needed here ?
 ) : StyleIF {
     override fun name() = name
     override fun id() = id

@@ -213,7 +213,7 @@ fun makeCvrsForOnePool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?
     val rcvrs = mutableListOf<Cvr>()
     var count = 1
     while (!vunderpool.done()) {
-        val cvrId = "${poolName}-${count}"
+        val cvrId = "pool-${poolName}.count-${count}"
         val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = poolId)
         vunderpool.simulatePooledCvr(cvb2)
         rcvrs.add(cvb2.build())

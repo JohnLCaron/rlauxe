@@ -66,8 +66,8 @@ these have the margins and the estimated samples from
 
 contest_name,audit_reason,random_audit_status,winners_allowed,          ballot_card_count, contest_ballot_card_count, winners, min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
 
-State Representative - District 10,county_wide_contest,in_progress,1,   396121, 44675,"""Junie Joseph""",27538,0.03000000,0,0,0,0,0,0,0,1.03905000,0,105,105
-State Representative - District 10	county_wide_contest	in_progress	1	396121	44675	"Junie Joseph"	27538	0.03	0	0	0	0	0	0	0	1.03905	0	105	105
+State Representative - District 10, county_wide_contest,in_progress,1,   396121, 44675,"""Junie Joseph""",27538,0.03000000,0,0,0,0,0,0,0,1.03905000,0,105,105
+State Representative - District 10	county_wide_contest	in_progress	1	 396121	 44675	"Junie Joseph"	  27538	0.03	0	0	0	0	0	0	0	1.03905	0	105	105
 
 ballot card count = 396121
 contest_ballot_card_count = 44675
@@ -90,6 +90,8 @@ TODO: For some reason they use ballot_card_count instead of contest_ballot_card_
 3. dilutedMargin = 0.0699 estSamples = 105.0
 
 The estimations agree closely with rlauxe simulations using AdaptiveComparision and assume no errors.
+
+Note 12 * 396121/44675 = 106, so "find 12 cards in entire pool"
 
 -----------------------------
 round2/contestComparison.csv has lines added reletive to round1/contestComparison.csv,

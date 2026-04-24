@@ -1,15 +1,16 @@
-Risk-limiting audit - 2025 Coordinated Election
+# Risk-limiting audit - 2025 Coordinated Election
 files downloaded from https://www.coloradosos.gov/pubs/elections/auditCenter.html
 4/22/2026
 
 // voting
 contestsByCounty.csv                county id, county name, contest name, contest id
-canonicalList.csv                   county, contestName, contestChoices
-tabulatePlurality.csv               summary of candidate votes
-tabulateCountyPlurality.csv         summary of candidate votes by county
+canonicalList.csv                   county, contestName, contestChoices  <--- maybe use this for creating contestInfo? doesnt have nwinners
+tabulatePlurality.csv               summary of candidate votes           <--- has the cadidate vote totals, can make the contest
+tabulateCountyPlurality.csv         summary of candidate votes by county <--- votes totals by county
 
-2025CoordinatedRLASelectedContests.xlsx 
-2025CoordinatedRLASelectedContests.csv 
+no undervotes, Nc, total cards anywhere Ive found....
+
+# 2025CoordinatedRLASelectedContests.xlsx .csv 
 
 county, contest, voteFor, lowest winner, highest loser, margin in votes, diluted margin, risk limit, estimated # cvrs to audit, #cvrs, remarks
 ````
@@ -26,11 +27,18 @@ Bent	Proposition LL (STATUTORY)	1	606	520	86	7.6%	3%	95	1,128	Single county audi
 Boulder	City of Boulder Ballot Issue 2B	1	15,600	8,944	6,656	7.4%	3%	98	26,826	No Data
 ````
 
+# canonicalList.csv
+
+CountyName,  ContestName,                                                   ContestChoices
+El Paso,     Academy School District 20 Board of Directors - 4 Year Term,   "Holly Tripp,Ren�e Malloy Ludlam,Brandon Clark,Susan Payne,Eddie Waldrep,Jennafer Stites,Cynthia Halverson"
+Adams,       Adams 12 Five Star School District Director - District No 3,   "Juan Evans,Ike Anyanwu-Ebo"
+Broomfield,  Adams 12 Five Star School District Director - District No 3,   "Juan Evans,Ike Anyanwu-Ebo"
+...
 
 // audit
-stateCoordinatedAuditReport.xlsx    summary of audit by county, audited contests, votes, margin
+# stateCoordinatedAuditReport.xlsx    summary of audit by county, audited contests, votes, margin
 
-contestComparison.csv   compare cvr/mvr, just for the targeted contests
+# contestComparison.csv   compare cvr/mvr, just for the targeted contests
 ````
 county_name	contest_name	imprinted_id	ballot_type	choice_per_voting_computer	audit_board_selection	consensus	record_type	audit_board_comment	timestamp	cvr_id	audit_reason
 Adams	Adams 12 Five Star School District Director - District No 3	101-1-65	28	"Juan Evans"	"Juan Evans"	YES	uploaded		2025-11-18 09:33:59.346136	844420

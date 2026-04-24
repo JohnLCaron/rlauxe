@@ -4,8 +4,6 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.testdataDir
@@ -25,7 +23,7 @@ class TestBoulder2024Cvrs {
         val stopwatch = Stopwatch()
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
         // println(export.summary())
         println("took = $stopwatch")
 
@@ -90,7 +88,7 @@ class TestBoulder2024Cvrs {
         val stopwatch = Stopwatch()
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
 
         val sovo = readBoulderStatementOfVotes(
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",

@@ -16,6 +16,7 @@ import kotlin.random.Random
 
 private val logger = KotlinLogging.logger("BoulderContestBuilder")
 
+// TODO This is specific to distributeExpectedOvervotes. maybe if we can get undervotes correct we dont need that ?
 class BoulderContestBuilder(val info: ContestInfo,
                             val sovoContest: BoulderContestVotes,
                             val cvrTab: ContestTabulation,
@@ -105,7 +106,7 @@ class BoulderContestBuilder(val info: ContestInfo,
 
     fun ncards(): Int {
         // for contest 20, correct the ncards, ignore undervote count
-        return if (info.name == "Town of Superior - Truste") 8256  // TODO fix this
+        return if (info.name == "Town of Superior - Trustee") 8256  // TODO fix this; Boulder 2024 only
         else sumAllCards()
     }
 
@@ -146,6 +147,7 @@ class BoulderContestBuilder(val info: ContestInfo,
 
 //////////////////////////////////////////////////////////////////
 
+// used by CreateBoulderElection and CreateColoradoElection. TODO Maybe only for 2024?
 // TODO could be in core so as to run unit tests on it
 fun distributeExpectedOvervotes(oaContest: OneAuditContestBuilderIF, cardPools: List<OneAuditPoolFromBallotStyle>) {
     val contestId = oaContest.contestId

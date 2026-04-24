@@ -2,8 +2,6 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.merge
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import kotlin.test.Test
 
@@ -17,7 +15,7 @@ class TestBoulderElectionOneAudit {
         )
 
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
 
         val election = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
         val infos = election.boulderContestBuilders.mapValues { it.value.info }

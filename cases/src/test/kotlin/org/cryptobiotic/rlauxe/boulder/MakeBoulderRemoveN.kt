@@ -76,11 +76,13 @@ class RunRemoveBoulderTask(
         val round = AuditRoundConfig(SimulationControl(nsimTrials = 22), ContestSampleControl.NONE, ClcaConfig(), null)
 
         createBoulderElection(
+            "2024",
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditDir,
             creation,
             round,
+            distributeOvervotes = listOf(0, 63)
         )
 
         val publisher = Publisher(auditDir)

@@ -54,12 +54,12 @@ open class ClcaAssorter(
     init {
         val reportedAssortAvg = assorter.dilutedMean() // ?? what used for ??
         if (check) { // suspend checking for some tests that expect to fail
-            require(reportedAssortAvg > 0.5) {
-                "*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($reportedAssortAvg) must be > .5"
+            require(reportedAssortAvg >= 0.5) {
+                "*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($reportedAssortAvg) must be >= .5"
             }
             // the math requires this; otherwise divide by negative number flips the inequality
-            require(noerror > 0.5) {
-                "${info.name} ${assorter.desc()}: ($noerror) noerror must be > .5"
+            require(noerror >= 0.5) {
+                "${info.name} ${assorter.desc()}: ($noerror) noerror must be >= .5"
             }
         }
     }

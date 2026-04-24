@@ -600,6 +600,7 @@ cards is
 
 	Ā ≡  1/N Sum( A(bi ).
 
+(Therefore we can treat undervotes and overvotes the same. TODO what about comparision audits that find an undervote instead of an overvotes etc?).
 
 Section 3.1 Ballot Polling
 
@@ -613,7 +614,6 @@ with valid votes for the reported loser. ie (1).  This is the diluted margin of 
 traditionally calculated as the difference in votes divided by the number of valid votes.
 Diluted refers to the fact that the denominator is the number of ballot cards, which is
 greater than or equal to the number of valid votes.
-
 
 Section 3.4 phantoms to zombies
 

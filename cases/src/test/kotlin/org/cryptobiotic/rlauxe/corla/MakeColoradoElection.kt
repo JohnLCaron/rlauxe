@@ -21,10 +21,10 @@ import kotlin.test.fail
 
 class MakeColoradoElection {
 
-    @Test
-    fun makeCountyAudits() {
-        val topdir = "$testdataDir/cases/corla/county"
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
+    // @Test
+    fun makeCountyAudits25() {
+        val topdir = "$testdataDir/cases/corla25/county"
+        val detailXmlFile = "src/test/data/corla2025/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
         val wantCounties = listOf("Summit") // listOf("Boulder",  "El Paso", "La Plata", "Weld",)
@@ -39,6 +39,27 @@ class MakeColoradoElection {
             detailXmlFile, contestRoundFile, precinctFile,
             wantCounties, creationConfig, roundConfig,
             startFirstRound = false
+        )
+    }
+
+    @Test
+    fun makeCountyAudits24() {
+        val topdir = "$testdataDir/cases/corla/county"
+        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
+        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
+        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
+        val wantCounties = listOf("Boulder",  "El Paso", "La Plata", "Weld",)
+
+        val creationConfig = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
+        val roundConfig = AuditRoundConfig(
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
+            ClcaConfig(), null)
+
+        createCountyAudits(topdir,
+            detailXmlFile, contestRoundFile, precinctFile,
+            wantCounties, creationConfig, roundConfig,
+            startFirstRound = true
             )
     }
 

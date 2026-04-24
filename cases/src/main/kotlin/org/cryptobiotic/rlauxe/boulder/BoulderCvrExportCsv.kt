@@ -1,21 +1,22 @@
-package org.cryptobiotic.rlauxe.dominion
+package org.cryptobiotic.rlauxe.boulder
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.boulder.isEmpty
+import org.cryptobiotic.rlauxe.boulder.RedactedGroup.Companion.makeAccumulator
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.ZipReader
-import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.util.trunc
+import org.cryptobiotic.rlauxe.util.roundUp
 import java.io.File
 import java.io.InputStreamReader
 import java.io.Reader
 import java.lang.StrictMath.sqrt
 import java.nio.charset.Charset
+import kotlin.collections.set
+import kotlin.math.max
 
-// this reads csv files from "Dominion CVR export files", probably standard Dominion format ?
+// this reads csv files from "Dominion CVR export files", maybe standard Dominion csv format ?
 // We are getting these files from Boulder County, used by createBoulderElection()
 // Note these record the cvr undervotes, but not for the redacted votes
 
@@ -36,18 +37,18 @@ import java.nio.charset.Charset
 // ... (cvrs)
 // Redacted and Aggregated,,,,,,BallotType,DEM,REP,APV,LBR,GRN,ACN,UNI,UNA ...
 
-private val showRaw = false
 private val showHeader = false
 private val showLines = false
 
-data class DominionCvrExportCsv(
+data class BoulderCvrExportCsv(
     val countyId: String,
     val electionName: String,
     val versionName: String,
     val filename: String,
     val schema: Schema,
-    val cvrs: List<CastVoteRecord>, // includes both regular and IRV votes
+    val cvrs: List<CastVoteRecord>, // includes both regular and IRV votes, but not redacted groups
     val redacted: List<RedactedGroup>,
+    val ballotTypes: List<BallotType>,
 ) {
     fun show() = buildString {
         appendLine("filename = $filename")
@@ -141,12 +142,17 @@ data class CastVoteRecord(
 // use colIdx to eliminate write-ins.
 data class ContestVotes(val contestId: Int, val candVotes: List<Int>)
 
+
 // raw data from Boulder, before we start to adjust it. Turn into a CardPool,
-// unfortunately, we dont know how many ballots this group represents, nor the number of undervotes
-class RedactedGroup(val ballotType: String) {
+// TODO check this: unfortunately, we dont know how many ballots this group represents, nor the number of undervotes
+// TODO merge groups of the same ballotType
+class RedactedGroup(var ballotType: String) {
     // dont have ContestInfos yet
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
-    var csvRecord : CSVRecord? = null // debugging
+    private var csvRecord : CSVRecord? = null // debugging
+    var ncards: Int = 1  //used by the accumulating group
+
+    fun contests() = contestVotes.keys.toSet()
 
     fun addVotes(schema: Schema, line: CSVRecord): RedactedGroup {
         var colidx = schema.nheaders // skip over the first 6 or 7 columns
@@ -166,6 +172,8 @@ class RedactedGroup(val ballotType: String) {
                         val prev = candidateVotes[candIdx] ?: 0
                         candidateVotes[candIdx] = prev + nvotes
                     }
+                    if (useContest.contestIdx == 31 && candidateVotes.values.sum() == 1)
+                        print("")
                 }
                 colidx += useContest.ncols
             } else {
@@ -176,27 +184,49 @@ class RedactedGroup(val ballotType: String) {
         return this
     }
 
+    fun merge(other: RedactedGroup, voteForNmap: Map<Int, Int>): RedactedGroup {
+        other.contestVotes.forEach { (contestId, otherCands) ->
+            val mycands = contestVotes.getOrPut(contestId, { mutableMapOf() })
+
+            otherCands.forEach { (cand, otherVote) ->
+                val myvotes = mycands[cand] ?: 0
+                mycands[cand] = myvotes + otherVote
+            }
+        }
+        this.ncards += other.ncards // other.minCards(voteForNmap)
+
+        return this
+    }
+
+    // method #1
+    // based on votes and voteForN, calculates the minimum number of cards that in this redacted line
+    fun minCards(voteForNmap: Map<Int, Int>): Int {
+        var minCards = 0
+        contestVotes.forEach { (contestId, cands) ->
+            val voteForN = voteForNmap[contestId]!!
+            val minCardsForContest = roundUp(cands.values.sum() / voteForN.toDouble())
+            minCards = max(minCards, minCardsForContest)
+        }
+        return minCards
+    }
+
     override fun toString() = buildString {
-        val contestIds = contestVotes.map { it.key }.sorted()
+        val contests = contestVotes.map { it.key }.sorted()
         val totalVotes = contestVotes.values.map{ it.values }.flatten().sum()
-        append("RedactedGroup '$ballotType', contestIds=$contestIds, totalVotes=$totalVotes")
+        append("RedactedGroup('$ballotType', ncards=$ncards, contests=$contests totalVotes=$totalVotes)")
         // appendLine(csvRecord.toString())
     }
 
-    // TODO divide by voteForN?
-    // TODO to get this right, the A and B should be merged into one group
-    fun maxCards(): Int {
-        return contestVotes.values.maxOfOrNull { it.values.sum() }!!
-    }
-
-    fun undervote(): Map<Int, Int> {  // contest -> undervote
-        val maxc = maxCards()
+    /* now we know the count, so we can calculate missing
+    fun undervote(infos: Map<Int, ContestInfo>): Map<Int, Int> {  // contest -> undervote
         val undervote = contestVotes.map { (id, cands) ->
+            val info = infos[id]!!
             val sum = cands.map { it.value }.sum()
-            Pair(id, maxc - sum)
+            Pair(id, count * info.voteForN - sum)
         }
         return undervote.toMap()
     }
+
 
     fun showVotes(wantIds: List<Int>) = buildString {
         val maxc = maxCards()
@@ -223,10 +253,86 @@ class RedactedGroup(val ballotType: String) {
             }
         }
         appendLine()
+    } */
+
+    companion object {
+
+        fun makeAccumulator(starting: RedactedGroup, accumName:String, voteForNmap: Map<Int, Int>): RedactedGroup {
+            val accum = RedactedGroup(accumName)
+            accum.merge(starting, voteForNmap)
+
+            // override with method #2
+            if (starting.csvRecord != null) {
+                accum.ncards = parseNCards(starting.csvRecord!!.values()[0])
+            }
+            return accum
+        }
     }
 }
 
-fun readDominionCvrExportCsv(filename: String, countyId: String): DominionCvrExportCsv {
+// method #2: specific to Boulder25; "Redacted and Consolidated 10 Ballots"
+fun parseNCards(line:String): Int {
+    if (!line.contains("Redacted and Consolidated")) return 1
+
+    val tokens = line.split(" ")
+    require(tokens.size > 3) { "unexpected redacted line $line" }
+    val ncards = tokens[3].toInt()
+    return ncards
+}
+
+data class BallotType(val name: String, val contests: Set<Int>, var count: Int = 0)
+
+class BallotStyles {
+    val ballotTypes = mutableMapOf<String, BallotType>()
+    val redactedGroups = mutableMapOf<String, RedactedGroup>()
+
+    fun add(cvr:CastVoteRecord) {
+        val cvrContests = cvr.contestVotes.map { it.contestId }.toSet()
+        val ballotType = ballotTypes.getOrPut(cvr.ballotType) { BallotType(cvr.ballotType, cvrContests) }
+        if (ballotType.contests == cvrContests)
+            ballotType.count++
+        else {
+            println("cvr $cvr doesnt match $ballotType")
+        }
+    }
+
+    fun add(redacted:RedactedGroup, voteForNmap: Map<Int, Int>) {
+        val rname = if (redacted.contestVotes.contains(31)) "r${redacted.ballotType}+31" else "r${redacted.ballotType}"
+        val group = redactedGroups[rname]
+        if (group == null) {
+            redactedGroups[rname] = makeAccumulator(redacted, rname, voteForNmap)
+        } else {
+            if (group.contests() == redacted.contests())
+                group.merge(redacted, voteForNmap)
+            else
+                println("redacted $redacted doesnt match $group; c31 = ${redacted.contestVotes[31]}")
+        }
+    }
+}
+
+// TODO extract the "Vote For" from the header, use to calculate the number of cards in the redacted lines. (method 1)
+// "Boulder County 2025 Coordinated","5.17.17.1",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+//,,,,,,,"City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Longmont Mayor (Vote For=1)","City of Longmont Mayor (Vote For=1)","City of Longmont Mayor (Vote For=1)","City of Longmont Mayor (Vote For=1)","City of Longmont City Council At Large (Vote For=2)","City of Longmont City Council At Large (Vote For=2)","City of Longmont City Council At Large (Vote For=2)","City of Longmont City Council At Large (Vote For=2)","City of Longmont City Council At Large (Vote For=2)","City of Longmont City Council At Large (Vote For=2)","City of Longmont City Council Ward 2 (Vote For=1)","City of Longmont City Council Ward 2 (Vote For=1)","City of Louisville City Council Ward 1 (4-year term) (Vote For=1)","City of Louisville City Council Ward 1 (4-year term) (Vote For=1)","City of Louisville City Council Ward 2 (4-year term) (Vote For=1)","City of Louisville City Council Ward 3 (4-year term) (Vote For=1)","Boulder Valley School District RE-2 Director District B (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District E (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District E (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District F (4 Years) (Vote For=1)","St. Vrain Valley School District RE-1J Board of Education Director in Director District B (Vote For=1)","St. Vrain Valley School District RE-1J Board of Education Director in Director District B (Vote For=1)","St. Vrain Valley School District RE-1J Board of Education Director in Director District D (Vote For=1)","St. Vrain Valley School District RE-1J Board of Education Director in Director District D (Vote For=1)","St. Vrain Valley School District RE-1J Board of Education Director in Director District E (Vote For=1)","St. Vrain Valley School District RE-1J Board of Education Director in Director District F (Vote For=1)","Thompson School District R2-J Board of Education Director District B (Vote For=1)","Thompson School District R2-J Board of Education Director District E (Vote For=1)","Thompson School District R2-J Board of Education Director District E (Vote For=1)","Thompson School District R2-J Board of Education Director District F (Vote For=1)","Thompson School District R2-J Board of Education Director District F (Vote For=1)","City of Longmont Municipal Court Judge - Frick (Vote For=1)","City of Longmont Municipal Court Judge - Frick (Vote For=1)","Proposition LL (Statutory) (Vote For=1)","Proposition LL (Statutory) (Vote For=1)","Proposition MM (Statutory) (Vote For=1)","Proposition MM (Statutory) (Vote For=1)","Boulder County Ballot Issue 1A (Vote For=1)","Boulder County Ballot Issue 1A (Vote For=1)","Boulder County Ballot Issue 1B (Vote For=1)","Boulder County Ballot Issue 1B (Vote For=1)","City of Boulder Ballot Issue 2A (Vote For=1)","City of Boulder Ballot Issue 2A (Vote For=1)","City of Boulder Ballot Issue 2B (Vote For=1)","City of Boulder Ballot Issue 2B (Vote For=1)","City of Lafayette Ballot Issue 2C (Vote For=1)","City of Lafayette Ballot Issue 2C (Vote For=1)","City of Louisville Ballot Question 300 (Vote For=1)","City of Louisville Ballot Question 300 (Vote For=1)","City of Louisville Ballot Question 301 (Vote For=1)","City of Louisville Ballot Question 301 (Vote For=1)","Thompson School District R2-J Ballot Issue 5A (Vote For=1)","Thompson School District R2-J Ballot Issue 5A (Vote For=1)","Hygiene Fire Protection District Ballot Issue 6A (Vote For=1)","Hygiene Fire Protection District Ballot Issue 6A (Vote For=1)","Sunshine Fire Protection District Ballot Issue 6B (Vote For=1)","Sunshine Fire Protection District Ballot Issue 6B (Vote For=1)","Coal Creek Canyon Fire Protection District Ballot Issue 7B (Vote For=1)","Coal Creek Canyon Fire Protection District Ballot Issue 7B (Vote For=1)"
+//,,,,,,,"Nicole Speer","Rob Kaplan","Montserrat Palacios","Rob Smoke","Maxwell Lord","Jennifer Robins","Aaron Stone","Lauren Folkerts","Mark Wallach","Matt Benjamin","Rachel Rose Isaacson","Adam Gianola","Luke Arrington","Josh Beryl","Eric Ryant","Saul Tapia Vega","Rob Glenn","Kyle Beaulieu","Annmarie Jensen","Crystal Gallegos","Michael Watson","Susie Hidalgo-Fahring","Sarah Levison","Diane Crist","Shakeel Dalal","Crystal Prieto","Alex Kalkhofer","John Lembke","Jake Marsing","Riegan Sage","Steven Altschuler","Matthew Popkin","Teresa Simpkins","Joshua H. Cooperman","Denise Montagu","Judi Kern","Dietrich Hoefner","Nicole Rajpal","Jeffrey Lowe Anderson","Deann Bucher","Ana Temu Otting","Peggy A. Kelly","Hadley Solomon","Meosha Babbs","John Ahrens","Jocelyn Gilligan","Sarah Hurianek","Mike Scholl","Alexandra Lessem","Mary Buchanan","Dmitri Atrash","Lori Goebel","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against"
+//"CvrNumber","TabulatorNum","BatchId","RecordId","ImprintedId","CountingGroup","BallotType",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+//"1","102","1","82","102-1-82","Regular","03",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,0,1,1,,,,,,,,,,,,,,1,0,1,0,1,0,1,0,,,,,,,,,,,,,,,,,,
+//"2","102","1","81","102-1-81","Regular","03",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,0,1,1,,,,,,,,,,,,,,1,0,1,0,1,0,1,0,,,,,,,,,,,,,,,,,,
+
+// TODO extract the number of ballots from the "Consolidated 10 Ballots", and compare with method 1 (method 2)
+// "Redacted and Consolidated 10 Ballots",,,,,,"11 & PO-CC",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,4,1,2,4,,,,,,,,,,,,,,6,2,3,6,3,5,3,5,,,,,,,,,,,,,,,,,4,5
+//"Redacted and Consolidated 18 Ballots",,,,,,"14 & PO-SF",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,8,9,1,8,,,,,,,,,,,,,,10,3,6,6,8,5,4,9,,,,,,,,,,,,,,,16,2,,
+//"Redacted and Consolidated 20 Ballots",,,,,,"18 & 12 & PO-HF",,,,,,,,,,,,,,,,,,,,,,2,0,3,1,0,3,1,1,2,5,3,3,,,,,,,,,5,1,1,5,3,3,,,,,,2,4,11,3,11,3,9,5,9,5,,,,,,,,,,,,,5,7,,,,
+//"Redacted",,,,,,"02",,,,,,,,,,,,,,,,,,,,,,0,0,0,0,0,0,0,1,0,0,,,,,,,,,,,0,0,0,0,0,0,,,,,,0,0,1,0,1,0,1,0,1,0,,,,,,,,,,,,,,,,,,
+//"Redacted",,,,,,"09",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,0,0,,,0,0,1,0,,,,,,,,,,,,,,1,0,1,0,1,0,1,0,,,,,,,0,1,0,1,,,,,,,,
+
+// method 1 vs 2: 9 should be 10; 18 should be 18; 14 should be 20
+
+
+// TODO add the ncards foreach Redacted group. that lets us calculate the missing votes in the pool.
+
+
+fun readDominionCvrExportCsv(filename: String, countyId: String): BoulderCvrExportCsv {
+    val ballotStyles = BallotStyles()
 
     val parser = if (filename.endsWith(".zip")) {
         val zipReader = ZipReader(filename)
@@ -275,10 +381,10 @@ fun readDominionCvrExportCsv(filename: String, countyId: String): DominionCvrExp
 
     // make the column structure out of those 3 lines
     val schema = makeSchema(contestLine, choiceLine, headerRecord)
+    val nvotesMap = schema.contests.associate { it.contestIdx to it.voteForN }
     val ballotTypeIdx = if (schema.nheaders == 6) 5 else 6 // TODO see if BallotType == header 6
 
     val cvrs = mutableListOf<CastVoteRecord>()
-    val redacted = mutableListOf<RedactedGroup>()
 
     var rcvRedacted = 0
     while (records.hasNext()) {
@@ -286,8 +392,10 @@ fun readDominionCvrExportCsv(filename: String, countyId: String): DominionCvrExp
         if (line.isEmpty()) break
         if (line.get(0).startsWith("Redacted")) { // but not "RCV Redacted ..." which can be treated like a normal CVR
             val isA =  line.get(0).contains("A cards")
-            val ballotStyle = line.get(ballotTypeIdx) + if (isA) "-A" else "-B"
-            redacted.add(RedactedGroup(ballotStyle).addVotes(schema, line)) // "redacted" group of votes
+            val isB =  line.get(0).contains("B cards")
+            val ballotStyle = line.get(ballotTypeIdx) + if (isA) "-A" else if (isB) "-B" else ""
+            val redactedGroup = RedactedGroup(ballotStyle).addVotes(schema, line)
+            ballotStyles.add(redactedGroup, nvotesMap)
 
         } else if (line.get(0).startsWith("RCV Redacted")) {
             val cvr = CastVoteRecord(
@@ -300,6 +408,7 @@ fun readDominionCvrExportCsv(filename: String, countyId: String): DominionCvrExp
             )
             rcvRedacted++
             cvrs.add(cvr.addVotes(schema, line))  // IRV redacted vote
+            ballotStyles.add(cvr)
 
         } else {
             try {
@@ -317,10 +426,20 @@ fun readDominionCvrExportCsv(filename: String, countyId: String): DominionCvrExp
                 ballotType = line.get(ballotTypeIdx),
             )
             cvrs.add(cvr.addVotes(schema, line)) // regular vote
+            ballotStyles.add(cvr)
         }
     }
     if (rcvRedacted > 0) println("  read $rcvRedacted RCV Redacted votes")
-    return DominionCvrExportCsv(countyId, electionName, versionName, filename, schema, cvrs, redacted)
+
+    println("Ballot Styles size=${ballotStyles.ballotTypes.size}")
+    ballotStyles.ballotTypes.toSortedMap().forEach { println(" ${it.key} ${it.value}")}
+
+    println("Redacted Groups size = ${ballotStyles.redactedGroups.size}")
+    ballotStyles.redactedGroups.toSortedMap().forEach { println("  ${it.value}")}
+
+    return BoulderCvrExportCsv(countyId, electionName, versionName, filename, schema, cvrs,
+        ballotStyles.redactedGroups.toSortedMap().values.toList(),
+        ballotStyles.ballotTypes.toSortedMap().values.toList())
 }
 
 val d3f = "%3d"
@@ -418,6 +537,7 @@ class ColumnInfo(val colno:Int, val contest: String, val choice: String, val hea
 class ExportContestInfo(val contestIdx: Int, val contestName: String, val startCol: Int, val ncols: Int) {
     val isIRV: Boolean
     val nchoices: Int
+    val voteForN: Int
 
     init {
         isIRV = contestName.contains("Number of ranks=")
@@ -425,6 +545,8 @@ class ExportContestInfo(val contestIdx: Int, val contestName: String, val startC
             // val pos = contestName.("Number of ranks=") + "Number of ranks=".length
             sqrt(ncols.toDouble()).toInt()
         } else ncols
+        val (name, nwinners) = if (isIRV) parseIrvContestName(contestName) else parseContestNameAndVoteFor(contestName)
+        voteForN = nwinners
     }
 }
 

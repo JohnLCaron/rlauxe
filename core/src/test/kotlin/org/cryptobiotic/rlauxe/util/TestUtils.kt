@@ -2,12 +2,85 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import kotlin.math.abs
+import kotlin.math.exp
+import kotlin.math.ln
+import kotlin.math.pow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
 class TestUtils {
+
+    @Test
+    fun calcMarginUpperFromSamples() {
+        val samples = 101
+        val bet = 2/1.03905
+        val margin = estMarginUpperFromSamples(bet, samples, .03)
+        println("samples=$samples margin=$margin")
+    }
+
+    @Test
+    fun calcSamplesFromMarginUpper() {
+        val bet = 2/1.03905
+        val alpha = .03
+        val marginUpper = .02
+        val samples = estSamplesFromMarginUpper(bet, marginUpper, alpha)
+        println("margin=$marginUpper samples=$samples ")
+        println("margin=${marginUpper/2} samples=${estSamplesFromMarginUpper(bet, marginUpper/2, alpha)} ")
+
+        val noerror = 1.0 / (2.0 - marginUpper)
+        val nomargin = 2.0 * noerror - 1.0
+        val n =  -ln(alpha) / ln(1.0 + bet * nomargin / 2)
+        println("-ln(alpha) = ${-ln(alpha)}")
+        println("1.0 + bet * nomargin / 2 = ${1.0 + bet * nomargin / 2}")
+        println("ln(1.0 + bet * nomargin / 2) = ${ln(1.0 + bet * nomargin / 2)}")
+        println("x = bet * nomargin / 2 = ${bet * nomargin / 2}") // x < 1
+
+        val ans = ln(1.0 + bet * nomargin / 2)
+        val x = bet * nomargin / 2
+        var sum = 0.0
+        println("taylor series of ln(1+x)")
+        repeat(5) {
+            val term = taylor(x, it+1)
+            sum += term
+            println("${it+1} $term $sum ${ans-sum}")
+        }
+
+        // noerror = 1 / (2 - marginUpper)
+        // noerror - 1/2 = 1 / (2 - marginUpper) - 1/2
+        // noerror - 1/2 = 2 / 2(2 - marginUpper) - (2 - marginUpper)/2(2 - marginUpper)
+        // noerror - 1/2 = (2 - (2 - marginUpper)) / 2 (2 - marginUpper )
+        // noerror - 1/2 = marginUpper / 2*(2 - marginUpper)
+
+        // val n =  -ln(alpha) / ln(1.0 + bet * (noerror - 1/2))
+        // val n =  -ln(alpha) / ln(1.0 + bet * (marginUpper / 2*(2 - marginUpper ))
+
+
+        // so ln(1.0 + x) ~ x
+        // so n = -ln(alpha) / ln(1.0 + bet * nomargin / 2)
+        // so n = -ln(alpha) / (bet * nomargin / 2)
+        // so n ~ -ln(alpha) / (bet * (marginUpper / 2*(2 - marginUpper )))
+        // so n ~ [-ln(alpha) / bet/2]  / (marginUpper/ (2 - marginUpper ))
+        val num = -ln(alpha) / (bet/2)
+        val den = marginUpper / (2 - marginUpper )
+        val napprox = num / den
+        println("num=$num den = $den")
+        println("${napprox} ${samples} ${samples-napprox}")
+
+        val den2 = marginUpper/2 / (2 - marginUpper/2 )
+        val napprox2 = num / den2
+        println("num=$num den2 = $den2")
+        println("${napprox2} ${2*samples} ${2*samples-napprox2}")
+
+        // so if margin = voteDiff/Npop, and you double Npop, you half the margin and you ~ double the sample size
+    }
+
+    // x < 1
+    fun taylor(x: Double, k: Int): Double {
+        val sign = if (k % 2 == 0) -1 else 1
+        return sign * x.pow(k) / k
+    }
 
     @Test
     fun testDoubleIsClose() {

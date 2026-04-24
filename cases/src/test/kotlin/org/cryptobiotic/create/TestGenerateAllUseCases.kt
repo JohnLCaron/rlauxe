@@ -43,11 +43,13 @@ class TestGenerateAllUseCases {
             ClcaConfig(fuzzMvrs=.001), null)
 
         createBoulderElection(
+            "2024",
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             creation,
-            round
+            round,
+            distributeOvervotes = listOf(0, 63)
         )
     }
 
@@ -62,11 +64,13 @@ class TestGenerateAllUseCases {
             ClcaConfig(fuzzMvrs=.001), null)
 
         createBoulderElection(
+            "2024",
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             creation,
             round,
+            distributeOvervotes = listOf(0, 63)
         )
     }
 

@@ -4,8 +4,6 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.collections.component1
@@ -23,7 +21,7 @@ class TestBoulder2025Cvrs {
     fun parseBoulder25cvrs() {
         val stopwatch = Stopwatch()
         // redaction lines are present
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         // println(export.summary())
         println("took = $stopwatch")
 
@@ -48,7 +46,7 @@ class TestBoulder2025Cvrs {
     fun testCreateBoulderElection() {
         val stopwatch = Stopwatch()
         // redaction lines are present
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         // println(export.summary())
         println("took = $stopwatch")
 
@@ -108,7 +106,7 @@ class TestBoulder2025Cvrs {
     fun testMakeRedactedCvrs() {
         val stopwatch = Stopwatch()
         // redaction lines are present
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
 
         val electionSimCvrs = CreateBoulderElection(AuditType.CLCA, export, sovo)
         val infos = electionSimCvrs.makeContestInfo()

@@ -13,13 +13,14 @@ import kotlin.collections.forEach
 import kotlin.math.max
 
 // used when you dont have CVRs, just pool totals.
-// the ContestTabulations are given
+// the ContestTabulations are passed in
 data class OneAuditPoolFromBallotStyle(
     override val poolName: String,
     override val poolId: Int,
     val hasExactContests: Boolean,
     val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests and candidates with no votes
     val infos: Map<Int, ContestInfo>, // all contests
+    val ncards: Int? = null
 ): CardPoolIF, StyleIF {
 
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
@@ -44,7 +45,7 @@ data class OneAuditPoolFromBallotStyle(
     override fun hasContest(contestId: Int) = voteTotals.contains(contestId)
     override fun possibleContests() = voteTotals.map { it.key }.toSortedSet().toIntArray()
 
-    override fun ncards() = maxMinCardsNeeded + adjustCards
+    override fun ncards() = ncards ?: (maxMinCardsNeeded + adjustCards)
 
     fun adjustCards(adjust: Int, contestId : Int) {
         if (!hasContest(contestId)) throw RuntimeException("NO CONTEST")
@@ -53,6 +54,7 @@ data class OneAuditPoolFromBallotStyle(
 
     override fun contestTab(contestId: Int) = voteTotals[contestId]
 
+    // TODO move to test
     // undervotes per contest when single BallotStyle, no blanks
     fun undervotesSingleBallotStyle(): Map<Int, Int> {  // contest -> undervote
         val undervote = voteTotals.map { (id, contestTab) ->

@@ -1,4 +1,5 @@
 # CORLA notes
+
 _last changed 04/24/2026_
 
 # County Support for Public Election Verification

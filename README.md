@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 04/19/2026_
+_last changed: 04/24/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -628,6 +628,7 @@ How to set MaxRisk in an optimal way?
 * [Belgium 2024](docs/cases/Belgium2024.md)
 * [Boulder County 2024](docs/cases/Boulder2024.md)
 * [Colorado Statewide Election 2024](docs/cases/Colorado2024.md)
+* [Corla Notes](docs/notes/CorlaNotes.md)
 * [San Francisco County 2024](docs/cases/SF2024.md)
 
 ## Documentation Index

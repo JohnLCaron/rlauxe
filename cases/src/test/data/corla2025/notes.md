@@ -14,7 +14,7 @@ no undervotes, Nc, total cards anywhere Ive found....
 
 county, contest, voteFor, lowest winner, highest loser, margin in votes, diluted margin, risk limit, estimated # cvrs to audit, #cvrs, remarks
 ````
-County	Contest	Vote For	Lowest Winner	Highest Loser	Contest Margin	Diluted Margin	  Risk Limit	Estimated # of CVRs to audit	# of CVRs	Remarks
+County	Contest	       Vote For	Lowest Winner	Highest Loser	Contest Margin	Diluted Margin	  Risk Limit	Estimated # of CVRs to audit	# of CVRs	Remarks
 Colorado	Proposition MM (STATUTORY)	1	828,425	598,293	230,132	15.9%	3%	45	1,448,499	Audited in all 63 counties
 Multi-county	Telluride School District R-1 Board of Directors	1	1,608	1,051	557	15.2%	3%	48	3,399	Audited in Dolores and San Miguel
 Adams	City of Thornton Ballot Question 2A	1	14,017	11,862	2,155	2.6%	3%	284	27,597	No Data
@@ -26,6 +26,8 @@ Baca	Town of Springfield Ballot Question 2C	1	346	188	158	11.7%	3%	62	542	No Dat
 Bent	Proposition LL (STATUTORY)	1	606	520	86	7.6%	3%	95	1,128	Single county audit
 Boulder	City of Boulder Ballot Issue 2B	1	15,600	8,944	6,656	7.4%	3%	98	26,826	No Data
 ````
+
+this has voteForN, margin, dilutedMargin 
 
 # canonicalList.csv
 
@@ -46,4 +48,6 @@ Adams	Adams 12 Five Star School District Director - District No 3	101-16-85	35		
 Adams	Adams 12 Five Star School District Director - District No 3	101-21-73	33	"Juan Evans"	"Juan Evans"	YES	uploaded		2025-11-18 10:03:02.987321	846391
 Adams	Adams 12 Five Star School District Director - District No 3	101-21-92	30	"Juan Evans"	"Juan Evans"	YES	uploaded		2025-11-18 10:04:01.692525	846381
 ````
+
+there are county pdf files with total ballots = total CVRs, W/L margin, diluted margin  for min assertion
 

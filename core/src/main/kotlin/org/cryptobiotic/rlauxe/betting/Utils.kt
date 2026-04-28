@@ -18,6 +18,18 @@ fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, tracker: Tracker): D
     return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - sum) / (N - sampleNum)
 }
 
+// Consider a single stratum with true mean µ* and null mean eta. N is the number of samples in the population.
+// eta is the null hypothesis, that avg sample assort values <= eta
+// The sample assort values are (X_t), t = 1..N.
+// The "conditional stratumwise null mean" =  eta_t is the mean of the values remaining in X at time t if the null is true.
+// without replacement: eta_t = (N * eta - Sum { X_i for 1 = 1..t-1 } / (N - (t-1))
+//
+fun populationMeanIfH0eta(N: Int, eta: Double, tracker: Tracker): Double {
+    val sampleNum = tracker.numberOfSamples() // t-1  (sample_i has not been put into tracker)
+    val sum = tracker.sum() // Sum { X_i for 1 = 1..t-1 }
+    return if (sampleNum == 0) eta else (N * eta - sum) / (N - sampleNum)
+}
+
 /*
     Alpha eq 12. Choosing λi is equivalent to choosing ηi :
            λi = (ηi /µi − 1) / (u − µi )

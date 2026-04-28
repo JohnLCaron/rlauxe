@@ -1247,6 +1247,7 @@ def banded_uits(x, N, etas, lam_func, allocation_func = Allocations.proportional
             eta_star_index = np.argmin(obj[:,t])
             eta_star = etas[eta_star_index][1] #centroid
         for i in np.arange(len(etas)):
+        for i in np.arange(len(etas)):
             sel[i,:,:] = T_k
     else:
         #draw the selection sequence one time if nonadaptive

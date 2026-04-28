@@ -5,6 +5,8 @@ import kotlinx.serialization.serializer
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.trunc
 import java.io.File
 
 // Detail XLS (295 contests, 92k zipped, 2.6M unzipped )
@@ -109,6 +111,18 @@ data class CorlaXmlContest(
         pcounties.participatingCounties.forEach { appendLine("      $it")}
         appendLine()
         choices.forEach { appendLine("      $it")}
+    }
+
+
+    fun showShort() = buildString {
+        append("${nfn(key, 4)}, ${trunc(text.takeLast(nameSize), nameSize)}, $voteFor/${choices.size},          ${nfn(countiesParticipating, 2)}, ")
+        pcounties.participatingCounties.take(3).forEach { append("${it.name}, ")}
+        appendLine()
+    }
+
+    companion object {
+        val nameSize = 50
+        val header = "  id, ${trunc("name", nameSize-6)}, voteFor/ncands, ncounties, first 3 counties"
     }
 }
 

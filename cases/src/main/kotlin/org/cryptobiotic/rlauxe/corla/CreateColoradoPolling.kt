@@ -12,7 +12,6 @@ class CreateColoradoPolling (
     contestRoundFile: String,
     precinctFile: String,
     auditdir: String,
-    hasExactContests: Boolean,
     pollingMode: PollingMode,
 ): CreateColoradoElection(
             electionDetailXmlFile,
@@ -20,7 +19,6 @@ class CreateColoradoPolling (
             precinctFile,
             AuditType.POLLING,
             auditdir,
-            hasExactContests=hasExactContests,
             pollingMode=pollingMode) {
 
     val contestsPolling: List<ContestWithAssertions>

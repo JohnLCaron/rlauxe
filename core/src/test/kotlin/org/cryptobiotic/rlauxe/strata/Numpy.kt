@@ -6,9 +6,9 @@ import kotlin.random.Random
 
 // easier to work with lists if they arent big
 
-fun numpy_linspace(start: Double, end: Double, n: Int): List<Double> {
-    val grid_step = (end - start) / (n - 1)
-    val result = DoubleArray(n) { start + it * grid_step }
+fun numpy_linspace(start: Double, end: Double, npts: Int): List<Double> {
+    val grid_step = (end - start) / (npts - 1)
+    val result = DoubleArray(npts) { start + it * grid_step }
     require(result.last() == end)
     return result.toList()
 }
@@ -74,6 +74,18 @@ fun numpy_maximum(x1: List<Double>, x2: List<Double>): List<Double> {
     return x1.mapIndexed{ idx, x -> max(x, x2[idx]) }
 }
 fun numpy_maximum(x1: List<Double>, lower: Double) = x1.map{ max(it, lower) }
+
+fun numpy_argmin_product(x :IntArray, exhausted: List<Boolean>): Int {
+    var minIndex = -1
+    var minValue = Integer.MAX_VALUE
+    repeat( x.size ) { i ->
+        if (!exhausted[i] && x[i] < minValue) {
+            minValue = x[i]
+            minIndex = i
+        }
+    }
+    return minIndex
+}
 
 //// arrays, turn into List I think?
 

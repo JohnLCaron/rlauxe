@@ -135,12 +135,15 @@ class MakeColoradoElection {
             pollingMode=PollingMode.withoutBatches, creation, round)
     }
 
-    // @Test
+    @Test
     fun testReadColoradoElectionDetail() {
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val electionResultXml: ElectionResult = readColoradoElectionDetail(detailXmlFile)
-        println(electionResultXml)
         println("  number of contests = ${electionResultXml.contests.size}")
+        println(CorlaXmlContest.header)
+        electionResultXml.contests.forEach {
+            print(it.showShort())
+        }
     }
 
     // @Test

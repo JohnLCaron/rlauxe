@@ -50,6 +50,7 @@ open class ClcaAssorter(
     // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,
     // so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from 0 to 2 /(2 − v/u) = 2 * noerror, from eq (7)
     val upperBound: Double = 2.0 * noerror // upper bound of clca assorter; betting functions may need to know this
+    // u = 2.0 / (2.0 - assorterMargin / assorter.upperBound())
 
     init {
         val reportedAssortAvg = assorter.dilutedMean() // ?? what used for ??

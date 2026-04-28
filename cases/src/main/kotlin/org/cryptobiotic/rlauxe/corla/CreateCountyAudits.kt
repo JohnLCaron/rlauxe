@@ -17,6 +17,7 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.audit.createElectionRecord
 import org.cryptobiotic.rlauxe.audit.startFirstRound
+import org.cryptobiotic.rlauxe.boulder.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -50,7 +51,6 @@ class CreateCountyAudits(
         contestRoundFile: String,
         precinctFile: String,
         val topdir: String,
-        val hasExactContests: Boolean,
         val wantCounties: List<String>,
     ) {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
@@ -60,7 +60,7 @@ class CreateCountyAudits(
 
     // hopefully all the infos are the same
     val infoMap = countyContestBuilders.values.map { it.map { it.info } }.flatten().associateBy { it.id }
-    val allCardPools = convertPrecinctsToCardPools(precinctFile, infoMap, hasExactContests)
+    val allCardPools = convertPrecinctsToCardPools(precinctFile, infoMap, true)
 
     val electionBuilders = mutableListOf<CorlaElectionBuilder>()
 
@@ -70,6 +70,15 @@ class CreateCountyAudits(
 
             // set contest total cards as sum over pools
             builders.forEach { it.setTotalCardsFromPools(countyCardPools) }
+
+            var countZero = 0
+            builders.forEach {
+                if (it.totalCards == 0) {
+                    countZero++
+                    println(it)
+                }
+            }
+            println("contests with no precinct data = $countZero out of ${builders.size}")
 
             // estimate undervotes based on each precinct having a single ballot style
 
@@ -210,9 +219,6 @@ fun makeCountyContestBuilders(
             } else {
                 val candidateNames = ccvs.map { Pair(candidateNameCleanup(it.candName), it.candId) }.toMap()
 
-                // they dont have precinct data for contest >= 260, so we'll just skip them
-                // if (CorlaXmlContest.idx < 260) { // index into the ElectionResult file
-
                 val info = ContestInfo(
                     mname,
                     corlaXmlContest.key,
@@ -349,7 +355,6 @@ fun createCountyAudits(
         contestRoundFile,
         precinctFile,
         topdir,
-        hasExactContests = false,
         wantCounties
     )
 

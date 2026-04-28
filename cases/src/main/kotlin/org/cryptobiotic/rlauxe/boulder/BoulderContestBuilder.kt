@@ -149,12 +149,17 @@ class BoulderContestBuilder(val info: ContestInfo,
 
 // used by CreateBoulderElection and CreateColoradoElection. TODO Maybe only for 2024?
 // TODO could be in core so as to run unit tests on it
-fun distributeExpectedOvervotes(oaContest: OneAuditContestBuilderIF, cardPools: List<OneAuditPoolFromBallotStyle>) {
-    val contestId = oaContest.contestId
-    val poolCards = oaContest.poolTotalCards()
-    val expectedCards = oaContest.expectedPoolNCards()
+
+
+// we dont know how many cards are in the pool.
+// so adjust the number of cards in the pools so that the sum of pool.undervotes agrees with the refContest
+// this only works if the pool has a single style.
+fun distributeExpectedOvervotes(refContest: OneAuditContestBuilderIF, cardPools: List<OneAuditPoolFromBallotStyle>) {
+    val contestId = refContest.contestId
+    val poolCards = refContest.poolTotalCards()
+    val expectedCards = refContest.expectedPoolNCards()
     val need = expectedCards - poolCards
-    // println("${oaContest.contestId} expectedCards=$expectedCards poolCards=$poolCards need = $need")
+    println("${refContest.contestId} expectedCards=$expectedCards poolCards=$poolCards need = $need")
 
     var used = 0
     val allocDiffPool = mutableMapOf<Int, Int>() // poolId -> adjusted undervotes

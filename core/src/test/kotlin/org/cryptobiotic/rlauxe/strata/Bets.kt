@@ -24,6 +24,9 @@ import kotlin.math.sqrt
 
 data class Kwargs(val args: Map<String, Double>) {
     fun get(key:String, def: Double?) = args[key] ?: def
+    companion object {
+        val empty = Kwargs(emptyMap())
+    }
 }
 
 //     def inverse_eta(x, eta, **kwargs):
@@ -61,7 +64,7 @@ fun inverse_eta(x: List<Double>, eta: Double, kwargs: Kwargs): List<Double> {
     val u = kwargs.get("u", 0.9)!!
 
     val (lag_mean, lag_sd) = lag_welford(x, kwargs)
-    val c_untrunc = lag_mean - lag_sd
+    val c_untrunc = lag_mean.zip(lag_sd).map { (a, b) -> a - b }
     val c = numpy_minimum(numpy_maximum(c_untrunc, l), u)
 
     val lam = c.map { it/eta }

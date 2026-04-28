@@ -27,7 +27,7 @@ data class ContestInfo(
     val minFraction: Double? = null,    // threshold and Dhondt assorters only.
 ) {
     val candidateIds: List<Int> // same order as candidateNames
-    val metadata = mutableMapOf<String, Int>()
+    val metadata = mutableMapOf<String, Int>()  // maybe should be a string ??
     val isIrv = choiceFunction == SocialChoiceFunction.IRV
 
     val candidateIdToName: Map<Int, String> by lazy { candidateNames.entries.associate {(k,v) -> v to k } }

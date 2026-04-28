@@ -160,6 +160,11 @@ open class ContestWithAssertions(
             appendLine()
         }
         append(contest.showCandidates())
+
+        if (contest.info().metadata.isNotEmpty()) {
+            appendLine("Metadata")
+            contest.info().metadata.forEach { appendLine("  $it") }
+        }
     }
 
     open fun showShort() = buildString {

@@ -32,14 +32,14 @@ open class CreateColoradoElection (
     precinctFile: String,
     val auditType: AuditType,
     val auditdir: String,
-    val hasExactContests: Boolean,
+    // val hasExactContests: Boolean,
     val pollingMode: PollingMode?,
 ): ElectionBuilder {
-    val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
-    val electionDetailXml: ElectionResult = readColoradoElectionDetail(electionDetailXmlFile)
+    val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile) // 725
+    val electionDetailXml: ElectionResult = readColoradoElectionDetail(electionDetailXmlFile) // 295
 
-    val corlaContestBuilders = makeContestBuilders(electionDetailXml, roundContests)
-    val infoMap = corlaContestBuilders.associate { it.info.id to it.info }
+    val corlaContestBuilders = makeContestBuilders(electionDetailXml, roundContests) // 181
+    val infoMap = corlaContestBuilders.associate { it.info.id to it.info }  // 181
 
     val cardPools: List<OneAuditPoolFromBallotStyle>
     val ncards: Int
@@ -50,23 +50,28 @@ open class CreateColoradoElection (
     val publisher = Publisher(auditdir)
 
     init {
-        cardPools = convertPrecinctsToCardPools(precinctFile, infoMap, hasExactContests)
+        cardPools = convertPrecinctsToCardPools(precinctFile, infoMap, true)
 
         // set contest total cards as sum over pools
         corlaContestBuilders.forEach { it.adjustPoolInfo(cardPools) }
 
-        // adjust so contest 0 has 0 undervotes. needed since we dont know number of cards in precincts or missing
+        // adjust so contest 0 undervotes agree with the sum of pool undervotes.
+        // needed since we dont know number of cards in precincts or missing
+        // hasExactContests should be true.
+        // TODO dont we have to adjust Nc to agree with pools?
         var countZero = 0
         val contest0 = corlaContestBuilders.find { it.contestId == 10 }!!
         distributeExpectedOvervotes(contest0, cardPools)
+
+        // now reset the contest total cards; contest 0 should now have 0 undervotes
         corlaContestBuilders.forEach {
             it.adjustPoolInfo(cardPools)
             if (it.poolTotalCards == 0) {
                 countZero++
-                println(it)
+                // println(it)
             }
         }
-        println("contests with no precinct data = $countZero")
+        println("contests with no precinct data = $countZero out of ${corlaContestBuilders.size}")
 
         if (debugUndervotes) {
             // estimate undervotes based on each precinct having a single ballot style
@@ -119,8 +124,10 @@ open class CreateColoradoElection (
         // ~725 contests in src/test/data/corla/2024audit/round1/contestSelection.csv
         // "targeted contests.csv" has one for each county +2 statewide. many/most are not in detail.xml.
 
-        val contests = mutableListOf<CorlaContestBuilder>()
-        electionDetailXml.contests.forEachIndexed { detailIdx, corlaXmlContest ->
+        // which one drives the boat ?
+
+        val contestBuilders = mutableListOf<CorlaContestBuilder>()
+        electionDetailXml.contests.forEach { corlaXmlContest ->
             val contestName = contestNameCleanup(corlaXmlContest.text)
             var roundContest = roundContestMap[contestName]
             if (roundContest == null) {
@@ -129,7 +136,8 @@ open class CreateColoradoElection (
                     val mname = mutatisMutandi(contestName)
                     println("*** Cant find ContestRoundCsv $mname")
                 }
-            } else {
+            }
+            if (roundContest != null) {
                 val candidates = corlaXmlContest.choices
                 val candidateNames =
                     candidates.mapIndexed { idx, choice -> Pair(candidateNameCleanup(choice.text), idx) }.toMap()
@@ -143,25 +151,25 @@ open class CreateColoradoElection (
                 )
                 info.metadata["CORLAsample"] = roundContest.optimisticSamplesToAudit
 
-                // they dont have precinct data for contest >= 260, so we'll just skip them
-               //  if (info.id < 260) {
-                    val contest = CorlaContestBuilder(
-                        info,
-                        corlaXmlContest,
-                        roundContest,
-                    )
-                    contests.add(contest)
-                // }
+                // they dont have precinct data for contest key >= 5000, so we'll just skip them NO
+                val contest = CorlaContestBuilder(
+                    info,
+                    corlaXmlContest,
+                    roundContest,
+                )
+                contestBuilders.add(contest)
             }
         }
 
-        return contests
+        println("number of contestBuilders = ${contestBuilders.size}")
+
+        return contestBuilders
     }
 
     fun makeContests(): List<ContestIF> {
         val infoList = corlaContestBuilders.map { it.info }.sortedBy { it.id }
         val contestMap = corlaContestBuilders.associateBy { it.info.id }
-        println("ncontests with info = ${infoList.size}")
+        println("number of contests with info = ${infoList.size}")
 
         return infoList.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
             val corlaContest = contestMap[info.id]!!
@@ -284,7 +292,7 @@ open class CreateColoradoElection (
 
 class CorlaContestBuilder(val info: ContestInfo, corlaXmlContest: CorlaXmlContest, contestRound: CorlaContestRoundCsv): OneAuditContestBuilderIF {
     override val contestId = info.id
-    val Nc: Int
+    val Nc: Int  // taken from contestRound.contestBallotCardCount
     val candidateVotes: Map<Int, Int>
     var poolTotalCards: Int = 0
 
@@ -318,8 +326,6 @@ class CorlaContestBuilder(val info: ContestInfo, corlaXmlContest: CorlaXmlContes
     override fun toString(): String {
         return "CorlaContestBuilder(info=$info, contestId=$contestId, Nc=$Nc, candidateVotes=$candidateVotes, poolTotalCards=$poolTotalCards)"
     }
-
-
 }
 
 fun convertPrecinctsToCardPools(
@@ -376,8 +382,8 @@ fun createColoradoElection(
 
     val election = if (creation.auditType.isClca())
         CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, creation.auditType, auditdir,
-                    hasExactContests=false, pollingMode=null) else
-        CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, auditdir, hasExactContests=false, pollingMode!!)
+                    pollingMode=null) else
+        CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, auditdir, pollingMode!!) // TODO hasExact = false ??
 
     createElectionRecord(election, auditDir = auditdir, clear = false)
     val config = Config(election.electionInfo(), creation, round)

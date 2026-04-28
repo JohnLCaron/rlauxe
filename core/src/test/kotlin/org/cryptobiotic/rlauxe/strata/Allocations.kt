@@ -23,12 +23,39 @@ package org.cryptobiotic.rlauxe.strata
 //        allocation: a length sum(n_k) sequence of interleaved stratum selections in each round
 //    '''
 //    #is there a way to bifurcate allocations and betting into eta-oblivious/aware using class structure
+
+// eta-oblivious, nonadaptive round robin strategy
+// return a length N sequence of interleaved stratum selections // TODO change to sample at a time?
+fun round_robinY(Nk: List<Int>): List<Int> {
+    val K = Nk.size
+    val leftInStata = IntArray(K) { Nk[it] }
+
+    val selectedStrata = mutableListOf<Int>()
+    while (leftInStata.sum() > 0) {
+        repeat(K) { strataNum ->
+            val leftInStatum = leftInStata[strataNum]
+            if (leftInStatum > 0) {
+                selectedStrata.add(strataNum)
+                leftInStata[strataNum] = leftInStatum - 1
+            }
+        }
+    }
+    return selectedStrata
+}
+
+fun round_robin(running_Tk: IntArray, Nk: List<Int>): Int {
+    val exhausted =  running_Tk.mapIndexed { k, v -> (v == Nk[k]) }
+    val next = numpy_argmin_product(running_Tk, exhausted, )
+    return next
+}
+
 //    def round_robin(x, running_T_k, n, N, eta, lam, **kwargs):
 //        #eta-nonadaptive round robin strategy
 //        exhausted = np.ones(len(n))
 //        exhausted[running_T_k == n] = np.inf
-//        next = np.argmin(exhausted * running_T_k)
+//        next = np.argmin(exhausted * running_T_k) // JMJ!!
 //        return next
+
 //
 //    def proportional_round_robin(x, running_T_k, n, N, eta, lam, **kwargs):
 //        #eta-nonadaptive round robin strategy, proportional to total sample size

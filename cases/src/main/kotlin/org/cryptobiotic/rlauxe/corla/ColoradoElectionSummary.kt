@@ -32,7 +32,7 @@ class ColoradoElectionContestSummary(
     fun complete() {
         shortName = contestName.replace("(Vote For 1)", "").trim()
         contestVotes = candidates.sumOf { it.totalVotes }
-        Nc = contestVotes + underVotes + overVotes
+        Nc = contestVotes + underVotes + overVotes  // TODO wrong - need voteForN
         underPct = 100.0 * underVotes / Nc
 
         val sortedCandidates = candidates.sortedBy { it.totalVotes }.reversed()

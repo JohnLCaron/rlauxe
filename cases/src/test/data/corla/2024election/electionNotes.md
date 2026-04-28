@@ -8,62 +8,27 @@ targeted contests
 https://www.coloradosos.gov/pubs/elections/resultsData.html
 https://results.enr.clarityelections.com/CO/122598/web.345435/#/summary
 
-## Summary CSV - Comma separated file showing total votes received (not used)
-see readColoradoElectionSummaryCsv()
-https://results.enr.clarityelections.com//CO//122598/355977/reports/summary.zip
-TODO:  Only 8 of 15 candidates show up for president: writeins??
 
-line number,"contest name",            "choice name","party name","total votes","percent of votes",
-                                                                                             "registered voters","ballots cast","num Area total","num Area rptg","over votes","under votes"
-1,"Presidential Electors (Vote For 1)","Kamala D. Harris / Tim Walz","DEM", 1728159,54.16,         0,0,64,0,"607","2801"
-2,"Presidential Electors (Vote For 1)","Donald J. Trump / JD Vance","REP",  1377441,43.17,         0,0,64,0,"607","2801"
-3,"Presidential Electors (Vote For 1)","Blake Huber / Andrea Denault","APV",   2196,0.07,          0,0,64,0,"607","2801"
-4,"Presidential Electors (Vote For 1)","Chase Russell Oliver / Mike ter Maat","LBR",21439,0.67,    0,0,64,0,"607","2801"
-5,"Presidential Electors (Vote For 1)","Jill Stein / Rudolph Ware","GRN",     17344,0.54,          0,0,64,0,"607","2801"
-6,"Presidential Electors (Vote For 1)","Randall Terry / Stephen E. Broden","ACN",3522,0.11,        0,0,64,0,"607","2801"
-7,"Presidential Electors (Vote For 1)","Cornel West / Melina Abdullah","UNI", 5149,0.16,           0,0,64,0,"607","2801"
-8,"Presidential Electors (Vote For 1)","Robert F. Kennedy Jr. / Nicole Shanahan","UAF",35623,1.12, 0,0,64,0,"607","2801"
+///////////////////////////////////////////////////////////////
 
-the last 5 fields are contest, not candidate specific. under/overvotes doubtful
+apparently detail.xml does not have all contests; not sure which it skips
+eg "City of Lafayette Ballot Question 2A" and many more in round/contest 2A. that file lists 726 contests
+   295 contests in src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip
+   295 contests in src/test/data/corla/2024election/summary.csv
+   ~725 contests in src/test/data/corla/2024audit/round1/contestSelection.csv
+   read 725 contests from src/test/data/corla/2024audit/round1/contest.csv
 
+"targeted contests.csv" has one for each county +2 statewide. many/most are not in detail.xml.
 
-Contest 'Presidential Electors' (0) PLURALITY voteForN=1 votes={0=1728159, 1=1377441, 7=35623, 3=21439, 4=17344, 6=5149, 5=3522, 2=2196} undervotes=48849, voteForN=1
-winners=[0] Nc=3239722 Nphantoms=0 Nu=48849 sumVotes=3190873
-0/1 votes=1728159/1377441 diff=350718 (w-l)/w =0.2029 Npop=3239722 dilutedMargin=10.8256% reportedMargin=10.8256% recountMargin=20.2943%
+=> we could use round1/contest.csv to create contests
 
-0 'Kamala D. Harris / Tim Walz': votes=1728159  (winner)
-1 'Donald J. Trump / JD Vance': votes=1377441
-2 'Blake Huber / Andrea Denault': votes=2196
-3 'Chase Russell Oliver / Mike ter Maat': votes=21439
-4 'Jill Stein / Rudolph Ware': votes=17344
-5 'Randall Terry / Stephen E. Broden': votes=3522
-6 'Cornel West / Melina Abdullah': votes=5149
-7 'Robert F. Kennedy Jr. / Nicole Shanahan': votes=35623
-Total=3190873
+but where do we get candidates and votes for ones not in detail.xml ?
 
-
-should be:
-
- choiceFunction=PLURALITY nwinners=1, winners=[0])
-   0 'Kamala D. Harris / Tim Walz (DEM)': votes=150149
-   1 'Donald J. Trump / JD Vance (REP)': votes=40758
-   2 'Blake Huber / Andrea Denault (APV)': votes=123
-   3 'Chase Russell Oliver / Mike ter Maat (LBR)': votes=1263
-   4 'Jill Stein / Rudolph Ware (GRN)': votes=1499
-   5 'Randall Terry / Stephen E Broden (ACN)': votes=147
-   6 'Cornel West / Melina Abdullah (UNI)': votes=457
-   7 'Robert F. Kennedy Jr. / Nicole Shanahan (UNA)': votes=1754
-   8 'Write-in': votes=2
-   9 'Chris Garrity / Cody Ballard': votes=4
-   10 'Claudia De la Cruz / Karina GarcÃ­a': votes=82
-   11 'Shiva Ayyadurai / Crystal Ellis': votes=2
-   12 'Peter Sonski / Lauren Onak': votes=65
-   13 'Bill Frankel / Steve Jenkins': votes=1
-   14 'Brian Anthony Perry / Mark Sbani': votes=0
 
 ## Detail XLS (295 contests, 92k zipped, 2.6M unzipped )
 has a separate sheet for every contest with vote count, by county
 https://results.enr.clarityelections.com//CO//122598/355977/reports/detailxls.zip
+
 can also get it as an XML (56k zipped, 780k unzipped ):
 https://results.enr.clarityelections.com//CO//122598/355977/reports/detailxml.zip
 
@@ -88,16 +53,9 @@ see readColoradoElectionDetail()
               <County name="countyName" votes = "voteCount">
 ...
 ````
-        // apparently detail.xml does not have all contests; not sure which it skips
-        // eg "City of Lafayette Ballot Question 2A" and many more in round/contest 2A. that file lists 726 contests
-        // 295 contests in src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip
-        // 295 contests in src/test/data/corla/2024election/summary.csv
-        // ~725 contests in src/test/data/corla/2024audit/round1/contestSelection.csv
-        // "targeted contests.csv" has one for each county +2 statewide. many/most are not in detail.xml.
 
 Note we can get ballotsCast by county.
 We can only use precinct results to get vote totals by contest, but we dont know what the card styles are.
-
 
 ## PrecinctLevelResults
 
@@ -215,3 +173,66 @@ Broomfield,Broomfield Ballot Question 2G,104-36-37,6,"""Yes/For""","""Yes/For"""
 Broomfield,Broomfield Ballot Question 2G,104-37-41,6,"""Yes/For""","""Yes/For""",YES,uploaded,"",2024-11-19 09:34:04.549326,815168,COUNTY_WIDE_CONTEST
 Broomfield,Broomfield Ballot Question 2G,104-61-31,3,"""No/Against""","""No/Against""",YES,uploaded,"",2024-11-19 09:42:38.015308,828814,COUNTY_WIDE_CONTEST
 Broomfield,Broomfield Ballot Question 2G,104-74-36,3,"""No/Against""","""No/Against""",YES,uploaded,"",2024-11-19 09:46:41.728707,856760,COUNTY_WIDE_CONTEST
+
+
+
+## NOT USED Summary CSV - Comma separated file showing total votes received
+
+see readColoradoElectionSummaryCsv()
+https://results.enr.clarityelections.com//CO//122598/355977/reports/summary.zip
+
+line number,"contest name",            "choice name","party name","total votes","percent of votes",
+"registered voters","ballots cast","num Area total","num Area rptg",
+"over votes","under votes"
+1,"Presidential Electors (Vote For 1)","Kamala D. Harris / Tim Walz","DEM", 1728159,54.16,         0,0,64,0,      "607","2801"
+2,"Presidential Electors (Vote For 1)","Donald J. Trump / JD Vance","REP",  1377441,43.17,         0,0,64,0,      "607","2801"
+3,"Presidential Electors (Vote For 1)","Blake Huber / Andrea Denault","APV",   2196,0.07,          0,0,64,0,      "607","2801"
+4,"Presidential Electors (Vote For 1)","Chase Russell Oliver / Mike ter Maat","LBR",21439,0.67,    0,0,64,0,      "607","2801"
+5,"Presidential Electors (Vote For 1)","Jill Stein / Rudolph Ware","GRN",     17344,0.54,          0,0,64,0,      "607","2801"
+6,"Presidential Electors (Vote For 1)","Randall Terry / Stephen E. Broden","ACN",3522,0.11,        0,0,64,0,      "607","2801"
+7,"Presidential Electors (Vote For 1)","Cornel West / Melina Abdullah","UNI", 5149,0.16,           0,0,64,0,      "607","2801"
+8,"Presidential Electors (Vote For 1)","Robert F. Kennedy Jr. / Nicole Shanahan","UAF",35623,1.12, 0,0,64,0,      "607","2801"
+
+the last 5 fields are contest, not candidate specific. under/overvotes doubtful
+
+295 contests in src/test/data/corla/2024election/summary.csv
+
+
+/////////////////////////////////////////////////////////////////////
+TODO:  Only 8 of 15 candidates show up for president: writeins??
+
+
+Contest 'Presidential Electors' (0) PLURALITY voteForN=1 votes={0=1728159, 1=1377441, 7=35623, 3=21439, 4=17344, 6=5149, 5=3522, 2=2196} undervotes=48849, voteForN=1
+winners=[0] Nc=3239722 Nphantoms=0 Nu=48849 sumVotes=3190873
+0/1 votes=1728159/1377441 diff=350718 (w-l)/w =0.2029 Npop=3239722 dilutedMargin=10.8256% reportedMargin=10.8256% recountMargin=20.2943%
+
+0 'Kamala D. Harris / Tim Walz': votes=1728159  (winner)
+1 'Donald J. Trump / JD Vance': votes=1377441
+2 'Blake Huber / Andrea Denault': votes=2196
+3 'Chase Russell Oliver / Mike ter Maat': votes=21439
+4 'Jill Stein / Rudolph Ware': votes=17344
+5 'Randall Terry / Stephen E. Broden': votes=3522
+6 'Cornel West / Melina Abdullah': votes=5149
+7 'Robert F. Kennedy Jr. / Nicole Shanahan': votes=35623
+Total=3190873
+
+
+should be:
+
+choiceFunction=PLURALITY nwinners=1, winners=[0])
+0 'Kamala D. Harris / Tim Walz (DEM)': votes=150149
+1 'Donald J. Trump / JD Vance (REP)': votes=40758
+2 'Blake Huber / Andrea Denault (APV)': votes=123
+3 'Chase Russell Oliver / Mike ter Maat (LBR)': votes=1263
+4 'Jill Stein / Rudolph Ware (GRN)': votes=1499
+5 'Randall Terry / Stephen E Broden (ACN)': votes=147
+6 'Cornel West / Melina Abdullah (UNI)': votes=457
+7 'Robert F. Kennedy Jr. / Nicole Shanahan (UNA)': votes=1754
+8 'Write-in': votes=2
+9 'Chris Garrity / Cody Ballard': votes=4
+10 'Claudia De la Cruz / Karina GarcÃ­a': votes=82
+11 'Shiva Ayyadurai / Crystal Ellis': votes=2
+12 'Peter Sonski / Lauren Onak': votes=65
+13 'Bill Frankel / Steve Jenkins': votes=1
+14 'Brian Anthony Perry / Mark Sbani': votes=0
+

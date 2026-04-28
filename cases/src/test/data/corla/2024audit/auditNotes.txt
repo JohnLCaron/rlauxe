@@ -1,30 +1,6 @@
 AuditCenter
-Mar 26, 2025
+Apr 24, 2026
 ------------
-*** Contest State Representative District 9 has 39638 total votes, but contestBallotCardCount is 32425 - using ballotCardCount = 1104271
-*** Cant find ContestRoundCsv San Juan County Court Edwards
-*** Contest Town of Erie Council Member District 2 has 11179 total votes, but contestBallotCardCount is 8394 - using ballotCardCount = 578518
-*** Contest Calhan School District RJ1 Question 5B has 2039 total votes, but contestBallotCardCount is 118 - using ballotCardCount = 20652
-
-contests = 295
-County, Precinct, Contest, Choice, Party, Total Votes
-precincts = 3199
-   total cvrs = 3191197
-   writeContestsJsonFile /home/stormy/rla/corla/election2/contests.json
-took = 32.32 s
-
- cvrs has 3191197 cvrs
-wrote 3191197 cvrs
-mergeSortedChunk took 60.91 s
-
-Each precinct has exactly one "ballot style", namely the one with all precinct.contestChoices on it.
-We create number of cvrs for each precinct equal to maximum vote across contests.
-So underestimating the undervotes. Not using phantoms.
-
-Compare to official "Ballots Cast" = 3,241,120
-
-
----------------------
 Files downloaded from:
 
 https://www.coloradosos.gov/pubs/elections/auditCenter.html
@@ -122,5 +98,33 @@ As the average number of cards per ballot decreases the number of ballots to aud
 
 "So number of CVRs" has to do with the cards vs the ballots ?
 
+-----------------------------------
+CreateCountyAudits 4/24/26
 
+*** Cant find contest with name 'Colorado Court of Appeals Roman' key=Colorado Court of Appeals Judge Roman - will ignore
+precincts = 3199
+ncontests with info = 48
+2026-04-24 13:10:54.747 INFO  CreateColoradoElection unsortedMvrsFile to /home/stormy/rla/cases/corla/county/Boulder/audit/private/unsortedMvrs.csv
+ncontests with info = 54
+2026-04-24 13:11:01.943 INFO  CreateColoradoElection unsortedMvrsFile to /home/stormy/rla/cases/corla/county/El Paso/audit/private/unsortedMvrs.csv
+ncontests with info = 30
+2026-04-24 13:11:08.837 INFO  CreateColoradoElection unsortedMvrsFile to /home/stormy/rla/cases/corla/county/La Plata/audit/private/unsortedMvrs.csv
+ncontests with info = 59
+
+contests = 295
+County, Precinct, Contest, Choice, Party, Total Votes
+precincts = 3199
+   total cvrs = 3191197
+   writeContestsJsonFile /home/stormy/rla/corla/election2/contests.json
+took = 32.32 s
+
+ cvrs has 3191197 cvrs
+wrote 3191197 cvrs
+mergeSortedChunk took 60.91 s
+
+Each precinct has exactly one "ballot style", namely the one with all precinct.contestChoices on it.
+We create number of cvrs for each precinct equal to maximum vote across contests.
+So underestimating the undervotes. Not using phantoms.
+
+Compare to official "Ballots Cast" = 3,241,120
 

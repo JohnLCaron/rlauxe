@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.strata
 
+import org.cryptobiotic.rlauxe.util.doubleIsClose
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -9,7 +10,7 @@ import kotlin.random.Random
 fun numpy_linspace(start: Double, end: Double, npts: Int): List<Double> {
     val grid_step = (end - start) / (npts - 1)
     val result = DoubleArray(npts) { start + it * grid_step }
-    require(result.last() == end)
+    require(doubleIsClose(result.last(), end)) {"${result.last()} != $end"}
     return result.toList()
 }
 
@@ -74,18 +75,6 @@ fun numpy_maximum(x1: List<Double>, x2: List<Double>): List<Double> {
     return x1.mapIndexed{ idx, x -> max(x, x2[idx]) }
 }
 fun numpy_maximum(x1: List<Double>, lower: Double) = x1.map{ max(it, lower) }
-
-fun numpy_argmin_product(x :IntArray, exhausted: List<Boolean>): Int {
-    var minIndex = -1
-    var minValue = Integer.MAX_VALUE
-    repeat( x.size ) { i ->
-        if (!exhausted[i] && x[i] < minValue) {
-            minValue = x[i]
-            minIndex = i
-        }
-    }
-    return minIndex
-}
 
 //// arrays, turn into List I think?
 

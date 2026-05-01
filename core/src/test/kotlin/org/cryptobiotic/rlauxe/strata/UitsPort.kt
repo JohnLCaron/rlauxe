@@ -8,6 +8,7 @@ import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 
+// ported from UI-TS python code
 /*
 In a stratified audit, the population of ballot cards is partitioned into K disjoint strata.
 Stratum k contains N_k ballot cards, so N = Sum { N_k }.
@@ -106,7 +107,6 @@ class PointmassSimulations {
                         inference = inference,
                         n_bands = n_bands,
                         alpha = alpha,
-                        // WOR = false, // TODO
                         reps = 1
                     )
                 }
@@ -195,7 +195,8 @@ fun simulate_plurcomp(
     alpha:Double = 0.05, // the significance level of the test
     // WOR: Boolean = false, // WR not supported
     reps: Int = 30, // the number of simulations of the audit to run
-) : Double {
+    show:Boolean = false,
+    ) : Double {
 
 // def simulate_plurcomp(N, A_c, p_1 = np.array([0.0, 0.0]), p_2 = np.array([0.0, 0.0]), lam_func = None, allocation_func = Allocations.proportional_round_robin, method = "ui-ts", n_bands = 100, alpha = 0.05, WOR = False, reps = 30):
 //    '''
@@ -241,7 +242,7 @@ fun simulate_plurcomp(
     val wk = Nk.map { it / N.toDouble() }
 
     val A_c_global = numpy_dotDD(wk, A_c) // weihjted
-    val etaBands = construct_eta_bands_plurcomp(A_c, Nk, n_bands)
+    val etaBands = construct_eta_bands_plurcomp(A_c, Nk, n_bands, show)
 //
 //    x = []
 //    v = 2 * A_c_global - 1 # global diluted margin
@@ -392,11 +393,10 @@ fun findFirst( x: DoubleArray, pred: (Double) -> Boolean): Int? {
 //        betas.append([(beta_grid[i,:], beta_grid[i+1,:]), centroid])
 //    return betas
 
-// TODO what is length ?
 // A_c: the reported assorter mean in each stratum, size = K
 // N: the size of the population within each stratum, size = K
-// n_bands: the number of equal-width bands in the tesselation of the null boundary, size =  ?
-fun construct_eta_bands_plurcomp(A_c: List<Double>, Nk: List<Int>, n_bands: Int = 100): List<Band> {
+// n_bands: the number of equal-width bands in the tesselation of the null boundary
+fun construct_eta_bands_plurcomp(A_c: List<Double>, Nk: List<Int>, n_bands: Int = 100, show: Boolean): List<Band> {
     require (A_c.max() <= 1.0 && A_c.min() >= 0.0) { "reported assorter margin is not in [0,1]" }
     require (Nk.min() >= 1) {"N (population size) must be no less than 1 in all strata" }
 
@@ -413,13 +413,19 @@ fun construct_eta_bands_plurcomp(A_c: List<Double>, Nk: List<Int>, n_bands: Int 
     val wk = Nk.map { it / N.toDouble() }
     val u = 2.0
     require (numpy_dotDD(wk, A_c) > 1/2) { "reported assorter mean (A_c) implies the winner lost" }
+    if (show) println("mu = ${numpy_dotDD(wk, A_c)}")
 
-    // TODO wtf ? eta_grid<K> aka vertices; see Algorithm1 in STRATIFIED "Compute I-TSMs at vertices" line 8
-    // THis probably just computes the verticies at each band endpoint
+    // eta_grid<K> aka vertices; see Algorithm 1 in STRATIFIED "Compute I-TSMs at vertices" line 8
+    // This probably just computes the verticies at each band endpoint
     // eta_1_grid = np.linspace(max(0, eta_0 - w[1]), min(u, eta_0/w[0]), n_bands + 1)
     val eta_1_grid = numpy_linspace(start = max(0.0, eta_0 - wk[1]), end = min(u, eta_0/wk[0]), npts = n_bands + 1) // 1D List
     // val eta_2_grid = (eta_0 - w[0] * eta_1_grid) / w[1]
     val eta_2_grid = eta_1_grid.map { (eta_0 - wk[0] * it) / wk[1]} // 1D List
+    if (show) {
+        println("wk = ${show(wk)}")
+        println("eta_1_grid = ${show(eta_1_grid)}")
+        println("eta_2_grid = ${show(eta_2_grid)}")
+    }
 
     // TODO WTF ?
     // transformed overstatement assorters
@@ -429,7 +435,10 @@ fun construct_eta_bands_plurcomp(A_c: List<Double>, Nk: List<Int>, n_bands: Int 
     val beta_1_grid = eta_1_grid.map { (it + 1 - A_c[0])/2} //  transformed null means in stratum 1
     // val beta_2_grid = (eta_2_grid + 1 - A_c[1])/2  //  transformed null means in stratum 2
     val beta_2_grid = eta_2_grid.map { (it + 1 - A_c[1])/2 } //  transformed null means in stratum 2
-
+    if (show) {
+        println("beta_1_grid = ${show(beta_1_grid)}")
+        println("beta_2_grid = ${show(beta_2_grid)}")
+    }
     // beta_1_grid and beta_2_grid are 1D lists
     // vstack turns them into 2D list of list
     // transpose transposes them
@@ -462,7 +471,7 @@ fun construct_eta_bands_plurcomp(A_c: List<Double>, Nk: List<Int>, n_bands: Int 
         //
         bands.add(Band(KPoint(startpoint), KPoint(endpoint), KPoint(centroid)))
     }
-    bands.forEachIndexed { idx, it -> println("$idx $it") }
+    // bands.forEachIndexed { idx, it -> println("$idx $it") }
     return bands
 }
 
@@ -525,7 +534,7 @@ fun banded_uits(x: List<List<Double>>, Nk: List<Int>, etaBands: List<Band>, bet:
     }
 
     // this seems wrong, Nk are the strata sizes. where are the samples used ??
-    val Tki: List<IntArray> = selector(x, Nk, first_centroid, bets)
+    val Tki: List<IntArray> = selector(Nk)
 
     val marts = mutableListOf<List<Double>>()  // (nbands, ntimes)
     val sel = mutableListOf<List<IntArray>>()
@@ -856,26 +865,16 @@ fun runningMaximum(input: List<Double>): List<Double> {
 //    else:
 //        return result
 
-// for one strata
-fun mart(x: List<Double>, eta: Double, lams: List<Double>, N: Int, log: Boolean): List<Double> {
+// for one strata, calculate all values of the martingale over t, for the null mean eta0
+fun mart(x: List<Double>, eta0: Double, lams: List<Double>, N: Int, log: Boolean): List<Double> {
 
-    val cumulSum = calcCumulativeSum(N, eta, x.toDoubleArray(), withReplacement = false)
-    val eta_t = cumulSum.S.mapIndexed { idx, s -> (N*eta - s)/(N - cumulSum.indices[idx]+1)}
-
-        // TODO we had this in the orinal port, but it got thrown away....
-    //val S = np.insert(np.cumsum(x), 0, 0)[0:-1]
-    //val j = np.arange(1,len(x)+1)
-    //val eta_t = (N*eta-S)/(N-j+1)
-
-    //        mart_array = np.zeros((len(x)+1, len(lam))) //
-
-//        for l in range(len(lam)):
-//            mart = np.insert(np.cumprod(1 + lam[l] * (x - eta_t)), 0, 1)
-//            mart[np.insert(eta_t < 0, 0, False)] = np.inf
-//            mart[np.insert(eta_t > 1, 0, False)] = 0
-//            mart_array[:,l] = mart
+    // data class CumulativeSum(val S: DoubleArray, val Stot: Double, val indices: IntArray, val mean: DoubleArray)
+    val cumulSum = calcCumulativeSum(N, eta0, x.toDoubleArray(), withReplacement = false)
+    // val eta_t = cumulSum.S.mapIndexed { idx, s -> (N*eta0 - s)/(N - cumulSum.indices[idx]+1)}
+    val eta_t = cumulSum.mean
 
     val payoffs = x.mapIndexed { idx, xt -> 1 + lams[idx] * (xt - eta_t[idx]) }
+
     val cumprod = payoffs.runningReduce { acc, d -> acc * d }
     //      mart = np.insert(np.cumprod(1 + lam[l] * (x - eta_t)), 0, 1)
     val mart = mutableListOf(1.0).apply { addAll(cumprod) }
@@ -893,7 +892,6 @@ fun mart(x: List<Double>, eta: Double, lams: List<Double>, N: Int, log: Boolean)
 //        h_mart = np.log(h_mart) if log else h_mart
     return if (log) mart.map{ ln(it) } else mart
 }
-
 
 // def mart(x, eta, lam_func = None, lam = None, N = np.inf, log = True, output = "mart"):
 //    '''
@@ -957,12 +955,11 @@ fun mart(x: List<Double>, eta: Double, lams: List<Double>, N: Int, log: Boolean)
 //        out = "Input a valid argument to return, either 'marts', 'terms', or 'bets'"
 //    return out
 
-
-
+// TODO rewrite to simplify
 //    takes data and predictable tuning parameters and returns a sequence of stratum sample sizes
 //    equivalent to [S_t for k in 1:K]
 // // return a length (N+1) sequence of interleaved stratum selections
-fun selector(x : List<List<Double>>, Nk: List<Int>, first_centroid: KPoint, bets: List<List<Double>> ): List<IntArray> {
+fun selector(Nk: List<Int>): List<IntArray> {
     // return round_robin(Nk)
 
     val K = Nk.size

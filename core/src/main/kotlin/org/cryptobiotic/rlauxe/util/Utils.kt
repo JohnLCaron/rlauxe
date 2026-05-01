@@ -18,7 +18,15 @@ fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8)
     //    two floating point values are equivalent.
     //
     //     absolute(`a` - `b`) <= (`atol` + `rtol` * absolute(`b`))
-    return abs(a - b) <= atol + rtol * abs(b)
+
+    val result =  abs(a - b) <= atol + rtol * abs(b)
+    if (!result) {
+        val t1 = abs(a - b)
+        val t2 = abs(b)
+        val t3 = atol + rtol * abs(b)
+        print("")
+    }
+    return result
 }
 
 fun roundToClosest(x: Double) = round(x).toInt()

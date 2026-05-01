@@ -45,8 +45,20 @@ fun round_robinY(Nk: List<Int>): List<Int> {
 
 fun round_robin(running_Tk: IntArray, Nk: List<Int>): Int {
     val exhausted =  running_Tk.mapIndexed { k, v -> (v == Nk[k]) }
-    val next = numpy_argmin_product(running_Tk, exhausted, )
+    val next = min_notexhausted(running_Tk, exhausted, )
     return next
+}
+
+fun min_notexhausted(x :IntArray, exhausted: List<Boolean>): Int {
+    var minIndex = -1
+    var minValue = Integer.MAX_VALUE
+    repeat( x.size ) { i ->
+        if (!exhausted[i] && x[i] < minValue) {
+            minValue = x[i]
+            minIndex = i
+        }
+    }
+    return minIndex
 }
 
 //    def round_robin(x, running_T_k, n, N, eta, lam, **kwargs):

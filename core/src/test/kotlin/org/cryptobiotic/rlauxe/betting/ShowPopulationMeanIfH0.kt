@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
 import kotlin.test.Test
@@ -47,8 +46,7 @@ class ShowPopulationMeanIfH0 {
                 }"
             )
             if ((diff1 == 0) && (0.5 - mj > .01)) diff1 = it     // how many samples before mj is 1% different from 1/2
-            if ((hitZero == 0) && (mj <= 0.0)) hitZero =
-                it       // first time (mj <= 0.0) "true mean certainly greater than hypothesized"
+            if ((hitZero == 0) && (mj <= 0.0)) hitZero = it       // first time (mj <= 0.0) "true mean certainly greater than hypothesized"
             if ((hitUpper == 0) && (mj >= upper)) hitUpper = it   // first time mj >= upper
         }
         println("N=$N, margin=$margin, upper=$upper: hitZero=$hitZero hitUpper=$hitUpper diff1% = $diff1")

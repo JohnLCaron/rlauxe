@@ -91,6 +91,7 @@ data class GeneralAdaptiveBetting(
         val errorTracker = prevSamples as ErrorTracker
         val trackerErrors = errorTracker.measuredClcaErrorCounts()
 
+        // TODO this assumes null mean = 1/2, and so is eta oblivious (?)
         // calling routine should check if mui < 0 or > assorter.upperBound() before calling bet()
         val mui = populationMeanIfH0(Npop, withoutReplacement=true, prevSamples)
         val maxBet = maxLoss / mui
@@ -220,6 +221,7 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
         return result.point
     }
 
+    // TODO using mui here, which noramlly depends on eta, the null mean
     fun expectedValueLogt(lam: Double, show: Boolean = false): Double {
         val noerrorTerm = ln(1.0 + lam * (noerror - mui)) * p0
 

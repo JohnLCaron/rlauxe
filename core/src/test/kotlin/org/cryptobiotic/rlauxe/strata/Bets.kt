@@ -63,6 +63,9 @@ fun inverse_eta(x: List<Double>, eta: Double, kwargs: Kwargs): List<Double> {
     val l = kwargs.get("l", 0.1)!!
     val u = kwargs.get("u", 0.9)!!
 
+    // c_kt := l_k ∨ (µ̂_k(t−1) − σ̂_k(t−1) ) ∧ u_k , where µ_̂k(t−1) and σ̂_k(t−1) are predictable estimates of
+    // the true mean and standard deviation.
+
     val (lag_mean, lag_sd) = lag_welford(x, kwargs)
     val c_untrunc = lag_mean.zip(lag_sd).map { (a, b) -> a - b }
     val c = numpy_minimum(numpy_maximum(c_untrunc, l), u)

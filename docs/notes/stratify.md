@@ -1,5 +1,83 @@
 # Implementing stratified audits
-_last changed: 4/20/2026_
+_last changed: 5/01/2026_
+
+# Alpha 5.2 "Supermartingale-based tests of intersection hypotheses"
+
+Suppose there are N ballots in all, partitioned into S strata. Stratum s contains N_s ballot cards.
+We want to test the hypothesis that Ā ≤ 1/2. Let u be the upper bound on the numbers A assigns.
+Let Ā_s be the average restricted to stratum s. 
+
+Suppose µ = (µ_s), s=1..S satisfies 0 <= µ_s <= u. 
+
+Let X_si be the ith draw the sth stratum.
+
+(25) R_si (µ_s) := (X_si / µ_si) * ((eta_si - µ_si) / (u - µ_si )) + ((u - eta_si) / (u - µ_si ))
+
+Recall from equation 6 that
+
+(26)    Ts_j(µ_si) = Prod {  R_si (µ_s) }
+
+is a test supermartingale for stratum s for the composite null θ_s ≤ µ_s , s = 1..S .
+
+{ eta_i is the estimate for the mean after the ith sample is drawn.
+The betting martingale is equivilenet when 
+    eta_i = µ_i (1 + λ_i (u − µ_i ))
+or
+    λ_i = (eta_i /µ_i − 1) / (u - µ_i )
+
+eta_i ranges from µ_i to u, λ_i ranges continuously from 0 to 1/µ_i
+
+For sampling without replacement from a population with null mean µ, after draw j − 1, the mean of the remaining numbers is 
+    (N * µ − Sum(Xk) )/(N − j + 1). 
+}
+
+We will now assemble the intersection test supermartingale by multiplying terms from
+different test supermartingales for individual strata, in an order that can be chosen adaptively.
+
+The stratum selector S(i) : N → {1..S} is the stratum from which the ith term in the
+intersection test supermartingale will come. The stratum selector S(·) can depend predictably
+on the sample: it can depend on (X_S(j)J(j))j=1..i−1, but not on XS_(k)J(k) for k ≥ j . 
+One example stratum selector is round-robin, S(i) = (i mod S) + 1, skipping any strata that have been exhausted. 
+Another example concatenates the samples across strata: if we have drawn n_s times from stratum s, 
+then S(i) = 1, 1 ≤ i ≤ n1 ; S(i) = 2, n1 < i ≤ n1 + n2 ; etc.
+
+At time i, the intersection test supermartingale includes J(i) := #{j ≤ i : S(j) = S(i)}
+terms from stratum S(i); S(j + 1) and J(j + 1) are predictable from { X_S(i)J(i) }i=1..j . 
+With this notation, the intersection test supermartingale is
+
+(27)    T_j(µ) = Prod {  R_S(i)J(i) (µ_S(i)) }
+
+Suppose S(j + 1) = s and J(j + 1) = ℓ. Samples from different strata are independent, so the
+conditional expectation of R_S(j+1)J(j+1) (µ_S(j+1) ) given {XS(i)J(i) }i=1..j is the conditional
+expectation of R_sℓ (µ_s ) given {Xsi }i=1..ℓ−1, computed on the assumption that θ_s = µ_s , which is
+at most 1. Thus
+
+(28)    Expecation { T_j+1(µ) | (X_S(i)J(i))i=1..j } =  Expecation { T_j(µ) * R_S(j+1)J(j+1)(µ_S(j+1)) | (X_S(i)J(i))i=1..j } ≤ T_j (µ).
+
+That is, under the intersection null, (T_j(µ))j∈N is a nonnegative supermartingale starting at 1, and by Ville’s inequality
+
+(29)  Prob {max Tj (µ) ≥ 1/α }  ≤ α   if θ ≤ µ.
+
+In general, the power of the test of the intersection null will depend on the stratum selector S(·), which can be adaptive. 
+For instance, if data from stratum s suggest that θs ≤ µs , future values of S(i) might omit stratum s or sample from s less frequently, 
+instead sampling preferentially from strata where there is some evidence that the intersection null is false,
+to maximize the expected rate at which the test supermartingale grows, minimizing the P-value.
+Indeed, for a fixed µ, choosing S(i) can be viewed as a (possibly finite-population)
+multi-armed bandit problem: which stratum should the next sample come from to maximize the expected rate of growth of the test statistic? 
+
+An additional complication is that we want fast growth for all vectors µ of stratumwise means for which the population mean
+    µ̃ := 1/N * Sum { N_s *µ_s, s=1..S } ≤ 1/2. 
+Importantly, different stratum selectors can be used for different
+values of µ; this flexibility is explored by Spertus and Stark (2022) (Sweeter).
+
+To audit a given assertion, we need to check whether there is _any_ µ = (µ1..µS ) ∈ [0, u]^S 
+with µ̃ ≤ 1/2 for which maxj Tj (µ) < 1/α. If there is, sampling needs to continue.
+We thus need to find
+
+(30)    PS_j := max { µ∈[0,u]^S : µ̃ ≤ 1/2 { max Tj (µ) over j}−1 }
+
+the solution to a finite-dimensional optimization problem.
+
 
 # Sweeter
 
@@ -14,22 +92,22 @@ Code in R at https://github.com/spertus/sweeter-than-SUITE
 In a stratified audit, the population of ballot cards is partitioned into K disjoint strata. 
 Stratum k contains N_k ballot cards, so N = Sum { N_k }.
 The weight of stratum k is w_k := N_k /N. The vector is w.
-The true mean of the assorter values in stratum k is µ_k. The vector is µ.
 
 For each assorter A there is a set of assorter values {x_i, i=1.. N}.
-Each assorter may have its own upper bound u_k in stratum k. (because in principle the assorters could be different??)
-The true mean of the assorter values in stratum k is µ_k ; µ := [µ1 , ..., µK ]
-The overall assorter mean µ = w dot µ.
+Each assorter has its own upper bound u_k in stratum k ( = 2 * noerror_k).
+The true mean of the assorter values in stratum k is µ_k ; µ := [µ1 , ..., µK ] is the vector.
+The global assorter mean µ = w dot µ.
 
-Let θ = [θ_1 , ..., θ_K ] with 0 ≤ θ_k ≤ u_k be the _hypothesized stratum mean θ_k in each stratum_ (aka _within-stratum nulls_).
-A single intersection null is of the form µ ≤ θ, i.e., ∩ k=1..K { µ_k ≤ θ_k }, (all assertions are true).
+Let θ = [θ_1 , ..., θ_K] with 0 ≤ θ_k ≤ u_k = 2*noerror_k be the _hypothesized stratum mean θ_k in each stratum_ (aka _within-stratum nulls_).
+TODO u_k is the assorter max, I guess θ_k is certainly bounded by u_k.
+A single _intersection null_ is of the form µ ≤ θ, i.e., ∩ k=1..K { µ_k ≤ θ_k }, (all assertions are true).
 The _union-intersection form of the complementary null that the outcome is incorrect_ is:
 
         H0:   U { w dot 0 < 1/2 }   { ∩ k=1..K { µ_k ≤ θ_k }    }          eq (1)
 
-(the union is over all values of 0 where the weighted sum of the 0_i are < 1/2)
+(the union is over all values of 0 where the weighted sum of the 0_k is < 1/2 and subject to the constraint  0 ≤ θ_k ≤ 2 * noerror_k).
 
-From stratum k we have n_k samples X_k := {X_1,k , ..., X_nk,k }
+From stratum k we have n_k samples X_k := {X_1,k , ..., X_nk,k } of the assorter value,
 drawn by simple random sampling, with or without replacement, independently across strata.
 
 ## 3.2 Stratified comparison audits
@@ -39,8 +117,8 @@ we assign a nonnegative number to each card that depends on the votes and
 reported votes, but instead of comparing the average of the resulting list to 1/2,
 we compare it to a threshold that depends on the hypothesized stratum mean θ_k.
 
-Let uA_k be the upper bound on the original(primitive) assorter for stratum k and
-ω_ik := A(c_ik ) − A(b_ik ) ∈ [−uk_A, uk_A]
+Let uA_k be the upper bound on the original (clca) assorter for stratum k and
+    ω_ik := A(c_ik ) − A(b_ik ) ∈ [−uk_A, uk_A]
 be the overstatement for the ith card in stratum k, where A(c_ik) is the value of the assorter applied to the CVR and
 A(b_ik ) is the value of the assorter for the MVR.
 
@@ -50,12 +128,20 @@ For a particular θ, the intersection null claims that in stratum k, Āb_k ≤ �
 
 Adding uA_k − Āc_k to both sides of the inequality yields
 
+    Āb_k + uA_k − Āc_k  ≤ θ_k + uA_k − Āc_k 
     uA_k − ω̄_k ≤ θ_k + uA_k − Āc_k .
+    B̄_k ≤ θ_k + uA_k − Āc_k .
 
-Letting u_k := 2*uA_k, take B_ik := uA_k − ω_ik ∈ [0, uk] and B̄_k := Sum { B_ik } / N_k (average B_ik in kth stratum)
+Letting u_k := 2*uA_k = 2*noerror, take B_ik := uA_k − ω_ik ∈ [0, uk] and B̄_k := Sum { B_ik } / N_k (average B_ik in kth stratum)
 Then { B_ik } is a bounded list of nonnegative numbers, and the assertion in stratum k is true if 
     
-    B̄_k > β_k := θ_k + uA_k − Āc_k , where all terms on the right are known.
+    B̄_k > β_k := θ_k + uA_k − Āc_k             (eq 3.2)
+
+where
+
+    θ_k is null mean in stratum k
+    uA_k is the uA_k be the upper bound on the original (clca) assorter for stratum k = noerror  
+    Āc_k is the reported assorter mean
 
 Testing whether B̄ ≤ βk is the canonical problem solved by ALPHA [19]. 
 The intersection null can be written
@@ -64,6 +150,7 @@ The intersection null can be written
 
 Define u := [u1 , . . . , uK]. As before, we can reject the complementary null if we
 can reject _all_ intersection nulls θ for which 0 ≤ θ ≤ u and w dot θ ≤ 1/2.
+
 
 ## 3.3 Union-intersection tests
 

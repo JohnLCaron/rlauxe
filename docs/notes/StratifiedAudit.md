@@ -1,5 +1,5 @@
 
-2. Stratified audits
+# Stratified audits
 
 For contests that span counties, the question is how to combine the county results.
 
@@ -102,7 +102,7 @@ values of µ; this flexibility is explored by Spertus and Stark (2022) [SWEETER]
 SWEETER has:
 
 "[ALPHA] provided a new approach to union-intersection tests using
-nonnegative supermartingales (NNSMs): intersection supermartingales, which
+nonnegative supermartingales (NNSMs): _intersection supermartingales_, which
 open the possibility of reducing sample sizes by adaptive stratum selection (using
 the first t sampled cards to select the stratum from which to draw the (t+1)th
 card). [ALPHA] does not provide an algorithm for stratum selection or evaluate
@@ -127,9 +127,6 @@ metric problem with a multi-dimensional nuisance paramete"
 All of these emphasis minimizing sample sizes; are there simplifications if all the sampling is already done?
 
 
-
-
-
 //////////////////////////////////////////////////////////////////////////////////////
 
 Im guessing we have a fixed-size stratified audit whose overall risk can be measured with
@@ -149,5 +146,107 @@ different strata are combined by multiplication and the combination is converted
 the intersection null."
 
 OTOH, the Alpha paper clearly favors sequential selection
+
+////////////////////////////
+eta0 = 0.5
+u = 2
+
+wk = 0.370, 0.630, mu_k = 0.400, 0.700,
+eta_1_grid = 0.000, 0.135, 0.270, 0.405, 0.540, 0.675, 0.810, 0.945, 1.080, 1.215, 1.350,  // mu_k = .4
+eta_2_grid = 0.794, 0.715, 0.635, 0.556, 0.476, 0.397, 0.318, 0.238, 0.159, 0.079, 0.000,  // mu_k = .7
+this is a grid of assorter means
+
+what is this?
+
+    // transformed overstatement assorters
+    beta1 = (1 + eta1 - mu[0]) / 2  // transformed null means in stratum 1
+    beta2 = (1 + eta2 - mu[1]) / 2  // transformed null means in stratum 2
+
+beta_1_grid = 0.300, 0.368, 0.435, 0.503, 0.570, 0.638, 0.705, 0.773, 0.840, 0.908, 0.975,
+beta_2_grid = 0.547, 0.507, 0.468, 0.428, 0.388, 0.349, 0.309, 0.269, 0.229, 0.190, 0.150,
+
+then the grid endpoints go from beta1 to beta2: WRONG confused with Kpoint
+
+    val beta_grid: Pair(beta1, beta2)
+
+    band i:
+        val startpoint = beta_grid[i]
+        val endpoint = beta_grid[i+1]
+        val centroid = doubleArrayOf( (startpoint.first + endpoint.first)/2, (startpoint.second + endpoint.second)/2 )
+
+fun mean2margin(mean: Double) = 2.0 * mean - 1.0
+noerror = 1 / (2 - assorterMargin)
+noerror = 1 / (2 - (2 * mean - 1))
+noerror = 1 / (3 - 2 * mean)
+(3 - 2 * mean) = 1/noerror
+mean = (3 - 1/noerror)/2
+
+beta = (eta + 1 - mu[0]) / 2
+overstatement = 
+
+bassort = (1-o/u)*noerror = tau * noerror
+where
+    o = overstatement error
+    u = assorter upper bound
+    v = reported assorter margin
+    tau = (1-o/u)
+    noerror = 1/(2-v/u)
+
+taus=(1-o/u)= [0, u12, 1-u12, 1, 2-u12, 1+u12, 2] where u12= 1/2u
+taus=(1-o/u)= [0, .5, 1, 1.5, 2] when u = 1
+upper bound of bassort is 2*noerror
+
+
+        val eta_1_grid = numpy_linspace(start = max(0.0, eta_0 - wk[1]), end = min(u, eta_0/wk[0]), npts = n_bands + 1) // 1D List
+start = max(0.0, eta_0 - wk[1])
+start = max(0.0, 0.5 - 0.63) = 0
+
+end = min(u, eta_0/wk[0])
+end = min(2, .5/.370) = 1.35
+
+        val eta_2_grid = eta_1_grid.map { (eta_0 - wk[0] * it) / wk[1]} // 1D List
+(eta_0 - wk[0] * it) / wk[1]
+
+
+bands
+startpoint=(0.30000, 0.54706, ), mu=0.45555555555555555
+centroid=(0.33375, 0.52721, ), mu=0.4555555555555556
+endpoint=(0.36750, 0.50735, ), mu=0.4555555555555556
+
+//////////////////////////////////////////////////////
+
+The within stratum nulls were defined
+as etak := (1 − θk − Āck )/2 where Āck was the stratumwise reported assorter mean—the share of votes for the winner
+and θ ∈ {θ : w · θ = 1/2, 0 ≤ θ ≤ 1} are the null means with constraint w · θ = 1/2
+
+    val wk = Nk.map { it / N.toDouble() }
+    val reportedMean = numpy_dotDD(wk, Ack)
+    
+
+w · θ = 1/2 = eta0
+1/2 = wk1 * theta1 + wk2*theta2
+(1/2 - wk1*theta1) = wk2 * theta2
+(1/2 - wk1*theta1)/wk2 = theta2
+
+theta1 is a grid around Ak1; then theta2 must = (eta0 - wk1 * theta1) / wk2, so
+
+    val eta_2_grid = eta_1_grid.map { (eta_0 - wk[0] * it) / wk[1]} // 1D List
+
+so thats the eta grid. The within stratum nulls are 
+
+nullk := (1 − thetak − Āck )/2
+
+but we have the wrong sign for etak:
+
+betak = (etak + 1 - Ack) / 2 
+
+        // eta_1_grid = np.linspace(max(0, eta_0 - w[1]), min(u, eta_0/w[0]), n_bands + 1)
+        val eta_1_grid = numpy_linspace(start = max(0.0, eta_0 - wk[1]), end = min(u, eta_0/wk[0]), npts = n_bands + 1) // 1D List
+
+        // val eta_2_grid = (eta_0 - w[0] * eta_1_grid) / w[1]
+        val eta_2_grid = eta_1_grid.map { (eta_0 - wk[0] * it) / wk[1]} // 1D List
+
+    // transformed overstatement assorters
+    betak = (etak + 1 - Ac[k]) / 2 //  transformed null means in stratum 1
 
 

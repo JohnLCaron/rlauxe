@@ -29,7 +29,7 @@ enum class EstimFnType {
 data class CumulativeSum(val S: DoubleArray, val Stot: Double, val indices: IntArray, val mean: DoubleArray)
 
 
-fun calcCumulativeSum(N: Int, eta: Double, x: DoubleArray, withReplacement: Boolean): CumulativeSum {
+fun calcCumulativeSum(N: Int, eta0: Double, x: DoubleArray, withReplacement: Boolean): CumulativeSum {
     /*
     This method calculates the cumulative sum of the input array `x`, the total sum of `x`,
     an array of indices, and the mean of the population after each draw if the null hypothesis is true.
@@ -37,7 +37,7 @@ fun calcCumulativeSum(N: Int, eta: Double, x: DoubleArray, withReplacement: Bool
     Parameters
     ----------
     N : int or float; The size of the population.
-    eta : float; The hypothesized population mean under the null hypothesis.
+    eta0 : float; The hypothesized population mean under the null hypothesis.
     x : np.array; The input data array.
 
     Returns
@@ -70,7 +70,7 @@ fun calcCumulativeSum(N: Int, eta: Double, x: DoubleArray, withReplacement: Bool
     require( withReplacement || x.size <= N) { "Sample size is larger than the population!" }
 //        m = ( (N * t - S) / (N - j + 1) if np.isfinite(N) else t )  # mean of population after (j-1)st draw, if null is true (t=eta is the mean)
     // val m = if (withReplacement) doubleArrayOf(t) else DoubleArray(x.size) { (N * t - Sp[it]) / (N - j[it] + 1)  }
-    val m = DoubleArray(x.size) { if (withReplacement) eta else (N * eta - Sp[it]) / (N - j[it] + 1)  }
+    val m = DoubleArray(x.size) { if (withReplacement) eta0 else (N * eta0 - Sp[it]) / (N - j[it] + 1)  }
     return CumulativeSum(Sp, Stot, j, m)
 }
 

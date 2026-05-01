@@ -8,13 +8,13 @@ import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 
-private val showPoints = false
-private val showMarts = false
+private val showPoints = true
+private val showMarts = true
 
 // dont use  "transformed overstatement assorters", use real assorters
 class KPointAuditor(
     val Nk: List<Int>,   // a length-K list of the size of each stratum
-    val Ac: List<Double>, // a length-K np.array of floats the reported assorter mean bar{A}_c in each stratum
+    val Ac: List<Double>, // must be normalized to agree with python code
     val n_bands: Int = 10,
     val alpha:Double = 0.05, // the significance level of the test
     val reps: Int = 1, // the number of simulations of the audit to run
@@ -28,7 +28,6 @@ class KPointAuditor(
     val margin = Ac.map { 2 * it - 1.0 }
     val noerror = margin.map { 1.0 / (2.0 - it) }
 
-    val reportedMean = numpy_dotDD(wk, Ac)
     val etaPoints: List<KPoint>
     val ptValues = mutableListOf<List<Double>>() // ptValues(K, N)
 
@@ -36,6 +35,7 @@ class KPointAuditor(
         if (show) {
             println("BandedAuditor2 Nk = $Nk wk = ${show(wk)} ")
             println(" Ac = ${show(Ac)} margin_k=${show(margin)} noerror_k=${show(noerror)}")
+            val reportedMean = numpy_dotDD(wk, Ac)
             val v = 2 * reportedMean - 1
             val noerror =
                 1.0 / (2.0 - v) //  where the pointmass would be for a global (unstratified) CCA TODO not used!
@@ -57,9 +57,10 @@ class KPointAuditor(
             val noerrorn = Nk[k] - p2n - p1n
 
             // TODO investigate as we add in errors
-            val p2assorts = List(p2n) { 0.0 }// assort value 0
-            val p1assorts = List(p1n) { noerror / 2 } // assort value noerror/2
-            val noerrors = List(noerrorn) { noerror }
+            // normalize to [0, 1] by dividing by 2 * noerror
+            val p2assorts = List(p2n) { 0.0 } // assort value 0
+            val p1assorts = List(p1n) { 1.0 / 4 } // assort value noerror/2
+            val noerrors = List(noerrorn) { 1.0 / 2 }
 
             ptValues.add(p2assorts + p1assorts + noerrors)
         }
@@ -72,7 +73,7 @@ class KPointAuditor(
         val log = true
 
         // intersection marts, (kpoints, N+1)
-        val marts = kpointUits(Xshuffled, Nk, etaPoints, log = log)
+        val marts = computeITS(Xshuffled, Nk, etaPoints, log = log)
 
         // for each time, find min across points and return its index in IntArray(time)
         val minPointIndex: IntArray = findMinBand(marts)  // should be (401), index of smallest mart over all the bands
@@ -88,7 +89,7 @@ class KPointAuditor(
             findFirst(optimalMarts) { it > 1 / alpha } ?: N
         }
 
-        if (showMarts) {
+        if (show && showMarts) {
             val martsT = numpy_transpose(marts) // (N+1, kpoints)
             for (t in 0 until firstIndex) {
                 val mart = martsT[t]
@@ -104,7 +105,7 @@ class KPointAuditor(
         val mu = numpy_dotDD(wk, optimalPoint.point.toList())
         if (show) println("thresh=$thresh pointIndex=${minPoint} optimalPoint = ${optimalPoint} mu=$mu optimalMart=$optimalMart samplesNeeded=$firstIndex")
 
-        if (showPoints) {
+        if (show && showPoints) {
             println("kpoints")
             etaPoints.forEachIndexed { idx, kpoint ->
                 val star = if (idx == minPoint) "**" else ""
@@ -122,15 +123,23 @@ class KPointAuditor(
     fun constructEtaPoints(): List<KPoint> {
         val eta_0 = 0.5 //  the global null in terms of the original assorters
 
-        // TODO generalize to K > 2
-        require(K == 2) { "only works for two strata" }
-        require(numpy_dotDD(wk, Ac) > 1 / 2) { "reported assorter mean (Ac) implies the winner lost" }
+        // Ac passed into python are normalized
+        // val Ac_rlauxe = Ac.mapIndexed { idx, it -> it * (2 * noerror[idx])}
 
         // original: eta_1_grid = numpy_linspace(start = max(0.0, eta_0 - wk[1]), end = min(u, eta_0/wk[0]), npts = n_bands + 1) // 1D List
+        //         // these are the hypothesized null means
+        //        val eta_1_grid = numpy_linspace(start = max(0.0, eta_0 - wk[1]), end = min(u, eta_0/wk[0]), npts = n_bands + 1) // 1D List
+        //
+        //        // since w dot Ac = 1/2, then setting eta1 gives us eta2:
+        //        // val eta_2_grid = (eta_0 - w[0] * eta_1_grid) / w[1]
+        //        val eta_2_grid = eta_1_grid.map { (eta_0 - wk[0] * it) / wk[1]}
+
         val diffMean = Ac[0] - Ac[1]  // -.3
         val reportedMean0 = Ac[0]
         val start0 = max(0.0, reportedMean0 + diffMean / 2)
         val end0 = min(noerror[0], reportedMean0 - diffMean / 2)
+        // val start0 = max(0.0, eta_0 - wk[1])
+        // val end0 = min(2.0, eta_0/wk[0])
         val eta1_grid = numpy_linspace(start = start0, end = end0, npts = n_bands + 1)
 
         // w · θ = 1/2 = eta0
@@ -153,15 +162,20 @@ class KPointAuditor(
         //    Āc_k is the reported assorter mean
 
         //  transformed null means in stratum k
-        val beta1_grid = eta1_grid.map { (it + noerror[0] - Ac[0]) }
-        val beta2_grid = eta2_grid.map { it + noerror[1] - Ac[1] }
+        // beta_1_grid = eta_1_grid.map { (it + 1 - Ac[0])/2} //  transformed null means in stratum 1
+        // normalize to [0, 1] by dividing by 2 * noerror
+        val beta1_grid = eta1_grid.map { (it + 1 - Ac[0]) / 2 }
+        val beta2_grid = eta2_grid.map { (it + 1 - Ac[1]) / 2 }
 
-        // TODO use KPoints instead of bands I think
         val kpoints = mutableListOf<KPoint>()
+        //print("pt dot weight=")
         repeat(n_bands + 1) { i ->  // 2D = (row, col), so loop over the rows of beta_grid
             val points = doubleArrayOf(beta1_grid[i], beta2_grid[i])
             kpoints.add(KPoint(points))
+            val term = beta1_grid[i] * wk[0] + beta2_grid[i] * wk[1]
+            //print(" $term,")
         }
+        //println()
 
         if (show) {
             println("eta1_grid = ${show(eta1_grid)}")
@@ -178,7 +192,7 @@ class KPointAuditor(
 
     // compute a product UI-TS by minimizing product I-TSMs along a grid of etas (the "band" method)
     // x(K, N), Nk(K); return Pair(optimalMart(N+1), optimalEta(N+1, K))
-    fun kpointUits(x: List<List<Double>>, Nk: List<Int>, etaPoints: List<KPoint>, log: Boolean = true):
+    fun computeITS(x: List<List<Double>>, Nk: List<Int>, etaPoints: List<KPoint>, log: Boolean = true):
             List<List<Double>> {  // (npoints, N+1)
 
         // precompute strata selection for each sample in the strata
@@ -187,7 +201,7 @@ class KPointAuditor(
         val marts = mutableListOf<List<Double>>()  // (npoints, N+1)
 
         etaPoints.forEach { kpoint ->
-            // TODO dont have to do if the bet in eta oblivious
+            // TODO dont have to do if the bet in eta oblivious, I think
             // precompute bet for each sample in the strata
             // bets are determined with max_eta, which makes the bets conservative for both strata and both vertices of the band
             // val bets_i = [mart(x[k], max_eta[k], bet[k], None, ws_N[k], log, output = "bets") for k in np.arange(K)]

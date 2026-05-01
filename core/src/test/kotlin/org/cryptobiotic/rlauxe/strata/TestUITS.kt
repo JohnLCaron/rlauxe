@@ -200,7 +200,7 @@ class TestUITS {
 
     @Test
     fun testBandedAuditor() {
-        var n_bands = 6
+        var n_bands = 10
 
         var Nk = listOf(100, 100)
         var A_c = listOf(0.4, 0.7)
@@ -214,12 +214,12 @@ class TestUITS {
         )
         val result = auditor.runBandAudit()
         println("Nk: ${Nk}, A_c: [${show(A_c)}] n_bands: $n_bands  result: ${result}")
-        assertEquals(97, roundToClosest(result))
+        assertEquals(94, roundToClosest(result))
     }
 
     @Test
     fun testBandedAuditor2() {
-        var n_bands = 6
+        var n_bands = 10
 
         var Nk = listOf(100, 100)
         var A_c = listOf(0.4, 0.7)
@@ -233,26 +233,27 @@ class TestUITS {
         )
         val result = auditor.runBandedAudit()
         println("Nk: ${Nk}, A_c: [${show(A_c)}] n_bands: $n_bands  result: ${result}")
-        assertEquals(53, roundToClosest(result)) // TODO is there a factor of 2 im missing?
+        assertEquals(52, roundToClosest(result)) // TODO is there a factor of 2 im missing?
     }
 
     @Test
     fun testKPointAuditor() {
+        // Nk: [200, 400], mu_k: [0.450, 0.650, ] n_bands: 10  plurcomp: 600.0 BandedAuditor: 600.0 BandedAuditor2: 46.0 KPointAuditor: 92.0
         var n_bands = 10
 
-        var Nk = listOf(1200, 1000)
-        var A_c = listOf(0.4, 0.7)
+        var Nk = listOf(200, 400)
+        var A_c = listOf(0.450, 0.650)
 
         val auditor = KPointAuditor(
             Nk,
             A_c,
             n_bands = n_bands,
             reps = 1,
-            show=false
+            show=true
         )
         val result = auditor.runAudit()
         println("Nk: ${Nk}, A_c: [${show(A_c)}] n_bands: $n_bands  result: ${result}")
-        // assertEquals(51, roundToClosest(result)) // TODO is there a factor of 2 im missing?
+        assertEquals(60, roundToClosest(result))
     }
 
     @Test
@@ -302,11 +303,15 @@ class TestUITS {
 
         n_bands = 100
         compare(Nk, A_c, n_bands = n_bands)
+
+        Nk = listOf(1200, 1000)
+        A_c = listOf(0.4, 0.66)
+        compare(Nk, A_c, n_bands = n_bands)
     }
 
     fun compare(
         Nk: List<Int>,   // a length-K list of the size of each stratum
-        mu_k: List<Double>, // a length-K np.array of floats the reported assorter mean bar{A}_c in each stratum
+        A_c: List<Double>, // a length-K np.array of floats the reported assorter mean bar{A}_c in each stratum
         n_bands: Int = 100,
         p_2: DoubleArray =  doubleArrayOf(0.0, 0.0),  // a length-K np.array of floats the true rate of 2 vote overstatements in each stratum, defaults to none
         p_1: DoubleArray =  doubleArrayOf(0.0, 0.0), // a length-K np.array of floats the true rate of 1 vote overstatements in each stratum, defaults to none
@@ -314,7 +319,7 @@ class TestUITS {
 
         val result1 = simulate_plurcomp(
             Nk,
-            mu_k,
+            A_c,
             bet = "inverse_eta",
             selection = "round_robin",
             inference = "ui-ts",
@@ -323,18 +328,36 @@ class TestUITS {
             show = false,
         )
 
-        val auditor = BandedAuditor(
+        val auditor2 = BandedAuditor(
             Nk,
-            mu_k,
+            A_c,
             n_bands = n_bands,
             reps = 1,
             p_2 = p_2,
             p_1 = p_1,
             show = false,
         )
-        val result2 = auditor.runBandAudit()
+        val result2 = auditor2.runBandAudit()
 
-        println("Nk: ${Nk}, mu_k: [${show(mu_k)}] n_bands: $n_bands  result1: ${result1} result2: ${result2}")
+        val auditor3 = BandedAuditor2(
+            Nk,
+            A_c,
+            n_bands = n_bands,
+            reps = 1,
+            show=false
+        )
+        val result3 = auditor3.runBandedAudit()
+
+        val auditor4 = KPointAuditor(
+            Nk,
+            A_c,
+            n_bands = n_bands,
+            reps = 1,
+            show=false
+        )
+        val result4 = auditor4.runAudit()
+
+        println("Nk: ${Nk}, mu_k: [${show(A_c)}] n_bands: $n_bands  plurcomp: ${result1} BandedAuditor: ${result2} BandedAuditor2: ${result3} KPointAuditor: ${result4}")
         assertEquals(roundToClosest(result1), roundToClosest(result2))
     }
 }

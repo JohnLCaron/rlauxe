@@ -14,6 +14,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 private val showBands = true
+private val showMarts = true
 
 // dont use  "transformed overstatement assorters", use real assorters
 class BandedAuditor2(
@@ -53,7 +54,7 @@ class BandedAuditor2(
         repeat(K) { k ->
             val margin = 2 * Ac[k] - 1.0
             val noerror = 1.0 / (2.0 - margin)
-            println("stratum $k: Ac= ${df(Ac[k])} margin=${df(margin)} noerror=${df(noerror)} upper=${df(2*noerror)}")
+            if (show) println("stratum $k: Ac= ${df(Ac[k])} margin=${df(margin)} noerror=${df(noerror)} upper=${df(2*noerror)}")
 
             val p2n = roundToClosest(Nk[k] * p_2[k])
             val p1n = roundToClosest(Nk[k] * p_1[k])
@@ -89,9 +90,9 @@ class BandedAuditor2(
         val optimalBand = etaBands[minBand]
         val optimalMart = optimalMarts[firstIndex]
         val mu = numpy_dotDD(wk, optimalBand.centroid.point.toList())
-        println("thresh=$thresh bandIndex=${minBand} optimalBand = ${optimalBand} mu=$mu optimalMart=$optimalMart samplesNeeded=$firstIndex")
+        if (show) println("thresh=$thresh bandIndex=${minBand} optimalBand = ${optimalBand} mu=$mu optimalMart=$optimalMart samplesNeeded=$firstIndex")
 
-        if (showBands) {
+        if (show && showBands) {
             println("bands")
             etaBands.forEachIndexed { idx, band ->
                 val star = if (idx == minBand) "**" else ""
@@ -162,7 +163,7 @@ class BandedAuditor2(
             val centroid = doubleArrayOf( (startpoint.first + endpoint.first)/2, (startpoint.second + endpoint.second)/2 )
             bands.add(Band(KPoint(startpoint), KPoint(endpoint), KPoint(centroid)))
         }
-        if (showBands) {
+        if (show && showBands) {
             println("bands")
             bands.forEachIndexed { idx, band ->
                 println(" $idx $band")
@@ -226,11 +227,12 @@ class BandedAuditor2(
             optimalMart[i] = marts[minBandIndex[i]][i]
         }
 
-        val martsT = numpy_transpose(marts)
-        martsT.forEachIndexed { t, it ->
-            println("$t ${showMin(it, minBandIndex[t])} index=${minBandIndex[t]} mart=${optimalMart[t]} ")
+        if (show && showMarts) {
+            val martsT = numpy_transpose(marts)
+            martsT.forEachIndexed { t, it ->
+                println("$t ${showMin(it, minBandIndex[t])} index=${minBandIndex[t]} mart=${optimalMart[t]} ")
+            }
         }
-
         // DoubleArray, List<DoubleArray>, Double
         return Pair(optimalMart, minBandIndex)
     }

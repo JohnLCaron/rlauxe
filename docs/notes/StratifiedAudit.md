@@ -1,3 +1,25 @@
+Im investigating using round-robin stratum selector and η-oblivious betting (or perhaps η-aware inverse betting) for arbitrary K strata. 
+
+The first version of the "Sequential stratified inference" mentioned using "using solvers.cp from version 1.3.2 of the cvxpy module" for inverse betting. Im wondering if the code driving that is available? It would be helpful to understand how the constraints are formulated.
+
+Im also looking at https://github.com/cobyqa/cobyqa which "is a derivative-free optimization solver designed to supersede COBYLA."
+
+Any thoughts appreciated.
+
+    E0 := {ζ : w · ζ ≤ η0 , 0 ≤ ζ ≤ 1}
+
+The boundary of E0 is
+
+    B := {η ∈ Ω : w · η ≤ η0 and Ω ∋ ζ > η =⇒ w · ζ > η0 }.
+
+Futhermore, define
+    
+    C := {η : w · η = η0 , 0 ≤ η ≤ 1} ⊂ E0 .
+
+Because of the componentwise monotonicity, optimizing over the set C rather than B gives a
+conservative result. In what follows, we will generally define Mt = min _η∈C { Mt (η) }
+
+which means w · ζ = η0, and we are minimizing over all η∈C.
 
 # Stratified audits
 

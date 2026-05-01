@@ -7,8 +7,8 @@ import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 
-private val showBands = true
-
+private val showBands = false
+private val showMarts = false
 
 class BandedAuditor(
     val Nk: List<Int>,   // a length-K list of the size of each stratum
@@ -100,7 +100,7 @@ class BandedAuditor(
         val optimalBand = etaBands[minBand]
         val optimalMart = optimalMarts[firstIndex]
         val mu = numpy_dotDD(wk, optimalBand.centroid.point.toList())
-        println("thresh=$thresh bandIndex=${minBand} optimalBand = ${optimalBand} mu=$mu optimalMart=$optimalMart samplesNeeded=$firstIndex")
+        if (show) println("thresh=$thresh bandIndex=${minBand} optimalBand = ${optimalBand} mu=$mu optimalMart=$optimalMart samplesNeeded=$firstIndex")
 
         if (showBands) {
             println("bands")
@@ -255,9 +255,11 @@ class BandedAuditor(
             optimalMart[i] = marts[minBandIndex[i]][i]
         }
 
-        val martsT = numpy_transpose(marts)
-        martsT.forEachIndexed { t, it ->
-            println("$t ${showMin(it, minBandIndex[t])} index=${minBandIndex[t]} mart=${optimalMart[t]} ")
+        if (showMarts) {
+            val martsT = numpy_transpose(marts)
+            martsT.forEachIndexed { t, it ->
+                println("$t ${showMin(it, minBandIndex[t])} index=${minBandIndex[t]} mart=${optimalMart[t]} ")
+            }
         }
 
         // DoubleArray, List<DoubleArray>, Double

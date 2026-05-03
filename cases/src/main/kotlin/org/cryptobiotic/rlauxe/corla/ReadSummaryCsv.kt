@@ -11,16 +11,31 @@ import java.nio.charset.Charset
 import kotlin.collections.reversed
 import kotlin.text.appendLine
 
-// Colorado Election Summary Results
-// https://results.enr.clarityelections.com/CO/122598/web.345435/#/summary
-// "corla/src/test/data/2024election/summary.csv"
+/* Colorado Election Summary Results
+    https://results.enr.clarityelections.com/CO/122598/web.345435/#/summary
+    not in auditcenter repo
 
-// A Line for every contest and candidate
+data/corla/2024election/summary.csv
 
-// "line number","contest name","choice name","party name","total votes","percent of votes","registered voters","ballots cast","num Area total","num Area rptg","over votes","under votes"
-//1,"Presidential Electors (Vote For 1)","Kamala D. Harris / Tim Walz","DEM",1728159,54.16,0,0,64,0,"607","2801"
-//2,"Presidential Electors (Vote For 1)","Donald J. Trump / JD Vance","REP",1377441,43.17,0,0,64,0,"607","2801"
-//3,"Presidential Electors (Vote For 1)","Blake Huber / Andrea Denault","APV",2196,0.07,0,0,64,0,"607","2801"
+has a Line for every contest and candidate
+
+    "line number","contest name","choice name","party name","total votes","percent of votes","registered voters","ballots cast","num Area total","num Area rptg","over votes","under votes"
+    1,"Presidential Electors (Vote For 1)","Kamala D. Harris / Tim Walz","DEM",1728159,54.16,0,0,64,0,"607","2801"
+    2,"Presidential Electors (Vote For 1)","Donald J. Trump / JD Vance","REP",1377441,43.17,0,0,64,0,"607","2801"
+    3,"Presidential Electors (Vote For 1)","Blake Huber / Andrea Denault","APV",2196,0.07,0,0,64,0,"607","2801"
+
+data/corla/2024audit/round1/contest.csv has one line per contest, showing more information:
+
+contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
+17th Judicial District Ballot Question 7B,opportunistic_benefits,in_progress,1,516401,279529,"""No/Against""",37549,0.03000000,0,0,0,0,0,0,0,1.03905000,0,101,101
+Adams 12 Five Star Schools Ballot Issue 5D,opportunistic_benefits,in_progress,1,516401,117043,"""No/Against""",12622,0.03000000,0,0,0,0,0,0,0,1.03905000,0,299,299
+Adams 12 Five Star Schools Ballot Issue 5E,opportunistic_benefits,in_progress,1,516401,117043,"""Yes/For""",10481,0.03000000,0,0,0,0,0,0,0,1.03905000,0,360,360
+Adams-Arapahoe School District 28J Ballot Issue 5A,opportunistic_benefits,in_progress,1,799746,84894,"""Yes/For""",22669,0.03000000,0,0,0,0,0,0,0,1.03905000,0,258,258
+Adams-Arapahoe School District 28J Ballot Issue 5B,opportunistic_benefits,in_progress,1,799746,84894,"""Yes/For""",39107,0.03000000,0,0,0,0,0,0,0,1.03905000,0,150,150
+
+
+we dont use
+*/
 
 class ColoradoElectionContestSummary(
     val contestName: String,

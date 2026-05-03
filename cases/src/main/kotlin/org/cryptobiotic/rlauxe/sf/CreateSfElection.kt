@@ -201,7 +201,6 @@ fun makeClcaContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, Contes
         } else {
             makeRaireContest(info, cvrTab, useNc, Nbin=contestNbs[contestId]!!) // HERE
         }
-        contestUA.contest.info().metadata["PoolPct"] = 0
         contestsUAs.add(contestUA)
     }
     return contestsUAs
@@ -225,7 +224,7 @@ fun makeOneAuditContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, Co
         val unpooledTab = unpooledPool.contestTabs[contestId]!!
         val unpooledPct = 100.0 * unpooledTab.ncardsTabulated / cvrTab.ncardsTabulated   // denominator is cards that have the contest, not Npop
         val poolPct = (100 - unpooledPct).toInt()
-        contestUA.contest.info().metadata["PoolPct"] = poolPct
+        contestUA.contest.info().metadata["PoolPct"] = poolPct.toString()
         contestsUAs.add(contestUA)
     }
     return contestsUAs
@@ -240,7 +239,6 @@ fun makePollingContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, Con
                 val info = infos[contestId]!!
                 val contest = Contest(info, contestSumTab.votes, useNc, contestSumTab.ncardsTabulated)
                 val contestUA = ContestWithAssertions(contest, isClca = false, NpopIn=contestNbs[contestId]).addStandardAssertions()
-                contestUA.contest.info().metadata["PoolPct"] = 0
                 contestsUAs.add(contestUA)
             }
         }
@@ -258,7 +256,7 @@ fun makeRegularContests(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, Conte
             val unpooledTab = unpooledPool.contestTabs[info.id]!!
             val unpooledPct = 100.0 * unpooledTab.ncardsTabulated / contestSumTab.ncardsTabulated
             val poolPct = (100 - unpooledPct).toInt()
-            contest.info().metadata["PoolPct"] = poolPct
+            contest.info().metadata["PoolPct"] = poolPct.toString()
             contests.add(contest)
         }
     }

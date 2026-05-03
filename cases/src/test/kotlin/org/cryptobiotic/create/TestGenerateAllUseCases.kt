@@ -77,9 +77,6 @@ class TestGenerateAllUseCases {
     @Test
     fun createColoradoClca() {
         val topdir = "$testdataDir/cases/corla/clca"
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -87,17 +84,12 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
             ClcaConfig(), null)
 
-        createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile,
-            null, creation, round)
+        createColoradoElection(topdir, "$topdir/audit", null, creation, round)
     }
 
     @Test
     fun createColoradoPollingPools() {
         val topdir = "$testdataDir/cases/corla/polling"
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -106,16 +98,12 @@ class TestGenerateAllUseCases {
             null, PollingConfig())
 
         createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile,
             pollingMode=PollingMode.withPools, creation, round)
     }
 
     @Test
     fun createColoradoPollingBatches() {
         val topdir = "$testdataDir/cases/corla/polling2"
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -124,16 +112,12 @@ class TestGenerateAllUseCases {
             null, PollingConfig())
 
         createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile,
             pollingMode=PollingMode.withBatches, creation, round)
     }
 
     @Test // too long - fix
     fun createColoradoPollingWithoutBatches() {
         val topdir = "$testdataDir/cases/corla/polling3"
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -142,7 +126,6 @@ class TestGenerateAllUseCases {
             null, PollingConfig())
 
         createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile,
             pollingMode=PollingMode.withoutBatches, creation, round,
             startFirstRound = false,
         )

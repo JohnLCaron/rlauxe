@@ -47,7 +47,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         logger.info { "runRoundAgain in $auditDir for round $roundIdx, contest '$contestName', and assertion $assertion" }
 
         val useAuditRecord = if (auditRecord is CompositeRecord) {
-            auditRecord.findComponentWithContest(contestRound.contestUA.name)
+            auditRecord.findComponentWithName(contestRound.contestUA.name)
         } else auditRecord
         if (useAuditRecord == null) return "Cant find contest named ${contestRound.contestUA.name}"
 

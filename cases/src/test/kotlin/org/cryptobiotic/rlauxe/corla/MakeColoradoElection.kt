@@ -21,12 +21,19 @@ import kotlin.test.fail
 
 class MakeColoradoElection {
 
+    val filename = "src/test/data/corla/2024audit/round3/contestComparison.csv"
+    val countyStyles = readContestComparisonCsv(filename)
+
+    val contestTabFile = "src/test/data/corla/2024audit/tabulateCounty.csv"
+    // val canonicalFile = "src/test/data/corla/2024audit/2024GeneralCanonicalList.csv"
+    val resultsFile = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
+    val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
+    val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
+    val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
+
     // @Test
     fun makeCountyAudits25() {
         val topdir = "$testdataDir/cases/corla25/county"
-        val detailXmlFile = "src/test/data/corla2025/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
         val wantCounties = listOf("Summit") // listOf("Boulder",  "El Paso", "La Plata", "Weld",)
 
         val creationConfig = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
@@ -36,7 +43,6 @@ class MakeColoradoElection {
             ClcaConfig(), null)
 
         createCountyAudits(topdir,
-            detailXmlFile, contestRoundFile, precinctFile,
             wantCounties, creationConfig, roundConfig,
             startFirstRound = false
         )
@@ -45,9 +51,6 @@ class MakeColoradoElection {
     @Test
     fun makeCountyAudits24() {
         val topdir = "$testdataDir/cases/corla/county"
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
         val wantCounties = listOf("Boulder",  "El Paso", "La Plata", "Weld",)
 
         val creationConfig = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
@@ -57,18 +60,14 @@ class MakeColoradoElection {
             ClcaConfig(), null)
 
         createCountyAudits(topdir,
-            detailXmlFile, contestRoundFile, precinctFile,
             wantCounties, creationConfig, roundConfig,
-            startFirstRound = true
-            )
+            startFirstRound = false
+        )
     }
 
     @Test
     fun makeColoradoClca() {
         val topdir = "$testdataDir/cases/corla/clca"
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -77,16 +76,12 @@ class MakeColoradoElection {
             ClcaConfig(), null)
 
         createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile,
-            null, creation, round)
+            null, creation, round, name = "Corla24",)
     }
 
     @Test
     fun makeColoradoPollingPools() {
         val topdir = "$testdataDir/cases/corla/polling"
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -95,16 +90,12 @@ class MakeColoradoElection {
             null, PollingConfig())
 
         createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile,
             pollingMode=PollingMode.withPools, creation, round)
     }
 
     @Test
     fun makeColoradoPollingBatches() {
         val topdir = "$testdataDir/cases/corla/polling2"
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -113,16 +104,12 @@ class MakeColoradoElection {
             null, PollingConfig())
 
         createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile,
             pollingMode=PollingMode.withBatches, creation, round)
     }
 
     @Test
     fun makeColoradoPollingWithoutBatches() {
         val topdir = "$testdataDir/cases/corla/polling3"
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -131,14 +118,13 @@ class MakeColoradoElection {
             null, PollingConfig())
 
         createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile,
             pollingMode=PollingMode.withoutBatches, creation, round)
     }
 
     @Test
     fun testReadColoradoElectionDetail() {
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val electionResultXml: ElectionResult = readColoradoElectionDetail(detailXmlFile)
+        val electionResultXml: ElectionDetailXml = readColoradoElectionDetail(detailXmlFile)
         println("  number of contests = ${electionResultXml.contests.size}")
         println(CorlaXmlContest.header)
         electionResultXml.contests.forEach {

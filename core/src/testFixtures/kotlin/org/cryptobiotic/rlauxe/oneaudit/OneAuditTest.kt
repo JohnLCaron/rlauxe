@@ -117,7 +117,7 @@ fun makeOneAuditTest(
     require (expectNc3 == Nc)
 
     val contest = Contest(info1, mapOf(0 to winnerVotes, 1 to loserVotes), Nc = Nc, Ncast = Nc - Np)
-    info1.metadata["PoolPct"] = (100.0 * poolNcards / Nc).toInt()
+    info1.metadata["PoolPct"] = (100.0 * poolNcards / Nc).toString()
 
     val mvrs = makeMvrs(contest, cvrNc, cvrVotes, cvrUndervotes, pool, extraInPool)
     val cardManifest = makeCardManifest(mvrs, pool)

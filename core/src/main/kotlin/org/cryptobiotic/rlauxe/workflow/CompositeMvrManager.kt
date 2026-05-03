@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.persist.CompositeRecord
+import org.cryptobiotic.rlauxe.persist.CompositeRecordIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFileUnwrapped
@@ -14,7 +14,7 @@ import kotlin.io.path.Path
 
 // TODO generalize using more than just first component
 open class CompositeMvrManager(
-    val auditRecord: CompositeRecord,
+    val auditRecord: CompositeRecordIF,
     val config: Config,
     val contestsUA: List<ContestWithAssertions>,
     val mvrWrite: Boolean = true): MvrManager {

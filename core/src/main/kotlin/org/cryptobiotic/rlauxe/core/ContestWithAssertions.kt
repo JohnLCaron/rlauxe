@@ -162,7 +162,7 @@ open class ContestWithAssertions(
         append(contest.showCandidates())
 
         if (contest.info().metadata.isNotEmpty()) {
-            appendLine("Metadata")
+            appendLine("\nMetadata")
             contest.info().metadata.forEach { appendLine("  $it") }
         }
     }

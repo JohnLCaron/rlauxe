@@ -36,7 +36,7 @@ import java.io.File
 
 @Serializable
 @XmlSerialName(value = "ElectionResult")
-data class ElectionResult(
+data class ElectionDetailXml(
     @XmlElement val Timestamp: String,
     @XmlElement val ElectionName: String,
     @XmlElement val ElectionDate: String,
@@ -193,16 +193,16 @@ data class CountyVote(
     val votes: Int,
 )
 
-fun readColoradoElectionDetail(filename : String) : ElectionResult {
+fun readColoradoElectionDetail(filename : String) : ElectionDetailXml {
     println("readColoradoElectionDetail filename = ${filename}")
 
     // gulp the entire file to a string
     val file = File(filename)
     val text = file.readText(Charsets.UTF_8)
 
-    val serializer = serializer<ElectionResult>() // use the default serializer
+    val serializer = serializer<ElectionDetailXml>() // use the default serializer
     val xml = XML { indent = 2 } // Create the configuration for (de)serialization
-    val result : ElectionResult = xml.decodeFromString(serializer, text)
+    val result : ElectionDetailXml = xml.decodeFromString(serializer, text)
 
     return result
 }

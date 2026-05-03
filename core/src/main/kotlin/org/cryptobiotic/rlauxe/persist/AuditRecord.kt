@@ -6,13 +6,11 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import com.github.michaelbull.result.unwrapError
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
@@ -29,7 +27,6 @@ import kotlin.io.path.Path
 
 interface AuditRecordIF {
     val location: String
-    val electionInfo: ElectionInfo
     val config: Config
     val contests: List<ContestWithAssertions>
     val rounds: List<AuditRoundIF>
@@ -38,20 +35,20 @@ interface AuditRecordIF {
     fun readSortedManifest(batches: List<StyleIF>?): CardManifest
     fun readOneShotMvrs(): Map<Int, Int>
     fun readCardStyles(): List<StyleIF>?
+    fun name(): String
 }
 
-class AuditRecord(
+open class AuditRecord(
     override val location: String,
-    override val electionInfo: ElectionInfo,
-    val auditCreationConfig: AuditCreationConfig,
-    val auditRoundConfig: AuditRoundConfig,
+    override val config: Config,
     override val contests: List<ContestWithAssertions>,
     override val rounds: List<AuditRound>,  // TODO do we need to replace AuditEst ??
     val nmvrs: Int // number of mvrs already sampled
 ): AuditRecordIF {
     val publisher = Publisher(location)
+    val electionInfo = config.election
 
-    override val config = Config(electionInfo, auditCreationConfig, auditRoundConfig)
+    override fun name() = electionInfo.electionName // it.location.substring(stateRecord.location.length)
 
     // for efficiency, batches can be read once and stored by the caller
     override fun readSortedManifest(batches: List<StyleIF>?): CardManifest {
@@ -116,14 +113,29 @@ class AuditRecord(
         return "audit $location election ${electionInfo.electionName}"
     }
 
+    override fun toString() = buildString {
+        append("AuditRecord ${name()} location='$location'\n$config")
+        appendLine("contests")
+        contests.forEach{ appendLine("  $it")}
+        appendLine("rounds")
+        rounds.forEach{ appendLine(it)}
+    }
+
     companion object {
         private val logger = KotlinLogging.logger("AuditRecord")
 
-        // used by viewer
+        // checks all types of AuditRecordIF
         fun checkExists(location: String?): Boolean {
             if (location == null) return false
+            if (CountyComposite.checkExists(location)) return true
             if (CompositeRecord.checkExists(location)) return true
+            if (checkAuditRecordExists(location)) return true
+            return false
+        }
 
+        // check for just an AuditRecord
+        fun checkAuditRecordExists(location: String?): Boolean {
+            if (location == null) return false
             val publisher = Publisher(location)
             if (!exists(publisher.electionInfoFile())) return false
             if (!exists(publisher.cardManifestFile())) return false
@@ -131,8 +143,14 @@ class AuditRecord(
             return true
         }
 
-        // used by viewer
+        // reads all types of AuditRecordIF
         fun read(location: String): AuditRecordIF? {
+
+            if (CountyComposite.checkExists(location)) {
+                val countyComposite = CountyComposite.readFrom(location)
+                if (countyComposite != null) return countyComposite
+            }
+
             if (CompositeRecord.checkExists(location)) {
                 val compositeRecord = CompositeRecord.readFrom(location)
                 if (compositeRecord != null) return compositeRecord
@@ -147,7 +165,8 @@ class AuditRecord(
             }
         }
 
-        fun readWithResult(location: String): Result<AuditRecordIF, ErrorMessages> {
+        // reads an AuditRecord
+        fun readWithResult(location: String): Result<AuditRecord, ErrorMessages> {
             val errs = ErrorMessages("readAuditRecord from '${location}'")
 
             val publisher = Publisher(location)
@@ -236,9 +255,9 @@ class AuditRecord(
             }
             val roundConfig = lastRoundConfig?: auditRoundProtoConfig!!
 
-            // TODO AuditRecord or CompositeRecord ??
             return if (errs.hasErrors()) Err(errs) else {
-                Ok(AuditRecord(location, electionInfo!!, auditCreationConfig!!, roundConfig, contests!!, rounds, countMvrsUsed))
+                val config = Config(electionInfo!!, auditCreationConfig!!, roundConfig)
+                Ok(AuditRecord(location, config, contests!!, rounds, countMvrsUsed))
             }
         }
     }

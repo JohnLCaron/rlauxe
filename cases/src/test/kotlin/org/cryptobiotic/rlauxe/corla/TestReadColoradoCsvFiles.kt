@@ -9,13 +9,14 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.test.Test
 
-class TestReadColoradoElectionSummaryCsv {
+class TestReadColoradoCsvFiles {
 
     @Test
     fun testColoradoElectionSummary() {
         val filename = "src/test/data/corla/2024election/summary.csv"
         val contests = readColoradoElectionSummaryCsv(filename)
-        println("${contests.size} contests in $filename")
+        println("read ${contests.size} contests in $filename")
+        println("read ${ contests.sumOf { it.candidates.size } } candidates")
         contests.forEach { it.complete() }
         println("--------------------------------------------------------------")
         println("contest sort by reversed underVote percentage\n")
@@ -27,12 +28,59 @@ class TestReadColoradoElectionSummaryCsv {
     }
 
     @Test
+    fun testResultsReportContest() {
+        val filename = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
+        val contests = readResultsReportContest(filename)
+        println("read ${contests.size} contests from $filename")
+    }
+
+    @Test
+    fun readGeneralCanonicalList() {
+        val filename = "src/test/data/corla/2024audit/2024GeneralCanonicalList.csv"
+        val contests = readGeneralCanonicalList(filename)
+        println("read ${contests.size} contests from $filename (${contests.sumOf { it.choices.size }} choices)")
+        // contests.forEach { println(it) }
+        val sizedist = mutableMapOf<Int, Int>() // size, count
+        contests.forEach {
+            val count = sizedist.getOrDefault(it.counties.size, 0)
+            sizedist[it.counties.size] = count+1
+        }
+        println("ncounties, contestCount")
+        sizedist.toSortedMap().forEach { println(it) }
+
+        //contests.forEach {
+        //    if (it.counties.size == 2) println(it)
+        //}
+    }
+
+    @Test
+    fun testCountyTabulateCsv() {
+        val filename = "src/test/data/corla/2024audit/tabulateCounty.csv"
+        val contests = readCountyTabulateCsv(filename)
+        println("read ${contests.size} contests from $filename (${contests.sumOf { it.choices.size }} choices)")
+        contests.forEach {
+            println(it)
+        }
+    }
+
+    @Test
     fun testColoradoContestRoundCsv() {
         val filename = "src/test/data/corla/2024audit/round1/contest.csv"
         val contests = readColoradoContestRoundCsv(filename)
         println("read ${contests.size} contests from $filename")
         contests.forEach { it.showEstimation() }
     }
+
+    @Test
+    fun testCountyStyles() {
+        val filename = "src/test/data/corla/2024audit/round3/contestComparison.csv"
+        val countyStyles = readContestComparisonCsv(filename)
+        println("read ${countyStyles.size} countyStyles from $filename totalStyles=${countyStyles.sumOf { it.styles.size }} totalCards=${ countyStyles.sumOf{it.cardCount} }")
+        countyStyles.forEach {
+            println(it.show())
+        }
+    }
+
 }
 
 fun CorlaContestRoundCsv.showEstimation() {

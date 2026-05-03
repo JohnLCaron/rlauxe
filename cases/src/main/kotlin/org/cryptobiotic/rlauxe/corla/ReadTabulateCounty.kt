@@ -5,8 +5,7 @@ import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import java.io.File
 import java.nio.charset.Charset
-
-// TODO not used ??
+import kotlin.text.appendLine
 
 // corla/src/test/data/2024audit/tabulateCounty.csv
 // county_name,contest_name,choice,votes
@@ -18,6 +17,21 @@ data class CountyTabulateCsv(
     val contestName: String,
 ) {
     val choices = mutableMapOf<String, CountyTabulateChoice>()
+
+    override fun toString() = buildString {
+        appendLine("'$contestName'")
+        choices.values.forEach{ appendLine("  $it") }
+    }
+
+    fun counties() : List<String> {
+        val counties = mutableSetOf<String>()
+        choices.values.forEach { choice ->
+            choice.counties.forEach { county ->
+                counties.add(county.countyName)
+            }
+        }
+        return counties.toList()
+    }
 }
 
 data class CountyTabulateChoice(
@@ -28,7 +42,13 @@ data class CountyTabulateChoice(
 
     fun addCounty(line: TabulateLine) {
         counties.add(line)
-        totalVotes += line.totalVotes
+        totalVotes += line.countyVote
+    }
+
+    override fun toString() = buildString {
+        append("'$choiceName'= $totalVotes [")
+        counties.forEach{ append("${it.countyName}=${it.countyVote}, ") }
+        append("]")
     }
 }
 
@@ -36,10 +56,10 @@ data class TabulateLine(
     val countyName: String,
     val contestName: String,
     val choiceName: String,
-    val totalVotes: Int,
+    val countyVote: Int,
 )
 
-fun readCountyTabulateCsv(filename: String): Map<String, CountyTabulateCsv> {
+fun readCountyTabulateCsv(filename: String): List<CountyTabulateCsv> {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
@@ -56,11 +76,13 @@ fun readCountyTabulateCsv(filename: String): Map<String, CountyTabulateCsv> {
         while (records.hasNext()) {
             line = records.next()!!
             var idx = 0
+            if (line.size() < 4 )
+                print("")
             val county = TabulateLine(
                 line.get(idx++),
                 line.get(idx++),
                 line.get(idx++),
-                line.get(idx++).toInt(),
+                line.get(idx).toInt(),
             )
             val contest = contests.getOrPut(county.contestName) { CountyTabulateCsv(county.contestName) }
             val choice = contest.choices.getOrPut(county.choiceName) { CountyTabulateChoice(county.choiceName) }
@@ -71,9 +93,10 @@ fun readCountyTabulateCsv(filename: String): Map<String, CountyTabulateCsv> {
         ex.printStackTrace()
     }
 
-    return contests
+    return contests.toSortedMap().values.toList()
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
 // corla/src/test/data/2024audit/tabulate.csv
 // contest_name,choice,votes
 // 17th Judicial District Ballot Question 7B,No/Against,142021
@@ -125,7 +148,7 @@ fun readTabulateCsv(filename: String): Map<String, TabulateContestCsv> {
                 line.get(idx++).toInt(),
             )
             val contest = contests.getOrPut(tabLine.contestName) { TabulateContestCsv(tabLine.contestName, contestIdx++) }
-            contest.addChoice(tabLine.choiceName, tabLine.totalVotes)
+            contest.addChoice(tabLine.choiceName, tabLine.countyVote)
         }
     } catch (ex: Exception) {
         println(line)

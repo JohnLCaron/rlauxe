@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestRound
-import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import kotlin.io.path.Path
@@ -38,14 +37,18 @@ import kotlin.io.path.isDirectory
 //    val nmvrs: Int // number of mvrs already sampled
 //)
 
+interface CompositeRecordIF: AuditRecordIF {
+    val componentRecords: List<AuditRecord>
+    fun findComponentWithName(name: String): AuditRecord?
+}
+
 data class CompositeRecord(
     override val location: String,
-    override val electionInfo: ElectionInfo,
     override val config: Config,
     override val contests: List<ContestWithAssertions>,
     override val rounds: List<AuditRoundIF>,
-    val componentRecords: List<AuditRecord>,
-): AuditRecordIF  {
+    override val componentRecords: List<AuditRecord>,
+): CompositeRecordIF  {
 
     override fun readSortedManifest(batches: List<StyleIF>?): CardManifest {
         return componentRecords.first().readSortedManifest(batches)
@@ -65,10 +68,14 @@ data class CompositeRecord(
         return allBatches
     }
 
-   fun findComponentWithContest(wantContestName: String): AuditRecord? {
+    override fun name(): String {
+        return "what"
+    }
+
+    override fun findComponentWithName(name: String): AuditRecord? {
         var want: AuditRecord? = null
         for (component in componentRecords) {
-            if (component.contests.find { contestUA -> contestUA.name == wantContestName } != null) {
+            if (component.contests.find { contestUA -> contestUA.name == name } != null) {
                 want = component
                 break
             }
@@ -90,6 +97,7 @@ data class CompositeRecord(
         private val logger = KotlinLogging.logger("CompositeRecord")
 
         // used by viewer
+        // look for subdirectories with an audit subdirectory
         fun checkExists(location: String): Boolean {
             val path = Path(location)
             if (path.isDirectory()) {
@@ -111,7 +119,6 @@ data class CompositeRecord(
             val components = mutableListOf<AuditRecord>()
             val contests = mutableListOf<ContestWithAssertions>()
             var config: Config? = null
-            var electionInfo: ElectionInfo? = null
 
             // find all subdirectories
             var componentId = 1
@@ -129,7 +136,6 @@ data class CompositeRecord(
                                 components.add(orgRecord)
                                 contests.addAll(orgRecord.contests)
                                 if (config == null) config = orgRecord.config // TODO all configs are the same ??
-                                if (electionInfo == null) electionInfo = orgRecord.electionInfo // TODO all electionInfo are the same ??
                                 componentId++
                             }
                         }
@@ -139,7 +145,7 @@ data class CompositeRecord(
             return if (config != null) {
                 // contests.sortBy { it.name }
                 val auditRounds = makeAuditRounds(components)
-                CompositeRecord(location, electionInfo!!, config, contests, auditRounds, components)
+                CompositeRecord(location, config, contests, auditRounds, components)
             } else {
                 null
             }

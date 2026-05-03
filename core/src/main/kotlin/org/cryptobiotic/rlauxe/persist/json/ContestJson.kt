@@ -38,7 +38,7 @@ data class ContestInfoJson(
     val nwinners: Int,
     val voteForN: Int? = null,
     val minFraction: Double?,
-    val metadata: Map<String, Int>?,
+    val metadata: Map<String, String>?,
 )
 
 fun ContestInfo.publishJson() : ContestInfoJson {

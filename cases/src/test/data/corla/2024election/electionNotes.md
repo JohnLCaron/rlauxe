@@ -8,6 +8,15 @@ targeted contests
 https://www.coloradosos.gov/pubs/elections/resultsData.html
 https://results.enr.clarityelections.com/CO/122598/web.345435/#/summary
 
+//////////////////////////////////////////////////////////////////
+*** Contest Calhan School District RJ1 Question 5B has 2039 total votes, but contestBallotCardCount is 118 - using totalVotes
+
+contestRound:
+contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
+
+    Calhan School District RJ1 Question 5B,opportunistic_benefits,in_progress,1,20652,118,"""No/Against""",61,0.03000000,0,0,0,0,0,0,0,1.03905000,0,2468,2468
+
+La Plata,La Plata County Surveyor,There are no candidates for this office
 
 ///////////////////////////////////////////////////////////////
 

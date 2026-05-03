@@ -60,7 +60,7 @@ ADAMS	4215601245	Presidential Electors	Kamala D. Harris / Tim Walz	DEM	64
 ...
 
 3. https://www.coloradosos.gov/pubs/elections/RLA/2024/general/round1/contest.csv
-This file is also no longer available.
+This file is still available at https://github.com/nealmcb/auditcenter
 
         corla/src/test/data/corla/2024audit/round1/contest.csv
 
@@ -121,6 +121,89 @@ contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,
 Presidential Electors,state_wide_contest,in_progress,1,4746866,3239722,"""Kamala D. Harris / Tim Walz""",350348,0.03000000,0,0,0,0,0,0,0,1.03905000,0,99,99
 ````
 Not exactly consistent, eg 1728159 - 1377441 = 350718 != 350348, but close enough for now (we can only do a simulation since we dont have the real CVRs).
+
+## what are the contests and candidates?
+
+read 295 contests in src/test/data/corla/2024election/summary.csv (602 candidates)
+
+read 725 contests from src/test/data/corla/2024audit/round1/contest.csv, only has the winning name
+
+All in /home/stormy/dev/github/rla/nealmcb/auditcenter/2024/general:
+
+In targetedContests.xlsl we have
+
+      "County","Contest","Vote For","Lowest Winner","Highest Loser","Contest Margin","Diluted Margin","Risk Limit","Estimated # of CVRs to audit","# of CVRs","Remarks",,,,,,,,,,,,,,,,
+      "El Paso","City of Colorado Springs Ballot Question 300",1,"130,671","108,300","2,735",5.78%,3%,126,"387,297",,,,,,,,,,,,,,,,,22
+
+      "Lowest Winner" = "130,671"
+      "Highest Loser" = "108,300" (vote diff = 22371)
+      "Contest Margin"= "2,735"   WTF? should be 22371
+      "Diluted Margin"=5.78%
+      "Estimated # of CVRs to audit", = 126
+      "# of CVRs" = "387297"  // ballot_card_count
+
+2024GeneralCanonicalList.csv seems to have all the contests and candidates
+
+      CountyName,ContestName,ContestChoices
+      El Paso,City of Colorado Springs Ballot Question 300,"Yes/For,No/Against"
+
+
+tabulateCounty.csv, matches targetedContests: (can use this to divide votes by county)
+
+      El Paso,City of Colorado Springs Ballot Question 300,Yes/For,130671
+      El Paso,City of Colorado Springs Ballot Question 300,No/Against,108300
+
+
+contestsByCounty.csv (the last field is "contest id"):
+
+      21,El Paso,City of Colorado Springs Ballot Question 300,1764152
+
+round1/contest.csv:
+
+      contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,
+         audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,
+            optimistic_samples_to_audit,estimated_samples_to_audit
+      City of Colorado Springs Ballot Question 300,county_wide_contest,in_progress,1,387297,254918,"""Yes/For""",22371,0.03000000,
+         0,0,0,0,0,0,0,1.03905000,0,
+            127,127
+
+      winners_allowed=1
+      ballot_card_count = 387297
+      contest_ballot_card_count = 254918
+      min_margin = 22371
+      optimistic_samples_to_audit,estimated_samples_to_audit = 127
+
+round1/contestComparison.csv has card-by-card comparision for all contests
+
+round1/contestSelection.csv has the seleced ballot ids:
+
+      22371,City of Colorado Springs Ballot Question 300,"[2406219,2209447,3122832,2075630,3072721,2617763,2909085,1954203,3019522,1840462,3138969,2077653,2526171,2636654,2661316,2673922,2716434,3037407,2165721,1845133,3109451,1803532,2611783,3150469,3009936,2373999,3195765,2269487,2507120,2564348,3189713,2005307,2188524,2741635,2623494,1789845,2139286,2007116,2312917,2225654,2457420,2026641,2300901,3207729,2592312,1769076,2681848,2253717,2289775,2755156,2130473,2245670,2026129,2700217,2790139,3130435,2761016,2378617,2917954,2740690,2651059,2243460,2054726,2733549,2193134,2287263,2709854,2768682,2082298,2292076,2339516,2529299,1854081,2670975,3286093,2317938,1990270,2850081,2911507,2842209,2048750,2912934,3226406,1852755,2056323,2882370,1951002,2836985,3069691,2049669,3153547,2899248,2998229,2863908,2680907,2729879,2285539,2293322,2714455,2513603,1985198,2068145,3104879,3290795,2987808,2454039,2389422,3017981,2707801,1818157,2574210,2378437,3019690,3128045,1923074,2412173,1891707,1930519,2849408,2753919,2594032,3200124,2394762,3087205,2045796,2861113,2827661,2581873]"
+
+round1/ResultsReport.xlsx has seperate sheets for all(?) contests with the card-to-card comparision; and a summary with
+
+      "Contest","targeted","Winner","Risk Limit met?","Risk measurement %","Audit Risk Limit %","diluted margin %","disc +2","disc +1","disc -1","disc -2","gamma","audited sample count","ballot count","min margin","votes for winner","votes for runner up","total votes","disagreement count (included in +2 and +1)"
+
+      "City of Colorado Springs Ballot Question 300","Yes","Yes/For","Yes","2.7","3.0","5.77618700","0","0","0","0","1.03905000","128","387297","22371","130671","108300","238971","0"
+
+      "Contest", = "City of Colorado Springs Ballot Question 300"
+      "targeted", = "Yes"
+      "Winner",   =   "Yes/For"
+      "Risk Limit met?", = "Yes"
+      "Risk measurement %", = "2.7"
+      "Audit Risk Limit %", = "3.0"
+      "diluted margin %", = "5.77618700"
+      "disc +2","disc +1","disc -1","disc -2","gamma",
+      "audited sample count", = "128"
+      "ballot count", = "387297"
+      "min margin", = "22371"
+      "votes for winner", = "130671"
+      "votes for runner up", = "108300"
+      "total votes", = "238971"
+      "disagreement count (included in +2 and +1)" = 0
+
+this has all previous info except for contest_ballot_card_count, which we use as Nc
+there are 725 contests, marked "targeted" both yes and no. this could be where we get our canonical contest list?
+but we dont have the candidate list, just the winner name
 
 ### simulated CVRs for CLCA audit
 

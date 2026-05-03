@@ -17,7 +17,6 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.audit.createElectionRecord
 import org.cryptobiotic.rlauxe.audit.startFirstRound
-import org.cryptobiotic.rlauxe.boulder.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -47,20 +46,17 @@ private val logger = KotlinLogging.logger("CreateCountyAudits")
 private val debugUndervotes = true
 
 class CreateCountyAudits(
-        electionDetailXmlFile: String,
-        contestRoundFile: String,
-        precinctFile: String,
         val topdir: String,
         val wantCounties: List<String>,
     ) {
-    val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
-    val electionDetailXml: ElectionResult = readColoradoElectionDetail(electionDetailXmlFile)
+    val corlaInput = Colorado2024Input
+
     val countyContestBuilders: Map<String, List<CountyContestBuilder>> =
-        makeCountyContestBuilders(electionDetailXml, roundContests, wantCounties)
+        makeCountyContestBuilders(corlaInput, wantCounties)
 
     // hopefully all the infos are the same
     val infoMap = countyContestBuilders.values.map { it.map { it.info } }.flatten().associateBy { it.id }
-    val allCardPools = convertPrecinctsToCardPools(precinctFile, infoMap, true)
+    val allCardPools = convertPrecinctsToCardPools(corlaInput.precinctFile, infoMap, true)
 
     val electionBuilders = mutableListOf<CorlaElectionBuilder>()
 
@@ -75,10 +71,10 @@ class CreateCountyAudits(
             builders.forEach {
                 if (it.totalCards == 0) {
                     countZero++
-                    println(it)
+                    println(" ${it.info.id} ${it.info.name}")
                 }
             }
-            println("contests with no precinct data = $countZero out of ${builders.size}")
+            if (countZero > 0) println("$countZero/${builders.size} contests with no precinct data for county $countyName")
 
             // estimate undervotes based on each precinct having a single ballot style
 
@@ -124,6 +120,7 @@ class CreateCountyAudits(
             electionBuilders.add(CorlaElectionBuilder(countyName, auditdir, contestsUAs, ncards, null, countyCardPools))
         }
     }
+
 }
 
 class CorlaElectionBuilder(
@@ -135,9 +132,13 @@ class CorlaElectionBuilder(
     val cardPools: List<OneAuditPoolFromBallotStyle>,
 ) : ElectionBuilder {
 
-    override fun electionInfo() =
-        ElectionInfo("CorlaContest24$countyName", AuditType.CLCA, ncards,
-            contestsUA.size, pollingMode = null)
+    override fun electionInfo(): ElectionInfo {
+        val useName = countyName.replace(" ", "_")
+        return ElectionInfo(
+            useName, AuditType.CLCA, ncards,
+            contestsUA.size, pollingMode = null
+        )
+    }
 
 
     override fun contestsUA() = contestsUA
@@ -154,14 +155,14 @@ class CorlaElectionBuilder(
     }
 
     override fun ncards() = ncards
-
     override fun cardStyles() = cardStyles
-
     override fun cardPools() = cardPools
-
     override fun createUnsortedMvrsInternal() = null
-
     override fun createUnsortedMvrsExternal() = null
+    override fun toString(): String {
+        return "CorlaElectionBuilder(countyName='$countyName', auditdir='$auditdir')"
+    }
+
 }
 
 
@@ -183,16 +184,15 @@ fun makeContests(builders: List<CountyContestBuilder>): List<ContestIF> {
 }
 
 fun makeCountyContestBuilders(
-    electionResult: ElectionResult,
-    roundContests: List<CorlaContestRoundCsv>,
+    corlaInput:  Colorado2024Input,
     wantCounties: List<String>,
 ): Map<String, List<CountyContestBuilder>> {
-    val roundContestMap = roundContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
+    val roundContestMap = corlaInput.roundContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
 
     // change ElectionResult to County name -> CountyContests
     val countyMap = mutableMapOf<String, CountyContests>()
     wantCounties.forEach { countyMap[it] = CountyContests(it) }
-    electionResult.contests.forEachIndexed { idx, corlaXmlContest ->
+    corlaInput.electionDetailXml.contests.forEachIndexed { idx, corlaXmlContest ->
         corlaXmlContest.choices.forEach { choice ->
             choice.voteTypes.forEach { voteType ->
                 voteType.byCounty.forEach{
@@ -226,7 +226,7 @@ fun makeCountyContestBuilders(
                     SocialChoiceFunction.PLURALITY,
                     corlaXmlContest.voteFor
                 )
-                info.metadata["CORLAsample"] = roundContest.optimisticSamplesToAudit
+                info.metadata["CORLAsample"] = roundContest.optimisticSamplesToAudit.toString()
 
                 val contest = CountyContestBuilder(
                     info,
@@ -340,25 +340,26 @@ class CardsFromPool(val cardPool: OneAuditPoolFromBallotStyle) : Iterator<Cvr> {
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
 fun createCountyAudits(
     topdir: String,
-    electionDetailXmlFile: String,
-    contestRoundFile: String,
-    precinctFile: String,
     wantCounties: List<String>,
     creationConfig: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
-    startFirstRound: Boolean = true,
+    startFirstRound: Boolean,
 ) {
     val stopwatch = Stopwatch()
 
-    val countyAudits = CreateCountyAudits(
-        electionDetailXmlFile,
-        contestRoundFile,
-        precinctFile,
-        topdir,
-        wantCounties
+    createColoradoElection(
+        externalSortDir = topdir,
+        auditdir = "$topdir/audit", // or put it in audit ??
+        pollingMode = null,
+        creationConfig,
+        roundConfig,
+        startFirstRound = startFirstRound,
+        name = "CorlaContest24",
     )
 
-    countyAudits.electionBuilders.forEach { election ->
+    val corlaCounty = CreateCountyAudits(topdir, wantCounties)
+
+    corlaCounty.electionBuilders.forEach { election ->
         createElectionRecord(election, auditDir = election.auditdir, clear = false)
         val config = Config(election.electionInfo(), creationConfig, roundConfig)
 

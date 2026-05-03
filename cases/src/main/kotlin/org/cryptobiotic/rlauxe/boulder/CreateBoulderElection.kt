@@ -280,7 +280,7 @@ class CreateBoulderElection(
             val candVotes = oaContest.candVoteTotals().filter { info.candidateIds.contains(it.key) } // remove Write-Ins
             val ncards = oaContest.ncards()
             val useNc = max( ncards, oaContest.Nc())
-            info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
+            info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt().toString()
             Contest(info, candVotes, useNc, ncards)
         }
     }

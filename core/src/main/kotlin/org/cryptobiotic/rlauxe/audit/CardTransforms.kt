@@ -151,7 +151,6 @@ class MvrsToCardsWithBatchNameIterator(
     val mvrs: CloseableIterator<Cvr>,
     batches: List<StyleIF>, //  either CardPool or CardStyle
     phantomCvrs : List<Cvr>? = null,
-    seed: Long? = null, // TODO not needed
 ): CloseableIterator<CardWithBatchName> {
 
     val allMvrs: Iterator<Cvr>
@@ -167,7 +166,6 @@ class MvrsToCardsWithBatchNameIterator(
     }
 
     val batchMap = batches.associateBy{ it.id() }
-    val prng = if (seed != null) Prng(seed) else null
 
     var cardIndex = 0 // 0 based index
 
@@ -187,7 +185,7 @@ class MvrsToCardsWithBatchNameIterator(
             org.id,
             null,
             cardIndex++,
-            prng?.next() ?: 0,
+            0,
             phantom = org.phantom,
             votes = org.votes,
             poolId = org.poolId,

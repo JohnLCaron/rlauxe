@@ -22,7 +22,7 @@ class CreateColoradoPolling (
 
     override fun contestsUA() = contestsPolling
 
-    override fun cardStyles(): List<StyleIF>? {
+    override fun cardStyles(): List<StyleIF> {
         val allContests = contestsUA().map { it.id }.sorted().toIntArray()
         return when {
             (auditType.isPolling() && pollingMode!!.withoutBatches()) -> listOf(CardStyle("OneBatch", 0, allContests, false))

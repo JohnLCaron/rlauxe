@@ -72,11 +72,11 @@ class MakeColoradoElection {
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
-            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 200000),
             ClcaConfig(), null)
 
         createColoradoElection(topdir, "$topdir/audit",
-            null, creation, round, name = "Corla24",)
+            null, creation, round, name = "Corla24", startFirstRound = false)
     }
 
     @Test

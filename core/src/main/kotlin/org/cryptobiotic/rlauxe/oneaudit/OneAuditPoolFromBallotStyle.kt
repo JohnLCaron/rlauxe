@@ -14,6 +14,8 @@ import kotlin.math.max
 
 // used when you dont have CVRs, just pool totals.
 // the ContestTabulations are passed in
+// rename OneAuditPool, since it isnt OneAudit specific anymoew
+
 data class OneAuditPoolFromBallotStyle(
     override val poolName: String,
     override val poolId: Int,
@@ -108,7 +110,7 @@ data class OneAuditPoolFromBallotStyle(
     }
 
     override fun toString(): String {
-        return "OneAuditPoolWithBallotStyle(poolName='$poolName', poolId=$poolId, voteTotals=$voteTotals, maxMinCardsNeeded=$maxMinCardsNeeded)"
+        return "OneAuditPoolWithBallotStyle(poolName='$poolName', poolId=$poolId, #contests=${voteTotals.size}, maxMinCardsNeeded=$maxMinCardsNeeded)"
     }
 
     override fun equals(other: Any?): Boolean {

@@ -56,7 +56,7 @@ class CreateCountyAudits(
 
     // hopefully all the infos are the same
     val infoMap = countyContestBuilders.values.map { it.map { it.info } }.flatten().associateBy { it.id }
-    val allCardPools = convertPrecinctsToCardPools(corlaInput.precinctFile, infoMap, true)
+    val allCardPools = emptyList<OneAuditPoolFromBallotStyle>() // convertPrecinctsToCardPools(corlaInput.precinctFile, infoMap, true)
 
     val electionBuilders = mutableListOf<CorlaElectionBuilder>()
 
@@ -268,7 +268,7 @@ class CountyContestBuilder(val info: ContestInfo, val candVotes: List<CountyCand
         val totalVotes = candVotes.map { it.vote }.sum() / info.voteForN
         var useNc = contestRound.contestBallotCardCount
         if (useNc < totalVotes) {
-            println("*** Contest ${info.name} has $totalVotes total votes, but contestBallotCardCount is ${contestRound.contestBallotCardCount} - using totalVotes")
+            println("*** Contest '${info.name}' has $totalVotes total votes, but contestBallotCardCount is ${contestRound.contestBallotCardCount} - using totalVotes")
             useNc = totalVotes // contestRound.ballotCardCount
         }
         Nc = useNc
@@ -279,6 +279,8 @@ class CountyContestBuilder(val info: ContestInfo, val candVotes: List<CountyCand
     }
 }
 
+// TODO wed like to add a style name, but becuse we are using cvrs instead of mvrs, we have to place to put it without setting a pool Id.
+//   which maybe we could but seems lame
 fun createAndSaveUnsortedMvrs(contests: List<ContestIF>, cardPools: List<OneAuditPoolFromBallotStyle>, publisher: Publisher): Int {
     val unsortedMvrIterator = MvrsToCardsWithBatchNameIterator(
         Closer(CvrIteratorfromPools(cardPools)),

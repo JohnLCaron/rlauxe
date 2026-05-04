@@ -206,7 +206,7 @@ class VunderPicker(val vunder: Vunder) {
 }
 
 // multiple contests, one pool
-// set Vunder.missing to 0 for hasExactContests=true
+// set Vunder.missing to 0 when hasExactContests=true
 fun makeCvrsForOnePool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasExactContests: Boolean): List<Cvr> {
     val vunderpool = VunderPool(vunders, poolName, poolId ?: -1, hasExactContests)
 

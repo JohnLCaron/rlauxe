@@ -97,6 +97,9 @@ interface ContestIF {
     fun votes() : Map<Int, Int>? {
         return if (this is Contest) this.votes else null
     }
+    fun nvotes() : Int {
+        return votes()?.values?.sum() ?: 0
+    }
 }
 
 /**

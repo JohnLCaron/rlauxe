@@ -41,6 +41,8 @@ data class Style(val id: Int, val contests: Set<String>) {
     }
 }
 
+///////////////////////////////////////////////////////////////
+
 data class Card(val cvrId: Int) {
     val lines = mutableListOf<ComparisonLine>()
 
@@ -101,12 +103,12 @@ fun readContestComparisonCsv(filename: String): List<CountyStyles> {
                 // 0 county_name,contest_name,imprinted_id,ballot_type, choice_per_voting_computer,audit_board_selection,
                 // 6 consensus,record_type,audit_board_comment,timestamp,cvr_id,audit_reason
                 val compareLine = ComparisonLine(
-                    line.get(0),
-                    line.get(1),
-                    line.get(2),
-                    line.get(3),
-                    line.get(4),
-                    line.get(5),
+                    line.get(0).trim(),
+                    line.get(1).trim(),
+                    line.get(2).trim(),
+                    line.get(3).trim(),
+                    line.get(4).trim(),
+                    line.get(5).trim(),
                     line.get(10).toInt(),
                 )
                 val card = cards.getOrPut(compareLine.cvrId) { Card(compareLine.cvrId) }
@@ -124,9 +126,9 @@ fun readContestComparisonCsv(filename: String): List<CountyStyles> {
         println(line)
         ex.printStackTrace()
     }
-
     cards.values.forEach { card: Card -> card.validate() }
 
+    // create the CountyStyles
     val stylesByCounty = mutableMapOf<String, CountyStyles>()
     cards.values.forEach { card: Card ->
         val countyStyles = stylesByCounty.getOrPut(card.county()) { CountyStyles(card.county()) }

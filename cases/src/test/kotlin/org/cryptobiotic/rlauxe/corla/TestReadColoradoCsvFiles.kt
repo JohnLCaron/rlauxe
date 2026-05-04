@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.shangrla.sampleSize
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
+import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.test.Test
 
 class TestReadColoradoCsvFiles {
@@ -58,9 +59,19 @@ class TestReadColoradoCsvFiles {
         val filename = "src/test/data/corla/2024audit/tabulateCounty.csv"
         val contests = readCountyTabulateCsv(filename)
         println("read ${contests.size} contests from $filename (${contests.sumOf { it.choices.size }} choices)")
-        contests.forEach {
-            println(it)
+        contests.forEach { println(it) }
+        contests.forEach { contest ->
+            val counties = contest.counties()
+            val sumCounties = counties.sumOf { contest.countyVotes(it) }
+            assertEquals(contest.totalVotesAllCounties, sumCounties)
         }
+
+        /*
+        println("\nconvertToCountyContestTabs")
+        val cct = convertToCountyContestTabs(contests)
+        cct.forEach {
+            println(it)
+        } */
     }
 
     @Test
@@ -78,6 +89,10 @@ class TestReadColoradoCsvFiles {
         println("read ${countyStyles.size} countyStyles from $filename totalStyles=${countyStyles.sumOf { it.styles.size }} totalCards=${ countyStyles.sumOf{it.cardCount} }")
         countyStyles.forEach {
             println(it.show())
+        }
+        countyStyles.forEach {
+            println("${it.countyName} ${it.styles.size}")
+            it.styles.values.forEach { println("  ${it.id} ${it.contests.size}") }
         }
     }
 

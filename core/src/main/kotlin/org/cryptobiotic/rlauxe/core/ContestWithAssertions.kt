@@ -156,7 +156,7 @@ open class ContestWithAssertions(
             val minAssorter = minAssertion.assorter
             append("   ${contest.showAssertionDifficulty(minAssertion.assorter)}")
             append(" Npop=$Npop dilutedMargin=${pfn(minAssorter.dilutedMargin())}")
-            appendLine(" reportedMargin=${pfn(minAssorter.dilutedMargin())} recountMargin=${pfn(contest.recountMargin(minAssorter))} ")
+            appendLine(" recountMargin=${pfn(contest.recountMargin(minAssorter))} ")
             appendLine()
         }
         append(contest.showCandidates())

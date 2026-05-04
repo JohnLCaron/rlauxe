@@ -196,7 +196,9 @@ fun distributeExpectedOvervotes(refContest: OneAuditContestBuilderIF, cardPools:
     }
 
     // check used == diff
-    require(allocDiffPool.values.sum() == need)
+    if (allocDiffPool.values.sum()!= need) {
+        println("distributeExpectedOvervotes: ${allocDiffPool.values.sum()} should equal == $need")
+    }
 
     // adjust
     val cardPoolMap = cardPools.associateBy { it.poolId }

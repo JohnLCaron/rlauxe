@@ -29,6 +29,14 @@ import java.nio.charset.Charset
 // 16           18, 19
 // 1.03905000,0,772,772
 
+// Presidential Electors, state_wide_contest,in_progress,1,
+// 4746866, 3239722,"""Kamala D. Harris / Tim Walz""", 350348,
+// 0.03000000,0,0,0,0,0,0,0,1.03905000,0,99,99
+
+// City of Dacono Council Members,opportunistic_benefits,not_auditable,2,
+// 182397,3109,"""Michelle Rogers"",""Jeff Stainbrook""",0,
+// 0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+
 data class CorlaContestRoundCsv(
     val contestName: String,
     val nwinners: Int,

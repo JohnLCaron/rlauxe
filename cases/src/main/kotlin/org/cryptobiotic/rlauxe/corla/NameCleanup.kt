@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 fun contestNameCleanup(name: String): String {
     var working = name
     if (working.contains(" -")) working = working.replace(" -", "")
+    if (working.contains("-")) working = working.replace("-", " ")
     if (working.contains("Colorado Court of Appeals Judge - Román")) working = working.replace("Colorado Court of Appeals Judge - Román", "Colorado Court of Appeals Judge Roman")
     if (working.contains("County Court Judge Cheyenne")) working = working.replace("County Court Judge Cheyenne", "Cheyenne County Court Judge")
     if (working.contains("County Court Judge Denver")) working = working.replace("County Court Judge Denver", "Denver County Court Judge")
@@ -28,6 +29,18 @@ fun contestNameCleanup(name: String): String {
     if (working.equals("Weld County School District No. RE-9 Ballot Issue 4C Bonds")) working = "Weld County School District No. RE-9 Ballot Issue 4C"
     if (working.equals("Weld County School District No. RE-7 Ballot Issue 4B Bonds")) working = "Weld County School District No. RE-7 Ballot Issue 4B"
     if (working.equals("Weld County School District No. RE-7 Ballot Issue 4A Mill Levy Override")) working = "Weld County School District No. RE-7 Ballot Issue 4A"
+    // these are from corla/2024audit/targetedContests.csv 11 out of 63 mistyped
+    if (working.equals("City and County of Broomfield Ballot Question 2G")) working = "Broomfield Ballot Question 2G"
+    if (working.equals("Custer County Commissioner District 2")) working = "Custer County Board of County Commissioners District 2"
+    if (working.equals("City and County of Denver Ballot Issue 2Q")) working = "Denver Ballot Issue 2Q"
+    if (working.equals("Fremont County Commissioner District 3")) working = "Fremont County Board of County Commissioners District 3"
+    if (working.equals("Garfield County Commissioner District 2")) working = "County Commissioner District 2"  // TODO flip this
+    if (working.equals("North Park School District R 1 Ballot Issue 4A")) working = "NORTH PARK SCHOOL DISTRICT R 1 BALLOT ISSUE 4A"  // TODO flip this
+    if (working.equals("Proposition 130 (STATUTORY)")) working = "Proposition 130 (STATUTORY) Kit Carson"  // TODO flip this ??
+    if (working.equals("Montezuma County Ballot Issue 1A")) working = "Montezuma County Ballot Issue 1 A"  // TODO flip this
+    if (working.equals("Pitkin County Ballot Issue 1A")) working = "Pitkin County Ballot Issue 1A: Affordable and Workforce Housing Mill Levy"
+    if (working.equals("Amendment 80 (CONSTITUTIONAL)")) working = "Amendment 80 (CONSTITUTIONAL) Rio Blanco"
+    if (working.equals("San Miguel County Ballot Measure 1A")) working = "San Miguel County Ballot Question 1A"
     return working.trim()
 }
 

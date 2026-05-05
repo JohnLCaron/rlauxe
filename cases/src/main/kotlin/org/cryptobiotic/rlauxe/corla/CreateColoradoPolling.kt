@@ -8,9 +8,10 @@ private val logger = KotlinLogging.logger("ColoradoPolling")
 
 // // Create polling audits where precincts are used to calculate Nb and simulated mvrs
 class CreateColoradoPolling (
+    countyElection: ColoradoCountyElection,
     auditdir: String,
     pollingMode: PollingMode,
-): CreateColoradoElection(AuditType.POLLING, auditdir, pollingMode=pollingMode) {
+): CreateColoradoElection(countyElection, AuditType.POLLING, auditdir, pollingMode=pollingMode) {
 
     val contestsPolling: List<ContestWithAssertions>
 
@@ -22,11 +23,11 @@ class CreateColoradoPolling (
 
     override fun contestsUA() = contestsPolling
 
-    override fun cardStyles(): List<StyleIF> {
+    override fun cardStyles(): List<StyleIF>? {
         val allContests = contestsUA().map { it.id }.sorted().toIntArray()
         return when {
             (auditType.isPolling() && pollingMode!!.withoutBatches()) -> listOf(CardStyle("OneBatch", 0, allContests, false))
-            else -> batches
+            else -> countyElection.cardPools
         }
     }
 

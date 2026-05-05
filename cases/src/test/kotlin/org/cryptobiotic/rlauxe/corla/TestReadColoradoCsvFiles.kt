@@ -5,9 +5,15 @@ import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.shangrla.sampleSize
+import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.estSamplesFromMarginUpper
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundUp
+import org.cryptobiotic.rlauxe.util.sfn
+import org.cryptobiotic.rlauxe.util.trunc
 import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.math.abs
 import kotlin.test.Test
 
 class TestReadColoradoCsvFiles {
@@ -66,12 +72,11 @@ class TestReadColoradoCsvFiles {
             assertEquals(contest.totalVotesAllCounties, sumCounties)
         }
 
-        /*
         println("\nconvertToCountyContestTabs")
         val cct = convertToCountyContestTabs(contests)
         cct.forEach {
             println(it)
-        } */
+        }
     }
 
     @Test
@@ -96,7 +101,116 @@ class TestReadColoradoCsvFiles {
         }
     }
 
+    @Test
+    fun testTargetedContests() {
+        val filename = "src/test/data/corla/2024audit/targetedContests.csv"
+        val targets = readTargetedContestsCsv(filename)
+        println()
+        println("${TargetedContestsCsv.header}, calcNeeded")
+        targets.forEach {
+            val calcNeeded = estSamplesFromMarginUpper(2 / 1.03905, it.dilutedMargin/100, it.riskLimit/100).toInt()
+            println("$it,    $calcNeeded")
+        }
+        println()
+        println("totalSamples=${targets.sumOf { it.estimatedSamplesToAudit } } totalCvrs=${targets.sumOf { it.numberOfCvrs }}")
+        println("read ${targets.size} countyStyles from $filename")
+    }
+
+    @Test
+    fun compareTargetedContestsAndTabulateCounty() {
+        val targets: List<TargetedContestsCsv> = readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv")
+
+        val contestTabsByCounty: Map<String, ContestTabByCounty> =
+            readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv").associateBy { clean(it.contestName) }
+        val ccts: Map<String, CountyContestTab> = convertToCountyContestTabs(contestTabsByCounty.values.toList()).associateBy { clean(it.countyName) }
+
+        println()
+        println(trunc("from tabulateCounty", 113))
+        println("${trunc(TargetedContestsCsv.header, 93)}  winner, loser, voteMargin, diff%")
+        targets.filter { it.countyName != "Colorado" }.forEach { it ->
+            /* val contestCountyTab = contestTabsByCounty[it.contestName]
+            if (contestCountyTab == null) {
+                println("cant find ${it.contestName}")
+                throw RuntimeException()
+            }
+
+            if (contestCountyTab.counties().size > 1)
+                println("$it has ${contestCountyTab.counties()}")
+
+             */
+
+            val contestName = clean(it.contestName)
+            val cct = ccts[it.countyName]!!
+            val cctContests = cct.contests.mapKeys { clean(it.key) }
+            //println("${it.countyName} = ${cctContests.keys}")
+            //cctContests.keys.forEach { println("  $it") }
+
+            val contestTab = cctContests[contestName]
+            if (contestTab == null) {
+                println("*** cant find '${contestName}'")
+                println()
+            } else {
+                val choices = contestTab.choices.map { it.value }.sorted().reversed()
+                //if (choices.size > 2)
+                //  println("$it has ${contestTab.choices}")
+
+                val desc = "${nfn(choices[0], 7)}, ${nfn(choices[1], 7)}, ${nfn(choices[0] - choices[1], 6)}"
+                val diff = abs(it.voteMargin - (choices[0] - choices[1])) / it.voteMargin.toDouble()
+                val star = if (diff > .05) "***" else ""
+
+                println("${it.short()}   $desc     ${dfn((100.0 * diff), 1)} $star")
+            }
+        }
+        println()
+    }
+
+
+    @Test
+    fun compareTabulateCountyAndRoundContest() {
+        // use targetedContests only for teh county and contest name
+        val targets: List<TargetedContestsCsv> = readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv")
+
+        val roundContests:  Map<String,CorlaContestRoundCsv> = readColoradoContestRoundCsv( "src/test/data/corla/2024audit/round1/contest.csv")
+            .associateBy { clean(it.contestName) }
+
+        val contestTabsByCounty: Map<String, ContestTabByCounty> = readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv")
+                .associateBy { clean(it.contestName) }
+        val ccts: Map<String, CountyContestTab> = convertToCountyContestTabs(contestTabsByCounty.values.toList()).associateBy { it.countyName }
+
+        println()
+        println("${trunc("---from tabulateCounty---", 100)}     --------from contestRound-----")
+
+        println("${trunc("contestName, countyName", -70)}  winner,  loser, voteMargin,   voteMargin,    npop, margin, nsamples, calcSamples")
+        targets.filter { it.countyName != "Colorado" }.forEach { target ->
+            val contestName = clean(target.contestName)
+            val roundContest = roundContests[contestName]!!
+
+            val cct = ccts[target.countyName]!!
+            val cctContests = cct.contests.mapKeys { clean(it.key) }
+
+            val contestTab = cctContests[contestName]
+            if (contestTab == null) {
+                println("*** cant find '${contestName}'")
+                println()
+            } else {
+                val choices = contestTab.choices.map { it.value }.sorted().reversed()
+                val contestTabDesc = "${nfn(choices[0], 7)}, ${nfn(choices[1], 7)}, ${nfn(choices[0] - choices[1], 6)}"
+
+                val npop = roundContest.ballotCardCount
+                val voteMargin = roundContest.minMargin
+                val nsamples = roundContest.optimisticSamplesToAudit
+                val calcMargin = voteMargin/npop.toDouble()
+                val contestRoundDesc = "${nfn(voteMargin, 7)}, ${nfn(npop, 7)}, ${dfn(calcMargin, 3)},     ${nfn(nsamples, 6)}"
+                val calcNeeded = estSamplesFromMarginUpper(2 / 1.03905, calcMargin, roundContest.riskLimit).toInt()
+
+                println("${trunc("${target.countyName}, ${contestName}", -70)} $contestTabDesc,         $contestRoundDesc,    $calcNeeded")
+            }
+        }
+        println()
+    }
 }
+
+fun clean(orgName: String) = mutatisMutandi(contestNameCleanup(orgName))
 
 fun CorlaContestRoundCsv.showEstimation() {
     // TODO they use ballotCardCount instead of contestBallotCardCount for some reason

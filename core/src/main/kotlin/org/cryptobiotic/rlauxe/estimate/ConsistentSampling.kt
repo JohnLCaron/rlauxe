@@ -252,5 +252,7 @@ fun consistentSampling(
     auditRound.nmvrs = sampledCards.size
     auditRound.newmvrs = newMvrs
     auditRound.samplePrns = sampledCards.map { it.prn }
+
+    logger.info{" consistentSampling chose ${sampledCards.size} cards"}
     return sampledCards
 }

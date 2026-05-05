@@ -100,7 +100,7 @@ Note that this gives us the number of samples estimated for each audit round, fr
 
 There are 725 contests listed on round1/contest.csv. There are 295 listed in detail.xml. I was told they dont have precinct data (or CVRs?) for contests \>= 260. So we ignore contests with id > 260.
 
-The file corla/2024audit/_targetedContests.xlsx_ shows contests selected for audit, eg:
+The file corla/2024audit/targetedContests.xlsx shows contests selected for audit, eg:
 
 ````
   "County","Contest","Vote For","Lowest Winner","Highest Loser","Contest Margin","Diluted Margin","Risk Limit","Estimated # of CVRs to audit","# of CVRs","Remarks",,,,,,,,,,,,,,,,
@@ -121,6 +121,19 @@ contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,
 Presidential Electors,state_wide_contest,in_progress,1,4746866,3239722,"""Kamala D. Harris / Tim Walz""",350348,0.03000000,0,0,0,0,0,0,0,1.03905000,0,99,99
 ````
 Not exactly consistent, eg 1728159 - 1377441 = 350718 != 350348, but close enough for now (we can only do a simulation since we dont have the real CVRs).
+
+## how many cards per ballot?
+
+corla/2024audit/targetedContests.xlsx/csv has at the bottom:
+
+""The assumption has been made in the ""Estimated # of CVRs to audit"" value that all ballot cards were returned for each ballot. 
+  Therefore, the number of CVRs is the ballots cast total multiplied by the number of cards. As the average number of cards per ballot 
+  decreases the number of ballots to audit will also decrease.",,,,,,,,,,,,,,,,,,,,,,,,,,
+"
+
+So presumably round1/contestComparison.csv has all cards. This complicates extracting the ballot style, unless the cvrs include the entire ballot.
+OTOH, it helps in getting more of the 
+
 
 ## what are the contests and candidates?
 

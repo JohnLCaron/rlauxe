@@ -124,7 +124,7 @@ class CreateCountyAudits(
         var poolTotalVotes: Int = 0
 
         init {
-            // TODO this assume these are in teh same order as for corlaContestBuilder.info. BAD
+            // TODO this assume these are in the same order as for corlaContestBuilder.info. BAD
             candidateVotes = contestTab.choices.values.toList().mapIndexed { idx, choice -> Pair(idx, choice) }.toMap()
             val totalVotes = roundUp(contestTab.contestVotes() / info.voteForN.toDouble())
 
@@ -136,7 +136,7 @@ class CreateCountyAudits(
                     useNc = totalVotes
                 }
                 Nc = useNc
-                Npop = corlaContestBuilder.contestRound.ballotCardCount
+                Npop = useNc // corlaContestBuilder.contestRound.ballotCardCount
             } else { // we dont know the Nc or Npop by County....; could pass in the division of Nc (proportional to voteCount)? barf
                 Nc = totalVotes
             }

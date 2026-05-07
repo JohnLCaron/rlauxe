@@ -20,6 +20,10 @@ class ContestTabulation(
 ) {
     constructor(info: ContestInfo) : this(info.id, info.voteForN, info.isIrv, info.candidateIds)
     constructor(other: ContestTabulation) : this(other.contestId, other.voteForN, other.isIrv, other.candidateIds)
+    constructor(info: ContestInfo, votes: Map<Int, Int>, ncards: Int): this(info) {
+        votes.forEach{ this.addVote(it.key, it.value) }
+        this.ncardsTabulated = ncards
+    }
 
     val voteForN = if (isIrv) 1 else voteForNin
     val candidateIdToIdx by lazy { candidateIds.mapIndexed { idx, id -> Pair(id, idx) }.toMap() }
@@ -33,11 +37,6 @@ class ContestTabulation(
     var undervotes = 0  // how many undervotes = voteForN - nvotes
     var overvotes = 0  // how many overvotes = (voteForN < cands.size)
     var nphantoms = 0  // how many phantoms
-
-    constructor(info: ContestInfo, votes: Map<Int, Int>, ncards: Int): this(info) {
-        votes.forEach{ this.addVote(it.key, it.value) }
-        this.ncardsTabulated = ncards
-    }
 
     fun ncards() = ncardsTabulated
     fun undervotes() = undervotes

@@ -127,6 +127,7 @@ fun readContestComparisonCsv(filename: String): List<CountyStyles> {
         ex.printStackTrace()
     }
     cards.values.forEach { card: Card -> card.validate() }
+    println("read ${cards.size} distinct cards with ${cards.values.sumOf{ it.contests().size } } total contests voted on")
 
     // create the CountyStyles
     val stylesByCounty = mutableMapOf<String, CountyStyles>()

@@ -46,9 +46,9 @@ class PersistedWorkflow(
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestWithAssertions> = auditContests
 
-    override fun startNewRound(quiet: Boolean, onlyTask: OnlyTask?): AuditRound {
+    override fun startNewRound(quiet: Boolean, onlyTask: OnlyTask?, auditorWantNewMvrs: Int?): AuditRound {
 
-        val nextRound = super.startNewRound(quiet, onlyTask)
+        val nextRound = super.startNewRound(quiet, onlyTask, auditorWantNewMvrs)
 
         if (nextRound.samplePrns.isEmpty()) {
             logger.warn {"*** FAILED TO GET ANY SAMPLES (PersistentAudit)"}

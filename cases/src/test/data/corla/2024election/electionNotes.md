@@ -27,7 +27,10 @@ eg "City of Lafayette Ballot Question 2A" and many more in round/contest 2A. tha
    ~725 contests in src/test/data/corla/2024audit/round1/contestSelection.csv
    read 725 contests from src/test/data/corla/2024audit/round1/contest.csv
 
-"targeted contests.csv" has one for each county +2 statewide. many/most are not in detail.xml.
+targetedContests.csv has one for each county +2 statewide. many/most are not in detail.xml.
+However this appears to be wrong, and is perhaps not used.
+
+
 
 => we could use round1/contest.csv to create contests
 
@@ -157,13 +160,85 @@ City of Longmont Ballot Issue 3A (5002) Nc=55848 Nphantoms=2401 votes={0=39825, 
    where is Nphantoms coming from? Nc - Ncast = 39825+13622 = 53447; 55848 -  53447 = 2401, probably better to make those undervotes ....
 
 
-# round contestSelection.csv, targetedContests.csv, contest.csv
+# targetedContests.csv
+
+// WRONG DONT USE
+"County",    "Contest",                               "Vote For","Lowest Winner","Highest Loser","Contest Margin","Diluted Margin","Risk Limit","Estimated # of CVRs to audit","# of CVRs","Remarks",,,,,,,,,,,,,,,,
+"Broomfield","City and County of Broomfield Ballot Question 2G",1,"23,893",       "17,219",       "6,674",         14.30%,        3%,            50,   "46,676",,,,,,,,,,,,,,,,,9
+
+                                                                                              from tabulateCounty
+contestName, countyName                              , nwinners,  winner, loser, voteMargin,   winner, loser, voteMargin, diff%
+Adams, Adams County Commissioner - District 5               , 1,   88099,   74153,  13946,     114772,   97011,  17761     27.4 ***
+Alamosa, Alamosa County Commissioner - District 1           , 1,    4475,    2751,   1724,       4530,    2773,   1757     1.9
+Arapahoe, District Attorney - 18th Judicial District        , 1,  120697,   87750,  32947,     175078,  128368,  46710     41.8 ***
+Archuleta, Archuleta County Commissioner - District 1       , 1,    4605,    2760,   1845,       4657,    2779,   1878     1.8
+Baca, Town of Springfield Ballot Issue 2A                   , 1,     428,     256,    172,        434,     259,    175     1.7
+Bent, Bent County Commissioner - District 1                 , 1,    1314,     778,    536,       1331,     794,    537     0.2
+Boulder, State Representative - District 10                 , 1,   23460,    3720,  19740,      33818,    6280,  27538     39.5 ***
+Broomfield, City and County of Broomfield Ballot Question 2G, 1,   23893,   17219,   6674,      24207,   17427,   6780     1.6
+Chaffee, Chaffee County Commissioner - District 2           , 1,    7482,    6270,   1212,       7540,    6320,   1220     0.7
+Cheyenne, Cheyenne County Court Judge - Eiring              , 1,     686,     266,    420,        704,     274,    430     2.4
+Clear Creek, Clear Creek County Commissioner - District 3   , 1,    2841,    2200,    641,       2887,    2246,    641     0.0
+Conejos, Conejos County Commissioner - District 3           , 1,    2184,    1767,    417,       2206,    1788,    418     0.2
+Costilla, Costilla County Commissioner - District 3         , 1,    1137,     796,    341,       1162,     822,    340     0.3
+Crowley, Crowley County Commissioner - District 3           , 1,    1305,     345,    960,       1317,     350,    967     0.7
+Custer, Custer County Commissioner - District 2             , 1,    2053,    1205,    848,       2068,    1217,    851     0.4
+Delta, Delta County Court Judge - Zeerip                    , 1,    8713,    6874,   1839,       8839,    7019,   1820     1.0
+Denver, City and County of Denver Ballot Issue 2Q           , 1,  187470,  149202,  38268,     187976,  149573,  38403     0.4
+Dolores, Dove Creek Ambulance District Ballot Issue 6A      , 1,     660,     458,    202,        668,     473,    195     3.5
+Douglas, Douglas County Commissioner - District 2           , 1,  120771,   94494,  26277,     129301,   99541,  29760     13.3 ***
+Eagle, Eagle County Commissioner - District 1               , 1,   14949,   10432,   4517,      15261,   10626,   4635     2.6
+El Paso, City of Colorado Springs Ballot Question 300       , 1,  130671,  108300,   2735,     130671,  108300,  22371     718.0 ***
+Elbert, Elbert County Question 1A                           , 1,   11395,    4117,   7278,      14398,    4960,   9438     29.7 ***
+Fremont, Fremont County Commissioner - District 3           , 1,   16911,    7223,   9688,      17173,    7364,   9809     1.2
+Garfield, Garfield County Commissioner - District 2         , 1,   14595,   12842,   1753,      15731,   13788,   1943     10.8 ***
+Gilpin, Gilpin County Commissioner - District 1             , 1,    1834,    1619,    215,       1867,    1650,    217     0.9
+Grand, Grand County Commissioner - District 2               , 1,    5378,    4023,   1355,       5423,    4077,   1346     0.7
+Gunnison, Gunnison County Library District Ballot Issue 6A  , 1,    6066,    4375,   1691,       6096,    4413,   1683     0.5
+Hinsdale, Hinsdale County Commissioner - District 1         , 1,     343,     245,     98,        351,     247,    104     6.1 ***
+Huerfano, Huerfano County Commissioner - District 1         , 1,    2207,    1582,    625,       2217,    1589,    628     0.5
+Jackson, North Park School District R-1 Ballot Issue 4A     , 1,     454,     345,    109,        458,     352,    106     2.8
+Jefferson, Jefferson County Commissioner - District 2       , 1,  183798,  142879,  40919,     188211,  146801,  41410     1.2
+Kiowa, Kiowa County Hospital District Ballot Question 6A    , 1,     579,     445,    134,        586,     450,    136     1.5
+Kit Carson, Proposition 130 (STATUTORY)                     , 1,    1870,    1599,    271,       1888,    1632,    256     5.5 ***
+La Plata, La Plata County Commissioner - District 3         , 1,   18987,   14832,   4155,      19130,   14947,   4183     0.7
+Lake, Lake County School District R-1 Ballot Issue 4A       , 1,    1994,    1749,    245,       2011,    1760,    251     2.4
+Larimer, Larimer County Clerk and Recorder                  , 1,   99324,   74197,  25127,     122241,   89471,  32770     30.4 ***
+Las Animas, Las Animas County Commissioner - District 2     , 1,    3027,    2199,    828,       4506,    3020,   1486     79.5 ***
+Lincoln, Lincoln County Commissioner - District 3           , 1,    1623,     826,    797,       1635,     837,    798     0.1
+Logan, Logan County Court Judge - Brammer                   , 1,    4991,    3833,   1158,       5054,    3854,   1200     3.6
+Mesa, Mesa County Ballot Issue 1A                           , 1,   44985,   34382,  10603,      48999,   37516,  11483     8.3 ***
+Mineral, Mineral County Commissioner - District 3           , 1,     493,     161,    332,        495,     161,    334     0.6
+Moffat, City of Craig Ballot Question 2A                    , 1,    1360,     716,    644,       2356,    1283,   1073     66.6 ***
+Montezuma, Montezuma County Ballot Issue 1A                 , 1,    6933,    5472,   1461,       8237,    6184,   2053     40.5 ***
+Montrose, Montrose County Commissioner - District 3         , 1,   12335,    7713,   4622,      15008,    8886,   6122     32.5 ***
+Morgan, City of Fort Morgan Ballot Question 2A              , 1,    3217,     546,   2671,       3244,     552,   2692     0.8
+Otero, Otero County Ballot Question 1A                      , 1,    5557,    2263,   3294,       6163,    2504,   3659     11.1 ***
+Ouray, Ouray County Commissioner - District 1               , 1,    2171,    1762,    409,       2208,    1797,    411     0.5
+Park, Park County Commissioner - District 1                 , 1,    6622,    4845,   1777,       6786,    4970,   1816     2.2
+Phillips, City of Holyoke Mayor                             , 1,     575,     315,    260,        581,     320,    261     0.4
+Pitkin, Pitkin County Ballot Issue 1A                       , 1,    4741,    3249,   1492,       6266,    4175,   2091     40.1 ***
+Prowers, Prowers County Ballot Issue 1A                     , 1,    3087,    1140,   1947,       3669,    1305,   2364     21.4 ***
+Pueblo, Pueblo County Commissioner - District 2             , 1,   42770,   39476,   3294,      42770,   39476,   3294     0.0
+Rio Blanco, Amendment 80 (CONSTITUTIONAL)                   , 1,    1859,    1437,    422,       2013,    1539,    474     12.3 ***
+Rio Grande, Rio Grande County Court Judge - Stenger         , 1,    3317,    1944,   1373,       3336,    1954,   1382     0.7
+Routt, Routt County Commissioner - District 1               , 1,    8298,    6664,   1634,       8719,    7319,   1400     14.3 ***
+Saguache, Saguache County Commissioner - District 1         , 1,    1708,    1507,    201,       1730,    1522,    208     3.5
+San Miguel, San Miguel County Ballot Measure 1A             , 1,    2653,    1692,    961,       2706,    1710,    996     3.6
+Sedgwick, Sedgwick County Commissioner - District 3         , 1,     702,     586,    116,        703,     587,    116     0.0
+Summit, Summit School District RE-1 Ballot Issue 4A         , 1,    9163,    6893,   2270,       9218,    6942,   2276     0.3
+Teller, Teller County Ballot Question 1A                    , 1,    6901,    5593,   1308,       8472,    6751,   1721     31.6 ***
+Washington, Washington County Commissioner - District 2     , 1,    1657,     964,    693,       1672,     972,    700     1.0
+Weld, District Court Judge - 19th Judicial District - Crowth, 1,   51150,   40167,  10983,      75911,   60300,  15611     42.1 ***
+Yuma, Yuma County Court Judge - Jones                       , 1,    2973,     924,   2049,       3100,     969,   2131     4.0
+
+
+# round contestSelection.csv 
 
 min_margin,contest_name,                  contest_cvr_ids
 6780      ,Broomfield Ballot Question 2G,"[765172,847804,869211,847648,874352,822455,863519,819346,868712,838654,715509,756755,833630,810634,715853,748171,856760,775569,839234,700256,699491,872125,830771,700721,718688,828814,822671,840431,833321,867867,758540,851979,840483,841036,822457,705703,851947,852677,739769,837895,815011,803476,830518,691040,762717,698406,691505,787851,773650,757760,773481,815168,811751]"
 
-"County",    "Contest",                               "Vote For","Lowest Winner","Highest Loser","Contest Margin","Diluted Margin","Risk Limit","Estimated # of CVRs to audit","# of CVRs","Remarks",,,,,,,,,,,,,,,,
-"Broomfield","City and County of Broomfield Ballot Question 2G",1,"23,893",       "17,219",       "6,674",         14.30%,        3%,            50,   "46,676",,,,,,,,,,,,,,,,,9
+# round  contest.csv
 
 contest_name,                audit_reason, random_audit_status,winners_allowed,
                                                                ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,
@@ -171,8 +246,89 @@ contest_name,                audit_reason, random_audit_status,winners_allowed,
                                                                                                                            gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
 Broomfield Ballot Question 2G,county_wide_contest,in_progress,1,47543,47543,"""No/Against""",6780,0.03000000,0,0,0,0,0,0,0,1.03905000,0,52,52
 
+ballot_card_count = Npop?
+contest_ballot_card_count = Nc ?
+min_margin = 6780
+optimistic_samples_to_audit = 52
 
-# contestComparison.csv is the audited result, but only for the selected contest ...
+
+Boulder selected contest:
+
+State Representative - District 10,county_wide_contest,in_progress,1,
+    396121,44675,"""Junie Joseph""",27538, 0.03000000,0,0,0,0,0,0,0,1.03905000,0,105,105
+
+ballot_card_count = Npop = 396121
+contest_ballot_card_count = Nc = 44675
+min_margin = 27538
+optimistic_samples_to_audit = 105
+
+                                                                           ---from tabulateCounty---     --------from contestRound-----
+contestName, countyName                                                 winner,  loser, voteMargin,   voteMargin,    npop, margin, nsamples, calcSamples
+Adams, Adams County Commissioner District 5                             114772,   97011,  17761,           17761,  468858, 0.038,        193,    190
+Alamosa, Alamosa County Commissioner District 1                           4530,    2773,   1757,            1757,   15216, 0.115,         64,    61
+Arapahoe, District Attorney 18th Judicial District                      175078,  128368,  46710,           46710,  351540, 0.133,         55,    52
+Archuleta, Archuleta County Commissioner District 1                       4657,    2779,   1878,            1878,    9489, 0.198,         37,    34
+Baca, Town of Springfield Ballot Issue 2A                                  434,     259,    175,             175,    2165, 0.081,         91,    88
+Bent, Bent County Commissioner District 1                                 1331,     794,    537,             537,    2221, 0.242,         31,    28
+Boulder, State Representative District 10                                33818,    6280,  27538,           27538,  396121, 0.070,        105,    102
+Broomfield, Broomfield Ballot Question 2G                                24207,   17427,   6780,            6780,   47543, 0.143,         52,    49
+Chaffee, Chaffee County Commissioner District 2                           7540,    6320,   1220,            1220,   14627, 0.083,         88,    85
+Cheyenne, Cheyenne County Court Eiring                                     704,     274,    430,             430,    1064, 0.404,         19,    16
+Clear Creek, Clear Creek County Commissioner District 3                   2887,    2246,    641,             641,    6180, 0.104,         71,    68
+Conejos, Conejos County Commissioner District 3                           2206,    1788,    418,             418,    4196, 0.100,         74,    71
+Costilla, Costilla County Commissioner District 3                         1162,     822,    340,             340,    2149, 0.158,         47,    44
+Crowley, Crowley County Commissioner District 3                           1317,     350,    967,             967,    1729, 0.559,         14,    11
+Custer, Custer County Board of County Commissioners District 2            2068,    1217,    851,             851,    3932, 0.216,         34,    31
+Delta, Delta County Court Zeerip                                          8839,    7019,   1820,            1820,   19786, 0.092,         80,    77
+Denver, Denver Ballot Issue 2Q                                          187976,  149573,  38403,           38403, 1104271, 0.035,        210,    207
+Dolores, Dove Creek Ambulance District Ballot Issue 6A                     668,     473,    195,             195,    1453, 0.134,         55,    52
+Douglas, Douglas County Commissioner District 2                         129301,   99541,  29760,           29760,  248173, 0.120,         61,    58
+Eagle, Eagle County Commissioner District 1                              15261,   10626,   4635,            4635,   28988, 0.160,         46,    43
+El Paso, City of Colorado Springs Ballot Question 300                   130671,  108300,  22371,           22371,  387297, 0.058,        127,    124
+Elbert, Elbert County Question 1A                                        14398,    4960,   9438,            9438,   20652, 0.457,         16,    13
+Fremont, Fremont County Board of County Commissioners District 3         17173,    7364,   9809,            9809,   26051, 0.377,         20,    17
+Garfield, County Commissioner District 2                                 15731,   13788,   1943,            1943,   30750, 0.063,        116,    113
+Gilpin, Gilpin County Commissioner District 1                             1867,    1650,    217,             217,    4183, 0.052,        141,    138
+Grand, Grand County Commissioner District 2                               5423,    4077,   1346,            1346,   10236, 0.131,         56,    53
+Gunnison, Gunnison County Library District Ballot Issue 6A                6096,    4413,   1683,            1683,   11126, 0.151,         49,    46
+Hinsdale, Hinsdale County Commissioner District 1                          351,     247,    104,             104,     618, 0.168,         44,    41
+Huerfano, Huerfano County Commissioner District 1                         2217,    1589,    628,             628,    4511, 0.139,         53,    50
+Jackson, NORTH PARK SCHOOL DISTRICT R 1 BALLOT ISSUE 4A                    458,     352,    106,             106,     845, 0.125,         59,    56
+Jefferson, Jefferson County Commissioner District 2                     188211,  146801,  41410,           41410,  367779, 0.113,         65,    62
+Kiowa, Kiowa County Hospital District Ballot Question 6A                   586,     450,    136,             136,    1060, 0.128,         57,    54
+Kit Carson, Proposition 130 (STATUTORY) Kit Carson                        1888,    1632,    256,             256,    3807, 0.067,        109,    106
+La Plata, La Plata County Commissioner District 3                        19130,   14947,   4183,            4183,   36150, 0.116,         63,    61
+Lake, Lake County School District R 1 Ballot Issue 4A                     2011,    1760,    251,             251,    3973, 0.063,        116,    113
+Larimer, Larimer County Clerk and Recorder                              122241,   89471,  32770,           32770,  458224, 0.072,        102,    99
+Las Animas, Las Animas County Commissioner District 2                     4506,    3020,   1486,            1486,    7886, 0.188,         39,    36
+Lincoln, Lincoln County Commissioner District 3                           1635,     837,    798,             798,    2595, 0.308,         24,    21
+Logan, Logan County Court Brammer                                         5054,    3854,   1200,            1200,   10274, 0.117,         63,    60
+Mesa, Mesa County Ballot Issue 1A                                        48999,   37516,  11483,           11483,   92921, 0.124,         59,    57
+Mineral, Mineral County Commissioner District 3                            495,     161,    334,             334,     766, 0.436,         17,    14
+Moffat, City of Craig Ballot Question 2A                                  2356,    1283,   1073,            1073,    6699, 0.160,         46,    43
+Montezuma, Montezuma County Ballot Issue 1 A                              8237,    6184,   2053,            2053,   15436, 0.133,         55,    52
+Montrose, Montrose County Commissioner District 3                        15008,    8886,   6122,            6122,   26005, 0.235,         31,    29
+Morgan, City of Fort Morgan Ballot Question 2A                            3244,     552,   2692,            2692,   13669, 0.197,         38,    35
+Otero, Otero County Ballot Question 1A                                    6163,    2504,   3659,            3659,    9039, 0.405,         19,    16
+Ouray, Ouray County Commissioner District 1                               2208,    1797,    411,             411,    4157, 0.099,         74,    71
+Park, Park County Commissioner District 1                                 6786,    4970,   1816,            1816,   13392, 0.136,         54,    51
+Phillips, City of Holyoke Mayor                                            581,     320,    261,             261,    2384, 0.109,         67,    64
+Pitkin, Pitkin County Ballot Issue 1A: Affordable and Workforce Housin    6266,    4175,   2091,            2091,   11348, 0.184,         40,    37
+Prowers, Prowers County Ballot Issue 1A                                   3669,    1305,   2364,            2364,    5209, 0.454,         17,    14
+Pueblo, Pueblo County Commissioner District 2                            42770,   39476,   3294,            3294,  170790, 0.019,        378,    375
+Rio Blanco, Amendment 80 (CONSTITUTIONAL) Rio Blanco                      2013,    1539,    474,             474,    3728, 0.127,         58,    55
+Rio Grande, Rio Grande County Court Stenger                               3336,    1954,   1382,            1382,    6286, 0.220,         34,    31
+Routt, Routt County Commissioner District 1                               8719,    7319,   1400,            1400,   33261, 0.042,        174,    171
+Saguache, Saguache County Commissioner District 1                         1730,    1522,    208,             208,    3446, 0.060,        121,    118
+San Miguel, San Miguel County Ballot Question 1A                          2706,    1710,    996,             996,    5008, 0.199,         37,    34
+Sedgwick, Sedgwick County Commissioner District 3                          703,     587,    116,             116,    1371, 0.085,         87,    84
+Summit, Summit School District RE 1 Ballot Issue 4A                       9218,    6942,   2276,            2276,   17819, 0.128,         58,    55
+Teller, Teller County Ballot Question 1A                                  8472,    6751,   1721,            1721,   17112, 0.101,         73,    70
+Washington, Washington County Commissioner District 2                     1672,     972,    700,             700,    2838, 0.247,         30,    27
+Weld, District Court 19th Judicial District Crowther                     75911,   60300,  15611,           15611,  182397, 0.086,         86,    83
+Yuma, Yuma County Court Jones                                             3100,     969,   2131,            2131,    4719, 0.452,         17,    14
+
+# contestComparison.csv is the audited result, for all contests on the selected ballots ...
 
 county_name,contest_name,                imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,timestamp,cvr_id,audit_reason
 Broomfield,Broomfield Ballot Question 2G,104-100-11,6,"""Yes/For""","""Yes/For""",YES,uploaded,"",2024-11-19 09:55:14.442508,869211,COUNTY_WIDE_CONTEST

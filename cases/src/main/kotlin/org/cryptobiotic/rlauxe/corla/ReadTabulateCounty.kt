@@ -8,7 +8,6 @@ import java.nio.charset.Charset
 import kotlin.String
 import kotlin.text.appendLine
 
-
 fun convertToCountyContestTabs(contestTabs: List<ContestTabByCounty>): List<CountyContestTab> {
     val counties = mutableMapOf<String, CountyContestTab>()
 

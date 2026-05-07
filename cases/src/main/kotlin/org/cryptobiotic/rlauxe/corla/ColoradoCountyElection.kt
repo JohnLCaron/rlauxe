@@ -3,235 +3,42 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
-import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
+import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import kotlin.Int
 import kotlin.String
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
-open class CreateColoradoElection (
-    val countyElection: ColoradoCountyElection,
-    val auditType: AuditType,
-    val auditdir: String,
-    val pollingMode: PollingMode?,
-    val name: String? = null,
-): ElectionBuilder {
-    val publisher = Publisher(auditdir)
-    val ncards: Int
-    val contestsUA: List<ContestWithAssertions>
+private val debugUndervotes = false
+private val debugNvotes = false
+private var nextPoolId = 0
 
-    init {
-        // have to save the mvrs and generate the cardManifest from them.
-        ncards = createAndSaveUnsortedMvrs(countyElection.contests, countyElection.cardPools, publisher)
-
-        // TODO Npop >= Nc
-        val npopMap: Map<Int, Int> = if ((auditType.isPolling() && pollingMode!!.withoutBatches())) {
-            countyElection.contests.associate { it.id to ncards } // then the population is the entire set of cards. (wont go well)
-        } else {
-            // read them back in as an Iterator, so we dont have to read all into memory
-            val infos = countyElection.contests.map { it.info() }.associateBy { it.id }
-            val mvrs: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.unsortedMvrsFile())
-            val auditableCardIter: CloseableIterator<AuditableCard> =
-                MergeBatchesIntoCardManifestIterator(mvrs, countyElection.cardPools)
-            // are we handling the batches correctly using mvrs?
-            val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
-            require(ncards == count)
-            manifestTabs.mapValues { it.value.ncardsTabulated }
-        }
-
-        contestsUA =
-                // if (auditType.isOA()) makeOneAuditContests(contests, npopMap, cardPools) else // in case we decide to support OA
-            ContestWithAssertions.make(countyElection.contests, npopMap, isClca = auditType.isClca(),)
-    }
-
-    override fun electionInfo() =
-        ElectionInfo(
-            name ?: "Corla24$auditType$pollingMode", auditType, ncards(),
-            contestsUA.size, pollingMode = pollingMode
-        )
-
-    override fun cardStyles(): List<StyleIF>? = countyElection.cardPools
-    override fun cardPools() = countyElection.cardPools
-    override fun contestsUA() = contestsUA
-    override fun ncards() = ncards
-
-    // TODO verify election creation, verify audit creation
-    override fun cards(): CloseableIterator<CardWithBatchName> {
-        val unsortedMvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
-        return TransformingIterator(unsortedMvrs) { mvr ->
-            when {
-                mvr.phantom -> mvr
-                auditType.isClca() -> mvr.copy(poolId = null, styleName = CardStyle.fromCvr)
-                (auditType.isPolling() && pollingMode!!.withoutBatches()) -> mvr.copy(
-                    votes = null,
-                    styleName = "OneBatch",
-                    poolId = 0
-                )
-
-                (auditType.isPolling()) -> mvr.copy(votes = null)
-                else -> throw IllegalStateException("Unknown what to do with mvr: $mvr")
-            }
-        }
-    }
-
-    // StartAuditFirstRound will create the sorted MVRs
-    override fun createUnsortedMvrsExternal() = readCardsCsvIterator(publisher.unsortedMvrsFile())
-    override fun createUnsortedMvrsInternal() = null
-}
-
-// CvrsToCardsAddStyles is random, so in order to match the mvrs and cvrs, we must generate the mvrs first,
-// then create manifest from them. This is nonstandard, so we will do it here.
-// Could put this into createAuditRecord(reverse = true) ??
-// return number of cards
-
-// TODO wed like to add a style name, but becuse we are using cvrs instead of mvrs, we have to place to put it without setting a pool Id.
-//   which maybe we could but seems lame
-fun createAndSaveUnsortedMvrs(
-    contests: List<ContestIF>,
-    cardPools: List<CardPoolIF>,
-    publisher: Publisher
-): Int {
-    val unsortedMvrIterator = MvrsToCardsWithBatchNameIterator(
-        Closer(CvrIteratorfromPools(cardPools.iterator())),
-        cardPools,
-        makePhantomCvrs(contests), // yes there are phantoms, heres where we need the contests' Nphantoms
-    )
-    validateOutputDirOfFile(publisher.unsortedMvrsFile())
-
-    writeCardCsvFile(unsortedMvrIterator, publisher.unsortedMvrsFile())
-    logger.info { "CreateColoradoElection unsortedMvrsFile to ${publisher.unsortedMvrsFile()}" }
-
-    return unsortedMvrIterator.cardIndex // card count
-}
-
-// dont load into memory all at once, just one pool at a time
-// this is random, cant do more than once. must do mvrs first
-class CvrIteratorfromPools(val cardPoolIter: Iterator<CardPoolIF>) : Iterator<Cvr> {
-    var innerIter: CardsFromPool
-
-    init {
-        innerIter = CardsFromPool(cardPoolIter.next())
-    }
-
-    override fun next(): Cvr {
-        return innerIter.next()
-    }
-
-    override fun hasNext(): Boolean {
-        if (innerIter.hasNext()) return true
-        if (cardPoolIter.hasNext()) {
-            innerIter = CardsFromPool(cardPoolIter.next())
-            return hasNext()
-        }
-        return false
-    }
-}
-
-// these are chosen randomly, so in order for mvrs and cvrs to match, the cvrs have to be made from the mvrs.
-class CardsFromPool(val cardPool: CardPoolIF) : Iterator<Cvr> {
-    val cvrs: Iterator<Cvr>
-
-    init {
-        val poolVunders = cardPool.possibleContests().map { Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
-
-        cvrs = makeCvrsForOnePool(
-            poolVunders,
-            cardPool.poolName,
-            poolId = cardPool.poolId,
-            cardPool.hasExactContests()
-        ).iterator()
-    }
-
-    override fun next() = cvrs.next()
-    override fun hasNext() = cvrs.hasNext()
-}
-
-
-////////////////////////////////////////////////////////////////////
-// Create audit where pools are from the precinct total. May be CLCA or OneAudit
-fun createColoradoElection(
-    externalSortDir: String,
-    auditdir: String,
-    pollingMode: PollingMode? = null,
-    creation: AuditCreationConfig,
-    round: AuditRoundConfig,
-    startFirstRound: Boolean = true,
-    name: String? = null,
+open class ColoradoCountyElection (
+    // val auditType: AuditType,
+    // val auditdir: String,
 ) {
-    val stopwatch = Stopwatch()
-
-    val countyElection = ColoradoCountyElection()
-
-    val election = if (creation.auditType.isClca())
-        CreateColoradoElection(countyElection, creation.auditType, auditdir, pollingMode=null, name=name) else
-        CreateColoradoPolling(countyElection, auditdir, pollingMode!!) // TODO hasExact = false ??
-
-    createElectionRecord(election, auditDir = auditdir, clear = false)
-    val config = Config(election.electionInfo(), creation, round)
-
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir = externalSortDir)
-
-    if (startFirstRound) {
-        val result = startFirstRound(auditdir)
-        if (result.isErr) logger.error { result.toString() }
-        logger.info { "createCorla took $stopwatch" }
-    }
-}
-
-/*
     val corlaInput = Colorado2024Input
     val corlaContestBuilders = makeContestBuilders(corlaInput) // 181
-
     val cardPools: List<CountyPoolFromStyle>
-    val ncards: Int
-
-    val batches: List<StyleIF>
     val contests: List<ContestIF>
-    val contestsUA: List<ContestWithAssertions>
-    val publisher = Publisher(auditdir)
 
     init {
         nextPoolId = 0
-        //// make pools from the precinct results, then generate CVRs from pools
-        // cardPools = makeCardPoolsFromPrecincts(corlaInput.precinctFile)
         cardPools = makeCardPoolsFromCountyStyles(corlaInput)
-        batches = cardPools
-
-        contests = makeContests()
-
-        // have to save the mvrs and generate the cardManifest from them.
-        // TODO have to generate non-pool cvrs before this step.
-        ncards = createAndSaveUnsortedMvrs()
-
-        // TODO Npop >= Nc
-        val npopMap: Map<Int, Int> = if ((auditType.isPolling() && pollingMode!!.withoutBatches())) {
-            contests.associate { it.id to ncards } // then the population is the entire set of cards. (wont go well)
-        } else {
-            // read them back in as an Iterator, so we dont have to read all into memory
-            val infos = contests.map { it.info() }.associateBy { it.id }
-            val mvrs: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.unsortedMvrsFile())
-            val auditableCardIter: CloseableIterator<AuditableCard> = MergeBatchesIntoCardManifestIterator(mvrs, batches)
-            // are we handling the batches correctly using mvrs?
-            val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
-            require(ncards == count)
-            manifestTabs.mapValues { it.value.ncardsTabulated }
-        }
-
-        contestsUA = // if (auditType.isOA()) makeOneAuditContests(contests, npopMap, cardPools) else // in case we decide to support OA
-                     ContestWithAssertions.make(contests, npopMap, isClca = auditType.isClca(),)
+        contests = corlaContestBuilders.map { it.makeContest() }
     }
 
     private fun makeContestBuilders(
         corlaInput: Colorado2024Input,
     ): List<CorlaContestBuilder> {
 
-        val contestsMap = corlaInput.contestsByCounty.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
+        val contestsMap = corlaInput.contestsByCounty.associateBy { it.contestName }
         val resultsContestMap = corlaInput.resultsContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
         val roundContestMap = corlaInput.roundContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
         val xmlDetailMap = corlaInput.electionDetailXml.contests.associateBy { mutatisMutandi(contestNameCleanup(it.text)) }
@@ -239,7 +46,8 @@ fun createColoradoElection(
         val contestBuilders = mutableListOf<CorlaContestBuilder>()
 
         // canonicalContestMap one drives the boat
-        contestsMap.forEach{ (contestName, contestByCounty) ->
+        contestsMap.forEach{ (orgContestName, contestByCounty) ->
+            val contestName = mutatisMutandi(contestNameCleanup(orgContestName))
             // read 725 contests from src/test/data/corla/2024audit/round1/ResultsReportSummary.csv
             val resultsContest = resultsContestMap[contestName]
             if (resultsContest == null) {
@@ -272,10 +80,11 @@ fun createColoradoElection(
                 info.metadata["CORLAcounties"] = contestByCounty.counties().toList().toString()
 
                 val contest = CorlaContestBuilder(
+                    orgContestName,
                     info,
                     contestByCounty,
-                    resultsContest,
                     roundContest,
+                    corlaXmlContest,
                 )
                 contestBuilders.add(contest)
             }
@@ -314,14 +123,6 @@ fun createColoradoElection(
         val missingPools: Map<String, CountyPoolFromStyle> = makeMissingPools(tabsMissingStyles)
 
         val countyPools: List<CountyPools> = contestTabByCounty.map { (countyName, countyContest) ->
-            //     private data class CountyPools(
-            //        val countyName: String,
-            //        val countyStyles: CountyStyles, // Set<contestId> and reletive count within county
-            //        val cct: CountyContestTab, // the votes subtotal for each contest in the county
-            //        val missingPool: CountyPoolFromStyle?,
-            //        val contestNc: Map<String, Int>, // contest name -> contest Nc for the county
-            //        val infos: Map<String, ContestInfo> // contest name -> contest id
-            //    )
             CountyPools(countyName, stylesByCounty[countyName]!!, countyContest,
                 missingPools[countyName], countyNc[countyName]!!, infos)
         }
@@ -331,7 +132,7 @@ fun createColoradoElection(
 
         corlaContestBuilders.forEach {
             // set contest total cards as sum over pools
-            it.adjustPoolInfo(pools)
+            it.setTotalCardsFromPools(pools)
             it.info.metadata["CORLApoolTotalCards"] = it.poolTotalCards.toString()
             it.info.metadata["CORLApoolTotalVotes"] = it.poolTotalVotes.toString()
         }
@@ -584,123 +385,15 @@ fun createColoradoElection(
             return pools
         }
     }
-
-    fun makeContests(): List<ContestIF> {
-        val infoList = corlaContestBuilders.map { it.info }.sortedBy { it.id }
-        val builderMap = corlaContestBuilders.associateBy { it.info.id }
-        println("number of contests with info = ${infoList.size}")
-
-        return infoList.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
-            val builder = builderMap[info.id]!!
-            val candVotes = builder.candidateVotes.filter { info.candidateIds.contains(it.key) } // get rid of writeins?
-            // val totalVotes = candVotes.map {it.value}.sum()
-            // val ncards = max(builder.poolTotalCards(), totalVotes)
-            // val useNc = max(ncards, builder.Nc)
-            info.metadata["PoolPct"] = (100.0 * builder.poolTotalCards / builder.Nc).toInt().toString()
-            // assume Ncast = Nc; maybe Ncase = builder.poolTotalCards() ??
-            Contest(info, candVotes, builder.Nc, builder.Nc)
-        }
-    }
-
-    override fun electionInfo() =
-        ElectionInfo(name ?: "Corla24$auditType$pollingMode", auditType, ncards(), contestsUA.size, pollingMode = pollingMode)
-
-    override fun cardStyles() = batches // TODO !cvrsHaveUndervotes need batches
-    // override fun cardPools() = if (auditType.isPolling() && pollingMode!!.withPools()) cardPools.map { it.toOneAuditPool() } else null
-    override fun cardPools() = cardPools
-    override fun contestsUA() = contestsUA
-    override fun ncards() = ncards
-
-    // TODO verify election creation, verify audit creation
-    override fun cards(): CloseableIterator<CardWithBatchName> {
-        val unsortedMvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
-        return TransformingIterator(unsortedMvrs) { mvr ->
-            when {
-                mvr.phantom -> mvr
-                auditType.isClca() -> mvr.copy(poolId = null, styleName = CardStyle.fromCvr)
-                (auditType.isPolling() && pollingMode!!.withoutBatches()) -> mvr.copy(votes = null, styleName="OneBatch", poolId=0)
-                (auditType.isPolling()) -> mvr.copy(votes = null)
-                else -> throw IllegalStateException("Unknown what to do with mvr: $mvr")
-            }
-        }
-    }
-
-    // StartAuditFirstRound will create the sorted MVRs
-    override fun createUnsortedMvrsExternal() = readCardsCsvIterator(publisher.unsortedMvrsFile())
-    override fun createUnsortedMvrsInternal() = null
-
-    // CvrsToCardsAddStyles is random, so in order to match the mvrs and cvrs, we must generate the mvrs first,
-    // then create manifest from them. This is nonstandard, so we will do it here.
-    // Could put this into createAuditRecord(reverse = true) ??
-    // return number of cards
-
-    // TODO wed like to add a style name, but becuse we are using cvrs instead of mvrs, we have to place to put it without setting a pool Id.
-    //   which maybe we could but seems lame
-    fun createAndSaveUnsortedMvrs(): Int {
-        val unsortedMvrIterator = MvrsToCardsWithBatchNameIterator(
-            Closer(CvrIteratorfromPools()),
-            cardPools,
-            makePhantomCvrs(contests), // yes there are phantoms, heres where we need the contests' Nphantoms
-        )
-
-        clearDirectory(Path(auditdir))
-        validateOutputDirOfFile(publisher.unsortedMvrsFile())
-
-        writeCardCsvFile(unsortedMvrIterator, publisher.unsortedMvrsFile())
-        logger.info{"CreateColoradoElection unsortedMvrsFile to ${publisher.unsortedMvrsFile()}"}
-
-        return unsortedMvrIterator.cardIndex // card count
-    }
-
-    // dont load into memory all at once, just one pool at a time
-    // this is random, cant do more than once. must do mvrs first
-    inner class CvrIteratorfromPools() : Iterator<Cvr> {
-        val cardPoolIter = cardPools.iterator()
-        var innerIter: CardsFromPool
-
-        init {
-            innerIter = CardsFromPool(cardPoolIter.next())
-        }
-
-        override fun next(): Cvr {
-            return innerIter.next()
-        }
-
-        override fun hasNext(): Boolean {
-            if (innerIter.hasNext()) return true
-            if (cardPoolIter.hasNext()) {
-                innerIter = CardsFromPool(cardPoolIter.next())
-                return hasNext()
-            }
-            return false
-        }
-    }
-
-    // these are chosen randomly, so in order for mvrs and cvrs to match, the cvrs have to be made from the mvrs.
-    class CardsFromPool(val cardPool: CountyPoolFromStyle) : Iterator<Cvr> {
-        val cvrs: Iterator<Cvr>
-
-        init {
-            val poolVunders = cardPool.possibleContests().map { Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
-
-            cvrs = makeCvrsForOnePool(
-                poolVunders,
-                cardPool.poolName,
-                poolId = cardPool.poolId,
-                cardPool.hasExactContests
-            ).iterator()
-        }
-
-        override fun next() = cvrs.next()
-        override fun hasNext() = cvrs.hasNext()
-    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
-/*
-class CorlaContestBuilder(val info: ContestInfo, val contestByCounty: ContestTabByCounty, resultsContest:ResultsReportContest, contestRound: CorlaContestRoundCsv?) {
+
+class CorlaContestBuilder(val orgContestName: String, val info: ContestInfo, val contestByCounty: ContestTabByCounty,
+                          val contestRound: CorlaContestRoundCsv?, val corlaXmlContest: CorlaXmlContest?) {
     val contestId = info.id
     val Nc: Int     // taken from contestRound.contestBallotCardCount
+    var Npop: Int? = null     // taken from contestRound.contestBallotCardCount
     val candidateVotes: Map<Int, Int>
     val totalVotesAllCounties = contestByCounty.totalVotesAllCounties
     val counties = contestByCounty.counties()
@@ -710,23 +403,34 @@ class CorlaContestBuilder(val info: ContestInfo, val contestByCounty: ContestTab
 
     init {
         candidateVotes = contestByCounty.choices.values.mapIndexed { idx, choice -> Pair(idx, choice.totalVotes) }.toMap()
-        val totalVotes = candidateVotes.map { it.value }.sum() / info.voteForN
+        val minCardsNeeded = roundUp(candidateVotes.map { it.value }.sum() / info.voteForN.toDouble())
 
-        Nc = if (contestRound != null) {
+        if (contestRound != null) {
             var useNc = contestRound.contestBallotCardCount
-            if (useNc < totalVotes) {
-                println("*** Contest '${info.name}' has $totalVotes total votes, but CorlaContestRoundCsv.contestBallotCardCount is ${contestRound.contestBallotCardCount} - using totalVotes")
-                useNc = totalVotes // contestRound.ballotCardCount
+            if (useNc < minCardsNeeded) {
+                println("*** Contest '${info.name}' has $minCardsNeeded total cards, but CorlaContestRoundCsv.contestBallotCardCount is ${contestRound.contestBallotCardCount} - using totalVotes")
+                useNc = minCardsNeeded
             }
-            useNc
+            Nc = useNc
+            Npop = contestRound.ballotCardCount
         } else {
-            totalVotes
+            Nc = minCardsNeeded
         }
     }
 
-    fun adjustPoolInfo(cardPools: List<CardPoolIF>){
+    fun setTotalCardsFromPools(cardPools: List<CardPoolIF>){
         poolTotalCards = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.ncards() }
         poolTotalVotes = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.contestTab(info.id)!!.nvotes() }
+    }
+
+    fun makeContest(): Contest {
+        val candVotes = candidateVotes.filter { info.candidateIds.contains(it.key) } // get rid of writeins?
+        // val totalVotes = candVotes.map {it.value}.sum()
+        // val ncards = max(builder.poolTotalCards(), totalVotes)
+        // val useNc = max(ncards, builder.Nc)
+        info.metadata["PoolPct"] = (100.0 * poolTotalCards / Nc).toInt().toString()
+        // assume Ncast = Nc; maybe Ncase = builder.poolTotalCards() ??
+        return Contest(info, candVotes, Nc, Nc)
     }
 
     override fun toString(): String {
@@ -736,7 +440,6 @@ class CorlaContestBuilder(val info: ContestInfo, val contestByCounty: ContestTab
 
 // a pool of cards based on a card style
 // we dont know ncards - initial estimate from voteTotals, then can adjust cards
-// TODO something wrong when voteForN > 1
 data class CountyPoolFromStyle(
     val countyName: String,
     override val poolName: String,
@@ -852,7 +555,7 @@ data class CountyPoolFromStyle(
 }
 
 
-// we dont know how many cards are in the pool.
+/* we dont know how many cards are in the pool.
 // so adjust the number of cards in the pools so that the sum of pool.undervotes agrees with the refContest
 // this only works if the pool has a single style.
 fun distributeExpectedOvervotes(refContest: CorlaContestBuilder, cardPools: List<CountyPoolFromStyle>) {
@@ -907,8 +610,5 @@ fun distributeExpectedOvervotes(refContest: CorlaContestBuilder, cardPools: List
         cardPoolMap[poolId]!!.adjustCards(adjust, contestId)
     }
 } */
-*/
-
-
 
 

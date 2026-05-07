@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.PollingConfig
 import org.cryptobiotic.rlauxe.audit.PollingMode
+import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.cli.RunVerifyAuditRecord.runVerifyAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
@@ -56,7 +57,8 @@ class MakeColoradoElection {
         val creationConfig = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val roundConfig = AuditRoundConfig(
             SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
-            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000,
+                sampling = Sampling.uniform),
             ClcaConfig(), null)
 
         createCountyAudits(topdir,

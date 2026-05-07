@@ -225,6 +225,7 @@ data class SimulationControl(
 }
 
 // at each round the EA manually reviews the removed contests; these parameters automate that for testing and simulation
+enum class Sampling { consistent, uniform }
 data class ContestSampleControl(
     //// checkContestsCorrectlyFormed: preAuditStatus
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
@@ -237,7 +238,8 @@ data class ContestSampleControl(
 
     // soft parameters
     val other: Map<String, String> = emptyMap(),    // soft parameters to ease migration
-    // val removeMaxContests: Int? = null, // remove top n estimated nmvrs contests, for plotting CaseStudiesRemoveNmax
+
+    val sampling: Sampling = Sampling.consistent
 ) {
 
     fun removeMaxContests(): Int? {

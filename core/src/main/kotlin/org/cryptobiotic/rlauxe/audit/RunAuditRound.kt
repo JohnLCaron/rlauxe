@@ -5,7 +5,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.estimate.consistentSampling
+import org.cryptobiotic.rlauxe.estimate.chooseSamples
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -23,8 +23,8 @@ import java.nio.file.Path
 private val logger = KotlinLogging.logger("RunAuditRound")
 
 // called from cli and rlauxe-viewer
-fun runRound(inputDir: String, onlyTask: OnlyTask? = null): AuditRoundIF? {
-    val roundResult = runRoundResult(inputDir, onlyTask)
+fun runRound(inputDir: String, onlyTask: OnlyTask? = null, auditorWantNewMvrs: Int? = null): AuditRoundIF? {
+    val roundResult = runRoundResult(inputDir, onlyTask, auditorWantNewMvrs)
     if (roundResult.isErr) {
         logger.error{"runRoundResult failed ${roundResult.component2()}"}
         return null
@@ -33,7 +33,7 @@ fun runRound(inputDir: String, onlyTask: OnlyTask? = null): AuditRoundIF? {
 }
 
 // run one round and get ready to run the next round; or get ready to run the first round.
-fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRoundIF, ErrorMessages> {
+fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null, auditorWantNewMvrs: Int? = null): Result<AuditRoundIF, ErrorMessages> {
     val errs = ErrorMessages("runRoundResult")
 
     try {
@@ -90,7 +90,7 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRo
                     logger.info{ results.toString() }
                 }
             }
-            val nextRound = workflow.startNewRound(quiet = false, onlyTask)
+            val nextRound = workflow.startNewRound(quiet = false, onlyTask, auditorWantNewMvrs)
 
             // get matching mvrs if needed
             if (!nextRound.auditIsComplete && auditRecord.config.election.mvrSource == MvrSource.testPrivateMvrs) {
@@ -156,7 +156,7 @@ fun resampleAndRun(auditdir: String, lastRound: AuditRound): Boolean {
         val previousSamples = auditRecord.rounds.previousSamplePrns(lastRound.roundIdx)
         // TODO removeContestsAndSample or consistentSampling??
         // removeContestsAndSample(auditRecord.config.round.sampling, auditRecord.readSortedManifest(), lastRound, previousSamples)
-        consistentSampling(lastRound, auditRecord.readSortedManifest(), previousSamples)
+        chooseSamples(auditRecord.config.sampling, lastRound, auditRecord.readSortedManifest(), previousSamples)
 
         // writeAuditState
         val publisher = Publisher(auditdir)

@@ -16,7 +16,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
     abstract fun contestsUA(): List<ContestWithAssertions>
 
     // start new round and create estimated sample sizes
-    open fun startNewRound(quiet: Boolean = true, onlyTask: OnlyTask? = null): AuditRound {
+    open fun startNewRound(quiet: Boolean = true, onlyTask: OnlyTask? = null, auditorWantNewMvrs: Int? = null): AuditRound {
         val auditRounds = auditRounds()
         val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last() as AuditRound
         val roundIdx = auditRounds.size + 1
@@ -54,6 +54,10 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
         estimate.run(nthreads=null, contestOnly=null)
 
         logger.debug{"Estimate round ${roundIdx} took ${stopwatch}"}
+
+        // maybe not on the first round ??
+        if (auditorWantNewMvrs != null) // hack-a-shack
+            auditRound.auditorWantNewMvrs = auditorWantNewMvrs
 
         // this sets the following fields:
         //    auditRound.nmvrs = sampledCards.size

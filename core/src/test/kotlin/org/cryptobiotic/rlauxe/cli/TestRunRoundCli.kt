@@ -27,6 +27,7 @@ class TestRunRoundCli {
         RunRlaRoundCli.main(
             arrayOf(
                 "-in", auditdir,
+                "--auditorWantNewMvrs", "105",
                 // "--onlyTask", "17-1/0",
             )
         )

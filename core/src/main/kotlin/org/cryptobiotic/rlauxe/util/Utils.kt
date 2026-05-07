@@ -46,6 +46,7 @@ fun margin2mean(margin: Double) = (margin + 1.0) / 2.0
 fun mean2margin(mean: Double) = 2.0 * mean - 1.0
 fun noerror(margin: Double, upper: Double) = 1.0 / (2.0 - margin / upper)
 
+// these are the number of ballots needed THAT CONTAIN THE CONTEST
 fun estSamplesFromNomargin(bet:Double, nomargin:Double, alpha: Double) =  -ln(alpha) / ln(1.0 + bet * nomargin/2)
 fun estSamplesFromNoerror(bet:Double, noerror:Double, alpha: Double): Double {
     val nomargin = 2.0 * noerror - 1.0
@@ -57,9 +58,7 @@ fun estSamplesFromMarginUpper(bet:Double, marginUpper:Double, alpha: Double): Do
     val nomargin = 2.0 * noerror - 1.0
     return -ln(alpha) / ln(1.0 + bet * nomargin / 2)
 }
-
 fun estMarginUpperFromSamples(bet:Double, samples:Int, alpha: Double): Double {
-
     // payoff^n = 1/alpha
     // ln(payoff) * n = -ln(alpha)
     // ln(1.0 + bet * nomargin / 2) = -ln(alpha) / n
@@ -84,10 +83,10 @@ fun estMarginUpperFromSamples(bet:Double, samples:Int, alpha: Double): Double {
     return 2.0 - 2.0 * bet / den
 }
 
+// this is the estimate risk when nsamles CONTAIN THE CONTEST
 fun estRisk(nomargin:Double, nsamples: Int): Double {
     return estRisk(2.0 / 1.03905, nomargin, nsamples)
 }
-
 // payoff^n = 1/risk; risk = 1/(payoff^n)
 fun estRisk(bet:Double, nomargin:Double, nsamples: Int): Double {
     val payoff = 1.0 + bet * nomargin/2
@@ -95,7 +94,16 @@ fun estRisk(bet:Double, nomargin:Double, nsamples: Int): Double {
     val result =  1.0 / payoffn
     return result
 }
+// marginUpper = margin/upper
+fun estRiskFromMargin(bet:Double, marginUpper:Double, nsamples: Int): Double {
+    val noerror = 1.0 / (2.0 - marginUpper)
+    val payoff = 1.0 + bet * (noerror - 0.5)
+    val payoffn = payoff.pow(nsamples.toDouble())
+    val result =  1.0 / payoffn
+    return result
+}
 
+// this is duplicated in PluralityAssorter.calcMarginFromRegVotes
 fun calcReportedMargin(useVotes: Map<Int, Int>, Nc: Int, winner: Int, loser: Int): Double {
     val winnerVotes = useVotes[winner] ?: 0
     val loserVotes = useVotes[loser] ?: 0

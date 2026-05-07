@@ -26,20 +26,20 @@ import kotlin.math.min
 //   * affect the RLA calculations, and 1 and 2 are overstatements.
 // so probably ensure contest canonical sequence = yes, allow more samples than estimated = no
 /*
-  public BigDecimal riskMeasurement() {
+  public Double riskMeasurement() {
     if (my_audited_sample_count > 0
-        && diluted_margin.compareTo(BigDecimal.ZERO) > 0) {
-      final BigDecimal result =  Audit.pValueApproximation(my_audited_sample_count,
+        && diluted_margin.compareTo(Double.ZERO) > 0) {
+      final Double result =  Audit.pValueApproximation(my_audited_sample_count,
           diluted_margin,
           my_gamma,
           my_one_vote_under_count,
           my_two_vote_under_count,
           my_one_vote_over_count,
           my_two_vote_over_count);
-      return result.setScale(3, BigDecimal.ROUND_HALF_UP);
+      return result.setScale(3, Double.ROUND_HALF_UP);
     } else {
       // full risk (100%) when nothing is known
-      return BigDecimal.ONE;
+      return Double.ONE;
     }
   }
  */
@@ -47,7 +47,7 @@ class Corla(
     val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
     val p1: Double, val p2: Double, val p3: Double, val p4: Double,
 ): RiskMeasuringFn {
-    val gamma = 1.03905 // static val GAMMA: BigDecimal = BigDecimal.valueOf(1.03905) in us.freeandfair.corla.math.Audit
+    val gamma = 1.03905 // static val GAMMA: Double = Double.valueOf(1.03905) in us.freeandfair.corla.math.Audit
 
     override fun testH0(
         maxSamples: Int,
@@ -212,10 +212,12 @@ fun estimateCorla(
     oneUnder: Int = 0,
     twoUnder: Int = 0,
 ): Int {
-    val two_under_term = twoUnder * ln( 1 + 1 / gamma)
-    val one_under_term = oneUnder * ln( 1 + 1 / (2 * gamma))
-    val one_over_term = oneOver * ln( 1 - 1 / (2 * gamma))
-    val two_over_term = twoOver * ln( 1 - 1 / gamma)
+    val two_under_term = if (twoUnder == 0) 0.0 else twoUnder * ln( 1 + 1 / gamma)
+    val one_under_term = if (oneUnder == 0) 0.0 else oneUnder * ln( 1 + 1 / (2 * gamma))
+    val temp = 1 / (2 * gamma)
+    val temp2 = 1 - 1 / (2 * gamma)
+    val one_over_term = if (oneOver == 0) 0.0 else oneOver * ln( 1 - 1 / (2 * gamma))
+    val two_over_term = if (twoOver == 0) 0.0 else twoOver * ln( 1 - 1 / gamma)
 
     // "sample-size multiplier" rho is independent of margin
     val rho: Double = -(2.0 * gamma) * (ln(riskLimit) + two_under_term + one_under_term + one_over_term + two_over_term)
@@ -223,4 +225,38 @@ fun estimateCorla(
     val over_under_sum = (twoUnder + oneUnder + oneOver + twoOver).toDouble()
     // println("   rho=$rho r=$r")
     return roundUp(max(r, over_under_sum))
+}
+
+fun optimistic(
+    riskLimit: Double,
+    dilutedMargin: Double,
+    gamma: Double,
+    twoUnder: Int = 0,
+    oneUnder: Int = 0,
+    oneOver: Int = 0,
+    twoOver: Int = 0,
+): Double {
+    if (dilutedMargin == 0.0) { //hilarious
+        // nothing to do here, no samples will need to be audited because the
+        // contest is uncontested
+        return 0.0
+    }
+
+    val result: Double
+    val invgamma = 1/gamma
+    val twogamma = 2/gamma
+    val invtwogamma = 1/twogamma
+
+    val over_under_sum = (twoUnder + oneUnder + oneOver + twoOver).toDouble()
+    val two_under = twoUnder * ln(1+invgamma)
+    val one_under = oneUnder * ln(1+invtwogamma)
+    val one_over = oneOver * ln(1-invtwogamma)
+    val two_over = twoOver * ln(1-invgamma)
+
+    val numerator: Double = - twogamma * ln(riskLimit + two_under + one_under + one_over + two_over)
+
+    val ceil = numerator / dilutedMargin
+    result = max( ceil, over_under_sum)
+
+    return result
 }

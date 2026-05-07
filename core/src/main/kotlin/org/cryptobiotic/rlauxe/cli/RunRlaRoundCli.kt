@@ -62,10 +62,15 @@ object RunRlaRoundCli {
             shortName = "quiet",
             description = "dont show progress messages"
         ).default(false)
+        val auditorWantNewMvrs by parser.option(
+            ArgType.Int,
+            shortName = "uniform",
+            description = "set mu,ber of mvrs for uniform sample"
+        )
 
         try {
             parser.parse(args)
-            runRound(inputDir, OnlyTask.parse(onlyTask))
+            runRound(inputDir, OnlyTask.parse(onlyTask), auditorWantNewMvrs)
         } catch (t: Throwable) {
             println(t.message)
         }

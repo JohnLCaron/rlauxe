@@ -106,7 +106,8 @@ data class ContestSampleControlJson(
     val maxSamplePct: Double,
     val contestSampleCutoff: Int?,
     val auditSampleCutoff: Int?,
-    val other: Map<String, String>
+    val other: Map<String, String>,
+    val sampling: Sampling = Sampling.consistent
 )
 
 fun ContestSampleControl.publishJson() = ContestSampleControlJson(
@@ -116,16 +117,18 @@ fun ContestSampleControl.publishJson() = ContestSampleControlJson(
     this.contestSampleCutoff,
     this.auditSampleCutoff,
     this.other,
+    this.sampling,
 )
 
 fun ContestSampleControlJson.import() =  ContestSampleControl(
-        this.minRecountMargin,
-        this.minMargin,
-        this.maxSamplePct,
-        this.contestSampleCutoff,
-        this.auditSampleCutoff,
-        this.other,
-    )
+    this.minRecountMargin,
+    this.minMargin,
+    this.maxSamplePct,
+    this.contestSampleCutoff,
+    this.auditSampleCutoff,
+    this.other,
+    this.sampling,
+)
 
 
 @Serializable

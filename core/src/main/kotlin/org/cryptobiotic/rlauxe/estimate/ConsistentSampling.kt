@@ -38,7 +38,7 @@ fun removeContestsAndSample(
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
     while (contestsNotDone.isNotEmpty()) {
         // create a strawman sample
-        lastCardsUsed = consistentSampling( auditRound, sortedManifest, previousSamples)
+        lastCardsUsed = chooseSamples(sampling, auditRound, sortedManifest, previousSamples)
 
         // enforce sample limits
         val removeContests = checkSampleLimits(sampling, auditRound, contestsNotDone)
@@ -143,6 +143,18 @@ private fun checkSampleLimits(
     return removeContests
 }
 
+fun chooseSamples(
+    sampling: ContestSampleControl,
+    auditRound: AuditRoundIF,
+    sortedManifest: CardManifest,
+    previousSamples: Set<Long> = emptySet(), // all previous prns ever sampled
+): List<AuditableCard> {
+    if (sampling.sampling == Sampling.consistent || (auditRound.roundIdx == 1 && !auditRound.auditWasDone))
+        return consistentSampling(auditRound, sortedManifest, previousSamples)
+    else
+        return uniformSampling(auditRound, sortedManifest, previousSamples)
+}
+
 // From Consistent Sampling with Replacement, Ronald Rivest, August 31, 2018
 // main side effects:
 //    auditRound.nmvrs = sampledCards.size
@@ -158,6 +170,9 @@ fun consistentSampling(
     previousSamples: Set<Long> = emptySet(), // all previous prns ever sampled
 ): List<AuditableCard>  // debugging
 {
+    // included means, includede in the sampling
+    // done means, remove from the udit
+    val contestsNotDone = auditRound.contestRounds.filter { !it.done}
     val contestsIncluded = auditRound.contestRounds.filter { !it.done && it.included}
     if (contestsIncluded.isEmpty()) return emptyList()
 
@@ -207,8 +222,8 @@ fun consistentSampling(
                 newMvrs++
         }
 
-        // track how many contiguous mvrs each contest has
-        contestsIncluded.forEach { contest ->
+        // track how many contiguous mvrs each not-done contest has
+        contestsNotDone.forEach { contest ->
             if (card.hasContest(contest.id)) {
                 if (include && !skippedContests.contains(contest.id)) {
                     contest.haveSampleSize++
@@ -256,3 +271,70 @@ fun consistentSampling(
     logger.info{" consistentSampling chose ${sampledCards.size} cards"}
     return sampledCards
 }
+
+fun uniformSampling(
+    auditRound: AuditRoundIF,
+    sortedManifest: CardManifest,
+    previousSamples: Set<Long> = emptySet(), // all previous prns ever sampled
+): List<AuditableCard> {
+
+    // ignore included flag, eliminate done
+    val contestsIncluded = auditRound.contestRounds.filter { !it.done }
+    if (contestsIncluded.isEmpty()) return emptyList()
+
+    // how many samples are wanted for each contest
+    contestsIncluded.forEach { if (it.auditorWantNewMvrs != null && it.auditorWantNewMvrs!! < 0) it.auditorWantNewMvrs = null } // TODO fix in viewerr
+
+    var newMvrs = 0 // count when this card not in previous samples
+    auditRound.contestRounds.forEach {
+        it.haveSampleSize = 0
+        it.haveNewSampleSize = 0
+    }
+
+    val sampledCards = mutableListOf<AuditableCard>()
+    var cardIndex = 0  // track maximum index (not done yet)
+
+    var maxNewSamples = auditRound.auditorWantNewMvrs
+    if (maxNewSamples == null || maxNewSamples < 0) {
+        logger.warn{" You must set auditRound.auditorWantNewMvrs for uniform sampling"}
+        return emptyList()
+    }
+
+    // TODO on subsequent rounds, start from where you left off ??
+    val sortedCardIter = sortedManifest.cards.iterator()
+    while (
+        sortedCardIter.hasNext() &&
+        sampledCards.size < maxNewSamples
+    ) {
+        // get the next card in sorted order
+        val card = sortedCardIter.next()
+        sampledCards.add(card)
+
+        //   If you assume that previousSamples had all contests audited, then previousSamples reflects ballots already audited,
+        //   (even if not used for this contest), so you dont need to sample them again, so theyre not new.
+        if (!previousSamples.contains(card.prn))
+            newMvrs++
+
+        // track how many mvrs each contest has
+        contestsIncluded.forEach { contest ->
+            if (card.hasContest(contest.id)) {
+                contest.haveSampleSize++
+                if (!previousSamples.contains(card.prn)) {
+                    contest.haveNewSampleSize++
+                }
+                contest.maxSampleAllowed = sampledCards.size // probably not needed ??
+            }
+        }
+
+        cardIndex++
+    }
+
+    // set the results into the auditRound direclty
+    auditRound.nmvrs = sampledCards.size
+    auditRound.newmvrs = newMvrs
+    auditRound.samplePrns = sampledCards.map { it.prn }
+
+    logger.info{" consistentSampling chose ${sampledCards.size} cards"}
+    return sampledCards
+}
+

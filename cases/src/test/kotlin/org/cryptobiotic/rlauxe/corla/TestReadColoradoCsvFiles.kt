@@ -91,7 +91,7 @@ class TestReadColoradoCsvFiles {
     fun testCountyStyles() {
         val filename = "src/test/data/corla/2024audit/round3/contestComparison.csv"
         val countyStyles = readContestComparisonCsv(filename)
-        println("read ${countyStyles.size} countyStyles from $filename totalStyles=${countyStyles.sumOf { it.styles.size }} totalCards=${ countyStyles.sumOf{it.cardCount} }")
+        println("read ${countyStyles.size} counties from $filename; totalStyles=${countyStyles.sumOf { it.styles.size }} totalCards=${ countyStyles.sumOf{it.cardCount} }")
         countyStyles.forEach {
             println(it.show())
         }

@@ -132,6 +132,15 @@ class TestUtils {
         println(" marginS = $marginS ssS = $sss") */
     }
 
+    @Test
+    fun testCorla() {
+        // step 4 page 4
+        val rho = rho(alpha = .03, gamma = 1.1, p1o = 0.0)
+        println("rho = $rho")
+        val ss = rho / .07
+        println("ss = $ss")
+    }
+
     ///////////////////////////////////////
     @Test
     fun calcMarginUpperFromSamples() {

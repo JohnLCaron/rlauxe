@@ -15,10 +15,13 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     val upperg = 1.0 / lastSeatWon  // upper bound of g = 1/d(WA)  = 1/lastSeatWon   (highest loser)
     val lowerg = -1.0 / firstSeatLost  // lower bound of g = -1/d(WB) = -1/firstSeatLost (lowest winner)
     val c = -1.0 / (2 * lowerg)  // first/2
-    private var dilutedMean: Double = 0.0
 
-    fun setDilutedMean(mean: Double): DHondtAssorter {
-        this.dilutedMean = mean
+    private var reportedMargin: Double = 0.0
+    private var dilutedMargin: Double = 0.0
+
+    fun setMeans(reportedMean: Double, dilutedMean: Double? = null): DHondtAssorter {
+        this.reportedMargin = mean2margin(reportedMean)
+        this.dilutedMargin = mean2margin(dilutedMean ?: reportedMean)
         return this
     }
 
@@ -47,8 +50,8 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     override fun upperBound() = h2(upperg)
     override fun winner() = winner
     override fun loser() = loser
-    override fun dilutedMean() = dilutedMean
-    override fun dilutedMargin() = mean2margin(dilutedMean)
+    override fun dilutedMargin() = dilutedMargin
+    override fun reportedMargin() = reportedMargin
 
     // [ 0, .5, u]
     override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {
@@ -106,7 +109,8 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         if (loser != other.loser) return false
         if (lastSeatWon != other.lastSeatWon) return false
         if (firstSeatLost != other.firstSeatLost) return false
-        if (dilutedMean != other.dilutedMean) return false
+        if (reportedMargin != other.reportedMargin) return false
+        if (dilutedMargin != other.dilutedMargin) return false
         if (lowerg != other.lowerg) return false
         if (upperg != other.upperg) return false
         if (c != other.c) return false
@@ -120,7 +124,8 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         result = 31 * result + loser
         result = 31 * result + lastSeatWon
         result = 31 * result + firstSeatLost
-        result = 31 * result + dilutedMean.hashCode()
+        result = 31 * result + reportedMargin.hashCode()
+        result = 31 * result + dilutedMargin.hashCode()
         result = 31 * result + lowerg.hashCode()
         result = 31 * result + upperg.hashCode()
         result = 31 * result + c.hashCode()
@@ -148,7 +153,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
                 if (winner.lastSeatWon != null) {
                     parties.filter { it.id != winner.id }.forEach { loser ->
                         if (loser.firstSeatLost != null) {
-                            val passorter = makeFrom(info, Nc, winner, loser)
+                            val passorter = makeFrom(info, winner, loser, Nc) // TODO Npop
                             assorters.add(passorter)
                         }
                     }
@@ -157,18 +162,20 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
             return assorters
         }
 
-        fun makeFrom(info: ContestInfo, Nc: Int, winner: DhondtCandidate, loser: DhondtCandidate): DHondtAssorter {
+        fun makeFrom(info: ContestInfo, winner: DhondtCandidate, loser: DhondtCandidate, Nc: Int, Npop: Int?=null): DHondtAssorter {
+
             // Let f_e,s = Te/d(s) for entity e and seat s
             // f_A,WA > f_B,LB, so e = A and s = Wa
 
             val fw = winner.votes / winner.lastSeatWon!!.toDouble()
             val fl = loser.votes / loser.firstSeatLost!!.toDouble()
-            val gmean = (fw - fl) / Nc
+            val voteDiff = (fw - fl)
 
             val lower = -1.0 / loser.firstSeatLost!!  // lower bound of g
             val upper = 1.0 / winner.lastSeatWon!!  // upper bound of g
             val c = -1.0 / (2 * lower)  // affine transform h = c * g + 1/2
-            val hmean = c * gmean + 0.5
+            val hmeanReported = c * voteDiff/Nc + 0.5
+            val hmeanDiluted = c * voteDiff/(Npop ?: Nc) + 0.5
 
             return DHondtAssorter(
                 info,
@@ -176,7 +183,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
                 loser.id,
                 lastSeatWon = winner.lastSeatWon!!,
                 firstSeatLost = loser.firstSeatLost!!
-            ).setDilutedMean(hmean)
+            ).setMeans(hmeanReported, hmeanDiluted)
         }
 
     }

@@ -87,8 +87,8 @@ fun makeContestFromFakeCvrs(info: ContestInfo, ncvrs: Int): Contest {
     return makeContestFromCvrs(info, cvrs)
 }
 
-fun makeContestUAfromCvrs(info: ContestInfo, cvrs: List<Cvr>, isComparison: Boolean=true, hasStyle: Boolean=true) : ContestWithAssertions {
-    return ContestWithAssertions( makeContestFromCvrs(info, cvrs), isClca=isComparison).addStandardAssertions()
+fun makeContestUAfromCvrs(info: ContestInfo, cvrs: List<Cvr>, isComparison: Boolean=true, NpopIn: Int? = null) : ContestWithAssertions {
+    return ContestWithAssertions( makeContestFromCvrs(info, cvrs), isClca=isComparison, NpopIn = NpopIn).addStandardAssertions()
 }
 
 fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyle: Boolean=true): List<ContestWithAssertions> {

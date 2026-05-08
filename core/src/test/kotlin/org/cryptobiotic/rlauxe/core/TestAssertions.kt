@@ -51,7 +51,7 @@ class TestAssertions {
         assertEquals("contest 0 winner: 4 loser: 0 upper: 1.0", firstAssertion.id())
 
         val expectShow = """ contestInfo: 'AvB' (0) candidates=[0, 1, 2, 3, 4] choiceFunction=PLURALITY nwinners=2 voteForN=2
-    assorter:  Plurality winner=4 loser=0 dilutedMargin=22.2222% dilutedMean=61.1111%
+    assorter:  Plurality winner=4 loser=0 reportedMargin=22.2222% dilutedMargin=22.2222%
 """
         assertEquals(expectShow, firstAssertion.show())
     }
@@ -101,7 +101,7 @@ class TestAssertions {
         val firstAssertion = assertions.first()
         assertEquals(firstAssertion, firstAssertion)
         assertEquals(firstAssertion.hashCode(), firstAssertion.hashCode())
-        assertEquals("'AvB' (0) AboveThreshold for 'E': dilutedMean=57.1429% noerror=53.0303% g= [-0.4 .. 0.6] h = [0.0 .. 1.25] margin=0.1429", firstAssertion.toString())
+        assertEquals("'AvB' (0) AboveThreshold for 'E': reportedMargin=14.2857%  dilutedMargin=14.2857% noerror=53.0303% g= [-0.4 .. 0.6] h = [0.0 .. 1.25] margin=0.1429", firstAssertion.toString())
     }
 
     @Test
@@ -131,11 +131,11 @@ class TestAssertions {
         val lastAssertion = assertions.last()
         assertNotEquals(firstAssertion, lastAssertion)
         assertNotEquals(firstAssertion.hashCode(), lastAssertion.hashCode())
-        assertEquals(" Plurality winner=4 loser=0 dilutedMargin=24.9160% dilutedMean=62.4580%", firstAssertion.toString())
+        assertEquals(" Plurality winner=4 loser=0 reportedMargin=24.9160% dilutedMargin=24.9160%", firstAssertion.toString())
         assertEquals("contest 0 winner: 4 loser: 0 upper: 1.0", firstAssertion.id())
 
         val expectShow = """ cassorter: ClcaAssorter for contest AvB (0)
-  assorter= Plurality winner=4 loser=0 dilutedMargin=24.9160% dilutedMean=62.4580%
+  assorter= Plurality winner=4 loser=0 reportedMargin=24.9160% dilutedMargin=24.9160%
   dilutedMargin=0.24915951 dilutedMean=0.62457975 assortUpper=1.00000000 noerror=0.57115426"""
         assertEquals(expectShow, firstAssertion.show())
 

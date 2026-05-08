@@ -76,7 +76,7 @@ fun RaireResultsContestAuditJson.import(Nc: Int, Np: Int): RaireContestWithAsser
         Ncast = Nc - Np,
         undervotes = 0,
     )
-    return RaireContestWithAssertions(contest, assertions, Nc)
+    return RaireContestWithAssertions(contest, assertions, false, Nc)
 }
 
 @Serializable

@@ -398,7 +398,7 @@ class TestClcaAssorter {
 
         val info = ContestInfo("standard", 0, listToMap("A", "B"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val cvrs = makeCvrsByExactMean(N, cvrMean)
-        val contestUA = makeContestUAfromCvrs(info, cvrs)
+        val contestUA = makeContestUAfromCvrs(info, cvrs, NpopIn=cvrs.size+2)
         val compareAssertion = contestUA.clcaAssertions.first()
         val cassorter = compareAssertion.cassorter
 

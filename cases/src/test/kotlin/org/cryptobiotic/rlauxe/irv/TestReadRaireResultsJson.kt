@@ -206,6 +206,6 @@ class TestReadRaireResultsJson {
 fun RaireContestWithAssertions.makeAssorters(): List<RaireAssorter> {
     return this.rassertions.map {
         val mean = margin2mean(it.marginInVotes.toDouble() / this@makeAssorters.contest.Nc())
-        RaireAssorter(this@makeAssorters.contest.info(), it, ).setDilutedMean(mean)
+        RaireAssorter(this@makeAssorters.contest.info(), it, ).setMeans(mean, mean)
     }
 }

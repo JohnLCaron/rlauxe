@@ -36,7 +36,7 @@ class TestCvrs {
             .addCvr().addContest("AvB", "4").ddone()
             .addCvr().addContest("AvB", "4").ddone()
             .build()
-        val contestUA = makeContestUAfromCvrs(info, cvrs, true, true)
+        val contestUA = makeContestUAfromCvrs(info, cvrs)
         assertEquals(1, contestUA.contest.winners().size)
         assertEquals(11, contestUA.Nc)
 
@@ -58,7 +58,7 @@ class TestCvrs {
             assertEquals(it, cvrs2[idx])
         }
         assertEquals(cvrs, cvrs2)
-        val contestUA2 = makeContestUAfromCvrs(info, cvrs2, true, true)
+        val contestUA2 = makeContestUAfromCvrs(info, cvrs2, true)
         assertEquals(1, contestUA2.contest.winners().size)
         assertEquals(11, contestUA2.Nc)
 

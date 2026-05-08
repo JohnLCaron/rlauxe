@@ -210,7 +210,7 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
     }
 
     // use RaireAssorter with an ClcaAssorterOneAudit
-    setPoolAssorterAveragesForRaire(listOf(rcontestUA), oneAuditPools)
+    setPoolAssorterAveragesForRaire(listOf(rcontestUA), oneAuditPools, useDilutedMargin = false)
 
     val candidateIdxs = info.candidateIds.mapIndexed { idx, candidateId -> idx } // TODO use candidateIdToIndex?
     val irvCount = IrvCount(votes.votes, candidateIdxs)
@@ -231,6 +231,7 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
 fun setPoolAssorterAveragesForRaire(
     oaContests: List<ContestWithAssertions>,
     pools: List<CardPool>, // poolId -> pool
+    useDilutedMargin: Boolean,
 ) {
     val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
 
@@ -238,7 +239,6 @@ fun setPoolAssorterAveragesForRaire(
     // create the clcaAssertions and add then to the oaContests
     oaContests.filter { it.isIrv }. forEach { oaContest ->
         val contestId = oaContest.id
-        val info = oaContest.contest.info()
         val clcaAssertions = oaContest.assertions.map { assertion ->
             val raireAssorter = assertion.assorter as RaireAssorter
             val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
@@ -250,8 +250,8 @@ fun setPoolAssorterAveragesForRaire(
                     assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                 }
             }
-            val oaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter,
-                poolAverages = AssortAvgsInPools(assortAverages))
+            val oaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, poolAverages = AssortAvgsInPools(assortAverages),
+                useDilutedMargin = useDilutedMargin)
 
             oaAssorter.oaAssortRates = oneAuditErrorsFromPools.oaErrorRatesIrv(oaContest, oaAssorter, raireAssorter)
 

@@ -252,6 +252,9 @@ data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double
 
     override fun winner() = winner
     override fun loser() = -1
+    override fun reportedMargin(): Double {
+        TODO("Not yet implemented")
+    }
 
     override fun dilutedMean() = reportedMean
     override fun dilutedMargin() = mean2margin(reportedMean)

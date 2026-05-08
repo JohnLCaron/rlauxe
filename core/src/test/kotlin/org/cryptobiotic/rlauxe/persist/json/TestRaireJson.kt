@@ -85,7 +85,7 @@ class TestRaireJson {
             // mapOf(1 to 111, 2 to 222, 3 to 333)
         )
         val mean = margin2mean(rassertion.marginInVotes.toDouble() / 1000)
-        val target = RaireAssorter(info, rassertion).setDilutedMean(mean)
+        val target = RaireAssorter(info, rassertion).setMeans(mean, mean)
 
         val json = target.publishJson()
         val roundtrip = json.import(info)
@@ -117,5 +117,5 @@ fun makeRaireUA(): RaireContestWithAssertions {
         // mapOf(1 to 1, 2 to 2, 3 to 3)
     )
 
-    return RaireContestWithAssertions(contest, rassertions=listOf(assert1, assert2), contest.Nc)
+    return RaireContestWithAssertions(contest, rassertions=listOf(assert1, assert2), false, contest.Nc)
 }

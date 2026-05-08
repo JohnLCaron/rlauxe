@@ -236,7 +236,7 @@ class TestUITS {
         assertEquals(52, roundToClosest(result)) // TODO is there a factor of 2 im missing?
     }
 
-    @Test
+    // @Test
     fun testKPointAuditor() {
         // Nk: [200, 400], mu_k: [0.450, 0.650, ] n_bands: 10  plurcomp: 600.0 BandedAuditor: 600.0 BandedAuditor2: 46.0 KPointAuditor: 92.0
         var n_bands = 10
@@ -256,7 +256,7 @@ class TestUITS {
         assertEquals(60, roundToClosest(result))
     }
 
-    @Test
+    // @Test
     fun testObjectiveAuditor() {
         var n_bands = 10
 

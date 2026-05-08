@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.math.ln
 
@@ -36,9 +35,12 @@ private val logger = KotlinLogging.logger("ClcaAssorter")
 open class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
-    val check: Boolean = true,
+    val hasStyle: Boolean = true,
+    check: Boolean = true,
 ) {
-    val assorterMargin = assorter.dilutedMargin() // dilutedMargin of the primitive assorter; note its only used in dilutedMargin / assorter.upperBound()
+    // in SHANGRLA 3.2, we have "Define v ≡ 2Āc − 1, the reported assorter margin."
+    // see docs/notes/clcaNotes.md
+    val assorterMargin = if (hasStyle) assorter.reportedMargin() else assorter.dilutedMargin() // if (useDilutedMargin) assorter.dilutedMargin() else assorter.reportedMargin()
 
     open fun classname() = this::class.simpleName
 
@@ -53,10 +55,9 @@ open class ClcaAssorter(
     // u = 2.0 / (2.0 - assorterMargin / assorter.upperBound())
 
     init {
-        val reportedAssortAvg = assorter.dilutedMean() // ?? what used for ??
         if (check) { // suspend checking for some tests that expect to fail
-            require(reportedAssortAvg >= 0.5) {
-                "*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($reportedAssortAvg) must be >= .5"
+            require(assorterMargin >= 0.0) {
+                "*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($assorterMargin) must be >= 0"
             }
             // the math requires this; otherwise divide by negative number flips the inequality
             require(noerror >= 0.5) {
@@ -137,7 +138,7 @@ open class ClcaAssorter(
     // [2, (fol+1+1)/(fol+1), (2fol+2-1)/(fol+1),  1, (fol+1-1)/(fol+1), 1/(fol+1), 0] * noerror
     // [2, (fol+2)/(fol+1), (2*fol+1)/(fol+1),  1, fol/(fol+1), 1/(fol+1), 0] * noerror
 
-    // open fun bassort(mvr: CardIF, cvr:CardIF, hasCompleteCvrs: Boolean = this.hasCompleteCvrs): Double {
+    // TODO use instance variable for hasStyle vs card.hasStyle()
     open fun bassort(mvr: CvrIF, cvr:CvrIF, hasStyle:Boolean): Double {
         val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi eq (1)
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
@@ -225,7 +226,9 @@ open class ClcaAssorter(
 
         val mvr_assort =
             if (mvr.isPhantom()) 0.0
-            else if (!mvr.hasContest(info.id)) { if (hasStyle) 0.0 else 0.5 }
+            else if (!mvr.hasContest(info.id)) {
+                if (hasStyle) 0.0 else 0.5
+            }
             else this.assorter.assort(mvr, usePhantoms = false)
 
         //         cvr_assort = (
@@ -242,7 +245,7 @@ open class ClcaAssorter(
         appendLine("  assorter=${assorter.desc()}")
         append("  dilutedMargin=${dfn(assorterMargin, 8)} dilutedMean=${dfn(margin2mean(assorterMargin), 8)}")
         append(" assortUpper=${dfn(assorter.upperBound(), 8)}")
-        append(" noerror=${dfn(noerror, 8)}  nomargin=${dfn(mean2margin(noerror), 8)}")
+        append(" noerror=${dfn(noerror, 8)}")
     }
 
     fun shortName() = assorter.shortName()

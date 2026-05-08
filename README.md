@@ -455,7 +455,7 @@ these choices are reviewed by the human auditors and may be overridden.
 Before the audit begins:
 1. Any contest whose margin in votes is less than its number of phantom cards is removed from the audit with failure code _TooManyPhantoms_.
 2. If _minRecountMargin_ is set, a contest whose recount margin is less than _minRecountMargin_ is removed from the audit with failure code MinMargin.
-3. If _minMargin_ is set, a contest whose diluted margin is less than _minMargin_ is removed from the audit with failure code MinMargin.
+3. If _minMargin_ is set, a contest whose reported margin is less than _minMargin_ is removed from the audit with failure code MinMargin.
 
 For each round:
 1. If _maxSamplePct_ is set, a contest whose estimated sample size is greater than _maxSamplePct * Npop_ is removed from the audit with failure code FailMaxSamplesAllowed.

@@ -27,6 +27,7 @@ class CreateBoulderElection25(
     val export: BoulderCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
+    val hasStyle: Boolean,
 ): ElectionBuilder {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
     val infoList = makeContestInfo().sortedBy{ it.id }
@@ -71,7 +72,7 @@ class CreateBoulderElection25(
         val npops = tabulateNpops(allCvrs, infoList)
         this.ncards = allCvrs.size
 
-        contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true, )
+        contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true, hasStyle = hasStyle)
             else makeOneAuditContests(contests, npops, cardPools)
 
         val totalRedactedBallots = cardPools.sumOf { it.ncards() }

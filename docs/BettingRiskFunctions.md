@@ -84,7 +84,7 @@ For now we let the user choose maxLoss, and set λmax accordingly.
 ## Betting when there are CLCA errors
 
 If there were never any errors, we would always place the maximum bet, and our sample size would always be at a minimum,
-depending only on the diluted margin of the assorter. What should we bet in the possible presence of errors that occur 
+depending only on the reported margin of the assorter. What should we bet in the possible presence of errors that occur 
 randomly in the sequence?
 
 Our betting strategy is a generalized form of AdaptiveBetting from the [COBRA paper](https://arxiv.org/pdf/2304.01010). 

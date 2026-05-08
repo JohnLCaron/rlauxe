@@ -108,8 +108,9 @@ data class IrvContest(
 class RaireContestWithAssertions(
     contest: IrvContest,
     val rassertions: List<RaireAssertion>,
+    useDilutedMargin: Boolean,
     NpopIn: Int,
-): ContestWithAssertions(contest, isClca=true, NpopIn) {
+): ContestWithAssertions(contest, isClca=true, useDilutedMargin, NpopIn) {
     val candidates =  contest.info.candidateIds
 
     init {
@@ -122,8 +123,9 @@ class RaireContestWithAssertions(
 
     fun makeRairePollingAssertions(): List<Assertion> {
         return rassertions.map { rassertion ->
+            val reportedMean = margin2mean(rassertion.marginInVotes.toDouble() / Nc)
             val dilutedMean = margin2mean(rassertion.marginInVotes.toDouble() / Npop)
-            val assorter = RaireAssorter(contest.info(), rassertion).setDilutedMean(dilutedMean)
+            val assorter = RaireAssorter(contest.info(), rassertion).setMeans(reportedMean, dilutedMean)
             Assertion(contest.info(), assorter)
         }
     }
@@ -171,7 +173,7 @@ class RaireContestWithAssertions(
                 Ncast = Ncast,
                 undervotes = undervotes,
             )
-            return RaireContestWithAssertions(contest, assertions, Npop)
+            return RaireContestWithAssertions(contest, assertions, useDilutedMargin=false, Npop)
         }
     }
 }
@@ -293,10 +295,12 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     val remainingIdx: IntArray = remaining.map { info.candidateIdToIdx[it]!! }.toIntArray() // candidate Indices
     val isNEB = rassertion.assertionType == RaireAssertionType.winner_only
 
-    var dilutedMean: Double = 0.0
+    private var reportedMargin: Double = 0.0
+    private var dilutedMargin: Double = 0.0
 
-    fun setDilutedMean(mean: Double): RaireAssorter {
-        this.dilutedMean = mean
+    fun setMeans(reportedMean: Double, dilutedMean: Double): RaireAssorter {
+        this.reportedMargin = mean2margin(reportedMean)
+        this.dilutedMargin = mean2margin(dilutedMean)
         return this
     }
 
@@ -333,8 +337,9 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     override fun upperBound() = 1.0
     override fun winner() = rassertion.winnerId // candidate id, not index
     override fun loser() = rassertion.loserId   // candidate id, not index
-    override fun dilutedMargin() = mean2margin(dilutedMean)
-    override fun dilutedMean() = dilutedMean
+    override fun reportedMargin() = reportedMargin
+    override fun dilutedMargin() = dilutedMargin
+
     override fun shortName() = "${rassertion.assertionType.shortName} ${winner()}/${loser()}" // TODO may have same win/lose but different remaining;
                                                                                               //   check for duplicate name and mark (1), (2), etc
 
@@ -375,6 +380,34 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     }
 
     override fun toString() = desc()
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is RaireAssorter) return false
+
+        if (contestId != other.contestId) return false
+        if (isNEB != other.isNEB) return false
+        if (reportedMargin != other.reportedMargin) return false
+        if (dilutedMargin != other.dilutedMargin) return false
+        if (info != other.info) return false
+        if (rassertion != other.rassertion) return false
+        if (remaining != other.remaining) return false
+        if (!remainingIdx.contentEquals(other.remainingIdx)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = contestId
+        result = 31 * result + isNEB.hashCode()
+        result = 31 * result + reportedMargin.hashCode()
+        result = 31 * result + dilutedMargin.hashCode()
+        result = 31 * result + info.hashCode()
+        result = 31 * result + rassertion.hashCode()
+        result = 31 * result + remaining.hashCode()
+        result = 31 * result + remainingIdx.contentHashCode()
+        return result
+    }
+
 }
 
 // if candidate not ranked, return 0, else rank (1 based)

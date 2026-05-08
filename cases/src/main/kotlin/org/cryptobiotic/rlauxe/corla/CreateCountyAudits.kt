@@ -12,26 +12,18 @@ import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterator
-import org.cryptobiotic.rlauxe.audit.MvrsToCardsWithBatchNameIterator
+import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.audit.createElectionRecord
 import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromBallotStyle
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
-import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.TransformingIterator
-import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import kotlin.collections.associateBy
@@ -45,7 +37,8 @@ class CreateCountyAudits(
     val countyName: String,
     val auditdir: String,
     val stateElection: ColoradoCountyElection,
-    val countyContestTab: CountyContestTab
+    val countyContestTab: CountyContestTab,
+    val hasStyle: Boolean,
 ): ElectionBuilder {
     val publisher = Publisher(auditdir)
     val ncards: Int
@@ -80,7 +73,7 @@ class CreateCountyAudits(
         val npopMapm: Map<Int, Int> = manifestTabs.mapValues { it.value.ncardsTabulated }
         val npopMap: Map<Int, Int> = builders.associate { it.info.id to (it.Npop ?: npopMapm[it.info.id] ?: 1) }
 
-        contestsUA = ContestWithAssertions.make(contests, npopMap, isClca = true)
+        contestsUA = ContestWithAssertions.make(contests, npopMap, isClca = true, hasStyle)
     }
 
     override fun electionInfo(): ElectionInfo {
@@ -136,7 +129,7 @@ class CreateCountyAudits(
                     useNc = totalVotes
                 }
                 Nc = useNc
-                Npop = useNc // corlaContestBuilder.contestRound.ballotCardCount
+                Npop = corlaContestBuilder.contestRound.ballotCardCount
             } else { // we dont know the Nc or Npop by County....; could pass in the division of Nc (proportional to voteCount)? barf
                 Nc = totalVotes
             }
@@ -184,7 +177,9 @@ fun createCountyAudits(
     ) */
 
     wantCounties.map { countyName ->
-        val election = CreateCountyAudits(countyName, "$topdir/$countyName/audit", countyElection, contestTabByCounty[countyName]!!)
+        val election = CreateCountyAudits(countyName, "$topdir/$countyName/audit", countyElection,
+            contestTabByCounty[countyName]!!,
+            hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
 
         createElectionRecord(election, auditDir = election.auditdir, clear = false)
         val config = Config(election.electionInfo(), creationConfig, roundConfig)

@@ -11,7 +11,7 @@ class CreateColoradoPolling (
     countyElection: ColoradoCountyElection,
     auditdir: String,
     pollingMode: PollingMode,
-): CreateColoradoElection(countyElection, AuditType.POLLING, auditdir, pollingMode=pollingMode) {
+): CreateColoradoElection(countyElection, AuditType.POLLING, auditdir, pollingMode=pollingMode, hasStyle = true) {
 
     val contestsPolling: List<ContestWithAssertions>
 

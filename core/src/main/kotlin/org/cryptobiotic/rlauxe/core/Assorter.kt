@@ -34,8 +34,10 @@ interface AssorterIF {
     fun winner(): Int  // candidate id
     fun loser(): Int   // candidate id
 
+    fun reportedMargin(): Double
     fun dilutedMargin(): Double
-    fun dilutedMean(): Double
+    fun reportedMean(): Double = margin2mean(reportedMargin())
+    fun dilutedMean(): Double = margin2mean(dilutedMargin())
 
     // only used for CLCA
     fun noerror(): Double  {
@@ -55,11 +57,13 @@ interface AssorterIF {
 }
 
 /** See SHANGRLA, section 2.1, p.4 */
-open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int): AssorterIF {
-    var dilutedMean: Double = 0.0
+class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int): AssorterIF {
+    var dilutedMargin: Double = 0.0
+    var reportedMargin: Double = 0.0
 
-    fun setDilutedMean(mean: Double): PluralityAssorter {
-        this.dilutedMean = mean
+    fun setMargins(reportedMargin:Double, dilutedMargin: Double? = null): PluralityAssorter {
+        this.reportedMargin = reportedMargin
+        this.dilutedMargin = dilutedMargin ?: reportedMargin
         return this
     }
 
@@ -81,12 +85,12 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     }
 
     override fun upperBound() = 1.0 // upper bound of assorter.assort()
-    override fun desc() = " Plurality winner=$winner loser=$loser dilutedMargin=${pfn(dilutedMargin())} dilutedMean=${pfn(dilutedMean)}"
+    override fun desc() = " Plurality winner=$winner loser=$loser reportedMargin=${pfn(reportedMargin())} dilutedMargin=${pfn(dilutedMargin())}"
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
     override fun winner() = winner
     override fun loser() = loser
-    override fun dilutedMargin() = mean2margin(dilutedMean)
-    override fun dilutedMean() = dilutedMean
+    override fun dilutedMargin() = dilutedMargin
+    override fun reportedMargin() = reportedMargin
 
     override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null) {
@@ -107,7 +111,8 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
 
         if (winner != other.winner) return false
         if (loser != other.loser) return false
-        if (dilutedMean != other.dilutedMean) return false
+        if (reportedMargin != other.reportedMargin) return false
+        if (dilutedMargin != other.dilutedMargin) return false
         if (info != other.info) return false
 
         return true
@@ -116,7 +121,8 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     override fun hashCode(): Int {
         var result = winner
         result = 31 * result + loser
-        result = 31 * result + dilutedMean.hashCode()
+        result = 31 * result + reportedMargin.hashCode()
+        result = 31 * result + dilutedMargin.hashCode()
         result = 31 * result + info.hashCode()
         return result
     }
@@ -129,8 +135,9 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
             val winnerVotes = useVotes[winner] ?: 0
             val loserVotes = useVotes[loser] ?: 0
             val totalVotes = Npop ?: contest.Nc()
+            val reportedMargin = (winnerVotes - loserVotes) / contest.Nc().toDouble()
             val dilutedMargin = (winnerVotes - loserVotes) / totalVotes.toDouble()
-            return PluralityAssorter(contest.info(), winner, loser).setDilutedMean(margin2mean(dilutedMargin))
+            return PluralityAssorter(contest.info(), winner, loser).setMargins(reportedMargin, dilutedMargin)
         }
     }
 }

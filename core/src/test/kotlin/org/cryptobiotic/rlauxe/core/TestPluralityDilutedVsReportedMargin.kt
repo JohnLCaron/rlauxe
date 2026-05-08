@@ -12,13 +12,17 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
-// Does assorter.dilutedMargin()) equals cvr assort average ?
-class TestAssortAvgOld {
 
-    //// first pass
+class TestPluralityDilutedVsReportedMargins {
+
+    // Does assorter.dilutedMargin() or assorter.reportedMargin() equals cvr assort average ?
+    // reportedMargin agrees when you sample from Population of only cvrs containing the contest
+    // dilutedMargin agrees when you sample from dilutedPopulation
+    // if Nc = Npop, then dilutedMargin = reportedMargin
     @Test
-    fun testPluralityAssorter() {
-        val cvrs = CvrBuilders()
+    fun testPluralityAssorterAverage() {
+        val cvrBuilder = CvrBuilders()
+        val cvrs = cvrBuilder
             .addCvr().addContest("AvB", "0").ddone()
             .addCvr().addContest("AvB", "1").ddone()
             .addCvr().addContest("AvB", "2").ddone()
@@ -41,7 +45,9 @@ class TestAssortAvgOld {
         )
         val contest = makeContestFromCvrs(contestInfo, cvrs) // Nc is set as number of cvrs with that contest
         println(contest)
-        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+        assertEquals(cvrs.size, contest.Nc)
+        // make dilutedMargin different than reportedMargin by setting NpopIn != contest.Nc
+        val contestUA = ContestWithAssertions(contest, isClca = false, NpopIn = contest.Nc + 2).addStandardAssertions()
 
         val assertions = contestUA.assertions
         assertNotNull(assertions)
@@ -51,14 +57,38 @@ class TestAssortAvgOld {
             assertIs<PluralityAssorter>(it.assorter)
             assertEquals(1.0, it.assorter.upperBound())
 
-            val assortAvgMean = cvrs.map { cvr -> it.assorter.assort(cvr)}.average()
-            val reportedMean = margin2mean(it.assorter.dilutedMargin())
-            println("${it.assorter.shortName()}: assortAvgMean=${assortAvgMean} reportedMean=${reportedMean}")
-            assertEquals(assortAvgMean, reportedMean, doublePrecision)
+            val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr)}.average()
+            println("${it.assorter.shortName()}: cvrMargin=${mean2margin(assortAvg)} reportedMargin=${it.assorter.reportedMargin()} dilutedMargin=${it.assorter.dilutedMargin()}")
+            assertEquals(mean2margin(assortAvg), it.assorter.reportedMargin(), doublePrecision)
+
+            val dilutedMean = margin2mean(it.assorter.dilutedMargin())
+            val reportedMean = margin2mean(it.assorter.reportedMargin())
+            println("${it.assorter.shortName()}: assortAvgMean=${assortAvg} reportedMean=${reportedMean} dilutedMean=${dilutedMean}")
+            assertEquals(assortAvg, reportedMean, doublePrecision)
 
             val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
-            assertEquals(assortAvgMean, margin2mean(calcMargin), doublePrecision)
-            assertEquals(it.assorter.dilutedMargin(), calcMargin, doublePrecision)
+            assertEquals(assortAvg, margin2mean(calcMargin), doublePrecision)
+            assertEquals(it.assorter.reportedMargin(), calcMargin, doublePrecision)
+        }
+
+        println()
+        val plusOtherCvrs = cvrBuilder
+            .addCvr().addContest("other", "0").ddone()
+            .addCvr().addContest("other", "1").ddone()
+            .build()
+        assertEquals(plusOtherCvrs.size, contestUA.Npop)
+
+        // for the dilutedMean to agree, you have to add 2 cvrs without that contest, since Npop = Nc+2
+        assertions.forEach {
+            val assortAvg = plusOtherCvrs.map { cvr -> it.assorter.assort(cvr)}.average()
+            println("${it.assorter.shortName()}: cvrMean=${assortAvg} reportedMean=${it.assorter.reportedMean()} dilutedMean=${it.assorter.dilutedMean()}")
+            assertEquals(assortAvg, it.assorter.dilutedMean(), doublePrecision)
+        }
+    }
+
+    fun showAverage(cvrs: List<Cvr>, assorter: AssorterIF) {
+        cvrs.forEach {
+            println("cvr=$it, assort= ${assorter.assort(it)}")
         }
     }
 
@@ -166,7 +196,7 @@ class TestAssortAvgOld {
         }
     }
 
-    //// second pass
+    //// CLCA
 
     @Test
     fun testMakeContestFromCvrsPlurality() {

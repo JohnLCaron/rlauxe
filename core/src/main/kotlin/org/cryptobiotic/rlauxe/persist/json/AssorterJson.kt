@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.irv.RaireAssorter
+import org.cryptobiotic.rlauxe.util.margin2mean
 
 // open class ClcaAssorter(
 //    val info: ContestInfo,
@@ -27,6 +28,7 @@ data class ClcaAssorterJson(
     val assorter: AssorterIFJson, // replicating the passorter
     val poolAverages: AssortAvgsInPoolsJson?, // consider putting these in another file ??
     val oaAssortRates: OneAuditAssortValueRatesJson?, // TODO may be very large, perhaps rehydrate from cardPool.csv ??
+    val useDilutedMargin: Boolean = false,
 )
 
 fun ClcaAssorter.publishJson() : ClcaAssorterJson {
@@ -35,7 +37,8 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
             "ClcaAssorterOneAudit",
             this.assorter.publishJson(),
             poolAverages.publishJson(),
-            oaAssortRates.publishJson()
+            oaAssortRates.publishJson(),
+            this.hasStyle,
         )
 
     } else {
@@ -44,6 +47,7 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
             this.assorter.publishJson(),
             null,
             null,
+            this.hasStyle,
         )
     }
 }
@@ -54,6 +58,7 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
             ClcaAssorter(
                 info,
                 this.assorter.import(info),
+                this.useDilutedMargin,
             )
 
         "ClcaAssorterOneAudit" -> {
@@ -61,6 +66,7 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
                 info,
                 this.assorter.import(info),
                 poolAverages!!.import(),
+                this.useDilutedMargin,
             )
             oaClcaAssorter.oaAssortRates = this.oaAssortRates!!.import()
             oaClcaAssorter
@@ -90,7 +96,8 @@ fun OneAuditAssortValueRatesJson.import() = OneAuditAssortValueRates(
 @Serializable
 data class AssorterIFJson(
     val className: String,
-    val reportedMean: Double,
+    val reportedMargin: Double,
+    val dilutedMargin: Double,
     val winner: Int,
     val loser: Int? = null,
     val minFraction: Double? = null,
@@ -104,14 +111,16 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is PluralityAssorter ->
             AssorterIFJson(
                 "PluralityAssorter",
-                reportedMean = this.dilutedMean(),
+                reportedMargin = this.reportedMargin(),
+                dilutedMargin = this.dilutedMargin(),
                 this.winner,
                 this.loser,
             )
         is RaireAssorter ->
             AssorterIFJson(
                 "RaireAssorter",
-                reportedMean = this.dilutedMean(),
+                reportedMargin = this.reportedMargin(),
+                dilutedMargin = this.dilutedMargin(),
                 this.rassertion.winnerId,
                 this.rassertion.loserId,
                 rassertion = this.rassertion.publishJson(),
@@ -119,7 +128,8 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is DHondtAssorter ->
             AssorterIFJson(
                 "DHondtAssorter",
-                reportedMean = this.dilutedMean(),
+                reportedMargin = this.reportedMargin(),
+                dilutedMargin = this.dilutedMargin(),
                 this.winner,
                 this.loser,
                 lastSeatWon = this.lastSeatWon,
@@ -128,14 +138,16 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is AboveThreshold ->
             AssorterIFJson(
                 "AboveThreshold",
-                reportedMean = this.dilutedMean(),
+                reportedMargin = this.reportedMargin(),
+                dilutedMargin = this.dilutedMargin(),
                 winner = this.candId,
                 minFraction = this.t,
             )
         is BelowThreshold ->
             AssorterIFJson(
                 "UnderThreshold",
-                reportedMean = this.dilutedMean(),
+                reportedMargin = this.reportedMargin(),
+                dilutedMargin = this.dilutedMargin(),
                 winner = this.candId,
                 minFraction = this.t,
             )
@@ -150,14 +162,14 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
                 info,
                 this.winner,
                 this.loser!!)
-            .setDilutedMean(this.reportedMean)
+            .setMargins(this.reportedMargin, this.dilutedMargin)
 
         "RaireAssorter" ->
             // data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion): AssorterIF {
             RaireAssorter(
                 info,
                 this.rassertion!!.import())
-            .setDilutedMean(this.reportedMean)
+            .setMeans(margin2mean(this.reportedMargin), margin2mean(this.dilutedMargin))
 
         "DHondtAssorterIF",
         "DHondtAssorter" ->
@@ -167,21 +179,21 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
                 this.loser!!,
                 lastSeatWon = this.lastSeatWon!!,
                 firstSeatLost = this.firstSeatLost!!)
-            .setDilutedMean(this.reportedMean)
+           .setMeans(margin2mean(this.reportedMargin), margin2mean(this.dilutedMargin))
 
         "AboveThreshold" ->
             AboveThreshold(
                 info,
                 this.winner,
                 this.minFraction!!)
-             .setDilutedMean(this.reportedMean)
+            .setMeans(margin2mean(this.reportedMargin), margin2mean(this.dilutedMargin))
 
         "UnderThreshold" ->
             BelowThreshold(
                 info,
                 this.winner,
                 this.minFraction!!)
-            .setDilutedMean(this.reportedMean)
+            .setMeans(margin2mean(this.reportedMargin), margin2mean(this.dilutedMargin))
 
         else -> throw RuntimeException("unknown class name ${this.className}")
     }

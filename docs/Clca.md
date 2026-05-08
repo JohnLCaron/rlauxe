@@ -1,5 +1,5 @@
 # CLCA - Card Level Comparison Audits
-_last changed 01/28/26_
+_last changed 05/07/26_
 
 ## CLCA Assorter
 
@@ -59,7 +59,7 @@ and so B is an half-average assorter.
 
 Notes
 * The comparison assorter B needs Ā(c) ≡ the average CVR assort value > 0.5.
-* Ā(c) should have the diluted margin as the denominator, So N = Npop, the size of the population that the contest is drawn from.
+* Ā(c) should have the reported margin as the denominator.
 * If overstatement error is always zero (no errors in CRV), the assort value is always
 
   ````

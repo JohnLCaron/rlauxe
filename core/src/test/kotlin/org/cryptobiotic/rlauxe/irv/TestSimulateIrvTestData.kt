@@ -80,7 +80,7 @@ class TestSimulateIrvTestData {
         println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
-        println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")
+        println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean())}")
 
         val cvrTab = tabulateCvrs(cvrs.iterator(), infos).values.first()
         val irvVotes = cvrTab.irvVotes.makeVotes(target.ncandidates)

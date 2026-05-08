@@ -30,6 +30,7 @@ class CreateBoulderElection(
     val sovo: BoulderStatementOfVotes,
     val distributeOvervotes: List<Int> = listOf(0, 63), // maybe no default,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
+    val hasStyle: Boolean,
 ): ElectionBuilder {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
     val infoList = makeContestInfo().sortedBy{ it.id }
@@ -82,7 +83,7 @@ class CreateBoulderElection(
         val npops = tabulateNpops(allCvrs, infoList)
         this.ncards = allCvrs.size
 
-        contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true, )
+        contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true, hasStyle)
             else makeOneAuditContests(contests, npops, cardPoolBuilders)
 
         val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
@@ -316,7 +317,7 @@ fun createBoulderElection(
     sovoFile: String,
     auditdir: String,
     creation: AuditCreationConfig,
-    round: AuditRoundConfig,
+    roundConfig: AuditRoundConfig,
     distributeOvervotes: List<Int>, // maybe no default
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     startFirstRound: Boolean = true,
@@ -331,12 +332,13 @@ fun createBoulderElection(
     val election = if (version == "2025")
         CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource)
     else
-        CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource)
+        CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource,
+            hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
 
     createElectionRecord(election, auditDir = auditdir)
     println("CreateBoulderElection took $stopwatch")
 
-    val config = Config(election.electionInfo(), creation, round)
+    val config = Config(election.electionInfo(), creation, roundConfig)
     createAuditRecord(config, election, auditDir = auditdir)
 
     if (startFirstRound) {
@@ -352,7 +354,7 @@ fun createBoulderElectionWithSovo(
     sovo: BoulderStatementOfVotes,
     auditdir: String,
     creation: AuditCreationConfig,
-    round: AuditRoundConfig,
+    roundConfig: AuditRoundConfig,
     distributeOvervotes: List<Int>,
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
 ): Result<AuditRoundIF, ErrorMessages> {
@@ -364,12 +366,14 @@ fun createBoulderElectionWithSovo(
     val election = if (version == "2025")
         CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource)
     else
-        CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource)
+        CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource,
+            hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
+
 
     createElectionRecord(election, auditDir = auditdir)
     println("CreateBoulderElection took $stopwatch")
 
-    val config = Config(election.electionInfo(), creation, round)
+    val config = Config(election.electionInfo(), creation, roundConfig)
     createAuditRecord(config, election, auditDir = auditdir)
 
     val result = startFirstRound(auditdir)

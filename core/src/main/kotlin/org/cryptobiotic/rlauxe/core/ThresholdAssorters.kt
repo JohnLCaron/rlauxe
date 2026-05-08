@@ -51,10 +51,13 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     val lowerg = (t-1) // aka 'a'
     val upperg = t
     val c = -1.0 / (2 * lowerg)  // 1 / 2(1-t)
-    var dilutedMean: Double = 0.0
 
-    fun setDilutedMean(mean: Double): BelowThreshold {
-        this.dilutedMean = mean
+    private var reportedMargin: Double = 0.0
+    private var dilutedMargin: Double = 0.0
+
+    fun setMeans(reportedMean: Double, dilutedMean: Double): BelowThreshold {
+        this.reportedMargin = mean2margin(reportedMean)
+        this.dilutedMargin = mean2margin(dilutedMean)
         return this
     }
 
@@ -96,8 +99,8 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     override fun winner() = candId
     override fun loser() = -1
 
-    override fun dilutedMean() = dilutedMean
-    override fun dilutedMargin() = mean2margin(dilutedMean)
+    override fun reportedMargin() = reportedMargin
+    override fun dilutedMargin() = dilutedMargin
 
     fun showAssertionDifficulty(votesForWinner: Int, nvotes: Int): String {
         val pct = 100.0 * votesForWinner / nvotes
@@ -121,7 +124,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         val otherweight = h2(upperg) // c * t + 1/2 = -t / (2 * (t-1)) + 1/2 = [(2 * (t-1)) - t] / ((2 * (t-1)))
                                                     // (t - 2) / (2t - 2)
         val hmean =  (otherVotes * otherweight + nuetralVotes * 0.5) / N.toDouble()
-        require(hmean == dilutedMean)
+        require(hmean == dilutedMean())
 
         val margin = mean2margin(hmean)
         val ratio = margin / h2(upperg)
@@ -169,22 +172,59 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     } */
 
     override fun toString() = desc()
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is BelowThreshold) return false
+
+        if (candId != other.candId) return false
+        if (t != other.t) return false
+        if (id != other.id) return false
+        if (lowerg != other.lowerg) return false
+        if (upperg != other.upperg) return false
+        if (c != other.c) return false
+        if (reportedMargin != other.reportedMargin) return false
+        if (dilutedMargin != other.dilutedMargin) return false
+        if (info != other.info) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = candId
+        result = 31 * result + t.hashCode()
+        result = 31 * result + id
+        result = 31 * result + lowerg.hashCode()
+        result = 31 * result + upperg.hashCode()
+        result = 31 * result + c.hashCode()
+        result = 31 * result + reportedMargin.hashCode()
+        result = 31 * result + dilutedMargin.hashCode()
+        result = 31 * result + info.hashCode()
+        return result
+    }
 
     companion object {
-        fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Npop: Int): BelowThreshold {
+
+        fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int, Npop: Int? = null): BelowThreshold {
             val result = BelowThreshold(info, partyId, minFraction)
 
             val winnerVotes = votes[partyId] ?: 0
             val otherVotes = votes.filter { it.key != partyId }.values.sum()
-            val nuetralVotes = Npop - winnerVotes - otherVotes
 
-            val winnerweight = result.h2(result.lowerg) // should be 0
-            val otherweight = result.h2(result.upperg)
-            val hmean =  (otherVotes * otherweight + nuetralVotes * 0.5) / Npop.toDouble()
-            result.setDilutedMean(hmean)
+            val winnerweight = result.h2(result.upperg)
+            val otherweight = result.h2(result.lowerg) // should be 0
 
+            val reportedVotes = Nc
+            val nuetralVotesReported = reportedVotes - winnerVotes - otherVotes
+            val hmeanReported = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotesReported * 0.5) / reportedVotes
+
+            val dilutedVotes = Npop ?: Nc
+            val nuetralVotesDiluted = dilutedVotes - winnerVotes - otherVotes
+            val hmeanDiluted = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotesDiluted * 0.5) / dilutedVotes
+
+            result.setMeans(hmeanReported, hmeanDiluted)
             return result
         }
+
     }
 }
 
@@ -232,10 +272,13 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     val lowerg = -t
     val upperg = (1.0 - t)
     val c = -1.0 / (2 * lowerg)  // = 1/(2t)
-    var dilutedMean: Double = 0.0
 
-    fun setDilutedMean(mean: Double): AboveThreshold {
-        this.dilutedMean = mean
+    private var reportedMargin: Double = 0.0
+    private var dilutedMargin: Double = 0.0
+
+    fun setMeans(reportedMean: Double, dilutedMean: Double): AboveThreshold {
+        this.reportedMargin = mean2margin(reportedMean)
+        this.dilutedMargin = mean2margin(dilutedMean)
         return this
     }
 
@@ -267,7 +310,7 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     override fun shortName() = "AboveThreshold for '${info.candidateIdToName[winner()]}'"
 
     override fun desc() = buildString {
-        append("${shortName()}: dilutedMean=${pfn(dilutedMean)} noerror=${pfn(noerror() )}")
+        append("${shortName()}: reportedMargin=${pfn(reportedMargin)}  dilutedMargin=${pfn(dilutedMargin)} noerror=${pfn(noerror() )}")
         append(" g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
     }
 
@@ -275,9 +318,8 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
     override fun winner() = candId
     override fun loser() = -1
-
-    override fun dilutedMean() = dilutedMean
-    override fun dilutedMargin() = mean2margin(dilutedMean)
+    override fun reportedMargin() = reportedMargin
+    override fun dilutedMargin() = dilutedMargin
 
     override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null || N <= 0) {
@@ -303,6 +345,8 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     fun difficulty(votesForWinner: Int, nvotes: Int): Double {
         return votesForWinner - t * nvotes
     }
+
+
 
     /* Olivier has:
     # Assertion:
@@ -339,34 +383,78 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
     override fun toString() = desc()
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is AboveThreshold) return false
+
+        if (candId != other.candId) return false
+        if (t != other.t) return false
+        if (id != other.id) return false
+        if (lowerg != other.lowerg) return false
+        if (upperg != other.upperg) return false
+        if (c != other.c) return false
+        if (reportedMargin != other.reportedMargin) return false
+        if (dilutedMargin != other.dilutedMargin) return false
+        if (info != other.info) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = candId
+        result = 31 * result + t.hashCode()
+        result = 31 * result + id
+        result = 31 * result + lowerg.hashCode()
+        result = 31 * result + upperg.hashCode()
+        result = 31 * result + c.hashCode()
+        result = 31 * result + reportedMargin.hashCode()
+        result = 31 * result + dilutedMargin.hashCode()
+        result = 31 * result + info.hashCode()
+        return result
+    }
+
     companion object {
-        fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Npop: Int): AboveThreshold {
+        fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int, Npop: Int? = null): AboveThreshold {
             val result = AboveThreshold(info, partyId, minFraction)
 
             val winnerVotes = votes[partyId] ?: 0
             val otherVotes = votes.filter { it.key != partyId }.values.sum()
-            val nuetralVotes = Npop - winnerVotes - otherVotes
 
             val winnerweight = result.h2(result.upperg)
             val otherweight = result.h2(result.lowerg) // should be 0
-            val hmean = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotes * 0.5) / Npop.toDouble()
-            result.setDilutedMean(hmean)
+
+            val reportedVotes = Nc
+            val nuetralVotesReported = reportedVotes - winnerVotes - otherVotes
+            val hmeanReported = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotesReported * 0.5) / reportedVotes
+
+            val dilutedVotes = Npop ?: Nc
+            val nuetralVotesDiluted = dilutedVotes - winnerVotes - otherVotes
+            val hmeanDiluted = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotesDiluted * 0.5) / dilutedVotes
+
+            result.setMeans(hmeanReported, hmeanDiluted)
             return result
         }
 
-        fun makeFromVotes(contest: Contest, partyId: Int, Npop: Int?): AboveThreshold {
+        fun makeFromVotes(contest: Contest, partyId: Int, Npop: Int? = null): AboveThreshold {
             val result = AboveThreshold(contest.info, partyId, contest.info.minFraction!!)
 
             val votes = contest.votes()!!
             val winnerVotes = votes[partyId] ?: 0
             val otherVotes = votes.filter { it.key != partyId }.values.sum()
-            val totalVotes = Npop ?: contest.Nc
-            val nuetralVotes = totalVotes - winnerVotes - otherVotes
+
 
             val winnerweight = result.h2(result.upperg)
             val otherweight = result.h2(result.lowerg) // should be 0
-            val hmean = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotes * 0.5) / totalVotes.toDouble()
-            result.setDilutedMean(hmean)
+
+            val reportedVotes = contest.Nc
+            val nuetralVotesReported = reportedVotes - winnerVotes - otherVotes
+            val hmeanReported = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotesReported * 0.5) / reportedVotes
+
+            val dilutedVotes = Npop ?: contest.Nc
+            val nuetralVotesDiluted = dilutedVotes - winnerVotes - otherVotes
+            val hmeanDiluted = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotesDiluted * 0.5) / dilutedVotes
+
+            result.setMeans(hmeanReported, hmeanDiluted)
             return result
         }
     }

@@ -293,7 +293,7 @@ class TestShangrlaAssertions {
     @Test
     fun test_overstatement_plurality() { // agrees with SHANGRLA
         // winner = alice, loser = bob
-        val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1).setDilutedMean(margin2mean(0.2))
+        val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1).setMargins(0.2)
         val cassorterHasStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP)
 
         // mvr == cvr, always get noerror
@@ -361,7 +361,7 @@ class TestShangrlaAssertions {
     @Test
     fun test_overstatement_plurality_assort() { // agrees with SHANGRLA
         // winner = alice, loser = bob
-        val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1).setDilutedMean(margin2mean(0.2))
+        val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1).setMargins(0.2)
         val cassorterHasStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP)
 
         // mvr == cvr, always get noerror

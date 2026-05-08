@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestAssortAvg {
+class TestRunningAssortAvg {
 
     @Test
     fun testMakeCvrsByExactMean() {
@@ -143,6 +143,7 @@ class TestAssortAvg {
 
 val show = false
 
+// each time you add a card, check that running assort mean equals running (winnerCount - loserCount) / ncards.toDouble()
 class AssorterMarginTracker(val contestId: Int, val assorter: AssorterIF) {
     val welford = Welford()
     val winner = assorter.winner()

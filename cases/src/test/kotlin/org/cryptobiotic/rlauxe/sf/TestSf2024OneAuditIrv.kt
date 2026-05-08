@@ -79,7 +79,7 @@ class TestSf2024OneAuditIrv() {
         println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
-        println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")
+        println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean())}")
 
         // the cards in the pools dont have votes
         val cardTab = tabulateAuditableCards(cardManifest.cards.iterator(), infos24).values.first()
@@ -128,7 +128,7 @@ class TestSf2024OneAuditIrv() {
         println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
-        println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")
+        println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean())}")
 
         val allTab = tabulateAuditableCards(mvrs.iterator(), infos24).values.first()
         val allVotes = allTab.irvVotes.makeVotes(rcontestUA.ncandidates)
@@ -165,7 +165,7 @@ class TestSf2024OneAuditIrv() {
         println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
-        println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")
+        println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean())}")
 
         val allTab = tabulateAuditableCards(mvrs.iterator(), infos24).values.first()
         val allVotes = allTab.irvVotes.makeVotes(rcontestUA.ncandidates)
@@ -231,7 +231,7 @@ class TestSf2024OneAuditIrv() {
 
         val passorter = minAssertion.assorter
         val rassorter = minAssertion.assorter as RaireAssorter
-        println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")
+        println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean())}")
 
         val nonpoolTab = ContestTabulation(rcontestUA.contest.info())
         val assortAvg = AssortAvg()

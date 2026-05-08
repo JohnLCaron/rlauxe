@@ -123,11 +123,11 @@ data class DhondtBuilder(
         parties.forEach { party ->
             if (party.isBelowMin) {
                 // decide which is cheaper
-                val bt = BelowThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, this.Nc)
+                val bt = BelowThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, this.Nc,)
 
                 val partyCopy = party.copy()
                 partyCopy.firstSeatLost = 1
-                val dh = DHondtAssorter.makeFrom(info, Nc, winner = lastWinner, loser = partyCopy)
+                val dh = DHondtAssorter.makeFrom(info, winner = lastWinner, loser = partyCopy, Nc)
 
                 val useAssorter = if (useBt || (bt.noerror() > dh.noerror())) bt else dh
                 contest.assorters.add(useAssorter)

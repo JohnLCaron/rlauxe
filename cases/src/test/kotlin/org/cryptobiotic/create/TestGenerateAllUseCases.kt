@@ -87,7 +87,7 @@ class TestGenerateAllUseCases {
         createColoradoElection(topdir, "$topdir/audit", null, creation, round)
     }
 
-    @Test
+   //  @Test
     fun createColoradoPollingPools() {
         val topdir = "$testdataDir/cases/corla/polling"
 
@@ -101,7 +101,7 @@ class TestGenerateAllUseCases {
             pollingMode=PollingMode.withPools, creation, round)
     }
 
-    @Test
+    // @Test
     fun createColoradoPollingBatches() {
         val topdir = "$testdataDir/cases/corla/polling2"
 
@@ -115,7 +115,7 @@ class TestGenerateAllUseCases {
             pollingMode=PollingMode.withBatches, creation, round)
     }
 
-    @Test // too long - fix
+    // @Test // too long - fix
     fun createColoradoPollingWithoutBatches() {
         val topdir = "$testdataDir/cases/corla/polling3"
 

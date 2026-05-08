@@ -86,7 +86,7 @@ class TestSf2024OneAuditIrv() {
         println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
-        println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")
+        println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean())}")
 
         val allTab = tabulateAuditableCards(SubsetIterator(0, 2000, mvrsIterable.iterator()), infos24).values.first()
         val allVotes = allTab.irvVotes.makeVotes(rcontestUA.ncandidates)

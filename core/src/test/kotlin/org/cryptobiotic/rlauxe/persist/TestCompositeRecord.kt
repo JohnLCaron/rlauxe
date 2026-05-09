@@ -43,10 +43,11 @@ class TestCompositeRecord {
     }
 
     @Test
-    fun testReadCorla() {
+    fun testReadCorlaCounty() {
         val record = AuditRecord.read(corlaCounty)!!
         val countyAudit = record as CountyComposite
         println(countyAudit)
+        countyAudit.countyData.forEach { println(it) }
 
         val workflow = PersistedWorkflow(countyAudit, mvrWrite = false)
         val manager = workflow.mvrManager()
@@ -62,4 +63,5 @@ class TestCompositeRecord {
         println("****** found ${acomponent?.name()} ${acomponent?.javaClass?.simpleName}")
         println(acomponent)
     }
+
 }

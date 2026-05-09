@@ -102,8 +102,8 @@ class OneAuditClcaAssorter(
     info: ContestInfo,
     assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs
     val poolAverages: AssortAvgsInPools,
-    useDilutedMargin: Boolean,
-) : ClcaAssorter(info, assorter, useDilutedMargin) {
+    hasStyle: Boolean,
+) : ClcaAssorter(info, assorter, hasStyle) {
 
     override fun classname() = this::class.simpleName
 

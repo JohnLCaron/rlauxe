@@ -43,7 +43,7 @@ fun makeOneAuditContests(
 fun setPoolAssorterAverages(
     oaContests: List<ContestWithAssertions>,
     pools: List<CardPoolIF>, // poolId -> pool
-    useDilutedMargin: Boolean = false
+    hasStyle: Boolean = true
 ) {
     val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
 
@@ -65,7 +65,7 @@ fun setPoolAssorterAverages(
             }
             val oaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter,
                 poolAverages = AssortAvgsInPools(assortAverages),
-                useDilutedMargin=useDilutedMargin)
+                hasStyle=hasStyle)
 
             oaAssorter.oaAssortRates = oneAuditErrorsFromPools.oaErrorRates(oaContest, oaAssorter)
 

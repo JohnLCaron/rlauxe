@@ -30,7 +30,7 @@ class CreateBoulderElection(
     val sovo: BoulderStatementOfVotes,
     val distributeOvervotes: List<Int> = listOf(0, 63), // maybe no default,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
-    val hasStyle: Boolean,
+    val hasStyle: Boolean = true,
 ): ElectionBuilder {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
     val infoList = makeContestInfo().sortedBy{ it.id }
@@ -330,7 +330,7 @@ fun createBoulderElection(
     val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
 
     val election = if (version == "2025")
-        CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource)
+        CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource, hasStyle = true)
     else
         CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
@@ -364,7 +364,7 @@ fun createBoulderElectionWithSovo(
     val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
 
     val election = if (version == "2025")
-        CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource)
+        CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource, hasStyle = true)
     else
         CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent)

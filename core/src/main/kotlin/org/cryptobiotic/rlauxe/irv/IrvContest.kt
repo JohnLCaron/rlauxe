@@ -108,9 +108,9 @@ data class IrvContest(
 class RaireContestWithAssertions(
     contest: IrvContest,
     val rassertions: List<RaireAssertion>,
-    useDilutedMargin: Boolean,
+    hasStyle: Boolean = true,
     NpopIn: Int,
-): ContestWithAssertions(contest, isClca=true, useDilutedMargin, NpopIn) {
+): ContestWithAssertions(contest, isClca=true, hasStyle, NpopIn) {
     val candidates =  contest.info.candidateIds
 
     init {
@@ -173,7 +173,7 @@ class RaireContestWithAssertions(
                 Ncast = Ncast,
                 undervotes = undervotes,
             )
-            return RaireContestWithAssertions(contest, assertions, useDilutedMargin=false, Npop)
+            return RaireContestWithAssertions(contest, assertions, hasStyle=true, Npop)
         }
     }
 }

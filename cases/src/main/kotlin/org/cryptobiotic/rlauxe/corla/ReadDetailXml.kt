@@ -194,7 +194,7 @@ data class CountyVote(
 )
 
 fun readColoradoElectionDetail(filename : String) : ElectionDetailXml {
-    println("readColoradoElectionDetail filename = ${filename}")
+    // println("readColoradoElectionDetail filename = ${filename}")
 
     // gulp the entire file to a string
     val file = File(filename)

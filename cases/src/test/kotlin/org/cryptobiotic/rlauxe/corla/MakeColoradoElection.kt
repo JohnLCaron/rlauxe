@@ -22,16 +22,6 @@ import kotlin.test.fail
 
 class MakeColoradoElection {
 
-    val filename = "src/test/data/corla/2024audit/round3/contestComparison.csv"
-    val countyStyles = readContestComparisonCsv(filename)
-
-    val contestTabFile = "src/test/data/corla/2024audit/tabulateCounty.csv"
-    // val canonicalFile = "src/test/data/corla/2024audit/2024GeneralCanonicalList.csv"
-    val resultsFile = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
-    val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-    val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-    val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
-
     // @Test
     fun makeCountyAudits25() {
         val topdir = "$testdataDir/cases/corla25/county"
@@ -52,7 +42,7 @@ class MakeColoradoElection {
     @Test
     fun makeCountyAudits24() {
         val topdir = "$testdataDir/cases/corla/county"
-        val wantCounties = listOf("Boulder",  "El Paso", "La Plata", "Weld",)
+        val wantCounties = emptyList<String>() // listOf("Boulder",  "El Paso", "La Plata", "Weld",)
 
         val creationConfig = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val roundConfig = AuditRoundConfig(
@@ -68,17 +58,33 @@ class MakeColoradoElection {
     }
 
     @Test
-    fun makeColoradoClca() {
+    fun makeColoradoClcaUniform() {
+        val topdir = "$testdataDir/cases/corla/county"
+
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
+        val round = AuditRoundConfig(
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 200000,
+                sampling = Sampling.uniform),
+            ClcaConfig(), null)
+
+        createColoradoElection2(topdir, "$topdir/audit",
+            creation, round, name = "Corla24County", startFirstRound = false)
+    }
+
+    @Test
+    fun makeColoradoClcaConsistent() {
         val topdir = "$testdataDir/cases/corla/clca"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
-            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 200000),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 200000,
+                sampling = Sampling.consistent),
             ClcaConfig(), null)
 
         createColoradoElection(topdir, "$topdir/audit",
-            null, creation, round, name = "Corla24", startFirstRound = false)
+            null, creation, round, name = "Corla24", startFirstRound = true)
     }
 
     @Test

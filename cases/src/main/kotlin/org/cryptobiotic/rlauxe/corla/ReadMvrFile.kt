@@ -8,7 +8,8 @@ import java.nio.charset.Charset
 import kotlin.text.appendLine
 
 // cases/src/test/data/corla/2024audit/round1/contestComparison.csv
-// county_name,contest_name,imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,timestamp,cvr_id,audit_reason
+// county_name,contest_name,imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,
+//      timestamp,cvr_id,audit_reason
 // Adams,17th Judicial District Ballot Question 7B,101-101-7,52,"""Yes/For""","""Yes/For""",YES,uploaded,"",2024-11-19 09:44:18.62646,178977,
 // Adams,17th Judicial District Ballot Question 7B,101-130-14,14,"""Yes/For""","""Yes/For""",YES,uploaded,"",2024-11-19 09:49:44.148182,240137,
 // Adams,17th Judicial District Ballot Question 7B,101-146-54,65,"""No/Against""","""No/Against""",YES,uploaded,"",2024-11-19 09:54:41.65526,250284,
@@ -29,7 +30,7 @@ data class CountyStyles(val countyName: String) {
     }
 
     fun show()= buildString {
-        append("'$countyName' has ${styles.size} styles cardCount=$cardCount")
+        appendLine("'$countyName' has ${styles.size} styles cardCount=$cardCount")
         styles.values.forEach { appendLine("  $it")}
     }
 }
@@ -42,6 +43,16 @@ data class Style(val id: Int, val contests: Set<String>) {
 }
 
 ///////////////////////////////////////////////////////////////
+
+// over all counties
+data class ContestMvrs(val contestName: String) {
+    var countMvr = 0
+    var countStatewide = 0
+}
+
+data class CountyMvrs(val countyName: String) {
+    var countMvr = 0
+}
 
 data class Card(val cvrId: Int) {
     val lines = mutableListOf<ComparisonLine>()
@@ -65,6 +76,8 @@ data class Card(val cvrId: Int) {
     }
 
     fun county() = lines.first().countyName
+    // they only mark the statewide contests "statewide", but the entire ballot must have come from the statewide sampling
+    fun statewide() = lines.any { it.statewide }
 
     fun contests() : Set<String> {
         val contests = mutableSetOf<String>()
@@ -81,9 +94,10 @@ data class ComparisonLine(
     val cvrChoice: String,
     val mvrChoice: String,
     val cvrId: Int,
+    val statewide: Boolean,
 )
 
-fun readContestComparisonCsv(filename: String): List<CountyStyles> {
+fun readContestComparisonCsv(filename: String, cleanup: (String) -> String): CardComparisonResults {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT) // TODO
     val records = parser.iterator()
@@ -91,7 +105,7 @@ fun readContestComparisonCsv(filename: String): List<CountyStyles> {
     // we expect the first line to be the headers
     val headerRecord = records.next()
     val header = headerRecord.toList().joinToString(", ")
-    println("readContestComparisonCsv $header")
+    // println("readContestComparisonCsv from $filename")
 
     val cards = mutableMapOf<Int, Card>()
     var  count = 0
@@ -104,13 +118,14 @@ fun readContestComparisonCsv(filename: String): List<CountyStyles> {
                 // 6 consensus,record_type,audit_board_comment,timestamp,cvr_id,audit_reason
                 val compareLine = ComparisonLine(
                     line.get(0).trim(),
-                    line.get(1).trim(),
+                    cleanup(line.get(1).trim()),
                     line.get(2).trim(),
                     line.get(3).trim(),
                     line.get(4).trim(),
                     line.get(5).trim(),
                     line.get(10).toInt(),
-                )
+                    (line.get(11).trim() == "STATE_WIDE_CONTEST"),
+                    )
                 val card = cards.getOrPut(compareLine.cvrId) { Card(compareLine.cvrId) }
                 card.add(compareLine)
                 count++
@@ -127,7 +142,24 @@ fun readContestComparisonCsv(filename: String): List<CountyStyles> {
         ex.printStackTrace()
     }
     cards.values.forEach { card: Card -> card.validate() }
-    println("read ${cards.size} distinct cards with ${cards.values.sumOf{ it.contests().size } } total contests voted on")
+
+    // accumulate mvr counts by County, skip statewide
+    val countyMvrs = mutableMapOf<String, CountyMvrs>()
+    cards.values.filter { !it.statewide() }.forEach { card: Card ->
+        val line = card.lines.first()
+        val countyMvrs = countyMvrs.getOrPut(line.countyName) { CountyMvrs(line.countyName) }
+        countyMvrs.countMvr++
+    }
+
+    // accumulate mvr counts by Contest
+    val contestMvrs = mutableMapOf<String, ContestMvrs>()
+    cards.values.forEach { card: Card ->
+        card.lines.forEach { line ->
+            val contestMvr = contestMvrs.getOrPut(line.contestName) { ContestMvrs(line.contestName) }
+            if (card.statewide()) contestMvr.countStatewide++
+                                  else contestMvr.countMvr++
+        }
+    }
 
     // create the CountyStyles
     val stylesByCounty = mutableMapOf<String, CountyStyles>()
@@ -136,5 +168,11 @@ fun readContestComparisonCsv(filename: String): List<CountyStyles> {
         countyStyles.add(card.contests())
     }
 
-    return stylesByCounty.values.toList()
+    return CardComparisonResults(contestMvrs.values.toList(), countyMvrs.values.toList(), stylesByCounty.values.toList())
 }
+
+data class CardComparisonResults(
+    val contestMvrs: List<ContestMvrs>,
+    val countyMvrs: List<CountyMvrs>,
+    val stylesByCounty: List<CountyStyles>
+)

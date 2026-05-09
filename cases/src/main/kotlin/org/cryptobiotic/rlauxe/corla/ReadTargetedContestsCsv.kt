@@ -58,7 +58,7 @@ data class TargetedContestsCsv(
     }
 }
 
-fun readTargetedContestsCsv(filename: String): List<TargetedContestsCsv> {
+fun readTargetedContestsCsv(filename: String, cleanupContest: (String) -> String): List<TargetedContestsCsv> {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
@@ -80,7 +80,7 @@ fun readTargetedContestsCsv(filename: String): List<TargetedContestsCsv> {
             if (line.get(0).startsWith("The assumption")) break
             val tcc = TargetedContestsCsv(
                 countyName = line.get(0),         // contest_name,
-                contestName = line.get(1),         // contest_name,
+                contestName = cleanupContest(line.get(1).trim()),         // contest_name,
                 nwinners = clean(line.get(2)).toInt(),   // winners_allowed,
                 lowestWinner = clean(line.get(3)).toInt(), // ballot_card_count,contest_ballot_card_count,winners,min_margin,
                 highestLoser = clean(line.get(4)).toInt(), // contest_ballot_card_count

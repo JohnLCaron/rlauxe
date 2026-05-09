@@ -40,7 +40,7 @@ open class ClcaAssorter(
 ) {
     // in SHANGRLA 3.2, we have "Define v ≡ 2Āc − 1, the reported assorter margin."
     // see docs/notes/clcaNotes.md
-    val assorterMargin = if (hasStyle) assorter.reportedMargin() else assorter.dilutedMargin() // if (useDilutedMargin) assorter.dilutedMargin() else assorter.reportedMargin()
+    val assorterMargin = if (hasStyle) assorter.reportedMargin() else assorter.dilutedMargin()
 
     open fun classname() = this::class.simpleName
 

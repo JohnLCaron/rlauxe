@@ -106,7 +106,7 @@ data class CompositeRecord(
                         val auditDir = "${entry.toAbsolutePath()}/audit"
                         val publisher = Publisher(auditDir)
                         if (exists(publisher.electionInfoFile()) &&
-                            exists(publisher.cardManifestFile()) &&
+                            // exists(publisher.cardManifestFile()) &&
                             exists(publisher.contestsFile())) return true
                     }
                 }

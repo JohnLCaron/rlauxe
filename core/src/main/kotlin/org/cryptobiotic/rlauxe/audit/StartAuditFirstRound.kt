@@ -29,34 +29,42 @@ import kotlin.use
 private val logger = KotlinLogging.logger("StartAudit")
 
 // TODO pass in creation, round config
-fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: String, externalSortDir: String? = null, validate: Boolean = false) {
+fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: String, externalSortDir: String? = null,
+                      validate: Boolean = false, sortManifest: Boolean = true) {
     val publisher = Publisher(auditDir)
 
     writeAuditCreationConfigJsonFile(config.creation, publisher.auditCreationConfigFile())
     logger.info{"writeAuditCreationConfig to ${publisher.auditCreationConfigFile()}\n  ${config.creation}"}
 
     writeAuditRoundConfigJsonFile(config.round, publisher.auditRoundProtoFile())
-    logger.info{"writeAuditCreationConfig to ${publisher.auditRoundProtoFile()}\n  ${config.round}"}
+    logger.info{"writeAuditRoundProto to ${publisher.auditRoundProtoFile()}\n  ${config.round}"}
 
-    if (externalSortDir == null) {
-        sortManifestInternal(publisher, config.creation.seed)
-    } else {
-        sortManifestExternal(externalSortDir, publisher, config.creation.seed)
-    }
-
-    // save Mvrs for testing and diagnostics
-    // cant write the sorted mvrs until after sortedCards is written
-    if (config.election.mvrSource == MvrSource.testPrivateMvrs) {
-        val unsortedMvrs = election.createUnsortedMvrsInternal() // make electionBuilder add the batches ??
-        if (unsortedMvrs != null) {
-            writePrivateMvrsInternal(publisher, unsortedMvrs, election.cardStyles(), seed = config.creation.seed)
+    if (sortManifest) {
+        if (externalSortDir == null) {
+            sortManifestInternal(publisher, config.creation.seed)
         } else {
-            val unsortedCards = election.createUnsortedMvrsExternal()
-            if (unsortedCards != null && externalSortDir != null) {
-                writeSortedCardsExternal(externalSortDir, publisher.sortedMvrsFile(), unsortedCards, seed = config.creation.seed)
-                logger.info { "createAuditRecord wrotePrivateMvrs to ${publisher.sortedMvrsFile()}" }
+            sortManifestExternal(externalSortDir, publisher, config.creation.seed)
+        }
+
+        // save Mvrs for testing and diagnostics
+        // cant write the sorted mvrs until after sortedCards is written
+        if (config.election.mvrSource == MvrSource.testPrivateMvrs) {
+            val unsortedMvrs = election.createUnsortedMvrsInternal() // make electionBuilder add the batches ??
+            if (unsortedMvrs != null) {
+                writePrivateMvrsInternal(publisher, unsortedMvrs, election.cardStyles(), seed = config.creation.seed)
             } else {
-                logger.warn { "createAuditRecord did not create private mvrs; not available for ${election.javaClass} auditType ${config.auditType}" }
+                val unsortedCards = election.createUnsortedMvrsExternal()
+                if (unsortedCards != null && externalSortDir != null) {
+                    writeSortedCardsExternal(
+                        externalSortDir,
+                        publisher.sortedMvrsFile(),
+                        unsortedCards,
+                        seed = config.creation.seed
+                    )
+                    logger.info { "createAuditRecord wrotePrivateMvrs to ${publisher.sortedMvrsFile()}" }
+                } else {
+                    logger.warn { "createAuditRecord did not create private mvrs; not available for ${election.javaClass} auditType ${config.auditType}" }
+                }
             }
         }
     }

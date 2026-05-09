@@ -1,21 +1,13 @@
 package org.cryptobiotic.rlauxe.persist
 
-import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import com.github.michaelbull.result.unwrapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.audit.AuditRoundIF
-import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.audit.ContestRound
-import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.ErrorMessages
-import kotlin.io.path.Path
-import kotlin.io.path.exists
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.isDirectory
+import java.io.BufferedReader
+import java.io.File
 
 // interface AuditRecordIF {
 //    val location: String
@@ -46,6 +38,7 @@ class CountyComposite(
     rounds: List<AuditRound>,
     nmvrs: Int,
     override val componentRecords: List<AuditRecord>,
+    val countyData: List<CountyData>,  // for viewer
 ): AuditRecord(location, config, contests, rounds, nmvrs), CompositeRecordIF  {
 
     override fun findComponentWithName(name: String): AuditRecord? {
@@ -64,11 +57,16 @@ class CountyComposite(
         rounds.forEach{ appendLine(it)}
     }
 
+    fun countyData(): Map<String, CountyData> {
+        return countyData.associateBy { it. countyName }
+    }
+
     companion object {
         private val logger = KotlinLogging.logger("CountyComposite")
 
-        fun fromStateAndCounties(stateRecord: AuditRecord, countyRecords: List<AuditRecord>): CountyComposite {
-            return CountyComposite(stateRecord.location, stateRecord.config, stateRecord.contests, stateRecord.rounds, stateRecord.nmvrs, countyRecords)
+        fun fromStateAndCounties(stateRecord: AuditRecord, countyRecords: List<AuditRecord>, countyData: List<CountyData>): CountyComposite {
+            return CountyComposite(stateRecord.location, stateRecord.config, stateRecord.contests, stateRecord.rounds,
+                stateRecord.nmvrs, countyRecords, countyData)
         }
 
         // check CountyComposite exists
@@ -89,7 +87,30 @@ class CountyComposite(
             val counties = CompositeRecord.readFrom(location)
             if (counties == null) return null
 
-            return fromStateAndCounties(stateLevel, counties.componentRecords)
+            val countyData = readCountyData("$location/countyData.csv")
+
+            return fromStateAndCounties(stateLevel, counties.componentRecords, countyData)
         }
     }
+}
+
+data class CountyData(val countyName: String, val nmvrs: Int)
+
+fun readCountyData(filename: String): List<CountyData> {
+    val reader: BufferedReader = File(filename).bufferedReader()
+    reader.readLine() // skip header line
+
+    val countyData = mutableListOf<CountyData>()
+    while (true) {
+        var line = reader.readLine()
+        if (line == null) break
+
+        val tokens = line.split(",")
+        val countyName = tokens[0]
+        val nmvrs = tokens[1].trim().toInt()
+        countyData.add( CountyData(countyName, nmvrs))
+    }
+    reader.close()
+
+    return countyData
 }

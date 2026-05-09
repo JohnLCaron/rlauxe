@@ -18,6 +18,27 @@ import kotlin.test.Test
 
 class TestReadColoradoCsvFiles {
 
+    // class ColoradoElectionContestSummary(
+    //    val contestName: String,
+    //    val overVotes: Int,
+    //    val underVotes: Int,
+    //) {
+    //    val candidates = mutableListOf<ColoradoElectionCandidateLine>()
+    //  }
+    // data class ColoradoElectionCandidateLine(
+    //    val lineNumber: Int,
+    //    val contestName: String,
+    //    val choiceName: String,
+    //    val partyName: String,
+    //    val totalVotes: Int,
+    //    val percentVotes: Double,
+    //    val registeredVoters: Int,
+    //    val ballotsCast: Int,
+    //    val numAreaTotal: Int,
+    //    val numAreaRptg: Int,
+    //    val overVotes: Int,
+    //    val underVotes: Int,
+    //)
     @Test
     fun testColoradoElectionSummary() {
         val filename = "src/test/data/corla/2024election/summary.csv"
@@ -34,21 +55,21 @@ class TestReadColoradoCsvFiles {
         println("--------------------------------------------------------------")
     }
 
-    @Test
-    fun testResultsReportContest() {
-        val filename = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
-        val contests = readResultsReportContest(filename)
-        println("read ${contests.size} contests from $filename")
-    }
-
+    // data class CanonicalContest(
+    //    val contestName: String,
+    //    val choices: List<String>
+    //) {
+    //    val counties =  mutableSetOf<String>()
+    //  }
     @Test
     fun readGeneralCanonicalList() {
         val filename = "src/test/data/corla/2024audit/2024GeneralCanonicalList.csv"
-        val contests = readGeneralCanonicalList(filename)
-        println("read ${contests.size} contests from $filename (${contests.sumOf { it.choices.size }} choices)")
-        // contests.forEach { println(it) }
+        val canonical = readGeneralCanonicalList(filename)
+        println("read ${canonical.size} contests from $filename (${canonical.sumOf { it.choices.size }} choices)")
+        canonical.sortedBy { it.contestName }.forEach { println(it) }
+
         val sizedist = mutableMapOf<Int, Int>() // size, count
-        contests.forEach {
+        canonical.forEach {
             val count = sizedist.getOrDefault(it.counties.size, 0)
             sizedist[it.counties.size] = count+1
         }
@@ -60,51 +81,225 @@ class TestReadColoradoCsvFiles {
         //}
     }
 
+    // data class CorlaContestRoundCsv(
+    //    val contestName: String,
+    //    val auditReason: AuditReason,
+    //    val nwinners: Int,
+    //    val ballotCardCount: Int,
+    //    val contestBallotCardCount: Int,
+    //    val winners: String,
+    //    val minMargin: Int,
+    //    val riskLimit: Double,
+    //    val gamma: Double,
+    //    val optimisticSamplesToAudit: Int,
+    //    val estimatedSamplesToAudit: Int,
+    //)
+    data class MergedContestInfo(
+        val contestName: String,
+        val choices: List<String>,
+        val counties: Set<String>,
+
+        val auditReason: AuditReason,
+        val npop:Int,
+        val nc:Int,
+
+        val countyMvrs: Int,
+        val stateMvrs: Int,
+    )
+
+    // data class CountyMvrs(val countyName: String) {
+    //    var countMvr = 0
+    //}
+
+    data class MergedCountyInfo(
+        val countyName: String,
+        val countyMvrs: Int,
+        val Npop: Int,
+    )
+
     @Test
-    fun testCountyTabulateCsv() {
+    fun mergeContestInfo() {
+        val canonicalFile = "src/test/data/corla/2024audit/2024GeneralCanonicalList.csv"
+        val canonical = readGeneralCanonicalList(canonicalFile)
+
+        val roundFile = "src/test/data/corla/2024audit/round1/contest.csv"
+        val contests = readColoradoContestRoundCsv(roundFile) { contestNameCleanup(it) }
+
+        val compareFile = "src/test/data/corla/2024audit/round3/contestComparison.csv"
+        val (contestMvrs, countyMvrs, _) = readContestComparisonCsv(compareFile) { contestNameCleanup(it) }
+        val compareMap = contestMvrs.associateBy { it.contestName }
+        val countyMap = countyMvrs.associateBy { it.countyName }
+
+        val mergedContestInfo = canonical.sortedBy { it.contestName }.map {
+            val round = contests[it.contestName]
+            val compare = compareMap[it.contestName]
+
+            MergedContestInfo(
+                it.contestName,
+                it.choices,
+                it.counties,
+                round?.auditReason ?: AuditReason.none,
+                round?.ballotCardCount ?: 0,
+                round?.contestBallotCardCount ?: 0,
+                compare ?. countMvr ?: 0,
+                compare ?. countStatewide ?: 0,
+            )
+        }
+
+        println("\nMerged Contest Info")
+        println("\n${trunc("contest", -50)}    Npop,      Nc, countyMvrs, stateMvrs, auditReason")
+        mergedContestInfo.forEach {
+            print("${trunc("${it.contestName}", -50)} ")
+            print("${nfn(it.npop, 7)}, ${nfn(it.nc, 7)}, ${nfn(it.countyMvrs, 7)},")
+            println(" ${nfn(it.stateMvrs, 7)},      ${it.auditReason}")
+        }
+        println()
+
+        // pick out the contests that are the targeted ones; should have a single contest
+        val mergedCountyInfo = mutableListOf<MergedCountyInfo>()
+        val statewideContests = mutableListOf<CorlaContestRoundCsv>()
+        canonical.forEach {
+            val round = contests[it.contestName]
+            if (round != null && round.auditReason == AuditReason.county_wide_contest) {
+                if (it.counties.size != 1)
+                    println("*** ${it.contestName} has multiple counties: ${it.counties}")
+                val county = it.counties.first()
+                val countyMvr = countyMap[county]!!
+
+                val countyInfo = MergedCountyInfo(
+                    county,
+                    countyMvr.countMvr,
+                    round.ballotCardCount
+                )
+                mergedCountyInfo.add(countyInfo)
+            }
+            if (round != null && round.auditReason == AuditReason.state_wide_contest) {
+                statewideContests.add(round)
+            }
+        }
+
+        println("\nMerged county Info")
+        println("\ncounty      nmvrs,  npop")
+        mergedCountyInfo.sortedBy { it.countyName }.forEach {
+            println("${sfn(it.countyName, -10)}  ${nfn(it.countyMvrs, 5)}, ${nfn(it.Npop, 7)}")
+        }
+        println()
+
+        println("\n${trunc("statewideContests", -50)}     Npop, Nc,   needSamples, auditReason")
+        statewideContests.forEach {
+            print("${trunc("${it.contestName}", -50)} ")
+            print("${nfn(it.ballotCardCount, 7)}, ${nfn(it.contestBallotCardCount, 7)},  ${nfn(it.optimisticSamplesToAudit, 7)},")
+            println(" ${it.auditReason}")
+        }
+
+        // return Pair(mergedContestInfo, mergedCountyInfo)
+    }
+
+    // data class ResultsReportContest(
+    //        val contestName: String,
+    //        val targeted: Boolean,
+    //        val winner: String,
+    //        val risk: Double,
+    //        val margin: Double,
+    //        val mvrCount: Int,  // "audited sample count"
+    //        val ballotCount: Int, // "ballot count"
+    //        val voteMargin: Int, // test winner - loser
+    //        val winnerVotes: Int,
+    //        val loserVotes: Int,
+    //        val totalVotes: Int, // just the sum of the winner and loser
+    //    )
+
+    @Test
+    fun readResultsReportContest() {
+        val filename = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
+        val contests = readResultsReportContest(filename) { contestNameCleanup(it) }
+        println("read ${contests.size} contests from $filename")
+        println("\n${trunc("contest", -50)} margin, mvrCount, ballotCount,")
+
+        contests.sortedBy { it.contestName }.forEach {
+            val star = if (it.targeted) "*" else " "
+            print("${trunc("$star${it.contestName}", -50)}   ${trunc(dfn(it.margin, 2), 4)}, ")
+            println("${nfn(it.mvrCount, 7)},    ${nfn(it.ballotCount, 7)},")
+        }
+    }
+
+    @Test
+    fun readCountyTabulateFile() {
         val filename = "src/test/data/corla/2024audit/tabulateCounty.csv"
-        val contests = readCountyTabulateCsv(filename)
-        println("read ${contests.size} contests from $filename (${contests.sumOf { it.choices.size }} choices)")
-        contests.forEach { println(it) }
-        contests.forEach { contest ->
+        val contests = readCountyTabulateCsv(filename, { contestNameCleanup(it)}, { candidateNameCleanup(it) })
+
+        println("read ${contests.size} contests from $filename (${contests.values.sumOf { it.choices.size }} choices)")
+
+        println("totalVotesAllCounties")
+        contests.values.forEach { contest ->
             val counties = contest.counties()
             val sumCounties = counties.sumOf { contest.countyVotes(it) }
             assertEquals(contest.totalVotesAllCounties, sumCounties)
+            println(" ${nfn(contest.totalVotesAllCounties,7)}, ${contest.contestName}")
         }
 
         println("\nconvertToCountyContestTabs")
-        val cct = convertToCountyContestTabs(contests)
+        val cct = convertToCountyContestTabs(contests.values.toList())
         cct.forEach {
             println(it)
         }
     }
 
+    //data class CorlaContestRoundCsv(
+    //    val contestName: String,
+    //    val auditReason: AuditReason,
+    //    val nwinners: Int,
+    //    val ballotCardCount: Int,
+    //    val contestBallotCardCount: Int,
+    //    val winners: String,
+    //    val minMargin: Int,
+    //    val riskLimit: Double,
+    //    val gamma: Double,
+    //    val optimisticSamplesToAudit: Int,
+    //    val estimatedSamplesToAudit: Int,
+    //)
     @Test
-    fun testColoradoContestRoundCsv() {
+    fun readColoradoContestRoundFile() {
         val filename = "src/test/data/corla/2024audit/round1/contest.csv"
-        val contests = readColoradoContestRoundCsv(filename)
+        val contests = readColoradoContestRoundCsv(filename) { contestNameCleanup(it) }
         println("read ${contests.size} contests from $filename")
-        contests.forEach { it.showEstimation() }
+
+        println("\n${trunc("contest", -50)}     Npop, Nc,   needSamples, auditReason")
+        contests.values.forEach {
+            print("${trunc("${it.contestName}", -50)} ")
+            print("${nfn(it.ballotCardCount, 7)}, ${nfn(it.contestBallotCardCount, 7)},  ${nfn(it.optimisticSamplesToAudit, 7)},")
+            println(" ${it.auditReason}")
+        }
     }
 
     @Test
-    fun testCountyStyles() {
+    fun readContestComparison() {
         val filename = "src/test/data/corla/2024audit/round3/contestComparison.csv"
-        val countyStyles = readContestComparisonCsv(filename)
+        val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(filename) { contestNameCleanup(it) }
         println("read ${countyStyles.size} counties from $filename; totalStyles=${countyStyles.sumOf { it.styles.size }} totalCards=${ countyStyles.sumOf{it.cardCount} }")
+
+        println("Styles by County")
         countyStyles.forEach {
             println(it.show())
         }
-        countyStyles.forEach {
-            println("${it.countyName} ${it.styles.size}")
-            it.styles.values.forEach { println("  ${it.id} ${it.contests.size}") }
+
+        println("\nNmvrs by County")
+        println("\ncounty,   county nmvrs")
+        countyMvrs.sortedBy { it.countyName }.forEach {
+            println("${it.countyName}, ${nfn(it.countMvr, 5)}")
+        }
+
+        println("\nNmvrs by Contest")
+        println("\n${trunc("contest", -51)}   county nmvrs, statewide nmvrs")
+        contestMvrs.sortedBy { it.contestName }.forEach {
+            println("${trunc("${it.contestName}", -60)} ${nfn(it.countMvr, 5)}, ${nfn(it.countStatewide, 5)}")
         }
     }
 
     @Test
-    fun testTargetedContests() {
+    fun readTargetedContests() {
         val filename = "src/test/data/corla/2024audit/targetedContests.csv"
-        val targets = readTargetedContestsCsv(filename)
+        val targets = readTargetedContestsCsv(filename) { contestNameCleanup(it) }
         println()
         println("${TargetedContestsCsv.header}, calcNeeded")
         targets.forEach {
@@ -113,37 +308,28 @@ class TestReadColoradoCsvFiles {
         }
         println()
         println("totalSamples=${targets.sumOf { it.estimatedSamplesToAudit } } totalCvrs=${targets.sumOf { it.numberOfCvrs }}")
-        println("read ${targets.size} countyStyles from $filename")
+        println("read ${targets.size} targetedContests from $filename")
     }
 
     @Test
     fun compareTargetedContestsAndTabulateCounty() {
-        val targets: List<TargetedContestsCsv> = readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv")
+        val targets: List<TargetedContestsCsv> = readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv") { contestNameCleanup(it) }
 
         val contestTabsByCounty: Map<String, ContestTabByCounty> =
-            readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv").associateBy { clean(it.contestName) }
+            readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv",
+                { contestNameCleanup(it) },
+                { candidateNameCleanup(it) },
+                )
+
         val ccts: Map<String, CountyContestTab> = convertToCountyContestTabs(contestTabsByCounty.values.toList()).associateBy { clean(it.countyName) }
 
         println()
         println(trunc("from tabulateCounty", 113))
         println("${trunc(TargetedContestsCsv.header, 93)}  winner, loser, voteMargin, diff%")
         targets.filter { it.countyName != "Colorado" }.forEach { it ->
-            /* val contestCountyTab = contestTabsByCounty[it.contestName]
-            if (contestCountyTab == null) {
-                println("cant find ${it.contestName}")
-                throw RuntimeException()
-            }
-
-            if (contestCountyTab.counties().size > 1)
-                println("$it has ${contestCountyTab.counties()}")
-
-             */
-
             val contestName = clean(it.contestName)
             val cct = ccts[it.countyName]!!
             val cctContests = cct.contests.mapKeys { clean(it.key) }
-            //println("${it.countyName} = ${cctContests.keys}")
-            //cctContests.keys.forEach { println("  $it") }
 
             val contestTab = cctContests[contestName]
             if (contestTab == null) {
@@ -164,26 +350,27 @@ class TestReadColoradoCsvFiles {
         println()
     }
 
-
     @Test
     fun compareTabulateCountyAndRoundContest() {
-        // use targetedContests only for teh county and contest name
-        val targets: List<TargetedContestsCsv> = readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv")
+        // use targetedContests only for the county and contest name
+        val targets: List<TargetedContestsCsv> = readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv") { contestNameCleanup(it) }
 
-        val roundContests:  Map<String,CorlaContestRoundCsv> = readColoradoContestRoundCsv( "src/test/data/corla/2024audit/round1/contest.csv")
-            .associateBy { clean(it.contestName) }
+        val roundContests:  Map<String, CorlaContestRoundCsv> = readColoradoContestRoundCsv( "src/test/data/corla/2024audit/round1/contest.csv") { contestNameCleanup(it) }
 
-        val contestTabsByCounty: Map<String, ContestTabByCounty> = readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv")
-                .associateBy { clean(it.contestName) }
+        val contestTabsByCounty: Map<String, ContestTabByCounty> = readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv",
+            { contestNameCleanup(it) },
+            { candidateNameCleanup(it) })
+
         val ccts: Map<String, CountyContestTab> = convertToCountyContestTabs(contestTabsByCounty.values.toList()).associateBy { it.countyName }
 
         println()
         println("${trunc("---from tabulateCounty---", 100)}     --------from contestRound-----")
 
-        println("${trunc("contestName, countyName", -70)}  winner,  loser, voteMargin,   voteMargin,    npop, margin, nsamples, calcSamples")
+        println("${trunc("countyName, contestName", -70)}  winner,  loser, voteMargin,   voteMargin,    npop, margin, nsamples, calcSamples")
         targets.filter { it.countyName != "Colorado" }.forEach { target ->
             val contestName = clean(target.contestName)
-            val roundContest = roundContests[contestName]!!
+
+            val roundContest = roundContests[contestName]
 
             val cct = ccts[target.countyName]!!
             val cctContests = cct.contests.mapKeys { clean(it.key) }
@@ -194,16 +381,22 @@ class TestReadColoradoCsvFiles {
                 println()
             } else {
                 val choices = contestTab.choices.map { it.value }.sorted().reversed()
-                val contestTabDesc = "${nfn(choices[0], 7)}, ${nfn(choices[1], 7)}, ${nfn(choices[0] - choices[1], 6)}"
+                val contestTabDesc =
+                    "${nfn(choices[0], 7)}, ${nfn(choices[1], 7)}, ${nfn(choices[0] - choices[1], 6)}"
 
-                val npop = roundContest.ballotCardCount
-                val voteMargin = roundContest.minMargin
-                val nsamples = roundContest.optimisticSamplesToAudit
-                val calcMargin = voteMargin/npop.toDouble()
-                val contestRoundDesc = "${nfn(voteMargin, 7)}, ${nfn(npop, 7)}, ${dfn(calcMargin, 3)},     ${nfn(nsamples, 6)}"
-                val calcNeeded = estSamplesFromMarginUpper(2 / 1.03905, calcMargin, roundContest.riskLimit).toInt()
+                val contestRoundDesc = if (roundContest != null) {
+                    val npop = roundContest.ballotCardCount
+                    val voteMargin = roundContest.minMargin
+                    val nsamples = roundContest.optimisticSamplesToAudit
+                    val calcMargin = voteMargin / npop.toDouble()
+                    val calcNeeded = estSamplesFromMarginUpper(2 / 1.03905, calcMargin, roundContest.riskLimit).toInt()
 
-                println("${trunc("${target.countyName}, ${contestName}", -70)} $contestTabDesc,         $contestRoundDesc,    $calcNeeded")
+                    "${nfn(voteMargin, 7)}, ${nfn(npop, 7)}, ${dfn(calcMargin, 3)},     ${nfn(nsamples, 6)},    $calcNeeded"
+
+                } else ""
+
+
+                println("${trunc("${target.countyName}, ${contestName}", -70)} $contestTabDesc,         $contestRoundDesc")
             }
         }
         println()

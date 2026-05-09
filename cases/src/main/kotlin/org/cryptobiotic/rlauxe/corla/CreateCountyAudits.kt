@@ -20,12 +20,16 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.persist.csv.CardPoolHeader
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.TransformingIterator
+import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 import kotlin.collections.associateBy
 import kotlin.io.path.Path
 
@@ -48,11 +52,11 @@ class CreateCountyAudits(
     init {
         val builders: List<CountyContestBuilder> =
             stateElection.corlaContestBuilders.filter { it.counties.contains(countyName) }
-                .map { CountyContestBuilder(it, countyContestTab.contests[it.orgContestName]!!) }
+                .map { CountyContestBuilder(it, countyContestTab.contests[it.contestName]!!) }
 
         countyCardPools = stateElection.cardPools.filter { it.poolName.lowercase().startsWith(countyName.lowercase()) }
 
-        // set contest total cards as sum over pools
+        // set contest pool totals
         builders.forEach { it.setTotalCardsFromPools(countyCardPools) }
 
         val contests = builders.map { it.makeContest() }
@@ -67,19 +71,21 @@ class CreateCountyAudits(
         val auditableCardIter: CloseableIterator<AuditableCard> =
             MergeBatchesIntoCardManifestIterator(mvrs, countyCardPools)
 
-        // are we handling the batches correctly using mvrs?
+        /* are we handling the batches correctly using mvrs?
         val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
         require(ncards == count)
         val npopMapm: Map<Int, Int> = manifestTabs.mapValues { it.value.ncardsTabulated }
-        val npopMap: Map<Int, Int> = builders.associate { it.info.id to (it.Npop ?: npopMapm[it.info.id] ?: 1) }
+        val npopMap: Map<Int, Int> = builders.associate { it.info.id to (it.Npop ?: npopMapm[it.info.id] ?: 1) } */
 
-        contestsUA = ContestWithAssertions.make(contests, npopMap, isClca = true, hasStyle)
+        val npopMap: Map<Int, Int> = builders.associate { it.info.id to it.Npop!! }.toMap()
+
+        contestsUA = ContestWithAssertions.make(contests, npopMap, isClca = true, hasStyle = hasStyle)
     }
 
     override fun electionInfo(): ElectionInfo {
-        val useName = countyName.replace(" ", "_")
+        // val useName = countyName.replace(" ", "_")
         return ElectionInfo(
-            useName, AuditType.CLCA, ncards,
+            countyName, AuditType.CLCA, ncards,
             contestsUA.size, pollingMode = null
         )
     }
@@ -110,7 +116,7 @@ class CreateCountyAudits(
     class CountyContestBuilder(corlaContestBuilder: CorlaContestBuilder, contestTab: ContestTab) {
         val info = corlaContestBuilder.info
         val Nc: Int     // taken from contestRound.contestBallotCardCount
-        var Npop: Int? = null
+        var Npop: Int = 0
         val candidateVotes: Map<Int, Int>
 
         var poolTotalCards: Int = 0
@@ -122,7 +128,8 @@ class CreateCountyAudits(
             val totalVotes = roundUp(contestTab.contestVotes() / info.voteForN.toDouble())
 
             val singleCounty = corlaContestBuilder.counties.size == 1
-            if (corlaContestBuilder.contestRound != null && singleCounty) {
+            // TODO single county appropriate for the individual counties ??
+            if (corlaContestBuilder.contestRound != null) { //  && singleCounty) {
                 var useNc = corlaContestBuilder.contestRound.contestBallotCardCount
                 if (useNc < totalVotes) {
                     println("*** Contest '${info.name}' has $totalVotes total votes, but CorlaContestRoundCsv.contestBallotCardCount is ${corlaContestBuilder.contestRound.contestBallotCardCount} - using totalVotes")
@@ -132,6 +139,7 @@ class CreateCountyAudits(
                 Npop = corlaContestBuilder.contestRound.ballotCardCount
             } else { // we dont know the Nc or Npop by County....; could pass in the division of Nc (proportional to voteCount)? barf
                 Nc = totalVotes
+                Npop = totalVotes
             }
         }
 
@@ -163,8 +171,12 @@ fun createCountyAudits(
 ) {
     val stopwatch = Stopwatch()
 
+    // misc data by county
+    writeCountyData(topdir)
+
     val countyElection = ColoradoCountyElection()
-    val contestTabByCounty: Map<String, CountyContestTab> = convertToCountyContestTabs(Colorado2024Input.contestsByCounty).associateBy { it.countyName }
+    val contestTabByCounty: Map<String, CountyContestTab> = convertToCountyContestTabs(Colorado2024Input.contestTabsByCounty.values.toList())
+        .associateBy { it.countyName }
 
     /* createColoradoElection(
         externalSortDir = topdir,
@@ -173,10 +185,11 @@ fun createCountyAudits(
         creationConfig,
         roundConfig,
         startFirstRound = startFirstRound,
-        name = "CorlaContest24",
+        name = "Corla24County",
     ) */
+    val whichCounties = if (wantCounties.isNotEmpty()) wantCounties else contestTabByCounty.keys.toList()
 
-    wantCounties.map { countyName ->
+    whichCounties.map { countyName ->
         val election = CreateCountyAudits(countyName, "$topdir/$countyName/audit", countyElection,
             contestTabByCounty[countyName]!!,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
@@ -193,5 +206,19 @@ fun createCountyAudits(
     }
 
     logger.info { "createCountyAudits for $wantCounties took $stopwatch" }
+}
+
+fun writeCountyData(topdir: String) {
+    // misc data by county
+    val countyMvrs = Colorado2024Input.countyMvrs
+
+    val outputFilename = "$topdir/countyData.csv"
+    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
+    writer.write("county,   nmvrs, npop\n")
+    countyMvrs.sortedBy { it.countyName }.forEach {
+        writer.write("${it.countyName}, ${nfn(it.countMvr, 5)}\n")
+    }
+    writer.close()
+    println("wrote countyData to $outputFilename")
 }
 

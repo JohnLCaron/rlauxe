@@ -1,9 +1,11 @@
 package org.cryptobiotic.rlauxe.corla
 
+// TODO specific to Corla 2024
+
 fun contestNameCleanup(name: String): String {
     var working = name
-    if (working.contains(" -")) working = working.replace(" -", "")
-    if (working.contains("-")) working = working.replace("-", " ")
+    // if (working.contains(" -")) working = working.replace(" -", "")
+    // if (working.contains("-")) working = working.replace("-", " ")
     if (working.contains("Colorado Court of Appeals Judge - Román")) working = working.replace("Colorado Court of Appeals Judge - Román", "Colorado Court of Appeals Judge Roman")
     if (working.contains("County Court Judge Cheyenne")) working = working.replace("County Court Judge Cheyenne", "Cheyenne County Court Judge")
     if (working.contains("County Court Judge Denver")) working = working.replace("County Court Judge Denver", "Denver County Court Judge")
@@ -34,13 +36,16 @@ fun contestNameCleanup(name: String): String {
     if (working.equals("Custer County Commissioner District 2")) working = "Custer County Board of County Commissioners District 2"
     if (working.equals("City and County of Denver Ballot Issue 2Q")) working = "Denver Ballot Issue 2Q"
     if (working.equals("Fremont County Commissioner District 3")) working = "Fremont County Board of County Commissioners District 3"
-    if (working.equals("Garfield County Commissioner District 2")) working = "County Commissioner District 2"  // TODO flip this
-    if (working.equals("North Park School District R 1 Ballot Issue 4A")) working = "NORTH PARK SCHOOL DISTRICT R 1 BALLOT ISSUE 4A"  // TODO flip this
-    if (working.equals("Proposition 130 (STATUTORY)")) working = "Proposition 130 (STATUTORY) Kit Carson"  // TODO flip this ??
-    if (working.equals("Montezuma County Ballot Issue 1A")) working = "Montezuma County Ballot Issue 1 A"  // TODO flip this
+    if (working.equals("County Commissioner District 2")) working = "Garfield County Commissioner District 2"
+    if (working.equals("NORTH PARK SCHOOL DISTRICT R 1 BALLOT ISSUE 4A")) working = "North Park School District R 1 Ballot Issue 4A"
+    // if (working.equals("Proposition 130 (STATUTORY) - Kit Carson")) working = "Proposition 130 (STATUTORY)"
+    if (working.equals("Montezuma County Ballot Issue 1 A")) working = "Montezuma County Ballot Issue 1A"
     if (working.equals("Pitkin County Ballot Issue 1A")) working = "Pitkin County Ballot Issue 1A: Affordable and Workforce Housing Mill Levy"
-    if (working.equals("Amendment 80 (CONSTITUTIONAL)")) working = "Amendment 80 (CONSTITUTIONAL) Rio Blanco"
+    // if (working.equals("Amendment 80 (CONSTITUTIONAL) - Rio Blanco")) working = "Amendment 80 (CONSTITUTIONAL)"
     if (working.equals("San Miguel County Ballot Measure 1A")) working = "San Miguel County Ballot Question 1A"
+    if (working.equals("Bent County Commissioner-District 1")) working = "Bent County Commissioner - District 1"
+    if (working.equals("Cheyenne,County Court Judge - Cheyenne")) working = "Cheyenne County Court - Eiring"
+
     return working.trim()
 }
 
@@ -51,8 +56,8 @@ fun candidateNameCleanup(name: String): String {
     var working = name
     if (working.contains("''")) working = working.replace("''", "'")
     if (working.contains("\"")) working = working.replace("\"", "'")
-    if (working.equals("Seth Ryan")) working = "Anna Cooling"
-    return working.trim()
+    if (working.equals("Seth Ryan")) working = "Anna Cooling"  // WTF ?
+    return mutatisMutandi(working.trim())
 }
 
 fun mutatisMutandi(choiceName: String): String {

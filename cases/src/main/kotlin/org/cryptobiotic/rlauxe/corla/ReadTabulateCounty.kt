@@ -125,7 +125,7 @@ data class ChoiceVote(
     val countyVote: Int,
 )
 
-fun readCountyTabulateCsv(filename: String): List<ContestTabByCounty> {
+fun readCountyTabulateCsv(filename: String, cleanupContest: (String) -> String, cleanupCandidate: (String) -> String): Map<String, ContestTabByCounty> {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
@@ -133,7 +133,7 @@ fun readCountyTabulateCsv(filename: String): List<ContestTabByCounty> {
     // we expect the first line to be the headers
     val headerRecord = records.next()
     val header = headerRecord.toList().joinToString(", ")
-    println(header)
+    // println(header)
 
     val contests = mutableMapOf<String, ContestTabByCounty>()
 
@@ -142,12 +142,10 @@ fun readCountyTabulateCsv(filename: String): List<ContestTabByCounty> {
         while (records.hasNext()) {
             line = records.next()!!
             var idx = 0
-            if (line.size() < 4 )
-                print("")
             val choiceVote = ChoiceVote(
                 line.get(idx++).trim(),
-                line.get(idx++).trim(),
-                line.get(idx++).trim(),
+                cleanupContest(line.get(idx++).trim()),
+                cleanupCandidate(line.get(idx++).trim()),
                 line.get(idx).toInt(),
             )
             val contest = contests.getOrPut(choiceVote.contestName) { ContestTabByCounty(choiceVote.contestName) }
@@ -158,7 +156,7 @@ fun readCountyTabulateCsv(filename: String): List<ContestTabByCounty> {
         ex.printStackTrace()
     }
 
-    return contests.toSortedMap().values.toList()
+    return contests.toSortedMap()
 }
 
 
@@ -191,7 +189,7 @@ data class TabulateContestChoice(
     val totalVotes: Int,
 )
 
-fun readTabulateCsv(filename: String): Map<String, TabulateContestCsv> {
+fun readTabulateCsv(filename: String, cleanupContest: (String) -> String, cleanupCandidate: (String) -> String): Map<String, TabulateContestCsv> {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
@@ -211,8 +209,8 @@ fun readTabulateCsv(filename: String): Map<String, TabulateContestCsv> {
             var idx = 0
             val tabLine = ChoiceVote(
                 "",
-                line.get(idx++),
-                line.get(idx++),
+                cleanupContest(line.get(idx++).trim()),
+                cleanupCandidate(line.get(idx++).trim()),
                 line.get(idx++).toInt(),
             )
             val contest = contests.getOrPut(tabLine.contestName) { TabulateContestCsv(tabLine.contestName, contestIdx++) }

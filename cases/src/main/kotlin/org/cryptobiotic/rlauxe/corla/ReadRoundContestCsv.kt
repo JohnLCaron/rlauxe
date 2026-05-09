@@ -37,8 +37,20 @@ import java.nio.charset.Charset
 // 182397,3109,"""Michelle Rogers"",""Jeff Stainbrook""",0,
 // 0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
 
+// state_wide_contest
+// county_wide_contest
+// opportunistic_benefits
+
+enum class AuditReason { county_wide_contest, state_wide_contest, opportunistic_benefits, none}
+fun getAuditReason(s: String): AuditReason {
+    val reason = AuditReason.entries.find { it.name == s }
+    if (reason == null) println("dont know AuditReason $s")
+    return reason ?: AuditReason.none
+}
+
 data class CorlaContestRoundCsv(
     val contestName: String,
+    val auditReason: AuditReason,
     val nwinners: Int,
     val ballotCardCount: Int,
     val contestBallotCardCount: Int,
@@ -50,7 +62,7 @@ data class CorlaContestRoundCsv(
     val estimatedSamplesToAudit: Int,
 )
 
-fun readColoradoContestRoundCsv(filename: String): List<CorlaContestRoundCsv> {
+fun readColoradoContestRoundCsv(filename: String, cleanup: (String) -> String): Map<String, CorlaContestRoundCsv> {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
@@ -58,9 +70,9 @@ fun readColoradoContestRoundCsv(filename: String): List<CorlaContestRoundCsv> {
     // we expect the first line to be the headers
     val headerRecord = records.next()
     val header = headerRecord.toList().joinToString(", ")
-    println(header)
+    // println(header)
 
-    val contests = mutableListOf<CorlaContestRoundCsv>()
+    val contests = mutableMapOf<String, CorlaContestRoundCsv>()
 
     // contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,
     //   audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,
@@ -70,9 +82,11 @@ fun readColoradoContestRoundCsv(filename: String): List<CorlaContestRoundCsv> {
         while (records.hasNext()) {
             line = records.next()!!
             val bmi = CorlaContestRoundCsv(
-                contestName = line.get(0),         // contest_name,
+                contestName = cleanup(line.get(0).trim()),         // contest_name,
+                auditReason = getAuditReason(line.get(1).trim()),
                 nwinners = line.get(3).toInt(),   // winners_allowed,
-                ballotCardCount = line.get(4).toInt(), // ballot_card_count,contest_ballot_card_count,winners,min_margin,
+                ballotCardCount = line.get(4)
+                    .toInt(), // ballot_card_count,contest_ballot_card_count,winners,min_margin,
                 contestBallotCardCount = line.get(5).toInt(), // contest_ballot_card_count
                 winners = line.get(6), // winners
                 minMargin = line.get(7).toInt(),    // minMargin
@@ -81,13 +95,12 @@ fun readColoradoContestRoundCsv(filename: String): List<CorlaContestRoundCsv> {
                 optimisticSamplesToAudit = line.get(18).toInt(), // optimistic_samples_to_audit
                 estimatedSamplesToAudit = line.get(19).toInt(), // estimated_samples_to_audit
             )
-            contests.add(bmi)
-            // println(bmi)
+            contests[bmi.contestName] = bmi
         }
     } catch (ex: Exception) {
         println(line)
         ex.printStackTrace()
     }
 
-    return contests
+    return contests.toSortedMap()
 }

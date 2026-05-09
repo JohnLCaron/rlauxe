@@ -27,8 +27,13 @@ data class CanonicalContest(
         }
     }
 
+    fun addCounties(counties: List<String>): CanonicalContest {
+        this.counties.addAll(counties)
+        return this
+    }
+
     override fun toString(): String {
-        return "CanonicalContest('$contestName', choices=$choices, counties=$counties)"
+        return "CanonicalContest(\"$contestName\", choices=listOf($choices)).addCounties(listOf($counties))"
     }
 }
 
@@ -41,7 +46,7 @@ fun readGeneralCanonicalList(filename: String): List<CanonicalContest> {
     records.next()
     val headerRecord = records.next()
     val header = headerRecord.toList().joinToString(", ")
-    println(header)
+    // println(header)
 
     val contests = mutableMapOf<String, CanonicalContest>()
 
@@ -52,9 +57,9 @@ fun readGeneralCanonicalList(filename: String): List<CanonicalContest> {
     try {
         while (records.hasNext()) {
             line = records.next()!!
-            val countyName = line.get(0)
-            val contestName = line.get(1)
-            val choices = line.get(2).split(",")
+            val countyName = line.get(0).trim()
+            val contestName = line.get(1).trim()
+            val choices = line.get(2).split(",").map { it.trim() }
             val cc = contests.getOrPut(contestName) { CanonicalContest(contestName, choices) }
             cc.addCounty(countyName, choices)
         }

@@ -25,15 +25,15 @@ data class ResultsReportContest(
     val winner: String,
     val risk: Double,
     val margin: Double,
-    val mvrCount: Int,
-    val ballotCount: Int,
+    val mvrCount: Int,  // "audited sample count"
+    val ballotCount: Int, // "ballot count"
     val voteMargin: Int, // test winner - loser
     val winnerVotes: Int,
     val loserVotes: Int,
     val totalVotes: Int, // just the sum of the winner and loser
 )
 
-fun readResultsReportContest(filename: String): List<ResultsReportContest> {
+fun readResultsReportContest(filename: String, cleanup: (String) -> String): List<ResultsReportContest> {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
@@ -42,7 +42,7 @@ fun readResultsReportContest(filename: String): List<ResultsReportContest> {
     records.next() // throw first away
     val headerRecord = records.next()
     val header = headerRecord.toList().joinToString(", ")
-    println(header)
+    // println(header)
 
     val contests = mutableListOf<ResultsReportContest>()
 
@@ -60,7 +60,7 @@ fun readResultsReportContest(filename: String): List<ResultsReportContest> {
             line = records.next()!!
             if (line.get(0) == "End of worksheet") break
             contests.add( ResultsReportContest(
-                contestName = line.get(0),
+                contestName = cleanup(line.get(0).trim()),
                 targeted = line.get(1) == "Yes",
                 winner = line.get(2),
                 risk = line.get(4).toDouble(),

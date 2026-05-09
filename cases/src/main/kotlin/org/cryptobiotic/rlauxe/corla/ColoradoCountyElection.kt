@@ -38,20 +38,26 @@ open class ColoradoCountyElection (
         corlaInput: Colorado2024Input,
     ): List<CorlaContestBuilder> {
 
-        val contestsMap = corlaInput.contestsByCounty.associateBy { it.contestName }
-        val resultsContestMap = corlaInput.resultsContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
-        val roundContestMap = corlaInput.roundContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
-        val xmlDetailMap = corlaInput.electionDetailXml.contests.associateBy { mutatisMutandi(contestNameCleanup(it.text)) }
+        val canonical = corlaInput.canonicalContests
+        val contestTabs = corlaInput.contestTabsByCounty
+        val resultsContestMap = corlaInput.resultsContests.associateBy { it.contestName }
+        val roundContestMap = corlaInput.roundContests
+        val xmlDetailMap = corlaInput.detailXmlContests.contests.associateBy { it.text }
+        val contestMvrs = corlaInput.contestMvrs.associateBy { it.contestName }
 
         val contestBuilders = mutableListOf<CorlaContestBuilder>()
 
-        // canonicalContestMap one drives the boat
-        contestsMap.forEach{ (orgContestName, contestByCounty) ->
-            val contestName = mutatisMutandi(contestNameCleanup(orgContestName))
+        // canonical drives the boat
+        canonical.forEach{ (contestName, canonicalContest) ->
+            val contestTab = contestTabs[contestName]
+            if (contestTab == null) {
+                logger.warn{"*** Cant find contestTab for '$contestName'" }
+                throw RuntimeException()
+            }
             // read 725 contests from src/test/data/corla/2024audit/round1/ResultsReportSummary.csv
             val resultsContest = resultsContestMap[contestName]
             if (resultsContest == null) {
-                logger.warn{"*** Cant find resultsContest for $contestByCounty" }
+                logger.warn{"*** Cant find resultsContest for $contestName" }
             } else {
                 // read 725 contests from src/test/data/corla/2024audit/round1/contest.csv
                 // need Nc = contestRound.contestBallotCardCount
@@ -60,11 +66,10 @@ open class ColoradoCountyElection (
                     logger.warn{ "*** Cant find CorlaContestRoundCsv $contestName" }
                 }
 
+                val candidateNames = canonicalContest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
+
                 // detail.xml only has 295 out 725 contests, so dont depend on it.
                 val corlaXmlContest = xmlDetailMap[contestName]
-
-                val candidateNames =
-                    contestByCounty.choices.values.mapIndexed { idx, choice -> Pair(candidateNameCleanup(choice.choiceName), idx) }.toMap()
                 val voteForN = corlaXmlContest?.voteFor ?: roundContest?.nwinners ?: 1 // TODO
 
                 val info = ContestInfo(
@@ -74,17 +79,25 @@ open class ColoradoCountyElection (
                     SocialChoiceFunction.PLURALITY, // TODO
                     voteForN
                 )
-                if (roundContest != null) info.metadata["CORLAsample"] = roundContest.optimisticSamplesToAudit.toString()
+
+                if (roundContest != null) {
+                    info.metadata["CORLAsample"] = roundContest.optimisticSamplesToAudit.toString()
+                    info.metadata["CORLAauditReason"] = roundContest.auditReason.toString()
+                }
                 info.metadata["CORLArisk"] = resultsContest.risk.toString()
                 info.metadata["CORLAmargin"] = resultsContest.margin.toString()
-                info.metadata["CORLAcounties"] = contestByCounty.counties().toList().toString()
+                info.metadata["CORLAcounties"] = canonicalContest.counties.toList().toString()
 
+                val mvrsForContest = contestMvrs[contestName]
+                if (mvrsForContest != null) {
+                    info.metadata["CORLAnmvrs"] = mvrsForContest.countMvr.toString()
+                    info.metadata["CORLAstatewideNmvrs"] = mvrsForContest.countStatewide.toString()
+                }
                 val contest = CorlaContestBuilder(
-                    orgContestName,
+                    contestName,
                     info,
-                    contestByCounty,
+                    contestTab,
                     roundContest,
-                    corlaXmlContest,
                 )
                 contestBuilders.add(contest)
             }
@@ -102,7 +115,7 @@ open class ColoradoCountyElection (
         val countyNc = distributeNc(builders) // county -> contest -> Nc for that contest in that county
 
         // convert from Contest -> County to County -> Contest
-        val contestTabByCounty: Map<String, CountyContestTab> = convertToCountyContestTabs(corlaInput.contestsByCounty).associateBy { it.countyName }
+        val contestTabByCounty: Map<String, CountyContestTab> = convertToCountyContestTabs(corlaInput.contestTabsByCounty.values.toList()).associateBy { it.countyName }
         val stylesByCounty: Map<String, CountyStyles> =  corlaInput.countyStyles.associateBy { it.countyName }
 
         // merge the styles into the CountyContestTabs, pick out the contestTabs that dont have styles
@@ -210,8 +223,8 @@ open class ColoradoCountyElection (
 
         // for each contest, distribte Nc to the counties it is in, proportional to votesInCounty / totalVotes
         val countyNc = mutableMapOf<String, MutableMap<String, Int>>() // county -> contest -> Nc
-        corlaInput.contestsByCounty.forEach { contestTabByCounty ->
-            val contestName = mutatisMutandi(contestNameCleanup(contestTabByCounty.contestName))
+        corlaInput.contestTabsByCounty.values.forEach { contestTabByCounty ->
+            val contestName = contestTabByCounty.contestName
             val builder = builders[contestName]
             if (builder == null)
                 throw RuntimeException()
@@ -235,8 +248,8 @@ open class ColoradoCountyElection (
                 contestSum[contestName] = contestAccum + contestVotes
             }
         }
-        corlaInput.contestsByCounty.forEach { contestTab ->
-            val contestName = mutatisMutandi(contestNameCleanup(contestTab.contestName))
+        corlaInput.contestTabsByCounty.values.forEach { contestTab ->
+            val contestName = contestTab.contestName
             val sum = contestSum[contestName]!!
             val builder = builders[contestName]!!
             val contestNc = builder.Nc
@@ -290,19 +303,19 @@ open class ColoradoCountyElection (
 */
         val buildersByName = corlaContestBuilders.associate { it.info.name to it }
         val contestBuilders = tabsMissingStyles.map {
-            val cleanedName = mutatisMutandi(contestNameCleanup(it.contestName))
+            val cleanedName = it.contestName
             buildersByName[cleanedName]!!
         } // clean
         val infos = contestBuilders.associate { it.info.id to it.info }
 
         val votesForStyle = mutableMapOf<Int, ContestTabulation>() // all contests, this style
         tabsMissingStyles.forEach { contestTab ->
-            val cleanedName = mutatisMutandi(contestNameCleanup(contestTab.contestName))
+            val cleanedName = contestTab.contestName
             val builder = buildersByName[cleanedName]!!
             val info = builder.info
             val votes = mutableMapOf<Int, Int>() // this contest
             contestTab.choices.forEach { (choiceName, choiceVote) ->
-                val candId = info.candidateNames[candidateNameCleanup(choiceName)]!!
+                val candId = info.candidateNames[choiceName]!!
                 votes[candId] = choiceVote
             }
             votesForStyle[info.id] = ContestTabulation(info, votes, builder.Nc)
@@ -350,22 +363,21 @@ open class ColoradoCountyElection (
                 val votesForStyle = mutableMapOf<Int, ContestTabulation>() // all contests, this style
 
                 style.contests.forEach { contestName: String ->
-                    val cleanedName = mutatisMutandi(contestNameCleanup(contestName))
                     // the denominator is sum of cardCounts of Style's that contain this contest; could do once above
                     val totalCardsForContest = countyStyles.styles.values.filter{ it.contests.contains(contestName) }.sumOf{ it.cardCount }
                     val stylePct = style.cardCount / totalCardsForContest.toDouble()
                     val contestPct = contestPcts.getOrDefault(contestName, 0.0)
                     contestPcts[contestName] = contestPct + stylePct
 
-                    val info = infos[cleanedName]!!
+                    val info = infos[contestName]!!
                     val votes = mutableMapOf<Int, Int>() // this contest
                     val contestTab = cct.contests[contestName]!!
                     contestTab.choices.forEach { (choiceName, choiceVote) ->
-                        val candId = info.candidateNames[candidateNameCleanup(choiceName)]!!
+                        val candId = info.candidateNames[choiceName]!!
                         votes[candId] = (stylePct * choiceVote).roundToInt() // scale by stylePct
                     }
                     // needs to be ajusted across the styles in proportion to how many cards used it
-                    val Nc = adjContestNc[cleanedName]!!  // total Nc for this contest over all styles
+                    val Nc = adjContestNc[contestName]!!  // total Nc for this contest over all styles
                     val ncards = (stylePct * Nc).roundToInt() // scale by stylePct
 
                     votesForStyle[info.id] = ContestTabulation(info, votes, ncards)
@@ -389,8 +401,8 @@ open class ColoradoCountyElection (
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CorlaContestBuilder(val orgContestName: String, val info: ContestInfo, val contestByCounty: ContestTabByCounty,
-                          val contestRound: CorlaContestRoundCsv?, val corlaXmlContest: CorlaXmlContest?) {
+class CorlaContestBuilder(val contestName: String, val info: ContestInfo, val contestByCounty: ContestTabByCounty,
+                          val contestRound: CorlaContestRoundCsv?) {
     val contestId = info.id
     val Nc: Int     // taken from contestRound.contestBallotCardCount
     var Npop: Int? = null     // taken from contestRound.contestBallotCardCount

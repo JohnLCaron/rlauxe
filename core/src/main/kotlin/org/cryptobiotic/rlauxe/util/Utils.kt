@@ -46,7 +46,7 @@ fun margin2mean(margin: Double) = (margin + 1.0) / 2.0
 fun mean2margin(mean: Double) = 2.0 * mean - 1.0
 fun noerror(margin: Double, upper: Double) = 1.0 / (2.0 - margin / upper)
 
-// these are the number of ballots needed THAT CONTAIN THE CONTEST
+// these are the number of ballots needed
 fun estSamplesFromNomargin(bet:Double, nomargin:Double, alpha: Double) =  -ln(alpha) / ln(1.0 + bet * nomargin/2)
 fun estSamplesFromNoerror(bet:Double, noerror:Double, alpha: Double): Double {
     val nomargin = 2.0 * noerror - 1.0
@@ -58,6 +58,7 @@ fun estSamplesFromMarginUpper(bet:Double, marginUpper:Double, alpha: Double): Do
     val nomargin = 2.0 * noerror - 1.0
     return -ln(alpha) / ln(1.0 + bet * nomargin / 2)
 }
+// work backwards, if samples are needed to satisfy risk limit, what must the margin be?
 fun estMarginUpperFromSamples(bet:Double, samples:Int, alpha: Double): Double {
     // payoff^n = 1/alpha
     // ln(payoff) * n = -ln(alpha)
@@ -83,8 +84,10 @@ fun estMarginUpperFromSamples(bet:Double, samples:Int, alpha: Double): Double {
     return 2.0 - 2.0 * bet / den
 }
 
-// this is the estimate risk when nsamles CONTAIN THE CONTEST
-fun estRisk(nomargin:Double, nsamples: Int): Double {
+// this is the estimate risk when you have nsamples, for the standard bet
+fun estRisk(marginUpper:Double, nsamples: Int): Double {
+    val noerror = 1.0 / (2.0 - marginUpper)
+    val nomargin = 2.0 * noerror - 1.0
     return estRisk(2.0 / 1.03905, nomargin, nsamples)
 }
 // payoff^n = 1/risk; risk = 1/(payoff^n)

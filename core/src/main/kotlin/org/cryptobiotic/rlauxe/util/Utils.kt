@@ -116,6 +116,14 @@ fun calcReportedMargin(useVotes: Map<Int, Int>, Nc: Int, winner: Int, loser: Int
 fun df(d: Double?) = if (d==null) "N/A" else "%6.4f".format(d)
 fun dfn(d: Double?, n: Int) = if (d==null) "N/A" else "%${n+2}.${n}f".format(d)
 fun pfn(d: Double?, n: Int=4) = if (d==null) "N/A" else "%${n+2}.${n}f%%".format(100*d)
+fun pfz(d: Double?, n: Int=1) = if (d==null) "N/A" else {
+    val s = "%${n+2}.${n}f%%".format(100*d)
+    val toks = s.split(".")
+    var tok0: String = toks[0]
+    if (tok0.length == 1) tok0 = "0${tok0}"
+    "$tok0.${toks[1]}"
+}
+
 fun nfn(i: Int, n: Int) = "%${n}d".format(i)
 fun nfz(i: Int, n: Int) = i.toString().padStart(n, '0')
 fun sfn(s: String, n: Int) = "%${n}s".format(s)  // +right/-left justify in width n

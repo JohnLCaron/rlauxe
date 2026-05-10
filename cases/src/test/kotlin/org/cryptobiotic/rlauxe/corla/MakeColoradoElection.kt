@@ -69,7 +69,7 @@ class MakeColoradoElection {
             ClcaConfig(), null)
 
         createColoradoElection2(topdir, "$topdir/audit",
-            creation, round, name = "Corla24County", startFirstRound = false)
+            creation, round, name = "Corla24County")
     }
 
     @Test

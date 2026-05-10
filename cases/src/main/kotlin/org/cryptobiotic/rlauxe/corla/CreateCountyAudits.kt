@@ -52,7 +52,7 @@ class CreateCountyAudits(
     init {
         val builders: List<CountyContestBuilder> =
             stateElection.corlaContestBuilders.filter { it.counties.contains(countyName) }
-                .map { CountyContestBuilder(it, countyContestTab.contests[it.contestName]!!) }
+                .map { CountyContestBuilder(it, countyContestTab.contests[it.info.name]!!) }
 
         countyCardPools = stateElection.cardPools.filter { it.poolName.lowercase().startsWith(countyName.lowercase()) }
 
@@ -129,14 +129,14 @@ class CreateCountyAudits(
 
             val singleCounty = corlaContestBuilder.counties.size == 1
             // TODO single county appropriate for the individual counties ??
-            if (corlaContestBuilder.contestRound != null) { //  && singleCounty) {
-                var useNc = corlaContestBuilder.contestRound.contestBallotCardCount
+            if (corlaContestBuilder.contest != null) { //  && singleCounty) {
+                var useNc = corlaContestBuilder.contest.nc
                 if (useNc < totalVotes) {
-                    println("*** Contest '${info.name}' has $totalVotes total votes, but CorlaContestRoundCsv.contestBallotCardCount is ${corlaContestBuilder.contestRound.contestBallotCardCount} - using totalVotes")
+                    println("*** Contest '${info.name}' has $totalVotes total votes, but CorlaContestRoundCsv.contestBallotCardCount is ${corlaContestBuilder.contest.nc} - using totalVotes")
                     useNc = totalVotes
                 }
                 Nc = useNc
-                Npop = corlaContestBuilder.contestRound.ballotCardCount
+                Npop = corlaContestBuilder.contest.npop
             } else { // we dont know the Nc or Npop by County....; could pass in the division of Nc (proportional to voteCount)? barf
                 Nc = totalVotes
                 Npop = totalVotes

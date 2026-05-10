@@ -24,88 +24,128 @@ open class ColoradoCountyElection (
     // val auditdir: String,
 ) {
     val corlaInput = Colorado2024Input
-    val corlaContestBuilders = makeContestBuilders(corlaInput) // 181
-    val cardPools: List<CountyPoolFromStyle>
+    val corlaContestBuilders = makeContestBuilders() // 181
+    val cardPools: List<CountyPoolFromStyle> = emptyList()
     val contests: List<ContestIF>
 
     init {
         nextPoolId = 0
-        cardPools = makeCardPoolsFromCountyStyles(corlaInput)
+        // cardPools = makeCardPoolsFromCountyStyles(corlaInput)
         contests = corlaContestBuilders.map { it.makeContest() }
     }
 
-    private fun makeContestBuilders(
-        corlaInput: Colorado2024Input,
-    ): List<CorlaContestBuilder> {
+    private fun makeContestBuilders(): List<CorlaContestBuilder> {
 
-        val canonical = corlaInput.canonicalContests
-        val contestTabs = corlaInput.contestTabsByCounty
+        /* val canonical = corlaInput.canonicalContests
         val resultsContestMap = corlaInput.resultsContests.associateBy { it.contestName }
         val roundContestMap = corlaInput.roundContests
         val xmlDetailMap = corlaInput.detailXmlContests.contests.associateBy { it.text }
-        val contestMvrs = corlaInput.contestMvrs.associateBy { it.contestName }
+        val contestMvrs = corlaInput.contestMvrs.associateBy { it.contestName } */
+
+        // data class MergedContestInfo(
+        //    // canonical
+        //    val contestName: String,
+        //    val choices: List<String>,
+        //    val counties: Set<String>,
+        //
+        //    // contestRound
+        //    val auditReason: AuditReason,
+        //    val npop:Int,
+        //    val nc:Int,
+        //    val voteForN: Int,
+        //    val nsamples: Int,
+        //    val marginInVotes: Int,
+        //
+        //    // mvr file
+        //    val countyMvrs: Int,
+        //    val statewideMvrs: Int,
+        //)
+        //
+        //data class StrataInfo(
+        //    val strataName: String,
+        //    val nmvrs: Int,
+        //    val Npop: Int,
+        //)
+        //
+        //data class MergedInfo(
+        //    val mergedContestInfo: List<MergedContestInfo>,
+        //    val strataInfo: List<StrataInfo>,
+        //    val statewideContests: List<CorlaContestRoundCsv>,
+        //)
+        val mergedContestMap = Colorado2024Input.mergedContestMap
+        val strataMap = Colorado2024Input.strataMap
+        val contestTabs = corlaInput.contestTabsByCounty
 
         val contestBuilders = mutableListOf<CorlaContestBuilder>()
 
         // canonical drives the boat
-        canonical.forEach{ (contestName, canonicalContest) ->
-            val contestTab = contestTabs[contestName]
+        mergedContestMap.values.forEach{ mcontest ->
+            val contestTab = contestTabs[mcontest.contestName]
             if (contestTab == null) {
-                logger.warn{"*** Cant find contestTab for '$contestName'" }
+                logger.warn{"*** Cant find contestTab for '${mcontest.contestName}'" }
                 throw RuntimeException()
             }
-            // read 725 contests from src/test/data/corla/2024audit/round1/ResultsReportSummary.csv
-            val resultsContest = resultsContestMap[contestName]
-            if (resultsContest == null) {
-                logger.warn{"*** Cant find resultsContest for $contestName" }
-            } else {
-                // read 725 contests from src/test/data/corla/2024audit/round1/contest.csv
-                // need Nc = contestRound.contestBallotCardCount
-                val roundContest = roundContestMap[contestName]
-                if (roundContest == null) {
-                    logger.warn{ "*** Cant find CorlaContestRoundCsv $contestName" }
+
+            val candidateNames = mcontest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
+
+            val info = ContestInfo(
+                mcontest.contestName,
+                contestBuilders.size + 1,
+                candidateNames,
+                SocialChoiceFunction.PLURALITY, // TODO
+                mcontest.voteForN
+            )
+
+            val strata = when{
+                (mcontest.counties.size == 1) -> strataMap[mcontest.counties.first()]!!
+                (mcontest.counties.size > 60) -> {
+                    val contestsPlus = mcontest.counties + listOf("Statewide")
+                    computeStrataMinRate(mcontest.contestName, contestsPlus, strataMap)
                 }
-
-                val candidateNames = canonicalContest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
-
-                // detail.xml only has 295 out 725 contests, so dont depend on it.
-                val corlaXmlContest = xmlDetailMap[contestName]
-                val voteForN = corlaXmlContest?.voteFor ?: roundContest?.nwinners ?: 1 // TODO
-
-                val info = ContestInfo(
-                    contestName,
-                    contestBuilders.size + 1,
-                    candidateNames,
-                    SocialChoiceFunction.PLURALITY, // TODO
-                    voteForN
-                )
-
-                if (roundContest != null) {
-                    info.metadata["CORLAsample"] = roundContest.optimisticSamplesToAudit.toString()
-                    info.metadata["CORLAauditReason"] = roundContest.auditReason.toString()
-                }
-                info.metadata["CORLArisk"] = resultsContest.risk.toString()
-                info.metadata["CORLAmargin"] = resultsContest.margin.toString()
-                info.metadata["CORLAcounties"] = canonicalContest.counties.toList().toString()
-
-                val mvrsForContest = contestMvrs[contestName]
-                if (mvrsForContest != null) {
-                    info.metadata["CORLAnmvrs"] = mvrsForContest.countMvr.toString()
-                    info.metadata["CORLAstatewideNmvrs"] = mvrsForContest.countStatewide.toString()
-                }
-                val contest = CorlaContestBuilder(
-                    contestName,
-                    info,
-                    contestTab,
-                    roundContest,
-                )
-                contestBuilders.add(contest)
+                else -> computeStrataMinRate(mcontest.contestName, mcontest.counties, strataMap)
             }
+            info.metadata["CORLAhaveMvrs"] = strata.nmvrs.toString()
+
+            info.metadata["CORLAsample"] = mcontest.nsamples.toString()
+            info.metadata["CORLAauditReason"] = mcontest.auditReason.toString()
+            info.metadata["CORLAmarginInVotes"] = mcontest.marginInVotes.toString()
+            info.metadata["CORLAcounties"] = mcontest.counties.toList().toString()
+            info.metadata["CORLAcountyMvrs"] = mcontest.countyMvrs.toString()
+            info.metadata["CORLAstatewideNmvrs"] = mcontest.statewideMvrs.toString()
+
+            val contest = CorlaContestBuilder(
+                info,
+                mcontest,
+                strata,
+                contestTab,
+            )
+            contestBuilders.add(contest)
         }
 
         println("number of contestBuilders = ${contestBuilders.size}")
 
         return contestBuilders
+    }
+
+    // Neals algorithm: use the minimum rate across strata
+    // depends only on the set of counties, could make common one
+    fun computeStrataMinRate(name: String, counties: Set<String>, strataMap: Map<String, StrataInfo>): StrataInfo {
+        var orgSamples = 0
+        val minRate = counties.map {
+            val s = strataMap[it]!!
+            orgSamples += s.nmvrs
+            s.nmvrs / s.Npop.toDouble()
+        }.min()
+
+        var npop = 0
+        var nmvrs = 0
+        counties.forEach {
+            val strata = strataMap[it]!!
+            npop += strata.Npop
+            val truncSamples = roundToClosest(strata.Npop * minRate)
+            nmvrs += truncSamples
+        }
+        return StrataInfo(name, nmvrs, npop)
     }
 
     private fun makeCardPoolsFromCountyStyles(corlaInput: Colorado2024Input): List<CountyPoolFromStyle> {
@@ -401,33 +441,29 @@ open class ColoradoCountyElection (
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CorlaContestBuilder(val contestName: String, val info: ContestInfo, val contestByCounty: ContestTabByCounty,
-                          val contestRound: CorlaContestRoundCsv?) {
+// TODO ContestTabByCounty is what you need to break out the votes by county....
+class CorlaContestBuilder(val info: ContestInfo, val contest: MergedContestInfo, strata: StrataInfo, val contestTab: ContestTabByCounty) {
     val contestId = info.id
     val Nc: Int     // taken from contestRound.contestBallotCardCount
     var Npop: Int? = null     // taken from contestRound.contestBallotCardCount
     val candidateVotes: Map<Int, Int>
-    val totalVotesAllCounties = contestByCounty.totalVotesAllCounties
-    val counties = contestByCounty.counties()
+    val totalVotesAllCounties = contestTab.totalVotesAllCounties
+    val counties = contest.counties
 
     var poolTotalCards: Int = 0
     var poolTotalVotes: Int = 0
 
     init {
-        candidateVotes = contestByCounty.choices.values.mapIndexed { idx, choice -> Pair(idx, choice.totalVotes) }.toMap()
+        candidateVotes = contestTab.choices.values.mapIndexed { idx, choice -> Pair(idx, choice.totalVotes) }.toMap()
         val minCardsNeeded = roundUp(candidateVotes.map { it.value }.sum() / info.voteForN.toDouble())
 
-        if (contestRound != null) {
-            var useNc = contestRound.contestBallotCardCount
-            if (useNc < minCardsNeeded) {
-                println("*** Contest '${info.name}' has $minCardsNeeded total cards, but CorlaContestRoundCsv.contestBallotCardCount is ${contestRound.contestBallotCardCount} - using totalVotes")
-                useNc = minCardsNeeded
-            }
-            Nc = useNc
-            Npop = contestRound.ballotCardCount
-        } else {
-            Nc = minCardsNeeded
+        var useNc = contest.nc
+        if (useNc < minCardsNeeded) {
+            println("*** Contest '${info.name}' has $minCardsNeeded total cards, but CorlaContestRoundCsv.contestBallotCardCount is ${contest.nc} - using totalVotes")
+            useNc = minCardsNeeded
         }
+        Nc = useNc
+        Npop = strata.Npop
     }
 
     fun setTotalCardsFromPools(cardPools: List<CardPoolIF>){

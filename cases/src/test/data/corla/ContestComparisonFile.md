@@ -1,17 +1,8 @@
 # Contest Comparison File
 
-````
-data class CountyStyles(val countyName: String) {
-    val styles = mutableMapOf<Set<String>, Style>()
-    var cardCount = 0
-}
+roundX/contestComparison.csv
 
-data class Style(val id: Int, val contests: Set<String>) {
-    var cardCount = 0
-}
-````
-
-are derived from
+These are the mvr / cvr comparisons
 
 ````
 data class Card(val cvrId: Int) {
@@ -29,11 +20,15 @@ data class ComparisonLine(
 )
 ````
 
-which are the mvr / cvr comparisons
+The audit reason is set to COUNTY_WIDE_CONTEST or STATE_WIDE_CONTEST when the contest is a county level target or a statewide target.
+That designation transfers to the entire card, although the other contests are not so marked.
 
 # contestComparison.csv is the audited result, for all contests on the selected ballots ...
 
 county_name,contest_name, imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,timestamp,cvr_id,audit_reason
+
+Adams,Presidential Electors,101-2-51,53,"""Donald J. Trump / JD Vance""","""Donald J. Trump / JD Vance""",YES,uploaded,"",2024-11-19 09:34:28.123296,81801,STATE_WIDE_CONTEST
+
 Broomfield,Broomfield Ballot Question 2G,104-100-11,6,"""Yes/For""","""Yes/For""",YES,uploaded,"",2024-11-19 09:55:14.442508,869211,COUNTY_WIDE_CONTEST
 Broomfield,Broomfield Ballot Question 2G,104-19-48,6,"""Yes/For""","""Yes/For""",YES,uploaded,"",2024-11-19 09:17:19.859941,810634,COUNTY_WIDE_CONTEST
 Broomfield,Broomfield Ballot Question 2G,104-23-20,3,"""No/Against""","""No/Against""",YES,uploaded,"",2024-11-19 09:30:09.072304,811751,COUNTY_WIDE_CONTEST
@@ -43,7 +38,40 @@ Broomfield,Broomfield Ballot Question 2G,104-61-31,3,"""No/Against""","""No/Agai
 Broomfield,Broomfield Ballot Question 2G,104-74-36,3,"""No/Against""","""No/Against""",YES,uploaded,"",2024-11-19 09:46:41.728707,856760,COUNTY_WIDE_CONTEST
 
 We create BallotStyles from this, (see readContestComparisonCsv()) and use those when generating the simulated CVRs.
-We also extract number of nmvrs by contest and by county.
+
+````
+data class CountyStyles(val countyName: String) {
+    val styles = mutableMapOf<Set<String>, Style>()
+    var cardCount = 0
+}
+
+data class Style(val id: Int, val contests: Set<String>) {
+    var cardCount = 0
+}
+````
+
+We also extract number of nmvrs by county and count cards, but exclude statewide cards in this count.
+
+````
+// for each county, over all contests that are not statewide
+data class CountyMvrs(val countyName: String) {
+    var countMvr = 0
+}
+````
+
+We also extract number of nmvrs by contest and count cards, keeping statewide  cards in a seperate count:
+
+
+````
+// for each contest, over all counties
+data class ContestMvrs(val contestName: String) {
+    var countMvr = 0
+    var countStatewide = 0
+}
+````
+
+Its important that these are the counts of cards that contain the contest, not the nmvrs used to calculate the risk.
+These numbers will be used when we compare uniform sampling to consistent sampling.
 
 ````
 Nmvrs by Contest

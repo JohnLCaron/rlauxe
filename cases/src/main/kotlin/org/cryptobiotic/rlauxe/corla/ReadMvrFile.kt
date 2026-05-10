@@ -44,15 +44,18 @@ data class Style(val id: Int, val contests: Set<String>) {
 
 ///////////////////////////////////////////////////////////////
 
-// over all counties
+// for each contest, over all counties
 data class ContestMvrs(val contestName: String) {
     var countMvr = 0
     var countStatewide = 0
 }
 
+// for each county, over all contests that are not statewide
 data class CountyMvrs(val countyName: String) {
     var countMvr = 0
 }
+
+///////////////////////////////////////////
 
 data class Card(val cvrId: Int) {
     val lines = mutableListOf<ComparisonLine>()

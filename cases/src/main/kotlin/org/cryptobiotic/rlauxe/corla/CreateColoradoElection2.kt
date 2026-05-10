@@ -3,15 +3,14 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
-import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 import kotlin.Int
 import kotlin.String
 
@@ -96,11 +95,12 @@ fun createColoradoElection2(
     auditdir: String,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
-    startFirstRound: Boolean = true,
     name: String? = null,
 ) {
     val stopwatch = Stopwatch()
-    writeCountyData(topdir)
+
+    val (mergedContestInfo: List<MergedContestInfo>, mergedCountyInfo, statewideContests) = mergeContestInfo()
+    writeCountyData2(topdir, mergedCountyInfo)
 
     val countyElection = ColoradoCountyElection()
 
@@ -127,4 +127,17 @@ fun createColoradoElection2(
 
     println("that took $stopwatch")
 }
+
+fun writeCountyData2(topdir: String, strataInfo: List<StrataInfo>) {
+    // misc data by county
+    val outputFilename = "$topdir/countyData.csv"
+    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
+    writer.write("county,   nmvrs, npop\n")
+    strataInfo.sortedBy { it.strataName }.forEach {
+        writer.write("${it.strataName}, ${nfn(it.nmvrs, 5)}, ${nfn(it.Npop, 5)}\n")
+    }
+    writer.close()
+    println("wrote countyData to $outputFilename")
+}
+
 

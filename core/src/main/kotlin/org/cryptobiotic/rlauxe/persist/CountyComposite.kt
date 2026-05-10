@@ -94,7 +94,7 @@ class CountyComposite(
     }
 }
 
-data class CountyData(val countyName: String, val nmvrs: Int)
+data class CountyData(val countyName: String, val nmvrs: Int, val npop: Int)
 
 fun readCountyData(filename: String): List<CountyData> {
     val reader: BufferedReader = File(filename).bufferedReader()
@@ -108,7 +108,8 @@ fun readCountyData(filename: String): List<CountyData> {
         val tokens = line.split(",")
         val countyName = tokens[0]
         val nmvrs = tokens[1].trim().toInt()
-        countyData.add( CountyData(countyName, nmvrs))
+        val npop = tokens[2].trim().toInt()
+        countyData.add( CountyData(countyName, nmvrs, npop))
     }
     reader.close()
 

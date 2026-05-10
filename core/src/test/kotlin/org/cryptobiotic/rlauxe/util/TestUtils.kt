@@ -26,7 +26,9 @@ class TestUtils {
         val margin = diff / Nc
         val dmargin = diff / Npop
         println("margin=$margin samples=${estSamplesFromMarginUpper(bet, margin, alpha)}")
-        println("dmargin=$dmargin margin=${estSamplesFromMarginUpper(bet, dmargin, alpha)}")
+        println("dmargin=$dmargin samples=${estSamplesFromMarginUpper(bet, dmargin, alpha)}")
+        println("dmargin=.105 samples=${estSamplesFromMarginUpper(bet, .105, alpha)}")
+        println("dmargin=.105 risk=${estRiskFromMargin(bet, .105, 269)}")
     }
 
     @Test
@@ -232,6 +234,11 @@ class TestUtils {
         assertEquals("1234567890", sfn("1234567890", 5))
         assertEquals("1234567890", sfn("1234567890", -5))
         assertEquals("1234567890     ", sfn("1234567890", -15))
+
+        assertEquals("00.2%", pfz(.0023))
+        assertEquals("02.3%", pfz(.023))
+        assertEquals("23.0%", pfz(.23))
+        assertEquals("123.0%", pfz(1.23))
     }
 
     @Test

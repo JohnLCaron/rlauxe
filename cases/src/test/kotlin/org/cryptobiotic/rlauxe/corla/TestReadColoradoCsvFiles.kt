@@ -1,15 +1,8 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
-import org.cryptobiotic.rlauxe.shangrla.sampleSize
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.estSamplesFromMarginUpper
-import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -81,107 +74,54 @@ class TestReadColoradoCsvFiles {
         //}
     }
 
-    // data class CorlaContestRoundCsv(
+    // data class MergedContestInfo(
+    //    // canonical
     //    val contestName: String,
+    //    val choices: List<String>,
+    //    val counties: Set<String>,
+    //
+    //    // contestRound
     //    val auditReason: AuditReason,
-    //    val nwinners: Int,
-    //    val ballotCardCount: Int,
-    //    val contestBallotCardCount: Int,
-    //    val winners: String,
-    //    val minMargin: Int,
-    //    val riskLimit: Double,
-    //    val gamma: Double,
-    //    val optimisticSamplesToAudit: Int,
-    //    val estimatedSamplesToAudit: Int,
+    //    val npop:Int,
+    //    val nc:Int,
+    //    val voteForN: Int,
+    //    val nsamples: Int,
+    //    val marginInVotes: Int,
+    //
+    //    // mvr file
+    //    val countyMvrs: Int,
+    //    val statewideMvrs: Int,
     //)
-    data class MergedContestInfo(
-        val contestName: String,
-        val choices: List<String>,
-        val counties: Set<String>,
-
-        val auditReason: AuditReason,
-        val npop:Int,
-        val nc:Int,
-
-        val countyMvrs: Int,
-        val stateMvrs: Int,
-    )
-
-    // data class CountyMvrs(val countyName: String) {
-    //    var countMvr = 0
-    //}
-
-    data class MergedCountyInfo(
-        val countyName: String,
-        val countyMvrs: Int,
-        val Npop: Int,
-    )
-
+    //
+    //data class MergedCountyInfo(
+    //    val countyName: String,
+    //    val countyMvrs: Int,
+    //    val Npop: Int,
+    //)
+    //
+    //data class MergedInfo(
+    //    val mergedContestInfo: List<MergedContestInfo>,
+    //    val mergedCountyInfo: List<MergedCountyInfo>,
+    //    val statewideContests: List<CorlaContestRoundCsv>,
+    //)
     @Test
-    fun mergeContestInfo() {
-        val canonicalFile = "src/test/data/corla/2024audit/2024GeneralCanonicalList.csv"
-        val canonical = readGeneralCanonicalList(canonicalFile)
-
-        val roundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val contests = readColoradoContestRoundCsv(roundFile) { contestNameCleanup(it) }
-
-        val compareFile = "src/test/data/corla/2024audit/round3/contestComparison.csv"
-        val (contestMvrs, countyMvrs, _) = readContestComparisonCsv(compareFile) { contestNameCleanup(it) }
-        val compareMap = contestMvrs.associateBy { it.contestName }
-        val countyMap = countyMvrs.associateBy { it.countyName }
-
-        val mergedContestInfo = canonical.sortedBy { it.contestName }.map {
-            val round = contests[it.contestName]
-            val compare = compareMap[it.contestName]
-
-            MergedContestInfo(
-                it.contestName,
-                it.choices,
-                it.counties,
-                round?.auditReason ?: AuditReason.none,
-                round?.ballotCardCount ?: 0,
-                round?.contestBallotCardCount ?: 0,
-                compare ?. countMvr ?: 0,
-                compare ?. countStatewide ?: 0,
-            )
-        }
+    fun showMergeContestInfo() {
+        val (mergedContestInfo, mergedCountyInfo, statewideContests) = mergeContestInfo()
 
         println("\nMerged Contest Info")
-        println("\n${trunc("contest", -50)}    Npop,      Nc, countyMvrs, stateMvrs, auditReason")
+        println("\n${trunc("contest", -50)}    Npop,      Nc, voteMargin, countyMvrs, stateMvrs, Ncounties, auditReason")
         mergedContestInfo.forEach {
             print("${trunc("${it.contestName}", -50)} ")
-            print("${nfn(it.npop, 7)}, ${nfn(it.nc, 7)}, ${nfn(it.countyMvrs, 7)},")
-            println(" ${nfn(it.stateMvrs, 7)},      ${it.auditReason}")
+            print("${nfn(it.npop, 7)}, ${nfn(it.nc, 7)}, ${nfn(it.marginInVotes, 7)},")
+            print("   ${nfn(it.countyMvrs, 7)},  ${nfn(it.statewideMvrs, 7)}, ")
+            println("         ${nfn(it.counties.size, 3)},   ${it.auditReason}")
         }
         println()
 
-        // pick out the contests that are the targeted ones; should have a single contest
-        val mergedCountyInfo = mutableListOf<MergedCountyInfo>()
-        val statewideContests = mutableListOf<CorlaContestRoundCsv>()
-        canonical.forEach {
-            val round = contests[it.contestName]
-            if (round != null && round.auditReason == AuditReason.county_wide_contest) {
-                if (it.counties.size != 1)
-                    println("*** ${it.contestName} has multiple counties: ${it.counties}")
-                val county = it.counties.first()
-                val countyMvr = countyMap[county]!!
-
-                val countyInfo = MergedCountyInfo(
-                    county,
-                    countyMvr.countMvr,
-                    round.ballotCardCount
-                )
-                mergedCountyInfo.add(countyInfo)
-            }
-            if (round != null && round.auditReason == AuditReason.state_wide_contest) {
-                statewideContests.add(round)
-            }
-        }
-
-        println("\nMerged county Info")
+        println("\nStrata Info")
         println("\ncounty      nmvrs,  npop")
-        mergedCountyInfo.sortedBy { it.countyName }.forEach {
-            println("${sfn(it.countyName, -10)}  ${nfn(it.countyMvrs, 5)}, ${nfn(it.Npop, 7)}")
+        mergedCountyInfo.sortedBy { it.strataName }.forEach {
+            println("${sfn(it.strataName, -10)}  ${nfn(it.nmvrs, 5)}, ${nfn(it.Npop, 7)}")
         }
         println()
 
@@ -191,8 +131,6 @@ class TestReadColoradoCsvFiles {
             print("${nfn(it.ballotCardCount, 7)}, ${nfn(it.contestBallotCardCount, 7)},  ${nfn(it.optimisticSamplesToAudit, 7)},")
             println(" ${it.auditReason}")
         }
-
-        // return Pair(mergedContestInfo, mergedCountyInfo)
     }
 
     // data class ResultsReportContest(
@@ -404,63 +342,3 @@ class TestReadColoradoCsvFiles {
 }
 
 fun clean(orgName: String) = mutatisMutandi(contestNameCleanup(orgName))
-
-fun CorlaContestRoundCsv.showEstimation() {
-    // TODO they use ballotCardCount instead of contestBallotCardCount for some reason
-    val dilutedMargin = minMargin.toDouble() / ballotCardCount
-    if (dilutedMargin > 0) {
-        val est = estimateCorla(riskLimit, dilutedMargin, gamma) // no errors
-        val (bet, payoff, samples) = betPayoffSamples(ballotCardCount, risk=riskLimit, assorterMargin=dilutedMargin, 0.0)
-
-        println("dilutedMargin = $dilutedMargin estSamples = ${est} corlaEst=$optimisticSamplesToAudit rauxEst=$samples")
-        require(optimisticSamplesToAudit == est)
-        println("   rlauxe bet = $bet payoff = $payoff rauxeEst=$samples")
-    }
-}
-
-// Compare Corla estimate with ours.
-// this assumes you get the same bet each time, which is not true because mui is changing.
-// Also eps (lower bound on the estimated rate) turns out to be important.
-fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double): Triple<Double, Double, Int> {
-    val avgCvrAssortValue = margin2mean(assorterMargin)
-    val assorterMargin2 = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin, not clca margin
-    // val noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())
-    val noerror = 1 / (2 - assorterMargin2)
-
-    // assumes upperBound = 1.0
-    // class GeneralAdaptiveBetting(
-    //    val Npop: Int, // population size for this contest
-    //    // val accumErrorCounts: ClcaErrorCounts, // propable illegal to do (cant use prior knowlege of the sample)
-    //    val oaErrorRates: OneAuditErrorRates?,
-    //    val d: Int = 100,  // trunc weight
-    //    val maxRisk: Double, // this bounds how close lam gets to 2.0; TODO study effects of this
-    //    val withoutReplacement: Boolean = true,
-    //    val debug: Boolean = false,
-    //
-    // data class GeneralAdaptiveBetting2(
-    //    val Npop: Int, // population size for this contest
-    //    val aprioriCounts: ClcaErrorCounts, // apriori counts not counting phantoms, non-null so we have noerror and upper
-    //    val nphantoms: Int, // number of phantoms in the population
-    //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
-    //
-    //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
-    //    val d: Int = 100,  // trunc weight
-    //    val debug: Boolean = false,
-    val bettingFn = GeneralAdaptiveBetting(
-        Npop = N,
-        aprioriErrorRates = ClcaErrorRates.empty(noerror, 1.0),
-        nphantoms = 0,
-        oaAssortRates = null,
-        d = 100,
-        maxLoss = .9,
-    )
-
-    val samples = ClcaErrorTracker(noerror, 1.0)
-    repeat(10) { samples.addSample(noerror) }
-    val bet = bettingFn.bet(samples)
-    val mj = populationMeanIfH0(N=N, true, samples)
-
-    val payoff = 1.0 + bet * (noerror - mj)
-    val samplesSize = sampleSize(risk, payoff) // fun sampleSize(risk: Double, payoff:Double) = -ln(risk) / ln(payoff)
-    return Triple(bet, payoff, roundUp(samplesSize))
-}

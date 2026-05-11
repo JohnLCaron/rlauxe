@@ -54,7 +54,7 @@ class TestDhondtContest {
         println("validVotes = ${contestd.votes.values.sum()} undervotes=${contestd.undervotes} ncvrsIF = ${cvrsIF.size}")
 
         contestd.assorters.forEach { assorter ->
-            println(" assorterif dilutedMean= ${df(assorter.dilutedMean())} dilutedMargin= ${df(assorter.dilutedMargin())}")
+            println(" assorterif dilutedMean= ${df(assorter.dilutedMean())} dilutedMargin= ${df(assorter.margin(true))}")
 
             val welford = Welford()
             cvrsIF.forEach { cvr ->
@@ -122,9 +122,9 @@ class TestDhondtContest {
                 assertEquals(it.dilutedMean(), hmean, doublePrecision)
             }
 
-            println(" dilutedMargin = ${it.dilutedMargin()}")
+            println(" margin = ${it.margin(true)}")
             println(" calcMarginFromRegVotes = ${it.calcMarginFromRegVotes(contestd.votes, contestd.Nc)}")
-            assertEquals(it.dilutedMargin(), it.calcMarginFromRegVotes(contestd.votes, contestd.Nc), doublePrecision)
+            assertEquals(it.margin(true), it.calcMarginFromRegVotes(contestd.votes, contestd.Nc), doublePrecision)
 
             println("recountMargin = ${contestd.recountMargin(it)}")
             println("showDifficulty = ${contestd.showAssertionDifficulty(it)}")

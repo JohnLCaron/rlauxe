@@ -59,7 +59,7 @@ class MakeColoradoElection {
 
     @Test
     fun makeColoradoClcaUniform() {
-        val topdir = "$testdataDir/cases/corla/county"
+        val topdir = "$testdataDir/cases/corla/uniform"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -68,13 +68,13 @@ class MakeColoradoElection {
                 sampling = Sampling.uniform),
             ClcaConfig(), null)
 
-        createColoradoElection2(topdir, "$topdir/audit",
-            creation, round, name = "Corla24County")
+        createUniformElection(topdir, "$topdir/audit",
+            creation, round, name = "Corla24Uniform")
     }
 
     @Test
     fun makeColoradoClcaConsistent() {
-        val topdir = "$testdataDir/cases/corla/clca"
+        val topdir = "$testdataDir/cases/corla/consistent"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -83,8 +83,8 @@ class MakeColoradoElection {
                 sampling = Sampling.consistent),
             ClcaConfig(), null)
 
-        createColoradoElection(topdir, "$topdir/audit",
-            null, creation, round, name = "Corla24", startFirstRound = true)
+        createConsistentElection(topdir, "$topdir/audit",
+            null, creation, round, name = "Corla24Consistent", startFirstRound = true)
     }
 
     @Test
@@ -97,7 +97,7 @@ class MakeColoradoElection {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createColoradoElection(topdir, "$topdir/audit",
+        createConsistentElection(topdir, "$topdir/audit",
             pollingMode=PollingMode.withPools, creation, round)
     }
 
@@ -111,7 +111,7 @@ class MakeColoradoElection {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createColoradoElection(topdir, "$topdir/audit",
+        createConsistentElection(topdir, "$topdir/audit",
             pollingMode=PollingMode.withBatches, creation, round)
     }
 
@@ -125,7 +125,7 @@ class MakeColoradoElection {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createColoradoElection(topdir, "$topdir/audit",
+        createConsistentElection(topdir, "$topdir/audit",
             pollingMode=PollingMode.withoutBatches, creation, round)
     }
 

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
+import kotlin.collections.contains
 import kotlin.test.Test
 
 class TestContestNames {
@@ -7,25 +8,15 @@ class TestContestNames {
     val canonical = readGeneralCanonicalList(filename).associateBy { it.contestName }
     val extra = mutableListOf<CanonicalContest>()
 
-    @Test
+    // @Test
     fun showGeneralCanonicalList() {
         canonical.values.forEach { println(it.contestName)}
     }
 
-    @Test
-    fun checkResultsReportContest() {
-        val filename = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
-        val contests = readResultsReportContest(filename) { it }
-        println("ResultsReportSummary $filename missing")
-        contests.forEach {
-            if (!canonical.contains(it.contestName)) println("  '${it.contestName}'")
-        }
-        //   'Bannock Ballot Issue 6A'
-        //  'Spring Canyon Ballot Issue 6B'
-    }
+    //        these have been tested to agree with tabulateCountyFile, contestRoundFile, mvrComparisonFile
 
     @Test
-    fun checkCountyTabulateCsv() {
+    fun checkCanonicalHasCountyTabulate() {
         val filename = "src/test/data/corla/2024audit/tabulateCounty.csv"
         val contests = readCountyTabulateCsv(filename, { it }, { it })
         println("CountyTabulateCsv $filename missing")
@@ -44,6 +35,7 @@ class TestContestNames {
         }
         println("add these:")
         extra.forEach { println(it) }
+        println()
         //  ''Bannock Ballot Issue 6A'
         //  'Yes'= 14 [Douglas=14, ]
         //  'No'= 9 [Douglas=9, ]
@@ -58,7 +50,18 @@ class TestContestNames {
     }
 
     @Test
-    fun checkColoradoContestRoundCsv() {
+    fun checkCountyTabulateHasCanonical() {
+        val filename = "src/test/data/corla/2024audit/tabulateCounty.csv"
+        val contests = readCountyTabulateCsv(filename, { it }, { it })
+        canonical.values.forEach {
+            if (!contests.contains(it.contestName)) {
+                println("countyTabulate missing canonical '${it}'")
+            }
+        }
+    }
+
+    @Test
+    fun checkCanonicalHasContestRound() {
         val filename = "src/test/data/corla/2024audit/round1/contest.csv"
         val contests = readColoradoContestRoundCsv(filename) { it }
         println("ColoradoContestRoundCsv $filename missing")
@@ -72,7 +75,18 @@ class TestContestNames {
     }
 
     @Test
-    fun checkContestComparisonCsv() {
+    fun checkContestRoundHasCanonical() {
+        val filename = "src/test/data/corla/2024audit/round1/contest.csv"
+        val contests = readColoradoContestRoundCsv(filename) { it }
+        canonical.values.forEach {
+            if (!contests.contains(it.contestName)) {
+                println("countyRound missing canonical '${it.contestName}'")
+            }
+        }
+    }
+
+    @Test
+    fun checkCanonicalHasContestComparison() {
         val filename = "src/test/data/corla/2024audit/round3/contestComparison.csv"
         val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(filename) { it  }
 
@@ -83,6 +97,35 @@ class TestContestNames {
     }
 
     @Test
+    fun checkContestComparisonHasCanonical() {
+        val filename = "src/test/data/corla/2024audit/round3/contestComparison.csv"
+        val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(filename) { it  }
+        val mvrMap = contestMvrs.associateBy{ it.contestName }
+        var count = 0
+        canonical.values.forEach {
+            if (!mvrMap.contains(it.contestName)) {
+                println("contestComparison missing canonical '${it.contestName}'")
+                count++
+            }
+        }
+        println("missing $count")
+    }
+
+    // not needed
+
+    //@Test
+    fun checkResultsReportContest() {
+        val filename = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
+        val contests = readResultsReportContest(filename) { it }
+        println("ResultsReportSummary $filename missing")
+        contests.forEach {
+            if (!canonical.contains(it.contestName)) println("  '${it.contestName}'")
+        }
+        //   'Bannock Ballot Issue 6A'
+        //  'Spring Canyon Ballot Issue 6B'
+    }
+
+    //@Test
     fun checkTargetedContestsCsv() {
         val filename = "src/test/data/corla/2024audit/targetedContests.csv"
         val targets = readTargetedContestsCsv(filename) { it }
@@ -114,7 +157,7 @@ class TestContestNames {
         //  'Yuma County Court Judge - Jones'
     }
 
-    @Test
+    //@Test
     fun checkColoradoElectionDetail() {
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val detail = readColoradoElectionDetail(detailXmlFile)

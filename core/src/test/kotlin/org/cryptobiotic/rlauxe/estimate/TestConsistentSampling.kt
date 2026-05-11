@@ -50,10 +50,10 @@ class TestConsistentSampling {
         }
 
         contestRounds.forEach { contestRound ->
-            val contest = contestRound.contestUA
-            print(" ${contest.name} (${contest.id}) estMvrs=${contestRound.estMvrs} pct=${contestRound.estMvrs/contest.Npop.toDouble()}")
+            val contestUA = contestRound.contestUA
+            print(" ${contestUA.name} (${contestUA.id}) estMvrs=${contestRound.estMvrs} pct=${contestRound.estMvrs/contestUA.Npop.toDouble()}")
             val assorter = contestRound.minAssertion()!!.assertion.assorter
-            println(" recountMargin=${contest.contest.recountMargin(assorter)} dilutedMargin=${assorter.dilutedMargin()} marginInVotes=${contest.contest.marginInVotes(assorter)}")
+            println(" recountMargin=${contestUA.contest.recountMargin(assorter)} margin=${assorter.margin(contestUA.hasStyle)} marginInVotes=${contestUA.contest.marginInVotes(assorter)}")
         }
 
         // double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
@@ -142,7 +142,7 @@ class TestConsistentSampling {
                 val contest = contestRound.contestUA
                 print(" ${contest.name} (${contest.id}) estMvrs=${contestRound.estMvrs} pct=${contestRound.estMvrs/contest.Npop.toDouble()}")
                 val assorter = contestRound.minAssertion()!!.assertion.assorter
-                println(" recountMargin=${contest.contest.recountMargin(assorter)} dilutedMargin=${assorter.dilutedMargin()} marginInVotes=${contest.contest.marginInVotes(assorter)}")
+                println(" recountMargin=${contest.contest.recountMargin(assorter)} dilutedMargin=${assorter.margin(contestUA.hasStyle)} marginInVotes=${contest.contest.marginInVotes(assorter)}")
             } */
 
             //// side effects:
@@ -174,7 +174,7 @@ class TestConsistentSampling {
                     val samplePct=contestRound.estMvrs/contest.Npop.toDouble()
                     val assorter = contestRound.minAssertion()!!.assertion.assorter
                     val recountMargin=contest.contest.recountMargin(assorter)
-                    val dilutedMargin=assorter.dilutedMargin()
+                    val dilutedMargin=assorter.margin(contestRound.contestUA.hasStyle)
                     val marginInVotes= contest.contest.marginInVotes(assorter)
 
                     assertTrue(contest.Nphantoms < marginInVotes)

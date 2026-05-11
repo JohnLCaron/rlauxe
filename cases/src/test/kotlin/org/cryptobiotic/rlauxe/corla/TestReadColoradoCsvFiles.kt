@@ -11,43 +11,6 @@ import kotlin.test.Test
 
 class TestReadColoradoCsvFiles {
 
-    // class ColoradoElectionContestSummary(
-    //    val contestName: String,
-    //    val overVotes: Int,
-    //    val underVotes: Int,
-    //) {
-    //    val candidates = mutableListOf<ColoradoElectionCandidateLine>()
-    //  }
-    // data class ColoradoElectionCandidateLine(
-    //    val lineNumber: Int,
-    //    val contestName: String,
-    //    val choiceName: String,
-    //    val partyName: String,
-    //    val totalVotes: Int,
-    //    val percentVotes: Double,
-    //    val registeredVoters: Int,
-    //    val ballotsCast: Int,
-    //    val numAreaTotal: Int,
-    //    val numAreaRptg: Int,
-    //    val overVotes: Int,
-    //    val underVotes: Int,
-    //)
-    @Test
-    fun testColoradoElectionSummary() {
-        val filename = "src/test/data/corla/2024election/summary.csv"
-        val contests = readColoradoElectionSummaryCsv(filename)
-        println("read ${contests.size} contests in $filename")
-        println("read ${ contests.sumOf { it.candidates.size } } candidates")
-        contests.forEach { it.complete() }
-        println("--------------------------------------------------------------")
-        println("contest sort by reversed underVote percentage\n")
-        contests.sortedBy { it.underPct }.reversed().forEach { println(it) }
-        println("--------------------------------------------------------------")
-        println("contest sort by dilutedMargin percentage\n")
-        contests.filter{ it.dilutedMargin != 0.0 }.sortedBy { it.dilutedMargin }.forEach { print(it.show()) }
-        println("--------------------------------------------------------------")
-    }
-
     // data class CanonicalContest(
     //    val contestName: String,
     //    val choices: List<String>
@@ -338,6 +301,45 @@ class TestReadColoradoCsvFiles {
             }
         }
         println()
+    }
+
+    //////////////////////////////////////
+
+    // class ColoradoElectionContestSummary(
+    //    val contestName: String,
+    //    val overVotes: Int,
+    //    val underVotes: Int,
+    //) {
+    //    val candidates = mutableListOf<ColoradoElectionCandidateLine>()
+    //  }
+    // data class ColoradoElectionCandidateLine(
+    //    val lineNumber: Int,
+    //    val contestName: String,
+    //    val choiceName: String,
+    //    val partyName: String,
+    //    val totalVotes: Int,
+    //    val percentVotes: Double,
+    //    val registeredVoters: Int,
+    //    val ballotsCast: Int,
+    //    val numAreaTotal: Int,
+    //    val numAreaRptg: Int,
+    //    val overVotes: Int,
+    //    val underVotes: Int,
+    //)
+    @Test
+    fun testColoradoElectionSummary() {
+        val filename = "src/test/data/corla/2024election/summary.csv"
+        val contests = readColoradoElectionSummaryCsv(filename)
+        println("read ${contests.size} contests in $filename")
+        println("read ${ contests.sumOf { it.candidates.size } } candidates")
+        contests.forEach { it.complete() }
+        println("--------------------------------------------------------------")
+        println("contest sort by reversed underVote percentage\n")
+        contests.sortedBy { it.underPct }.reversed().forEach { println(it) }
+        println("--------------------------------------------------------------")
+        println("contest sort by dilutedMargin percentage\n")
+        contests.filter{ it.dilutedMargin != 0.0 }.sortedBy { it.dilutedMargin }.forEach { print(it.show()) }
+        println("--------------------------------------------------------------")
     }
 }
 

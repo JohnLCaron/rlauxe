@@ -53,7 +53,7 @@ class TestOAShangrla {
         //val contestUA = contestOA.makeContestUnderAudit()
         val cassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
 
-        val assortMargin = cassorter.assorter.dilutedMargin()
+        val assortMargin = cassorter.assorter.margin(contestUA.hasStyle)
         val assortMean = margin2mean(assortMargin)
         assertEquals(margin2mean(margin), assortMean, .0001)
 

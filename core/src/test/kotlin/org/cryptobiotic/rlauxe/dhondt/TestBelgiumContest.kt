@@ -93,9 +93,9 @@ class TestBelgiumContest {
                 assertEquals(assorter.dilutedMean(), hmean, doublePrecision)
             }
 
-            println(" dilutedMargin = ${assorter.dilutedMargin()}")
+            println(" margin = ${assorter.margin(contestUA.hasStyle)}")
             println(" calcMarginFromRegVotes = ${assorter.calcMarginFromRegVotes(contestd.votes, contestd.Nc)}")
-            assertEquals(assorter.dilutedMargin(), assorter.calcMarginFromRegVotes(contestd.votes, contestd.Nc), doublePrecision)
+            assertEquals(assorter.margin(contestUA.hasStyle), assorter.calcMarginFromRegVotes(contestd.votes, contestd.Nc), doublePrecision)
 
             println("recountMargin = ${contestd.recountMargin(assorter)}")
             println("showDifficulty = ${contestd.showAssertionDifficulty(assorter)}")

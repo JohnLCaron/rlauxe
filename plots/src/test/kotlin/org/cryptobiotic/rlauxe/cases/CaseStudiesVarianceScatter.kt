@@ -230,7 +230,7 @@ fun readAuditRecord(auditDir: String, cat: String, marginOverride:Map<Int, Doubl
         val contestRounds = auditRound.contestRounds
         contestRounds.forEach { contestRound ->
             contestRound.assertionRounds.forEach { assertionRound ->  // could just use minAsertion
-                val margin = if (marginOverride == null) assertionRound.assertion.assorter.dilutedMargin() else
+                val margin = if (marginOverride == null) assertionRound.assertion.assorter.margin(contestRound.contestUA.hasStyle) else
                     marginOverride[assertionRound.assertion.id().hashCode()] ?: 0.0
                 if (assertionRound.auditResult != null) {
                     allAssertions[assertionRound.assertion.assorter.hashcodeDesc()] = CatPoint(cat, assertionRound.auditResult!!.samplesUsed, margin)

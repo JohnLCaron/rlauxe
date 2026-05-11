@@ -15,7 +15,7 @@ import kotlin.test.assertNotNull
 
 class TestPluralityDilutedVsReportedMargins {
 
-    // Does assorter.dilutedMargin() or assorter.reportedMargin() equals cvr assort average ?
+    // Does assorter.margin(contestUA.hasStyle) or assorter.reportedMargin() equals cvr assort average ?
     // reportedMargin agrees when you sample from Population of only cvrs containing the contest
     // dilutedMargin agrees when you sample from dilutedPopulation
     // if Nc = Npop, then dilutedMargin = reportedMargin
@@ -58,10 +58,10 @@ class TestPluralityDilutedVsReportedMargins {
             assertEquals(1.0, it.assorter.upperBound())
 
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr)}.average()
-            println("${it.assorter.shortName()}: cvrMargin=${mean2margin(assortAvg)} reportedMargin=${it.assorter.reportedMargin()} dilutedMargin=${it.assorter.dilutedMargin()}")
+            println("${it.assorter.shortName()}: cvrMargin=${mean2margin(assortAvg)} reportedMargin=${it.assorter.reportedMargin()} dilutedMargin=${it.assorter.margin(contestUA.hasStyle)}")
             assertEquals(mean2margin(assortAvg), it.assorter.reportedMargin(), doublePrecision)
 
-            val dilutedMean = margin2mean(it.assorter.dilutedMargin())
+            val dilutedMean = margin2mean(it.assorter.margin(contestUA.hasStyle))
             val reportedMean = margin2mean(it.assorter.reportedMargin())
             println("${it.assorter.shortName()}: assortAvgMean=${assortAvg} reportedMean=${reportedMean} dilutedMean=${dilutedMean}")
             assertEquals(assortAvg, reportedMean, doublePrecision)
@@ -128,13 +128,13 @@ class TestPluralityDilutedVsReportedMargins {
             assertEquals(1.0, it.assorter.upperBound())
 
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr, usePhantoms = false)}.average()
-            val mean = margin2mean(it.assorter.dilutedMargin())
+            val mean = margin2mean(it.assorter.margin(contestUA.hasStyle))
             println("$it: assortAvg=${assortAvg} mean=${mean}")
             assertEquals(assortAvg, mean, doublePrecision)
 
             val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
             assertEquals(assortAvg, margin2mean(calcMargin), doublePrecision)
-            assertEquals(it.assorter.dilutedMargin(), calcMargin, doublePrecision)
+            assertEquals(it.assorter.margin(contestUA.hasStyle), calcMargin, doublePrecision)
 
             val Ncd = contest.Nc.toDouble()
             val expectWithPhantoms = (assortAvg * Ncd - 0.5) / Ncd
@@ -185,14 +185,14 @@ class TestPluralityDilutedVsReportedMargins {
 
             // if you include all cvr assorts, the
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr, usePhantoms = false)}.average()
-            val reportedMean = margin2mean(it.assorter.dilutedMargin())
+            val reportedMean = margin2mean(it.assorter.margin(contestUA.hasStyle))
             println("  allcvrs: assortAvg=${assortAvg} reportedMean=${reportedMean} equals = ${doubleIsClose(assortAvg, reportedMean, doublePrecision)}")
             // assertEquals(assortAvg, reportedMean, doublePrecision)
 
             // this skips cvrs that dont have the contest
             val skipMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
             println("$it: assortAvg=${assortAvg} skipMean=${margin2mean(skipMargin)}")
-            assertEquals(it.assorter.dilutedMargin(), skipMargin, doublePrecision)
+            assertEquals(it.assorter.margin(contestUA.hasStyle), skipMargin, doublePrecision)
         }
     }
 
@@ -249,22 +249,22 @@ class TestPluralityDilutedVsReportedMargins {
     }
 
     fun testMeanAssort(cvrs: List<Cvr>, contest: Contest) {
-        val contestAU = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
 
-        contestAU.assertions.forEach { assertion ->
+        contestUA.assertions.forEach { assertion ->
             val assorter = assertion.assorter
             println("=== ${assorter}")
 
             // val reportedMargin = (winnerVotes - loserVotes) / (contest.info.voteForN * contest.Nc.toDouble())
             // println("   assorter reportedMargin = ${assorter.reportedMargin()}")
-            println("   assorter dilutedMargin = ${margin2mean(assorter.dilutedMargin())}")
+            println("   assorter dilutedMargin = ${margin2mean(assorter.margin(contestUA.hasStyle))}")
 
             val assortAvg = cvrs.map { assorter.assort(it, usePhantoms = false) }.average()
             println("   assorter assort mean = $assortAvg")
             // println("   assorter assort margin = ${mean2margin(assortAvg)}")
             // cvrs.forEach{ println(" $it == ${assorter.assort(it)}")}
 
-            assertEquals(assortAvg, margin2mean(assorter.dilutedMargin()), doublePrecision)
+            assertEquals(assortAvg, margin2mean(assorter.margin(contestUA.hasStyle)), doublePrecision)
         }
     }
 }

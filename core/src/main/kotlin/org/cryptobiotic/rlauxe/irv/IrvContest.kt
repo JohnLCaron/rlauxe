@@ -131,7 +131,7 @@ class RaireContestWithAssertions(
     }
 
     override fun showShort() = buildString {
-        append("${name} ($id) Nc=$Nc Npop=$Npop winner ${contest.winners().first()} losers ${contest.losers()} minMargin=${df(minDilutedMargin())}")
+        append("${name} ($id) Nc=$Nc Npop=$Npop winner ${contest.winners().first()} losers ${contest.losers()} minMargin=${df(minMargin())}")
     }
 
     override fun equals(other: Any?): Boolean {

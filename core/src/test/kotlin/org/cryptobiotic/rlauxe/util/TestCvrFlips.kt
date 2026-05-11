@@ -17,14 +17,14 @@ class TestCvrFlips {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.PLURALITY)
         val contest =  makeContestFromCvrs(info, cvrs)
         val contestUA = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
-        val margin = contestUA.minDilutedMargin()!!
+        val margin = contestUA.minMargin()!!
         assertEquals(mean2margin(mean), margin, doublePrecision)
 
         val minClcaAssertion: ClcaAssertion = contestUA.minClcaAssertion()!!
         val cassorter = minClcaAssertion.cassorter
         val assorter = cassorter.assorter
         val calcAssorter = assorter.calcAssorterMargin(0, cvrs)
-        println("margin = $margin reportedMargin=${assorter.dilutedMargin()} calcAssorterMargin=${calcAssorter}")
+        println("margin = $margin margin=${assorter.margin(contestUA.hasStyle)} calcAssorterMargin=${calcAssorter}")
 
         var p2o = .01
         var mvrs = makeFlippedMvrs(cvrs, cvrs.size, p2o, null)
@@ -71,14 +71,14 @@ class TestCvrFlips {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.PLURALITY)
         val contest =  makeContestFromCvrs(info, cvrs)
         val contestUA = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
-        val margin = contestUA.minDilutedMargin()!!
+        val margin = contestUA.minMargin()!!
         assertEquals(mean2margin(mean), margin, doublePrecision)
 
         val minClcaAssertion: ClcaAssertion = contestUA.minClcaAssertion()!!
         val cassorter = minClcaAssertion.cassorter
         val assorter = cassorter.assorter
         val calcAssorter = assorter.calcAssorterMargin(0, cvrs)
-        println("margin = $margin reportedMargin=${assorter.dilutedMargin()} calcAssorterMargin=${calcAssorter}")
+        println("margin = $margin reportedMargin=${assorter.margin(contestUA.hasStyle)} calcAssorterMargin=${calcAssorter}")
 
         var p2o = .01
         var mvrs = makeFlippedMvrs(cvrs, cvrs.size, p2o, null)

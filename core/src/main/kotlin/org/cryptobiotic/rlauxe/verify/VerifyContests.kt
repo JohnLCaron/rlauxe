@@ -355,10 +355,10 @@ fun verifyClcaAssortAvg(
         contestUA.assertions.forEach { assertion ->
             val passorter = assertion.assorter
             val assortAvg = cardAssortAvg[passorter.hashcodeDesc()]!!
-            val dilutedMargin = passorter.dilutedMargin()
-            if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
-                result.addError("  verifyClcaAssortAvg dilutedMargin does not agree for contest ${contestUA.id} assorter='$passorter'")
-                result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards}")
+            val margin = passorter.margin(contestUA.hasStyle)
+            if (!doubleIsClose(margin, assortAvg.margin())) {
+                result.addError("  verifyClcaAssortAvg margin does not agree for contest ${contestUA.id} assorter='$passorter'")
+                result.addError("     margin= ${pfn(margin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards}")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
                 allOk = false
             } else {
@@ -408,7 +408,7 @@ fun verifyOAassortAvg(
         }
     }
 
-    // compare the assortAverage with the dilutedMargin in passorter.
+    // compare the assortAverage with the margin in passorter.
     contestsUA.forEach { contestUA ->
         val cardAssortAvg = cardAssortAvgs[contestUA.id]
         if (cardAssortAvg == null) {
@@ -419,10 +419,10 @@ fun verifyOAassortAvg(
             val passorter = assertion.assorter
             if (cardAssortAvg[passorter.hashcodeDesc()] != null) {  //  may be Raire
                 val assortAvg = cardAssortAvg[passorter.hashcodeDesc()]!!
-                val dilutedMargin = passorter.dilutedMargin()
-                if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
-                    result.addError("  verifyOAassortAvg dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")
-                    result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards} Npop=${contestUA.Npop}")
+                val margin = passorter.margin(contestUA.hasStyle)
+                if (!doubleIsClose(margin, assortAvg.margin())) {
+                    result.addError("  verifyOAassortAvg margin does not agree for contest ${contestUA.id} assorter '$passorter'")
+                    result.addError("     margin= ${pfn(margin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards} Npop=${contestUA.Npop}")
                     contestUA.preAuditStatus = TestH0Status.ContestMisformed
                     allOk = false
                 } else {
@@ -481,10 +481,10 @@ fun verifyOApools(
                 }
             }
 
-            val dilutedMargin = passorter.dilutedMargin()
-            if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
-                result.addError("  verifyOApools dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")
-                result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cardPools assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards} Npop=${contestUA.Npop}")
+            val margin = passorter.margin(contestUA.hasStyle)
+            if (!doubleIsClose(margin, assortAvg.margin())) {
+                result.addError("  verifyOApools margin does not agree for contest ${contestUA.id} assorter '$passorter'")
+                result.addError("     margin= ${pfn(margin)} cardPools assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards} Npop=${contestUA.Npop}")
 
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
                 allOk = false

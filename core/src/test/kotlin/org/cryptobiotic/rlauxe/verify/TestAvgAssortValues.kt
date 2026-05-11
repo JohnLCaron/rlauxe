@@ -52,7 +52,7 @@ class TestAvgAssortValues {
 
         val minassert = contestUA.minPollingAssertion()
         println(minassert)
-        assertEquals(minassert!!.assorter.dilutedMargin(), contestUA.minDilutedMargin())
+        assertEquals(minassert!!.assorter.margin(contestUA.hasStyle), contestUA.minMargin())
 
         //     cards: CloseableIterator<AuditableCard>,
         //    result: VerifyResults,
@@ -96,7 +96,7 @@ class TestAvgAssortValues {
 
         val minassert = contestUA.minPollingAssertion()
         println(minassert)
-        assertEquals(minassert!!.assorter.dilutedMargin(), contestUA.minDilutedMargin())
+        assertEquals(minassert!!.assorter.margin(contestUA.hasStyle), contestUA.minMargin())
 
         val results = VerifyResults()
         verifyClcaAssortAvg(contestsUA, cardIterable.iterator(), results, show = true)

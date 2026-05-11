@@ -88,7 +88,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     override fun upperBound() = h2(upperg)
 
     override fun desc() = buildString {
-        append("${shortName()}: dilutedMean=${pfn(dilutedMean())} noerror=${pfn(noerror())} ")
+        append("${shortName()}: dilutedMean=${pfn(dilutedMean())} noerror=${pfn(noerror(true))} ")
         append("g=[$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
     }
 
@@ -310,7 +310,7 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     override fun shortName() = "AboveThreshold for '${info.candidateIdToName[winner()]}'"
 
     override fun desc() = buildString {
-        append("${shortName()}: reportedMargin=${pfn(reportedMargin)}  dilutedMargin=${pfn(dilutedMargin)} noerror=${pfn(noerror() )}")
+        append("${shortName()}: reportedMargin=${pfn(reportedMargin)}  dilutedMargin=${pfn(dilutedMargin)} noerror=${pfn(noerror(true) )}")
         append(" g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
     }
 

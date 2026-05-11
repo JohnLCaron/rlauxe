@@ -106,7 +106,7 @@ class TestSfElection {
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
         val scontests = contests.sortedBy { it.id  }
 
-        scontests.filter { !it.isIrv && it.minDilutedMargin()!! < .07 }.forEach { contest ->
+        scontests.filter { !it.isIrv && it.minMargin()!! < .07 }.forEach { contest ->
             val minAssertion = contest.minClcaAssertion()!!
             val oaass = minAssertion.cassorter as OneAuditClcaAssorter
 

@@ -187,7 +187,7 @@ fun estSamplesNeeded(config: Config, contestRound: ContestRound, ncards: Int): I
     val minAssertion = minAssertionRound.assertion
     val cassorter = (minAssertion as ClcaAssertion).cassorter
 
-    val contest = contestRound.contestUA
+    val contestUA = contestRound.contestUA
     val assorter = cassorter.assorter
 
     /* i think problem is that we arent adding the fuzzPct to estWithOptimalBet ??
@@ -205,7 +205,7 @@ fun estSamplesNeeded(config: Config, contestRound: ContestRound, ncards: Int): I
         )
     } */
 
-    val nsamples = minAssertionRound.calcNewMvrsNeeded(contest, config) // TODO NEXT
+    val nsamples = minAssertionRound.calcNewMvrsNeeded(contestUA, config) // TODO NEXT
 
     // TODO underestimates when nsamples is low ?
     val stddev = .586 * nsamples - 23.85 // see https://github.com/JohnLCaron/rlauxe?tab=readme-ov-file#clca-with-errors
@@ -214,14 +214,14 @@ fun estSamplesNeeded(config: Config, contestRound: ContestRound, ncards: Int): I
     val needed = if (stddev > 0) roundUp(nsamples + fac * stddev) else fac * nsamples
 
     // TODO using contestSampleCutoff as maximum
-    var est =  min( contest.Npop, needed)
+    var est =  min( contestUA.Npop, needed)
     if (config.round.sampling.contestSampleCutoff != null) est = min(config.round.sampling.contestSampleCutoff, est)
 
     if (est < 0) {
         // TODO what to do when estimate is negetive?? Perhaps fail ??
         //val wtf = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
         //throw RuntimeException("est samples $est < 0")
-        logger.warn { " *** getSubsetForEstimation ${contest.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.dilutedMargin()} " +
+        logger.warn { " *** getSubsetForEstimation ${contestUA.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.margin(contestUA.hasStyle)} " +
                 "nsamples=${nsamples}, stddev=$stddev" }
 
         val lastPvalue = minAssertionRound.auditResult?.plast ?: config.riskLimit
@@ -234,7 +234,7 @@ fun estSamplesNeeded(config: Config, contestRound: ContestRound, ncards: Int): I
             logger.info{"*** removeMaxContests contest ${contestRound.id} with status FailMaxSamplesAllowed"}
         }
     } else {
-        logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.dilutedMargin()} " +
+        logger.info { "getSubsetForEstimation ${contestUA.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.margin(contestUA.hasStyle)} " +
                 "nsamples=${nsamples}, stddev=$stddev" }
     }
     return est

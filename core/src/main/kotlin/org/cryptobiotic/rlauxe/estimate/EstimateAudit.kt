@@ -25,6 +25,7 @@ import org.cryptobiotic.rlauxe.persist.CardManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.util.estSamplesFromNomargin
+import org.cryptobiotic.rlauxe.util.noerror
 import kotlin.Double
 import kotlin.Int
 import kotlin.math.abs
@@ -142,7 +143,8 @@ class EstimateAudit(
                 // attach estimationResult to all the other assertions still to be done
                 // TODO kludge
                 contestRound.assertionRounds.filter { it != useAssertionRound}.forEach { round ->
-                    val nomargin = 2.0 * round.assertion.assorter.noerror() - 1.0
+                    val noerror = round.assertion.assorter.noerror(contestRound.contestUA.hasStyle)
+                    val nomargin = 2.0 * noerror - 1.0
                     val estMvrs = roundUp(estSamplesFromNomargin(2.0 / 1.03905, nomargin, config.creation.riskLimit))
                     val prevNmrs = round.prevAssertionRound?.auditResult?.samplesUsed ?: 0
                     val newMvrs = estMvrs - prevNmrs
@@ -382,7 +384,7 @@ class ContestPollingTrial(val run: Int,
     val welford = Welford() // use this as the Tracker
 
     init {
-        val eta0 = margin2mean(assorter.dilutedMargin())
+        val eta0 = margin2mean(assorter.margin(contest.hasStyle))
 
         val estimFn = TruncShrinkage(
             N = contest.Npop,

@@ -110,16 +110,16 @@ class PollingSingleRoundAuditTask(
         }
         val nmvrs = maxSamples
 
-        val contest = contestRounds.first() // theres only one
-        val minAssertion = contest.minAssertion()!!
+        val contestRound = contestRounds.first() // theres only one
+        val minAssertion = contestRound.minAssertion()!!
         val assorter = minAssertion.assertion.assorter
-        val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true)
+        val mvrMargin = assorter.calcAssorterMargin(contestRound.id, testMvrs, usePhantoms = true)
 
         return if (minAssertion.auditResult == null) { // TODO why might this this empty?
             WorkflowResult(
                 name,
-                contest.Npop,
-                assorter.dilutedMargin(),
+                contestRound.Npop,
+                assorter.margin(contestRound.contestUA.hasStyle),
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
                 otherParameters,
@@ -128,8 +128,8 @@ class PollingSingleRoundAuditTask(
             val lastRound = minAssertion.auditResult!!
             WorkflowResult(
                 name,
-                contest.Npop,
-                assorter.dilutedMargin(),
+                contestRound.Npop,
+                assorter.margin(contestRound.contestUA.hasStyle),
                 lastRound.status,
                 nrounds = minAssertion.roundProved.toDouble(),
                 samplesUsed = lastRound.samplesUsed.toDouble(),

@@ -63,7 +63,7 @@ class TestOneAuditAssortAvg {
 
         println("oaContest = $oaContest")
         if (showCvrs) mvrs.subList(0, 10).forEach { println("  $it") }
-        assertEquals(margin, oaContest.minDilutedMargin()!!, doublePrecision)
+        assertEquals(margin, oaContest.minMargin()!!, doublePrecision)
 
         // note: using the mvrs
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable { cards.iterator() }

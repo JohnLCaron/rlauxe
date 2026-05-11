@@ -90,7 +90,7 @@ class RelaxedAssertions(val org: DHondtContest) {
         lastAssertionRounds.forEach { (key, ar) ->
             val assorter = ar.assertion.assorter
             val risk = if (ar.auditResult != null) ar.auditResult!!.pmin else {
-                estRisk(2/1.03905, mean2margin(assorter.noerror()), 1000) // TODO how many samples ??
+                estRisk(2/1.03905, mean2margin(assorter.noerror(true)), 1000) // TODO how many samples ??
             }
             if (risk > .05 && assorter is DHondtAssorter) {
                 val winnerId = assorter.winner()
@@ -108,7 +108,7 @@ class RelaxedAssertions(val org: DHondtContest) {
         lastAssertionRounds.forEach { (key, ar) ->
             val assorter = ar.assertion.assorter
             val risk = if (ar.auditResult != null) ar.auditResult!!.pmin else {
-                estRisk(2/1.03905, mean2margin(assorter.noerror()), 1000) // TODO how many samples ??
+                estRisk(2/1.03905, mean2margin(assorter.noerror(true)), 1000) // TODO how many samples ??
             }
             if (risk > .05 && assorter !is DHondtAssorter) {
                 thrashers.add(ThresholdRiskFailure(assorter, risk, ar.auditResult?.nmvrs))
@@ -165,7 +165,7 @@ class RelaxedAssertions(val org: DHondtContest) {
         lastAssertionRounds.forEach { (key, ar) ->
             val assorter = ar.assertion.assorter
             val risk = if (ar.auditResult != null) ar.auditResult!!.pmin else {
-                estRisk(2/1.03905, mean2margin(assorter.noerror()), 1000) // TODO how many samples ??
+                estRisk(2/1.03905, mean2margin(assorter.noerror(true)), 1000) // TODO how many samples ??
             }
             if (risk > .05 && assorter is DHondtAssorter) {
                 val winnerId = assorter.winner()
@@ -188,7 +188,7 @@ class RelaxedAssertions(val org: DHondtContest) {
         lastAssertionRounds.forEach { (key, ar) ->
             val assorter = ar.assertion.assorter
             val risk = if (ar.auditResult != null) ar.auditResult!!.pmin else {
-                estRisk(2/1.03905, mean2margin(assorter.noerror()), 1000) // TODO how many samples ??
+                estRisk(2/1.03905, mean2margin(assorter.noerror(true)), 1000) // TODO how many samples ??
             }
             if (risk > .05 && assorter !is DHondtAssorter) {
                 thrashers.add(ThresholdRiskFailure(assorter, risk, ar.auditResult?.nmvrs))
@@ -272,7 +272,7 @@ class RelaxedAssertions(val org: DHondtContest) {
         val risk: Double,
         val samplesUsed: Int?
     ) {
-        val nomargin = 2.0 * assorter.noerror() - 1.0
+        val nomargin = 2.0 * assorter.noerror(true) - 1.0
         val nmvrs = samplesUsed ?: 0
         fun estMvrs(): Int  {
             // payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (µ_i is approximately 1/2)
@@ -299,7 +299,7 @@ class RelaxedAssertions(val org: DHondtContest) {
                     append(" (${nfn(arm.winnerScore.winningSeat!!, 2)})  ")
                     append("                                           ")
                 }
-                append(" ${nfn(org.marginInVotes(assorter), 7)}, ${dfn(assorter.noerror(), 6)},   ${dfn(arm.nomargin, 4)}, ")
+                append(" ${nfn(org.marginInVotes(assorter), 7)}, ${dfn(assorter.noerror(true), 6)},   ${dfn(arm.nomargin, 4)}, ")
                 append(" ${nfn(arm.estMvrs(), 8)}, ${nfn(arm.nmvrs, 8)},    ${dfn(arm.risk, 4)},")
                 append(" winner ${assorter.winnerNameRound()} loser ${assorter.loserNameRound()}")
                 appendLine()
@@ -311,7 +311,7 @@ class RelaxedAssertions(val org: DHondtContest) {
     // threshold
 
     inner class ThresholdRiskFailure(val assorter: AssorterIF, val risk: Double, val samplesUsed: Int?) {
-        val nomargin = 2.0 * assorter.noerror() - 1.0
+        val nomargin = 2.0 * assorter.noerror(true) - 1.0
         val nmvrs = samplesUsed ?: 0
         fun estMvrs(): Int  {
             // payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (µ_i is approximately 1/2)
@@ -361,7 +361,7 @@ class RelaxedAssertions(val org: DHondtContest) {
             val loserScore = alt.sortedScores.find { it.divisor == assorter.firstSeatLost && it.candidate == loserId }
             if (loserScore == null)
                 print("")
-            val nomargin = 2.0 * assorter.noerror() - 1.0
+            val nomargin = 2.0 * assorter.noerror(true) - 1.0
             val risk = estRisk(2 / 1.03905, nomargin, 1000) // TODO get actual nsamples
             val arm = DhondtRiskFailure(assorter, winnerScore, loserScore!!, risk, null)
             if (arm.risk > .05) {
@@ -433,7 +433,7 @@ class RelaxedAssertions(val org: DHondtContest) {
                     append(" (${nfn(arm.winnerScore.winningSeat!!, 2)})  ")
                     append("                                           ")
                 }
-                append(" ${nfn(org.marginInVotes(assorter), 7)}, ${dfn(assorter.noerror(), 6)},   ${dfn(arm.nomargin, 4)}, ")
+                append(" ${nfn(org.marginInVotes(assorter), 7)}, ${dfn(assorter.noerror(true), 6)},   ${dfn(arm.nomargin, 4)}, ")
                 append(" ${nfn(arm.estMvrs(), 8)},   ${dfn(arm.risk, 4)},")
                 append("    winner ${assorter.winnerNameRound()} loser ${assorter.loserNameRound()}")
                 appendLine()

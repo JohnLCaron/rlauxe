@@ -46,7 +46,7 @@ open class ContestWithAssertions(
         this@ContestWithAssertions.assertions = assertions
 
         if (isClca) {
-            addClcaAssertionsFromDilutedMargin()
+            addClcaAssertions()
         }
 
         return this
@@ -65,7 +65,7 @@ open class ContestWithAssertions(
         }
 
         if (isClca) {
-            addClcaAssertionsFromDilutedMargin()
+            addClcaAssertions()
         }
 
         return this
@@ -94,11 +94,11 @@ open class ContestWithAssertions(
         return assertions
     }
 
-    private fun addClcaAssertionsFromDilutedMargin(): ContestWithAssertions {
+    private fun addClcaAssertions(): ContestWithAssertions {
         require(isClca) { "makeComparisonAssertions() can be called only on comparison contest"}
 
-        this.clcaAssertions = assertions.map { assertion ->
-            ClcaAssertion(contest.info(), makeClcaAssorter(assertion))
+        this.clcaAssertions = assertions.map { cassertion ->
+            ClcaAssertion(contest.info(), makeClcaAssorter(cassertion))
         }
         return this
     }
@@ -119,10 +119,13 @@ open class ContestWithAssertions(
         return minMargin.first().first
     }
 
-    // assertion with the minimum dilutedMargin
+    // assertion with the minimum margin
     fun minPollingAssertion(): Assertion? {
         if (assertions.isEmpty()) return null
-        val margins = assertions.map { Pair(it, it.assorter.dilutedMargin())  }
+        val margins = assertions.map {
+            val assorterMargin = if (hasStyle) it.assorter.reportedMargin() else it.assorter.dilutedMargin()
+            Pair(it, assorterMargin)
+        }
         val minMargin = margins.sortedBy { it.second }
         return minMargin.first().first
     }
@@ -131,14 +134,10 @@ open class ContestWithAssertions(
         return if (isClca) minClcaAssertion() else minPollingAssertion()
     }
 
-    fun minDilutedMargin(): Double? {
-        val minAssertion = minAssertion()
-        return if (minAssertion != null) minAssertion.assorter.dilutedMargin() else null
-    }
-
-    fun minReportedMargin(): Double? {
-        val minAssertion = minAssertion()
-        return if (minAssertion != null) minAssertion.assorter.reportedMargin() else null
+    fun minMargin(): Double? {
+        return if (isClca) minClcaAssertion()?.cassorter?.assorterMargin
+            else if (hasStyle) minPollingAssertion()?.assorter?.reportedMargin()
+            else minPollingAssertion()?.assorter?.dilutedMargin()
     }
 
     fun minRecountMargin(): Double? {
@@ -161,7 +160,7 @@ open class ContestWithAssertions(
         if (minAssertion != null) {
             val minAssorter = minAssertion.assorter
             append("   ${contest.showAssertionDifficulty(minAssertion.assorter)}")
-            append(" Npop=$Npop dilutedMargin=${pfn(minAssorter.dilutedMargin())}")
+            append(" Npop=$Npop minMargin=${pfn(minMargin())}")
             appendLine(" recountMargin=${pfn(contest.recountMargin(minAssorter))} ")
             appendLine()
         }
@@ -175,7 +174,7 @@ open class ContestWithAssertions(
 
     open fun showShort() = buildString {
         val votes = contest.votes() ?: "N/A"
-        append("$name ($id) votes=${votes} Nc=$Nc Npop=$Npop minDilutedMargin=${df(minDilutedMargin())}")
+        append("$name ($id) votes=${votes} Nc=$Nc Npop=$Npop minMargin=${df(minMargin())}")
     }
 
     override fun equals(other: Any?): Boolean {

@@ -49,7 +49,7 @@ class TestAuditPolling {
         val cvrSampler = PollingSamplerTracker(contestUA.id, assorter, pairs)
 
         val d = 100
-        val margin = assorter.dilutedMargin()
+        val margin = assorter.margin(contestUA.hasStyle)
         val result = runAlphaMartRepeated(
             name = "testMultiContestTestData",
             samplerTracker = cvrSampler,

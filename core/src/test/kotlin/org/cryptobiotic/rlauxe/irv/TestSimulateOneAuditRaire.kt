@@ -140,7 +140,7 @@ class TestSimulateOneAuditRaire {
         println(avgWithPool)
         println("assortAvg.margin = ${avgWithPool.margin()}")
 
-        assertEquals(cassorter.assorterMargin, rassorter.dilutedMargin(), doublePrecision)
+        assertEquals(cassorter.assorterMargin, rassorter.margin(rcontestUA.hasStyle), doublePrecision)
         assertEquals(cassorter.assorterMargin, rassorter.calcMarginFromVotes(irvVotes, N), doublePrecision)
         assertEquals(cassorter.assorterMargin, avgIgnorePool.margin(), doublePrecision)
         assertEquals(cassorter.assorterMargin, avgWithPool.margin(), doublePrecision)

@@ -90,7 +90,7 @@ fun corlaCalc(config: Config, contestRound: ContestRound): SampleEst? {
     // these 3 are oracles - we know the actual errors
     val est1 = estimateCorla(
         config.riskLimit,
-        dilutedMargin = minAssertion.assertion.assorter.dilutedMargin(),
+        dilutedMargin = minAssertion.assertion.assorter.margin(true),
         twoOver = errorCounts.getNamedCount("p2o") ?: 0,
         oneOver = errorCounts.getNamedCount("p1o") ?: 0,
         oneUnder = errorCounts.getNamedCount("p1u") ?: 0,

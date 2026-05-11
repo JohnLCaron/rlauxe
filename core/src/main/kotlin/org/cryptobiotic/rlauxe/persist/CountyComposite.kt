@@ -37,8 +37,8 @@ class CountyComposite(
     contests: List<ContestWithAssertions>,
     rounds: List<AuditRound>,
     nmvrs: Int,
-    override val componentRecords: List<AuditRecord>,
-    val countyData: List<CountyData>,  // for viewer
+    override val componentRecords: List<AuditRecord>, // optional
+    val countyData: List<CountyData>,
 ): AuditRecord(location, config, contests, rounds, nmvrs), CompositeRecordIF  {
 
     override fun findComponentWithName(name: String): AuditRecord? {
@@ -63,6 +63,7 @@ class CountyComposite(
 
     companion object {
         private val logger = KotlinLogging.logger("CountyComposite")
+        val countyDataFile = "countyData.csv"
 
         fun fromStateAndCounties(stateRecord: AuditRecord, countyRecords: List<AuditRecord>, countyData: List<CountyData>): CountyComposite {
             return CountyComposite(stateRecord.location, stateRecord.config, stateRecord.contests, stateRecord.rounds,
@@ -72,8 +73,11 @@ class CountyComposite(
         // check CountyComposite exists
         fun checkExists(location: String?): Boolean {
             if (location == null) return false
-            if (!CompositeRecord.checkExists(location)) return false
-            return checkAuditRecordExists("$location/audit")
+            if (!exists("$location/$countyDataFile")) return false
+            val publisher = Publisher("$location/audit")
+            return (exists(publisher.electionInfoFile()) &&
+                // exists(publisher.cardManifestFile()) &&
+                exists(publisher.contestsFile()))
         }
 
         // used by viewer
@@ -84,34 +88,13 @@ class CountyComposite(
                 return null
             }
 
-            val counties = CompositeRecord.readFrom(location)
-            if (counties == null) return null
+            val components = if (CompositeRecord.checkExists(location)) {
+                CompositeRecord.readFrom(location)!!.componentRecords
+            } else emptyList()
 
-            val countyData = readCountyData("$location/countyData.csv")
+            val countyData = readCountyData("$location/$countyDataFile")
 
-            return fromStateAndCounties(stateLevel, counties.componentRecords, countyData)
+            return fromStateAndCounties(stateLevel, components, countyData)
         }
     }
-}
-
-data class CountyData(val countyName: String, val nmvrs: Int, val npop: Int)
-
-fun readCountyData(filename: String): List<CountyData> {
-    val reader: BufferedReader = File(filename).bufferedReader()
-    reader.readLine() // skip header line
-
-    val countyData = mutableListOf<CountyData>()
-    while (true) {
-        var line = reader.readLine()
-        if (line == null) break
-
-        val tokens = line.split(",")
-        val countyName = tokens[0]
-        val nmvrs = tokens[1].trim().toInt()
-        val npop = tokens[2].trim().toInt()
-        countyData.add( CountyData(countyName, nmvrs, npop))
-    }
-    reader.close()
-
-    return countyData
 }

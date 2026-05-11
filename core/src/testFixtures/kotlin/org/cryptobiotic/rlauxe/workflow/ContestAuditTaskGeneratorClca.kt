@@ -131,16 +131,17 @@ class ClcaSingleRoundWorkflowTask(
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         val maxEstMvrs = runClcaSingleRoundAudit(workflow, contestRounds, auditor, parameters)
 
-        val contest = contestRounds.first() // theres only one
-        val minAssertion = contest.minAssertion()!!
+        val contestRound = contestRounds.first() // theres only one
+        val contestUA = contestRound.contestUA
+        val minAssertion = contestRound.minAssertion()!!
         val assorter = minAssertion.assertion.assorter
-        val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true)
+        val mvrMargin = assorter.calcAssorterMargin(contestRound.id, testMvrs, usePhantoms = true)
 
         return if (minAssertion.auditResult == null) { // TODO why might this be empty?
             WorkflowResult(
                 name,
-                contest.Npop,
-                assorter.dilutedMargin(),
+                contestRound.Npop,
+                assorter.margin(contestUA.hasStyle),
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
                 parameters,
@@ -149,8 +150,8 @@ class ClcaSingleRoundWorkflowTask(
             val auditResult = minAssertion.auditResult!!
             WorkflowResult(
                 name,
-                Nc = contest.Npop,
-                margin = assorter.dilutedMargin(),
+                Nc = contestRound.Npop,
+                margin = assorter.margin(contestUA.hasStyle),
                 status = auditResult.status,
                 nrounds = minAssertion.roundProved.toDouble(),
                 samplesUsed = auditResult.samplesUsed.toDouble(),

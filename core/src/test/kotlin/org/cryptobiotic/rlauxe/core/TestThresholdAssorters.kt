@@ -72,10 +72,10 @@ class TestThresholdAssorters {
     }
 
     fun testNway(contest: Contest, cvrs: List<Cvr>, counts: List<Int>, winner: Int): Double {
-        val assort = AboveThreshold.makeFromVotes(contest.info, winner, contest.votes, contest.info.minFraction!!, contest.Nc)
-        assertEquals(1.0 / (2 * assort.t), assort.upperBound())
-        val assortAvg = cvrs.map { assort.assort(it) }.average()
-        assertEquals(margin2mean(assort.dilutedMargin()), assortAvg, doublePrecision)
+        val assorter = AboveThreshold.makeFromVotes(contest.info, winner, contest.votes, contest.info.minFraction!!, contest.Nc)
+        assertEquals(1.0 / (2 * assorter.t), assorter.upperBound())
+        val assortAvg = cvrs.map { assorter.assort(it) }.average()
+        assertEquals(margin2mean(assorter.margin(true)), assortAvg, doublePrecision)
 
         val n = counts.sum().toDouble()
         val p = counts[winner] / n

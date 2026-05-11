@@ -7,7 +7,7 @@ import kotlin.test.Test
 
 class TestCompositeRecord {
     val belgiumData = "$testdataDir/cases/belgium/2024limited"
-    val corlaCounty = "$testdataDir/cases/corla/county"
+    val corlaUniform = "$testdataDir/cases/corla/uniform"
 
     @Test
     fun testReadFrom() {
@@ -43,8 +43,23 @@ class TestCompositeRecord {
     }
 
     @Test
-    fun testReadCorlaCounty() {
-        val record = AuditRecord.read(corlaCounty)!!
+    fun testReadCorlaCountyAudit() {
+        val record = AuditRecord.read(corlaUniform)!!
+        val countyAudit = record as CountyAudit
+        println("contests = ${countyAudit.contests.size}")
+        println("countyData = ${countyAudit.countyData.size}")
+
+        val workflow = PersistedWorkflow(countyAudit, mvrWrite = false)
+        val manager = workflow.mvrManager()
+        println("pools = ${manager.pools()?.size}")
+        println("batches = ${manager.batches()?.size}")
+        val manifest = manager.sortedManifest()
+        println("manifest.ncards = ${manifest.ncards}")
+    }
+
+    @Test
+    fun testReadCorlaCountyComposite() {
+        val record = AuditRecord.read(corlaUniform)!!
         val countyAudit = record as CountyComposite
         println(countyAudit)
         countyAudit.countyData.forEach { println(it) }

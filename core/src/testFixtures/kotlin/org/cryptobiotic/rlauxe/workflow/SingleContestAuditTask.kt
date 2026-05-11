@@ -41,14 +41,14 @@ class SingleContestAuditTask(
 
         // single contest
         val nmvrs = lastRound.samplePrns.size
-        val contest = lastRound.contestRounds.first() // theres only one contest
+        val contestRound = lastRound.contestRounds.first() // theres only one contest
 
-        val minAssertion = contest.minAssertion()
+        val minAssertion = contestRound.minAssertion()
         if (minAssertion == null) {  // TODO why would this be null ?
             logger.error { "minAssertion is null, setting contest to ContestMisformed"}
             return WorkflowResult(
                 name,
-                contest.Npop,
+                contestRound.Npop,
                 0.0,
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
@@ -61,8 +61,8 @@ class SingleContestAuditTask(
             logger.error { "minAssertion.auditResult is null, setting contest to ContestMisformed"}
             WorkflowResult(
                 name,
-                contest.Npop,
-                assorter.dilutedMargin(),
+                contestRound.Npop,
+                assorter.margin(contestRound.contestUA.hasStyle),
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
                 otherParameters,
@@ -71,8 +71,8 @@ class SingleContestAuditTask(
             val lastRoundResult = minAssertion.auditResult!!
             WorkflowResult(
                 name,
-                contest.Npop,
-                assorter.dilutedMargin(),
+                contestRound.Npop,
+                assorter.margin(contestRound.contestUA.hasStyle),
                 lastRoundResult.status,
                 nrounds = minAssertion.roundProved.toDouble(),
                 samplesUsed = lastRoundResult.samplesUsed.toDouble(),

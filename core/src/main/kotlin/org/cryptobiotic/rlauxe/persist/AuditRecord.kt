@@ -127,6 +127,7 @@ open class AuditRecord(
         // checks all types of AuditRecordIF
         fun checkExists(location: String?): Boolean {
             if (location == null) return false
+            if (CountyAudit.checkExists(location)) return true
             if (CountyComposite.checkExists(location)) return true
             if (CompositeRecord.checkExists(location)) return true
             if (checkAuditRecordExists(location)) return true
@@ -145,6 +146,11 @@ open class AuditRecord(
 
         // reads all types of AuditRecordIF
         fun read(location: String): AuditRecordIF? {
+
+            if (CountyAudit.checkExists(location)) {
+                val countyAudit = CountyAudit.readFrom(location)
+                if (countyAudit != null) return countyAudit
+            }
 
             if (CountyComposite.checkExists(location)) {
                 val countyComposite = CountyComposite.readFrom(location)

@@ -24,9 +24,9 @@ fun removeContestsAndSample(
     // remove first "removeMaxContests" - to generate plot comparisions
     val removeMaxContests: Int? = sampling.removeMaxContests()
     if (auditRound.roundIdx == 1 && removeMaxContests != null && removeMaxContests > 0) {
-        val sortedByMargin : List<ContestRound> = auditRound.contestRounds.sortedByDescending { it.estMvrs }
+        val sortedByEstMvrs : List<ContestRound> = auditRound.contestRounds.sortedByDescending { it.estMvrs }
         repeat(removeMaxContests) { idx ->
-            val maxContest = sortedByMargin[idx]
+            val maxContest = sortedByEstMvrs[idx]
             maxContest.status = TestH0Status.FailMaxSamplesAllowed
             maxContest.included = false
             maxContest.done = true // this will remove from contestsNotDone
@@ -86,8 +86,8 @@ private fun checkSampleLimits(
                 logger.warn { "*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${sampleControl.minRecountMargin}" }
                 contestUA.preAuditStatus = TestH0Status.MinMargin
             }
-            if ((contestUA.minDilutedMargin() ?: 0.0) <= sampleControl.minMargin) {
-                logger.warn { "*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minDilutedMargin()} <= ${sampleControl.minMargin}" }
+            if ((contestUA.minMargin() ?: 0.0) <= sampleControl.minMargin) {
+                logger.warn { "*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minMargin()} <= ${sampleControl.minMargin}" }
                 contestUA.preAuditStatus = TestH0Status.MinMargin
             }
         }

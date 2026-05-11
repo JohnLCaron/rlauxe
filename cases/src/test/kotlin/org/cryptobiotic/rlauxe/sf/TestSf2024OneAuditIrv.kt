@@ -286,12 +286,12 @@ class TestSf2024OneAuditIrv() {
         val poolMarginInVotes = sumMarginInVotes.roundToInt()
         assertEquals(sumMarginInVotes2.roundToInt(), poolMarginInVotes)
 
-        val dilutedMargin = passorter.dilutedMargin()
-        if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
-            println("  verifyOApools dilutedMargin does not agree for contest ${rcontestUA.id} assorter '$passorter'")
-            println("     dilutedMargin= ${pfn(dilutedMargin)} cardPools assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards} Npop=${rcontestUA.Npop}")
+        val margin = passorter.margin(rcontestUA.hasStyle)
+        if (!doubleIsClose(margin, assortAvg.margin())) {
+            println("  verifyOApools margin does not agree for contest ${rcontestUA.id} assorter '$passorter'")
+            println("     margin= ${pfn(margin)} cardPools assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards} Npop=${rcontestUA.Npop}")
         } else {
-            println("  dilutedMargin agrees with cvrs.assortMargin= ${pfn(assortAvg.margin())} for contest ${rcontestUA.id} assorter '$passorter'")
+            println("  margin agrees with cvrs.assortMargin= ${pfn(assortAvg.margin())} for contest ${rcontestUA.id} assorter '$passorter'")
         }
     }
 }

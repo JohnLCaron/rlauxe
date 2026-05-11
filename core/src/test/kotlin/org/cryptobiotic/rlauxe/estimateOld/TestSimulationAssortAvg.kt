@@ -105,7 +105,7 @@ class TestSimulationAssortAvg {
             val calcReportedMargin = contest.reportedMargin(ast.winner, ast.loser)
             val calcAssorterMargin = ast.assorter.calcAssorterMargin(ast.info.id, cvrs)
             assertEquals(calcReportedMargin, calcAssorterMargin, doublePrecision, "calcReportedMargin")
-            assertEquals(ast.assorter.dilutedMargin(), calcAssorterMargin, doublePrecision, "calcAssorterMargin")
+            assertEquals(ast.assorter.margin(true), calcAssorterMargin, doublePrecision, "calcAssorterMargin")
 
             val assortWithoutPhantoms = margin2mean(calcAssorterMargin)
             val assortWithPhantoms = cvrs.filter { it.hasContest(ast.info.id) }

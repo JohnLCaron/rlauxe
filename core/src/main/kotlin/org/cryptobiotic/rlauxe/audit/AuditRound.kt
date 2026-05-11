@@ -115,7 +115,10 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
             val sortedNoerrors = noerrors.sortedBy { it.second }
             return sortedNoerrors.first().first
         } else {
-            val margins = assertionRounds.map { Pair(it, it.assertion.assorter.dilutedMargin()) }
+            val margins = assertionRounds.map {
+                val assorterMargin = if (contestUA.hasStyle) it.assertion.assorter.reportedMargin() else it.assertion.assorter.dilutedMargin()
+                Pair(it, assorterMargin)
+            }
             val minMargin = margins.sortedBy { it.second }
             return minMargin.first().first
         }

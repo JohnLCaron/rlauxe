@@ -44,13 +44,13 @@ class TestAssorterBasics {
             assertEquals(1.0, it.assorter.upperBound())
 
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr)}.average()
-            val mean = margin2mean(it.assorter.dilutedMargin())
+            val mean = margin2mean(it.assorter.margin(contestUA.hasStyle))
             println("$it: assortAvg=${assortAvg} mean=${mean}")
             assertEquals(assortAvg, mean, doublePrecision)
 
             val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
             assertEquals(assortAvg, margin2mean(calcMargin), doublePrecision)
-            assertEquals(it.assorter.dilutedMargin(), calcMargin, doublePrecision)
+            assertEquals(it.assorter.margin(contestUA.hasStyle), calcMargin, doublePrecision)
         }
     }
 
@@ -90,13 +90,13 @@ class TestAssorterBasics {
             assertEquals(1.0, it.assorter.upperBound())
 
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr, usePhantoms = false)}.average()
-            val mean = margin2mean(it.assorter.dilutedMargin())
+            val mean = margin2mean(it.assorter.margin(contestUA.hasStyle))
             println("$it: assortAvg=${assortAvg} mean=${mean}")
             assertEquals(assortAvg, mean, doublePrecision)
 
             val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
             assertEquals(assortAvg, margin2mean(calcMargin), doublePrecision)
-            assertEquals(it.assorter.dilutedMargin(), calcMargin, doublePrecision)
+            assertEquals(it.assorter.margin(contestUA.hasStyle), calcMargin, doublePrecision)
 
             val Ncd = contest.Nc.toDouble()
             val expectWithPhantoms = (assortAvg * Ncd - 0.5) / Ncd
@@ -158,7 +158,7 @@ class TestAssorterBasics {
                 assertion.assorter.assort(cvr)
             }.average()
 
-            val mean = margin2mean(assertion.assorter.dilutedMargin())
+            val mean = margin2mean(assertion.assorter.margin(contestUA.hasStyle))
             println("$assertion: facc=$facc assortAvg=${assortAvg} mean=${mean}")
 
             // we no longer expect these to be equal, when nwinners > 1

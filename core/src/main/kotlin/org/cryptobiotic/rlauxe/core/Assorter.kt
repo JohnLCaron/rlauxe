@@ -36,12 +36,14 @@ interface AssorterIF {
 
     fun reportedMargin(): Double
     fun dilutedMargin(): Double
+    fun margin(hasStyle: Boolean) = if (hasStyle) reportedMargin() else dilutedMargin()
+
     fun reportedMean(): Double = margin2mean(reportedMargin())
     fun dilutedMean(): Double = margin2mean(dilutedMargin())
 
     // only used for CLCA
-    fun noerror(): Double  {
-        val ratio = dilutedMargin() / upperBound()
+    fun noerror(hasStyle: Boolean): Double  {
+        val ratio = margin(hasStyle) / upperBound()
         return 1.0 / (2.0 - ratio)
     }
 

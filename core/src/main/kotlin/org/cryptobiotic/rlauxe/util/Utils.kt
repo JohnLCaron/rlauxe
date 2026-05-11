@@ -120,7 +120,8 @@ fun pfz(d: Double?, n: Int=1) = if (d==null) "N/A" else {
     val s = "%${n+2}.${n}f%%".format(100*d)
     val toks = s.split(".")
     var tok0: String = toks[0]
-    if (tok0.length == 1) tok0 = "0${tok0}"
+    if (tok0.length == 1) tok0 = "00${tok0}"
+    if (tok0.length == 2) tok0 = "0${tok0}"
     "$tok0.${toks[1]}"
 }
 

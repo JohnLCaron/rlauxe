@@ -129,7 +129,7 @@ data class DhondtBuilder(
                 partyCopy.firstSeatLost = 1
                 val dh = DHondtAssorter.makeFrom(info, winner = lastWinner, loser = partyCopy, Nc)
 
-                val useAssorter = if (useBt || (bt.noerror() > dh.noerror())) bt else dh
+                val useAssorter = if (useBt || (bt.noerror(true) > dh.noerror(true))) bt else dh
                 contest.assorters.add(useAssorter)
             } else {
                 contest.assorters.add(AboveThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, this.Nc))

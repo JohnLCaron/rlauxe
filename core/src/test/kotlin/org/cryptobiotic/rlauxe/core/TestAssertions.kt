@@ -43,8 +43,8 @@ class TestAssertions {
             assertIs<Assertion>(it)
             assertIs<PluralityAssorter>(it.assorter)
             assertEquals(1.0, it.assorter.upperBound())
-            println("$it: ${it.assorter.dilutedMargin()}")
-            assertEquals(if (it.loser == 3) 3.0/9.0 else 2.0/9.0, it.assorter.dilutedMargin(), doublePrecision)
+            println("$it: ${it.assorter.margin(contestUA.hasStyle)}")
+            assertEquals(if (it.loser == 3) 3.0/9.0 else 2.0/9.0, it.assorter.margin(contestUA.hasStyle), doublePrecision)
         }
 
         val firstAssertion = assertions.first()
@@ -93,9 +93,9 @@ class TestAssertions {
             assertIs<Assertion>(it)
             assertIs<AboveThreshold>(it.assorter)
             assertEquals(1.0 / (2.0 * contest.info.minFraction!!), it.assorter.upperBound())
-            println("$it: ${it.assorter.dilutedMargin()}")
+            println("$it: ${it.assorter.margin(contestUA.hasStyle)}")
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr) }.average()
-            val mean = margin2mean(it.assorter.dilutedMargin())
+            val mean = margin2mean(it.assorter.margin(contestUA.hasStyle))
             assertEquals(assortAvg, mean)
         }
         val firstAssertion = assertions.first()

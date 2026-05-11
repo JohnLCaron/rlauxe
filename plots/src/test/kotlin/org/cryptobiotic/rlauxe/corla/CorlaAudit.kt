@@ -141,7 +141,7 @@ class CorlaAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val testFn = Corla(
             N = contestUA.Npop,
             riskLimit = config.riskLimit,
-            reportedMargin = cassertion.assorter.dilutedMargin(),
+            reportedMargin = cassertion.assorter.margin(contestUA.hasStyle),
             noerror = cassorter.noerror(),
             p1 = 0.0, p2 = 0.0, p3 = 0.0, p4 = 0.0, // TODO
         )

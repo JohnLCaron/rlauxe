@@ -84,7 +84,7 @@ class SfoaSingleRoundAuditTask(
                     WorkflowResult(
                         name(),
                         contestUA.Nc,
-                        cassertion.assorter.dilutedMargin(),
+                        cassertion.assorter.margin(contestUA.hasStyle),
                         result.status,
                         1.0,
                         result.sampleCount.toDouble(),

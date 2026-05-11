@@ -83,11 +83,11 @@ class MakeBelgiumElections {
         allResults.forEach {
             val (Nc, nmvrs, minAssorter) = it.value
             val pct = (100.0 * nmvrs) / Nc.toDouble()
-            val minSamples = -ln(.05) / ln(2 * minAssorter.noerror())
+            val minSamples = -ln(.05) / ln(2 * minAssorter.noerror(true))
 
             println("${sfn(it.key, 15)} | " +
                     "${sfn(minAssorter.shortName(), 42)} | " +
-                    "${dfn(minAssorter.noerror(), 6)} | " +
+                    "${dfn(minAssorter.noerror(true), 6)} | " +
                     "${dfn(minAssorter.dilutedMean(), 6)} | " +
                     "${dfn(minAssorter.upperBound(), 6)} | " +
                     "${trunc(nmvrs.toString(), 6)} | " +

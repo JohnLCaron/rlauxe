@@ -69,7 +69,7 @@ fun readSampleAndCat(belgiumData : CompositeRecord): List<SampleAndCat> {
         lastRound.contestRounds.forEach { contestRound ->
             contestRound.assertionRounds.forEach { assertionRound ->
                 val assorter = assertionRound.assertion.assorter
-                val noerror = assorter.noerror()
+                val noerror = assorter.noerror(true)
                 val sampleSize = if (assertionRound.auditResult != null) assertionRound.auditResult!!.samplesUsed else 0
                 val cat = when (assorter) {
                     is DHondtAssorter -> "DHondt"

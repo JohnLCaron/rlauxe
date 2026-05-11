@@ -174,7 +174,7 @@ class TestConsistentSampling {
                     val samplePct=contestRound.estMvrs/contest.Npop.toDouble()
                     val assorter = contestRound.minAssertion()!!.assertion.assorter
                     val recountMargin=contest.contest.recountMargin(assorter)
-                    val dilutedMargin=assorter.margin(contestUA.hasStyle)
+                    val dilutedMargin=assorter.margin(contestRound.contestUA.hasStyle)
                     val marginInVotes= contest.contest.marginInVotes(assorter)
 
                     assertTrue(contest.Nphantoms < marginInVotes)

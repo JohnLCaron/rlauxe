@@ -245,7 +245,7 @@ data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double
     override fun shortName() = "AboveThresholdB for ${info.candidateIdToName[winner()]}"
 
     override fun desc() = buildString {
-        append("${shortName()}: reportedMean=${pfn(reportedMean)} noerror=${pfn(noerror() )} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
+        append("${shortName()}: reportedMean=${pfn(reportedMean)} noerror=${pfn(noerror(true) )} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
     }
 
     override fun hashcodeDesc() = "AboveThresholdB ${winLose()} ${info.name}" // must be unique for serialization

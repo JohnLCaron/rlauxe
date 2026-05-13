@@ -170,6 +170,8 @@ fun consistentSampling(
     previousSamples: Set<Long> = emptySet(), // all previous prns ever sampled
 ): List<AuditableCard>  // debugging
 {
+    val stopwatch = Stopwatch()
+
     // included means, includede in the sampling
     // done means, remove from the udit
     val contestsNotDone = auditRound.contestRounds.filter { !it.done}
@@ -268,7 +270,7 @@ fun consistentSampling(
     auditRound.newmvrs = newMvrs
     auditRound.samplePrns = sampledCards.map { it.prn }
 
-    logger.info{" consistentSampling chose ${sampledCards.size} cards"}
+    logger.info{" consistentSampling chose ${sampledCards.size} cards took $stopwatch"}
     return sampledCards
 }
 

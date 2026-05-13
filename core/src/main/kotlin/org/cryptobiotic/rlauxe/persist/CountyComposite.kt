@@ -41,6 +41,8 @@ class CountyComposite(
     val countyData: List<CountyData>,
 ): AuditRecord(location, config, contests, rounds, nmvrs), CompositeRecordIF  {
 
+    override fun auditdir() = "$location/audit"
+
     override fun findComponentWithName(name: String): AuditRecord? {
         return componentRecords.find {
             name == it.name()

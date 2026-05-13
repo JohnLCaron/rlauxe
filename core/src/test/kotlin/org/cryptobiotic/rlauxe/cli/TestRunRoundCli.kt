@@ -22,12 +22,12 @@ class TestRunRoundCli {
 
     @Test
     fun testRunRoundCli() {
-        val auditdir = "$testdataDir/cases/corla/county/Boulder/audit"
+        val auditdir = "$testdataDir/cases/corla/consistent/audit"
 
         RunRlaRoundCli.main(
             arrayOf(
                 "-in", auditdir,
-                "--auditorWantNewMvrs", "105",
+                // "--auditorWantNewMvrs", "105",
                 // "--onlyTask", "17-1/0",
             )
         )

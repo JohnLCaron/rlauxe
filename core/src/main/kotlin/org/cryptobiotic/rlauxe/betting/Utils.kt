@@ -11,7 +11,7 @@ package org.cryptobiotic.rlauxe.betting
 // For sampling without replacement from a population with mean µ, after draw j - 1, the mean of the remaining numbers is
 //   (N * µ − Sum {Xi, i=1..j-1 }) / (N - j  + 1)
 
-// note µ = 1/2 here
+// note eta = 1/2 here
 fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, tracker: Tracker): Double {
     val sampleNum = tracker.numberOfSamples()
     val sum = tracker.sum()

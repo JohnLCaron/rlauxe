@@ -148,7 +148,7 @@ fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7, verify:Boolean = tr
 }
 
 // for viewer
-fun resampleAndRun(auditdir: String, lastRound: AuditRound): Boolean {
+fun resampleAndSaveResults(auditdir: String, lastRound: AuditRound): Boolean {
     try {
         val auditRecord = AuditRecord.read(auditdir)!!
 
@@ -164,7 +164,7 @@ fun resampleAndRun(auditdir: String, lastRound: AuditRound): Boolean {
         logger.info {"resampleAndRun writeAuditEstimation to ${publisher.auditEstFile(lastRound.roundIdx)}"}
 
         writeSamplePrnsJsonFile(lastRound.samplePrns, publisher.samplePrnsFile(lastRound.roundIdx))
-        logger.info {"resampleAndRun ${lastRound.samplePrns.size} samplePrns written to ${publisher.samplePrnsFile(lastRound.roundIdx)}"}
+        logger.info {"resampleAndRun wrote ${lastRound.samplePrns.size} samplePrns written to ${publisher.samplePrnsFile(lastRound.roundIdx)}"}
 
         val workflow = PersistedWorkflow(auditRecord)
 
@@ -173,8 +173,6 @@ fun resampleAndRun(auditdir: String, lastRound: AuditRound): Boolean {
             val ncards = workflow.writeMvrsForRound(lastRound.roundIdx)
             logger.info{"resampleAndRun writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(lastRound.roundIdx)}"}
         }
-
-        workflow.runAuditRound(lastRound)
         return true
 
     } catch (t: Throwable) {

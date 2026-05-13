@@ -145,6 +145,11 @@ open class ContestWithAssertions(
         return if (minAssertion != null)  contest.recountMargin(minAssertion.assorter) else null
     }
 
+    fun marginInVotes(): Int? {
+        val minAssertion = minAssertion()
+        return if (minAssertion != null)  contest.marginInVotes(minAssertion.assorter) else null
+    }
+
     fun minAssertionDifficulty(): String {
         val minAssertion = minAssertion()
         return if (minAssertion != null)  contest.showAssertionDifficulty(minAssertion.assorter) else "N/A"

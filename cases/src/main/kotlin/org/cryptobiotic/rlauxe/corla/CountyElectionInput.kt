@@ -1,14 +1,38 @@
 package org.cryptobiotic.rlauxe.corla
 
-object Colorado2024Input {
-    // not used
-    val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.persist.CountyAudit
+import org.cryptobiotic.rlauxe.util.nfn
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 
-    // canonical contests and choices
+/*
+   1. the following files are sufficient for calculating the uniform audit risks:
+
+        val tabulateCountyFile = "2024/general/tabulateCounty.csv"
+        val contestRoundFile =   "2024/general/round1/contest.csv"
+        val mvrComparisonFile =  "2024/general/round3/contestComparison.csv"
+
+    2. generalCanonicalFile can be used for the canonical contestName, choiceNames, and counties (with 3 modifications)
+
+    generalCanonicalFile = "2024/general/2024GeneralCanonicalList.csv"
+       with following contests added:
+         CanonicalContest("Bannock Ballot Issue 6A", choices = listOf("Yes", "No"), counties=listOf("Douglas")
+         CanonicalContest("Spring Canyon Ballot Issue 6B", choices = listOf("Yes", "No"), counties=listOf("Douglas")
+       and the following contest removed:
+         CanonicalContest("La Plata County Surveyor", comment="There are no candidates for this office")
+
+       the names in tabulateCountyFile, contestRoundFile, mvrComparisonFile agree with generalCanonicalFile
+       tabulateCountyFile, contestRoundFile have every name in generalCanonicalFile
+       mvrComparisonFile is missing 58 contests that are in generalCanonicalFile
+ */
+object Colorado2024Input {
+     // canonical contests and choices
     val generalCanonicalFile = "src/test/data/corla/2024audit/2024GeneralCanonicalList.csv"
     val canonicalContests: Map<String, CanonicalContest> by lazy {
         val result: MutableMap<String, CanonicalContest> =
             readGeneralCanonicalList(generalCanonicalFile).associateBy { it.contestName }.toMutableMap()
+
         //add these missing contests:
         val extras = listOf(
             CanonicalContest("Bannock Ballot Issue 6A", choices = listOf("Yes", "No")).addCounties(listOf("Douglas")),
@@ -24,27 +48,16 @@ object Colorado2024Input {
         result.toSortedMap()
     }
 
-    //// contest formation
+    //// contest building
     val tabulateCountyFile = "src/test/data/corla/2024audit/tabulateCounty.csv"
     val contestTabsByCounty: Map<String, ContestTabByCounty> by lazy {
         readCountyTabulateCsv(tabulateCountyFile, { it }, { it })
-        //{ contestName -> contestNameCleanup(contestName) },
-        // { contestName -> candidateNameCleanup(contestName) })
     }
 
     val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
     val roundContests: Map<String, CorlaContestRoundCsv> by lazy {
         readColoradoContestRoundCsv(contestRoundFile) { it }
     } // 725
-
-    //// suplementary info for contests, use when available
-    val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-    val detailXmlContests: ElectionDetailXml by lazy { readColoradoElectionDetail(detailXmlFile) }
-
-    val resultsReportSummaryFile = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
-    val resultsContests: List<ResultsReportContest> by lazy {
-        readResultsReportContest(resultsReportSummaryFile) { it }
-    }
 
     //// generating cvrs
     val mvrComparisonFile = "src/test/data/corla/2024audit/round3/contestComparison.csv"
@@ -65,6 +78,19 @@ object Colorado2024Input {
     val mergedContestMap: Map<String, MergedContestInfo> by lazy { mergedInfo.mergedContestInfo.associateBy { it.contestName } }
     val strataMap: Map<String, StrataInfo> by lazy { mergedInfo.strataInfo.associateBy { it.strataName } }
     val statewideContests: List<CorlaContestRoundCsv> by lazy { mergedInfo.statewideContests }
+
+    val countyContestMap: List<CountyContestTab> by lazy { convertToCountyContestTabs(contestTabsByCounty.values.toList()) }
+
+    //// not used
+    val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
+
+    val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
+    val detailXmlContests: ElectionDetailXml by lazy { readColoradoElectionDetail(detailXmlFile) }
+
+    val resultsReportSummaryFile = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
+    val resultsContests: List<ResultsReportContest> by lazy {
+        readResultsReportContest(resultsReportSummaryFile) { it }
+    }
 }
 
 data class MergedContestInfo(
@@ -75,11 +101,11 @@ data class MergedContestInfo(
 
     // contestRound
     val auditReason: AuditReason,
-    val npop:Int,
-    val nc:Int,
-    val voteForN: Int,
-    val nsamples: Int,
-    val marginInVotes: Int,
+    val npop:Int,       // ballotCardCount
+    val nc:Int,         // contestBallotCardCount
+    val voteForN: Int,  // nwinners
+    val nsamples: Int,  // optimisticSamplesToAudit
+    val marginInVotes: Int, // minMargin
 
     // mvr file
     val countyMvrs: Int,
@@ -147,9 +173,63 @@ fun mergeContestInfo(): MergedInfo {
             statewideContests.add(round)
         }
     }
+
     val totalCards = strataInfo.sumOf { it.Npop }
     val stateMvrCount = mergedContestInfo.filter { it.auditReason == AuditReason.state_wide_contest}.maxOf { it.statewideMvrs }
     strataInfo.add(StrataInfo("Statewide", nmvrs = stateMvrCount, Npop= totalCards, ))
 
     return MergedInfo(mergedContestInfo, strataInfo, statewideContests)
+}
+
+fun writeCountyData(topdir: String, strataInfo: List<StrataInfo>) {
+    // misc data by county
+    val outputFilename = "$topdir/${CountyAudit.countyDataFile}"
+    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
+    writer.write("county,   nmvrs, npop\n")
+    strataInfo.sortedBy { it.strataName }.forEach {
+        writer.write("${it.strataName}, ${nfn(it.nmvrs, 5)}, ${nfn(it.Npop, 5)}\n")
+    }
+    writer.close()
+    println("wrote ${strataInfo.size} countyData to $outputFilename")
+}
+
+// data class CountyContestTab(val countyName: String) {
+//    val contests = mutableMapOf<String, ContestTab>()
+// data class ContestTab(val contestName: String) {
+//    val choices = mutableMapOf<String, Int>()
+
+fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAssertions>, countyTabs: List<CountyContestTab>) {
+    // misc data by county
+    val outputFilename = "$topdir/${CountyAudit.countyContestDataFile}"
+    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
+    writer.write("county, contest, id, voteDiff, votes,\n")
+
+    var count = 0
+    countyTabs.forEach { countyTab ->
+        countyTab.contests.values.forEach { contestTab ->
+            val contestUA = contestMap[contestTab.contestName]!!
+            val contest = contestUA.contest
+            val info = contest.info()
+            val candidateVotes = contestTab.choices.map { (choice, vote) ->
+                Pair(info.candidateNames[choice]!!, vote)
+            }.toMap()
+
+            if (info.id == 533)
+                print("")
+
+            // calculate the vote difference for the minimum assorter
+            val minAssertion = contestUA.minAssertion()
+            val voteDiff = if (minAssertion != null) minAssertion.assorter.calcMarginFromRegVotes(candidateVotes, 1).toInt()
+                           else 0
+
+            writer.write("${countyTab.countyName}, ${contestTab.contestName}, ${info.id}, $voteDiff, ")
+            candidateVotes.forEach { (id, vote) ->
+                writer.write("$id:$vote, ")
+            }
+            writer.write("\n")
+            count++
+        }
+    }
+    writer.close()
+    println("wrote ${count}  countyContestData to $outputFilename")
 }

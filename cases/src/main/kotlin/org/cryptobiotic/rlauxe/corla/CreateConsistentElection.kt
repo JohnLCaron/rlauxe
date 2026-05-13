@@ -15,8 +15,8 @@ import kotlin.String
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
-open class CreateColoradoElection (
-    val countyElection: ColoradoCountyElection,
+open class CreateConsistentElection (
+    val countyElection: CountyContestBuilder,
     val auditType: AuditType,
     val auditdir: String,
     val hasStyle: Boolean,
@@ -26,10 +26,13 @@ open class CreateColoradoElection (
     val publisher = Publisher(auditdir)
     val ncards: Int
     val contestsUA: List<ContestWithAssertions>
+    val countyPools: List<CountyPoolFromStyle>
 
     init {
+        countyPools = CountyPoolsFromStyles(countyElection.corlaContestBuilders).countyPools
+
         // have to save the mvrs and generate the cardManifest from them.
-        ncards = createAndSaveUnsortedMvrs(countyElection.contests, countyElection.cardPools, publisher)
+        ncards = createAndSaveUnsortedMvrs(countyElection.contests, countyPools, publisher)
 
         // TODO Npop >= Nc
         val npopMap: Map<Int, Int> = if ((auditType.isPolling() && pollingMode!!.withoutBatches())) {
@@ -39,7 +42,7 @@ open class CreateColoradoElection (
             val infos = countyElection.contests.map { it.info() }.associateBy { it.id }
             val mvrs: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.unsortedMvrsFile())
             val auditableCardIter: CloseableIterator<AuditableCard> =
-                MergeBatchesIntoCardManifestIterator(mvrs, countyElection.cardPools)
+                MergeBatchesIntoCardManifestIterator(mvrs, countyPools)
             // are we handling the batches correctly using mvrs?
             val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
             require(ncards == count)
@@ -52,11 +55,12 @@ open class CreateColoradoElection (
     override fun electionInfo() =
         ElectionInfo(
             name ?: "Corla24$auditType$pollingMode", auditType, ncards(),
-            contestsUA.size, pollingMode = pollingMode
+            contestsUA.size, pollingMode = pollingMode,
+            mvrSource = MvrSource.testPrivateMvrs
         )
 
-    override fun cardStyles(): List<StyleIF>? = countyElection.cardPools
-    override fun cardPools() = countyElection.cardPools
+    override fun cardStyles(): List<StyleIF>? = countyPools
+    override fun cardPools() = countyPools
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
 
@@ -151,11 +155,10 @@ class CardsFromPool(val cardPool: CardPoolIF) : Iterator<Cvr> {
     override fun hasNext() = cvrs.hasNext()
 }
 
-
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
-fun createColoradoElection(
-    externalSortDir: String,
+fun createConsistentElection(
+    topdir: String,
     auditdir: String,
     pollingMode: PollingMode? = null,
     creation: AuditCreationConfig,
@@ -165,10 +168,10 @@ fun createColoradoElection(
 ) {
     val stopwatch = Stopwatch()
 
-    val countyElection = ColoradoCountyElection()
+    val countyElection = CountyContestBuilder()
 
     val election = if (creation.auditType.isClca())
-            CreateColoradoElection(countyElection, creation.auditType, auditdir, pollingMode=null, name=name,
+            CreateConsistentElection(countyElection, creation.auditType, auditdir, pollingMode=null, name=name,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
         else
             CreateColoradoPolling(countyElection, auditdir, pollingMode!!) // TODO hasExact = false ??
@@ -176,7 +179,11 @@ fun createColoradoElection(
     createElectionRecord(election, auditDir = auditdir, clear = false)
     val config = Config(election.electionInfo(), creation, roundConfig)
 
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir = externalSortDir)
+    createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir)
+
+    writeCountyData(topdir, Colorado2024Input.strataMap.values.toList())
+    val contestMap = election.contestsUA.associate { it.contest.info().name to it }
+    writeCountyContestData(topdir, contestMap, Colorado2024Input.countyContestMap)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

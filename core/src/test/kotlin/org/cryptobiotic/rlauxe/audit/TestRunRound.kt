@@ -20,7 +20,7 @@ class TestRunRound {
     }
 
     @Test
-    fun testResampleAndRun() {
+    fun testResampleAndSaveResults() {
         val auditdir = "$testdataDir/cases/boulder24/oa/audit"
         val auditRecord = AuditRecord.read(auditdir)!!
         val lastRound = auditRecord.rounds.last()
@@ -30,6 +30,6 @@ class TestRunRound {
             contestRound.included = false
         }
 
-        resampleAndRun(auditdir, lastRound as AuditRound)
+        resampleAndSaveResults(auditdir, lastRound as AuditRound)
     }
 }

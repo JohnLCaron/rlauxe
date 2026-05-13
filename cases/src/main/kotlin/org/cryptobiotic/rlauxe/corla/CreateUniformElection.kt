@@ -6,18 +6,17 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeElectionInfoJsonFile
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
-import java.io.FileOutputStream
-import java.io.OutputStreamWriter
 import kotlin.Int
 import kotlin.String
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
-open class CreateColoradoElection2 (
-    val stateElection: ColoradoCountyElection,
+open class CreateUniformElection (
+    val stateElection: CountyContestBuilder,
     val auditType: AuditType,
     val auditdir: String,
     val hasStyle: Boolean,
@@ -32,21 +31,6 @@ open class CreateColoradoElection2 (
         // have to save the mvrs and generate the cardManifest from them.
         ncards = 0 // createAndSaveUnsortedMvrs(stateElection.contests, stateElection.cardPools, publisher)
 
-        /* TODO Npop >= Nc
-        val npopMap: Map<Int, Int> = if ((auditType.isPolling() && pollingMode!!.withoutBatches())) {
-            countyElection.contests.associate { it.id to ncards } // then the population is the entire set of cards. (wont go well)
-        } else {
-            // read them back in as an Iterator, so we dont have to read all into memory
-            val infos = countyElection.contests.map { it.info() }.associateBy { it.id }
-            val mvrs: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.unsortedMvrsFile())
-            val auditableCardIter: CloseableIterator<AuditableCard> =
-                MergeBatchesIntoCardManifestIterator(mvrs, countyElection.cardPools)
-            // are we handling the batches correctly using mvrs?
-            val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
-            require(ncards == count)
-            manifestTabs.mapValues { it.value.ncardsTabulated }
-        } */
-
         val builders: List<CorlaContestBuilder> = stateElection.corlaContestBuilders
         val npopMap: Map<Int, Int> = builders.associate { it.info.id to it.Npop!! }.toMap()
 
@@ -59,8 +43,8 @@ open class CreateColoradoElection2 (
             contestsUA.size, pollingMode = pollingMode
         )
 
-    override fun cardStyles(): List<StyleIF>? = stateElection.cardPools
-    override fun cardPools() = stateElection.cardPools
+    override fun cardStyles(): List<StyleIF>? = null
+    override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
 
@@ -90,7 +74,7 @@ open class CreateColoradoElection2 (
 
 ////////////////////////////////////////////////////////////////////
 // Create audit using mvrs from Corla, dont write cards (!)
-fun createColoradoElection2(
+fun createUniformElection(
     topdir: String,
     auditdir: String,
     creation: AuditCreationConfig,
@@ -100,16 +84,15 @@ fun createColoradoElection2(
     val stopwatch = Stopwatch()
 
     val (mergedContestInfo: List<MergedContestInfo>, mergedCountyInfo, statewideContests) = mergeContestInfo()
-    writeCountyData2(topdir, mergedCountyInfo)
 
-    val countyElection = ColoradoCountyElection()
+    val countyElection = CountyContestBuilder()
 
     val election =
-        CreateColoradoElection2(countyElection, creation.auditType, auditdir, pollingMode=null, name=name,
+        CreateUniformElection(countyElection, creation.auditType, auditdir, pollingMode=null, name=name,
         hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
 
     // skip the simulated cvrs
-    //     createElectionRecord(election, auditDir = auditdir, clear = false)
+    // createElectionRecord(election, auditDir = auditdir, clear = false)
     val contestsUA = election.contestsUA()
 
     val results = VerifyResults()
@@ -122,22 +105,18 @@ fun createColoradoElection2(
     logger.info{"createElectionRecord write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
 
     // write config
+    val electionInfo = election.electionInfo()
+    writeElectionInfoJsonFile(electionInfo, publisher.electionInfoFile())
+    logger.info{"createElectionRecord writeElectionInfoJsonFile to ${publisher.electionInfoFile()}\n  $electionInfo"}
+
     val config = Config(election.electionInfo(), creation, roundConfig)
     createAuditRecord(config, election, auditDir = auditdir, externalSortDir = null, sortManifest = false)
 
-    println("that took $stopwatch")
-}
+    writeCountyData(topdir, Colorado2024Input.strataMap.values.toList())
+    val contestMap = election.contestsUA.associate { it.contest.info().name to it }
+    writeCountyContestData(topdir, contestMap, Colorado2024Input.countyContestMap)
 
-fun writeCountyData2(topdir: String, strataInfo: List<StrataInfo>) {
-    // misc data by county
-    val outputFilename = "$topdir/countyData.csv"
-    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
-    writer.write("county,   nmvrs, npop\n")
-    strataInfo.sortedBy { it.strataName }.forEach {
-        writer.write("${it.strataName}, ${nfn(it.nmvrs, 5)}, ${nfn(it.Npop, 5)}\n")
-    }
-    writer.close()
-    println("wrote countyData to $outputFilename")
+    println("that took $stopwatch")
 }
 
 

@@ -33,7 +33,7 @@ class ConcurrentTaskRunner<T>(val show: Boolean = false, val showTaskResult: Boo
     fun run(tasks: List<ConcurrentTask<T>>, nthreads: Int? = null): List<T> {
         val stopwatch = Stopwatch()
         val useThreads = nthreads ?: 30
-        logger.debug{"ConcurrentTaskRunner run ${tasks.size} concurrent tasks with $nthreads threads"}
+        logger.debug{"ConcurrentTaskRunner run ${tasks.size} concurrent tasks with $useThreads threads"}
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()

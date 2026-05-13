@@ -36,6 +36,7 @@ interface AuditRecordIF {
     fun readOneShotMvrs(): Map<Int, Int>
     fun readCardStyles(): List<StyleIF>?
     fun name(): String
+    fun auditdir() : String
 }
 
 open class AuditRecord(
@@ -48,6 +49,7 @@ open class AuditRecord(
     val publisher = Publisher(location)
     val electionInfo = config.election
 
+    override fun auditdir() = location // it.location.substring(stateRecord.location.length)
     override fun name() = electionInfo.electionName // it.location.substring(stateRecord.location.length)
 
     // for efficiency, batches can be read once and stored by the caller

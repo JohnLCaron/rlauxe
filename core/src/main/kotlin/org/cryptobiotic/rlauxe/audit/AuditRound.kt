@@ -128,6 +128,10 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         return assertionRounds.maxOfOrNull { it.auditResult?.samplesUsed ?: 0 } ?: 0
     }
 
+    fun risk(): Double {
+        return assertionRounds.minOfOrNull { it.auditResult?.pmin ?: 1.0 } ?: 1.0
+    }
+
     /* called by viewer
     fun corlaCalc(alpha: Double): Int {
         val minAssertion = minAssertion()

@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.util.df
-
 open class Assertion(
     val info: ContestInfo,
     val assorter: AssorterIF,

@@ -100,7 +100,7 @@ fun estRisk(bet:Double, nomargin:Double, nsamples: Int): Double {
 // marginUpper = margin/upper
 fun estRiskFromMargin(bet:Double, marginUpper:Double, nsamples: Int): Double {
     val noerror = 1.0 / (2.0 - marginUpper)
-    val payoff = 1.0 + bet * (noerror - 0.5)
+    val payoff = 1.0 + bet * (noerror - 0.5)  // 0.5 is an approximation to mu = populationMeanIfH0()
     val payoffn = payoff.pow(nsamples.toDouble())
     val result =  1.0 / payoffn
     return result
@@ -120,8 +120,7 @@ fun pfz(d: Double?, n: Int=1) = if (d==null) "N/A" else {
     val s = "%${n+2}.${n}f%%".format(100*d)
     val toks = s.split(".")
     var tok0: String = toks[0]
-    if (tok0.length == 1) tok0 = "00${tok0}"
-    if (tok0.length == 2) tok0 = "0${tok0}"
+    if (tok0.length == 1) tok0 = "0${tok0}"
     "$tok0.${toks[1]}"
 }
 

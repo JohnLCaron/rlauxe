@@ -44,13 +44,13 @@ data class Style(val id: Int, val contests: Set<String>) {
 
 ///////////////////////////////////////////////////////////////
 
-// for each contest, over all counties
+// for each contest, total mvrs over all counties
 data class ContestMvrs(val contestName: String) {
     var countMvr = 0
     var countStatewide = 0
 }
 
-// for each county, over all contests that are not statewide
+// for each county, over all contests
 data class CountyMvrs(val countyName: String) {
     var countMvr = 0
 }
@@ -79,6 +79,7 @@ data class Card(val cvrId: Int) {
     }
 
     fun county() = lines.first().countyName
+
     // they only mark the statewide contests "statewide", but the entire ballot must have come from the statewide sampling
     fun statewide() = lines.any { it.statewide }
 
@@ -145,10 +146,12 @@ fun readContestComparisonCsv(filename: String, cleanup: (String) -> String): Car
         ex.printStackTrace()
     }
     cards.values.forEach { card: Card -> card.validate() }
+    println("statewide cards ${cards.values.count { it.statewide() } } total ${cards.size}")
 
     // accumulate mvr counts by County, skip statewide
     val countyMvrs = mutableMapOf<String, CountyMvrs>()
-    cards.values.filter { !it.statewide() }.forEach { card: Card ->
+    // cards.values.filter { !it.statewide() }.forEach { card: Card ->
+    cards.values.forEach { card: Card ->
         val line = card.lines.first()
         val countyMvrs = countyMvrs.getOrPut(line.countyName) { CountyMvrs(line.countyName) }
         countyMvrs.countMvr++

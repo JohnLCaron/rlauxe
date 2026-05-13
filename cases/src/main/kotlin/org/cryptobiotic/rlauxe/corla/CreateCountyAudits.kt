@@ -20,9 +20,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.csv.CardPoolHeader
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.TransformingIterator
@@ -40,7 +38,7 @@ private val debugUndervotes = true
 class CreateCountyAudits(
     val countyName: String,
     val auditdir: String,
-    val stateElection: ColoradoCountyElection,
+    val stateElection: org.cryptobiotic.rlauxe.corla.CountyContestBuilder,
     val countyContestTab: CountyContestTab,
     val hasStyle: Boolean,
 ): ElectionBuilder {
@@ -54,7 +52,7 @@ class CreateCountyAudits(
             stateElection.corlaContestBuilders.filter { it.counties.contains(countyName) }
                 .map { CountyContestBuilder(it, countyContestTab.contests[it.info.name]!!) }
 
-        countyCardPools = stateElection.cardPools.filter { it.poolName.lowercase().startsWith(countyName.lowercase()) }
+        countyCardPools = emptyList() // stateElection.cardPools.filter { it.poolName.lowercase().startsWith(countyName.lowercase()) }
 
         // set contest pool totals
         builders.forEach { it.setTotalCardsFromPools(countyCardPools) }
@@ -160,7 +158,7 @@ class CreateCountyAudits(
     }
 }
 
-    ////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
 fun createCountyAudits(
     topdir: String,
@@ -172,9 +170,9 @@ fun createCountyAudits(
     val stopwatch = Stopwatch()
 
     // misc data by county
-    writeCountyData(topdir)
+    writeCountyAuditData(topdir)
 
-    val countyElection = ColoradoCountyElection()
+    val countyElection = CountyContestBuilder()
     val contestTabByCounty: Map<String, CountyContestTab> = convertToCountyContestTabs(Colorado2024Input.contestTabsByCounty.values.toList())
         .associateBy { it.countyName }
 
@@ -208,7 +206,7 @@ fun createCountyAudits(
     logger.info { "createCountyAudits for $wantCounties took $stopwatch" }
 }
 
-fun writeCountyData(topdir: String) {
+fun writeCountyAuditData(topdir: String) {
     // misc data by county
     val countyMvrs = Colorado2024Input.countyMvrs
 

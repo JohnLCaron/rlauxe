@@ -50,6 +50,8 @@ data class CompositeRecord(
     override val componentRecords: List<AuditRecord>,
 ): CompositeRecordIF  {
 
+    override fun auditdir() = "$location/audit"
+
     override fun readSortedManifest(batches: List<StyleIF>?): CardManifest {
         return componentRecords.first().readSortedManifest(batches)
     }

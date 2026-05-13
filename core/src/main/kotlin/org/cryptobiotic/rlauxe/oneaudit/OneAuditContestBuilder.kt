@@ -39,7 +39,7 @@ fun makeOneAuditContests(
 }
 
 // use dilutedMargin to set the pool assorter averages. can only use for non-IRV contests because calcMargin(regVotes)
-// this also repalces the clcaAssertions with ones that use ClcaAssorterOneAudit which contain the pool assorter averages
+// this also repalaces the clcaAssertions with ones that use ClcaAssorterOneAudit which contain the pool assorter averages
 fun setPoolAssorterAverages(
     oaContests: List<ContestWithAssertions>,
     pools: List<CardPoolIF>, // poolId -> pool
@@ -57,8 +57,10 @@ fun setPoolAssorterAverages(
                 if (cardPool.hasContest(contestId)) {
                     val tab = cardPool.contestTab(oaContest.id)!! // Irv not done here
                     if (cardPool.ncards() > 0) {
-                        // note: using cardPool.ncards(), this is the diluted count
-                        val poolMargin = assertion.assorter.calcMarginFromRegVotes(tab.votes, cardPool.ncards())
+                        // TODO This should depend on hasStyle I guess
+                        // TODO note: using cardPool.ncards(), this is the diluted count
+                        val N = if (oaContest.hasStyle) oaContest.Nc else oaContest.Npop
+                        val poolMargin = assertion.assorter.calcMarginFromRegVotes(tab.votes, N)
                         assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                     }
                 }

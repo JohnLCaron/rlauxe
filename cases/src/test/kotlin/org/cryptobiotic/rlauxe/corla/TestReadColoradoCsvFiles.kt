@@ -184,11 +184,14 @@ class TestReadColoradoCsvFiles {
             println(it.show())
         }
 
+        var countMvrs = 0
         println("\nNmvrs by County")
-        println("\ncounty,   county nmvrs")
+        println("\ncounty,     county nmvrs")
         countyMvrs.sortedBy { it.countyName }.forEach {
-            println("${it.countyName}, ${nfn(it.countMvr, 5)}")
+            println("${trunc(it.countyName, -11)}, ${nfn(it.countMvr, 5)}")
+            countMvrs += it.countMvr
         }
+        println("total mvrs = $countMvrs")
 
         println("\nNmvrs by Contest")
         println("\n${trunc("contest", -51)}   county nmvrs, statewide nmvrs")

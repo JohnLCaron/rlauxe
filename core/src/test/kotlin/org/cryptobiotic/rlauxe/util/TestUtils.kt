@@ -1,12 +1,8 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.betting.TestH0Status
-import org.cryptobiotic.rlauxe.corla.estimateCorla
-import org.cryptobiotic.rlauxe.corla.optimistic
-import org.cryptobiotic.rlauxe.corla.pValueApproximation
 import org.junit.Assert.assertTrue
 import kotlin.math.abs
-import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.test.Test
@@ -15,6 +11,42 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
 class TestUtils {
+
+    @Test
+    fun problem() {
+        val bet = 2/1.03905
+        val margin = .164003
+        val alpha = .03
+
+        println("margin=$margin samples=${estSamplesFromMarginUpper(bet, margin, alpha)}")
+
+        val estRisk = estRiskFromMargin(2.0 / 1.03905, margin, 42)
+        println("dmargin=$margin risk=$estRisk")
+    }
+
+    @Test
+    fun test_KMpayoff() {
+        val gamma = 1.03905
+        val bet = 2/gamma // maximum bet
+        val margin = .01
+        val KMp = KM_P_value(gamma, margin)
+        println("KMpayoff = ${1/KMp}")
+
+        // could call it the betting martingale, eq 10 of ALPHA paper
+        val noerror = 1.0 / (2.0 - margin)
+        val payoff = 1.0 + bet * (noerror - 0.5)
+        println("  payoff = ${payoff}")
+        println("  ratio = ${payoff * KMp}")
+        //       KMpayoff = 1.0856816556318722
+        // betting payoff = 1.085969297609816
+        //           ratio = 1.0002649413632916
+    }
+
+    // probably the taylor expansion ??
+    fun KM_P_value(gamma:Double, margin:Double): Double {
+        //           return((1 - margin/(2*gamma))**n *\
+        return 1.0 - margin/(2*gamma)
+    }
 
     @Test
     fun calcStuff() {

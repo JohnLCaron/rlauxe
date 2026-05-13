@@ -69,6 +69,14 @@ class PersistedWorkflow(
 
             writeSamplePrnsJsonFile(nextRound.samplePrns, publisher.samplePrnsFile(nextRound.roundIdx))
             logger.info {"startNewRound ${nextRound.samplePrns.size} samplePrns written to ${publisher.samplePrnsFile(nextRound.roundIdx)}"}
+
+            // TODO what if we wrote mvrs as part of startNewRound instead of runAuditRound ??
+            //   in a real audit, need to set the real mvrs externally with EnterMvrsCli, which calls auditRecord.enterMvrs(mvrs)
+            //   in a test audit, the test mvrs are generated from the cardManifest, with optional fuzzing
+            if (mvrManager is PersistedMvrManagerTest) {
+                val sampledMvrs = mvrManager.setMvrsForRoundIdx(nextRound.roundIdx)
+                logger.info {"  added ${sampledMvrs.size} mvrs to mvrManager"}
+            }
         }
 
         return nextRound
@@ -77,12 +85,12 @@ class PersistedWorkflow(
     override fun runAuditRound(auditRound: AuditRound, onlyTask: OnlyTask?, quiet: Boolean): Boolean  { // return complete
         val roundIdx = auditRound.roundIdx
 
-        //   in a real audit, need to set the real mvrs externally with EnterMvrsCli, which calls auditRecord.enterMvrs(mvrs)
+        /*   in a real audit, need to set the real mvrs externally with EnterMvrsCli, which calls auditRecord.enterMvrs(mvrs)
         //   in a test audit, the test mvrs are generated from the cardManifest, with optional fuzzing
         if (mvrManager is PersistedMvrManagerTest) {
             val sampledMvrs = mvrManager.setMvrsForRoundIdx(roundIdx)
             logger.info {"  added ${sampledMvrs.size} mvrs to mvrManager"}
-        }
+        }  */
 
         val complete =  when (config.auditType) {
             AuditType.CLCA -> runClcaAuditRound(config, auditRound, mvrManager, auditRound.roundIdx,

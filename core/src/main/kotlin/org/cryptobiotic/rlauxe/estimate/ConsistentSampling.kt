@@ -173,8 +173,8 @@ fun consistentSampling(
     val stopwatch = Stopwatch()
     val skippedContests = mutableListOf<ContestRound>()
 
-    // included means, includede in the sampling
-    // done means, remove from the udit
+    // included means these are included in the sampling
+    // we still want to estimate risks for not-done contests
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
     val contestsIncluded = auditRound.contestRounds.filter { !it.done && it.included }
     if (contestsIncluded.isEmpty()) return emptyList()

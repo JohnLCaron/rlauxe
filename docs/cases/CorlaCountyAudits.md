@@ -5,7 +5,7 @@
 * 723 contests, no IRV.
 * No CVRs, just subtotals by County.
 * 4897 sampled MVRS and corresponding CVRS are available.
-* risk limit = 3%
+* risk limit =  3%
 
 ## Colorado-RLA (Corla) uniform sampling
 

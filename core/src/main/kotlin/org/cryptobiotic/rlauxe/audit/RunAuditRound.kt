@@ -147,6 +147,12 @@ fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7, verify:Boolean = tr
     return true
 }
 
+// for testing
+fun resampleAndSaveResults(auditdir: String): Boolean {
+    val auditRecord = AuditRecord.read(auditdir)!!
+    return resampleAndSaveResults(auditdir, auditRecord.rounds.last() as AuditRound)
+}
+
 // for viewer
 fun resampleAndSaveResults(auditdir: String, lastRound: AuditRound): Boolean {
     try {

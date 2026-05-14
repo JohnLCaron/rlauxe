@@ -86,7 +86,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
 
     var haveSampleSize: Int = 0
     var haveNewSampleSize: Int = 0
-    var auditorWantNewMvrs: Int? = null
+    var auditorWantNewMvrs: Int? = null // TODO remove I think
 
     init {
         if (status.complete) {

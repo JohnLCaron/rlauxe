@@ -13,14 +13,19 @@ data class AuditableCard (
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
     val poolId: Int?, // must be set if its from a CardPool
-    val votes: Map<Int, IntArray>?,   // CVRs and phantoms
+    val votes: Map<Int, IntArray>?,   // contestId -> candidateIds voted for; CVRs and phantoms
+                                      // might be more efficient to have contestIds in an IntArray, and all candidates voted for in another IntArray.
+                                      // common case is only one candidate voted for. Otherwise you need another IntArray for the #starting index.
+                                      // hasContest: maybe a bitMap? and factor out into a StyleIF?
     val style: StyleIF,
 ): CvrIF, CardIF {
+    val useCvr: Boolean
 
     init {
         if (CardStyle.useVotes(style.name()) && votes == null) {
             throw RuntimeException("cardStyle '${style.name()}' must have non-null votes")
         }
+        useCvr = CardStyle.useVotes(style.name())
     }
 
     constructor(card: CardWithBatchName, cardStyle: StyleIF): this(card.id, card.location, card.index, card.prn, card.phantom, card.poolId, card.votes, cardStyle)
@@ -30,10 +35,8 @@ data class AuditableCard (
 
     // "may have contest". Cvr hasContest does not allow missing, ie is not the same as "may have contest"
     override fun hasContest(contestId: Int): Boolean {
-        return when {
-            CardStyle.useVotes(style.name()) -> votes!![contestId] != null // assumes cvrsContainUndervotes, use cardStyle if not.
-            else -> style.hasContest(contestId)
-        }
+        return if (useCvr) (votes!![contestId] != null) // assumes cvrsContainUndervotes, use cardStyle if not.
+               else style.hasContest(contestId)
     }
 
     override fun id() = id

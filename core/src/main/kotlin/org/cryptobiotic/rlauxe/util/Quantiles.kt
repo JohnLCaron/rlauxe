@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.util.Quantiles.scale
 import java.util.*
 import kotlin.Boolean
 import kotlin.DoubleArray

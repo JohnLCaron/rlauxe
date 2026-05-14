@@ -1,0 +1,196 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;d36Mh6&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;d36Mh6&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;Corla24 Percentiles of contests' measured risk&quot;,
+&quot;subtitle&quot;:&quot;uniform nmvrs=4897; consistent: target and contests&lt;35 samples, nmvrs=4818&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;percentile&quot;,
+&quot;y&quot;:&quot;measured risk %&quot;,
+&quot;color&quot;:&quot;sampling&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;],
+&quot;measured risk %&quot;:[1.0070128403098608E-73,4.102843412737893E-37,1.456634525928541E-29,1.4676685699431626E-13,2.130805119689085E-11,1.528549311069079E-9,8.041035766136632E-9,1.778722498523578E-8,2.1631528715704353E-8,2.985470749877318E-8,4.248521487516482E-8,6.913880942824848E-8,1.4018083910982606E-7,3.4709530286468425E-7,6.51229281106998E-7,9.907889932496173E-7,1.47428275229085E-6,2.09037281228549E-6,4.477433129903504E-6,6.488737282499942E-6,8.857186057667665E-6,1.3413430337423176E-5,1.9729479336756936E-5,3.457733412230658E-5,4.449460411158998E-5,6.653582580347744E-5,1.448267566466622E-4,1.8563928528583112E-4,4.686369578552635E-4,8.142348883767096E-4,0.001235332880004762,0.001704230451577954,0.002659837447491927,0.0035444736431579143,0.004749982883787656,0.006026456455622013,0.007405641645017303,0.009766828522373785,0.01177723026684036,0.013881311090743084,0.017424862430230083,0.01880828323065658,0.01965613743289116,0.021517400647588343,0.022698380170025692,0.02339994113394213,0.024199501671104635,0.025640344768423116,0.027431300887929735,0.029755697747050062,0.03717920339132397,0.0441875023195649,0.05229945602888559,0.06333763076874213,0.07576961318379145,0.08801661929325422,0.10828631737600598,0.12428707812768802,0.14198655278350997,0.16152381905606716,0.18286868414334195,0.19724282041625518,0.23278771364554682,0.26073841187942104,0.2904445547327252,0.31110862042578025,0.3429371931537619,0.38415832312845555,0.4496689918259471,0.49828745392103757,0.5208374347077285,0.5575333368001356,0.5757665397150865,0.6040329011928425,0.6517041323991247,0.6761300635780854,0.7101394540581585,0.7300884374896253,0.7667623947454686,0.780842818859668,0.8089800399303451,0.8243149417520782,0.8413266110794655,0.852654944898069,0.8605120298705209,0.870628039713851,0.8862774026930345,0.9030442926952572,0.9296037952101159,0.9412921638313757,0.9521914658539309,0.9648015085658312,0.971228479104697,0.9751118653226765,0.9792113303152653,0.9860684880681355,0.9895590325466536,0.9946388985509582,0.9972893967466187,0.9986069965169122,0.9992925097058623,9.196023523343759E-20,3.660797760513721E-15,1.3385692140384846E-10,2.498176499863444E-9,4.3756431319223365E-8,1.7164093531999663E-7,8.314267621067323E-7,2.36354779295232E-6,4.08044428575671E-6,1.2900710927383286E-5,2.300474433443131E-5,3.5295096064669186E-5,4.3308367435147344E-5,4.720234044758598E-5,5.384537604279429E-5,6.721652733658877E-5,9.12560858099984E-5,1.064966872212988E-4,1.5435011968846016E-4,1.9528655940571113E-4,2.757613150987388E-4,3.836457838773072E-4,5.65001210466528E-4,8.806508195945378E-4,0.0015419189440976568,0.0022380830807978494,0.0030954917966441934,0.0038664817227387527,0.004459569790281654,0.005534155638034038,0.006486503796910151,0.007392394900448242,0.009077113819019657,0.010421079333734791,0.01287698796683443,0.015448529157192801,0.017214535424580374,0.01842959016555137,0.020561462737853982,0.022053411930094538,0.02319284255538176,0.024017417866061007,0.02479025784111087,0.025553477694091904,0.02615283836627584,0.026463762456369742,0.027007898407206375,0.027189357996142288,0.02726591435150298,0.027523351112787788,0.027957641170956005,0.028288195807503667,0.028415386221567612,0.028654610133022475,0.028846904352611245,0.028895011767939002,0.029112611581079445,0.029294500320025854,0.029463949942230134,0.029613263890935708,0.029795508874430762,0.029930770961098436,0.030069439862770414,0.030539523283457565,0.03133273869225537,0.032942166010750604,0.037977462273483746,0.055046269628033107,0.06810320371795411,0.0782286147120348,0.10049354160521871,0.11867315176418793,0.15895721972682347,0.18549978776553813,0.22617770372085985,0.259898107597333,0.3105757521122081,0.3590937476710345,0.39919694021178226,0.5011450295211394,0.5580824607830548,0.6237728117558202,0.6478444844849802,0.6840973137450184,0.7251269796263579,0.7394727464475984,0.7900115578199929,0.8068503106287882,0.8353971861204076,0.861487688299012,0.8846085436666993,0.9191032770843516,0.9356632625854407,0.94737792053745,0.9643592328401678,0.9782200547569905,0.9922832344613278,1.0,1.0,1.0,1.0],
+&quot;percentile&quot;:[0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0,32.0,33.0,34.0,35.0,36.0,37.0,38.0,39.0,40.0,41.0,42.0,43.0,44.0,45.0,46.0,47.0,48.0,49.0,50.0,51.0,52.0,53.0,54.0,55.0,56.0,57.0,58.0,59.0,60.0,61.0,62.0,63.0,64.0,65.0,66.0,67.0,68.0,69.0,70.0,71.0,72.0,73.0,74.0,75.0,76.0,77.0,78.0,79.0,80.0,81.0,82.0,83.0,84.0,85.0,86.0,87.0,88.0,89.0,90.0,91.0,92.0,93.0,94.0,95.0,96.0,97.0,98.0,99.0,100.0,0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0,32.0,33.0,34.0,35.0,36.0,37.0,38.0,39.0,40.0,41.0,42.0,43.0,44.0,45.0,46.0,47.0,48.0,49.0,50.0,51.0,52.0,53.0,54.0,55.0,56.0,57.0,58.0,59.0,60.0,61.0,62.0,63.0,64.0,65.0,66.0,67.0,68.0,69.0,70.0,71.0,72.0,73.0,74.0,75.0,76.0,77.0,78.0,79.0,80.0,81.0,82.0,83.0,84.0,85.0,86.0,87.0,88.0,89.0,90.0,91.0,92.0,93.0,94.0,95.0,96.0,97.0,98.0,99.0,100.0],
+&quot;sampling&quot;:[&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;sampling&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;percentile&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;measured risk %&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;yintercept&quot;:0.0,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;]
+},
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;size&quot;:0.3,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;hline&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;sampling&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;percentile&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;measured risk %&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;yintercept&quot;:0.03,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;uniform&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;,&quot;consistent&quot;]
+},
+&quot;color&quot;:&quot;#3ba272&quot;,
+&quot;size&quot;:0.3,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;hline&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;sampling&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;percentile&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;measured risk %&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

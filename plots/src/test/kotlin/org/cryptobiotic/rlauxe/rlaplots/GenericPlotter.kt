@@ -28,6 +28,7 @@ fun <T> genericPlotter(
         catfld: (T) -> String,
         addPoints: Boolean = true,
         scaleType: ScaleType = ScaleType.Linear,
+        addHLineAt: Double? = null,
     ) {
 
     val groups = makeGGroups(data, catfld)
@@ -84,6 +85,14 @@ fun <T> genericPlotter(
                 yIntercept.constant(0) // Sets the line position
                 color = Color.BLACK       // Customizes the line color
                 width = .3             // Customizes the line thickness
+            }
+
+            if (addHLineAt != null) {
+                hLine {
+                    yIntercept.constant(addHLineAt) // Sets the line position
+                    color = Color.GREEN       // Customizes the line color
+                    width = .3           // Customizes the line thickness
+                }
             }
 
             layout {

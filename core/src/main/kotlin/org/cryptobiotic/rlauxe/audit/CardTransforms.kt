@@ -50,6 +50,7 @@ class MergeBatchesIntoCardManifestIterator(
     override fun close() { cardsIter.close() }
 }
 
+// TODO this is slowing things down
 // read CardWithBatchName, add batch, output AuditableCard as Iterable
 class MergeBatchesIntoCardManifestIterable(
     val cards: CloseableIterable<CardWithBatchName>,

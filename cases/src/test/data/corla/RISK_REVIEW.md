@@ -229,11 +229,15 @@ the predictions should match.  They do, across every case checked:
 the larger n directly to the formula, which gives those non-contest ballots unearned credit and
 understates the risk.
 
+JOHN COMMENT: not true
+
 In the KM test martingale, ballots that do **not** contain the contest contribute a factor of
 exactly 1.0 — they carry no information about the contest and should not count toward n.
 Therefore Python's definition (contest-specific ballots only) is mathematically correct for
 `rlacalc.KM_P_value`, and John's larger n gives a result that is optimistic by a factor of
 `(1 − dm/(2γ))^(nJ − nPy)` — the spurious contribution of the extra non-contest draws.
+
+JOHN COMMENT: not true
 
 **Note on John's `haveMvrs` count:** For Adams County, `haveMvrs = 214`, not 231.  The 17
 ballots excluded are those that appear in `contestComparison.csv` under **both**

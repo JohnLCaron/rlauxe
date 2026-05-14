@@ -149,16 +149,17 @@ The next three plots have the targeted contests plus all contests with margins g
 ## Uniform vs Consistent Sampling
 
 The last scenarios emphasize getting as many contests as possible under the limit. Yet these contests are probably the least
-interesting because they arent close. The advantage of consistent sampling is that one has to explicity choose which contests
-to audit, the seeing exactly what is required in sample size. You can run "what if" scenarios until you are satisfied
+interesting because they arent close. The advantage of consistent sampling is that one explicity chooses which contests
+to audit, then seeing exactly what sample size is required. You can run "what if" scenarios until you are satisfied
 with the result and the cost. Further, if there are no errors (and all the ballots selected can be accurately found), 
 the estimated sample sizes will be exact, and there will be no need to have multiple rounds.
 
 The number of samples needed can be shown by county. Each county could make its own choices of which contests to audit, and immediately see the
-number of samples it would need to audit. Here is an example from the last distribution (targeted plus margin greater than 1/2%),
-see the column labeled **nmvrsConsistent**:
+number of samples it would need. Here is an example from the "targeted plus important contests" scenario,
+the column labeled **nmvrsConsistent** is the number of samples needed for each county. These reflect whether the county has
+close contests, not the size of the county:
 
-<img src="Corla24Dist/AllGt005ByCounty.png" alt="AllGt005 samples by County">
+<img src="Corla24Dist/TargetedPlusSamplesByCounty.png" alt="TargetedPlusSamples samples by County">
 
 In order to do consistent sampling we would like to have access to the CVRs, and they must record the undervotes.
 However, consistent sampling doesnt actually need the CVR unless it gets selected for the audit. What we do need is an 

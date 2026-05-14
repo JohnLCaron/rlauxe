@@ -1,4 +1,4 @@
-# Colorado Statewide Election 2024
+# Colorado Statewide election by Counties 2024
 05/14/2026
 
 * 4,767,518 ballot cast (Colorado 2024 General Election) in 63 Counties.
@@ -131,6 +131,7 @@ needing less than 150 samples:
 
 * Note the number of total samples: uniform = 4897, consistent = 4818. The 35 sample cutoff was chosen to
   make these approximately equal.
+* The consistent sampling is quite a bit better, with over 65% of contests under the risk limit.
 
 The contests selected for auditing are the targeted contests plus all contests needing less than 100 samples:
 
@@ -149,8 +150,8 @@ The next three plots have the targeted contests plus all contests with margins g
 
 The last scenarios emphasize getting as many contests as possible under the limit. Yet these contests are probably the least
 interesting because they arent close. The advantage of consistent sampling is that one has to explicity choose which contests
-to audit. But you can see exactly what each will require in sample sizes. You can run "what if" scenarios until you are satisfied
-with what result you will get, and at what cost. Further, if there are no errors (and all the ballots selected can be accurately found), 
+to audit, the seeing exactly what is required in sample size. You can run "what if" scenarios until you are satisfied
+with the result and the cost. Further, if there are no errors (and all the ballots selected can be accurately found), 
 the estimated sample sizes will be exact, and there will be no need to have multiple rounds.
 
 The number of samples needed can be shown by county. Each county could make its own choices of which contests to audit, and immediately see the
@@ -160,11 +161,11 @@ see the column labeled **nmvrsConsistent**:
 <img src="Corla24Dist/AllGt005ByCounty.png" alt="AllGt005 samples by County">
 
 In order to do consistent sampling we would like to have access to the CVRs, and they must record the undervotes.
-However, consistent sampling doesnt actually need the CVRs unless they get selected for the audit. What we do need is an 
+However, consistent sampling doesnt actually need the CVR unless it gets selected for the audit. What we do need is an 
 accurate list of the contests that are on each ballot. I imagine that each county has a relatively small number of "ballot styles". 
 If they included the ballot style on the manifest for each ballot, we could do consistent sampling from that.
 
-A _publicly verifiable_ audit needs the CVRS to be publically "commited to" before the audit starts, to ensure that the election
+A _publicly verifiable_ audit needs the CVRS to be publically _commited to_ before the audit starts, to ensure that the election
 authority cant cheat on the audit. But if releasing the actual votes is impossible for now, then ballot styles in the manifest 
 would be a good first step. 
 

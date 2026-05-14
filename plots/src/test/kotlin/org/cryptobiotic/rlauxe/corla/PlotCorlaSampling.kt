@@ -51,10 +51,10 @@ class CompareCorlaSampling {
         }
 
         val title = "Corla24 Percentiles of contests' measured risk"
-        val subtitle = "uniform nmvrs=4897; consistent: target and contests > .005 margin, nmvrs=25382"
+        val subtitle = "nmvrs: uniform=4897, consistent=15417; targeted and contests margin >.02"
 
         plotCumul(
-            writeFile = "$dirName/$name-AllGt005",
+            writeFile = "$dirName/$name-AllGt02",
             title=title,
             subtitle=subtitle,
             percentiles,

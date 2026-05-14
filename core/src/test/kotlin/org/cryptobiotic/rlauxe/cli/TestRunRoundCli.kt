@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.cli
 
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
+import org.cryptobiotic.rlauxe.audit.resampleAndSaveResults
 import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
@@ -31,6 +32,12 @@ class TestRunRoundCli {
                 // "--onlyTask", "17-1/0",
             )
         )
+    }
+
+    @Test
+    fun testResampleAndSaveResults() {
+        val auditdir = "$testdataDir/cases/corla/consistent/audit"
+        resampleAndSaveResults(auditdir)
     }
 
     //@Test

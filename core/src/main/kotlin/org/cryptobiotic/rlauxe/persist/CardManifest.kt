@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 
+// TODO could this return
 class CardManifest(val cards: CloseableIterable<AuditableCard>, val ncards: Int) {
 
     companion object {

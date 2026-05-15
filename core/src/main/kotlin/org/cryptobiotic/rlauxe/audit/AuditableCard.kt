@@ -3,6 +3,154 @@ package org.cryptobiotic.rlauxe.audit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrIF
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCard
+import kotlin.ranges.until
+
+
+// interface CardIF {
+//    fun id(): String // enough info to find the card for a manual audit.
+//    fun location(): String // enough info to find the card for a manual audit.
+//    fun index(): Int  // index into the original, canonical list of cards
+//    fun prn(): Long   // psuedo random number
+//    fun isPhantom(): Boolean
+//
+//    fun votes(): Map<Int, IntArray>?   // CVRs and phantoms
+//    fun poolId(): Int?                 // must be set if its from a CardPool
+//    fun styleName(): String            // "fromCvr" if no cardStyle and its from a CVR (then votes is non null)
+//}
+
+// change to
+
+// could break the rule and return ProtoCard for speed....
+// HEY consistent sampling only wants hasContest, optimize for that...
+// which might want the card styles to be joined
+
+//     val votes: Map<Int, IntArray>?,   // contestId -> candidateIds voted for; CVRs and phantoms
+//                                      // might be more efficient to have contestIds in an IntArray, and all candidates voted for in another IntArray.
+//                                      // common case is only one candidate voted for. Otherwise you need another IntArray for the #starting index.
+//                                      // hasContest: maybe a bitMap? and factor out into a StyleIF?
+
+class CardUsingArrays(
+    val id: String, // enough info to find the card for a manual audit.
+    val location: String?, // enough info to find the card for a manual audit.
+    val index: Int,  // index into the original, canonical list of cards
+    val prn: Long,   // psuedo random number
+    val phantom: Boolean,
+    val poolId: Int?, // must be set if its from a CardPool
+    val contestIds: IntArray,
+    val contestStarts: IntArray,
+    val candidates: IntArray,
+    val style: StyleIF
+) : CvrIF, CardIF {
+
+    val votes: Map<Int, IntArray>? by lazy {
+        if (contestIds == null || contestIds.isEmpty()) null else {
+            val lastIndex = contestIds.size - 1
+            val makeVotes = mutableMapOf<Int, IntArray>()
+            contestIds.forEachIndexed { index, contestId ->
+                val start = contestStarts[index]
+                val end = if (index < lastIndex) contestStarts[index + 1] else candidates.size
+                if (start > end || end > candidates.size)
+                makeVotes[contestId] = candidates.sliceArray(start until end)
+            }
+            makeVotes.toMap()
+        }
+    }
+
+    override fun hasContest(contestId: Int): Boolean {
+        return contestIds.contains(contestId) // or delegate to style
+    }
+
+    override fun id() = id
+    override fun location() = location ?: id()
+    override fun index() = index
+    override fun prn() = prn
+    override fun isPhantom() = phantom
+    override fun votes() = votes
+    override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
+    override fun poolId(): Int? = poolId
+    override fun styleName() = style.name()
+
+    override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
+        val contestVotes = votes(contestId)
+        return if (contestVotes == null) 0
+        else if (contestVotes.contains(candidateId)) 1 else 0
+    }
+
+    /*
+    override fun votes(contestId: Int): IntArray? {
+        // or turn back into a map lazily ??
+        // HEY consistent sampling only wants hasContest, optimize for that...
+        val contestIdx = contestIds.indexOf(contestId)
+        val start = contestStarts[contestIdx]
+        val end = contestStarts[contestIdx+1]
+        return candidates // .subarray(start, end)
+    } */
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is CardUsingArrays) return false
+
+        if (index != other.index) return false
+        if (prn != other.prn) return false
+        if (phantom != other.phantom) return false
+        if (poolId != other.poolId) return false
+        if (id != other.id) return false
+        if (location != other.location) return false
+        if (!contestIds.contentEquals(other.contestIds)) return false
+        if (!contestStarts.contentEquals(other.contestStarts)) return false
+        if (!candidates.contentEquals(other.candidates)) return false
+        if (style != other.style) return false
+        if ((votes == null) != (other.votes == null)) return false
+        if (votes != null) {
+            for ((contestId, candidates) in votes) {
+                val otherCands = other.votes!![contestId]
+                if (!candidates.contentEquals(otherCands)) return false
+            }
+        }
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = index
+        result = 31 * result + prn.hashCode()
+        result = 31 * result + phantom.hashCode()
+        result = 31 * result + (poolId ?: 0)
+        result = 31 * result + id.hashCode()
+        result = 31 * result + (location?.hashCode() ?: 0)
+        result = 31 * result + contestIds.contentHashCode()
+        result = 31 * result + contestStarts.contentHashCode()
+        result = 31 * result + candidates.contentHashCode()
+        result = 31 * result + style.hashCode()
+        result = 31 * result + votes.hashCode()
+        return result
+    }
+
+    override fun toString()= buildString {
+        appendLine("id='$id', location=$location, index=$index, prn=$prn, phantom=$phantom, poolId=$poolId, ")
+        appendLine("   contestIds=${contestIds.contentToString()}, contestStarts=${contestStarts.contentToString()}, ")
+        appendLine("   candidates=${candidates.contentToString()}, style=$style, votes=$votes")
+    }
+
+    companion object {
+        // how much does a copy cost?
+        fun from(pcard: ProtoCard, styles: Map<String, StyleIF>) =
+            CardUsingArrays(
+                pcard.id,
+                if (pcard.location == pcard.id) null else pcard.location,
+                pcard.index,
+                pcard.prn,
+                pcard.phantom,
+                pcard.poolId,
+                pcard.contestIds,  // not making copies
+                pcard.contestStarts,
+                pcard.candidates,
+                styles[pcard.styleName] ?: CardStyle.fromCvrBatch,   // we could do style here
+            )
+    }
+}
+
 
 // The information we have on each physical card in the audit; the complete set is the CardManifest.
 

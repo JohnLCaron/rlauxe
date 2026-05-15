@@ -130,7 +130,7 @@ object RunCalcAssortAvg {
                 val card = cardIter.next()
                 val mvr = if (usePrivate) mvrIter!!.next() else card
                 if (usePrivate) {
-                    require(mvr.prn == card.prn)
+                    require(mvr.prn() == card.prn())
                 }
                 expectations.forEach { expect ->
                     if (card.hasContest(expect.id)) {

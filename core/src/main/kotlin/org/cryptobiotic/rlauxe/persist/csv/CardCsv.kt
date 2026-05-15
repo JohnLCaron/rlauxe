@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.persist.csv
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardUsingArrays
+import org.cryptobiotic.rlauxe.audit.AuditableCardProto
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -31,7 +31,7 @@ val CardHeader = "id, location, index, prn, phantom, poolId, cardStyle, cvr cont
 fun writeCardCsv(card: CardIF) = buildString {
     append("${card.id()}, ")
     if (card.id() == card.location()) append(", ") else append("${card.location()}, ")
-    append("${card.index()}, ${card.prn().toString(radix=16)}, ${if(card.isPhantom()) "yes," else ","} ")
+    append("${card.index()}, ${card.prn().toString(radix=16)}, ${if(card.phantom()) "yes," else ","} ")
     if (card.poolId() == null) append(", ") else append("${card.poolId()}, ")
     append("${card.styleName()}, ")
 
@@ -204,7 +204,7 @@ class IteratorCardsCsvStream(input: InputStream, bufferSize: Int): CloseableIter
     }
 }
 
-class CsvCardUsingArrays(input: InputStream, bufferSize: Int): CloseableIterator<CardUsingArrays> {
+class CsvCardUsingArrays(input: InputStream, bufferSize: Int): CloseableIterator<AuditableCardProto> {
     // was val reader = BufferedReader(InputStreamReader(input, "ISO-8859-1")) for some reason
     val reader = BufferedReader(InputStreamReader(input),bufferSize)
     var nextLine: String? = null
@@ -222,7 +222,7 @@ class CsvCardUsingArrays(input: InputStream, bufferSize: Int): CloseableIterator
         return nextLine != null
     }
 
-    override fun next(): CardUsingArrays {
+    override fun next(): AuditableCardProto {
         if (!hasNext()) throw NoSuchElementException()
         val result =  readCardWithArrays(nextLine!!)
         nextLine = null
@@ -235,7 +235,7 @@ class CsvCardUsingArrays(input: InputStream, bufferSize: Int): CloseableIterator
 }
 
 
-fun readCardWithArrays(line: String): CardUsingArrays {
+fun readCardWithArrays(line: String): AuditableCardProto {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
@@ -290,7 +290,7 @@ fun readCardWithArrays(line: String): CardUsingArrays {
         }
     }
 
-        return CardUsingArrays(
+        return AuditableCardProto(
             id,
             if (location == id) null else location,
             index, sampleNum, phantom, poolId,

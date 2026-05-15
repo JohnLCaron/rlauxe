@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
@@ -140,7 +139,7 @@ class OneAuditClcaAssorter(
 
     fun overstatementPoolError(mvr: CvrIF, poolAvgAssortValue: Double, hasStyle: Boolean): Double {
         val mvr_assort =
-            if (mvr.isPhantom()) 0.0
+            if (mvr.phantom()) 0.0
             else if (!mvr.hasContest(info.id)) {
                 if (hasStyle) 0.0 else 0.5
             }

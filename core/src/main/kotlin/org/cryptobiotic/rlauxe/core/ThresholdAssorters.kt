@@ -80,7 +80,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
     override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {
         if (!cvr.hasContest(id)) return 0.5
-        if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
+        if (usePhantoms && cvr.phantom()) return 0.0 // worst case
         val cands = cvr.votes(id)
         return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
@@ -300,7 +300,7 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
     override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {
         if (!cvr.hasContest(id)) return 0.5
-        if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
+        if (usePhantoms && cvr.phantom()) return 0.0 // worst case
         val cands = cvr.votes(id)
         return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }

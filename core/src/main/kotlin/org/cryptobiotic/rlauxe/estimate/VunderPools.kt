@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -23,7 +24,7 @@ class VunderPools(pools: List<CardPool>) {
     }
 
     // for the given pooled card with no votes, simulate one with votes, staying within the pool vote totals.
-    fun simulatePooledCard(card: AuditableCard): AuditableCard {
+    fun simulatePooledCard(card: AuditableCardIF): AuditableCard {
         val vunderPool = vunderPools[card.poolId()]
         return vunderPool!!.simulatePooledCard(card)
     }
@@ -36,7 +37,7 @@ class VunderPools(pools: List<CardPool>) {
 class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int, val hasExactContests: Boolean) {
     var vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
 
-    fun simulatePooledCard(card: AuditableCard): AuditableCard {
+    fun simulatePooledCard(card: AuditableCardIF): AuditableCard {
         require (poolName == "all" || card.poolId() == poolId) // TODO
         val cardb = AuditableCardBuilder.fromCard(card)
 
@@ -105,8 +106,8 @@ class VunderBatches(batches: List<StyleIF>, val onePool: VunderPool) {
     val batchMap = batches.associateBy { it.name() }
 
     // for the given pooled card with no votes, simulate one with votes, staying within the onePool vote totals.
-    fun simulatePooledCard(card: AuditableCard): AuditableCard {
-        if (card.isPhantom()) return card
+    fun simulatePooledCard(card: AuditableCardIF): AuditableCardIF {
+        if (card.phantom()) return card
 
         val batch = batchMap[card.styleName()]
         val cardb = AuditableCardBuilder.fromCard(card)

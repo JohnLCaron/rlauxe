@@ -356,7 +356,7 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
 
     override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {
         if (!cvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && cvr.isPhantom()) return 0.5
+        if (usePhantoms && cvr.phantom()) return 0.5
         return if (isNEB) assortNotEliminatedBefore(cvr)
                else assortNotEliminatedNext(cvr)
     }

@@ -164,11 +164,11 @@ class TestClcaAssortValues {
     fun testOne(what: String, taus: Taus, cassorter: ClcaAssorter, cvr: Cvr, mvr: Cvr, hasStyle: Boolean) {
         val cvrValue =
             if (hasStyle && !cvr.hasContest(cassorter.info.id)) Double.NaN
-            else if (cvr.isPhantom()) 0.5
+            else if (cvr.phantom()) 0.5
             else cassorter.assorter.assort(cvr, usePhantoms=false)
 
         val mvrValue =
-            if (mvr.isPhantom()) 0.0
+            if (mvr.phantom()) 0.0
             else if (!mvr.hasContest(cassorter.info.id)) { if (hasStyle) 0.0 else 0.5 }
             else cassorter.assorter.assort(mvr, usePhantoms = false)
 

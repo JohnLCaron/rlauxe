@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.core.Contest
@@ -145,7 +145,7 @@ class TestVunder {
         val infos = mapOf(contestOA.id to contestOA.contest.info(), 2 to info2)
         val vunderFuzz = VunderPoolsFuzzer(cardPools, infos, 0.0, cards)
 
-        val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
+        val oaFuzzedPairs: List<Pair<AuditableCardIF, AuditableCardIF>> = vunderFuzz.mvrCvrPairs
         val fuzzedMvrs = oaFuzzedPairs.map { it.first }
 
         val fuzzedMvrTab = tabulateCards(fuzzedMvrs.iterator(), infos)
@@ -162,7 +162,7 @@ class TestVunder {
         val limit = 1000
         val limitedCards = cards.subList(0, limit)
         val limitedFuzz = VunderPoolsFuzzer(cardPools, infos, 0.0, limitedCards)
-        val limitedPairs: List<Pair<AuditableCard, AuditableCard>> = limitedFuzz.mvrCvrPairs
+        val limitedPairs: List<Pair<AuditableCardIF, AuditableCardIF>> = limitedFuzz.mvrCvrPairs
         val limitedMvrs = limitedPairs.map { it.first }
 
         val limitedMvrTab = tabulateCards(limitedMvrs.iterator(), infos)

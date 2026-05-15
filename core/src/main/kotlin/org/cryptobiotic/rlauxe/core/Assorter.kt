@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
 
 // from SuperSimple:
@@ -80,7 +79,7 @@ class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int):
     override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {
         // if (!cvr.hasContest(info.id)) return if (hasStyle) 0.0 else 0.5 TODO use hasStyle, see Issue#552
         if (!cvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
+        if (usePhantoms && cvr.phantom()) return 0.0 // worst case
         val w = cvr.hasMarkFor(info.id, winner)
         val l = cvr.hasMarkFor(info.id, loser)
         return (w - l + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -13,9 +13,6 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import java.io.BufferedInputStream
 import java.io.File
-import java.io.FileInputStream
-import java.io.InputStream
-import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
@@ -101,7 +98,7 @@ class TimeCardReading {
         val countyAudit = AuditRecord.readWithResult("$topdir/audit").unwrap()
         // val contestNameMap = countyAudit.contests.associate { it.contest.info().name to it }
         val mvrManager = PersistedMvrManager(countyAudit)
-        val cards: CloseableIterable<AuditableCard> = mvrManager.sortedManifest().cards
+        val cards: CloseableIterable<AuditableCardIF> = mvrManager.sortedManifest().cards
         val contestsUA = mvrManager.contestsUA
 
         val stopwatch = Stopwatch()

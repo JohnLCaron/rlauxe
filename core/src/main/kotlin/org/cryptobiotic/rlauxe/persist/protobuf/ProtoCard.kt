@@ -8,8 +8,9 @@ import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
 import org.cryptobiotic.rlauxe.audit.CardIF
-import org.cryptobiotic.rlauxe.audit.CardUsingArrays
+import org.cryptobiotic.rlauxe.audit.AuditableCardProto
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.BufferedInputStream
@@ -27,6 +28,7 @@ data class ProtoCards (
     val cards: List<ProtoCard>
 )
 
+// TODO check is using real protobuf library is better
 @Serializable
 data class ProtoCard (
     val id: String, // enough info to find the card for a manual audit.
@@ -61,7 +63,7 @@ fun CardIF.publishProto() : ProtoCard {
         this.location(),
         this.index(),
         this.prn(),
-        this.isPhantom(),
+        this.phantom(),
         this.poolId(),
         contestIdas,
         contestStarts.toIntArray(),
@@ -222,7 +224,9 @@ fun testConvert(card: CardWithBatchName) {
 // could break the rule and return ProtoCard for speed....
 // that is, ProtoCard == CardWithBatchName
 // otoh,
-class ProtoCardUsingArrays(filename: String, bufferSize: Int): CloseableIterator<CardUsingArrays> {
+class AuditableCardProtoIterator(filename: String, bufferSize: Int, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCardProto> {
+    val styleMap: Map<String, StyleIF> = styles?.associateBy{ it.name() } ?: emptyMap()
+
     val errs = ErrorMessages("readProtoCardsFile '${filename}'")
     val inputStream: InputStream
     var currentBunch: Iterator<ProtoCard>
@@ -247,8 +251,8 @@ class ProtoCardUsingArrays(filename: String, bufferSize: Int): CloseableIterator
         return true
     }
 
-    override fun next(): CardUsingArrays {
-        return CardUsingArrays.from(currentBunch.next(), emptyMap()) // .import()
+    override fun next(): AuditableCardProto {
+        return AuditableCardProto.from(currentBunch.next(), styleMap)
     }
 
     override fun close() {

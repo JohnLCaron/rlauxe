@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
@@ -223,12 +223,12 @@ fun tabulateCloseableCvrs(cvrs: CloseableIterator<Cvr>, infos: Map<Int, ContestI
     return votes
 }
 
-fun tabulateCards(cards: Iterator<AuditableCard>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+fun tabulateCards(cards: Iterator<AuditableCardIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     return tabulateAuditableCards(Closer(cards), infos)
 }
 
 // tabulates both regular and IRV over everything in the cards
-fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+fun tabulateAuditableCards(cards: CloseableIterator<AuditableCardIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val tabs = mutableMapOf<Int, ContestTabulation>()
     cards.use { cardIter ->
         while (cardIter.hasNext()) {
@@ -236,10 +236,10 @@ fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<I
             infos.forEach { (contestId, info) ->
                 if (card.hasContest(contestId)) { // TODO note that here, we believe possibleContests ...
                     val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
-                    if (card.phantom) tab.nphantoms++
-                    if (card.votes != null && card.votes[contestId] != null) { // happens when cardStyle == all
-                        val contestVote = card.votes[contestId]!!
-                        tab.addVotes(contestVote, card.phantom)
+                    if (card.phantom()) tab.nphantoms++
+                    if (card.votes(contestId) != null) { // happens when cardStyle == all
+                        val contestVote = card.votes(contestId)!!
+                        tab.addVotes(contestVote, card.phantom())
                     } else {
                         tab.ncardsTabulated++
                     }

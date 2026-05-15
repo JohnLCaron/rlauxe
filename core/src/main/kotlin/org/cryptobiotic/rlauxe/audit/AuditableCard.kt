@@ -30,7 +30,19 @@ import kotlin.ranges.until
 //                                      // common case is only one candidate voted for. Otherwise you need another IntArray for the #starting index.
 //                                      // hasContest: maybe a bitMap? and factor out into a StyleIF?
 
-class CardUsingArrays(
+
+interface AuditableCardIF: CardIF, CvrIF {
+    fun style(): StyleIF            // "fromCvr" if no cardStyle and its from a CVR (then votes is non null)
+    fun possibleContests() : IntArray
+    // TODO is hasStyle really card specific? contest? audit?
+    //    is it the same as "consistentSampling" or something else ??
+    fun hasStyle(): Boolean
+
+    // fun show(): String
+    fun toCvr(): Cvr  // TODO can we get rid of?
+}
+
+class AuditableCardProto(
     val id: String, // enough info to find the card for a manual audit.
     val location: String?, // enough info to find the card for a manual audit.
     val index: Int,  // index into the original, canonical list of cards
@@ -41,10 +53,10 @@ class CardUsingArrays(
     val contestStarts: IntArray,
     val candidates: IntArray,
     val style: StyleIF
-) : CvrIF, CardIF {
+): AuditableCardIF {
 
     val votes: Map<Int, IntArray>? by lazy {
-        if (contestIds == null || contestIds.isEmpty()) null else {
+        if (contestIds.isEmpty()) null else {
             val lastIndex = contestIds.size - 1
             val makeVotes = mutableMapOf<Int, IntArray>()
             contestIds.forEachIndexed { index, contestId ->
@@ -57,19 +69,35 @@ class CardUsingArrays(
         }
     }
 
+    // constructor(card: CardWithBatchName, cardStyle: StyleIF): this(card.id, card.location, card.index, card.prn, card.phantom, card.poolId, card.votes, cardStyle)
+    // constructor(cvr: Cvr, index: Int, prn: Long): this(cvr.id, null, index, prn, cvr.phantom, cvr.poolId, cvr.votes, style = CardStyle.fromCvrBatch)
+
     override fun hasContest(contestId: Int): Boolean {
         return contestIds.contains(contestId) // or delegate to style
+    }
+
+    override fun possibleContests() : IntArray {
+        return when {
+            CardStyle.useVotes(style.name()) -> votes!!.keys.toList().sorted().toIntArray() // assumes cvrsContainUndervotes, use cardStyle if not.
+            else -> style.possibleContests().toList().sorted().toIntArray()
+        }
     }
 
     override fun id() = id
     override fun location() = location ?: id()
     override fun index() = index
     override fun prn() = prn
-    override fun isPhantom() = phantom
+    override fun phantom() = phantom
     override fun votes() = votes
     override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
     override fun poolId(): Int? = poolId
     override fun styleName() = style.name()
+    override fun style() = style
+    override fun hasStyle() = style.hasExactContests()
+
+    override fun toCvr(): Cvr {
+        TODO("Not yet implemented")
+    }
 
     override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
         val contestVotes = votes(contestId)
@@ -89,7 +117,7 @@ class CardUsingArrays(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is CardUsingArrays) return false
+        if (other !is AuditableCardProto) return false
 
         if (index != other.index) return false
         if (prn != other.prn) return false
@@ -136,7 +164,7 @@ class CardUsingArrays(
     companion object {
         // how much does a copy cost?
         fun from(pcard: ProtoCard, styles: Map<String, StyleIF>) =
-            CardUsingArrays(
+            AuditableCardProto(
                 pcard.id,
                 if (pcard.location == pcard.id) null else pcard.location,
                 pcard.index,
@@ -146,7 +174,7 @@ class CardUsingArrays(
                 pcard.contestIds,  // not making copies
                 pcard.contestStarts,
                 pcard.candidates,
-                styles[pcard.styleName] ?: CardStyle.fromCvrBatch,   // we could do style here
+                styles[pcard.styleName] ?: CardStyle.fromCvrBatch,
             )
     }
 }
@@ -166,7 +194,8 @@ data class AuditableCard (
                                       // common case is only one candidate voted for. Otherwise you need another IntArray for the #starting index.
                                       // hasContest: maybe a bitMap? and factor out into a StyleIF?
     val style: StyleIF,
-): CvrIF, CardIF {
+): AuditableCardIF {
+
     val useCvr: Boolean
 
     init {
@@ -179,7 +208,7 @@ data class AuditableCard (
     constructor(card: CardWithBatchName, cardStyle: StyleIF): this(card.id, card.location, card.index, card.prn, card.phantom, card.poolId, card.votes, cardStyle)
     constructor(cvr: Cvr, index: Int, prn: Long): this(cvr.id, null, index, prn, cvr.phantom, cvr.poolId, cvr.votes, style = CardStyle.fromCvrBatch)
 
-    fun toCvr() = Cvr(id, votes!!, phantom, poolId()) // TODO can we get rid of?
+    override fun toCvr() = Cvr(id, votes!!, phantom, poolId()) // TODO can we get rid of?
 
     // "may have contest". Cvr hasContest does not allow missing, ie is not the same as "may have contest"
     override fun hasContest(contestId: Int): Boolean {
@@ -191,11 +220,13 @@ data class AuditableCard (
     override fun location() = location ?: id()
     override fun index() = index
     override fun prn() = prn
-    override fun isPhantom() = phantom
+    override fun phantom() = phantom
     override fun votes() = votes
     override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
     override fun poolId(): Int? = poolId
     override fun styleName() = style.name()
+    override fun style() = style
+    override fun hasStyle() = style.hasExactContests()
 
     override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
         val contestVotes = votes?.get(contestId)
@@ -204,14 +235,13 @@ data class AuditableCard (
     }
 
     // return sorted
-    fun possibleContests() : IntArray {
+    override fun possibleContests() : IntArray {
         return when {
             CardStyle.useVotes(style.name()) -> votes!!.keys.toList().sorted().toIntArray() // assumes cvrsContainUndervotes, use cardStyle if not.
             else -> style.possibleContests().toList().sorted().toIntArray()
         }
     }
 
-    fun hasStyle() = style.hasExactContests()
 
     //// Kotlin data class doesnt handle IntArray correctly
     override fun equals(other: Any?): Boolean {
@@ -265,7 +295,7 @@ interface CardIF {
     fun location(): String // enough info to find the card for a manual audit.
     fun index(): Int  // index into the original, canonical list of cards
     fun prn(): Long   // psuedo random number
-    fun isPhantom(): Boolean
+    fun phantom(): Boolean
 
     fun votes(): Map<Int, IntArray>?   // CVRs and phantoms
     fun poolId(): Int?                 // must be set if its from a CardPool
@@ -291,7 +321,7 @@ data class CardWithBatchName (
     override fun location() = location ?: id()
     override fun index() = index
     override fun prn() = prn
-    override fun isPhantom() = phantom
+    override fun phantom() = phantom
     override fun votes() = votes
     override fun poolId() = poolId
     override fun styleName() = styleName

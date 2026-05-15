@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 interface CvrIF {
     fun id(): String
-    fun isPhantom(): Boolean
+    fun phantom(): Boolean
     fun poolId(): Int?
     fun hasContest(contestId: Int): Boolean // Cvr: "has contest"; AuditableCard: "may have contest"
 
@@ -27,7 +27,7 @@ data class Cvr(
     constructor(contest: Int, ranks: List<Int>): this( "testing", mapOf(contest to ranks.toIntArray())) // for quick testing
 
     override fun id() = id
-    override fun isPhantom() = phantom
+    override fun phantom() = phantom
 
     override fun hasContest(contestId: Int): Boolean = votes[contestId] != null
     override fun votes(contestId: Int): IntArray? = votes[contestId]

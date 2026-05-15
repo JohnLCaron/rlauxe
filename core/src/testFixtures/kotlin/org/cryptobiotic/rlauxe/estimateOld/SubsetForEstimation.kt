@@ -18,10 +18,10 @@ private val logger = KotlinLogging.logger("ConsistentSampling")
 
 // cant use the "maxSampleIndex", because we need to run permutations.
 // so we have to send back the list of sample indices for each contest
-data class CardSamples(val cards: List<AuditableCard>, val usedByContests: Map<Int, List<Int>>) {
+data class CardSamples(val cards: List<AuditableCardIF>, val usedByContests: Map<Int, List<Int>>) {
 
-    fun extractSubsetByIndex(contestId: Int): List<AuditableCard> {
-        val extract = mutableListOf<AuditableCard>()
+    fun extractSubsetByIndex(contestId: Int): List<AuditableCardIF> {
+        val extract = mutableListOf<AuditableCardIF>()
         val want = usedByContests[contestId]
         requireNotNull(want)
         var wantIdx = 0
@@ -54,7 +54,7 @@ fun getSubsetForEstimation(
     val skippedContests = mutableSetOf<Int>()
     val usedByContests = mutableMapOf<Int, MutableList<Int>>()
 
-    val sampledCards = mutableListOf<AuditableCard>()
+    val sampledCards = mutableListOf<AuditableCardIF>()
     var cardIndex = 0  // track maximum index (not done yet)
 
     fun contestWantsMoreSamples(c: ContestRound): Boolean {
@@ -69,7 +69,7 @@ fun getSubsetForEstimation(
 
         // get the next card in sorted order
         val card = sortedCardIter.next()
-        if (previousSamples.contains(card.prn)) continue
+        if (previousSamples.contains(card.prn())) continue
         countCardsLookedAt++
 
         // does anyone want this card ?
@@ -85,7 +85,7 @@ fun getSubsetForEstimation(
 
         if (include) {
             sampledCards.add(card)
-            if (card.isPhantom()) countPhantoms++
+            if (card.phantom()) countPhantoms++
         }
 
         // update the haveSampleSize count and maxSampleIndexAllowed
@@ -147,7 +147,7 @@ class ContestDebugInfo(val contestId: Int, var count: Int, var countNotPooled: I
     }
 }
 
-fun tabulateDebugInfo(cards: CloseableIterator<AuditableCard>, contests: List<ContestRound>, usedByContests: Map<Int, List<Int>>? = null): Map<Int, ContestDebugInfo> {
+fun tabulateDebugInfo(cards: CloseableIterator<AuditableCardIF>, contests: List<ContestRound>, usedByContests: Map<Int, List<Int>>? = null): Map<Int, ContestDebugInfo> {
     val tabs = mutableMapOf<Int, ContestDebugInfo>()
     var sampleIndex = 0
     cards.use { cardIter ->

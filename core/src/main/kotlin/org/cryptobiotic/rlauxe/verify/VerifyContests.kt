@@ -40,7 +40,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
 
     init {
         val result = AuditRecord.readWithResult(auditRecordLocation)
-        auditRecord = if (result.isOk) result.unwrap() as AuditRecord else {
+        auditRecord = if (result.isOk) result.unwrap() else {
             println(result.unwrapError())
             throw RuntimeException(result.unwrapError().toString())
         }
@@ -113,7 +113,7 @@ data class ContestSummary(
 fun verifyManifest(
     config: Config,
     contestsUA: List<ContestWithAssertions>,
-    cards: CloseableIterable<AuditableCard>,
+    cards: CloseableIterable<AuditableCardIF>,
     infos: Map<Int, ContestInfo>,
     results: VerifyResults,
 ): ContestSummary {
@@ -128,7 +128,7 @@ fun verifyManifest(
     val indexList = mutableListOf<Pair<Int, Long>>()
 
     var count = 0
-    var lastCard: AuditableCard? = null
+    var lastCard: AuditableCardIF? = null
     cards.iterator().use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
@@ -136,43 +136,43 @@ fun verifyManifest(
             //    print("")
 
             // 1. Check that all card locations and indices are unique, and the card prns are in ascending order
-            if (!locationSet.add(card.id)) {
-                results.addError("$count duplicate card.id ${card.id}")
+            if (!locationSet.add(card.id())) {
+                results.addError("$count duplicate card.id ${card.id()}")
             }
 
-            if (!indexSet.add(card.index)) {
-                results.addError("$count duplicate card.index ${card.index}")
+            if (!indexSet.add(card.index())) {
+                results.addError("$count duplicate card.index ${card.index()}")
             }
 
             if (lastCard != null) {
-                if (card.prn <= lastCard.prn) {
+                if (card.prn() <= lastCard.prn()) {
                     results.addError("$count prn out of order lastCard = $lastCard card = ${card}")
                 }
             }
 
-            indexList.add(Pair(card.index, card.prn))
+            indexList.add(Pair(card.index(), card.prn()))
             lastCard = card
             count++
 
-            // the same as tabulateAuditableCards(), replicate so we can do allCvrVotes, nonpooled, pooled
+            // the same as tabulateCardAndCvrIFs(), replicate so we can do allCvrVotes, nonpooled, pooled
             infos.forEach { (contestId, info) ->
                 val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(info) }
                 if (card.hasContest(contestId)) { // TODO heres a possible problem, believing possibleContests()
-                    if (card.votes != null && card.votes[contestId] != null) { // happens when cardStyle == all
-                        val cands = card.votes[contestId]!!
-                        allTab.addVotes(cands, card.phantom)
+                    if (card.votes(contestId) != null) { // happens when cardStyle == all
+                        val cands = card.votes(contestId)!!
+                        allTab.addVotes(cands, card.phantom())
                     } else {
-                        if (card.phantom) allTab.nphantoms++
+                        if (card.phantom()) allTab.nphantoms++
                         allTab.ncardsTabulated++
                     }
 
                     if (card.poolId() == null) {
                         val nonpoolTab = nonpooled.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-                        if (card.votes != null && card.votes[contestId] != null) { // happens when cardStyle == all
-                            val cands = card.votes[contestId]!!
-                                nonpoolTab.addVotes(cands, card.phantom)  // for IRV
+                        if (card.votes(contestId) != null) { // happens when cardStyle == all
+                            val cands = card.votes(contestId)!!
+                                nonpoolTab.addVotes(cands, card.phantom())  // for IRV
                         } else {
-                            if (card.phantom) nonpoolTab.nphantoms++
+                            if (card.phantom()) nonpoolTab.nphantoms++
                             nonpoolTab.ncardsTabulated++
                         }
                     } else {
@@ -321,7 +321,7 @@ fun verifyClcaAgainstCards(
 
 fun verifyClcaAssortAvg(
     contestsUA: List<ContestWithAssertions>,
-    cards: CloseableIterator<AuditableCard>,
+    cards: CloseableIterator<AuditableCardIF>,
     result: VerifyResults,
     show: Boolean = false
 ): VerifyResults {
@@ -373,7 +373,7 @@ fun verifyClcaAssortAvg(
 // calculate diluted margin from assort values and poolAverages
 fun verifyOAassortAvg(
     contestsUA: List<ContestWithAssertions>,
-    cards: CloseableIterator<AuditableCard>,
+    cards: CloseableIterator<AuditableCardIF>,
     result: VerifyResults,
     show: Boolean = false
 ): VerifyResults {

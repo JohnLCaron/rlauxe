@@ -25,14 +25,14 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
 
     private val batches = auditRecord.readCardStyles() ?: auditRecord.readCardPools()  // styles are preferred
     val sortedManifest = auditRecord.readSortedManifest(batches)
-    fun auditableCards(): CloseableIterator<AuditableCard> = sortedManifest.cards.iterator()
+    fun auditableCards(): CloseableIterator<AuditableCardIF> = sortedManifest.cards.iterator()
 
     override fun sortedManifest() = sortedManifest
     override fun batches() = auditRecord.readCardStyles()
     override fun pools() = auditRecord.readCardPools() // could test if batches are cardPools
     override fun auditdir() = auditRecord.location
 
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCardIF>>  {
         val mvrsForRound = readMvrsForRound(round)
         val sampleNumbers = mvrsForRound.map { it.prn }
 
@@ -72,7 +72,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
 
         // validate
         sampledMvrs.forEachIndexed { index, mvr ->
-            require(mvr.prn == sampleNumbers[index])
+            require(mvr.prn() == sampleNumbers[index])
         }
 
         return writeCardCsvFile(Closer(sampledMvrs.iterator()), publisher.sampleMvrsFile(round))
@@ -108,7 +108,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
 
         // validate
         sampledMvrs.forEachIndexed { index, mvr ->
-            require(mvr.prn == sampledPrns[index])
+            require(mvr.prn() == sampledPrns[index])
         }
 
         // TODO NEXTASK is this all prns or just new? humans want just new

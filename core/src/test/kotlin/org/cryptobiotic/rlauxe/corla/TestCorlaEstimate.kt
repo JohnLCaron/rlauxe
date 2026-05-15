@@ -56,7 +56,7 @@ fun countPhantoms(cardManifest: CardManifest, contestId: Int) {
     cardManifest.cards.iterator().use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
-            if (card.isPhantom() && card.possibleContests().contains(contestId)) {
+            if (card.phantom() && card.possibleContests().contains(contestId)) {
                 countPhantoms++
             }
             count++

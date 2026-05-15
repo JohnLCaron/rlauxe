@@ -110,7 +110,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
     }
 }
 
-fun runClcaAudit(config: Config, cvrPairs: List<Pair<CvrIF, AuditableCard>>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
+fun runClcaAudit(config: Config, cvrPairs: List<Pair<CvrIF, AuditableCardIF>>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
     try {
         val auditor = ClcaAssertionAuditor()
 
@@ -133,7 +133,7 @@ fun runClcaAudit(config: Config, cvrPairs: List<Pair<CvrIF, AuditableCard>>, con
     }
 }
 
-fun runOneAudit(config: Config, cvrPairs: List<Pair<CvrIF, AuditableCard>>, pools: List<CardPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
+fun runOneAudit(config: Config, cvrPairs: List<Pair<CvrIF, AuditableCardIF>>, pools: List<CardPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
     try {
         val auditor = OneAuditAssertionAuditor(pools)
         val cassertion = assertionRound.assertion as ClcaAssertion

@@ -71,7 +71,7 @@ class OneShotAudit(
                 // get the next card in sorted order
                 val card = sortedCardIter.next()
                 val mvr = mvrsIter.next()
-                require( card.prn == mvr.prn )
+                require( card.prn() == mvr.prn )
 
                 var include = false
                 assertionAudits.forEach { assertionAudit ->

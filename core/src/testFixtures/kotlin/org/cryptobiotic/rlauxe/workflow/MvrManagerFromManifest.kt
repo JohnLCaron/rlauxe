@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.util.Prng
 
 // used in OneAuditSingleRoundWithDilutedMargin and attacks
 class MvrManagerFromManifest(
-    cardManifest: List<AuditableCard>,
+    cardManifest: List<AuditableCardIF>,
     mvrs: List<Cvr>,
     val infoList: List<ContestInfo>,
     seed:Long,
@@ -19,8 +19,8 @@ class MvrManagerFromManifest(
     val pools: List<CardPool>? = null,
 ) : MvrManager {
 
-    private var mvrsRound: List<AuditableCard> = emptyList()
-    val sortedCards: List<AuditableCard>
+    private var mvrsRound: List<AuditableCardIF> = emptyList()
+    val sortedCards: List<AuditableCardIF>
     val sortedMvrs: List<Cvr>
 
     init {
@@ -28,9 +28,9 @@ class MvrManagerFromManifest(
 
         val pairs = cardManifest.zip(mvrs)
         val prng = Prng(seed)
-        val cardsWithPrn = mutableListOf<Pair<AuditableCard, Cvr>>()
-        pairs.forEach { cardsWithPrn.add(Pair(it.first.copy(prn=prng.next()), it.second)) }
-        val sortedPairs = cardsWithPrn.sortedBy { it.first.prn }
+        val cardsWithPrn = mutableListOf<Pair<AuditableCardIF, Cvr>>()
+        // pairs.forEach { cardsWithPrn.add(Pair(it.first.copy(prn=prng.next()), it.second)) } // TODO
+        val sortedPairs = cardsWithPrn.sortedBy { it.first.prn() }
         sortedCards = sortedPairs.map { it.first }
         sortedMvrs = sortedPairs.map { it.second }
     }
@@ -42,7 +42,7 @@ class MvrManagerFromManifest(
     override fun pools() = pools
     override fun batches() = pools
 
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCardIF>>  {
         if (mvrsRound.isEmpty()) {  // for SingleRoundAudit.
             val sampledMvrs = if (simFuzzPct == null) {
                 sortedMvrs // use the mvrs as they are - ie, no errors
@@ -52,16 +52,16 @@ class MvrManagerFromManifest(
             return sampledMvrs.map{ it }.zip(sortedCards.map{ it })
         }
 
-        val sampleNumbers = mvrsRound.map { it.prn }
+        val sampleNumbers = mvrsRound.map { it.prn() }
         val sampledCvrs = findSamples(sampleNumbers, Closer(sortedCards.iterator()))
 
         // prove that sampledCvrs correspond to mvrs
         require(sampledCvrs.size == mvrsRound.size)
-        val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsRound.zip(sampledCvrs)
+        val cvruaPairs: List<Pair<AuditableCardIF, AuditableCardIF>> = mvrsRound.zip(sampledCvrs)
         cvruaPairs.forEach { (mvr, cvr) ->
-            require(mvr.location == cvr.location)
-            require(mvr.index == cvr.index)
-            require(mvr.prn== cvr.prn)
+            require(mvr.location() == cvr.location())
+            require(mvr.index ()== cvr.index())
+            require(mvr.prn() == cvr.prn())
         }
 
         return mvrsRound.zip(sampledCvrs)

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
@@ -16,17 +16,17 @@ class VunderPoolsFuzzer(
     pools: List<CardPool>,
     val infos: Map<Int, ContestInfo>,
     val fuzzPct: Double,
-    cards: List<AuditableCard>
+    cards: List<AuditableCardIF>
 ) {
     val isIRV = infos.mapValues { it.value.isIrv }
-    var mvrCvrPairs: List<Pair<AuditableCard, AuditableCard>>  // the (mvr, cvr) pairs suitable for CLCA audit
+    var mvrCvrPairs: List<Pair<AuditableCardIF, AuditableCardIF>>  // the (mvr, cvr) pairs suitable for CLCA audit
     val vunderPools =  VunderPools(pools)
 
     init {
         val mvrs = cards.map { card ->
             val onecard = if (card.poolId() != null) {
                 vunderPools.simulatePooledCard(card)
-            } else if (card.votes != null) {
+            } else if (card.votes() != null) {
                 makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct)  // in ClcaFuzzSamplerTracker
             } else {
                 throw RuntimeException("card must be pooled or have votes")
@@ -49,14 +49,14 @@ class VunderPoolsFuzzer(
 fun makeFuzzedCardFromCard(
     infos: Map<Int, ContestInfo>,
     isIRV: Map<Int, Boolean>, // contestId -> isIRV
-    card: AuditableCard, // must have votes, ie have a Cvr
+    card: AuditableCardIF, // must have votes, ie have a Cvr
     fuzzPct: Double,
-) : AuditableCard {
-    if (fuzzPct == 0.0 || card.phantom) return card
+) : AuditableCardIF {
+    if (fuzzPct == 0.0 || card.phantom()) return card
     val r = Random.nextDouble(1.0)
     if (r > fuzzPct) return card
 
-    require(card.votes != null)
+    require(card.votes() != null)
     val cardb = AuditableCardBuilder.fromCard(card)
     // TODO ?? cardb.possibleContests().forEach { contestId ->
     cardb.votes.forEach { (contestId, cands) ->
@@ -69,7 +69,7 @@ fun makeFuzzedCardFromCard(
             } else {
                 // votes.size == 0 means an undervote
                 // votes = null means it doesnt have this contest. perhaps one shouldnt add it ??
-                val currCand: Int? = if (cands == null || cands.size == 0)
+                val currCand: Int? = if (cands.size == 0)
                     null
                 else
                     cands[0] // TODO only one vote allowed

@@ -117,7 +117,7 @@ class ClcaDistributions {
 
             // heres the ConsistentSample permutation
             //             val sortedIndices = cvrsUA.indices.sortedBy { cvrsUA[it].sampleNumber() }
-            val sortedIndices = ballotCards.sortedCards.indices.sortedBy { ballotCards.sortedCards[it].prn } // TODO?
+            val sortedIndices = ballotCards.sortedCards.indices.sortedBy { ballotCards.sortedCards[it].prn() } // TODO?
             val sortedCards = sortedIndices.map { AuditableCard(testCvrs[it], it, 0) }
             val sortedMvrs = sortedIndices.map { testMvrs[it] }
 

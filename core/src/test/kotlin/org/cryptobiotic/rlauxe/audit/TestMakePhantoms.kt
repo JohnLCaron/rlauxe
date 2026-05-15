@@ -29,7 +29,7 @@ class TestMakePhantoms {
         val target = makePhantomCvrs(phantomCount, prefix)
         assertEquals(42, target.size)
         target.forEach {
-            assertTrue(it.isPhantom())
+            assertTrue(it.phantom())
             assertTrue(it.id.startsWith(prefix))
         }
 

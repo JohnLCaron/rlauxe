@@ -3,14 +3,14 @@ package org.cryptobiotic.rlauxe.persist.proto
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
-import org.cryptobiotic.rlauxe.audit.CardUsingArrays
+import org.cryptobiotic.rlauxe.audit.AuditableCardProto
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.CsvCardUsingArrays
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCard
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardUsingArrays
+import org.cryptobiotic.rlauxe.persist.protobuf.AuditableCardProtoIterator
 import org.cryptobiotic.rlauxe.persist.protobuf.publishProto
 import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
 import org.cryptobiotic.rlauxe.testdataDir
@@ -55,7 +55,7 @@ class TestProtoCard {
         val publisher = Publisher("$topdir/audit")
         val cardIter: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.cardManifestFile())
 
-        val protoFilename = "${testdataDir}/temp/cards.proto"
+        val protoFilename = "${topdir}/audit/cards.proto"
         val outputStream: OutputStream = FileOutputStream(protoFilename)
 
         val stopwatch = Stopwatch()
@@ -72,7 +72,7 @@ class TestProtoCard {
         val stopwatch = Stopwatch()
         var ncards = 0L
 
-        val protoIter: CloseableIterator<CardUsingArrays> = ProtoCardUsingArrays(protoFilename, bufferSize)
+        val protoIter: CloseableIterator<AuditableCardProto> = AuditableCardProtoIterator(protoFilename, bufferSize)
         while (protoIter.hasNext()) { //  && ncards < 1000_000) {
             val card = protoIter.next()
             ncards++
@@ -101,7 +101,7 @@ class TestProtoCard {
         val bufferSize = 100_000
 
         val inputStream = File(publisher.cardManifestFile()).inputStream()
-        val csvIter: CloseableIterator<CardUsingArrays> = CsvCardUsingArrays(inputStream, bufferSize)
+        val csvIter: CloseableIterator<AuditableCardProto> = CsvCardUsingArrays(inputStream, bufferSize)
         while (csvIter.hasNext() && ncards < 1000000) {
             val card = csvIter.next()
             ncards++
@@ -157,13 +157,13 @@ class TestProtoCard {
         val bufferSize = 100_000
 
         val inputStream = File(publisher.cardManifestFile()).inputStream()
-        val csvIter: CloseableIterator<CardUsingArrays> = CsvCardUsingArrays(inputStream, bufferSize)
+        val csvIter: CloseableIterator<AuditableCardProto> = CsvCardUsingArrays(inputStream, bufferSize)
 
         val protoFilename = "${testdataDir}/temp/cards.proto"
         val stopwatch = Stopwatch()
         var ncards = 0L
 
-        val protoIter: CloseableIterator<CardUsingArrays> = ProtoCardUsingArrays(protoFilename, bufferSize)
+        val protoIter: CloseableIterator<AuditableCardProto> = AuditableCardProtoIterator(protoFilename, bufferSize)
         while (protoIter.hasNext() && csvIter.hasNext() && ncards < 100_000) {
             val cardFromCsv = csvIter.next()
             val cardFromProto = protoIter.next()
@@ -186,7 +186,7 @@ class TestProtoCard {
         val bufferSize = 100_000
 
         val inputStream = File(publisher.cardManifestFile()).inputStream()
-        val csvIter: CloseableIterator<CardUsingArrays> = CsvCardUsingArrays(inputStream, bufferSize)
+        val csvIter: CloseableIterator<AuditableCardProto> = CsvCardUsingArrays(inputStream, bufferSize)
 
         val stopwatch = Stopwatch()
         var ncards = 0L
@@ -218,7 +218,7 @@ class TestProtoCard {
         val protoFilename = "${testdataDir}/temp/cards.proto"
         val protoIter: CloseableIterator<CardWithBatchName> = ProtoCardIterator(protoFilename, bufferSize)
 
-        val protoIterWithArrays: CloseableIterator<CardUsingArrays> = ProtoCardUsingArrays(protoFilename, bufferSize)
+        val protoIterWithArrays: CloseableIterator<AuditableCardProto> = AuditableCardProtoIterator(protoFilename, bufferSize)
         while (protoIterWithArrays.hasNext() && protoIter.hasNext() && ncards < 1000) {
             val c1 = protoIterWithArrays.next()
             val c2 = protoIter.next()
@@ -230,7 +230,7 @@ class TestProtoCard {
     }
 }
 
-fun checkEqual(c1: CardUsingArrays, c2: CardWithBatchName): Boolean {
+fun checkEqual(c1: AuditableCardProto, c2: CardWithBatchName): Boolean {
     assertEquals(c1.id(), c2.id())
     assertEquals(c1.location(), c2.location())
     assertEquals(c1.index(), c2.index())

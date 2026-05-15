@@ -25,7 +25,6 @@ import org.cryptobiotic.rlauxe.persist.CardManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.util.estSamplesFromNomargin
-import org.cryptobiotic.rlauxe.util.noerror
 import kotlin.Double
 import kotlin.Int
 import kotlin.math.abs
@@ -179,7 +178,7 @@ class AuditTrialTask(
 
     override fun run(): List<AssertionTrialIF> {
         val stopwatch = Stopwatch()
-        val simMvrs = mutableListOf<AuditableCard>()
+        val simMvrs = mutableListOf<AuditableCardIF>()
 
         // TODO use VunderPoolsFuzzer when cvrsContainUndervotes = false
         // used for OA and Polling; different simulated pool data each run; TODO could use VunderPoolsFuzzer
@@ -311,13 +310,13 @@ class ContestClcaTrial(val run: Int,
     override fun startingTestStatistic() = startingTestStatistic
 
     // why not just use BettingMart ??
-    override fun addCard(mvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int) {
+    override fun addCard(mvr: AuditableCardIF?, card: AuditableCardIF, cardSortedIndex: Int) {
         countUsed++
 
         val assortValue = if (mvr != null) {
-            cassorter.bassort(mvr, card, hasStyle=card.hasStyle())
+            cassorter.bassort(mvr, card, hasStyle=card.hasStyle()) // TODO is hasStyle really card specific? contest? audit?
         } else {
-            if (card.isPhantom()) phantomAssortValue * cassorter.noerror else cassorter.noerror
+            if (card.phantom()) phantomAssortValue * cassorter.noerror else cassorter.noerror
         }
 
         val mui = populationMeanIfH0(contest.Npop, true, errorTracker)
@@ -352,7 +351,7 @@ class ContestClcaTrial(val run: Int,
             val mvrVotes = mvr?.votes(wantId)?.contentToString() ?: "missing"
             val cardVotes = card.votes(wantId)?.contentToString() ?: "N/A"
             println("$countUsed, ${dfn(assortValue, 8)}, ${dfn(bet, 8)}, ${dfn(payoff, 8)}, ${dfn(testStatistic, 8)}, " +
-                    "${card.location}, ${mvrVotes}, ${cardVotes}")
+                    "${card.location()}, ${mvrVotes}, ${cardVotes}")
         }
         errorTracker.addSample(assortValue, card.poolId() == null)
 
@@ -422,13 +421,13 @@ class ContestPollingTrial(val run: Int,
     override fun nmvrs() = countUsed
     override fun startingTestStatistic() = startingTestStatistic
 
-    override fun addCard(cvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int) {
+    override fun addCard(mvr: AuditableCardIF?, card: AuditableCardIF, cardSortedIndex: Int) {
         countUsed++
 
-        val assortValue = if (card.isPhantom()) phantomAssortValue else {
-            if (cvr == null)
+        val assortValue = if (card.phantom()) phantomAssortValue else {
+            if (mvr == null)
                 print("why")
-            assorter.assort(cvr!!, usePhantoms = true)
+            assorter.assort(mvr!!, usePhantoms = true)
         }
 
         val mui = populationMeanIfH0(contest.Npop, true, welford)
@@ -453,10 +452,10 @@ class ContestPollingTrial(val run: Int,
 
         val wantId = -1
         if (run == 1 && contest.id == wantId && countUsed < 1000) {
-            val mvrVotes = cvr?.votes(wantId)?.contentToString() ?: "missing"
+            val mvrVotes = mvr?.votes(wantId)?.contentToString() ?: "missing"
             val cardVotes = card.votes(wantId)?.contentToString() ?: "N/A"
             println("$countUsed, ${dfn(assortValue, 8)}, ${dfn(maxBet, 8)}, ${dfn(payoff, 8)}, ${dfn(testStatistic, 8)}, " +
-                    "${card.location}, ${cardSortedIndex}, mvr=${mvrVotes}, cvr=${cardVotes}")
+                    "${card.location()}, ${cardSortedIndex}, mvr=${mvrVotes}, cvr=${cardVotes}")
             if (countUsed == 999)
                 print("")
         }
@@ -480,7 +479,7 @@ interface AssertionTrialIF {
 
     fun skip(): Boolean
     fun wantsMore(): Boolean
-    fun addCard(mvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int)
+    fun addCard(mvr: AuditableCardIF?, card: AuditableCardIF, cardSortedIndex: Int)
 }
 
 fun findClosestTrial(data: List<AssertionTrialIF>, nmvrs: Int): AssertionTrialIF {

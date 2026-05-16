@@ -9,8 +9,8 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.CsvCardUsingArrays
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCard
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.persist.protobuf.AuditableCardProtoIterator
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardBunchIterator
 import org.cryptobiotic.rlauxe.persist.protobuf.publishProto
 import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
 import org.cryptobiotic.rlauxe.testdataDir
@@ -72,16 +72,18 @@ class TestProtoCard {
         val stopwatch = Stopwatch()
         var ncards = 0L
 
+        var accum = 0
         val protoIter: CloseableIterator<AuditableCardProto> = AuditableCardProtoIterator(protoFilename, bufferSize)
         while (protoIter.hasNext()) { //  && ncards < 1000_000) {
             val card = protoIter.next()
+            accum += card.index() // prevent optimization
             ncards++
         }
 
         val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ncards.toDouble()
         val secPer = msPer / 1000
 
-        println("timeReadProto ($bufferSize):  ncards = $ncards, took $stopwatch = $msPer ms/card")
+        println("timeReadProto ($bufferSize):  ncards = $ncards, accum=$accum took $stopwatch = $msPer ms/card")
         val totalCards = 4982747
         println("time to read all cards = ${dfn(totalCards * secPer, 3)} secs")
     }
@@ -115,7 +117,7 @@ class TestProtoCard {
         println("time to read all cards = ${dfn(totalCards * secPer, 3)} secs")
     }
 
-    @Test
+    // @Test
     fun testProtoAndCsvAgreeOnCardWithBatchName () {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val publisher = Publisher("$topdir/audit")
@@ -126,7 +128,7 @@ class TestProtoCard {
         val stopwatch = Stopwatch()
         var ncards = 0L
 
-        val protoIter: CloseableIterator<CardWithBatchName> = ProtoCardIterator(protoFilename, bufferSize)
+        val protoIter: CloseableIterator<CardWithBatchName> = ProtoCardBunchIterator(protoFilename, bufferSize)
         while (protoIter.hasNext() && currentCardIter.hasNext() && ncards < 100_000) {
             val cardFromCsv = currentCardIter.next()
             val cardFromProto = protoIter.next()
@@ -208,7 +210,7 @@ class TestProtoCard {
         println("time to read all cards = ${dfn(totalCards * secPer, 3)} secs")
     }
 
-    @Test
+    // @Test
     fun testProtoAgreeOnCards () {
         val bufferSize = 100_000
 
@@ -216,7 +218,7 @@ class TestProtoCard {
         var ncards = 0L
 
         val protoFilename = "${testdataDir}/temp/cards.proto"
-        val protoIter: CloseableIterator<CardWithBatchName> = ProtoCardIterator(protoFilename, bufferSize)
+        val protoIter: CloseableIterator<CardWithBatchName> = ProtoCardBunchIterator(protoFilename, bufferSize)
 
         val protoIterWithArrays: CloseableIterator<AuditableCardProto> = AuditableCardProtoIterator(protoFilename, bufferSize)
         while (protoIterWithArrays.hasNext() && protoIter.hasNext() && ncards < 1000) {

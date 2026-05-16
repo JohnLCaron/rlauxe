@@ -1,7 +1,6 @@
 @file:OptIn(ExperimentalSerializationApi::class)
 package org.cryptobiotic.rlauxe.persist.protobuf
 
-
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromByteArray
@@ -22,13 +21,7 @@ import java.nio.file.StandardOpenOption
 import kotlin.String
 import kotlin.io.path.Path
 
-// TODO: check if faster
-@Serializable
-data class ProtoCards (
-    val cards: List<ProtoCard>
-)
-
-// TODO check is using real protobuf library is better
+// TODO check if using real protobuf library is better
 @Serializable
 data class ProtoCard (
     val id: String, // enough info to find the card for a manual audit.
@@ -37,6 +30,7 @@ data class ProtoCard (
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
     val poolId: Int?, // must be set if its from a CardPool
+    // The default integer type is a varint encoding (intXX) that is optimized for small non-negative numbers.
     val contestIds: IntArray,
     val contestStarts: IntArray,
     val candidates: IntArray,
@@ -103,7 +97,7 @@ fun makeVotes( contestIds: IntArray,  contestStarts: IntArray,  candidates: IntA
         val start = contestStarts[index]
         val end = if (index < lastIndex) contestStarts[index+1] else candidates.size
         if (start > end || end > candidates.size)
-            print("")
+            print("HEY")
         makeVotes[contestId] = candidates.sliceArray(start until end)
     }
     return makeVotes.toMap()
@@ -115,15 +109,11 @@ fun writeProtoCards(cards: CloseableIterator<CardIF>, output: OutputStream): Int
     // kotlinx.serialization's Protobuf implementation does not natively support writeDelimitedTo
     var count = 0
     while (cards.hasNext()) {
-        val bunch = mutableListOf<ProtoCard>()
-        while (cards.hasNext() && bunch.size < 1000) {  // bunch into 1000
-            val card = cards.next()
-            bunch.add(card.publishProto())
-            count++
-        }
-        val protoCards = ProtoCards(bunch)
-        val bytes = ProtoBuf.encodeToByteArray(protoCards)
+        val card = cards.next()
+        val protoCard = card.publishProto()
+        val bytes = ProtoBuf.encodeToByteArray(protoCard)
         writeDelimitedTo(bytes, output)
+        count++
         if (count % 10000 == 0) { print("$count, ")}
         if (count % 100000 == 0) { println("$count, ")}
     }
@@ -146,52 +136,6 @@ private fun writeVlenForProto(messageSize: Int, output: OutputStream) {
             output.write(value and 0x7F or 0x80)
             value = value ushr 7
         }
-    }
-}
-
-
-// could break the rule and return ProtoCard for speed....
-// that is, ProtoCard == CardWithBatchName
-// otoh,
-class ProtoCardIterator(filename: String, bufferSize: Int): CloseableIterator<CardWithBatchName> {
-    val errs = ErrorMessages("readProtoCardsFile '${filename}'")
-    val inputStream: InputStream
-    var currentBunch: Iterator<ProtoCard>
-
-    init {
-        val filepath = Path(filename)
-        if (!Files.exists(filepath)) {
-            throw RuntimeException("file does not exist")
-        }
-        val input = Files.newInputStream(filepath, StandardOpenOption.READ)
-        inputStream = BufferedInputStream(input, bufferSize)
-
-        val messageSize = readVlen(inputStream)
-        currentBunch = nextBunch(messageSize)
-    }
-
-    override fun hasNext(): Boolean {
-        if (currentBunch.hasNext()) return true
-        val messageSize  = readVlen(inputStream)
-        if (messageSize <= 0) return false
-        currentBunch = nextBunch(messageSize)
-        return true
-    }
-
-    override fun next(): CardWithBatchName {
-        return currentBunch.next().import()
-    }
-
-    override fun close() {
-        inputStream.close()
-    }
-
-    // the inner iterator
-    fun nextBunch(messageSize: Int): Iterator<ProtoCard> {
-        val bytes = ByteArray(messageSize)
-        val bytesRead = inputStream.read(bytes)
-        val protoCards = ProtoBuf.decodeFromByteArray<ProtoCards>(bytes)
-        return protoCards.cards.iterator()
     }
 }
 
@@ -229,7 +173,7 @@ class AuditableCardProtoIterator(filename: String, bufferSize: Int, val styles: 
 
     val errs = ErrorMessages("readProtoCardsFile '${filename}'")
     val inputStream: InputStream
-    var currentBunch: Iterator<ProtoCard>
+    var nextMessageSize = -1
 
     init {
         val filepath = Path(filename)
@@ -238,33 +182,22 @@ class AuditableCardProtoIterator(filename: String, bufferSize: Int, val styles: 
         }
         val input = Files.newInputStream(filepath, StandardOpenOption.READ)
         inputStream = BufferedInputStream(input, bufferSize)
-
-        val messageSize = readVlen(inputStream)
-        currentBunch = nextBunch(messageSize)
     }
 
     override fun hasNext(): Boolean {
-        if (currentBunch.hasNext()) return true
-        val messageSize  = readVlen(inputStream)
-        if (messageSize <= 0) return false
-        currentBunch = nextBunch(messageSize)
-        return true
+        nextMessageSize = readVlen(inputStream)
+        return (nextMessageSize > 0)
     }
 
     override fun next(): AuditableCardProto {
-        return AuditableCardProto.from(currentBunch.next(), styleMap)
+        val bytes = ByteArray(nextMessageSize)
+        val bytesRead = inputStream.read(bytes)
+        val protoCard = ProtoBuf.decodeFromByteArray<ProtoCard>(bytes)
+        return AuditableCardProto.from(protoCard, styleMap)
     }
 
     override fun close() {
         inputStream.close()
-    }
-
-    // the inner iterator
-    fun nextBunch(messageSize: Int): Iterator<ProtoCard> {
-        val bytes = ByteArray(messageSize)
-        val bytesRead = inputStream.read(bytes)
-        val protoCards = ProtoBuf.decodeFromByteArray<ProtoCards>(bytes)
-        return protoCards.cards.iterator()
     }
 }
 

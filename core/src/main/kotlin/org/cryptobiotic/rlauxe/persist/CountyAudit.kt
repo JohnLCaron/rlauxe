@@ -59,6 +59,7 @@ class CountyAudit(
         val bufferSize = 100_000
         val protoFilename = publisher.cardsProtoFile()
         val protoManifest: CloseableIterable<AuditableCardProto> = CloseableIterable { AuditableCardProtoIterator(protoFilename, bufferSize, batches) }
+        logger.info{"using cardsProtoFile at ${protoFilename}"}
         return CardManifest(protoManifest, electionInfo.totalCardCount)
     }
 
@@ -76,6 +77,7 @@ class CountyAudit(
         fun checkExists(location: String?): Boolean {
             if (location == null) return false
             if (!exists("$location/$countyDataFile")) return false
+            if (!exists("$location/$countyContestDataFile")) return false
             val publisher = Publisher("$location/audit")
             return (exists(publisher.electionInfoFile()) &&
                     exists(publisher.auditCreationConfigFile()) &&

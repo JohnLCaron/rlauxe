@@ -54,6 +54,7 @@ class AuditableCardProto(
     val candidates: IntArray,
     val style: StyleIF
 ): AuditableCardIF {
+    val useCvr = CardStyle.useVotes(style.name())
 
     val votes: Map<Int, IntArray>? by lazy {
         if (contestIds.isEmpty()) null else {
@@ -73,7 +74,8 @@ class AuditableCardProto(
     // constructor(cvr: Cvr, index: Int, prn: Long): this(cvr.id, null, index, prn, cvr.phantom, cvr.poolId, cvr.votes, style = CardStyle.fromCvrBatch)
 
     override fun hasContest(contestId: Int): Boolean {
-        return contestIds.contains(contestId) // or delegate to style
+        return if (!useCvr) style.hasContest(contestId)
+        else contestIds.contains(contestId)
     }
 
     override fun possibleContests() : IntArray {

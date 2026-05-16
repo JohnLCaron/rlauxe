@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -95,7 +95,7 @@ class TimeCardReading {
         // val styles: List<CountyStyles> = Colorado2024Input.countyStyles
 
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val countyAudit = AuditRecord.readWithResult("$topdir/audit").unwrap()
+        val countyAudit = AuditRecord.read(topdir) as CountyAudit
         // val contestNameMap = countyAudit.contests.associate { it.contest.info().name to it }
         val mvrManager = PersistedMvrManager(countyAudit)
         val cards: CloseableIterable<AuditableCardIF> = mvrManager.sortedManifest().cards
@@ -111,7 +111,7 @@ class TimeCardReading {
         val previousSamples = emptySet<Long>()
 
         val sortedCardIter = cards.iterator()
-        while ( sortedCardIter.hasNext() && ncards < 100000) {
+        while (sortedCardIter.hasNext()) {
             // get the next card in sorted order
             val card = sortedCardIter.next()
             ncards++
@@ -141,6 +141,7 @@ class TimeCardReading {
                     }
                 }
             }
+
         }
 
         println("ncards = $ncards, included = $included that took $stopwatch= ${stopwatch.elapsed(TimeUnit.MILLISECONDS)/ncards.toDouble()} ms/card")

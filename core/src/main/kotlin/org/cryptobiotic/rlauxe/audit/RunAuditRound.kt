@@ -162,7 +162,8 @@ fun resampleAndSaveResults(auditdir: String, lastRound: AuditRound): Boolean {
         val previousSamples = auditRecord.rounds.previousSamplePrns(lastRound.roundIdx)
         // TODO removeContestsAndSample or consistentSampling??
         // removeContestsAndSample(auditRecord.config.round.sampling, auditRecord.readSortedManifest(), lastRound, previousSamples)
-        chooseSamples(auditRecord.config.sampling, lastRound, auditRecord.readSortedManifest(), previousSamples)
+        val sortedManifest = auditRecord.readSortedManifest(auditRecord.readCardStyles())
+        chooseSamples(auditRecord.config.sampling, lastRound, sortedManifest, previousSamples)
 
         // writeAuditState
         val publisher = Publisher(auditdir)

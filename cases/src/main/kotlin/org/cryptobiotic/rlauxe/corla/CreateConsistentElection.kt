@@ -70,7 +70,7 @@ open class CreateConsistentElection (
         return TransformingIterator(unsortedMvrs) { mvr ->
             when {
                 mvr.phantom -> mvr
-                auditType.isClca() -> mvr.copy(poolId = null, styleName = CardStyle.fromCvr)
+                auditType.isClca() -> mvr.copy(poolId = null)
                 (auditType.isPolling() && pollingMode!!.withoutBatches()) -> mvr.copy(
                     votes = null,
                     styleName = "OneBatch",

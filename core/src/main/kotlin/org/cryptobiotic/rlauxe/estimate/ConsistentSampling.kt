@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.persist.CardManifest
 import kotlin.collections.set
 
-private val debugConsistent = false
 private val verifyMaxIndex = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
 
@@ -215,7 +214,7 @@ fun consistentSampling(
         }
 
         if (include) {
-            sampledCards.add(card)
+            sampledCards.add(card) // TODO just save the prns?
             //   If you assume that previousSamples had all contests audited, then previousSamples reflects ballots already audited,
             //   (even if not used for this contest), so you dont need to sample them again, so theyre not new.
             // TODO do all at once at the end for speed ??

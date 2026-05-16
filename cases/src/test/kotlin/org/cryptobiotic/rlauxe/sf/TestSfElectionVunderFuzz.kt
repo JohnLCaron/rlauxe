@@ -43,7 +43,7 @@ class TestSfElectionVunderFuzz {
 
     @Test
     fun testSFvunderFuzz() {
-        val contestCards = mutableListOf<AuditableCard>()
+        val contestCards = mutableListOf<AuditableCardIF>()
         val ncards = 30_000
         var countCards = 0
 
@@ -69,7 +69,7 @@ class TestSfElectionVunderFuzz {
         var countCvr49 = 0
         var showCards = 0
         pairs.forEach { (mvr, cvr) ->
-            assertEquals(mvr.location, cvr.location)
+            assertEquals(mvr.location(), cvr.location())
             assertEquals(mvr.poolId(), cvr.poolId())
             if (mvr.hasContest(49)) countMvr49++
             if (mvr.hasContest(49)) countCvr49++
@@ -146,7 +146,7 @@ class TestSfElectionVunderFuzz {
         // TODO what can we test?
 
         ///////////////////////////////////////////////////////////////////////////////////////////
-        val contestCards = mutableListOf<AuditableCard>()
+        val contestCards = mutableListOf<AuditableCardIF>()
         val ncards = 100_000 // all
         var countCards = 0
         cardManifest.cards.iterator().use { iter ->
@@ -200,7 +200,7 @@ class TestSfElectionVunderFuzz {
     */
 }
 
-fun findPoolAverageB(mvrs: CloseableIterator<AuditableCard>, cvrs: Iterator<AuditableCard>, contestId: Int, poolId: Int, cassorter: ClcaAssorter): AssortAvg {
+fun findPoolAverageB(mvrs: CloseableIterator<AuditableCardIF>, cvrs: Iterator<AuditableCardIF>, contestId: Int, poolId: Int, cassorter: ClcaAssorter): AssortAvg {
     var missingInMvr = 0
     val assortAvg = AssortAvg()
     mvrs.use { iter ->
@@ -222,7 +222,7 @@ fun findPoolAverageB(mvrs: CloseableIterator<AuditableCard>, cvrs: Iterator<Audi
     return assortAvg
 }
 
-fun findPoolAverageB(mvrCvrPairs: List<Pair<AuditableCard, AuditableCard>>, contestId: Int, poolId: Int, cassorter: ClcaAssorter): AssortAvg {
+fun findPoolAverageB(mvrCvrPairs: List<Pair<AuditableCardIF, AuditableCardIF>>, contestId: Int, poolId: Int, cassorter: ClcaAssorter): AssortAvg {
     var missingInMvr = 0
     val assortAvg = AssortAvg()
     mvrCvrPairs.forEach { (mvr, cvr) ->
@@ -241,7 +241,7 @@ fun findPoolAverageB(mvrCvrPairs: List<Pair<AuditableCard, AuditableCard>>, cont
     return assortAvg
 }
 
-fun findPoolAverage(cardIter: CloseableIterator<AuditableCard>, contestId: Int, poolId: Int, passorter: AssorterIF): AssortAvg {
+fun findPoolAverage(cardIter: CloseableIterator<AuditableCardIF>, contestId: Int, poolId: Int, passorter: AssorterIF): AssortAvg {
     val assortAvg = AssortAvg()
     cardIter.use { iter ->
         for (card in iter) {
@@ -258,7 +258,7 @@ fun findPoolAverage(cardIter: CloseableIterator<AuditableCard>, contestId: Int, 
     return assortAvg
 }
 
-fun countCardsInPool(cardIter: CloseableIterator<AuditableCard>, contestId: Int, poolId: Int): Int {
+fun countCardsInPool(cardIter: CloseableIterator<AuditableCardIF>, contestId: Int, poolId: Int): Int {
     var ncards = 0
     cardIter.use { iter ->
         for (mvr in iter) {
@@ -273,9 +273,9 @@ fun countCardsInPool(cardIter: CloseableIterator<AuditableCard>, contestId: Int,
     return ncards
 }
 
-class PairAdapter(val org: Iterator<Pair<AuditableCard, AuditableCard>>,
-                  val trans: (Pair<AuditableCard, AuditableCard>) -> AuditableCard)
-    : AbstractIterator<AuditableCard>() {
+class PairAdapter(val org: Iterator<Pair<AuditableCardIF, AuditableCardIF>>,
+                  val trans: (Pair<AuditableCardIF, AuditableCardIF>) -> AuditableCardIF)
+    : AbstractIterator<AuditableCardIF>() {
 
     override fun computeNext() {
         if (org.hasNext())

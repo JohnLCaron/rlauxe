@@ -136,7 +136,7 @@ class TestBoulder2024Cvrs {
                 if (mvr.poolId() == 18) {
                     val cands = mvr.votes?.get(17)
                     if (cands != null) {
-                        tab.addVotes(cands, mvr.isPhantom())
+                        tab.addVotes(cands, mvr.phantom())
                         println("mvr ${mvr.location()} ${cands.contentToString()}")
                     }
                 }

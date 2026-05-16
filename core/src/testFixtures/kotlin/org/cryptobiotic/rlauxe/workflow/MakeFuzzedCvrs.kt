@@ -18,7 +18,7 @@ fun makeFuzzedCvrsForClca(infoList: List<ContestInfo>, cvrs: List<Cvr>, fuzzPct:
     val result =  cvrs.map { cvr ->
         val card = AuditableCard( cvr.id, null, 0, prn=0, cvr.phantom, null, cvr.votes, style = CardStyle.fromCvrBatch)
         val fuzzedCard = makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct)
-        val fuzzedCvr = Cvr( cvr.id, fuzzedCard.votes!!, cvr.phantom, cvr.poolId)
+        val fuzzedCvr = Cvr( cvr.id, fuzzedCard.votes()!!, cvr.phantom, cvr.poolId)
         if (fuzzedCvr != cvr)
             countChanged++
         fuzzedCvr

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
-import kotlin.collections.contains
+import java.util.BitSet
 
 /* From SamplePopulations.md
  * CardStyle = the full and exact list of contests on a card.
@@ -27,10 +27,25 @@ data class CardStyle(
     val possibleContests: IntArray,      // the list of possible contests.
     val hasExactContests: Boolean,       // aka hasStyle: if all cards have exactly the contests in possibleContests; TODO why needed here ?
 ) : StyleIF {
+    val maxId = possibleContests.maxOrNull() ?: 1
+    val bitset: BitSet
+    // val boolset: ByteArray
+
+    init {
+        bitset = BitSet(maxId)
+        possibleContests.forEach { bitset.set(it) }
+    }
+    /* init {
+        boolset = ByteArray(maxId+1)
+        possibleContests.forEach { boolset[it] = ONE_BYTE }
+    } */
+
     override fun name() = name
     override fun id() = id
     override fun hasExactContests() = hasExactContests
-    override fun hasContest(contestId: Int) = possibleContests.contains(contestId)
+    // override fun hasContest(contestId: Int) = possibleContests.contains(contestId)
+    override fun hasContest(contestId: Int) = bitset.get(contestId)
+    // override fun hasContest(contestId: Int): Boolean = (contestId <= maxId) && (boolset[contestId] == ONE_BYTE)
     override fun possibleContests() = possibleContests
 
     override fun equals(other: Any?): Boolean {
@@ -68,5 +83,44 @@ data class CardStyle(
             "cardStyle$id", id, contests.toList().sorted().toIntArray(), true)
     }
 }
+
+/*
+timeConsistentSampling with CardStyle.hasContest using
+	IntArray.contains:
+		ncards = 4982786, included = 142470869 that took 106.1 s= 0.021296118276000614 ms/card
+	BitSet.get:
+		ncards = 4982786, included = 142470869 that took 46.50 s= 0.009329921052198509 ms/card
+		ncards = 4982786, included = 142470869 that took 46.50 s= 0.009330523125014801 ms/card
+
+
+why so much more than
+	timeReadProto (100000):  ncards = 4982747, took 16.35 s = 0.003279917683960273 ms/card
+	time to read all cards = 16.343 secs
+?
+
+remove everything but the card iterator:
+
+2026-05-16 07:44:04.825 INFO  using cardsProtoFile at /home/stormy/rla/cases/corla/consistent/audit/cards.proto
+	ncards = 4982786, included = 0 that took 20.36 s= 0.004084060603846924 ms/card
+
+is it becazuse we have 723 contest, so need 723/64 = 12 longs
+instead of fitting into one word ?? sems unlikely but...
+
+use idxToId = Map<Int, Int>
+	ncards = 4982786, included = 142470869 that took 96.04 s= 0.01927255154044344 ms/card
+use Set<Id>
+	ncards = 4982786, included = 142470869 that took 98.93 s= 0.019853752499103913 ms/card
+use ByteArray[maxId]
+	ncards = 4982786, included = 142470869 that took 43.04 s= 0.00863553040407515 ms/card (Bitset has 46)
+	ncards = 4982786, included = 142470869 that took 46.38 s= 0.009306640903301888 ms/card
+
+run actual sampling from viewer using BitSet:
+
+2026-05-16 08:01:30,074 [    100360] INFO  ConsistentSampling -  consistentSampling read 3879127 and chose 22405 cards; took 52.23 s
+
+(was 2026-05-16 06:27:56,359 [  47226432] INFO  ConsistentSampling -  consistentSampling read 3690306 and chose 22417 cards; took 83.60 s)
+
+would like to find another factor of 2....
+ */
 
 

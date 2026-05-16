@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.sf
 
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.persist.CardManifest
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
@@ -35,7 +35,7 @@ class TestSf2024OneAuditIrv() {
     val infos: Map<Int, ContestInfo>
     val cardManifest: CardManifest
     val cardPools: List<CardPool>
-    val mvrs: CloseableIterable<AuditableCard>
+    val mvrs: CloseableIterable<AuditableCardIF>
 
     init {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
@@ -241,11 +241,10 @@ class TestSf2024OneAuditIrv() {
         while (iter.hasNext()) {
             val card = iter.next()
             if (card.hasContest(contestId) && (card.poolId() == null)) {
-                if (card.phantom) nonpoolTab.nphantoms++
-                if (card.votes != null) { // I  think this is always true
-                    val votes = card.votes!!
-                    val cands = votes[contestId]!!
-                    nonpoolTab.addVotes(cands, card.phantom)  // for IRV
+                if (card.phantom()) nonpoolTab.nphantoms++
+                if (card.votes(contestId) != null) { // I  think this is always true
+                    val cands = card.votes(contestId)!!
+                    nonpoolTab.addVotes(cands, card.phantom())  // for IRV
                 } else {
                     nonpoolTab.ncardsTabulated++
                 }

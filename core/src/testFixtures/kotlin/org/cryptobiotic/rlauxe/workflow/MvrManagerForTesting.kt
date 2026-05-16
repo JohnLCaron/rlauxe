@@ -29,9 +29,9 @@ class MvrManagerForTesting(
     val pools: List<CardPool>? = null,
 ) : MvrManager, MvrManagerTestIF {
 
-    val sortedCards: List<AuditableCard>
-    val sortedMvrs: List<AuditableCard> // the mvrs in the same order as the sorted cards
-    private var mvrsForRound: List<AuditableCard> = emptyList()
+    val sortedCards: List<AuditableCardIF>
+    val sortedMvrs: List<AuditableCardIF> // the mvrs in the same order as the sorted cards
+    private var mvrsForRound: List<AuditableCardIF> = emptyList()
 
     init {
         // the order of the sortedCards cannot be changed once set.
@@ -47,21 +47,21 @@ class MvrManagerForTesting(
     override fun pools() = pools
     override fun batches() = pools
 
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>> {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCardIF>> {
         if (mvrsForRound.isEmpty()) {
             return sortedMvrs.zip(sortedCards) // all of em, for SingleRoundAudit
         }
 
-        val sampleNumbers = mvrsForRound.map { it.prn }
+        val sampleNumbers = mvrsForRound.map { it.prn() }
         val sampledCvrs = findSamples(sampleNumbers, Closer(sortedCards.iterator()))
 
         // prove that sampledCvrs correspond to mvrs
         require(sampledCvrs.size == mvrsForRound.size)
-        val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsForRound.zip(sampledCvrs)
+        val cvruaPairs: List<Pair<AuditableCardIF, AuditableCardIF>> = mvrsForRound.zip(sampledCvrs)
         cvruaPairs.forEach { (mvr, cvr) ->
-            require(mvr.location == cvr.location)
-            require(mvr.index == cvr.index)
-            require(mvr.prn == cvr.prn)
+            require(mvr.location() == cvr.location())
+            require(mvr.index() == cvr.index())
+            require(mvr.prn() == cvr.prn())
         }
         return mvrsForRound.zip(sampledCvrs)
     }
@@ -71,15 +71,15 @@ class MvrManagerForTesting(
     }
 
     // MvrManagerTestIF
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard> {
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCardIF> {
         val sampledMvrs = findSamples(sampleNumbers, Closer(sortedMvrs.iterator()))
         require(sampledMvrs.size == sampleNumbers.size)
 
         // debugging sanity check
         var lastRN = 0L
         sampledMvrs.forEach { mvr ->
-            require(mvr.prn > lastRN)
-            lastRN = mvr.prn
+            require(mvr.prn() > lastRN)
+            lastRN = mvr.prn()
         }
 
         mvrsForRound = sampledMvrs

@@ -36,7 +36,7 @@ class TestRunRoundCli {
 
     @Test
     fun testResampleAndSaveResults() {
-        val auditdir = "$testdataDir/cases/corla/consistent/audit"
+        val auditdir = "$testdataDir/cases/corla/consistent"
         resampleAndSaveResults(auditdir)
     }
 

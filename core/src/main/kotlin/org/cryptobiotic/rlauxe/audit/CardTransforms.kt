@@ -121,7 +121,7 @@ class CvrsToCardsWithBatchNameIterator(
         val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
 
         val styleName = when {
-            org.isPhantom() -> CardStyle.phantoms
+            org.phantom() -> CardStyle.phantoms
             (batch != null) -> batch.name()
             else -> CardStyle.fromCvr
         }
@@ -177,7 +177,7 @@ class MvrsToCardsWithBatchNameIterator(
         val batch = batchMap[org.poolId]  // hijack poolId
 
         val styleName = when {
-            org.isPhantom() -> CardStyle.phantoms
+            org.phantom() -> CardStyle.phantoms
             (batch != null) -> batch.name()
             else -> CardStyle.fromCvr
         }
@@ -211,7 +211,7 @@ fun mvrsToAuditableCardsList(
         val batch = batchMap[org.poolId]  // hijack poolId
 
         val useBatchName = when {
-            org.isPhantom() -> CardStyle.phantoms
+            org.phantom() -> CardStyle.phantoms
             (batch != null) -> batch.name()
             else -> CardStyle.fromCvr
         }
@@ -248,7 +248,7 @@ fun mvrsToAuditableCardsTest(
         val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
 
         val useBatch = when {
-            org.isPhantom() -> CardStyle.phantomBatch
+            org.phantom() -> CardStyle.phantomBatch
             (batch != null) -> batch
             else -> CardStyle.fromCvrBatch
         }

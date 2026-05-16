@@ -141,7 +141,7 @@ open class AuditRecord(
             if (location == null) return false
             val publisher = Publisher(location)
             if (!exists(publisher.electionInfoFile())) return false
-            if (!exists(publisher.cardManifestFile())) return false
+            if (!exists(publisher.cardsProtoFile()) && !exists(publisher.cardManifestFile())) return false
             if (!exists(publisher.contestsFile())) return false
             return true
         }

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.betting
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Welford
 import java.io.FileOutputStream
@@ -116,13 +116,13 @@ class PollingSamplerTracker(
 class ClcaSamplerErrorTracker(
     val contestId: Int,
     val cassorter: ClcaAssorter,
-    val samples: List<Pair<CvrIF, AuditableCard>>,
+    val samples: List<Pair<CvrIF, AuditableCardIF>>,
     val clcaErrorTracker: ClcaErrorTracker,
     val allowReset: Boolean = true,  // needed ?
     val name: String? = null, // debugging
 ): SamplerTracker, ErrorTracker {
 
-    constructor(contestId: Int, cassorter: ClcaAssorter, samples:List<Pair<CvrIF, AuditableCard>>, name: String? = null)
+    constructor(contestId: Int, cassorter: ClcaAssorter, samples:List<Pair<CvrIF, AuditableCardIF>>, name: String? = null)
             : this(contestId, cassorter, samples, ClcaErrorTracker(cassorter.noerror, cassorter.assorter.upperBound()),
                    name = name)
 
@@ -190,11 +190,11 @@ class ClcaSamplerErrorTracker(
         fun fromIndexList(
             contestId: Int,
             cassorter: ClcaAssorter,
-            pairs: List<Pair<AuditableCard, AuditableCard>>,
+            pairs: List<Pair<AuditableCardIF, AuditableCardIF>>,
             wantIndices: List<Int>,
             clcaErrorTracker: ClcaErrorTracker? = null,
         ): ClcaSamplerErrorTracker {
-            val extract = mutableListOf<Pair<AuditableCard, AuditableCard>>()
+            val extract = mutableListOf<Pair<AuditableCardIF, AuditableCardIF>>()
             var wantIdx = 0
             pairs.forEachIndexed { idx, pair ->
                 if (wantIdx < wantIndices.size && idx == wantIndices[wantIdx]) {
@@ -210,12 +210,12 @@ class ClcaSamplerErrorTracker(
         fun withMaxSample(
             contestId: Int,
             cassorter: ClcaAssorter,
-            cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
+            cvrPairs: List<Pair<CvrIF, AuditableCardIF>>, // Pair(mvr, card)
             maxSampleIndex: Int? = null,  // if maxSampleIndex != null then reset = false)
             name: String?=null,
         ): ClcaSamplerErrorTracker {
             val maxIndex = maxSampleIndex ?: Int.MAX_VALUE
-            val extract = mutableListOf<Pair<CvrIF, AuditableCard>>()
+            val extract = mutableListOf<Pair<CvrIF, AuditableCardIF>>()
             cvrPairs.forEachIndexed { idx, pair ->
                 if (pair.second.hasContest(contestId) && idx < maxIndex) {
                     extract.add(pair)
@@ -227,9 +227,9 @@ class ClcaSamplerErrorTracker(
         fun withNoErrors(
             contestId: Int,
             cassorter: ClcaAssorter,
-            cvrIterator: Iterator<AuditableCard>,
+            cvrIterator: Iterator<AuditableCardIF>,
         ): ClcaSamplerErrorTracker {
-            val extract = mutableListOf<Pair<CvrIF, AuditableCard>>()
+            val extract = mutableListOf<Pair<CvrIF, AuditableCardIF>>()
             while (cvrIterator.hasNext()) {
                 val cvr = cvrIterator.next()
                 if (cvr.hasContest(contestId)) {

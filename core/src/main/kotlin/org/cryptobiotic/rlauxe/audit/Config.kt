@@ -224,8 +224,13 @@ data class SimulationControl(
     }
 }
 
+// TODO is hasStyle really card specific? contest? audit?
+//    is it the same as "consistentSampling" or something else ??
+//    could you sample different contest different?
+enum class Sampling { consistent, uniform }  // TODO move to ElectionInfo? or Contest? probably not Card
+
+
 // at each round the EA manually reviews the removed contests; these parameters automate that for testing and simulation
-enum class Sampling { consistent, uniform }
 data class ContestSampleControl(
     //// checkContestsCorrectlyFormed: preAuditStatus
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin

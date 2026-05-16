@@ -225,7 +225,7 @@ open class ClcaAssorter(
         //            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every contest.
 
         val mvr_assort =
-            if (mvr.isPhantom()) 0.0
+            if (mvr.phantom()) 0.0
             else if (!mvr.hasContest(info.id)) {
                 if (hasStyle) 0.0 else 0.5
             }
@@ -235,7 +235,7 @@ open class ClcaAssorter(
         //                int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.assort(cvr)
         //        )
         // so if they both agree its a phantom, its a p1o. if mvr cant find it and cvr doesnt think its a phantom, its a p2o
-        val cvr_assort = if (cvr.isPhantom()) .5 else this.assorter.assort(cvr, usePhantoms = false)
+        val cvr_assort = if (cvr.phantom()) .5 else this.assorter.assort(cvr, usePhantoms = false)
 
         return cvr_assort - mvr_assort
     }

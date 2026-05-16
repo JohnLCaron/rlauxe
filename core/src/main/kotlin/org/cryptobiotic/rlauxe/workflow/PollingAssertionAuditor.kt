@@ -54,7 +54,7 @@ fun runPollingAuditRound(
 class RunPollingContestTask(
     val config: Config,
     val contestRound: ContestRound,
-    val mvrCvrs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
+    val mvrCvrs: List<Pair<CvrIF, AuditableCardIF>>, // Pair(mvr, card)
     val roundIdx: Int,
     val onlyTask: OnlyTask? = null,
 ): ConcurrentTask<Boolean> {

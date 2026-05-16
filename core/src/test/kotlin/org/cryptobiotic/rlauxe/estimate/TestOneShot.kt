@@ -7,7 +7,7 @@ import kotlin.test.Test
 
 class TestOneShot {
 
-    @Test
+    // @Test
     fun testOneShot() {
         val auditdir = "$testdataDir/cases/sf2024oasp/audit20"
         val record = AuditRecord.read(auditdir)

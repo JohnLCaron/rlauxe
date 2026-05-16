@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.irv
 
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
@@ -23,8 +23,8 @@ class TestSf2024OneAuditIrv() {
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
     val cardPools: List<CardPool>
-    val mvrsIterable: CloseableIterable<AuditableCard>
-    val mvrs = mutableListOf<AuditableCard>()
+    val mvrsIterable: CloseableIterable<AuditableCardIF>
+    val mvrs = mutableListOf<AuditableCardIF>()
 
     init {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"

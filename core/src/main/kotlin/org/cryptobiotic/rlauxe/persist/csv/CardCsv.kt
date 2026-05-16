@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.CardIF
+import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.audit.AuditableCardProto
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -29,7 +31,7 @@ val CardHeader = "id, location, index, prn, phantom, poolId, cardStyle, cvr cont
 fun writeCardCsv(card: CardIF) = buildString {
     append("${card.id()}, ")
     if (card.id() == card.location()) append(", ") else append("${card.location()}, ")
-    append("${card.index()}, ${card.prn().toString(radix=16)}, ${if(card.isPhantom()) "yes," else ","} ")
+    append("${card.index()}, ${card.prn().toString(radix=16)}, ${if(card.phantom()) "yes," else ","} ")
     if (card.poolId() == null) append(", ") else append("${card.poolId()}, ")
     append("${card.styleName()}, ")
 
@@ -166,15 +168,15 @@ fun readCardsCsvIterator(filename: String): CloseableIterator<CardWithBatchName>
     return if (useFilename.endsWith(".zip")) {
         val reader = ZipReader(useFilename)
         val input = reader.inputStream()
-        IteratorCardsCsvStream(input)
+        IteratorCardsCsvStream(input, 8192)
     } else {
-        IteratorCardsCsvStream(File(filename).inputStream())
+        IteratorCardsCsvStream(File(filename).inputStream(), 8192)
     }
 }
 
-class IteratorCardsCsvStream(input: InputStream): CloseableIterator<CardWithBatchName> {
+class IteratorCardsCsvStream(input: InputStream, bufferSize: Int): CloseableIterator<CardWithBatchName> {
     // was val reader = BufferedReader(InputStreamReader(input, "ISO-8859-1")) for some reason
-    val reader = BufferedReader(InputStreamReader(input))
+    val reader = BufferedReader(InputStreamReader(input),bufferSize)
     var nextLine: String? = null
     var countLines  = 0
 
@@ -201,6 +203,107 @@ class IteratorCardsCsvStream(input: InputStream): CloseableIterator<CardWithBatc
         reader.close()
     }
 }
+
+class CsvCardUsingArrays(input: InputStream, bufferSize: Int): CloseableIterator<AuditableCardProto> {
+    // was val reader = BufferedReader(InputStreamReader(input, "ISO-8859-1")) for some reason
+    val reader = BufferedReader(InputStreamReader(input),bufferSize)
+    var nextLine: String? = null
+    var countLines  = 0
+
+    init {
+        reader.readLine() // get rid of header line
+    }
+
+    override fun hasNext() : Boolean {
+        if (nextLine == null) {
+            countLines++
+            nextLine = reader.readLine()
+        }
+        return nextLine != null
+    }
+
+    override fun next(): AuditableCardProto {
+        if (!hasNext()) throw NoSuchElementException()
+        val result =  readCardWithArrays(nextLine!!)
+        nextLine = null
+        return result
+    }
+
+    override fun close() {
+        reader.close()
+    }
+}
+
+
+fun readCardWithArrays(line: String): AuditableCardProto {
+    val tokens = line.split(",")
+    val ttokens = tokens.map { it.trim() }
+
+    var idx = 0
+    val id = ttokens[idx++]
+    val locationToken = ttokens[idx++]
+    val location = locationToken.ifEmpty { null }
+    val index = ttokens[idx++].toInt()
+    val sampleNum = ttokens[idx++].toLong(radix=16)
+    val phantom = ttokens[idx++] == "yes"
+    val poolIdToken = ttokens[idx++]
+    val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()
+    val styleName = ttokens[idx++].trim()
+
+    // if clca, list of actual contests and their votes
+    // if (idx < ttokens.size-1) {
+        val contestsStr = ttokens[idx++].trim()
+        val contestsTokenTrimmed = contestsStr.split(" ").map { it.trim() }
+
+        val contestIds = mutableListOf<Int>()
+
+        contestsTokenTrimmed.forEach { tok ->
+            if (tok.isNotEmpty()) contestIds.add(tok.toInt())
+        }
+
+    val contestStarts = mutableListOf<Int>()
+    val candidates = mutableListOf<Int>()
+
+        val hasVotes = (idx + contestIds.size) < ttokens.size
+
+        val votes = if (!hasVotes) null else {
+            val work = mutableListOf<IntArray>()
+            while (idx < ttokens.size && (work.size < contestIds.size)) {
+                val vtokens = ttokens[idx]
+                val candArray =
+                    if (vtokens.isEmpty()) intArrayOf()
+                    else vtokens.split(" ").map { it.trim().toInt() }.toIntArray()
+                work.add(candArray)
+                idx++
+            }
+            require(contestIds.size == work.size) { "contests.size (${contestIds.size}) != votes.size (${work.size})" }
+            contestIds.zip(work).toMap()
+        }
+
+    if (votes != null) {
+        var start = 0
+        contestIds.forEach {
+            val cands = votes[it]!!
+            candidates.addAll(cands.toList())
+            contestStarts.add(start)
+            start += cands.size
+        }
+    }
+
+        return AuditableCardProto(
+            id,
+            if (location == id) null else location,
+            index, sampleNum, phantom, poolId,
+            contestIds.toIntArray(),
+            contestStarts.toIntArray(),
+            candidates.toIntArray(),
+            CardStyle.fromCvrBatch,
+            // styleName=styleName
+        )
+    //}
+    //return CardUsingArrays(id, location, index, sampleNum, phantom, poolId,null, , styleName=styleName)
+}
+
 
 
 

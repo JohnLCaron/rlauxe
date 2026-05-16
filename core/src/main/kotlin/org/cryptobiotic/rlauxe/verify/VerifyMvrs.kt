@@ -1,37 +1,38 @@
 package org.cryptobiotic.rlauxe.verify
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 
 // see if the mvr, card pairs match
-fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCard, AuditableCard>>, errs: ErrorMessages) {
+fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCardIF, AuditableCardIF>>, errs: ErrorMessages) {
     var countErrs = 0
     mvrCardPairs.forEachIndexed { index, (mvr, card) ->
         val nested = errs.nested("sample $index")
         var hasError = false
-        if (mvr.id != card.id || mvr.prn != card.prn || mvr.index != card.index && countErrs < 10) {
+        if (mvr.id() != card.id() || mvr.prn() != card.prn() || mvr.index() != card.index() && countErrs < 10) {
             hasError = true
             nested.add("*** Mvr location, prn, or index does not match card")
             countErrs++
         }
 
-        mvr.votes!!.keys.forEach { mvrContestId ->
+        mvr.votes()!!.keys.forEach { mvrContestId ->
             if (!card.possibleContests().contains(mvrContestId)) {
                 hasError = true
                 nested.add("*** Mvr contains contest ${mvrContestId} not contained in card $card")
             }
         }
-        if (card.style.hasExactContests()) {
-            card.style.possibleContests().forEach { batchContestId ->
-                if (!mvr.votes.contains(batchContestId)) {
+        if (card.style().hasExactContests()) {
+            card.style().possibleContests().forEach { batchContestId ->
+                if (!mvr.votes()!!.contains(batchContestId)) {
                     hasError = true
                     nested.add("*** batch contains contest ${batchContestId} not contained in Mvr")
                 }
             }
         }
         if (hasError) {
-            nested.add("    mvr=${mvr.show()}")
-            nested.add("    card=${card.show()}")
+            nested.add("    mvr=${mvr}")
+            nested.add("    card=${card}")
         }
     }
 }

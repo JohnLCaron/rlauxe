@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.estimateOld
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.ErrorTracker
@@ -28,7 +28,7 @@ class ClcaFuzzSamplerTracker(
     val permutedIndex = MutableList(samples.size) { it }
 
     var welford = Welford()
-    var cvrPairs: List<Pair<AuditableCard, AuditableCard>> // (mvr, cvr)
+    var cvrPairs: List<Pair<AuditableCardIF, AuditableCardIF>> // (mvr, cvr)
     var idx = 0
     var simulation = 0
 
@@ -64,7 +64,7 @@ class ClcaFuzzSamplerTracker(
         clcaErrorTracker.reset()
     }
 
-    fun remakeFuzzed(): List<AuditableCard> {
+    fun remakeFuzzed(): List<AuditableCardIF> {
         return makeFuzzedCardsForClca(listOf(contest.info()), samples, simFuzzPct)
     }
 

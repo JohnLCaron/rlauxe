@@ -14,16 +14,16 @@ private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
 class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, PersistedMvrManager(auditRecord) {
 
     // extract the cards with sampleNumbers from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard> {
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCardIF> {
         val cards = findSamples(sampleNumbers, auditableCards())
 
         var lastRN = 0L
         cards.forEachIndexed { idx, mvr ->
-            if (mvr.prn <= lastRN) {
-                logger.error { "findSamples are out of order ${mvr.prn} <= ${lastRN}" }
-                throw RuntimeException("findSamples are out of order ${mvr.prn} <= ${lastRN}")
+            if (mvr.prn() <= lastRN) {
+                logger.error { "findSamples are out of order ${mvr.prn()} <= ${lastRN}" }
+                throw RuntimeException("findSamples are out of order ${mvr.prn()} <= ${lastRN}")
             }
-            lastRN = mvr.prn
+            lastRN = mvr.prn()
         }
 
         // get maybe-fuzzed mvrs from previous round, use them again
@@ -47,7 +47,7 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
             val wantPrevious = previousMvrs.filter{ wantSet.contains(it.prn) }
 
             // get the new cards not in the previous sample
-            val newCards = cards.filter{ !previousPrnsSet.contains(it.prn) }
+            val newCards = cards.filter{ !previousPrnsSet.contains(it.prn()) }
 
             // here we get a different fuzz each time we run the audit
             val newFuzzedCards = makeFuzzedCardsForClca(contestsUA.map { it.contest.info() }, newCards, mvrFuzzPct)
@@ -55,9 +55,9 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
             // then the cards we want are the previous cards and the new fuzzed cards
             // cant assume they are sorted by prn
 
-            val mvrs2 = mutableListOf<AuditableCard>()
+            val mvrs2 = mutableListOf<AuditableCardIF>()
             mvrs2.addAll(wantPrevious + newFuzzedCards)
-            mvrs2.sortBy{ it.prn}
+            mvrs2.sortBy{ it.prn() }
 
             require(cards.size == mvrs2.size)
             require(mvrs2.size == sampleNumbers.size)
@@ -65,19 +65,19 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
             var count = 0
             var lastRN = 0L
             mvrs2.forEachIndexed { idx, mvr ->
-                if (mvr.prn <= lastRN) {
+                if (mvr.prn() <= lastRN) {
                     logger.error { "setMvrsBySampleNumberout of order prn" }
                     throw RuntimeException("setMvrsBySampleNumberout of order prn")
                 }
-                lastRN = mvr.prn
+                lastRN = mvr.prn()
                 count++
             }
 
             val z = mvrs2.zip(cards)
             z.forEach { (mvr, card) ->
-                if (mvr.prn != card.prn) {
-                    logger.error { "setMvrsBySampleNumberout bad location mvr=${mvr.location} ${mvr.prn}  card=${card.location} ${card.prn}" }
-                    throw RuntimeException("setMvrsBySampleNumberout bad location mvr=${mvr.location} card=${card.location} ")
+                if (mvr.prn() != card.prn()) {
+                    logger.error { "setMvrsBySampleNumberout bad location mvr=${mvr.location()} ${mvr.prn()}  card=${card.location()} ${card.prn()}" }
+                    throw RuntimeException("setMvrsBySampleNumberout bad location mvr=${mvr.location()} card=${card.location()} ")
                 }
             }
 
@@ -90,7 +90,7 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
     }
 
     // get the wanted sampleNumbers from samplePrnsFile, and call setMvrsBySampleNumber(sampledMvrs) with them.
-    fun setMvrsForRoundIdx(roundIdx: Int): List<AuditableCard> {
+    fun setMvrsForRoundIdx(roundIdx: Int): List<AuditableCardIF> {
         val sampleNumbers = readSamplePrns(publisher.samplePrnsFile(roundIdx))
 
         return if (sampleNumbers.isEmpty()) {
@@ -108,9 +108,9 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
 // ClcaFuzzSamplerTracker uses this for only one contest; so the other fuzzings are ignored
 // PersistedMvrManagerTest uses this to fuzz all contests
 fun makeFuzzedCardsForClca(infoList: List<ContestInfo>,
-                           cards: List<AuditableCard>,
+                           cards: List<AuditableCardIF>,
                            fuzzPct: Double,
-) : List<AuditableCard> {
+) : List<AuditableCardIF> {
     if (fuzzPct == 0.0) return cards
     val infos = infoList.associate{ it.id to it }
     val isIRV = infoList.associate { it.id to it.isIrv}

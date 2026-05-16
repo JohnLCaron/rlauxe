@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
@@ -43,15 +44,15 @@ class AuditableCardBuilder(
     }
 
     companion object {
-        fun fromCard(card: AuditableCard) = AuditableCardBuilder(
-            card.id,
-            card.location,
-            card.index,
-            card.prn,
-            card.phantom,
-            card.poolId,
-            card.votes,
-            card.style
+        fun fromCard(card: AuditableCardIF) = AuditableCardBuilder(
+            card.id(),
+            card.location(),
+            card.index(),
+            card.prn(),
+            card.phantom(),
+            card.poolId(),
+            card.votes(),
+            card.style()
         )
 
     }

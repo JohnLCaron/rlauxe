@@ -39,6 +39,7 @@ import kotlin.io.path.isDirectory
 //    val nmvrs: Int // number of mvrs already sampled
 //)
 
+// TODO can we get rid of ??
 interface CompositeRecordIF: AuditRecordIF {
     val componentRecords: List<AuditRecord>
     fun findComponentWithName(name: String): AuditRecord?
@@ -58,7 +59,7 @@ data class CompositeRecord(
         return componentRecords.first().readSortedManifest(styles)
     }
 
-    override fun readSamplingCards(): CloseableIterable<SamplingCardIF>? = null
+    override fun readSamplingCards(styles: List<StyleIF>?): CloseableIterable<SamplingCardIF>? = null
 
     override fun readOneShotMvrs() = emptyMap<Int, Int>()
 

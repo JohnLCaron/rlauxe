@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.rlauxe.audit.PollingConfig
 import org.cryptobiotic.rlauxe.audit.PollingMode
+import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.audit.createElectionRecord
@@ -19,6 +20,7 @@ import org.cryptobiotic.rlauxe.belgium.createAndRunBelgiumElection
 import org.cryptobiotic.rlauxe.belgium.toptopdir
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.corla.createConsistentElection
+import org.cryptobiotic.rlauxe.corla.createUniformElection
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.sf.CreatePrecinctAndStyle
 import org.cryptobiotic.rlauxe.sf.createSfElection
@@ -75,6 +77,36 @@ class TestGenerateAllUseCases {
     }
 
     @Test
+    fun makeColoradoClcaUniform() {
+        val topdir = "$testdataDir/cases/corla/uniform"
+
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
+        val round = AuditRoundConfig(
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 200000,
+                sampling = Sampling.uniform),
+            ClcaConfig(), null)
+
+        createUniformElection(topdir, "$topdir/audit",
+            creation, round, name = "Corla24Uniform")
+    }
+
+    @Test
+    fun makeColoradoClcaConsistent() {
+        val topdir = "$testdataDir/cases/corla/consistent"
+
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
+        val round = AuditRoundConfig(
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 200000,
+                sampling = Sampling.consistent),
+            ClcaConfig(), null)
+
+        createConsistentElection(topdir, "$topdir/audit",
+            null, creation, round, name = "Corla24Consistent", startFirstRound = true)
+    }
+
+    // @Test
     fun createColoradoClca() {
         val topdir = "$testdataDir/cases/corla/clca"
 
@@ -131,7 +163,7 @@ class TestGenerateAllUseCases {
         )
     }
 
-    @Test
+    // @Test
     fun makeSFPrecinctAndStyleOA() {
         val auditdir = "$testdataDir/cases/sf2024/oaps/audit"
         val contestManifestFilename = "ContestManifest.json"

@@ -46,7 +46,7 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifyCorlaClca() {
-        val auditdir = "$testdataDir/cases/corla/clca/audit"
+        val auditdir = "$testdataDir/cases/corla/consistent/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)

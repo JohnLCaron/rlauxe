@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 
 // builds one AuditableCard
 class AuditableCardBuilder(
@@ -87,7 +87,7 @@ class CardWithBatchNameBuilder(
         votes[id] = if (candidateId == null) intArrayOf() else intArrayOf(candidateId)
     }
 
-    fun build(poolId:Int? = null) : CardWithBatchName {
+    fun build(poolId:Int? = null) : CardWithStyleName {
         val useBatchName: String = when {
             cardStyle != null -> cardStyle
             !votes.isEmpty() -> CardStyle.fromCvr
@@ -103,7 +103,7 @@ class CardWithBatchNameBuilder(
         //    val poolId: Int?,                 // must be set if its from a CardPool  TODO verify batch name, poolId
         //    val batchName: String,            // batch name: "fromCvr" if no batch and its from a CVR (then votes is non null)
         //)
-        return CardWithBatchName(
+        return CardWithStyleName(
             id, location, index, prn, phantom,
             votes = votes,
             poolId = poolId,

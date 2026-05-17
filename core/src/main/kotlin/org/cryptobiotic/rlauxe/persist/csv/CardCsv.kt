@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.CardIF
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -89,7 +89,7 @@ class CardCsvWriter(outputFilename: String) {
 
 /////////////////////////////////////////////////////////
 
-fun readCardCsv(line: String): CardWithBatchName {
+fun readCardCsv(line: String): CardWithStyleName {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
@@ -129,26 +129,26 @@ fun readCardCsv(line: String): CardWithBatchName {
             require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
             contests.zip(work).toMap()
         }
-        return CardWithBatchName(id, location, index, sampleNum, phantom, votes, poolId, styleName=styleName)
+        return CardWithStyleName(id, location, index, sampleNum, phantom, votes, poolId, styleName=styleName)
     }
-    return CardWithBatchName(id, location, index, sampleNum, phantom, null, poolId, styleName=styleName)
+    return CardWithStyleName(id, location, index, sampleNum, phantom, null, poolId, styleName=styleName)
 }
 
-class CardCsvReader(filename: String): CloseableIterable<CardWithBatchName> {
+class CardCsvReader(filename: String): CloseableIterable<CardWithStyleName> {
     var useFilename = if (Files.exists(Path(filename))) filename
         else if (Files.exists(Path("$filename.zip"))) "$filename.zip" // TODO unzip and leave it unzipped
         else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
 
-    override fun iterator(): CloseableIterator<CardWithBatchName> {
+    override fun iterator(): CloseableIterator<CardWithStyleName> {
         return readCardsCsvIterator(useFilename)
     }
 }
 
-fun readCardCsvFile(filename: String): List<CardWithBatchName> {
+fun readCardCsvFile(filename: String): List<CardWithStyleName> {
     val reader: BufferedReader = File(filename).bufferedReader()
     reader.readLine() // get rid of header line
 
-    val cards = mutableListOf<CardWithBatchName>()
+    val cards = mutableListOf<CardWithStyleName>()
     while (true) {
         val line = reader.readLine() ?: break
         cards.add(readCardCsv(line))
@@ -157,7 +157,7 @@ fun readCardCsvFile(filename: String): List<CardWithBatchName> {
     return cards
 }
 
-fun readCardsCsvIterator(filename: String): CloseableIterator<CardWithBatchName> {
+fun readCardsCsvIterator(filename: String): CloseableIterator<CardWithStyleName> {
     val useFilename: String = if (Files.exists(Path(filename))) filename
     else if (Files.exists(Path("$filename.zip"))) "$filename.zip" // TODO unzip
     else {
@@ -174,7 +174,7 @@ fun readCardsCsvIterator(filename: String): CloseableIterator<CardWithBatchName>
     }
 }
 
-class IteratorCardsCsvStream(input: InputStream, bufferSize: Int): CloseableIterator<CardWithBatchName> {
+class IteratorCardsCsvStream(input: InputStream, bufferSize: Int): CloseableIterator<CardWithStyleName> {
     // was val reader = BufferedReader(InputStreamReader(input, "ISO-8859-1")) for some reason
     val reader = BufferedReader(InputStreamReader(input),bufferSize)
     var nextLine: String? = null
@@ -192,7 +192,7 @@ class IteratorCardsCsvStream(input: InputStream, bufferSize: Int): CloseableIter
         return nextLine != null
     }
 
-    override fun next(): CardWithBatchName {
+    override fun next(): CardWithStyleName {
         if (!hasNext()) throw NoSuchElementException()
         val result =  readCardCsv(nextLine!!)
         nextLine = null
@@ -206,7 +206,9 @@ class IteratorCardsCsvStream(input: InputStream, bufferSize: Int): CloseableIter
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-fun writeSamplingCards(cards: CloseableIterator<CardIF>, outputStream: OutputStream, styles: List<StyleIF>, limit: Int? = null): Int {
+fun writeSamplingCards(cards: CloseableIterator<CardIF>, filenameOut: String, styles: List<StyleIF>, limit: Int? = null): Int {
+    val outputStream: OutputStream = FileOutputStream(filenameOut)
+
     val styleMap = styles.associate { it.name() to it.id() }
     var count = 0
 
@@ -224,13 +226,16 @@ fun writeSamplingCards(cards: CloseableIterator<CardIF>, outputStream: OutputStr
         dos.writeLong(0L)
         dos.writeInt(-1)
     }
+    outputStream.close() // probably dos closes it
+    cards.close()
+
     return count
 }
 
 class SamplingCardIterator(inputFile: String, styles: List<StyleIF>, bufferSize: Int): CloseableIterator<SamplingCardIF> {
     val styleMap = styles.associate { it.id() to it }
-    val inputStream = FileInputStream(inputFile)
-    val dos = DataInputStream(inputStream)
+    val binputStream = BufferedInputStream( FileInputStream(inputFile), bufferSize)
+    val dos = DataInputStream(binputStream)
 
     var nextCard: SamplingCard? = null
     var count = 0
@@ -253,7 +258,7 @@ class SamplingCardIterator(inputFile: String, styles: List<StyleIF>, bufferSize:
 
     override fun close() {
         dos.close()
-        inputStream.close()
+        binputStream.close()
     }
 }
 

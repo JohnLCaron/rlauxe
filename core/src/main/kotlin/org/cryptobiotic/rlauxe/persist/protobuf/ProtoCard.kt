@@ -9,12 +9,12 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.BufferedInputStream
+import java.io.FileOutputStream
 
 import java.io.InputStream
 import java.io.OutputStream
@@ -25,7 +25,7 @@ import kotlin.io.path.Path
 
 // TODO check if using real protobuf library is better
 @Serializable
-data class ProtoCard (
+class ProtoCard (
     val id: String, // enough info to find the card for a manual audit.
     val location: String?, // enough info to find the card for a manual audit.
     val index: Int,  // index into the original, canonical list of cards
@@ -33,64 +33,84 @@ data class ProtoCard (
     val phantom: Boolean,
     val poolId: Int?, // must be set if its from a CardPool
     // The default integer type is a varint encoding (intXX) that is optimized for small non-negative numbers.
-    val contestIds: IntArray,
-    val contestStarts: IntArray,
-    val candidates: IntArray,
+    val contestIds: IntArray?,
+    val contestStarts: IntArray?,
+    val candidates: IntArray?,
     val styleName: String,
 )
 
 fun CardIF.publishProto() : ProtoCard {
     val votes = this.votes()
-    val contestIds = votes!!.keys
-    val contestIdas = contestIds.toList().toIntArray()
-    val candidates = mutableListOf<Int>()
-    val contestStarts = mutableListOf<Int>()
-    var start = 0
+    if (votes != null) {
+        val contestIds = votes.keys
+        val contestIdas = contestIds.toList().toIntArray()
+        val candidates = mutableListOf<Int>()
+        val contestStarts = mutableListOf<Int>()
+        var start = 0
 
-    contestIds.forEach {
-        val cands = votes[it]!!
-        candidates.addAll(cands.toList())
-        contestStarts.add(start)
-        start += cands.size
+        contestIds.forEach {
+            val cands = votes[it]!!
+            candidates.addAll(cands.toList())
+            contestStarts.add(start)
+            start += cands.size
+        }
+
+        return ProtoCard(
+            this.id(),
+            this.location(),
+            this.index(),
+            this.prn(),
+            this.phantom(),
+            this.poolId(),
+            contestIdas,
+            contestStarts.toIntArray(),
+            candidates.toIntArray(),
+            this.styleName(),
+        )
+    } else {
+        return ProtoCard(
+            this.id(),
+            this.location(),
+            this.index(),
+            this.prn(),
+            this.phantom(),
+            this.poolId(),
+            null,
+            null,
+            null,
+            this.styleName(),
+        )
     }
-
-    return ProtoCard(
-        this.id(),
-        this.location(),
-        this.index(),
-        this.prn(),
-        this.phantom(),
-        this.poolId(),
-        contestIdas,
-        contestStarts.toIntArray(),
-        candidates.toIntArray(),
-        this.styleName(),
-    )
 }
 
-// data class CardWithBatchName (
-//    val id: String,
+// class AuditableCardProto(
+//    val id: String, // enough info to find the card for a manual audit.
 //    val location: String?, // enough info to find the card for a manual audit.
 //    val index: Int,  // index into the original, canonical list of cards
 //    val prn: Long,   // psuedo random number
 //    val phantom: Boolean,
-//
-//    val votes: Map<Int, IntArray>?,   // CVRs and phantoms
-//    val poolId: Int?,                 // must be set if its from a CardPool
-//    val styleName: String,
-//): CardIF {
-//
-//    constructor(card: AuditableCard): this(card.id, card.location, card.index, card.prn, card.phantom, card.votes, card.poolId(), card.styleName())
-fun ProtoCard.import() = CardWithBatchName(
+//    val poolId: Int?, // must be set if its from a CardPool
+//    val contestIds: IntArray,
+//    val contestStarts: IntArray,
+//    val candidates: IntArray,
+//    val style: StyleIF
+//): AuditableCardIF
+fun ProtoCard.import(styleMap: Map<String, StyleIF> ): AuditableCardProto {
+    val style = styleMap[this.styleName]!!
+
+    return AuditableCardProto(
         this.id,
         if (this.location == this.id) null else this.location,
         this.index,
         this.prn,
         this.phantom,
-    makeVotes(this.contestIds, this.contestStarts, this.candidates),
         this.poolId,
-        this.styleName,
+        this.contestIds ?: intArrayOf(),
+        this.contestStarts ?: intArrayOf(),
+        this.candidates ?: intArrayOf(),
+        style,
     )
+}
 
 fun makeVotes( contestIds: IntArray,  contestStarts: IntArray,  candidates: IntArray): Map<Int, IntArray> {
     val lastIndex = contestIds.size-1
@@ -107,21 +127,25 @@ fun makeVotes( contestIds: IntArray,  contestStarts: IntArray,  candidates: IntA
 
 /////////////////////////////////////////////////////////
 
-fun writeProtoCards(cards: CloseableIterator<CardIF>, output: OutputStream): Int {
-    // kotlinx.serialization's Protobuf implementation does not natively support writeDelimitedTo
+fun writeProtoCards(cards: CloseableIterator<CardIF>, protoFilename: String): Int {
+    val outputStream: OutputStream = FileOutputStream(protoFilename)
+
     var count = 0
     while (cards.hasNext()) {
         val card = cards.next()
         val protoCard = card.publishProto()
         val bytes = ProtoBuf.encodeToByteArray(protoCard)
-        writeDelimitedTo(bytes, output)
+        writeDelimitedTo(bytes, outputStream)
         count++
         if (count % 10000 == 0) { print("$count, ")}
         if (count % 100000 == 0) { println("$count, ")}
     }
+    outputStream.close()
     return count
 }
 
+// kotlinx.serialization's Protobuf implementation does not natively support writeDelimitedTo
+// so roll em up
 fun writeDelimitedTo(bytes: ByteArray, output: OutputStream) {
    writeVlenForProto(bytes.size, output)
    output.write(bytes)
@@ -158,15 +182,6 @@ private fun writeVlenForProto(messageSize: Int, output: OutputStream) {
 //}
 // import pbandk.decodeFromStream
 
-
-fun testConvert(card: CardWithBatchName) {
-    val protoCard: ProtoCard = card.publishProto()
-    val bytes = ProtoBuf.encodeToByteArray(protoCard)
-    println(bytes.toHexString())
-    val obj = ProtoBuf.decodeFromByteArray<ProtoCard>(bytes)
-    println(obj)
-}
-
 // could break the rule and return ProtoCard for speed....
 // that is, ProtoCard == CardWithBatchName
 // otoh,
@@ -195,7 +210,7 @@ class ProtoCardIterator(filename: String, bufferSize: Int, val styles: List<Styl
         val bytes = ByteArray(nextMessageSize)
         val bytesRead = inputStream.read(bytes)
         val protoCard = ProtoBuf.decodeFromByteArray<ProtoCard>(bytes)
-        return AuditableCardProto.from(protoCard, styleMap)
+        return protoCard.import(styleMap)
     }
 
     override fun close() {
@@ -223,7 +238,6 @@ fun readVlen(input: InputStream): Int {
 }
 
 //////////////////////////////////////////////////////
-
 
 class AuditableCardProto(
     val id: String, // enough info to find the card for a manual audit.
@@ -292,16 +306,6 @@ class AuditableCardProto(
         else if (contestVotes.contains(candidateId)) 1 else 0
     }
 
-    /*
-    override fun votes(contestId: Int): IntArray? {
-        // or turn back into a map lazily ??
-        // HEY consistent sampling only wants hasContest, optimize for that...
-        val contestIdx = contestIds.indexOf(contestId)
-        val start = contestStarts[contestIdx]
-        val end = contestStarts[contestIdx+1]
-        return candidates // .subarray(start, end)
-    } */
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is AuditableCardProto) return false
@@ -346,22 +350,5 @@ class AuditableCardProto(
         appendLine("id='$id', location=$location, index=$index, prn=$prn, phantom=$phantom, poolId=$poolId, ")
         appendLine("   contestIds=${contestIds.contentToString()}, contestStarts=${contestStarts.contentToString()}, ")
         appendLine("   candidates=${candidates.contentToString()}, style=$style, votes=$votes")
-    }
-
-    companion object {
-        // how much does a copy cost?
-        fun from(pcard: ProtoCard, styles: Map<String, StyleIF>) =
-            AuditableCardProto(
-                pcard.id,
-                if (pcard.location == pcard.id) null else pcard.location,
-                pcard.index,
-                pcard.prn,
-                pcard.phantom,
-                pcard.poolId,
-                pcard.contestIds,  // not making copies
-                pcard.contestStarts,
-                pcard.candidates,
-                styles[pcard.styleName] ?: CardStyle.fromCvrBatch,
-            )
     }
 }

@@ -3,14 +3,14 @@ package org.cryptobiotic.rlauxe.persist.csv
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.util.createZipFile
 
 class TestAuditableCardsCsv {
 
     @Test
     fun testRoundtrip() {
-        val target = CardWithBatchName (
+        val target = CardWithStyleName (
             "id to find card",
             "location to find card",
             42,
@@ -32,7 +32,7 @@ class TestAuditableCardsCsv {
 
     @Test
     fun testRoundtripNoVotes() {
-        val target = CardWithBatchName (
+        val target = CardWithStyleName (
             "deets",
             "dots",
             42,
@@ -55,11 +55,11 @@ class TestAuditableCardsCsv {
     @Test
     fun testRoundtripIO() {
         val target = listOf(
-            CardWithBatchName ("deets", "dots", 42, 43L, false, null, 111, "pool111"),
-            CardWithBatchName ("deeks","docs",  42, 43L, false, null, null, styleName="all"),
-            CardWithBatchName ("id", "info to find card", 42, 43L, true,
+            CardWithStyleName ("deets", "dots", 42, 43L, false, null, 111, "pool111"),
+            CardWithStyleName ("deeks","docs",  42, 43L, false, null, null, styleName="all"),
+            CardWithStyleName ("id", "info to find card", 42, 43L, true,
                 mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), 11, "pool11"),
-            CardWithBatchName ("id1", "info2 to find card", 42, 43L, true,
+            CardWithStyleName ("id1", "info2 to find card", 42, 43L, true,
                 mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), null, "cvr"),
         )
 

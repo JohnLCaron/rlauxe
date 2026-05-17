@@ -42,9 +42,9 @@ class TestAuditableCard {
     @Test
     fun testEqualsAndString() {
         val id = Random.nextInt()
-        val card1 = CardWithBatchName ("cvr$id", null, 42, 4422L, false, // intArrayOf(1,2,3),
+        val card1 = CardWithStyleName ("cvr$id", null, 42, 4422L, false, // intArrayOf(1,2,3),
             mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), 1, "pool1")
-        val card2 = CardWithBatchName ("cvr$id", null, 42, 4422L, false, // intArrayOf(1,2,3),
+        val card2 = CardWithStyleName ("cvr$id", null, 42, 4422L, false, // intArrayOf(1,2,3),
             mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), 1, "pool1")
         assertEquals(card1.toCvr(), card2.toCvr())
         assertEquals(card1.hashCode(), card2.hashCode())

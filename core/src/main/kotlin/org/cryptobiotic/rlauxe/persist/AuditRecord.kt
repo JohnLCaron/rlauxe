@@ -16,6 +16,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
+import org.cryptobiotic.rlauxe.persist.csv.SamplingCardIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.*
@@ -34,7 +35,7 @@ interface AuditRecordIF {
 
     // fun readSortedManifest(): CardManifest
     fun readSortedManifest(styles: List<StyleIF>?): CardManifest
-    fun readSamplingCards(): CloseableIterable<SamplingCardIF>?
+    fun readSamplingCards(styles: List<StyleIF>?): CloseableIterable<SamplingCardIF>?
 
     fun readOneShotMvrs(): Map<Int, Int>
     fun readCardStyles(): List<StyleIF>?
@@ -46,7 +47,7 @@ open class AuditRecord(
     override val location: String,
     override val config: Config,
     override val contests: List<ContestWithAssertions>,
-    override val rounds: List<AuditRound>,  // TODO do we need to replace AuditEst ??
+    override val rounds: List<AuditRound>,
     val nmvrs: Int // number of mvrs already sampled
 ): AuditRecordIF {
     val publisher = Publisher(location)
@@ -55,7 +56,13 @@ open class AuditRecord(
     override fun auditdir() = location // it.location.substring(stateRecord.location.length)
     override fun name() = electionInfo.electionName // it.location.substring(stateRecord.location.length)
 
-    override fun readSamplingCards(): CloseableIterable<SamplingCardIF>? = null
+    override fun readSamplingCards(styles: List<StyleIF>?): CloseableIterable<SamplingCardIF>? {
+        if (styles == null || !Files.exists(Path(publisher.samplingCardsFile()))) return null
+        return CloseableIterable {
+            logger.info{"readSamplingCards at ${publisher.samplingCardsFile()}"}
+            SamplingCardIterator(publisher.samplingCardsFile(), styles, bufferSize = 100_000)
+        }
+    }
 
     override fun readSortedManifest(styles: List<StyleIF>?): CardManifest {
         // merge style references into the Card
@@ -66,18 +73,6 @@ open class AuditRecord(
             )
         return CardManifest(mergedCards, electionInfo.totalCardCount)
     }
-
-    /*
-    override fun readSortedManifest(): CardManifest {
-        val batches = readCardPools() ?: readCardStyles() ?: emptyList() // pools are preferred
-        val mergedCards =
-            MergeBatchesIntoCardManifestIterable(
-                CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
-                batches,
-            )
-
-        return CardManifest(mergedCards, electionInfo.totalCardCount)
-    } */
 
     override fun readCardStyles(): List<StyleIF>? {
         return if (!Files.exists(Path(publisher.cardStylesFile()))) null else {
@@ -145,7 +140,7 @@ open class AuditRecord(
             if (location == null) return false
             val publisher = Publisher(location)
             if (!exists(publisher.electionInfoFile())) return false
-            if (!exists(publisher.cardsProtoFile()) && !exists(publisher.cardManifestFile())) return false
+            if (!exists(publisher.sortedCardsProtoFile()) && !exists(publisher.cardManifestFile())) return false
             if (!exists(publisher.contestsFile())) return false
             return true
         }

@@ -264,13 +264,13 @@ class CreateBoulderElection25(
     override fun cards() = createCards()
     override fun ncards() = ncards
 
-    fun createCards(): CloseableIterator<CardWithBatchName> {
+    fun createCards(): CloseableIterator<CardWithStyleName> {
         // same cvrs for CLCA and OneAudit
         return CvrsToCardsWithBatchNameIterator(
             auditType,
             Closer(allCvrs.iterator()), // use the mvrs as the cvrs
             null,
-            batches = if (auditType.isClca()) null else cardPools
+            styles = if (auditType.isClca()) null else cardPools
         )
     }
 }

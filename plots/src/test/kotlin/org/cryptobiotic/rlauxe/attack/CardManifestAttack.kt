@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
@@ -77,12 +77,12 @@ class CardManifestAttack {
         var index=0
         mvrCount = 0
         poolCount = 0
-        val mcards = mutableListOf<CardWithBatchName>()
+        val mcards = mutableListOf<CardWithStyleName>()
 
         //// group A, mvr index 0-50 match real mvrs.
         repeat(50) {
             mcards.add(
-                CardWithBatchName(
+                CardWithStyleName(
                     "mvr$mvrCount",
                     null,
                     index,
@@ -102,7 +102,7 @@ class CardManifestAttack {
         // we move these 50 into the pool, when they sample the mvr, contestA is missing
         repeat(50) {
             mcards.add(
-                CardWithBatchName(
+                CardWithStyleName(
                     "Pool1-$poolCount",
                     null,
                     index,
@@ -126,7 +126,7 @@ class CardManifestAttack {
             // mcards.add(AuditableCard("mvr$mvrCount", mvrCount, 0L, false, intArrayOf(2), votes = mapOf(1 to intArrayOf(1)), poolId=null))
 
             // substitute cards with contest 2 undervotes
-            mcards.add( CardWithBatchName("mvr$mvrCount", null,
+            mcards.add( CardWithStyleName("mvr$mvrCount", null,
                 index,
                 0L,
                 false,
@@ -143,14 +143,14 @@ class CardManifestAttack {
         // these are Bobs pooled votes that match the mvrs
         repeat(25) {
             // mvr has Bob's votes
-            mcards.add(CardWithBatchName("Pool1-$poolCount", null, index, 0L, false, votes = null, poolId = 1, "pool1"))
+            mcards.add(CardWithStyleName("Pool1-$poolCount", null, index, 0L, false, votes = null, poolId = 1, "pool1"))
             poolCount++
             index++
         }
         // these are contestB pooled votes that match the mvrs
         repeat(25) {
             // mvr doesnt contain contest 1
-            mcards.add(CardWithBatchName("Pool1-$poolCount", null, index, 0L, false, votes = null, poolId = 1, "pool1"))
+            mcards.add(CardWithStyleName("Pool1-$poolCount", null, index, 0L, false, votes = null, poolId = 1, "pool1"))
             poolCount++
             index++
         }
@@ -269,7 +269,7 @@ class CardManifestAttack {
 
 class CreateElectionForAttack(
     val contestsUA: List<ContestWithAssertions>,
-    val cards: List<CardWithBatchName>,
+    val cards: List<CardWithStyleName>,
     val mvrs: List<Cvr>,
     val populations: List<StyleIF>?,
     val cardPools: List<CardPool>?,

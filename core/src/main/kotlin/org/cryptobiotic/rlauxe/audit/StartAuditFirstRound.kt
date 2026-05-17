@@ -8,8 +8,11 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeSamplingCards
 import org.cryptobiotic.rlauxe.persist.json.writeAuditCreationConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundConfigJsonFile
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
+import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
@@ -39,12 +42,13 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: Strin
     writeAuditRoundConfigJsonFile(config.round, publisher.auditRoundProtoFile())
     logger.info{"writeAuditRoundProto to ${publisher.auditRoundProtoFile()}\n  ${config.round}"}
 
-    if (sortManifest) {
+    if (sortManifest) { // sortManifest false for uniform sampling
         if (externalSortDir == null) {
             sortManifestInternal(publisher, config.creation.seed)
         } else {
             sortManifestExternal(externalSortDir, publisher, config.creation.seed)
         }
+        makeFastCards(publisher, election.cardStyles() ?: emptyList())  // TODO cant be optional styles I think
 
         // save Mvrs for testing and diagnostics
         // cant write the sorted mvrs until after sortedCards is written
@@ -145,9 +149,9 @@ fun sortManifestInternal(publisher: Publisher, seed: Long) {
     logger.info{"sortManifestInternal ${countCards} cards to ${publisher.sortedCardsFile()} seed= $seed"}
 }
 
-fun createSortedCardsInternal(unsortedCards: CloseableIterator<CardWithBatchName>, seed: Long) : List<CardWithBatchName> {
+fun createSortedCardsInternal(unsortedCards: CloseableIterator<CardWithStyleName>, seed: Long) : List<CardWithStyleName> {
     val prng = Prng(seed)
-    val cards = mutableListOf<CardWithBatchName>()
+    val cards = mutableListOf<CardWithStyleName>()
     unsortedCards.use { cardIter ->
         while (cardIter.hasNext()) {
             val unsorted = cardIter.next()
@@ -164,16 +168,31 @@ fun sortManifestExternal(topdir: String, publisher: Publisher, seed: Long) {
     writeSortedCardsExternal(topdir, publisher.sortedCardsFile(), unsortedCards, seed)
 }
 
-fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: CloseableIterator<CardWithBatchName>, seed: Long) {
-    val sorter = SortMerge<CardWithBatchName>("$topdir/sortChunks", outputFile = outputFile, seed = seed)
+fun makeFastCards(publisher: Publisher, styles: List<StyleIF>) {
+    val stopwatch = Stopwatch()
+
+    // copy sorted csv to a proto file for better performance
+    val sortedCards = readCardsCsvIterator(publisher.sortedCardsFile())
+    writeProtoCards(sortedCards, publisher.sortedCardsProtoFile())
+
+    // extract some info from sorted proto cards for a super compact "samplingCards" binary file
+    val bufferSize = 100_000
+    val protoIter = ProtoCardIterator(publisher.sortedCardsProtoFile(), bufferSize, styles)  // dont actually need styles i think
+    val ncards = writeSamplingCards(protoIter, publisher.samplingCardsFile(), styles)
+
+    logger.info{"makeFastCards ${ncards} took ${stopwatch}"}
+}
+
+fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: CloseableIterator<CardWithStyleName>, seed: Long) {
+    val sorter = SortMerge<CardWithStyleName>("$topdir/sortChunks", outputFile = outputFile, seed = seed)
     sorter.run(
         cardIter = unsortedCards,
-        toCard = { from: CardWithBatchName, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
+        toCard = { from: CardWithStyleName, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
     )
 }
 
 // internal sort of unsortedMvrs, must be in canonical order
-fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<CardWithBatchName>, batches: List<StyleIF>?, seed: Long) {
+fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<CardWithStyleName>, batches: List<StyleIF>?, seed: Long) {
     validateOutputDirOfFile(publisher.sortedMvrsFile())
 
     // val mvrCardIter = MvrsToCardsWithBatchNameIterator( mvrIter, batches ?: emptyList(), phantomCvrs = null, seed = seed)
@@ -181,7 +200,7 @@ fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<CardWithBa
     // add the prn
     val prng = Prng(seed)
     val mvrIter = unsortedMvrs.iterator()
-    val mvrCards = mutableListOf<CardWithBatchName>()
+    val mvrCards = mutableListOf<CardWithStyleName>()
     while (mvrIter.hasNext()) { mvrCards.add( mvrIter.next().copy(prn=prng.next()) ) }
 
     val sortedMvrs = mvrCards.sortedBy { it.prn }

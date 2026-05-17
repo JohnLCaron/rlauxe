@@ -27,15 +27,32 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     val sortedManifest by lazy { auditRecord.readSortedManifest(styles) }
     val auditableCards: CloseableIterator<AuditableCardIF> by lazy {  sortedManifest.cards.iterator() }
 
+    //// problem is that you lose the cache when you close and open the AuditRecord between samplings
+
+    val cachedCards : List<SamplingCardIF>? by lazy {
+        val scards = auditRecord.readSamplingCards(styles)
+        if (scards == null) null else {
+            val cards = mutableListOf<SamplingCardIF>()
+            val siter = scards.iterator()
+            while (siter.hasNext()) {
+                cards.add(siter.next())
+            }
+            cards.toList()
+        }
+    }
+
+    override fun samplingCards(): CloseableIterable<SamplingCardIF> {
+        return if (cachedCards != null) CloseableIterable { cachedCards!!.iterator() } else sortedManifest().cards
+    }
+
     override fun auditdir() = auditRecord.location
 
     override fun sortedManifest() = sortedManifest
-    override fun styles() = auditRecord.readCardStyles()
+    override fun styles() = styles
+
     override fun pools() = auditRecord.readCardPools() // could test if batches are cardPools
 
-    override fun samplingCards(): CloseableIterable<SamplingCardIF> {
-        return auditRecord.readSamplingCards() ?: sortedManifest().cards
-    }
+
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCardIF>>  {
         val mvrsForRound = readMvrsForRound(round)
@@ -70,7 +87,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         val sampleNumbers = resultSamples.unwrap()
 
         val mvrCardIter = readCardsCsvIterator(publisher.sortedMvrsFile())
-        val mergedMvrIter = MergeBatchesIntoCardManifestIterator(mvrCardIter, styles ?: emptyList())
+        val mergedMvrIter = MergeStylesIntoCards(mvrCardIter, styles ?: emptyList())
 
         val sampledMvrs = findSamples(sampleNumbers, mergedMvrIter)
         require(sampledMvrs.size == sampleNumbers.size)
@@ -89,13 +106,13 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     // return complete list of mvrs used for this round
     private fun readMvrsForRound(round: Int): List<AuditableCard> {
         val mvrCardIter = readCardsCsvIterator(publisher.sampleMvrsFile(round))
-        val mergedMvrIter = MergeBatchesIntoCardManifestIterator(mvrCardIter, styles ?: emptyList())
+        val mergedMvrIter = MergeStylesIntoCards(mvrCardIter, styles ?: emptyList())
         val mvrCards = mutableListOf<AuditableCard>()
         while (mergedMvrIter.hasNext()) { mvrCards.add(mergedMvrIter.next())}
         return mvrCards
     }
 
-    fun enterMvrsForRound(round: Int, mvrs: CloseableIterable<CardWithBatchName>, errs: ErrorMessages): Boolean {
+    fun enterMvrsForRound(round: Int, mvrs: CloseableIterable<CardWithStyleName>, errs: ErrorMessages): Boolean {
         val sampledPrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))
         if (sampledPrnsResult.isErr) {
             logger.error{ "$sampledPrnsResult" } // needed?
@@ -106,7 +123,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         require(sampledPrnsResult.isOk)
         val sampledPrns = sampledPrnsResult.unwrap()
 
-        val mergedMvrIter = MergeBatchesIntoCardManifestIterator(mvrs.iterator(), styles ?: emptyList())
+        val mergedMvrIter = MergeStylesIntoCards(mvrs.iterator(), styles ?: emptyList())
 
         val sampledMvrs = findSamples(sampledPrns, mergedMvrIter) // what does this do
         require(sampledMvrs.size == sampledPrns.size)
@@ -125,12 +142,12 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
 
     fun readCardsAndMerge(filename: String): CloseableIterator<AuditableCard> {
         val mvrCardIter = readCardsCsvIterator(filename)
-        return MergeBatchesIntoCardManifestIterator(mvrCardIter, styles ?: emptyList())
+        return MergeStylesIntoCards(mvrCardIter, styles ?: emptyList())
     }
 
     fun readCardsAndMergeList(filename: String): List<AuditableCard> {
         val mvrCardIter = readCardsCsvIterator(filename)
-        val mergedMvrIter = MergeBatchesIntoCardManifestIterator(mvrCardIter, styles ?: emptyList())
+        val mergedMvrIter = MergeStylesIntoCards(mvrCardIter, styles ?: emptyList())
         val mvrCards = mutableListOf<AuditableCard>()
         while (mergedMvrIter.hasNext()) { mvrCards.add(mergedMvrIter.next())}
         return mvrCards

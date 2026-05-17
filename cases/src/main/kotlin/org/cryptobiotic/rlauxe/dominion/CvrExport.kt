@@ -1,11 +1,17 @@
 package org.cryptobiotic.rlauxe.dominion
 
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.audit.unpooled
 
 // intermediate CVR representation for DominionCvrSummary
-data class CvrExport(val id: String, val group: Int, val ballotStyleId: Int, val precinctPortionId: Int, val votes: Map<Int, IntArray>) {
+data class CvrExport(
+    val id: String,
+    val group: Int,
+    val ballotStyleId: Int, // TODO can this be used as a ballotStyle ??
+    val precinctPortionId: Int,
+    val votes: Map<Int, IntArray>
+) {
 
     // Calculate the pool name from the cvr id. Could pass in a function (CvrExport) -> pool name
     fun poolKey(): String {
@@ -15,13 +21,13 @@ data class CvrExport(val id: String, val group: Int, val ballotStyleId: Int, val
     }
 
     // only used in test
-    fun toCardNoBatch(index: Int, prn: Long, phantom: Boolean = false, pools: Map<String, Int>? = null, showPoolVotes: Boolean = true): CardWithBatchName {
+    fun toCardNoBatch(index: Int, prn: Long, phantom: Boolean = false, pools: Map<String, Int>? = null, showPoolVotes: Boolean = true): CardWithStyleName {
         val contests = votes.map { it.key }.toIntArray()
         val poolkey = poolKey()
         val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]  // TODO not general
         // TODO if you want to delete the votes, add an adapter
         val useVotes = if (poolId == null || showPoolVotes) votes else null
-        return CardWithBatchName(id, null, index, prn, phantom, useVotes, poolId, styleName=poolKey())
+        return CardWithStyleName(id, null, index, prn, phantom, useVotes, poolId, styleName=poolKey())
     }
 
     fun toCvr(pools: Map<String, Int>? = null , convertId: String) : Cvr {

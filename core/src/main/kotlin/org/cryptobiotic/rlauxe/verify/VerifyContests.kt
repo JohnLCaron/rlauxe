@@ -67,7 +67,9 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         // all
         val infos = allInfos ?: contests.associate { it.id to it.contest.info() }
         preAuditContestCheck(contests, results)
+        println("preAuditContestCheck done")
         val contestSummary = verifyManifest(config, contests, cardManifest.cards, infos, results)
+        println("verifyManifest done")
 
         // OA
         if (config.isOA) {
@@ -81,7 +83,11 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         // CLCA
         if (config.isClca) {
             verifyClcaAgainstCards(contests, contestSummary, results, show = show)
+            println("verifyClcaAgainstCards done")
+
             verifyClcaAssortAvg(contests, cardManifest.cards.iterator(), results, show = show)
+            println("verifyClcaAssortAvg done")
+
         }
         return results
     }
@@ -185,11 +191,17 @@ fun verifyManifest(
                     }
                 }
             }
+
+            if (count % 1000 == 0) print("$count, ")
+            if (count % 10000 == 0) println()
+            if (count % 100000 == 0) println()
         }
     }
     if (!results.hasErrors) {
         results.addMessage("  verified that $count cards in the Manifest are ordered with no duplicate locations or indices")
     }
+    println("verifyManifest1 done")
+
 
     // 2. Given the seed and the PRNG, check that the PRNs are correct and are assigned sequentially by index.
     var countErrs = 0
@@ -204,6 +216,7 @@ fun verifyManifest(
         results.addError("  $count cards in the Manifest do not have correct prn: there are $countErrs errors")
     else
       results.addMessage("  verified that $count cards in the Manifest have correct prn")
+    println("verifyManifest2 $countErrs")
 
     // check if tabulation agrees with diluted count
     contestsUA.forEach {
@@ -212,6 +225,8 @@ fun verifyManifest(
             results.addError("contest ${it.id} Npop ${it.Npop} disagree with cards = ${tab.ncardsTabulated}")
         }
     }
+    println("verifyManifest3 done")
+
 
     // 3. If hasStyle, check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
     // 4. If hasStyle, check that the count of non-phantom cards containing a contest = Contest.Ncast.
@@ -233,6 +248,8 @@ fun verifyManifest(
             }
         }
         if (allOk) results.addMessage("  verified that contest.Nc and Np agree with manifest")
+        println("verifyManifest4 done")
+
     }
     return ContestSummary(allCvrVotes, nonpooled, pooled)
 }

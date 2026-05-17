@@ -48,7 +48,7 @@ open class CreateUniformElection (
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
 
-    override fun cards(): CloseableIterator<CardWithBatchName> {
+    override fun cards(): CloseableIterator<CardWithStyleName> {
         val unsortedMvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
         return TransformingIterator(unsortedMvrs) { mvr ->
             when {

@@ -7,11 +7,11 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
-import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterator
+import org.cryptobiotic.rlauxe.audit.MergeStylesIntoCards
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.audit.createElectionRecord
@@ -65,9 +65,9 @@ class CreateCountyAudits(
 
         // read them back in as an Iterator, so we dont have to read all into memory
         val infos = contests.map { it.info() }.associateBy { it.id }
-        val mvrs: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.unsortedMvrsFile())
+        val mvrs: CloseableIterator<CardWithStyleName> = readCardsCsvIterator(publisher.unsortedMvrsFile())
         val auditableCardIter: CloseableIterator<AuditableCard> =
-            MergeBatchesIntoCardManifestIterator(mvrs, countyCardPools)
+            MergeStylesIntoCards(mvrs, countyCardPools)
 
         /* are we handling the batches correctly using mvrs?
         val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
@@ -90,7 +90,7 @@ class CreateCountyAudits(
 
     override fun contestsUA() = contestsUA
 
-    override fun cards(): CloseableIterator<CardWithBatchName> {
+    override fun cards(): CloseableIterator<CardWithStyleName> {
         val publisher = Publisher(auditdir)
         val unsortedMvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
         return TransformingIterator(unsortedMvrs) { mvr ->

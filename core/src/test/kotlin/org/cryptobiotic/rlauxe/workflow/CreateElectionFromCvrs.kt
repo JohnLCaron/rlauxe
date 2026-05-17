@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
 import org.cryptobiotic.rlauxe.audit.ElectionBuilder
@@ -38,12 +38,12 @@ class CreateElectionFromCvrs (
     override fun cards() = createCards()
     override fun ncards() = cvrs.size
 
-    fun createCards(): CloseableIterator<CardWithBatchName> {
+    fun createCards(): CloseableIterator<CardWithStyleName> {
         return CvrsToCardsWithBatchNameIterator(
             auditType,
             Closer(cvrs.iterator()),
             phantomCvrs = null,
-            batches = cardPools ?: batches,
+            styles = cardPools ?: batches,
         )
     }
 }
@@ -68,7 +68,7 @@ class CreateElectionFromCards (
                 pollingMode = PollingMode.withBatches
             )
     }
-    override fun createUnsortedMvrsInternal() = cards.map { CardWithBatchName(it) }
+    override fun createUnsortedMvrsInternal() = cards.map { CardWithStyleName(it) }
     override fun createUnsortedMvrsExternal() = null // Closer(createCards().iterator()) // for out-of-memory case
     override fun cardStyles() = batches
     override fun cardPools() = cardPools
@@ -76,7 +76,7 @@ class CreateElectionFromCards (
     override fun cards() = Closer(createCards().iterator())
     override fun ncards() = cards.size
 
-    fun createCards(): List<CardWithBatchName> {
-        return cards.map { CardWithBatchName(it) }
+    fun createCards(): List<CardWithStyleName> {
+        return cards.map { CardWithStyleName(it) }
     }
 }

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.dominion
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.util.createZipFile
 import kotlin.io.path.createTempFile
 
@@ -11,6 +11,7 @@ const val cvrExportCsvFile = "cvrExport.csv"
 
 class TestCvrExportCsv {
 
+    // Test CvrExport <--> Csv
     @Test
     fun testRoundtrip() {
         val target = CvrExport(
@@ -53,6 +54,7 @@ class TestCvrExportCsv {
         println("delete file $zipFile was successful = $ok")
     }
 
+    // Test CvrExport <--> CardWithBatchName
     @Test
     fun testToAuditableCard() {
         val cvr = CvrExport (
@@ -63,7 +65,7 @@ class TestCvrExportCsv {
         )
         val card = cvr.toCardNoBatch(42, 43L, true, mapOf("test1-2" to 99))
 
-        val target = CardWithBatchName (
+        val target = CardWithStyleName (
             "test1-2-3", null,
             42,
             43L,
@@ -87,7 +89,7 @@ class TestCvrExportCsv {
         )
         val card = cvr.toCardNoBatch(42, 43L, true, mapOf("test1-2" to 99), showPoolVotes=true)
 
-        val target = CardWithBatchName (
+        val target = CardWithStyleName (
             "test1-2-3", null,
             42,
             43L,

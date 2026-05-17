@@ -1,7 +1,7 @@
 package org.cryptobiotic.cli
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
@@ -55,7 +55,7 @@ data class IrvCounter(val rcontest: IrvContest) {
     val vc = VoteConsolidator()
     val contestId = rcontest.id
 
-    fun addCvr( cvr: CardWithBatchName) {
+    fun addCvr( cvr: CardWithStyleName) {
         val votes = cvr.votes!![contestId]
         if (votes != null) {
             vc.addVote(votes)

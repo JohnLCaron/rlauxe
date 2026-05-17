@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
@@ -57,7 +57,7 @@ class TimeCardReading {
         val inputStream = File(publisher.sortedCardsFile()).inputStream()
 
         val bufferSize = 8096 // 100_000
-        val cardIter: CloseableIterator<CardWithBatchName> = IteratorCardsCsvStream(inputStream, 8096)
+        val cardIter: CloseableIterator<CardWithStyleName> = IteratorCardsCsvStream(inputStream, 8096)
         while (cardIter.hasNext()) { //  && ncards < 1000000) {
             val card = cardIter.next()
             ncards++
@@ -159,7 +159,7 @@ class TimeCardReading {
         val styles = mvrManager.styles()
 
         val bufferSize = 100_000
-        val protoFilename = publisher.cardsProtoFile()
+        val protoFilename = publisher.sortedCardsProtoFile()
 
         // also merges the styles
         val protoCards = CloseableIterable { ProtoCardIterator(protoFilename, bufferSize, styles) }

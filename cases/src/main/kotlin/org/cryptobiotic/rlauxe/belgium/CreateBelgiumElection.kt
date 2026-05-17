@@ -41,7 +41,7 @@ class BelgiumClca (
     override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, null)
     override fun createUnsortedMvrsExternal() = null
 
-    fun createCards(): CloseableIterator<CardWithBatchName> {
+    fun createCards(): CloseableIterator<CardWithStyleName> {
         return CvrsToCardsWithBatchNameIterator(
             AuditType.CLCA,
             Closer(allCvrs.iterator()),

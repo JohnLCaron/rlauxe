@@ -3,8 +3,6 @@ package org.cryptobiotic.rlauxe.audit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrIF
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCard
-import kotlin.ranges.until
 
 
 // interface CardIF {
@@ -72,7 +70,7 @@ data class AuditableCard (
         useCvr = CardStyle.useVotes(style.name())
     }
 
-    constructor(card: CardWithBatchName, cardStyle: StyleIF): this(card.id, card.location, card.index, card.prn, card.phantom, card.poolId, card.votes, cardStyle)
+    constructor(card: CardWithStyleName, cardStyle: StyleIF): this(card.id, card.location, card.index, card.prn, card.phantom, card.poolId, card.votes, cardStyle)
     constructor(cvr: Cvr, index: Int, prn: Long): this(cvr.id, null, index, prn, cvr.phantom, cvr.poolId, cvr.votes, style = CardStyle.fromCvrBatch)
 
     override fun toCvr() = Cvr(id, votes!!, phantom, poolId()) // TODO can we get rid of?
@@ -169,7 +167,7 @@ interface CardIF {
 }
 
 // for serialization and ElectionBuilder
-data class CardWithBatchName (
+data class CardWithStyleName (
     val id: String,
     val location: String?, // enough info to find the card for a manual audit.
     val index: Int,  // index into the original, canonical list of cards
@@ -197,7 +195,7 @@ data class CardWithBatchName (
     //// Kotlin data class doesnt handle IntArray and List<IntArray> correctly
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is CardWithBatchName) return false
+        if (other !is CardWithStyleName) return false
 
         if (index != other.index) return false
         if (prn != other.prn) return false

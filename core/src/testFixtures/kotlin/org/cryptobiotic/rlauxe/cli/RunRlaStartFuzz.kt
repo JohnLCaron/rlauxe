@@ -190,7 +190,7 @@ class TestClcaElection(
     override fun contestsUA() = contestsUA
     override fun ncards() = allCvrs.size
 
-    override fun cards() : CloseableIterator<CardWithBatchName> {
+    override fun cards() : CloseableIterator<CardWithStyleName> {
         return CvrsToCardsWithBatchNameIterator(
             AuditType.CLCA,
             Closer(allCvrs.iterator()),
@@ -257,7 +257,7 @@ class TestPollingElection(
     val testMvrs: List<Cvr>
     val batches: List<StyleIF>
     // val pools: List<CardPoolIF>
-    val cards: List<CardWithBatchName>
+    val cards: List<CardWithStyleName>
     val contestsUA: List<ContestWithAssertions>
 
     init {
@@ -275,7 +275,7 @@ class TestPollingElection(
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
         val mvrCardAndPops = testData.makeMvrCardAndPops()
         this.testMvrs  = mvrCardAndPops.mvrs
-        this.cards = mvrCardAndPops.cards.map { CardWithBatchName(it) }
+        this.cards = mvrCardAndPops.cards.map { CardWithStyleName(it) }
         // this.pools = mvrCardAndPops.pools
         this.batches = mvrCardAndPops.batches
 
@@ -388,8 +388,8 @@ class TestOneAuditElection(
 
     // override fun cards() = Closer ( cards.iterator())
 
-    override fun cards() : CloseableIterator<CardWithBatchName> {
-        return Closer( this.cards.map { CardWithBatchName(it) }.iterator())
+    override fun cards() : CloseableIterator<CardWithStyleName> {
+        return Closer( this.cards.map { CardWithStyleName(it) }.iterator())
     }
 
 }

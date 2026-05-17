@@ -49,17 +49,16 @@ class Publisher(val auditDir: String) {
     fun auditRoundProtoFile() = "$auditDir/auditRoundConfig.json"
     // fun auditSeedFile() = "$auditDir/auditSeed.json"
     fun cardManifestFile() = "$auditDir/cardManifest.csv" // cardManifest
-    fun cardsSamplingFile() = "$auditDir/cardsSampling.bin" // just use for sampling
-    fun cardsProtoFile() = "$auditDir/cards.proto" // cardManifest
-    fun cardsProtobufFile() = "$auditDir/cards.protobuf" // cardManifest
     fun cardPoolsFile() = "$auditDir/cardPools.csv"
     fun cardStylesFile() = "$auditDir/cardStyles.json"
     fun contestsFile() = "$auditDir/contests.json"
     fun electionInfoFile() = "$auditDir/electionInfo.json"
+    fun samplingCardsFile() = "$auditDir/samplingCards.bin" //make sampling fast
     fun sortedCardsFile() = "$auditDir/sortedCards.csv" // sorted cardManifest
+    fun sortedCardsProtoFile() = "$auditDir/sortedCards.proto" // cardManifest
 
     // private
-    fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"
+    fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"   // TODO make proto ??
     fun privateOneshotFile() = "$auditDir/private/oneshot.txt"
     fun unsortedMvrsFile() = "$auditDir/private/unsortedMvrs.csv"
 

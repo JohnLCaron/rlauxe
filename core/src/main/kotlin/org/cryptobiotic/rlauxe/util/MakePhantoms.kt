@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.Cvr
 
@@ -86,7 +86,7 @@ fun makePhantomNoBatch(
     contests: List<ContestIF>,
     startIdx: Int,
     prefix: String = "phantom-",
-): List<CardWithBatchName> {
+): List<CardWithStyleName> {
     var idx = startIdx
 
     val phantombs = mutableListOf<PhantomBuilder>()
@@ -115,9 +115,9 @@ class PhantomBuilder(val id: String, val idx: Int) {
         val votes = contests.associateWith { IntArray(0) }
         return AuditableCard(id = id, location = null, index = idx, prn = 0L, phantom = true, poolId = null, votes = votes, style=CardStyle.phantomBatch)
     }
-    fun buildCardNoBatch(): CardWithBatchName {
+    fun buildCardNoBatch(): CardWithStyleName {
         val votes = contests.associateWith { IntArray(0) }
-        return CardWithBatchName(id = id, location = null, index = idx, prn = 0L, phantom = true, votes = votes, poolId = null, styleName=CardStyle.phantoms)
+        return CardWithStyleName(id = id, location = null, index = idx, prn = 0L, phantom = true, votes = votes, poolId = null, styleName=CardStyle.phantoms)
     }
 
 }

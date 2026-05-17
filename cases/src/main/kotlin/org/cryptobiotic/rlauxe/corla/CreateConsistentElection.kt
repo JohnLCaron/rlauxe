@@ -40,9 +40,9 @@ open class CreateConsistentElection (
         } else {
             // read them back in as an Iterator, so we dont have to read all into memory
             val infos = countyElection.contests.map { it.info() }.associateBy { it.id }
-            val mvrs: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.unsortedMvrsFile())
+            val mvrs: CloseableIterator<CardWithStyleName> = readCardsCsvIterator(publisher.unsortedMvrsFile())
             val auditableCardIter: CloseableIterator<AuditableCard> =
-                MergeBatchesIntoCardManifestIterator(mvrs, countyPools)
+                MergeStylesIntoCards(mvrs, countyPools)
             // are we handling the batches correctly using mvrs?
             val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
             require(ncards == count)
@@ -65,7 +65,7 @@ open class CreateConsistentElection (
     override fun ncards() = ncards
 
     // TODO verify election creation, verify audit creation
-    override fun cards(): CloseableIterator<CardWithBatchName> {
+    override fun cards(): CloseableIterator<CardWithStyleName> {
         val unsortedMvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
         return TransformingIterator(unsortedMvrs) { mvr ->
             when {

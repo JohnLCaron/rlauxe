@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.sf.TestSfCardStyles.StylesCount
+import org.cryptobiotic.rlauxe.util.nfn
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.test.Test
@@ -18,16 +19,33 @@ class TestSfCardStyles {
     val ballotTypesContestManifest: BallotTypesContestManifest =
         readBallotTypeContestManifestUnwrapped("src/test/data/SF2024/manifests/BallotTypeContestManifest.json")!!
 
+    //// Pass 1 - PoolCardStyles
     @Test
     fun showPoolCardStyles() {
+        println("showCardStyles in Pools")
+        showPoolCardStyles(1, "pools", "24-")
+    }
+
+    @Test
+    fun showNonPoolCardStyles() {
+        println("showCardStyles in Non-Pools")
+        showPoolCardStyles(2, "non-pools", "5-")
+    }
+
+    fun groupKey(cex: CvrExport): String {
+        val lastIdx = cex.id.lastIndexOf('-')
+        return cex.id.substring(0, lastIdx)
+    }
+
+    fun showPoolCardStyles(group: Int, what: String, poolName: String) {
         val poolMap: MutableMap<String, PoolCardStyles> = mutableMapOf()
         var cardCount = 0
         cvrExportCsvIterator(cvrExportCsv).use { cvrIter ->
             while (cvrIter.hasNext()) {
                 cardCount++
                 val cvrExport: CvrExport = cvrIter.next()
-                if (cvrExport.group == 1) { // only want the pools
-                    val poolName = cvrExport.poolKey()
+                if (cvrExport.group == group) { // only from this group
+                    val poolName = groupKey(cvrExport)
                     val poolStyles = poolMap.getOrPut(poolName) { PoolCardStyles(poolName) }
                     poolStyles.countInPool++
 
@@ -38,28 +56,30 @@ class TestSfCardStyles {
                 }
             }
         }
-        println("count cards = ${cardCount}\n")
+        println(" cards in $what = ${cardCount}")
+        println(" groups in $what = ${poolMap.size}\n")
 
         var allOverlap = 0
         var allSave = 0
-        var poolCount = 0
+        var poolIdx = 0
         poolMap.toSortedMap().forEach { (_, pool) ->
-            poolCount++
-            if (pool.name.startsWith("24-")) {
+            poolIdx++
+            if (pool.name.startsWith(poolName)) { // just one pool
                 val allContests = mutableSetOf<Int>()
-                println("Pool $poolCount ${pool.name}  countInPool ${pool.countInPool} precincts=${pool.precincts}")
+                println("Pool $poolIdx '${pool.name}'  #cardsInGroup ${pool.countInPool} number of precincts in this group=${pool.precincts}")
                 var ncontests = 0
                 pool.styles.forEach { (_, style) ->
-                    println("   countHasStyle=${style.countHasStyle} #contests=${style.contests.size} contests=${style.contests}")
+                    println("   #cardsInStyle=${style.countHasStyle} contests=${style.contests} (${style.contests.size})")
                     allContests.addAll(style.contests)
                     ncontests += style.contests.size
                 }
+
                 var save = 0
                 pool.styles.forEach { (_, style) ->
-                    save += allContests.size - style.contests.size
+                    save += (allContests.size - style.contests.size)
                 }
                 val overlap = ncontests - allContests.size
-                println("save=$save overlap=${ncontests - allContests.size} #allContests=${allContests.size}")
+                println("save=$save contestsAreDisjunct=${overlap == 0} total #contestsInGroup=${allContests.size}")
                 println()
 
                 allOverlap += overlap
@@ -100,49 +120,66 @@ class TestSfCardStyles {
         }
     }
 
+    //// CardStyleCounter
+
     @Test
     fun showCardStyles() {
-        val cardStyles1 = mutableMapOf<Set<Int>, CardStyleCounter>() // contests.hashCode -> contests
-        val cardStylesAll = mutableMapOf<Set<Int>, CardStyleCounter>() // contests.hashCode -> contests
+        val cardStyles = mutableMapOf<Set<Int>, CardStyleCounter>() // contests.hashCode -> contests
+        val ballotStyles = mutableMapOf<Int, BallotStyleCounter>() // contests.hashCode -> contests
         var cardCount = 0
         cvrExportCsvIterator(cvrExportCsv).use { cvrIter ->
             while (cvrIter.hasNext()) {
                 cardCount++
                 val cvrExport: CvrExport = cvrIter.next()
-                if (cvrExport.group == 1) { // only want the precinct voting
-                    val cardStyle = cardStyles1.getOrPut(cvrExport.votes.keys) { CardStyleCounter(cardStyles1.size + 1, cvrExport.votes.keys) }
-                    cardStyle.count++
-                }
-                val cardStyle = cardStylesAll.getOrPut(cvrExport.votes.keys) { CardStyleCounter(cardStylesAll.size + 1, cvrExport.votes.keys) }
-                cardStyle.count++
+                val csc = cardStyles.getOrPut(cvrExport.votes.keys) { CardStyleCounter(cardStyles.size + 1, cvrExport.votes.keys) }
+                csc.count++
+                csc.ballotStyleIds.add(cvrExport.ballotStyleId)
+
+                val csca = ballotStyles.getOrPut(cvrExport.ballotStyleId) { BallotStyleCounter(cvrExport.ballotStyleId) }
+                csca.count++
+                csca.contestStyles.add(cvrExport.votes.keys)
             }
         }
         println("count cards = ${cardCount}\n")
 
-        println("card styles in precincts (${cardStyles1.size})")
-        val sorted1 = cardStyles1.toList().sortedBy { it.second.count }
-        sorted1.forEach { (_, pv) ->
-            println(pv)
-        }
-        println("\nall card styles (${cardStylesAll.size})")
-        val sortedAll = cardStylesAll.toList().sortedBy { it.second.count }
-        sortedAll.forEach { (_, pv) ->
+        println("card styles  (${cardStyles.size})")
+        println("\ncount ballotStyleIds  contests")
+        val sortedCardStyles = cardStyles.toList().sortedBy { it.second.count }
+        sortedCardStyles.forEach { (_, pv) ->
             println(pv)
         }
 
-        cardStylesAll.forEach { (key, fromAll) ->
-            val from1 = cardStyles1[key]!!
-            assertEquals(fromAll.contests, from1.contests)
+        println("\nballot styles (${ballotStyles.size})")
+        println("\ncount cardStyles =? ncards per ballot?")
+        val sortedBallotStyles = ballotStyles.toList().sortedBy { it.second.count }
+        sortedBallotStyles.forEach { (_, pv) ->
+            println(pv)
         }
     }
 
     class CardStyleCounter(val id: Int, val contests: Set<Int>) {
         var count = 0
+        val ballotStyleIds = mutableSetOf<Int>()
+
         override fun toString(): String {
-            return "$count $contests)"
+            return "${nfn(count, 5)} ${nfn(ballotStyleIds.size, 3)} $contests"
+        }
+    }
+
+    class BallotStyleCounter(val ballotStyle: Int) {
+        var count = 0
+        val contestStyles = mutableSetOf<Set<Int>>()
+
+        fun add(contests: Set<Int>) {
+            contestStyles.add(contests)
         }
 
+        override fun toString(): String {
+            return "${nfn(count, 5)} ${nfn(contestStyles.size, 3)}"
+        }
     }
+
+    //// Styles by Precinct
 
     @Test
     fun showPrecinctStyles() {

@@ -15,7 +15,9 @@ import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import java.io.BufferedReader
 import java.io.File
+import java.nio.file.Files
 import kotlin.collections.forEach
+import kotlin.io.path.Path
 import kotlin.text.split
 
 class CountyAudit(
@@ -29,37 +31,6 @@ class CountyAudit(
 ): AuditRecord(location, config, contests, rounds, nmvrs)  {
 
     override fun auditdir() = "$location/audit"
-
-    //// problem is you lose the cache is you close and open the AuditRecord between samplings
-    // caching takes about 10 secs
-
-    val styles by lazy { this.readCardStyles() ?: this.readCardPools() } // styles are preferred
-
-    val samplingCards : List<SamplingCardIF> by lazy {
-        logger.info{"using cardsSamplingFile at ${publisher.cardsSamplingFile()}"}
-
-        val bufferSize = 100_000
-        val cardIter = SamplingCardIterator(publisher.cardsSamplingFile(), styles!!, bufferSize)
-        val cards = mutableListOf<SamplingCard>()
-        while (cardIter.hasNext()) {
-            cards.add(cardIter.next())
-        }
-        cards.toList()
-    }
-
-    override fun readSamplingCards(): CloseableIterable<SamplingCardIF> {
-        return CloseableIterable { samplingCards.iterator() }
-    }
-
-    // use proto cards
-    override fun readSortedManifest(styles: List<StyleIF>?): CardManifest {
-        val bufferSize = 100_000
-        val protoFilename = publisher.cardsProtoFile()
-
-        val protoManifest = CloseableIterable { ProtoCardIterator(protoFilename, bufferSize, styles) }
-        logger.info{"using cardsProtoFile at ${protoFilename}"}
-        return CardManifest(protoManifest, electionInfo.totalCardCount)
-    }
 
     // for viewer
     fun countMvrsByCounty(): Map<String, CountyData> {

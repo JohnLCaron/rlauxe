@@ -4,9 +4,9 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterator
+import org.cryptobiotic.rlauxe.audit.MergeStylesIntoCards
 import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
@@ -125,18 +125,18 @@ data class MultiContestTestData(
         ) */
 
         // convert MVRS to cardWithBatchName
-        val batchNameIter: CloseableIterator<CardWithBatchName> = CvrsToCardsWithBatchNameIterator(
+        val batchNameIter: CloseableIterator<CardWithStyleName> = CvrsToCardsWithBatchNameIterator(
             auditType,
             cvrs = Closer( mvrs.iterator()),  // hmmm fishy
             phantomCvrs = null, // mvrs already have the phantoms
-            batches = cardStyleWithNcards,
+            styles = cardStyleWithNcards,
         )
 
         // cardWithBatchName to AuditableCard
         val cards = mutableListOf<AuditableCard>()
-        val converter: CloseableIterator<AuditableCard> = MergeBatchesIntoCardManifestIterator(
+        val converter: CloseableIterator<AuditableCard> = MergeStylesIntoCards(
             batchNameIter,
-            batches = cardStyleWithNcards,
+            styles = cardStyleWithNcards,
         )
         converter.forEach { it ->
             cards.add(it)
@@ -188,11 +188,11 @@ data class MultiContestTestData(
         return cvrb.build(poolId)
     }
 
-    fun makeCardsFromContests(startCvrId : Int = 0): List<CardWithBatchName> {
+    fun makeCardsFromContests(startCvrId : Int = 0): List<CardWithStyleName> {
         contestTestBuilders.forEach { it.resetTracker() } // startFresh
 
         var nextCardId = startCvrId
-        val result = mutableListOf<CardWithBatchName>()
+        val result = mutableListOf<CardWithStyleName>()
         cardStyleWithNcards.forEach { cardStyle ->
             val fcontests = contestTestBuilders.filter { cardStyle.hasContest(it.info.id) }
             repeat(cardStyle.ncards) {
@@ -206,7 +206,7 @@ data class MultiContestTestData(
         return result
     }
 
-    private fun makeCard(nextCardId: Int, fcontests: List<ContestTestDataBuilder>, poolId: Int?, cardStyle: String?): CardWithBatchName {
+    private fun makeCard(nextCardId: Int, fcontests: List<ContestTestDataBuilder>, poolId: Int?, cardStyle: String?): CardWithStyleName {
         val cardBuilder = CardWithBatchNameBuilder("card${nextCardId}", null, nextCardId, poolId, cardStyle)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build(poolId)

@@ -1,7 +1,8 @@
 plugins {
     kotlin("jvm")
-    // alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlinx.serialization)
+    id("com.google.protobuf") version "0.10.0"
+
     id ("java-test-fixtures")
     `java-test-fixtures`
 }
@@ -19,6 +20,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.serialization.protobuf)
     implementation(libs.bundles.logging)
+    implementation(libs.google.protobuf)
 
     testImplementation(platform("org.junit:junit-bom:5.13.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -38,6 +40,21 @@ dependencies {
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.logback.classic)
+}
+
+protobuf {
+    protoc {
+        path = "/home/stormy/install/protoc/bin/protoc"
+    }
+
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                // Generates idiomatic Kotlin DSLs
+                create("kotlin")
+            }
+        }
+    }
 }
 
 tasks.test {

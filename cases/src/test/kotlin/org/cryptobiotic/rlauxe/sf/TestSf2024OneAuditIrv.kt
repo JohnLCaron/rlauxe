@@ -23,6 +23,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.verify.AssortAvg
+import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import org.cryptobiotic.rlauxe.workflow.readSortedManifest
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.math.roundToInt
@@ -40,7 +41,8 @@ class TestSf2024OneAuditIrv() {
     init {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
         val auditRecord = AuditRecord.read(auditdir) as AuditRecord
-        cardManifest = auditRecord.readSortedManifest()
+        val mvrManager = PersistedMvrManager(auditRecord)
+        cardManifest = mvrManager.sortedManifest()
         config = auditRecord.config
         contests = auditRecord.contests
         infos = contests.map{ it.contest.info() }.associateBy { it.id }

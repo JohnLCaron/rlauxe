@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.persist.CardManifest
 import org.cryptobiotic.rlauxe.persist.CompositeRecordIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
@@ -21,10 +22,7 @@ open class CompositeMvrManager(
 
     val publisher = Publisher(auditRecord.componentRecords.first().location)
 
-    // override fun sortedManifest() = readCardManifestComposite(publisher)
-    override fun sortedManifest() = auditRecord.readSortedManifest()
-
-    override fun batches(): List<StyleIF>? {
+    override fun styles(): List<StyleIF>? {
         return readBatchesComposite(publisher)
     }
 
@@ -34,6 +32,10 @@ open class CompositeMvrManager(
 
     override fun writeMvrsForRound(round: Int): Int {
         TODO("Not yet implemented")
+    }
+
+    override fun sortedManifest(): CardManifest {
+        return auditRecord.readSortedManifest(styles())
     }
 
     override fun pools(): List<CardPool>? {

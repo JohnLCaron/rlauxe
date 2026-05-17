@@ -29,7 +29,7 @@ class TestAuditRound {
         mvrs.mapIndexed { idx, it -> AuditableCard(it, idx, prng.next()) }
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
-        consistentSampling(auditRound, mvrManager.sortedManifest())
+        consistentSampling(auditRound, mvrManager.samplingCards())
 
         contestRounds.forEach { contestRound ->
             val firstAssertion = contestRound.assertionRounds.first()

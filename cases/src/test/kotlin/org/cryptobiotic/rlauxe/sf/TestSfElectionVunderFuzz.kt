@@ -33,7 +33,8 @@ class TestSfElectionVunderFuzz {
     init {
         val auditRecord = AuditRecord.read(auditdir) as AuditRecord
         mvrManager = PersistedMvrManager(auditRecord)
-        cardManifest = auditRecord.readSortedManifest()
+        val mvrManager = PersistedMvrManager(auditRecord)
+        cardManifest = mvrManager.sortedManifest()
         config = auditRecord.config
         contests = auditRecord.contests
         infos = contests.map { it.contest.info() }.associateBy { it.id }

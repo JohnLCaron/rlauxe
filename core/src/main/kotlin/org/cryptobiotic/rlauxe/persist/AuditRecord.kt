@@ -15,6 +15,7 @@ import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.Config
+import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.*
@@ -31,8 +32,10 @@ interface AuditRecordIF {
     val contests: List<ContestWithAssertions>
     val rounds: List<AuditRoundIF>
 
-    fun readSortedManifest(): CardManifest
-    fun readSortedManifest(batches: List<StyleIF>?): CardManifest
+    // fun readSortedManifest(): CardManifest
+    fun readSortedManifest(styles: List<StyleIF>?): CardManifest
+    fun readSamplingCards(): CloseableIterable<SamplingCardIF>?
+
     fun readOneShotMvrs(): Map<Int, Int>
     fun readCardStyles(): List<StyleIF>?
     fun name(): String
@@ -52,20 +55,21 @@ open class AuditRecord(
     override fun auditdir() = location // it.location.substring(stateRecord.location.length)
     override fun name() = electionInfo.electionName // it.location.substring(stateRecord.location.length)
 
-    // for efficiency, batches can be read once and stored by the caller
-    override fun readSortedManifest(batches: List<StyleIF>?): CardManifest {
-        // merge batch references into the Card
+    override fun readSamplingCards(): CloseableIterable<SamplingCardIF>? = null
+
+    override fun readSortedManifest(styles: List<StyleIF>?): CardManifest {
+        // merge style references into the Card
         val mergedCards: CloseableIterable<AuditableCard> =
             MergeBatchesIntoCardManifestIterable(
                 CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
-                batches ?: emptyList(),
+                styles ?: emptyList(),
             )
         return CardManifest(mergedCards, electionInfo.totalCardCount)
     }
 
+    /*
     override fun readSortedManifest(): CardManifest {
         val batches = readCardPools() ?: readCardStyles() ?: emptyList() // pools are preferred
-        // merge batch references into the Card
         val mergedCards =
             MergeBatchesIntoCardManifestIterable(
                 CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
@@ -73,7 +77,7 @@ open class AuditRecord(
             )
 
         return CardManifest(mergedCards, electionInfo.totalCardCount)
-    }
+    } */
 
     override fun readCardStyles(): List<StyleIF>? {
         return if (!Files.exists(Path(publisher.cardStylesFile()))) null else {

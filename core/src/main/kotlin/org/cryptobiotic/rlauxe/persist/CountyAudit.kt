@@ -4,16 +4,15 @@ import com.github.michaelbull.result.unwrap
 import com.github.michaelbull.result.unwrapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.AuditableCardProto
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
+import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.persist.csv.SamplingCard
+import org.cryptobiotic.rlauxe.persist.csv.SamplingCardIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.protobuf.AuditableCardProtoIterator
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtobufCardIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import java.io.BufferedReader
 import java.io.File
 import kotlin.collections.forEach
@@ -31,6 +30,38 @@ class CountyAudit(
 
     override fun auditdir() = "$location/audit"
 
+    //// problem is you lose the cache is you close and open the AuditRecord between samplings
+    // caching takes about 10 secs
+
+    val styles by lazy { this.readCardStyles() ?: this.readCardPools() } // styles are preferred
+
+    val samplingCards : List<SamplingCardIF> by lazy {
+        val bufferSize = 100_000
+        val cardIter = SamplingCardIterator(publisher.cardsSamplingFile(), styles!!, bufferSize)
+        val cards = mutableListOf<SamplingCard>()
+        while (cardIter.hasNext()) {
+            cards.add(cardIter.next())
+        }
+        cards.toList()
+    }
+
+    override fun readSamplingCards(): CloseableIterable<SamplingCardIF> {
+        return CloseableIterable { samplingCards.iterator() }
+    }
+
+    // use proto cards
+    override fun readSortedManifest(styles: List<StyleIF>?): CardManifest {
+        val bufferSize = 100_000
+        val protoFilename = publisher.cardsProtoFile()
+
+        val protoManifest = CloseableIterable { ProtobufCardIterator(protoFilename, bufferSize, styles) }
+        // val protoManifest: CloseableIterable<AuditableCardProto> = CloseableIterable { AuditableCardProtoIterator(protoFilename, bufferSize, styles) }
+        logger.info{"using cardsProtoFile at ${protoFilename}"}
+        return CardManifest(protoManifest, electionInfo.totalCardCount)
+    }
+
+
+    // for viewer
     fun countMvrsByCounty(): Map<String, CountyData> {
         if (rounds.isEmpty()) return emptyMap()
         val lastRound = rounds.last() // TODO last round that has results
@@ -52,15 +83,6 @@ class CountyAudit(
         logger.info{ "countMvrsByCounty mvrs=$count sumCounties = ${ countyData.values.sumOf { it.nmvrs } }"}
 
         return countyData.toSortedMap()
-    }
-
-    // use proto cards
-    override fun readSortedManifest(batches: List<StyleIF>?): CardManifest {
-        val bufferSize = 100_000
-        val protoFilename = publisher.cardsProtoFile()
-        val protoManifest: CloseableIterable<AuditableCardProto> = CloseableIterable { AuditableCardProtoIterator(protoFilename, bufferSize, batches) }
-        logger.info{"using cardsProtoFile at ${protoFilename}"}
-        return CardManifest(protoManifest, electionInfo.totalCardCount)
     }
 
     companion object {

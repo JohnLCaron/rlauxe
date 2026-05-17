@@ -45,7 +45,7 @@ class MvrManagerForTesting(
     }
 
     override fun pools() = pools
-    override fun batches() = pools
+    override fun styles() = pools
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCardIF>> {
         if (mvrsForRound.isEmpty()) {

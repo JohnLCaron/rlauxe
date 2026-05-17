@@ -8,7 +8,9 @@ import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestRound
+import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import kotlin.io.path.Path
 import kotlin.io.path.exists
@@ -52,12 +54,11 @@ data class CompositeRecord(
 
     override fun auditdir() = "$location/audit"
 
-    override fun readSortedManifest(batches: List<StyleIF>?): CardManifest {
-        return componentRecords.first().readSortedManifest(batches)
+    override fun readSortedManifest(styles: List<StyleIF>?): CardManifest {
+        return componentRecords.first().readSortedManifest(styles)
     }
-    override fun readSortedManifest(): CardManifest {
-        return componentRecords.first().readSortedManifest() // barf
-    }
+
+    override fun readSamplingCards(): CloseableIterable<SamplingCardIF>? = null
 
     override fun readOneShotMvrs() = emptyMap<Int, Int>()
 

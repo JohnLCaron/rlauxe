@@ -51,7 +51,7 @@ class EstimateAudit(
     val roundIdx: Int,
     val contests: List<ContestRound>,
     val pools: List<CardPool>?,
-    val batches: List<StyleIF>?,
+    val styles: List<StyleIF>?,
     val cardManifest: CardManifest,
 ) {
     val auditType = config.auditType
@@ -71,7 +71,7 @@ class EstimateAudit(
         // each trial is running all the contests in the round (but only the minAssertion)
         val ntrials = if (auditType.isClca()) 1 else config.round.simulation.nsimTrials
         repeat(ntrials) { run ->
-            tasks.add(AuditTrialTask(auditdir, roundIdx, run+1, config, contestsToAudit, pools, batches, cardManifest))
+            tasks.add(AuditTrialTask(auditdir, roundIdx, run+1, config, contestsToAudit, pools, styles, cardManifest))
         }
         val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunner<List<AssertionTrialIF>>().run(tasks, nthreads)
 

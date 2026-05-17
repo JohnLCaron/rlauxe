@@ -16,6 +16,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.verify.VerifyAuditRoundCommitment
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
+import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import java.nio.file.Files.notExists
 import java.nio.file.Path
@@ -149,24 +150,21 @@ fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7, verify:Boolean = tr
 
 // for testing
 fun resampleAndSaveResults(auditdir: String): Boolean {
-    val auditRecord = AuditRecord.read(auditdir)!!
-    return resampleAndSaveResults(auditdir, auditRecord.rounds.last() as AuditRound)
+    val auditRecord = AuditRecord.read(auditdir)!! as AuditRecord
+    return resampleAndSaveResults(auditRecord, auditRecord.rounds.last())
 }
 
 // for viewer
-fun resampleAndSaveResults(auditdir: String, lastRound: AuditRound): Boolean {
+fun resampleAndSaveResults(auditRecord: AuditRecord, lastRound: AuditRound): Boolean {
     try {
-        val auditRecord = AuditRecord.read(auditdir)!!
+        val mvrManager = PersistedMvrManager(auditRecord)
 
         // resample
         val previousSamples = auditRecord.rounds.previousSamplePrns(lastRound.roundIdx)
-        // TODO removeContestsAndSample or consistentSampling??
-        // removeContestsAndSample(auditRecord.config.round.sampling, auditRecord.readSortedManifest(), lastRound, previousSamples)
-        val sortedManifest = auditRecord.readSortedManifest(auditRecord.readCardStyles())
-        chooseSamples(auditRecord.config.sampling, lastRound, sortedManifest, previousSamples)
+        chooseSamples(auditRecord.config.sampling, lastRound, mvrManager.samplingCards(), previousSamples)
 
         // writeAuditState
-        val publisher = Publisher(auditdir)
+        val publisher = Publisher(auditRecord.location)
         writeAuditRoundJsonFile(lastRound, publisher.auditEstFile(lastRound.roundIdx))
         logger.info {"resampleAndRun writeAuditEstimation to ${publisher.auditEstFile(lastRound.roundIdx)}"}
 

@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.irv.RaireAssorter
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -21,6 +20,7 @@ import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateOneAuditPools
 import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -32,22 +32,27 @@ import kotlin.use
 // for all audit types. Cards and CardPools must already be published, contests might not,
 // but only if you call cerify with the contests' note only then do you get contestUA.preAuditStatus saved
 class VerifyContests(val auditRecordLocation: String, val show: Boolean = false) {
-    val auditRecord: AuditRecord
+    // val auditRecord: AuditRecord
     val config: Config
     val allContests: List<ContestWithAssertions>?
     val allInfos: Map<Int, ContestInfo>?
     val cardManifest: CardManifest
+    val cardPools: List<CardPoolIF>?
 
     init {
         val result = AuditRecord.readWithResult(auditRecordLocation)
-        auditRecord = if (result.isOk) result.unwrap() else {
+        val auditRecord = if (result.isOk) result.unwrap() else {
             println(result.unwrapError())
             throw RuntimeException(result.unwrapError().toString())
         }
         config = auditRecord.config
         allContests = auditRecord.contests.sortedBy { it.id }
         allInfos = allContests.map{ it.contest.info() }.associateBy { it.id }
-        cardManifest = auditRecord.readSortedManifest()
+
+        val mvrManager = PersistedMvrManager(auditRecord)
+
+        cardManifest = mvrManager.sortedManifest()
+        cardPools = mvrManager.pools()
     }
 
     fun verify() = verify( allContests!!, show = show)
@@ -66,7 +71,6 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
 
         // OA
         if (config.isOA) {
-            val cardPools = auditRecord.readCardPools()
             if (cardPools != null) {
                 verifyOAagainstCards(contests, contestSummary, cardPools, infos, results, show = show)
                 verifyOAassortAvg(contests, cardManifest.cards.iterator(), results, show = show)
@@ -236,7 +240,7 @@ fun verifyManifest(
 fun verifyOAagainstCards(
     contests: List<ContestWithAssertions>,
     contestSummary: ContestSummary,
-    cardPools: List<CardPool>,
+    cardPools: List<CardPoolIF>,
     infos: Map<Int, ContestInfo>,
     result: VerifyResults,
     show: Boolean = false
@@ -439,7 +443,7 @@ fun verifyOAassortAvg(
 fun verifyOApools(
     contestsUA: List<ContestWithAssertions>,
     contestSummary: ContestSummary,
-    cardPools: List<CardPool>,
+    cardPools: List<CardPoolIF>,
     result: VerifyResults,
     show: Boolean = false
 ): VerifyResults {

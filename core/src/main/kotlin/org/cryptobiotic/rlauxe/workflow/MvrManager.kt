@@ -4,7 +4,9 @@ import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 
 // use MvrManager for auditing, not creating an audit
@@ -12,11 +14,13 @@ interface MvrManager {
     // TODO why does mvrManager manage these ?? maybe let AuditWorkflow ??
     fun sortedManifest(): CardManifest
     fun pools(): List<CardPool>?
-    fun batches(): List<StyleIF>?
+    fun styles(): List<StyleIF>?
 
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCardIF>>  // Pair(mvr, cvr)
     fun writeMvrsForRound(round: Int): Int
     fun auditdir() = "none"
+
+    fun samplingCards(): CloseableIterable<SamplingCardIF> = sortedManifest().cards
 }
 
 // when the MvrManager supplies the audited mvrs, its a test

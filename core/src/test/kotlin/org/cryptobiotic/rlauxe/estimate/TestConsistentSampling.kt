@@ -37,7 +37,7 @@ class TestConsistentSampling {
         ////    auditRound.newmvrs = newMvrs
         ////    auditRound.samplePrns = sampledCards.map { it.prn }
         ////    contestRound.maxSampleAllowed = sampledCards.size
-        consistentSampling(auditRound, mvrManager.sortedManifest())
+        consistentSampling(auditRound, mvrManager.samplingCards())
         println("nsamples needed = ${auditRound.samplePrns.size}\n")
         assertEquals(auditRound.samplePrns.size, auditRound.nmvrs)
         assertEquals(auditRound.nmvrs, auditRound.newmvrs)
@@ -76,7 +76,7 @@ class TestConsistentSampling {
         val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong())
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
-        consistentSampling(auditRound, mvrManager.sortedManifest())
+        consistentSampling(auditRound, mvrManager.samplingCards())
         println("nsamples needed = ${auditRound.samplePrns.size}\n")
 
         // must be ordered
@@ -133,7 +133,7 @@ class TestConsistentSampling {
                 auditRound.roundIdx,
                 auditRound.contestRounds,
                 mvrManager.pools(),
-                mvrManager.batches(),
+                mvrManager.styles(),
                 mvrManager.sortedManifest()
             )
             estimate.run(nthreads=null, contestOnly=null)
@@ -156,7 +156,7 @@ class TestConsistentSampling {
             //    contestRound.done = true
             removeContestsAndSample(
                 sampleControl,
-                mvrManager.sortedManifest(),
+                mvrManager.samplingCards(),
                 auditRound,
                 emptySet(),
             )

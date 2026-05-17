@@ -39,7 +39,6 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
         val stopwatch = Stopwatch()
 
         val mvrManager = mvrManager()
-        val sortedManifest = mvrManager.sortedManifest()
 
         // estimate how many samples are needed for each contest, to satisfy the risk function,
         val estimate = EstimateAudit(
@@ -48,8 +47,8 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
             auditRound.roundIdx,
             auditRound.contestRounds,
             mvrManager().pools(),
-            mvrManager().batches(),
-            sortedManifest
+            mvrManager().styles(),
+            mvrManager.sortedManifest()
         )
         estimate.run(nthreads=null, contestOnly=null)
 
@@ -66,7 +65,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
         //    contestRound.maxSampleAllowed = sampledCards.size
         removeContestsAndSample(
             config.round.sampling,
-            sortedManifest,
+            mvrManager.samplingCards(),
             auditRound,
             previousSamples = previousSamples,
         )

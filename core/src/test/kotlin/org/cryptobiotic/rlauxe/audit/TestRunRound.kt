@@ -30,6 +30,6 @@ class TestRunRound {
             contestRound.included = false
         }
 
-        resampleAndSaveResults(auditdir, lastRound as AuditRound)
+        resampleAndSaveResults(auditRecord as AuditRecord, lastRound as AuditRound)
     }
 }

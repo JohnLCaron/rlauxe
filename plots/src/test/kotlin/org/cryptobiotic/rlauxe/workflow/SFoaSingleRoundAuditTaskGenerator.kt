@@ -52,7 +52,7 @@ class SfoaSingleRoundAuditTask(
 
         val rlauxAudit = PersistedWorkflow.readFrom(auditDir)!!
         val mvrManager = rlauxAudit.mvrManager()
-        val batches = mvrManager.batches()
+        val batches = mvrManager.styles()
 
         rlauxAudit.contestsUA().forEach { contestUA ->
             contestUA.clcaAssertions.forEach { cassertion ->

@@ -17,7 +17,7 @@ class TestCompositeRecord {
         val workflow = PersistedWorkflow(compositeRecord, mvrWrite = false)
         val manager = workflow.mvrManager()
         println("pools = ${manager.pools()}")
-        println("batches = ${manager.batches()}")
+        println("batches = ${manager.styles()}")
         val manifest = manager.sortedManifest()
         println("manifest.ncards = ${manifest.ncards}")
 
@@ -34,7 +34,7 @@ class TestCompositeRecord {
         val workflow = PersistedWorkflow(compositeRecord, mvrWrite = false)
         val manager = workflow.mvrManager()
         println("pools = ${manager.pools()}")
-        println("batches = ${manager.batches()}")
+        println("batches = ${manager.styles()}")
         val manifest = manager.sortedManifest()
         println("manifest.ncards = ${manifest.ncards}")
 
@@ -52,7 +52,7 @@ class TestCompositeRecord {
         val workflow = PersistedWorkflow(countyAudit, mvrWrite = false)
         val manager = workflow.mvrManager()
         println("pools = ${manager.pools()?.size}")
-        println("batches = ${manager.batches()?.size}")
+        println("batches = ${manager.styles()?.size}")
         val manifest = manager.sortedManifest()
         println("manifest.ncards = ${manifest.ncards}")
     }
@@ -67,7 +67,7 @@ class TestCompositeRecord {
         val workflow = PersistedWorkflow(countyAudit, mvrWrite = false)
         val manager = workflow.mvrManager()
         println("pools = ${manager.pools()?.size}")
-        println("batches = ${manager.batches()?.size}")
+        println("batches = ${manager.styles()?.size}")
         val manifest = manager.sortedManifest()
         println("manifest.ncards = ${manifest.ncards}")
 

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.testdataDir
-import kotlin.test.Test
+import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 
 class TestOneShot {
 
@@ -28,6 +28,7 @@ class TestOneShot {
         val record = AuditRecord.read(auditdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)
+        val mvrManager = PersistedMvrManager(record)
 
         val roundIdx = 4
         val auditRound = record.rounds[roundIdx-1]
@@ -36,9 +37,9 @@ class TestOneShot {
             record.config,
             roundIdx,
             auditRound.contestRounds,
-            pools = record.readCardPools(),
-            batches = record.readCardStyles(),
-            cardManifest = record.readSortedManifest(),
+            pools = mvrManager.pools(),
+            styles = mvrManager.styles(),
+            cardManifest = mvrManager.sortedManifest(),
         )
         estaudit.run()
     }

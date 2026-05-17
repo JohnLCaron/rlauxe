@@ -1,22 +1,18 @@
-package org.cryptobiotic.rlauxe.persist.proto
+package org.cryptobiotic.rlauxe.persist.protobuf
 
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
-import org.cryptobiotic.rlauxe.audit.AuditableCardProto
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
+import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.CsvCardUsingArrays
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCard
-import org.cryptobiotic.rlauxe.persist.protobuf.AuditableCardProtoIterator
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardBunchIterator
-import org.cryptobiotic.rlauxe.persist.protobuf.publishProto
-import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -28,7 +24,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class TestProtoCard {
+class TestProtobuf {
 
     // @Test
     fun testConvert(card: CardWithBatchName) {
@@ -50,30 +46,37 @@ class TestProtoCard {
     } */
 
     @Test
-    fun writeProtoFile () {
+    fun writeProtobufFile () {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val publisher = Publisher("$topdir/audit")
         val cardIter: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.cardManifestFile())
 
-        val protoFilename = "${topdir}/audit/cards.proto"
+        val protoFilename = "${topdir}/audit/cards.protobuf"
         val outputStream: OutputStream = FileOutputStream(protoFilename)
 
         val stopwatch = Stopwatch()
-        val ncards = writeProtoCards(cardIter, outputStream)
+        // fun writeProtobufCards(cards: CloseableIterator<CardIF>, output: OutputStream): Int {
+        val ncards = writeProtobufCards(cardIter, outputStream)
         outputStream.close()
         println("writeProtoFile ncards = $ncards, took $stopwatch")
     }
 
     @Test
-    fun timeReadProto () {
-        val protoFilename = "${testdataDir}/temp/cards.proto"
+    fun timeReadProtobuf () {
+        val topdir = "${testdataDir}/cases/corla/consistent"
+        val protoFilename = "${topdir}/audit/cards.protobuf"
         val bufferSize = 100_000
+
+        val countyAudit = AuditRecord.read(topdir) as CountyAudit
+        val mvrManager = PersistedMvrManager(countyAudit)
+        val styles = mvrManager.styles()
 
         val stopwatch = Stopwatch()
         var ncards = 0L
 
         var accum = 0
-        val protoIter: CloseableIterator<AuditableCardProto> = AuditableCardProtoIterator(protoFilename, bufferSize)
+        // class ProtobufCardIterator(filename: String, bufferSize: Int, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCardProtobuf> {
+        val protoIter: CloseableIterator<AuditableCardProtobuf> = ProtobufCardIterator(protoFilename, bufferSize, styles)
         while (protoIter.hasNext()) { //  && ncards < 1000_000) {
             val card = protoIter.next()
             accum += card.index() // prevent optimization
@@ -83,93 +86,32 @@ class TestProtoCard {
         val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ncards.toDouble()
         val secPer = msPer / 1000
 
-        println("timeReadProto ($bufferSize):  ncards = $ncards, accum=$accum took $stopwatch = $msPer ms/card")
-        val totalCards = 4982747
-        println("time to read all cards = ${dfn(totalCards * secPer, 3)} secs")
-    }
-    // ===========================
-    //ok 16 sec reading: use proto, CardUsingArrays, init votes lazily
-    //
-    //vs 52?
-    //should speed up Consistent sampling by 3x ??
-
-    @Test
-    fun timeReadCsv () {
-        val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
-
-        val stopwatch = Stopwatch()
-        var ncards = 0L
-        val bufferSize = 100_000
-
-        val inputStream = File(publisher.cardManifestFile()).inputStream()
-        val csvIter: CloseableIterator<AuditableCardProto> = CsvCardUsingArrays(inputStream, bufferSize)
-        while (csvIter.hasNext() && ncards < 1000000) {
-            val card = csvIter.next()
-            ncards++
-        }
-
-        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ncards.toDouble()
-        val secPer = msPer / 1000
-
-        println("timeReadCsv ($bufferSize):  ncards = $ncards, took $stopwatch = $msPer ms/card")
-        val totalCards = 4982747
-        println("time to read all cards = ${dfn(totalCards * secPer, 3)} secs")
-    }
-
-    // @Test
-    fun testProtoAndCsvAgreeOnCardWithBatchName () {
-        val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
-        val currentCardIter: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.cardManifestFile())
-
-        val protoFilename = "${testdataDir}/temp/cards.proto"
-        val bufferSize = 100_000
-        val stopwatch = Stopwatch()
-        var ncards = 0L
-
-        val protoIter: CloseableIterator<CardWithBatchName> = ProtoCardBunchIterator(protoFilename, bufferSize)
-        while (protoIter.hasNext() && currentCardIter.hasNext() && ncards < 100_000) {
-            val cardFromCsv = currentCardIter.next()
-            val cardFromProto = protoIter.next()
-            assertEquals(cardFromCsv, cardFromProto)
-            ncards++
-        }
-
-/*
-        val inputStream = File(publisher.cardManifestFile()).inputStream()
-        val csvIter: CloseableIterator<CardUsingArrays> = IteratorCardUsingArrays(inputStream, bufferSize)
-        while (csvIter.hasNext() && ncards < 1000000) {
-            val card = csvIter.next()
-            ncards++
-        } */
-
-        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ncards.toDouble()
-        val secPer = msPer / 1000
-
-        println("timeReadCsv ($bufferSize):  ncards = $ncards, took $stopwatch = $msPer ms/card")
+        println("timeReadProtobuf ($bufferSize):  ncards = $ncards, accum=$accum took $stopwatch = $msPer ms/card")
         val totalCards = 4982747
         println("time to read all cards = ${dfn(totalCards * secPer, 3)} secs")
     }
 
     @Test
-    fun testProtoAndCsvAgreeOnCardUsingArrays () {
-        val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
+    fun testProtoAndCsvAgree () {
         val bufferSize = 100_000
 
-        val inputStream = File(publisher.cardManifestFile()).inputStream()
-        val csvIter: CloseableIterator<AuditableCardProto> = CsvCardUsingArrays(inputStream, bufferSize)
+        val topdir = "${testdataDir}/cases/corla/consistent"
+        val countyAudit = AuditRecord.read(topdir) as CountyAudit
+        val mvrManager = PersistedMvrManager(countyAudit)
+        val styles = mvrManager.styles()
 
-        val protoFilename = "${testdataDir}/temp/cards.proto"
+        val publisher = Publisher("$topdir/audit")
+        val csvIter: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.cardManifestFile())
+
+        val protoFilename = "${topdir}/audit/cards.protobuf"
         val stopwatch = Stopwatch()
         var ncards = 0L
 
-        val protoIter: CloseableIterator<AuditableCardProto> = AuditableCardProtoIterator(protoFilename, bufferSize)
+        val protoIter: CloseableIterator<AuditableCardProtobuf> = ProtobufCardIterator(protoFilename, bufferSize, styles)
         while (protoIter.hasNext() && csvIter.hasNext() && ncards < 100_000) {
             val cardFromCsv = csvIter.next()
             val cardFromProto = protoIter.next()
-            assertEquals(cardFromCsv, cardFromProto)
+            assertTrue(checkEqual(cardFromCsv, cardFromProto))
             ncards++
         }
 
@@ -232,7 +174,7 @@ class TestProtoCard {
     }
 }
 
-fun checkEqual(c1: AuditableCardProto, c2: CardWithBatchName): Boolean {
+fun checkEqual(c1: CardWithBatchName, c2: AuditableCardProtobuf): Boolean {
     assertEquals(c1.id(), c2.id())
     assertEquals(c1.location(), c2.location())
     assertEquals(c1.index(), c2.index())

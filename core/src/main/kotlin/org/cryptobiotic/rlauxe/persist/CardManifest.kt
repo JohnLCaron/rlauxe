@@ -7,7 +7,8 @@ import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 
-// TODO could this return
+// TODO why in persist ??
+// TODO why is ncards here ??
 class CardManifest(val cards: CloseableIterable<AuditableCardIF>, val ncards: Int) {
 
     companion object {

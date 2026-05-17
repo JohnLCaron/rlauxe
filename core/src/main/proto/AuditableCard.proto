@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package org.cryptobiotic.rlauxe.persist.protobuf;
+
+option java_package = "org.cryptobiotic.rlauxe.persist.protobuf";
+option java_outer_classname = "Protobuf";
+
+message Card {
+    string id = 1;        // enough info to find the card for a manual audit.
+    string location = 2;  // enough info to find the card for a manual audit.
+    uint32 index = 3;     // index into the original, canonical list of cards
+    fixed64 prn = 4;      // psuedo random number
+    bool phantom = 5;
+    optional uint32 poolId = 6;    // must be set if its from a CardPool
+
+    string styleName = 10;
+    repeated VotesEntry votes = 11; // these define the votes: Map<Int, IntArray>
+
+    // or
+    //repeated uint32 contestIds = 7;     // these define the votes: Map<Int, IntArray>
+    //repeated uint32 contestStarts = 8;
+    //repeated uint32 candidates = 9;
+}
+
+message VotesEntry {
+    uint32 contest = 1;
+    repeated uint32 cands = 2;
+}

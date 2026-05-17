@@ -15,7 +15,7 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
 
     // extract the cards with sampleNumbers from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCardIF> {
-        val cards = findSamples(sampleNumbers, auditableCards())
+        val cards = findSamples(sampleNumbers, auditableCards)
 
         var lastRN = 0L
         cards.forEachIndexed { idx, mvr ->

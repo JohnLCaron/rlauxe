@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.csv.SamplingCard
 import org.cryptobiotic.rlauxe.persist.csv.SamplingCardIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtobufCardIterator
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import java.io.BufferedReader
 import java.io.File
@@ -36,6 +36,8 @@ class CountyAudit(
     val styles by lazy { this.readCardStyles() ?: this.readCardPools() } // styles are preferred
 
     val samplingCards : List<SamplingCardIF> by lazy {
+        logger.info{"using cardsSamplingFile at ${publisher.cardsSamplingFile()}"}
+
         val bufferSize = 100_000
         val cardIter = SamplingCardIterator(publisher.cardsSamplingFile(), styles!!, bufferSize)
         val cards = mutableListOf<SamplingCard>()
@@ -54,12 +56,10 @@ class CountyAudit(
         val bufferSize = 100_000
         val protoFilename = publisher.cardsProtoFile()
 
-        val protoManifest = CloseableIterable { ProtobufCardIterator(protoFilename, bufferSize, styles) }
-        // val protoManifest: CloseableIterable<AuditableCardProto> = CloseableIterable { AuditableCardProtoIterator(protoFilename, bufferSize, styles) }
+        val protoManifest = CloseableIterable { ProtoCardIterator(protoFilename, bufferSize, styles) }
         logger.info{"using cardsProtoFile at ${protoFilename}"}
         return CardManifest(protoManifest, electionInfo.totalCardCount)
     }
-
 
     // for viewer
     fun countMvrsByCounty(): Map<String, CountyData> {

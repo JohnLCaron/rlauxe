@@ -50,7 +50,8 @@ class Publisher(val auditDir: String) {
     // fun auditSeedFile() = "$auditDir/auditSeed.json"
     fun cardManifestFile() = "$auditDir/cardManifest.csv" // cardManifest
     fun cardsSamplingFile() = "$auditDir/cardsSampling.bin" // just use for sampling
-    fun cardsProtoFile() = "$auditDir/cards.protobuf" // cardManifest
+    fun cardsProtoFile() = "$auditDir/cards.proto" // cardManifest
+    fun cardsProtobufFile() = "$auditDir/cards.protobuf" // cardManifest
     fun cardPoolsFile() = "$auditDir/cardPools.csv"
     fun cardStylesFile() = "$auditDir/cardStyles.json"
     fun contestsFile() = "$auditDir/contests.json"

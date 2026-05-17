@@ -50,7 +50,7 @@ class TestProtoCard {
     fun writeProtoFile () {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val publisher = Publisher("$topdir/audit")
-        val cardIter: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.cardManifestFile())
+        val cardIter: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.sortedCardsFile())
 
         val protoFilename = "${topdir}/audit/cards.proto"
         val outputStream: OutputStream = FileOutputStream(protoFilename)
@@ -70,7 +70,7 @@ class TestProtoCard {
         var ncards = 0L
 
         var accum = 0
-        val protoIter: CloseableIterator<AuditableCardProto> = AuditableCardProtoIterator(protoFilename, bufferSize)
+        val protoIter: CloseableIterator<AuditableCardProto> = ProtoCardIterator(protoFilename, bufferSize)
         while (protoIter.hasNext()) { //  && ncards < 1000_000) {
             val card = protoIter.next()
             accum += card.index() // prevent optimization
@@ -162,7 +162,7 @@ class TestProtoCard {
         val stopwatch = Stopwatch()
         var ncards = 0L
 
-        val protoIter: CloseableIterator<AuditableCardProto> = AuditableCardProtoIterator(protoFilename, bufferSize)
+        val protoIter: CloseableIterator<AuditableCardProto> = ProtoCardIterator(protoFilename, bufferSize)
         while (protoIter.hasNext() && csvIter.hasNext() && ncards < 100_000) {
             val cardFromCsv = csvIter.next()
             val cardFromProto = protoIter.next()
@@ -217,7 +217,7 @@ class TestProtoCard {
         val protoFilename = "${testdataDir}/temp/cards.proto"
         val protoIter: CloseableIterator<CardWithBatchName> = ProtoCardBunchIterator(protoFilename, bufferSize)
 
-        val protoIterWithArrays: CloseableIterator<AuditableCardProto> = AuditableCardProtoIterator(protoFilename, bufferSize)
+        val protoIterWithArrays: CloseableIterator<AuditableCardProto> = ProtoCardIterator(protoFilename, bufferSize)
         while (protoIterWithArrays.hasNext() && protoIter.hasNext() && ncards < 1000) {
             val c1 = protoIterWithArrays.next()
             val c2 = protoIter.next()

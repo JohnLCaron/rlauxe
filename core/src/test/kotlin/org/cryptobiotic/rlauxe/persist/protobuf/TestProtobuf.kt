@@ -49,7 +49,7 @@ class TestProtobuf {
     fun writeProtobufFile () {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val publisher = Publisher("$topdir/audit")
-        val cardIter: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.cardManifestFile())
+        val cardIter: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.sortedCardsFile())
 
         val protoFilename = "${topdir}/audit/cards.protobuf"
         val outputStream: OutputStream = FileOutputStream(protoFilename)
@@ -162,7 +162,7 @@ class TestProtobuf {
         val protoFilename = "${testdataDir}/temp/cards.proto"
         val protoIter: CloseableIterator<CardWithBatchName> = ProtoCardBunchIterator(protoFilename, bufferSize)
 
-        val protoIterWithArrays: CloseableIterator<AuditableCardProto> = AuditableCardProtoIterator(protoFilename, bufferSize)
+        val protoIterWithArrays: CloseableIterator<AuditableCardProto> = ProtoCardIterator(protoFilename, bufferSize)
         while (protoIterWithArrays.hasNext() && protoIter.hasNext() && ncards < 1000) {
             val c1 = protoIterWithArrays.next()
             val c2 = protoIter.next()

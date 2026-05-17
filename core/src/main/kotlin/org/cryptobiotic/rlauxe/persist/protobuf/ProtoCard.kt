@@ -170,7 +170,7 @@ fun testConvert(card: CardWithBatchName) {
 // could break the rule and return ProtoCard for speed....
 // that is, ProtoCard == CardWithBatchName
 // otoh,
-class AuditableCardProtoIterator(filename: String, bufferSize: Int, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCardProto> {
+class ProtoCardIterator(filename: String, bufferSize: Int, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCardProto> {
     val styleMap: Map<String, StyleIF> = styles?.associateBy{ it.name() } ?: emptyMap()
 
     val errs = ErrorMessages("readProtoCardsFile '${filename}'")

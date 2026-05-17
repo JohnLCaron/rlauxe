@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -25,8 +26,9 @@ class TestSamplingCards {
         val countyAudit = AuditRecord.read(topdir) as CountyAudit
         val mvrManager = PersistedMvrManager(countyAudit)
         val styles = mvrManager.styles()!! // TODO maybe not optional ?
+        val cardManifest = countyAudit.readSortedManifest(styles)
 
-        val cardIter: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.sortedCardsFile())
+        val cardIter = cardManifest.cards.iterator()
 
         val filenameOut = publisher.cardsSamplingFile()
         val outputStream: OutputStream = FileOutputStream(filenameOut)
@@ -36,7 +38,7 @@ class TestSamplingCards {
         outputStream.close()
         cardIter.close()
 
-        println("writeProtoFile ncards = $ncards, took $stopwatch")
+        println("writeSamplingCards ncards = $ncards, took $stopwatch")
     }
 
     @Test
@@ -99,6 +101,21 @@ class TestSamplingCards {
         runConsistentSampling(Closer(samplingCards.iterator()))
         // ncards = 4982786, included = 142470869 that took 23.37 s= 0.004688541711404022 ms/card
         // ncards = 4982786, included = 142470869 that took 25.84 s= 0.005185452475783628 ms/card
+    }
+
+    @Test
+    fun timeSamplingFromMvrManager() {
+        val topdir = "${testdataDir}/cases/corla/consistent"
+        val countyAudit = AuditRecord.read(topdir) as CountyAudit
+        val mvrManager = PersistedMvrManager(countyAudit)
+
+        runConsistentSampling(Closer(mvrManager.samplingCards().iterator()))
+        runConsistentSampling(Closer(mvrManager.samplingCards().iterator()))
+        runConsistentSampling(Closer(mvrManager.samplingCards().iterator()))
+        // ncards = 4982786, included = 142470869 that took 30.67 s= 0.006154789710013635 ms/card
+        // ncards = 4982786, included = 142470869 that took 27.15 s= 0.005448357605564437 ms/card
+        // ncards = 4982786, included = 142470869 that took 28.03 s= 0.0056261697773093205 ms/card
+        //  thats what we got
     }
 
     fun runConsistentSampling(cardIter: CloseableIterator<SamplingCardIF>) {

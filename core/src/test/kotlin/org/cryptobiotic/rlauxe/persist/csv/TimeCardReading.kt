@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtobufCardIterator
+// import org.cryptobiotic.rlauxe.persist.protobuf.ProtobufCardIterator
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -113,6 +113,7 @@ class TimeCardReading {
         // maybe 53 / 49.4 = 1.07 = 7%  slower than timeReadCardsCsvIterator
     }
 
+    /*
     @Test
     fun timeReadSortedCardsFromProtobuf () {
         val topdir = "${testdataDir}/cases/corla/consistent"
@@ -147,7 +148,7 @@ class TimeCardReading {
         // timeReadSortedCardsFromProtobuf ncards = 4982786, took 19.21 s = 0.003853868097084643 ms/card
         // avg 20.1
         // maybe 53 / 18.5 = 2.63 faster than timeReadCardsCsvIterator
-    }
+    } */
 
     @Test
     fun timeReadSortedCardsFromProto () {

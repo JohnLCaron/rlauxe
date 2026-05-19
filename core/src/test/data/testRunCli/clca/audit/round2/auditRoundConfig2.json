@@ -1,6 +1,6 @@
 {
     "simulation": {
-        "nsimEst": 20,
+        "nsimEst": 100,
         "estPercentile": [
             50,
             80
@@ -13,7 +13,8 @@
         "minMargin": 0.0,
         "maxSamplePct": 0.0,
         "contestSampleCutoff": 2000,
-        "auditSampleCutoff": 10000
+        "auditSampleCutoff": 10000,
+        "other": {}
     },
     "clcaConfig": {
         "strategy": "generalAdaptive",

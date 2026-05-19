@@ -212,7 +212,7 @@ fun findPoolAverageB(mvrs: CloseableIterator<AuditableCardIF>, cvrs: Iterator<Au
                     if (!mvr.hasContest(contestId)) {
                         missingInMvr++
                     }
-                    val assortVal = cassorter.bassort(mvr, cvr, hasStyle=cvr.hasExactContests())
+                    val assortVal = cassorter.bassort(mvr, cvr)
                     assortAvg.totalAssort += assortVal
                     assortAvg.ncards++
                 }
@@ -232,7 +232,7 @@ fun findPoolAverageB(mvrCvrPairs: List<Pair<AuditableCardIF, AuditableCardIF>>, 
                 if (!mvr.hasContest(contestId)) {
                     missingInMvr++
                 }
-                val assortVal = cassorter.bassort(mvr, cvr, hasStyle=cvr.hasExactContests())
+                val assortVal = cassorter.bassort(mvr, cvr)
                 assortAvg.totalAssort += assortVal
                 assortAvg.ncards++
             }

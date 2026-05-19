@@ -25,19 +25,17 @@ import kotlin.io.path.Path
 @Serializable
 class ProtoCard (
     val id: String, // enough info to find the card for a manual audit.
-    val location: String?, // enough info to find the card for a manual audit.
+    val location: String? = null, // enough info to find the card for a manual audit.
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    val poolId: Int?, // must be set if its from a CardPool
+    val poolId: Int? = null, // must be set if its from a CardPool
     // The default integer type is a varint encoding (intXX) that is optimized for small non-negative numbers.
-    val contestIds: IntArray?,
-    val contestStarts: IntArray?,
-    val candidates: IntArray?,
+    val contestIds: IntArray? = null,
+    val contestStarts: IntArray? = null,
+    val candidates: IntArray? = null,
     val styleName: String,
-) {
-    fun contestIdSet(): Set<Int> = if (contestIds == null) emptySet() else contestIds.toList().toSet()
-}
+)
 
 fun AuditableCardIF.publishProto() : ProtoCard {
     val votes = this.votes()

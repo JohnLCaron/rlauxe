@@ -43,7 +43,6 @@ fun makeOneAuditContests(
 fun setPoolAssorterAverages(
     oaContests: List<ContestWithAssertions>,
     pools: List<CardPoolIF>, // poolId -> pool
-    hasStyle: Boolean = true
 ) {
     val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
 
@@ -57,17 +56,12 @@ fun setPoolAssorterAverages(
                 if (cardPool.hasContest(contestId)) {
                     val tab = cardPool.contestTab(oaContest.id)!! // Irv not done here
                     if (cardPool.ncards() > 0) {
-                        // TODO This should depend on hasStyle I guess
-                        // TODO note: using cardPool.ncards(), this is the diluted count
-                        val N = if (oaContest.hasStyle) oaContest.Nc else oaContest.Npop
-                        val poolMargin = assertion.assorter.calcMarginFromRegVotes(tab.votes, N)
+                        val poolMargin = assertion.assorter.calcMarginFromRegVotes(tab.votes, cardPool.ncards())
                         assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                     }
                 }
             }
-            val oaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter,
-                poolAverages = AssortAvgsInPools(assortAverages),
-                hasStyle=hasStyle)
+            val oaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, poolAverages = AssortAvgsInPools(assortAverages))
 
             oaAssorter.oaAssortRates = oneAuditErrorsFromPools.oaErrorRates(oaContest, oaAssorter)
 

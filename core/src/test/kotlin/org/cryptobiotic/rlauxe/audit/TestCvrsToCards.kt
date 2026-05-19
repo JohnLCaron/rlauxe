@@ -70,7 +70,9 @@ class TestCvrsToCards {
         var hasCardStyles = false
 
         // polling but no batches
+
         var cvr = cvrr.copy(poolId=null)  // no poolId
+
         var message = assertFailsWith<RuntimeException> {
             mvrsToAuditableCardsTestM(auditType, listOf(cvr), styles= null)
         }.message!!

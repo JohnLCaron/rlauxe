@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.persist.SortedManifest
+import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -88,6 +89,8 @@ class TestBelgiumContest {
                 println(" diff = $diff")
                 val gmean = diff/contestd.Nc
                 println(" diff/Nc = ${diff/contestd.Nc}")
+                if (!doubleIsClose(diff/contestd.Nc, contestd.recountMargin(assorter), doublePrecision))
+                    print("")
                 assertEquals(diff/contestd.Nc, contestd.recountMargin(assorter), doublePrecision)
 
                 val hmean = assorter.h2(gmean)

@@ -4,39 +4,42 @@
             "name": "style0",
             "id": 0,
             "possibleContests": [
-                0,
                 1,
-                3,
-                4
+                2,
+                3
             ],
-            "hasSingleCardStyle": false
+            "hasExactContests": false
         },
         {
             "name": "style1",
             "id": 1,
             "possibleContests": [
-                1,
-                2
+                0,
+                3,
+                4
             ],
-            "hasSingleCardStyle": false
+            "hasExactContests": false
         },
         {
             "name": "style2",
             "id": 2,
             "possibleContests": [
                 1,
+                2,
                 4
             ],
-            "hasSingleCardStyle": false
+            "hasExactContests": false
         },
         {
             "name": "style3",
             "id": 3,
             "possibleContests": [
                 1,
+                2,
+                3,
                 4
             ],
-            "hasSingleCardStyle": false
+            "hasExactContests": false
         }
     ]
 }

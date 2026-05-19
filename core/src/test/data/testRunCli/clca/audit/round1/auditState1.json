@@ -5,39 +5,39 @@
             "id": 0,
             "assertionRounds": [
                 {
-                    "assorterDesc": "1/0 contest0",
+                    "assorterDesc": "0/1 contest0",
                     "roundIdx": 1,
-                    "estSampleSize": 371,
-                    "estNewSampleSize": 371,
+                    "estSampleSize": 140,
+                    "estNewSampleSize": 140,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 382,
+                        "calcMvrsNeeded": 141,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            371
+                            140
                         ],
-                        "lastIndex": 619,
+                        "lastIndex": 156,
                         "quantile": 50,
                         "ntrials": 1,
-                        "simNewMvrs": 371,
-                        "simMvrs": 371
+                        "simNewMvrs": 140,
+                        "simMvrs": 140
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.0496 plast=0.0496 nmvrs=371 samplesUsed=371 status=StatRejectNull measuredCounts=empty",
+                        "desc": "round=1 pmin=0.0494 plast=0.0494 nmvrs=550 samplesUsed=140 status=StatRejectNull measuredCounts=empty",
                         "roundIdx": 1,
-                        "nmvrs": 371,
-                        "plast": 0.049614114431772605,
-                        "pmin": 0.049614114431772605,
-                        "samplesUsed": 371,
+                        "nmvrs": 550,
+                        "plast": 0.04939111905622096,
+                        "pmin": 0.04939111905622096,
+                        "samplesUsed": 140,
                         "status": "StatRejectNull",
                         "clcaErrorTracker": {
-                            "noerror": 0.5040973824488821,
+                            "noerror": 0.5111914199114013,
                             "upper": 1.0,
                             "errorCounts": {},
-                            "count": 371,
-                            "mean": 0.5040973824488821,
+                            "count": 140,
+                            "mean": 0.5111914199114013,
                             "M2": 0.0
                         },
                         "params": {}
@@ -47,50 +47,50 @@
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 522,
-            "estMvrs": 371,
-            "estNewMvrs": 371,
+            "maxSampleAllowed": 614,
+            "estMvrs": 140,
+            "estNewMvrs": 140,
             "done": true,
             "included": true,
-            "status": "StatRejectNull"
+            "status": "StatRejectNull",
+            "haveSampleSize": 550,
+            "haveNewSampleSize": 550
         },
         {
             "id": 1,
             "assertionRounds": [
                 {
-                    "assorterDesc": "3/0 contest1",
+                    "assorterDesc": "1/0 contest1",
                     "roundIdx": 1,
-                    "estSampleSize": 0,
-                    "estNewSampleSize": 0,
+                    "estSampleSize": 13,
+                    "estNewSampleSize": 13,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 257,
+                        "strategy": "estSamples",
+                        "calcMvrsNeeded": 171,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
-                        "estimatedDistribution": [
-                            254
-                        ],
-                        "lastIndex": 254,
+                        "estimatedDistribution": [],
+                        "lastIndex": 170,
                         "quantile": 50,
                         "ntrials": 1,
-                        "simNewMvrs": 254,
-                        "simMvrs": 254
+                        "simNewMvrs": 13,
+                        "simMvrs": 13
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.0478 plast=0.0478 nmvrs=360 samplesUsed=20 status=StatRejectNull measuredCounts=empty",
+                        "desc": "round=1 pmin=0.0436 plast=0.0436 nmvrs=614 samplesUsed=13 status=StatRejectNull measuredCounts=empty",
                         "roundIdx": 1,
-                        "nmvrs": 360,
-                        "plast": 0.04775615248745289,
-                        "pmin": 0.04775615248745289,
-                        "samplesUsed": 20,
+                        "nmvrs": 614,
+                        "plast": 0.043617443300660835,
+                        "pmin": 0.043617443300660835,
+                        "samplesUsed": 13,
                         "status": "StatRejectNull",
                         "clcaErrorTracker": {
-                            "noerror": 0.5852402411189794,
+                            "noerror": 0.6414368184733804,
                             "upper": 1.0,
                             "errorCounts": {},
-                            "count": 20,
-                            "mean": 0.5852402411189794,
+                            "count": 13,
+                            "mean": 0.6414368184733804,
                             "M2": 0.0
                         },
                         "params": {}
@@ -99,80 +99,39 @@
                     "roundProved": 1
                 },
                 {
-                    "assorterDesc": "3/1 contest1",
+                    "assorterDesc": "1/2 contest1",
                     "roundIdx": 1,
-                    "estSampleSize": 0,
-                    "estNewSampleSize": 0,
+                    "estSampleSize": 170,
+                    "estNewSampleSize": 170,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 257,
+                        "calcMvrsNeeded": 171,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            254
+                            170
                         ],
-                        "lastIndex": 254,
+                        "lastIndex": 170,
                         "quantile": 50,
                         "ntrials": 1,
-                        "simNewMvrs": 254,
-                        "simMvrs": 254
+                        "simNewMvrs": 170,
+                        "simMvrs": 170
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.0498 plast=0.0498 nmvrs=360 samplesUsed=66 status=StatRejectNull measuredCounts=empty",
+                        "desc": "round=1 pmin=0.0494 plast=0.0494 nmvrs=614 samplesUsed=170 status=StatRejectNull measuredCounts=empty",
                         "roundIdx": 1,
-                        "nmvrs": 360,
-                        "plast": 0.04976133020497977,
-                        "pmin": 0.04976133020497977,
-                        "samplesUsed": 66,
+                        "nmvrs": 614,
+                        "plast": 0.04944499332960912,
+                        "pmin": 0.04944499332960912,
+                        "samplesUsed": 170,
                         "status": "StatRejectNull",
                         "clcaErrorTracker": {
-                            "noerror": 0.524081547088727,
+                            "noerror": 0.5091908956667854,
                             "upper": 1.0,
                             "errorCounts": {},
-                            "count": 66,
-                            "mean": 0.524081547088727,
-                            "M2": 0.0
-                        },
-                        "params": {}
-                    },
-                    "status": "StatRejectNull",
-                    "roundProved": 1
-                },
-                {
-                    "assorterDesc": "3/2 contest1",
-                    "roundIdx": 1,
-                    "estSampleSize": 254,
-                    "estNewSampleSize": 254,
-                    "estimationResult": {
-                        "roundIdx": 1,
-                        "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 257,
-                        "startingTestStatistic": 1.0,
-                        "startingErrorRates": {},
-                        "estimatedDistribution": [
-                            254
-                        ],
-                        "lastIndex": 254,
-                        "quantile": 50,
-                        "ntrials": 1,
-                        "simNewMvrs": 254,
-                        "simMvrs": 254
-                    },
-                    "auditResult": {
-                        "desc": "round=1 pmin=0.0497 plast=0.0497 nmvrs=360 samplesUsed=254 status=StatRejectNull measuredCounts=empty",
-                        "roundIdx": 1,
-                        "nmvrs": 360,
-                        "plast": 0.04965658411415505,
-                        "pmin": 0.04965658411415505,
-                        "samplesUsed": 254,
-                        "status": "StatRejectNull",
-                        "clcaErrorTracker": {
-                            "noerror": 0.5060984867655246,
-                            "upper": 1.0,
-                            "errorCounts": {},
-                            "count": 254,
-                            "mean": 0.5060984867655246,
+                            "count": 170,
+                            "mean": 0.5091908956667854,
                             "M2": 0.0
                         },
                         "params": {}
@@ -182,12 +141,14 @@
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 360,
-            "estMvrs": 254,
-            "estNewMvrs": 254,
+            "maxSampleAllowed": 614,
+            "estMvrs": 170,
+            "estNewMvrs": 170,
             "done": true,
             "included": true,
-            "status": "StatRejectNull"
+            "status": "StatRejectNull",
+            "haveSampleSize": 614,
+            "haveNewSampleSize": 614
         },
         {
             "id": 2,
@@ -195,90 +156,172 @@
                 {
                     "assorterDesc": "0/1 contest2",
                     "roundIdx": 1,
-                    "estSampleSize": 79,
-                    "estNewSampleSize": 79,
+                    "estSampleSize": 550,
+                    "estNewSampleSize": 550,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 80,
+                        "calcMvrsNeeded": 568,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            79
+                            550
                         ],
-                        "lastIndex": 125,
+                        "lastIndex": 614,
                         "quantile": 50,
                         "ntrials": 1,
-                        "simNewMvrs": 79,
-                        "simMvrs": 79
+                        "simNewMvrs": 550,
+                        "simMvrs": 550
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.0498 plast=0.0498 nmvrs=371 samplesUsed=79 status=StatRejectNull measuredCounts=empty",
+                        "desc": "round=1 pmin=0.0975 plast=0.0975 nmvrs=550 samplesUsed=550 status=LimitReached measuredCounts={0.2513758312313689=1}",
                         "roundIdx": 1,
-                        "nmvrs": 371,
-                        "plast": 0.04975479180384152,
-                        "pmin": 0.04975479180384152,
-                        "samplesUsed": 79,
-                        "status": "StatRejectNull",
+                        "nmvrs": 550,
+                        "plast": 0.0974645917945908,
+                        "pmin": 0.0974645917945908,
+                        "samplesUsed": 550,
+                        "status": "LimitReached",
                         "clcaErrorTracker": {
-                            "noerror": 0.5199835863766926,
+                            "noerror": 0.5027516624627378,
                             "upper": 1.0,
-                            "errorCounts": {},
-                            "count": 79,
-                            "mean": 0.5199835863766926,
-                            "M2": 0.0
+                            "errorCounts": {
+                                "0.2513758312313689": 1
+                            },
+                            "count": 550,
+                            "mean": 0.5022946154968624,
+                            "M2": 0.06307491796630309
                         },
                         "params": {}
                     },
-                    "status": "StatRejectNull",
-                    "roundProved": 1
+                    "status": "LimitReached",
+                    "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 522,
-            "estMvrs": 79,
-            "estNewMvrs": 79,
-            "done": true,
+            "maxSampleAllowed": 614,
+            "estMvrs": 550,
+            "estNewMvrs": 550,
+            "done": false,
             "included": true,
-            "status": "StatRejectNull"
+            "status": "LimitReached",
+            "haveSampleSize": 550,
+            "haveNewSampleSize": 550
         },
         {
             "id": 3,
             "assertionRounds": [
                 {
-                    "assorterDesc": "0/1 contest3",
+                    "assorterDesc": "1/0 contest3",
                     "roundIdx": 1,
-                    "estSampleSize": 157,
-                    "estNewSampleSize": 157,
+                    "estSampleSize": 66,
+                    "estNewSampleSize": 66,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 159,
+                        "calcMvrsNeeded": 66,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            157
+                            66
                         ],
-                        "lastIndex": 157,
+                        "lastIndex": 66,
                         "quantile": 50,
                         "ntrials": 1,
-                        "simNewMvrs": 157,
-                        "simMvrs": 157
+                        "simNewMvrs": 66,
+                        "simMvrs": 66
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.0498 plast=0.0498 nmvrs=360 samplesUsed=157 status=StatRejectNull measuredCounts=empty",
+                        "desc": "round=1 pmin=0.0489 plast=0.0489 nmvrs=614 samplesUsed=66 status=StatRejectNull measuredCounts=empty",
                         "roundIdx": 1,
-                        "nmvrs": 360,
-                        "plast": 0.04976967393426436,
-                        "pmin": 0.04976967393426436,
-                        "samplesUsed": 157,
+                        "nmvrs": 614,
+                        "plast": 0.04893560441618625,
+                        "pmin": 0.04893560441618625,
+                        "samplesUsed": 66,
                         "status": "StatRejectNull",
                         "clcaErrorTracker": {
-                            "noerror": 0.5099439061703213,
+                            "noerror": 0.5242189138184106,
                             "upper": 1.0,
                             "errorCounts": {},
-                            "count": 157,
-                            "mean": 0.5099439061703213,
+                            "count": 66,
+                            "mean": 0.5242189138184106,
+                            "M2": 0.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "roundProved": 1
+                },
+                {
+                    "assorterDesc": "1/2 contest3",
+                    "roundIdx": 1,
+                    "estSampleSize": 20,
+                    "estNewSampleSize": 20,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "estSamples",
+                        "calcMvrsNeeded": 66,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [],
+                        "lastIndex": 66,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 20,
+                        "simMvrs": 20
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pmin=0.0484 plast=0.0484 nmvrs=614 samplesUsed=20 status=StatRejectNull measuredCounts=empty",
+                        "roundIdx": 1,
+                        "nmvrs": 614,
+                        "plast": 0.048410197027720425,
+                        "pmin": 0.048410197027720425,
+                        "samplesUsed": 20,
+                        "status": "StatRejectNull",
+                        "clcaErrorTracker": {
+                            "noerror": 0.5848295221942804,
+                            "upper": 1.0,
+                            "errorCounts": {},
+                            "count": 20,
+                            "mean": 0.5848295221942804,
+                            "M2": 0.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "roundProved": 1
+                },
+                {
+                    "assorterDesc": "1/3 contest3",
+                    "roundIdx": 1,
+                    "estSampleSize": 16,
+                    "estNewSampleSize": 16,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "estSamples",
+                        "calcMvrsNeeded": 66,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [],
+                        "lastIndex": 66,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 16,
+                        "simMvrs": 16
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pmin=0.0416 plast=0.0416 nmvrs=614 samplesUsed=16 status=StatRejectNull measuredCounts=empty",
+                        "roundIdx": 1,
+                        "nmvrs": 614,
+                        "plast": 0.04161360657885449,
+                        "pmin": 0.04161360657885449,
+                        "samplesUsed": 16,
+                        "status": "StatRejectNull",
+                        "clcaErrorTracker": {
+                            "noerror": 0.6140997297961188,
+                            "upper": 1.0,
+                            "errorCounts": {},
+                            "count": 16,
+                            "mean": 0.6140997297961188,
                             "M2": 0.0
                         },
                         "params": {}
@@ -288,12 +331,14 @@
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 360,
-            "estMvrs": 157,
-            "estNewMvrs": 157,
+            "maxSampleAllowed": 614,
+            "estMvrs": 66,
+            "estNewMvrs": 66,
             "done": true,
             "included": true,
-            "status": "StatRejectNull"
+            "status": "StatRejectNull",
+            "haveSampleSize": 614,
+            "haveNewSampleSize": 614
         },
         {
             "id": 4,
@@ -301,89 +346,170 @@
                 {
                     "assorterDesc": "1/0 contest4",
                     "roundIdx": 1,
+                    "estSampleSize": 74,
+                    "estNewSampleSize": 74,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 76,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            74
+                        ],
+                        "lastIndex": 697,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 74,
+                        "simMvrs": 74
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pmin=0.0488 plast=0.0488 nmvrs=132 samplesUsed=74 status=StatRejectNull measuredCounts=empty",
+                        "roundIdx": 1,
+                        "nmvrs": 132,
+                        "plast": 0.04879328701897531,
+                        "pmin": 0.04879328701897531,
+                        "samplesUsed": 74,
+                        "status": "StatRejectNull",
+                        "clcaErrorTracker": {
+                            "noerror": 0.5209656925031766,
+                            "upper": 1.0,
+                            "errorCounts": {},
+                            "count": 74,
+                            "mean": 0.5209656925031766,
+                            "M2": 0.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "roundProved": 1
+                }
+            ],
+            "roundIdx": 1,
+            "maxSampleAllowed": 733,
+            "estMvrs": 74,
+            "estNewMvrs": 74,
+            "done": true,
+            "included": true,
+            "status": "StatRejectNull",
+            "haveSampleSize": 132,
+            "haveNewSampleSize": 132
+        },
+        {
+            "id": 5,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "2/0 contest5",
+                    "roundIdx": 1,
                     "estSampleSize": 20,
                     "estNewSampleSize": 20,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 123,
+                        "strategy": "estSamples",
+                        "calcMvrsNeeded": 94,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
-                        "estimatedDistribution": [
-                            20
-                        ],
+                        "estimatedDistribution": [],
+                        "lastIndex": 666,
                         "quantile": 50,
                         "ntrials": 1,
                         "simNewMvrs": 20,
                         "simMvrs": 20
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.1342 plast=0.1342 nmvrs=20 samplesUsed=20 status=SampleSumRejectNull measuredCounts=empty",
+                        "desc": "round=1 pmin=0.0497 plast=0.0497 nmvrs=90 samplesUsed=19 status=StatRejectNull measuredCounts=empty",
                         "roundIdx": 1,
-                        "nmvrs": 20,
-                        "plast": 0.1341777224619875,
-                        "pmin": 0.1341777224619875,
-                        "samplesUsed": 20,
-                        "status": "SampleSumRejectNull",
+                        "nmvrs": 90,
+                        "plast": 0.049739920932961555,
+                        "pmin": 0.049739920932961555,
+                        "samplesUsed": 19,
+                        "status": "StatRejectNull",
                         "clcaErrorTracker": {
-                            "noerror": 0.5128205128205129,
+                            "noerror": 0.5880880880880881,
                             "upper": 1.0,
                             "errorCounts": {},
-                            "count": 20,
-                            "mean": 0.5128205128205129,
+                            "count": 19,
+                            "mean": 0.5880880880880881,
                             "M2": 0.0
                         },
                         "params": {}
                     },
-                    "status": "SampleSumRejectNull",
+                    "status": "StatRejectNull",
                     "roundProved": 1
-                }
-            ],
-            "roundIdx": 1,
-            "maxSampleAllowed": 598,
-            "estMvrs": 20,
-            "estNewMvrs": 20,
-            "done": true,
-            "included": true,
-            "status": "SampleSumRejectNull"
-        },
-        {
-            "id": 5,
-            "assertionRounds": [
+                },
                 {
-                    "assorterDesc": "1/0 contest5",
+                    "assorterDesc": "2/1 contest5",
                     "roundIdx": 1,
-                    "estSampleSize": 223,
-                    "estNewSampleSize": 223,
+                    "estSampleSize": 19,
+                    "estNewSampleSize": 19,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "estSamples",
+                        "calcMvrsNeeded": 94,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [],
+                        "lastIndex": 666,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 19,
+                        "simMvrs": 19
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pmin=0.0424 plast=0.0424 nmvrs=90 samplesUsed=19 status=StatRejectNull measuredCounts=empty",
+                        "roundIdx": 1,
+                        "nmvrs": 90,
+                        "plast": 0.04244474536797706,
+                        "pmin": 0.04244474536797706,
+                        "samplesUsed": 19,
+                        "status": "StatRejectNull",
+                        "clcaErrorTracker": {
+                            "noerror": 0.5931347804139324,
+                            "upper": 1.0,
+                            "errorCounts": {},
+                            "count": 19,
+                            "mean": 0.5931347804139324,
+                            "M2": 0.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "roundProved": 1
+                },
+                {
+                    "assorterDesc": "2/3 contest5",
+                    "roundIdx": 1,
+                    "estSampleSize": 90,
+                    "estNewSampleSize": 90,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 225,
+                        "calcMvrsNeeded": 94,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            223
+                            90
                         ],
-                        "lastIndex": 223,
+                        "lastIndex": 666,
                         "quantile": 50,
                         "ntrials": 1,
-                        "simNewMvrs": 223,
-                        "simMvrs": 223
+                        "simNewMvrs": 90,
+                        "simMvrs": 90
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.0495 plast=0.0495 nmvrs=360 samplesUsed=223 status=StatRejectNull measuredCounts=empty",
+                        "desc": "round=1 pmin=0.0495 plast=0.0495 nmvrs=90 samplesUsed=90 status=StatRejectNull measuredCounts=empty",
                         "roundIdx": 1,
-                        "nmvrs": 360,
-                        "plast": 0.04948953985019611,
-                        "pmin": 0.04948953985019611,
-                        "samplesUsed": 223,
+                        "nmvrs": 90,
+                        "plast": 0.049548482865102515,
+                        "pmin": 0.049548482865102515,
+                        "samplesUsed": 90,
                         "status": "StatRejectNull",
                         "clcaErrorTracker": {
-                            "noerror": 0.5069708491761724,
+                            "noerror": 0.5169379674439067,
                             "upper": 1.0,
                             "errorCounts": {},
-                            "count": 223,
-                            "mean": 0.5069708491761724,
+                            "count": 90,
+                            "mean": 0.5169379674439067,
                             "M2": 0.0
                         },
                         "params": {}
@@ -393,51 +519,55 @@
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 360,
-            "estMvrs": 223,
-            "estNewMvrs": 223,
+            "maxSampleAllowed": 636,
+            "estMvrs": 90,
+            "estNewMvrs": 90,
             "done": true,
             "included": true,
-            "status": "StatRejectNull"
+            "status": "StatRejectNull",
+            "haveSampleSize": 90,
+            "haveNewSampleSize": 90
         },
         {
             "id": 6,
             "assertionRounds": [
                 {
-                    "assorterDesc": "1/0 contest6",
+                    "assorterDesc": "0/1 contest6",
                     "roundIdx": 1,
-                    "estSampleSize": 77,
-                    "estNewSampleSize": 77,
+                    "estSampleSize": 341,
+                    "estNewSampleSize": 341,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 78,
+                        "calcMvrsNeeded": 347,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            77
+                            341
                         ],
-                        "lastIndex": 178,
+                        "lastIndex": 341,
                         "quantile": 50,
                         "ntrials": 1,
-                        "simNewMvrs": 77,
-                        "simMvrs": 77
+                        "simNewMvrs": 341,
+                        "simMvrs": 341
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.0492 plast=0.0492 nmvrs=142 samplesUsed=77 status=StatRejectNull measuredCounts=empty",
+                        "desc": "round=1 pmin=0.0467 plast=0.0467 nmvrs=614 samplesUsed=304 status=StatRejectNull measuredCounts={0.7567731194187983=1}",
                         "roundIdx": 1,
-                        "nmvrs": 142,
-                        "plast": 0.049207525314410125,
-                        "pmin": 0.049207525314410125,
-                        "samplesUsed": 77,
+                        "nmvrs": 614,
+                        "plast": 0.04667137257598495,
+                        "pmin": 0.04667137257598495,
+                        "samplesUsed": 304,
                         "status": "StatRejectNull",
                         "clcaErrorTracker": {
-                            "noerror": 0.520497071846879,
+                            "noerror": 0.5045154129458655,
                             "upper": 1.0,
-                            "errorCounts": {},
-                            "count": 77,
-                            "mean": 0.520497071846879,
-                            "M2": 0.0
+                            "errorCounts": {
+                                "0.7567731194187983": 1
+                            },
+                            "count": 304,
+                            "mean": 0.5053452080329476,
+                            "M2": 0.0634246282694745
                         },
                         "params": {}
                     },
@@ -446,50 +576,52 @@
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 358,
-            "estMvrs": 77,
-            "estNewMvrs": 77,
+            "maxSampleAllowed": 614,
+            "estMvrs": 341,
+            "estNewMvrs": 341,
             "done": true,
             "included": true,
-            "status": "StatRejectNull"
+            "status": "StatRejectNull",
+            "haveSampleSize": 614,
+            "haveNewSampleSize": 614
         },
         {
             "id": 7,
             "assertionRounds": [
                 {
-                    "assorterDesc": "0/1 contest7",
+                    "assorterDesc": "1/0 contest7",
                     "roundIdx": 1,
-                    "estSampleSize": 137,
-                    "estNewSampleSize": 137,
+                    "estSampleSize": 234,
+                    "estNewSampleSize": 234,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 140,
+                        "calcMvrsNeeded": 236,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            137
+                            234
                         ],
-                        "lastIndex": 358,
+                        "lastIndex": 234,
                         "quantile": 50,
                         "ntrials": 1,
-                        "simNewMvrs": 137,
-                        "simMvrs": 137
+                        "simNewMvrs": 234,
+                        "simMvrs": 234
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.0496 plast=0.0496 nmvrs=137 samplesUsed=137 status=StatRejectNull measuredCounts=empty",
+                        "desc": "round=1 pmin=0.0495 plast=0.0495 nmvrs=614 samplesUsed=234 status=StatRejectNull measuredCounts=empty",
                         "roundIdx": 1,
-                        "nmvrs": 137,
-                        "plast": 0.049551982991327674,
-                        "pmin": 0.049551982991327674,
-                        "samplesUsed": 137,
+                        "nmvrs": 614,
+                        "plast": 0.049498096338285794,
+                        "pmin": 0.049498096338285794,
+                        "samplesUsed": 234,
                         "status": "StatRejectNull",
                         "clcaErrorTracker": {
-                            "noerror": 0.5112860112860113,
+                            "noerror": 0.506636943965954,
                             "upper": 1.0,
                             "errorCounts": {},
-                            "count": 137,
-                            "mean": 0.5112860112860113,
+                            "count": 234,
+                            "mean": 0.506636943965954,
                             "M2": 0.0
                         },
                         "params": {}
@@ -499,12 +631,14 @@
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 358,
-            "estMvrs": 137,
-            "estNewMvrs": 137,
+            "maxSampleAllowed": 614,
+            "estMvrs": 234,
+            "estNewMvrs": 234,
             "done": true,
             "included": true,
-            "status": "StatRejectNull"
+            "status": "StatRejectNull",
+            "haveSampleSize": 614,
+            "haveNewSampleSize": 614
         },
         {
             "id": 8,
@@ -512,37 +646,37 @@
                 {
                     "assorterDesc": "1/0 contest8",
                     "roundIdx": 1,
-                    "estSampleSize": 241,
-                    "estNewSampleSize": 241,
+                    "estSampleSize": 243,
+                    "estNewSampleSize": 243,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 244,
+                        "calcMvrsNeeded": 257,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            241
+                            243
                         ],
-                        "lastIndex": 241,
+                        "lastIndex": 1136,
                         "quantile": 50,
                         "ntrials": 1,
-                        "simNewMvrs": 241,
-                        "simMvrs": 241
+                        "simNewMvrs": 243,
+                        "simMvrs": 243
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.0497 plast=0.0497 nmvrs=360 samplesUsed=241 status=StatRejectNull measuredCounts=empty",
+                        "desc": "round=1 pmin=0.0495 plast=0.0495 nmvrs=243 samplesUsed=243 status=StatRejectNull measuredCounts=empty",
                         "roundIdx": 1,
-                        "nmvrs": 360,
-                        "plast": 0.04970477139355451,
-                        "pmin": 0.04970477139355451,
-                        "samplesUsed": 241,
+                        "nmvrs": 243,
+                        "plast": 0.049498890941590164,
+                        "pmin": 0.049498890941590164,
+                        "samplesUsed": 243,
                         "status": "StatRejectNull",
                         "clcaErrorTracker": {
-                            "noerror": 0.5064316823660489,
+                            "noerror": 0.5060989643268125,
                             "upper": 1.0,
                             "errorCounts": {},
-                            "count": 241,
-                            "mean": 0.5064316823660489,
+                            "count": 243,
+                            "mean": 0.5060989643268125,
                             "M2": 0.0
                         },
                         "params": {}
@@ -552,12 +686,14 @@
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 360,
-            "estMvrs": 241,
-            "estNewMvrs": 241,
+            "maxSampleAllowed": 735,
+            "estMvrs": 243,
+            "estNewMvrs": 243,
             "done": true,
             "included": true,
-            "status": "StatRejectNull"
+            "status": "StatRejectNull",
+            "haveSampleSize": 243,
+            "haveNewSampleSize": 243
         },
         {
             "id": 9,
@@ -565,172 +701,92 @@
                 {
                     "assorterDesc": "0/1 contest9",
                     "roundIdx": 1,
-                    "estSampleSize": 20,
-                    "estNewSampleSize": 20,
+                    "estSampleSize": 121,
+                    "estNewSampleSize": 121,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 61,
+                        "calcMvrsNeeded": 125,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            20
+                            121
                         ],
-                        "lastIndex": 9183,
+                        "lastIndex": 489,
                         "quantile": 50,
                         "ntrials": 1,
-                        "simNewMvrs": 20,
-                        "simMvrs": 20
+                        "simNewMvrs": 121,
+                        "simMvrs": 121
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.0552 plast=0.0552 nmvrs=20 samplesUsed=20 status=SampleSumRejectNull measuredCounts=empty",
+                        "desc": "round=1 pmin=0.0497 plast=0.0497 nmvrs=164 samplesUsed=121 status=StatRejectNull measuredCounts=empty",
                         "roundIdx": 1,
-                        "nmvrs": 20,
-                        "plast": 0.05515111328215339,
-                        "pmin": 0.05515111328215339,
-                        "samplesUsed": 20,
-                        "status": "SampleSumRejectNull",
+                        "nmvrs": 164,
+                        "plast": 0.04967654915406926,
+                        "pmin": 0.04967654915406926,
+                        "samplesUsed": 121,
+                        "status": "StatRejectNull",
                         "clcaErrorTracker": {
-                            "noerror": 0.5263157894736842,
+                            "noerror": 0.5126733620277379,
                             "upper": 1.0,
                             "errorCounts": {},
-                            "count": 20,
-                            "mean": 0.5263157894736842,
+                            "count": 121,
+                            "mean": 0.5126733620277379,
                             "M2": 0.0
                         },
                         "params": {}
                     },
-                    "status": "SampleSumRejectNull",
+                    "status": "StatRejectNull",
                     "roundProved": 1
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 598,
-            "estMvrs": 20,
-            "estNewMvrs": 20,
+            "maxSampleAllowed": 636,
+            "estMvrs": 121,
+            "estNewMvrs": 121,
             "done": true,
             "included": true,
-            "status": "SampleSumRejectNull"
+            "status": "StatRejectNull",
+            "haveSampleSize": 164,
+            "haveNewSampleSize": 164
         },
         {
             "id": 10,
             "assertionRounds": [
                 {
-                    "assorterDesc": "2/0 contest10",
+                    "assorterDesc": "0/1 contest10",
                     "roundIdx": 1,
-                    "estSampleSize": 71,
-                    "estNewSampleSize": 71,
+                    "estSampleSize": 72,
+                    "estNewSampleSize": 72,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 85,
+                        "calcMvrsNeeded": 72,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            71
+                            72
                         ],
-                        "lastIndex": 3153,
+                        "lastIndex": 72,
                         "quantile": 50,
                         "ntrials": 1,
-                        "simNewMvrs": 71,
-                        "simMvrs": 71
+                        "simNewMvrs": 72,
+                        "simMvrs": 72
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.0476 plast=0.0476 nmvrs=71 samplesUsed=71 status=StatRejectNull measuredCounts=empty",
+                        "desc": "round=1 pmin=0.0485 plast=0.0485 nmvrs=614 samplesUsed=72 status=StatRejectNull measuredCounts=empty",
                         "roundIdx": 1,
-                        "nmvrs": 71,
-                        "plast": 0.04756617455718592,
-                        "pmin": 0.04756617455718592,
-                        "samplesUsed": 71,
+                        "nmvrs": 614,
+                        "plast": 0.048486889018541195,
+                        "pmin": 0.048486889018541195,
+                        "samplesUsed": 72,
                         "status": "StatRejectNull",
                         "clcaErrorTracker": {
-                            "noerror": 0.5187793427230046,
+                            "noerror": 0.522220481487284,
                             "upper": 1.0,
                             "errorCounts": {},
-                            "count": 71,
-                            "mean": 0.5187793427230046,
-                            "M2": 0.0
-                        },
-                        "params": {}
-                    },
-                    "status": "StatRejectNull",
-                    "roundProved": 1
-                },
-                {
-                    "assorterDesc": "2/1 contest10",
-                    "roundIdx": 1,
-                    "estSampleSize": 0,
-                    "estNewSampleSize": 0,
-                    "estimationResult": {
-                        "roundIdx": 1,
-                        "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 85,
-                        "startingTestStatistic": 1.0,
-                        "startingErrorRates": {},
-                        "estimatedDistribution": [
-                            71
-                        ],
-                        "lastIndex": 3153,
-                        "quantile": 50,
-                        "ntrials": 1,
-                        "simNewMvrs": 71,
-                        "simMvrs": 71
-                    },
-                    "auditResult": {
-                        "desc": "round=1 pmin=0.0478 plast=0.0478 nmvrs=71 samplesUsed=15 status=StatRejectNull measuredCounts=empty",
-                        "roundIdx": 1,
-                        "nmvrs": 71,
-                        "plast": 0.04776520199567807,
-                        "pmin": 0.04776520199567807,
-                        "samplesUsed": 15,
-                        "status": "StatRejectNull",
-                        "clcaErrorTracker": {
-                            "noerror": 0.6121883656509696,
-                            "upper": 1.0,
-                            "errorCounts": {},
-                            "count": 15,
-                            "mean": 0.6121883656509696,
-                            "M2": 0.0
-                        },
-                        "params": {}
-                    },
-                    "status": "StatRejectNull",
-                    "roundProved": 1
-                },
-                {
-                    "assorterDesc": "2/3 contest10",
-                    "roundIdx": 1,
-                    "estSampleSize": 0,
-                    "estNewSampleSize": 0,
-                    "estimationResult": {
-                        "roundIdx": 1,
-                        "strategy": "EstimateAudit",
-                        "calcMvrsNeeded": 85,
-                        "startingTestStatistic": 1.0,
-                        "startingErrorRates": {},
-                        "estimatedDistribution": [
-                            71
-                        ],
-                        "lastIndex": 3153,
-                        "quantile": 50,
-                        "ntrials": 1,
-                        "simNewMvrs": 71,
-                        "simMvrs": 71
-                    },
-                    "auditResult": {
-                        "desc": "round=1 pmin=0.0397 plast=0.0397 nmvrs=71 samplesUsed=14 status=StatRejectNull measuredCounts=empty",
-                        "roundIdx": 1,
-                        "nmvrs": 71,
-                        "plast": 0.039669586346828,
-                        "pmin": 0.039669586346828,
-                        "samplesUsed": 14,
-                        "status": "StatRejectNull",
-                        "clcaErrorTracker": {
-                            "noerror": 0.6296296296296295,
-                            "upper": 1.0,
-                            "errorCounts": {},
-                            "count": 14,
-                            "mean": 0.6296296296296295,
+                            "count": 72,
+                            "mean": 0.522220481487284,
                             "M2": 0.0
                         },
                         "params": {}
@@ -740,18 +796,20 @@
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 586,
-            "estMvrs": 71,
-            "estNewMvrs": 71,
+            "maxSampleAllowed": 614,
+            "estMvrs": 72,
+            "estNewMvrs": 72,
             "done": true,
             "included": true,
-            "status": "StatRejectNull"
+            "status": "StatRejectNull",
+            "haveSampleSize": 614,
+            "haveNewSampleSize": 614
         }
     ],
     "auditWasDone": true,
-    "auditIsComplete": true,
-    "nmvrs": 598,
-    "newmvrs": 598,
-    "mvrsUnused": 598,
+    "auditIsComplete": false,
+    "nmvrs": 735,
+    "newmvrs": 735,
+    "mvrsUnused": 735,
     "mvrsUsed": 0
 }

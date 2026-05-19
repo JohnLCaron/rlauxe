@@ -139,8 +139,8 @@ open class ClcaAssorter(
     // [2, (fol+2)/(fol+1), (2*fol+1)/(fol+1),  1, fol/(fol+1), 1/(fol+1), 0] * noerror
 
     // TODO use instance variable for hasStyle vs card.hasStyle()
-    open fun bassort(mvr: CvrIF, cvr:CvrIF, hasStyle:Boolean): Double {
-        val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi eq (1)
+    open fun bassort(mvr: CvrIF, cvr:CvrIF, hasStyle:Boolean? = null): Double {
+        val overstatement = overstatementError(mvr, cvr, hasStyle ?: this.hasStyle) // ωi eq (1)
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
         return tau * noerror   // Bi eq (7)
     }
@@ -241,11 +241,9 @@ open class ClcaAssorter(
     }
 
     override fun toString() = buildString {
-        appendLine("${classname()} for contest ${info.name} (${info.id})")
+        append("${classname()} for contest ${info.name} (${info.id}) hasStyle=$hasStyle assorterMargin=${assorterMargin}")
+        appendLine(" noerror=${dfn(noerror, 8)}")
         appendLine("  assorter=${assorter.desc()}")
-        append("  dilutedMargin=${dfn(assorterMargin, 8)} dilutedMean=${dfn(margin2mean(assorterMargin), 8)}")
-        append(" assortUpper=${dfn(assorter.upperBound(), 8)}")
-        append(" noerror=${dfn(noerror, 8)}")
     }
 
     fun shortName() = assorter.shortName()

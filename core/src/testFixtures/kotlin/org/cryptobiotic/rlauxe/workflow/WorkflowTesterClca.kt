@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
@@ -57,7 +57,7 @@ class WorkflowTesterClca(
 }
 
 fun makeClcaNoErrorSamplerTracker(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): SamplerTracker {
-    val cards = cvrs.mapIndexed { idx, it -> AuditableCard(it, idx, 0) }
+    val cards = cvrs.mapIndexed { idx, it -> AuditableCardM.fromCvr(it, idx, 0) }
     val cvrPairs = cvrs.zip(cards)
     return ClcaSamplerErrorTracker.withMaxSample(
         contestId,

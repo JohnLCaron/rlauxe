@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.attack
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardStyle
@@ -202,7 +201,7 @@ class CardsWithStylesAttack(
     val type: AuditType,
     val cvrsAreComplete: Boolean = true,
     val cards: CloseableIterator<AuditableCardIF>,
-    phantomCards : List<AuditableCard>? = null,
+    phantomCards : List<AuditableCardM>? = null,
     styles: List<CardStyle>,
     val wantFlips: Int
 ): CloseableIterator<AuditableCardIF> {

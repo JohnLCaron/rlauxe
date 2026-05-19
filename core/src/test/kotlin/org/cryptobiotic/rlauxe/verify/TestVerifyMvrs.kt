@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.verify
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.makeCvr
@@ -15,11 +14,11 @@ class TestVerifyMvrs {
     @Test
     fun testMatch() {
         val N = 2
-        val cards = mutableListOf<AuditableCard>()
+        val cards = mutableListOf<AuditableCardM>()
         repeat(N) {
             val id = Random.nextInt()
             val cvr = makeCvr(id, 11, 15)
-            cards.add(AuditableCard(cvr, it, prn=it.toLong()))
+            cards.add(AuditableCardM.fromCvr(cvr, it, prn=it.toLong()))
         }
 
         val errs = ErrorMessages("testMatch")

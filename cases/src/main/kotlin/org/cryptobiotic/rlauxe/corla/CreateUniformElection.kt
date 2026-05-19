@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeElectionInfoJsonFile
@@ -48,24 +47,6 @@ open class CreateUniformElection (
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
-
-    fun cardsOld(): CloseableIterator<CardWithStyleName> {
-        val unsortedMvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
-        return TransformingIterator(unsortedMvrs) { mvr ->
-            when {
-                mvr.phantom -> mvr
-                auditType.isClca() -> mvr.copy(poolId = null, styleName = CardStyle.fromCvr)
-                (auditType.isPolling() && pollingMode!!.withoutBatches()) -> mvr.copy(
-                    votes = null,
-                    styleName = "OneBatch",
-                    poolId = 0
-                )
-
-                (auditType.isPolling()) -> mvr.copy(votes = null)
-                else -> throw IllegalStateException("Unknown what to do with mvr: $mvr")
-            }
-        }
-    }
 
     override fun cards(): CloseableIterator<AuditableCardM> {
         val unsortedMvrs: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)

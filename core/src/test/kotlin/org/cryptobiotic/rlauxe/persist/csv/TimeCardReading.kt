@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.AuditableCardM
-import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -53,10 +52,9 @@ class TimeCardReading {
         var ncards = 0
 
         val publisher = Publisher("$topdir/audit")
-        val inputStream = File(publisher.sortedCardsFile()).inputStream()
 
         val bufferSize = 8096 // 100_000
-        val cardIter: CloseableIterator<CardWithStyleName> = IteratorCardsCsvStream(inputStream, 8096)
+        val cardIter = CardCsvReaderM(publisher.sortedCardsFile(), null).iterator()
         while (cardIter.hasNext()) { //  && ncards < 1000000) {
             val card = cardIter.next()
             ncards++

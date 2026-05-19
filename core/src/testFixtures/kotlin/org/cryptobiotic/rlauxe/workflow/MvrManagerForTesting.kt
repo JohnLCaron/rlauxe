@@ -2,9 +2,12 @@ package org.cryptobiotic.rlauxe.workflow
 
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.audit.AuditRoundIF
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
@@ -37,8 +40,8 @@ class MvrManagerForTesting(
     init {
         // the order of the sortedCards cannot be changed once set.
         val prng = Prng(seed)
-        sortedCards = cvrs.mapIndexed { idx, it -> AuditableCard(it, idx, prng.next()) }.sortedBy { it.prn }
-        sortedMvrs = sortedCards.map { AuditableCard(mvrs[it.index], it.index, it.prn) }
+        sortedCards = cvrs.mapIndexed { idx, it -> AuditableCardM.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
+        sortedMvrs = sortedCards.map { AuditableCardM.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 
     override fun sortedManifest(): SortedManifest {

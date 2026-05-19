@@ -11,24 +11,21 @@ import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CardStyle.Companion.useVotes
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
-import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
-import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
-import org.cryptobiotic.rlauxe.persist.json.readElectionInfoJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import java.nio.file.Files
 import kotlin.io.path.Path
 
-class VerifyElectionCommitment(val auditDir: String) {
-    val publisher = Publisher(auditDir)
+class VerifyElectionCommitment(val location: String) {
+    val publisher = Publisher(location)
     val election: ElectionCommitment
     val auditType: AuditType
     val contests: List<ContestWithAssertions>
@@ -37,7 +34,7 @@ class VerifyElectionCommitment(val auditDir: String) {
     val cardManifest: CloseableIterable<AuditableCardIF>
 
     init {
-        val result = readElectionCommitment(publisher)
+        val result = readElectionCommitment(location)
         election = if (result.isOk) result.unwrap() else {
             println(result.unwrapError())
             throw RuntimeException(result.unwrapError().toString())
@@ -53,7 +50,7 @@ class VerifyElectionCommitment(val auditDir: String) {
 
     fun verify(): VerifyResults {
         val results = VerifyResults()
-        results.addMessage("---VerifyElection on $auditDir")
+        results.addMessage("---VerifyElection on $location")
         if (contests.size == 1) results.addMessage("  ${contests.first()} ")
 
         val contestSummary = verifyCardManifest(auditType, contests, cardManifest, infos, batchSet, results)
@@ -83,43 +80,21 @@ class VerifyElectionCommitment(val auditDir: String) {
 data class ElectionCommitment(val electionInfo: ElectionInfo, val contests: List<ContestWithAssertions>, val batches: List<StyleIF>?,
                               val pools: List<CardPoolIF>?, val cardManifest: CloseableIterable<AuditableCardIF> )
 
-// TODO: use AuditRecord
-fun readElectionCommitment(publisher: Publisher): Result<ElectionCommitment, ErrorMessages> {
-    val errs = ErrorMessages("readElectionRecord from '${publisher.auditDir}'")
+fun readElectionCommitment(location: String): Result<ElectionCommitment, ErrorMessages> {
+    val errs = ErrorMessages("readElectionRecord from '${location}'")
 
-    val electionInfoResult = readElectionInfoJsonFile(publisher.electionInfoFile())
-    val electionInfo = if (electionInfoResult.isOk) electionInfoResult.unwrap() else {
-        errs.addNested(electionInfoResult.unwrapError())
-        null
-    }
+    val auditRecord = AuditRecord.read(location) as AuditRecord
+    val mvrManager = PersistedMvrManager(auditRecord)
 
-    val contestsResults = readContestsJsonFile(publisher.contestsFile())
-    val contests = if (contestsResults.isOk) contestsResults.unwrap()  else {
-        errs.addNested(contestsResults.unwrapError())
-        null
-    }
-
-    val infos = contests!!.map { it.contest.info() }.associateBy { it.id }
-    val pools = if (!Files.exists(Path(publisher.cardPoolsFile()))) null
-        else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
-
-    val batches: List<StyleIF>? = if (!Files.exists(Path(publisher.cardStylesFile()))) null else {
-            val batchesResult = readCardStylesJsonFile(publisher.cardStylesFile())
-            if (batchesResult.isOk) batchesResult.unwrap() else {
-                errs.addNested(batchesResult.unwrapError())
-                emptyList()
-            }
-        }
-
-    val useBatches = batches ?: pools
-    val cardManifest: CloseableIterable<AuditableCardIF> =
-        MergeBatchesIntoCardManifestIterable(
-            CloseableIterable { readCardsCsvIterator(publisher.cardManifestFile()) },
-            useBatches!!,
-        )
+    val electionInfo = auditRecord.electionInfo
+    val config = auditRecord.config
+    val contests = auditRecord.contests
+    val styles = mvrManager.styles()
+    val pools = mvrManager.pools()
+    val sortedManifest = mvrManager.sortedManifest()
 
     return if (errs.hasErrors()) Err(errs) else
-        Ok(ElectionCommitment(electionInfo!!, contests, batches, pools, cardManifest))
+        Ok(ElectionCommitment(electionInfo!!, contests, styles, pools, sortedManifest.cards))
 }
 
 fun verifyCardManifest(

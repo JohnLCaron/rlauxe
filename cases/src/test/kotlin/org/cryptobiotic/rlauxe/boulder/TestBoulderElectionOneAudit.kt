@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.merge
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import kotlin.test.Test
 

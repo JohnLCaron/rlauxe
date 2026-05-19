@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.workflow.readBatches
+import org.cryptobiotic.rlauxe.workflow.readStyles
 import org.cryptobiotic.rlauxe.workflow.readCardPools
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
@@ -18,7 +18,7 @@ class TestReadPopulations {
         val auditdir = "$testdataDir/persist/testRunCli/polling/audit"
 
         val publisher = Publisher(auditdir)
-        val pops = readBatches(publisher)!!
+        val pops = readStyles(publisher)!!
         println("read ${pops} batch (original)")
         val pool = pops.first()
         assertEquals(0, pool.id) // bogus

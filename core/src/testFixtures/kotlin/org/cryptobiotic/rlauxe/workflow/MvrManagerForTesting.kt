@@ -8,8 +8,9 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
@@ -20,7 +21,7 @@ import kotlin.io.path.Path
 private val logger = KotlinLogging.logger("MvrManagerForTesting")
 
 // simulated cvrs, mvrs for testing are sorted and kept here in memory
-// not persistent
+// not persistent; no AuditRecord
 // TODO can we redo this as a MvrSource?
 class MvrManagerForTesting(
     cvrs: List<Cvr>,
@@ -131,18 +132,19 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
 // no AuditRecord, pass in publisher...
 
 fun readSortedManifest(publisher: Publisher, infos: Map<Int, ContestInfo>, ncards: Int): SortedManifest {
-    val batches = readBatches(publisher) ?: readCardPools(publisher, infos) ?: emptyList() // which is preferrred ?
-    // merge batch references into the Card
-    val mergedCards =
-        MergeBatchesIntoCardManifestIterable(
-            CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
-            batches,
-        )
+    val styles = readStyles(publisher) ?: readCardPools(publisher, infos) ?: emptyList() // which is preferrred ?
 
+    // first look for sortedCardsProtoFile, use if present, else use sortedCardsFile
+    if (Files.exists(Path(publisher.sortedCardsProtoFile()))) {
+        val sortedCardsIter = CloseableIterable { ProtoCardIterator(publisher.sortedCardsProtoFile(), styles = styles) }
+        return SortedManifest(sortedCardsIter, ncards)
+    }
+
+    val mergedCards = CloseableIterable { readCardsCsvIteratorM(publisher.sortedCardsFile(), styles) }
     return SortedManifest(mergedCards, ncards)
 }
 
-fun readBatches(publisher: Publisher): List<CardStyle>? {
+fun readStyles(publisher: Publisher): List<CardStyle>? {
     return if (!Files.exists(Path(publisher.cardStylesFile()))) null else {
         val batchesResult = readCardStylesJsonFile(publisher.cardStylesFile())
         if (batchesResult.isOk) batchesResult.unwrap() else {

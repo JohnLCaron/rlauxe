@@ -19,7 +19,6 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.audit.merge
 import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsListM
 import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs

@@ -1,10 +1,8 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardWithStyleName
-import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -84,11 +82,7 @@ class TimeCardReading {
         val publisher = Publisher("$topdir/audit")
         val styles = mvrManager.styles()
 
-        val csvCards: CloseableIterable<AuditableCard> =
-            MergeBatchesIntoCardManifestIterable(
-                CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
-                styles ?: emptyList(),
-            )
+        val csvCards = CloseableIterable { readCardsCsvIteratorM(publisher.sortedCardsFile(), styles) }
 
         val stopwatch = Stopwatch()
         var ncards = 0

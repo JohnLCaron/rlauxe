@@ -13,6 +13,7 @@ import kotlin.sequences.plus
 
 //// Add style reference when reading in CardNoBatch
 
+/*
 fun merge(cards: CloseableIterator<CardWithStyleName>, styles: List<StyleIF>?) : CloseableIterator<AuditableCard> {
     return MergeStylesIntoCards(cards, styles ?: emptyList())
 }
@@ -49,7 +50,7 @@ class MergeStylesIntoCards(
     }
 
     override fun close() { cardsIter.close() }
-}
+} */
 
 // read CardWithBatchName, add style, output AuditableCard as Iterable
 class MergeBatchesIntoCardManifestIterable(
@@ -91,6 +92,8 @@ class MergeBatchesIntoCardManifestIterable(
 // relies on cvrs having poolIds that match the style.id()
 // when it has a pool, use the pool name for the batchName
 // replace with CvrsToCardStylesIterator
+
+/*
 class CvrsToCardsWithBatchNameIterator(
     val type: AuditType,
     val cvrs: CloseableIterator<Cvr>,
@@ -266,3 +269,5 @@ fun mvrsToAuditableCardsTest(
         )
     }
 }
+
+ */

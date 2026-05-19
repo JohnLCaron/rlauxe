@@ -2,13 +2,15 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
+import org.cryptobiotic.rlauxe.audit.readCsvAndMergeCards
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
-// import org.cryptobiotic.rlauxe.persist.protobuf.ProtobufCardIterator
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIteratorM
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -113,25 +115,19 @@ class TimeCardReading {
         // maybe 53 / 49.4 = 1.07 = 7%  slower than timeReadCardsCsvIterator
     }
 
-    /*
     @Test
-    fun timeReadSortedCardsFromProtobuf () {
+    fun timeReadCsvAndMergeCardM () {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
         val publisher = Publisher("$topdir/audit")
         val styles = mvrManager.styles()
 
-        val bufferSize = 100_000
-        val protobufFilename = publisher.cardsProtobufFile()
-
-        // also merges the styles
-        val protoCards = CloseableIterable { ProtobufCardIterator(protobufFilename, bufferSize, styles) }
-
         val stopwatch = Stopwatch()
         var ncards = 0
 
-        val cardIter =  protoCards.iterator()
+        // includes time to merge the styles
+        val cardIter: CloseableIterator<AuditableCardM> = readCsvAndMergeCards(publisher.sortedCardsFile(), styles)
         while (cardIter.hasNext()) { //  && ncards < 1000000) {
             val card = cardIter.next()
             ncards++
@@ -140,15 +136,15 @@ class TimeCardReading {
         val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ncards.toDouble()
         val secPer = msPer / 1000
 
-        println("timeReadSortedCardsFromProtobuf ncards = $ncards, took $stopwatch = $msPer ms/card")
+        println("timeReadAndMergeCardM ncards = $ncards, took $stopwatch = $msPer ms/card")
         val totalCards = 4982747
         println("time to read all cards = ${dfn(totalCards * secPer, 3)} secs")
-        // timeReadSortedManifestFromProtobuf ncards = 4982786, took 20.61 s = 0.004133631265721627 ms/card
-        // timeReadSortedCardsFromProtobuf ncards = 4982786, took 20.53 s = 0.004118378754375564 ms/card
-        // timeReadSortedCardsFromProtobuf ncards = 4982786, took 19.21 s = 0.003853868097084643 ms/card
-        // avg 20.1
-        // maybe 53 / 18.5 = 2.63 faster than timeReadCardsCsvIterator
-    } */
+        // timeReadAndMergeCardM ncards = 4982795, took 60.18 s = 0.012076154046072535 ms/card
+        // timeReadAndMergeCardM ncards = 4982795, took 54.69 s = 0.010974362782334011 ms/card
+        // timeReadAndMergeCardM ncards = 4982795, took 55.34 s = 0.011104811656911432 ms/card
+        // timeReadAndMergeCardM ncards = 4982795, took 56.13 s = 0.01126355790274334 ms/card
+        // avg 56.6
+    }
 
     @Test
     fun timeReadSortedCardsFromProto () {
@@ -185,6 +181,40 @@ class TimeCardReading {
         // avg 15.08
         // 20.1/15.08 = 1.33 = 33% faster than protobuf
         // 53/15.08 = 3.5 faster than csv
+    }
+
+    @Test
+    fun timeReadSortedCardsMFromProto () {
+        val topdir = "${testdataDir}/cases/corla/consistent"
+        val auditRecord = AuditRecord.read(topdir) as AuditRecord
+        val mvrManager = PersistedMvrManager(auditRecord)
+        val publisher = Publisher("$topdir/audit")
+        val styles = mvrManager.styles()
+
+        val bufferSize = 100_000
+        val protoFilename = publisher.sortedCardsProtoFile()
+
+        // also merges the styles
+        val protoCards = CloseableIterable { ProtoCardIteratorM(protoFilename, bufferSize, styles) }
+
+        val stopwatch = Stopwatch()
+        var ncards = 0
+
+        val cardIter =  protoCards.iterator()
+        while (cardIter.hasNext()) { //  && ncards < 1000000) {
+            val card = cardIter.next()
+            ncards++
+        }
+
+        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ncards.toDouble()
+        val secPer = msPer / 1000
+
+        println("timeReadSortedCardsMFromProto ncards = $ncards, took $stopwatch = $msPer ms/card")
+        // timeReadSortedCardsMFromProto ncards = 4982795, took 19.92 s = 0.003995347992441993 ms/card
+        // timeReadSortedCardsMFromProto ncards = 4982795, took 14.91 s = 0.002990289586467033 ms/card
+        // timeReadSortedCardsMFromProto ncards = 4982795, took 21.64 s = 0.004341137855360295 ms/card
+        // timeReadSortedCardsMFromProto ncards = 4982795, took 14.40 s = 0.0028887401548729178 ms/card
+        // timeReadSortedCardsMFromProto ncards = 4982795, took 16.01 s = 0.0032104471486384648 ms/card
     }
 
     @Test

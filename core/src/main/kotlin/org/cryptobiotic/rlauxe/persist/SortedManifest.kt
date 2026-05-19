@@ -9,22 +9,22 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 
 // TODO why in persist ??
 // TODO why is ncards here ??
-class CardManifest(val cards: CloseableIterable<AuditableCardIF>, val ncards: Int) {
+class SortedManifest(val cards: CloseableIterable<AuditableCardIF>, val ncards: Int) {
 
     companion object {
-        fun createFromAList(cards: List<AuditableCardIF>) : CardManifest {
-            return CardManifest(CloseableIterable { cards.iterator() }, cards.size)
+        fun createFromAList(cards: List<AuditableCardIF>) : SortedManifest {
+            return SortedManifest(CloseableIterable { cards.iterator() }, cards.size)
         }
 
-        fun createFromList(cards: List<CardWithStyleName>, batches: List<StyleIF>) : CardManifest {
+        fun createFromList(cards: List<CardWithStyleName>, batches: List<StyleIF>) : SortedManifest {
             val cardIterable = CloseableIterable { cards.iterator() }
             val auditableCards: CloseableIterable<AuditableCard> = MergeBatchesIntoCardManifestIterable(cardIterable, batches)
-            return CardManifest(auditableCards, cards.size)
+            return SortedManifest(auditableCards, cards.size)
         }
 
-        fun createFromIterable(cards: CloseableIterable<CardWithStyleName>, batches: List<StyleIF>, ncards: Int) : CardManifest {
+        fun createFromIterable(cards: CloseableIterable<CardWithStyleName>, batches: List<StyleIF>, ncards: Int) : SortedManifest {
             val auditableCards: CloseableIterable<AuditableCard> = MergeBatchesIntoCardManifestIterable(cards, batches)
-            return CardManifest(auditableCards, ncards)
+            return SortedManifest(auditableCards, ncards)
         }
     }
 }

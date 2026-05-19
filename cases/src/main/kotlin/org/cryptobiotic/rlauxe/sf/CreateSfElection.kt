@@ -88,24 +88,6 @@ class CreateSfElection(
         }
     }
 
-    data class CardStyleProxy(val id: Int, val contests: Set<Int>): StyleIF {
-        var count = 0
-
-        override fun name() = "style$id"
-
-        override fun id() = id
-
-        override fun possibleContests(): IntArray {
-            return contests.toList().sorted().toIntArray()
-        }
-
-        override fun hasExactContests() = true
-
-        override fun hasContest(contestId: Int): Boolean {
-            return contests.contains(contestId)
-        }
-    }
-
     data class CardPoolsAndStyles(
         val cardPools: Map<String, OneAuditPoolFromCvrs>,
         val cardStyleCounters: Map<Set<Int>, CardStyleProxy>,

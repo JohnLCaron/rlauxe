@@ -15,15 +15,14 @@ class AuditableCardBuilder(
     val phantom: Boolean,
     val poolId: Int? = null,
     votesIn: Map<Int, IntArray>? = null,
-    val cardStyle: StyleIF
+    val styleName: String,
+    val cardStyle: StyleIF?
 ) {
     val votes = mutableMapOf<Int, IntArray>()
 
     init {
         if (votesIn != null) votes.putAll(votesIn)
     }
-
-    fun possibleContests() = cardStyle.possibleContests()
 
     fun replaceContestVotes(contestId: Int, contestVotes: IntArray): AuditableCardBuilder  {
         votes[contestId] = contestVotes
@@ -39,7 +38,7 @@ class AuditableCardBuilder(
             id, location, index, prn, phantom,
             poolId = poolId,
             votes = votes,
-            style = cardStyle
+            style = cardStyle!! // TODO
         )
     }
 
@@ -52,6 +51,7 @@ class AuditableCardBuilder(
             card.phantom(),
             card.poolId(),
             card.votes(),
+            card.styleName(),
             card.style()
         )
 

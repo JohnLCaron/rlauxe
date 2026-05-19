@@ -18,7 +18,7 @@ data class MultiContestCombineData(
     val poolId: Int? = null,
 ) {
     val contestVoteTrackers: List<ContestVoteTracker>
-    val batch = if (poolId == null) CardStyle.fromCvrBatch
+    val style = if (poolId == null) CardStyle.fromCvrBatch
         else CardStyle("batch$poolId", poolId, contests.map { it.id }.toIntArray(), false)
 
     init {
@@ -42,12 +42,13 @@ data class MultiContestCombineData(
         val phantoms = makePhantomCards(contests, startIdx = result.size)
         result.addAll(phantoms)
         // result.shuffle(Random)
-        return Pair(result, listOf(batch))
+        return Pair(result, listOf(style))
     }
 
     private fun makeCard(nextCardId: Int, fcontests: List<ContestVoteTracker>, cardStyle:String?): AuditableCard {
         //         constructor(location: String, index: Int, poolId: Int?, cardStyle: String?):
-        val cardBuilder = AuditableCardBuilder("card${nextCardId}", null, nextCardId, 0, false, cardStyle = batch)
+        val cardBuilder = AuditableCardBuilder("card${nextCardId}", null, nextCardId, 0, false,
+            styleName=style.name(), cardStyle = style)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build()
     }

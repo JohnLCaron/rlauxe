@@ -165,8 +165,8 @@ fun verifyCardManifest(
             infos.forEach { (contestId, info) ->
                 val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(info) }
                 if (card.hasContest(contestId)) {
-                    if (card.votes != null && card.votes[contestId] != null) { // happens when cardStyle == all
-                        val cands = card.votes[contestId]!!
+                    if (card.votes(contestId) != null) { // happens when cardStyle == all
+                        val cands = card.votes(contestId)!!
                         allTab.addVotes(cands, card.phantom)
                     } else {
                         if (card.phantom) allTab.nphantoms++
@@ -175,8 +175,8 @@ fun verifyCardManifest(
 
                     if (card.poolId() == null) {
                         val nonpoolTab = nonpooled.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-                        if (card.votes != null && card.votes[contestId] != null) { // happens when cardStyle == all
-                            val cands = card.votes[contestId]!!
+                        if (card.votes(contestId) != null) { // happens when cardStyle == all
+                            val cands = card.votes(contestId)!!
                             nonpoolTab.addVotes(cands, card.phantom)  // for IRV
                         } else {
                             if (card.phantom) nonpoolTab.nphantoms++

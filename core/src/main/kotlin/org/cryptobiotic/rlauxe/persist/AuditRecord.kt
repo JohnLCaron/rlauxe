@@ -9,17 +9,17 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
-import org.cryptobiotic.rlauxe.persist.csv.SamplingCardIterator
+import org.cryptobiotic.rlauxe.persist.bin.FastSamplingCardIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.*
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.File
@@ -34,7 +34,7 @@ interface AuditRecordIF {
     val rounds: List<AuditRoundIF>
 
     // fun readSortedManifest(): CardManifest
-    fun readSortedManifest(styles: List<StyleIF>?): CardManifest
+    fun readSortedManifest(styles: List<StyleIF>?): SortedManifest
     fun readSamplingCards(styles: List<StyleIF>?): CloseableIterable<SamplingCardIF>?
 
     fun readOneShotMvrs(): Map<Int, Int>
@@ -57,21 +57,30 @@ open class AuditRecord(
     override fun name() = electionInfo.electionName // it.location.substring(stateRecord.location.length)
 
     override fun readSamplingCards(styles: List<StyleIF>?): CloseableIterable<SamplingCardIF>? {
-        if (styles == null || !Files.exists(Path(publisher.samplingCardsFile()))) return null
+        if (styles == null || !Files.exists(Path(publisher.fastSamplingFile()))) return null
         return CloseableIterable {
-            logger.info{"readSamplingCards at ${publisher.samplingCardsFile()}"}
-            SamplingCardIterator(publisher.samplingCardsFile(), styles, bufferSize = 100_000)
+            logger.info{"readSamplingCards at ${publisher.fastSamplingFile()}"}
+            FastSamplingCardIterator(publisher.fastSamplingFile(), styles, bufferSize = 100_000)
         }
     }
 
-    override fun readSortedManifest(styles: List<StyleIF>?): CardManifest {
-        // merge style references into the Card
-        val mergedCards: CloseableIterable<AuditableCard> =
+    // TODO should styles be optional ?
+    override fun readSortedManifest(styles: List<StyleIF>?): SortedManifest {
+        // TODO move that to persistent audit
+        // first look for sortedCardsProtoFile, use if present, else use sortedCardsFile
+
+        if (Files.exists(Path(publisher.sortedCardsProtoFile()))) {
+            val sortedCardsIter = CloseableIterable { ProtoCardIterator(publisher.sortedCardsProtoFile(), styles = styles) }
+            return SortedManifest(sortedCardsIter, electionInfo.totalCardCount)
+        }
+
+        // merge style references into the sortedCards
+        val mergedCards =
             MergeBatchesIntoCardManifestIterable(
                 CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
                 styles ?: emptyList(),
             )
-        return CardManifest(mergedCards, electionInfo.totalCardCount)
+        return SortedManifest(mergedCards, electionInfo.totalCardCount)
     }
 
     override fun readCardStyles(): List<StyleIF>? {

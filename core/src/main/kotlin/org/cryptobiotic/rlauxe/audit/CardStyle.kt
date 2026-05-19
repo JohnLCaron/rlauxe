@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
+import org.cryptobiotic.rlauxe.util.nfn
 import java.util.BitSet
 
 /* From SamplePopulations.md
@@ -16,9 +17,31 @@ interface StyleIF {
     fun possibleContests(): IntArray // the set of contests that might be on any card in the batch
     fun hasExactContests(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests()
     fun hasContest(contestId: Int): Boolean // "is in possibleContests()"
+    fun contestIdSet(): Set<Int> = possibleContests().toList().toSet()
+
     // if you have these, then you're a CardPool
     //   fun ncards(): Int
     //   fun votesAndUndervotes(contestId: Int): Vunder
+}
+
+// TODO probably dont need
+// use Set<Int> to match with cards
+data class CardStyleProxy(val id: Int, val contests: Set<Int>): StyleIF {
+    var count = 0
+
+    override fun name() = "style$id"
+    override fun id() = id
+    override fun possibleContests(): IntArray {
+        return contests.toList().sorted().toIntArray()
+    }
+    override fun hasExactContests() = true
+    override fun hasContest(contestId: Int): Boolean {
+        return contests.contains(contestId)
+    }
+    override fun toString(): String {
+        val sortedContests = contests.toSortedSet()
+        return "${nfn(id, 3)} ${nfn(count, 5)} $sortedContests"
+    }
 }
 
 data class CardStyle(
@@ -77,7 +100,7 @@ data class CardStyle(
         val fromCvrBatch = CardStyle(fromCvr, -1, intArrayOf(), true)
         val phantomBatch = CardStyle(phantoms, -1, intArrayOf(), true)
 
-        fun useVotes(batchName: String): Boolean = batchName == fromCvr || batchName == phantoms
+        fun useVotes(styleName: String): Boolean = styleName == fromCvr || styleName == phantoms
 
         fun from(id: Int, contests: Set<Int>) = CardStyle(
             "cardStyle$id", id, contests.toList().sorted().toIntArray(), true)

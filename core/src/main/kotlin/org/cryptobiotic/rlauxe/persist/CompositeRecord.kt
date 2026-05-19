@@ -55,7 +55,7 @@ data class CompositeRecord(
 
     override fun auditdir() = "$location/audit"
 
-    override fun readSortedManifest(styles: List<StyleIF>?): CardManifest {
+    override fun readSortedManifest(styles: List<StyleIF>?): SortedManifest {
         return componentRecords.first().readSortedManifest(styles)
     }
 

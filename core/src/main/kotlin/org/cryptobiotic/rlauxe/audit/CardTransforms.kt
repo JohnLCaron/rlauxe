@@ -89,6 +89,7 @@ class MergeBatchesIntoCardManifestIterable(
 // used in CreateElectionIF
 // relies on cvrs having poolIds that match the style.id()
 // when it has a pool, use the pool name for the batchName
+
 class CvrsToCardsWithBatchNameIterator(
     val type: AuditType,
     val cvrs: CloseableIterator<Cvr>,

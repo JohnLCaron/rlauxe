@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.sf
 
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
-import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
@@ -34,7 +34,7 @@ class TestSf2024OneAuditIrv() {
     val config: Config
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
-    val cardManifest: CardManifest
+    val sortedManifest: SortedManifest
     val cardPools: List<CardPool>
     val mvrs: CloseableIterable<AuditableCardIF>
 
@@ -42,7 +42,7 @@ class TestSf2024OneAuditIrv() {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
         val auditRecord = AuditRecord.read(auditdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
-        cardManifest = mvrManager.sortedManifest()
+        sortedManifest = mvrManager.sortedManifest()
         config = auditRecord.config
         contests = auditRecord.contests
         infos = contests.map{ it.contest.info() }.associateBy { it.id }
@@ -84,7 +84,7 @@ class TestSf2024OneAuditIrv() {
         println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean())}")
 
         // the cards in the pools dont have votes
-        val cardTab = tabulateAuditableCards(cardManifest.cards.iterator(), infos24).values.first()
+        val cardTab = tabulateAuditableCards(sortedManifest.cards.iterator(), infos24).values.first()
         // println("cardTab.irvVotes = ${cardTab.irvVotes}")
         val cardIrvVotes = cardTab.irvVotes.makeVotes(rcontestUA.ncandidates)
         println("rassorter calcMargin from cvrs only = ${rassorter.calcMarginFromVotes(cardIrvVotes, Npop)}")
@@ -96,7 +96,7 @@ class TestSf2024OneAuditIrv() {
 
         // sum all the assorter values in one pass across all the cards, using PoolAverage when card is in a pool
         val avgWithPool = AssortAvg()
-        val cards = cardManifest.cards.iterator()
+        val cards = sortedManifest.cards.iterator()
         cards.use { cardIter ->
             while (cardIter.hasNext()) {
                 val card = cardIter.next()
@@ -192,14 +192,14 @@ class TestSf2024OneAuditIrv() {
         val poolMarginInVotes = sumMarginInVotes.roundToInt()
 
         // whats the margin in votes for the cvrs ??
-        val cvrTab = tabulateAuditableCards(cardManifest.cards.iterator(), infos24).values.first()
+        val cvrTab = tabulateAuditableCards(sortedManifest.cards.iterator(), infos24).values.first()
         val cvrVotes = cvrTab.irvVotes.makeVotes(rcontestUA.ncandidates)
         println("  cvrVotes calcMarginInVotes= ${rassorter.calcVoteMargin(cvrVotes)}")
         val cvrMarginInVotes = rassorter.calcVoteMargin(cvrVotes)
 
         // another way to compute the cvr margin
         val avgNoPool = AssortAvg()
-        val cards = cardManifest.cards.iterator()
+        val cards = sortedManifest.cards.iterator()
         cards.use { cardIter ->
             while (cardIter.hasNext()) {
                 val card = cardIter.next()
@@ -239,7 +239,7 @@ class TestSf2024OneAuditIrv() {
         val assortAvg = AssortAvg()
 
         // the cvrs
-        val iter = cardManifest.cards.iterator()
+        val iter = sortedManifest.cards.iterator()
         while (iter.hasNext()) {
             val card = iter.next()
             if (card.hasContest(contestId) && (card.poolId() == null)) {

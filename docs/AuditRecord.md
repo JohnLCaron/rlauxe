@@ -4,7 +4,7 @@ _last changed 04/11/2026_
 An _Audit Record_ may have the following files in it:
 
     $auditdir/
-        // election record - output of createElectionRecord (prover)
+        // election record - output of createElectionRecord
         cardManifest.csv      // AuditableCardCsv, may be zipped
         cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool (optional)
         cardStyles.json       // CardStylesJson: CardStyleIF -> CardStyle (optional)  
@@ -14,7 +14,9 @@ An _Audit Record_ may have the following files in it:
         // auditRecord - output of createAuditRecord, after the seed has been chosen
         auditCreationConfig.json  // AuditCreationConfigJson 
         auditRoundPrototype.json  // auditRoundConfigJson ; prototype for auditRoundConfigX
-        sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
+        sortedCards.csv           // AuditableCardCsv, sorted by prn, may be zipped
+        sortedCards.proto         // duplicate sortedCards, protobuf format (make sampling fast)
+        fastSampling.bin           // match sortedCards, just prn and styleId (make sampling fast)
 
         roundX/
             auditEstX.json       // AuditRoundJson,  an audit state with estimation, ready for auditing

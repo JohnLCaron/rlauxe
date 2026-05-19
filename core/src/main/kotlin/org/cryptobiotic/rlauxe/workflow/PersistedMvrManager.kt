@@ -28,7 +28,6 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     val auditableCards: CloseableIterator<AuditableCardIF> by lazy {  sortedManifest.cards.iterator() }
 
     //// problem is that you lose the cache when you close and open the AuditRecord between samplings
-
     val cachedCards : List<SamplingCardIF>? by lazy {
         val scards = auditRecord.readSamplingCards(styles)
         if (scards == null) null else {
@@ -51,8 +50,6 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     override fun styles() = styles
 
     override fun pools() = auditRecord.readCardPools() // could test if batches are cardPools
-
-
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCardIF>>  {
         val mvrsForRound = readMvrsForRound(round)

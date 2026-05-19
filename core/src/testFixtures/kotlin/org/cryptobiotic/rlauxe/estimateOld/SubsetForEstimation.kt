@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.SortedManifest
 import kotlin.math.min
 
 private val debug = false
@@ -39,17 +39,17 @@ data class CardSamples(val cards: List<AuditableCardIF>, val usedByContests: Map
 fun getSubsetForEstimation(
     config: Config,
     contests: List<ContestRound>,
-    cardManifest: CardManifest,
+    sortedManifest: SortedManifest,
     previousSamples: Set<Long>,
 ): CardSamples  {
     val contestsIncluded = contests.filter { !it.done && it.included }
     if (contestsIncluded.isEmpty())
         return CardSamples(emptyList(), emptyMap())
 
-    val allInfos = if (debug) tabulateDebugInfo(cardManifest.cards.iterator(), contestsIncluded, null) else null
+    val allInfos = if (debug) tabulateDebugInfo(sortedManifest.cards.iterator(), contestsIncluded, null) else null
 
     // calculate how many samples are wanted for each contest.
-    val wantSampleSize: Map<Int, Int> = contestsIncluded.associate { it.id to estSamplesNeeded(config, it, cardManifest.ncards) }
+    val wantSampleSize: Map<Int, Int> = contestsIncluded.associate { it.id to estSamplesNeeded(config, it, sortedManifest.ncards) }
     val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
     val skippedContests = mutableSetOf<Int>()
     val usedByContests = mutableMapOf<Int, MutableList<Int>>()
@@ -63,7 +63,7 @@ fun getSubsetForEstimation(
 
     var countPhantoms = 0
     var countCardsLookedAt = 0
-    val sortedCardIter = cardManifest.cards.iterator()
+    val sortedCardIter = sortedManifest.cards.iterator()
     while (sortedCardIter.hasNext()) {
         if (!contestsIncluded.any { contestWantsMoreSamples(it)} ) break
 

@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.SortedManifest
 
 
 private val logger = KotlinLogging.logger("EstimateSampleSizes")
@@ -26,7 +26,7 @@ private val logger = KotlinLogging.logger("EstimateSampleSizes")
 fun estimateSampleSizes(
     config: Config,
     auditRound: AuditRoundIF,
-    sortedManifest: CardManifest,
+    sortedManifest: SortedManifest,
     cardPools: List<CardPool>?,
     batches: List<StyleIF>?, // why dont you need batches ?
     previousSamples: Set<Long>,

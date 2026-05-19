@@ -146,7 +146,7 @@ class ClcaSingleRoundWorkflowTaskGeneratorU(
         // to make the mvrs, we change all undervotes to candA.
         var countFlips = 0
         val mvrs = cards.mapIndexed { idx, card ->
-            val cardVotes = card.votes!!
+            val cardVotes = card.votes()!!
             if (cardVotes[1] != null && cardVotes[1]!!.isEmpty()) {
                 countFlips++
                 val flippedVotes = cardVotes.toMutableMap()

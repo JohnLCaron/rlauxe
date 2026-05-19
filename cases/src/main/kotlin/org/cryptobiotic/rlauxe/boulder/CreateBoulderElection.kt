@@ -21,6 +21,7 @@ import kotlin.math.max
 
 private val logger = KotlinLogging.logger("CreateBoulderElection")
 private val debugUndervotes = false
+private val showCardStyles = true
 
 // Use OneAudit; redacted ballots are in pools. Cant do IRV because we dont have VoteConsolidators
 // this version does a bunch of baloney to estimate the redacted undervotes
@@ -33,6 +34,7 @@ class CreateBoulderElection(
     val hasStyle: Boolean = true,
 ): ElectionBuilder {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
+
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }
 
@@ -46,6 +48,7 @@ class CreateBoulderElection(
     val contestsUA : List<ContestWithAssertions>
     val simulatedCvrs: List<Cvr>  // redacted cvrs
     val allCvrs: List<Cvr>  // redacted cvrs
+    val cardStyles: List<StyleIF>
 
     init {
         //// the redacted groups dont have undervotes, so we do some fancy dancing to generate reasonable undervote counts
@@ -78,7 +81,9 @@ class CreateBoulderElection(
         simulatedCvrs = makeRedactedCvrs()
 
         val phantoms = makePhantomCvrs(contests)
-        allCvrs = exportCvrs + simulatedCvrs + phantoms
+        allCvrs = exportCvrs + simulatedCvrs + phantoms // TODO leave out phantoms ??
+        val cardStyleMap = makeCardStyles(allCvrs)
+        cardStyles = cardStyleMap.values.toList()
 
         val npops = tabulateNpops(allCvrs, infoList)
         this.ncards = allCvrs.size
@@ -91,6 +96,24 @@ class CreateBoulderElection(
 
         // TODO put in verify
         // checkNpops(allCvrs, createCards(), infoList)
+    }
+
+    fun makeCardStyles(cvrs: List<Cvr>): Map<Set<Int>, CardStyleProxy> {
+        val cardStyleMap = mutableMapOf<Set<Int>, CardStyleProxy>()
+        cvrs.forEach { cvr ->
+            val csc = cardStyleMap.getOrPut(cvr.votes.keys) { CardStyleProxy(cardStyleMap.size + 1, cvr.votes.keys) }
+            csc.count++
+        }
+
+        if (showCardStyles) {
+            println("card styles  (${cardStyleMap.size})")
+            println("\nid  count contests")
+            val sortedCardStyles = cardStyleMap.toList().sortedBy { it.second.count }
+            sortedCardStyles.forEach { (_, pv) ->
+                println(pv)
+            }
+        }
+        return cardStyleMap
     }
 
     // make ContestInfo from BoulderStatementOfVotes, and matching export.schema.contests
@@ -289,7 +312,7 @@ class CreateBoulderElection(
     override fun electionInfo() = ElectionInfo("Boulder24$auditType", auditType, ncards(), contestsUA.size,
         true, mvrSource=mvrSource)
     override fun contestsUA() = contestsUA
-    override fun cardStyles() = null // TODO !cvrsHaveUndervotes need batches
+    override fun cardStyles() = cardStyles
     override fun cardPools() = if (auditType.isOA()) cardPoolBuilders else null
     override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, cardPools())
     override fun createUnsortedMvrsExternal() = null
@@ -299,11 +322,11 @@ class CreateBoulderElection(
 
     fun createCards(): CloseableIterator<CardWithStyleName> {
         // same cvrs for CLCA and OneAudit
-        return CvrsToCardsWithBatchNameIterator(
+        return CvrsToCardStylesIterator(
             auditType,
             Closer(allCvrs.iterator()), // use the mvrs as the cvrs
             null,
-            styles = if (auditType.isClca()) null else cardPoolBuilders
+            styles = cardStyles // if (auditType.isClca()) null else cardPoolBuilders // integrate OA pools
         )
     }
 }

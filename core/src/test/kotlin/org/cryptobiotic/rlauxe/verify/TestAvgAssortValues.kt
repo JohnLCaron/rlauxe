@@ -167,7 +167,7 @@ class TestAvgAssortValues {
             println("\n$CardHeader")
             var count = 0
             for (card in cardIterable.iterator()) {
-                if (card.possibleContests().toSet() != card.votes?.keys) print("*** ")
+                if (card.possibleContests().toSet() != card.votes()?.keys) print("*** ")
                 print(writeCardCsv(card))
                 if (count++ > 100) break
             }
@@ -215,7 +215,7 @@ class TestAvgAssortValues {
             println("\n$CardHeader")
             var count = 0
             for (card in cardIterable.iterator()) {
-                if (card.possibleContests().toSet() != card.votes?.keys) print("*** ")
+                if (card.possibleContests().toSet() != card.votes()?.keys) print("*** ")
                 print(writeCardCsv(card))
                 if (count++ > 100) break
             }

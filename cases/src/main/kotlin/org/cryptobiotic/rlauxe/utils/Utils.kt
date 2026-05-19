@@ -30,7 +30,7 @@ fun tabulateCardsAndCount(cards: CloseableIterator<AuditableCard>, infos: Map<In
                 if (card.hasContest(contestId)) { // TODO note that here, we believe possibleContests ...
                     val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
                     if (card.phantom) tab.nphantoms++
-                    val votes = card.votes
+                    val votes = card.votes()
                     if (votes != null && votes[contestId] != null) { // happens when cardStyle == all
                         val contestVote = votes[contestId]!!
                         tab.addVotes(contestVote, card.phantom)

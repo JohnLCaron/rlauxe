@@ -13,7 +13,8 @@
         "minMargin": 0.0,
         "maxSamplePct": 0.0,
         "contestSampleCutoff": 10000,
-        "auditSampleCutoff": 10000
+        "auditSampleCutoff": 10000,
+        "other": {}
     },
     "pollingConfig": {
         "d": 100

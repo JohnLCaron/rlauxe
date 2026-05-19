@@ -190,7 +190,6 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<A
         phantomCvrs = null,
         listOf(pool),
     )
-    // could also run it through MergeBatchesIntoCardManifestIterable
     val cards = mutableListOf<AuditableCardM>()
     cardsNoBatch.forEach { card ->
         // val batch = if (card.poolId == 42) pool else CardStyle.fromCvrBatch

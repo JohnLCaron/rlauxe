@@ -66,7 +66,7 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
                 info,
                 this.assorter.import(info),
                 poolAverages!!.import(),
-                this.hasStyle,
+                // this.hasStyle,
             )
             oaClcaAssorter.oaAssortRates = this.oaAssortRates!!.import()
             oaClcaAssorter

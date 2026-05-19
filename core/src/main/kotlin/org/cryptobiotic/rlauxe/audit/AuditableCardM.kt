@@ -16,6 +16,7 @@ interface AuditableCardIF: CvrIF, SamplingCardIF {
 
     fun style(): StyleIF?            // "fromCvr" if no cardStyle and its from a CVR (then votes is non null)
     fun possibleContests() : IntArray
+
     // TODO is hasStyle really card specific? contest? audit?
     //    is it the same as "consistentSampling" or something else ??
     fun hasExactContests(): Boolean // TODO
@@ -45,7 +46,7 @@ data class AuditableCardM (
     private var style: StyleIF? = null
     fun setStyle(style: StyleIF): AuditableCardM {
         if (styleName != style.name())
-            print("wtf?")
+            logger.warn{"AuditableCardM.setStyle $styleName != ${style.name()}"}
         require(styleName == style.name())
         this.style = style
         return this
@@ -53,7 +54,6 @@ data class AuditableCardM (
     override fun style(): StyleIF? = style // TODO
 
     // TODO could ignore useCvr
-    private val useCvr = CardStyle.useVotes(styleName)
     private val votes: Map<Int, IntArray>? by lazy {
         if (contestIds.isEmpty()) null else {
             val lastIndex = contestIds.size - 1
@@ -67,6 +67,13 @@ data class AuditableCardM (
                     makeVotes[contestId] = candidates.sliceArray(start until end)
             }
             makeVotes.toMap()
+        }
+    }
+
+    private val useCvr = CardStyle.useVotes(styleName)
+    init {
+        if (useCvr && votes == null) {
+            throw RuntimeException("cardStyle '${styleName}' must have non-null votes")
         }
     }
 

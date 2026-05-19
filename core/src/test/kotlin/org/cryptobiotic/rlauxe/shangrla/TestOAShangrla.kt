@@ -124,9 +124,9 @@ class TestOAShangrla {
         assertEquals(loserVoteNoCvr, cassorter.bassort(loserNoCvr, winnerNoCvr, true), .0001)
         assertEquals(otherVoteNoCvr, cassorter.bassort(otherNoCvr, winnerNoCvr, true), .0001)
 
-        val expect = """OneAuditClcaAssorter for contest OneAuditTest (1)
-  assorter= Plurality winner=0 loser=1 dilutedMargin=65.7200% dilutedMean=82.8600%
-  dilutedMargin=0.65720000 dilutedMean=0.82860000 assortUpper=1.00000000 noerror=0.74471254"""
+        val expect = """OneAuditClcaAssorter for contest OneAuditTest (1) hasStyle=false assorterMargin=0.6572 noerror=0.74471254
+  assorter= Plurality winner=0 loser=1 reportedMargin=65.7200% dilutedMargin=65.7200%
+"""
         assertEquals(expect, cassorter.toString())
     }
 

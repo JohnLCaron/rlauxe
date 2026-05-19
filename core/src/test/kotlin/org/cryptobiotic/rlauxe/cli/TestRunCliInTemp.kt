@@ -135,7 +135,7 @@ class TestRunCliInTemp {
             arrayOf(
                 "-in", topdir,
                 "-type", "ONEAUDIT",
-                "-minMargin", "0.01",
+                "-minMargin", "0.02",
                 "-fuzzMvrs", "0.001",
                 "-ncards", "10000",
             )

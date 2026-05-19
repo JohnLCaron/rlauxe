@@ -52,7 +52,7 @@ class MergeStylesIntoCards(
     override fun close() { cardsIter.close() }
 } */
 
-// read CardWithBatchName, add style, output AuditableCard as Iterable
+/* read CardWithBatchName, add style, output AuditableCard as Iterable
 class MergeBatchesIntoCardManifestIterable(
     val cards: CloseableIterable<CardWithStyleName>,
     val styles: List<StyleIF>,
@@ -85,7 +85,7 @@ class MergeBatchesIntoCardManifestIterable(
         }
         override fun close() = cardsIter.close()
     }
-}
+} */
 
 ////////////////////////////////////////////
 // used in CreateElectionIF
@@ -231,7 +231,7 @@ fun mvrsToAuditableCardsList(
             styleName = useBatchName,
         )
     }
-}
+} */
 
 // TODO only used in testing; remove and replace with mvrsToAuditableCardsList where needed
 fun mvrsToAuditableCardsTest(
@@ -269,5 +269,3 @@ fun mvrsToAuditableCardsTest(
         )
     }
 }
-
- */

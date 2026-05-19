@@ -142,7 +142,7 @@ class ClcaSamplerErrorTracker(
         while (idx < samples.size) {
             val (mvr, card) = samples[permutedIndex[idx]]
             idx++
-            val nextVal = cassorter.bassort(mvr, card, hasStyle=card.hasExactContests())
+            val nextVal = cassorter.bassort(mvr, card)
             clcaErrorTracker.addSample(nextVal, card.poolId() == null) // dont track errors from oa pools
             return nextVal
         }

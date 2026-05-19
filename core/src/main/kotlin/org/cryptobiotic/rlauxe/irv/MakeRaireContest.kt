@@ -250,8 +250,7 @@ fun setPoolAssorterAveragesForRaire(
                     assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                 }
             }
-            val oaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, poolAverages = AssortAvgsInPools(assortAverages),
-                hasStyle = hasStyle)
+            val oaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, poolAverages = AssortAvgsInPools(assortAverages))
 
             oaAssorter.oaAssortRates = oneAuditErrorsFromPools.oaErrorRatesIrv(oaContest, oaAssorter, raireAssorter)
 

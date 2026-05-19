@@ -12,7 +12,7 @@
                 "nwinners": 1,
                 "voteForN": 1,
                 "metadata": {
-                    "PoolPct": 5
+                    "PoolPct": "5.0"
                 }
             },
             "contest": {
@@ -30,7 +30,8 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5198019801980198,
+                        "reportedMargin": 0.04,
+                        "dilutedMargin": 0.039603960396039604,
                         "winner": 0,
                         "loser": 1
                     }
@@ -42,7 +43,8 @@
                         "className": "ClcaAssorterOneAudit",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.5198019801980198,
+                            "reportedMargin": 0.04,
+                            "dilutedMargin": 0.039603960396039604,
                             "winner": 0,
                             "loser": 1
                         },
@@ -58,12 +60,14 @@
                                 "0.7565648148148146": 0.025504950495049503
                             },
                             "totalInPools": 3000
-                        }
+                        },
+                        "hasStyle": false
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 50500
+            "Npop": 50500,
+            "hasStyle": true
         }
     ],
     "rcontestsUnderAudit": []

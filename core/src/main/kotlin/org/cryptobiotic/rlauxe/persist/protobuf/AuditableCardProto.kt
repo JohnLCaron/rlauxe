@@ -19,6 +19,8 @@ import kotlin.collections.iterator
 import kotlin.io.path.Path
 import kotlin.ranges.until
 
+// TODO remobe in favor of AuditableCardM
+
 // aka CardWithArrays
 class AuditableCardProto(
     val id: String, // enough info to find the card for a manual audit.

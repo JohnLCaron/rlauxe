@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.persist.bin
 
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
+import org.cryptobiotic.rlauxe.audit.makeFastCards
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -161,27 +163,14 @@ class TestFastSamplingCards {
 
     @Test
     fun testMakeFastCards() {
-        val auditdir = "${testdataDir}/cases/sf2024/clca/audit"
+        val auditdir = "${testdataDir}/cases/sf2024/oa/audit"
         val auditRecord = AuditRecord.read(auditdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
         val styles = mvrManager.styles()!!
 
         val stopwatch = Stopwatch()
-
-        // copy sorted csv to a proto file for better performance
         val publisher = Publisher(auditdir)
-
-        val sortedCards = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles)
-        writeProtoCards(sortedCards, publisher.sortedCardsProtoFile())
-
-        // extract some info from sorted proto cards for a super compact "samplingCards" binary file
-        val bufferSize = 100_000
-        val protoIter = ProtoCardIterator(
-            publisher.sortedCardsProtoFile(),
-            bufferSize,
-            styles
-        )  // dont actually need styles i think
-        val ncards = writeFastSamplingCards(protoIter, publisher.fastSamplingFile(), styles)
+        val ncards = makeFastCards(publisher, styles)
         println("ncards = $ncards that took $stopwatch= ${stopwatch.elapsed(TimeUnit.MILLISECONDS)/ncards.toDouble()} ms/card")
 
     }

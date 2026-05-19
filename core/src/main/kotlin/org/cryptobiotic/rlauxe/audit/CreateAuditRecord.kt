@@ -100,7 +100,7 @@ fun sortManifestExternal(topdir: String, publisher: Publisher, seed: Long) {
     writeSortedCardsExternal(topdir, publisher.sortedCardsFile(), unsortedCards, seed)
 }
 
-fun makeFastCards(publisher: Publisher, styles: List<StyleIF>) {
+fun makeFastCards(publisher: Publisher, styles: List<StyleIF>): Int {
     val stopwatch = Stopwatch()
 
     // copy sortedCards csv to sortedCards proto file for better performance
@@ -113,6 +113,7 @@ fun makeFastCards(publisher: Publisher, styles: List<StyleIF>) {
     val ncards = writeFastSamplingCards(protoIter, publisher.fastSamplingFile(), styles)
 
     logger.info{"makeFastCards ${ncards} took ${stopwatch}"}
+    return ncards
 }
 
 fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCardM>, seed: Long) {

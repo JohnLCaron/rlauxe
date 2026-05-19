@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.attack
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.Contest
@@ -142,7 +144,7 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
             CardStyle("group1",  1,intArrayOf(1,2), hasStyle),
             CardStyle("group2", 2, intArrayOf(2), hasStyle),
         )
-        val modifiedCards = mutableListOf<AuditableCard>()
+        val modifiedCards = mutableListOf<AuditableCardIF>()
         val cardAttacker = CardsWithStylesAttack(AuditType.CLCA, cards=Closer(cardsu.iterator()), styles=cardStyles, wantFlips=diff+1)
         while (cardAttacker.hasNext()) {
             modifiedCards.add(cardAttacker.next())
@@ -169,7 +171,7 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
                 val org = mcard
                 val mvotes = mcard.votes()!!.toMutableMap()
                 mvotes[1] = intArrayOf(1) // switch vote to candidate A
-                org.copy(votes = mvotes)
+                org // org.copy(votes = mvotes) TODO
             } else
                 mcard
         }
@@ -199,14 +201,14 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
 class CardsWithStylesAttack(
     val type: AuditType,
     val cvrsAreComplete: Boolean = true,
-    val cards: CloseableIterator<AuditableCard>,
+    val cards: CloseableIterator<AuditableCardIF>,
     phantomCards : List<AuditableCard>? = null,
     styles: List<CardStyle>,
     val wantFlips: Int
-): CloseableIterator<AuditableCard> {
+): CloseableIterator<AuditableCardIF> {
 
     val poolMap = styles.associateBy{ it.name() }
-    val allCards: Iterator<AuditableCard>
+    val allCards: Iterator<AuditableCardIF>
     var cardIndex = 1
     var flipCount = 0
 
@@ -222,7 +224,7 @@ class CardsWithStylesAttack(
 
     override fun hasNext() = allCards.hasNext()
 
-    override fun next(): AuditableCard {
+    override fun next(): AuditableCardIF {
         val org = allCards.next()
         val hasCvr = type.isClca()
 
@@ -236,11 +238,11 @@ class CardsWithStylesAttack(
         val contests = style.possibleContests()
         val votes = if (hasCvr) org.votes() else null
 
-        return AuditableCard(org.id, org.location, cardIndex++, 0, phantom=org.phantom,
-            org.poolId,
-            votes,
-            style=org.style,
-        )
+        return AuditableCardM.fromVotes(org.id(), org.location(), cardIndex++, 0, phantom=org.phantom(),
+            poolId=org.poolId(),
+            votes=votes,
+            styleName=org.styleName(),
+        ).setStyle(org.style()!!)
     }
 
     override fun close() = cards.close()

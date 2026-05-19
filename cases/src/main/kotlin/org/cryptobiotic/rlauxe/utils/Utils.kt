@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.utils
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -19,7 +19,7 @@ fun countPhantoms(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<I
     return result
 }
 
-fun tabulateCardsAndCount(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>): Pair<Map<Int, ContestTabulation>, Int> {
+fun tabulateCardsAndCount(cards: CloseableIterator<AuditableCardIF>, infos: Map<Int, ContestInfo>): Pair<Map<Int, ContestTabulation>, Int> {
     val tabs = mutableMapOf<Int, ContestTabulation>()
     var count = 0
     cards.use { cardIter ->
@@ -29,11 +29,11 @@ fun tabulateCardsAndCount(cards: CloseableIterator<AuditableCard>, infos: Map<In
             infos.forEach { (contestId, info) ->
                 if (card.hasContest(contestId)) { // TODO note that here, we believe possibleContests ...
                     val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
-                    if (card.phantom) tab.nphantoms++
+                    if (card.phantom()) tab.nphantoms++
                     val votes = card.votes()
                     if (votes != null && votes[contestId] != null) { // happens when cardStyle == all
                         val contestVote = votes[contestId]!!
-                        tab.addVotes(contestVote, card.phantom)
+                        tab.addVotes(contestVote, card.phantom())
                     } else {
                         tab.ncardsTabulated++
                     }
@@ -46,7 +46,7 @@ fun tabulateCardsAndCount(cards: CloseableIterator<AuditableCard>, infos: Map<In
 
 // TODO is cvr.hasContest(contestId) the same as card.hasContest(contestId) ??
 // no, card.hasContest(contestId) may be true but votes[contestId] = null; cards supporst missing contests
-fun checkNpops(cvrs: List<Cvr>, cards: CloseableIterator<AuditableCard>, infoList: List<ContestInfo>): Pair<Map<Int, Int>, Int> {
+fun checkNpops(cvrs: List<Cvr>, cards: CloseableIterator<AuditableCardIF>, infoList: List<ContestInfo>): Pair<Map<Int, Int>, Int> {
     val npops = tabulateNpops(cvrs, infoList)
     val (npops2, count2) = tabulateNpopsFromCards(cards, infoList)
     if (npops2 != npops || count2 != cvrs.size) {
@@ -77,7 +77,7 @@ fun tabulateNpops(cvrs: List<Cvr>, infos: List<ContestInfo>): Map<Int, Int> {
     return npops
 }
 
-fun tabulateNpopsFromCards(cards: CloseableIterator<AuditableCard>, infos: List<ContestInfo>): Pair<Map<Int, Int>, Int> {
+fun tabulateNpopsFromCards(cards: CloseableIterator<AuditableCardIF>, infos: List<ContestInfo>): Pair<Map<Int, Int>, Int> {
     val npops = mutableMapOf<Int, Int>()
     var count = 0
     cards.use { cardIter ->
@@ -96,14 +96,14 @@ fun tabulateNpopsFromCards(cards: CloseableIterator<AuditableCard>, infos: List<
 }
 
 // cvrs and the cards reference the same ballots
-fun checkHasContest(cvrs: List<Cvr>, cards: CloseableIterator<AuditableCard>, infos: List<ContestInfo>) {
+fun checkHasContest(cvrs: List<Cvr>, cards: CloseableIterator<AuditableCardIF>, infos: List<ContestInfo>) {
     cards.use { cardIter ->
         var count = 0
         cvrs.forEach { cvr ->
             val card = cardIter.next()
             for (info in infos) {
-                if (card.location != cvr.id) {
-                    print("${card.location} != ${cvr.id}")
+                if (card.location() != cvr.id) {
+                    print("${card.location()} != ${cvr.id}")
                     break
                 }
                 if (card.hasContest(info.id) != cvr.hasContest(info.id)) {

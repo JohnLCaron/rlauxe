@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeElectionInfoJsonFile
 import org.cryptobiotic.rlauxe.util.*
@@ -48,7 +49,7 @@ open class CreateUniformElection (
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
 
-    override fun cards(): CloseableIterator<CardWithStyleName> {
+    fun cardsOld(): CloseableIterator<CardWithStyleName> {
         val unsortedMvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
         return TransformingIterator(unsortedMvrs) { mvr ->
             when {
@@ -66,11 +67,30 @@ open class CreateUniformElection (
         }
     }
 
+    override fun cards(): CloseableIterator<AuditableCardM> {
+        val unsortedMvrs: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
+
+        return TransformingIterator(unsortedMvrs) { cardm ->
+            when {
+                cardm.phantom -> cardm
+                auditType.isClca() -> cardm.copy(poolId = null, styleName = CardStyle.fromCvr) // TODO fishy
+                // auditType.isClca() -> cardm.copy(poolId = null)
+                (auditType.isPolling() && pollingMode!!.withoutBatches()) -> cardm.copy(
+                    contestIds = IntArray(0), // might be safer to provide a function to remove all three
+                    styleName = "OneBatch",
+                    poolId = 0
+                )
+
+                (auditType.isPolling()) -> cardm.copy(contestIds = IntArray(0))
+                else -> throw IllegalStateException("Unknown what to do with mvr: $cardm")
+            }
+        }
+    }
+
     // StartAuditFirstRound will create the sorted MVRs
-    override fun createUnsortedMvrsExternal() = readCardsCsvIterator(publisher.unsortedMvrsFile())
+    override fun createUnsortedMvrsExternal() = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
     override fun createUnsortedMvrsInternal() = null
 }
-
 
 ////////////////////////////////////////////////////////////////////
 // Create audit using mvrs from Corla, dont write cards (!)

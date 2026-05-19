@@ -314,13 +314,13 @@ class CreateBoulderElection(
     override fun contestsUA() = contestsUA
     override fun cardStyles() = cardStyles
     override fun cardPools() = if (auditType.isOA()) cardPoolBuilders else null
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, cardPools())
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, cardPools())
     override fun createUnsortedMvrsExternal() = null
 
     override fun cards() = createCards()
     override fun ncards() = ncards
 
-    fun createCards(): CloseableIterator<CardWithStyleName> {
+    fun createCards(): CloseableIterator<AuditableCardM> {
         // same cvrs for CLCA and OneAudit
         return CvrsToCardStylesIterator(
             auditType,

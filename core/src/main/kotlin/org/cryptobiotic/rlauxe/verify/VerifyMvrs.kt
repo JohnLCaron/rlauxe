@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.verify
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 
@@ -22,7 +21,7 @@ fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCardIF, AuditableCardIF>
                 nested.add("*** Mvr contains contest ${mvrContestId} not contained in card $card")
             }
         }
-        if (card.hasStyle()) {
+        if (card.hasExactContests()) {
             card.possibleContests().forEach { batchContestId ->
                 if (!mvr.votes()!!.contains(batchContestId)) {
                     hasError = true
@@ -37,10 +36,10 @@ fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCardIF, AuditableCardIF>
     }
 }
 
-fun AuditableCard.show() = buildString {
-    append("AuditableCard(id='$id', index=$index, sampleNum=$prn, phantom=$phantom")
+fun AuditableCardIF.show() = buildString {
+    append("AuditableCardIF(id='${id()}', index=${index()}, sampleNum=${prn()}, phantom=${phantom()}")
     if (poolId() != null) append(", poolId=${poolId()}")
     append(", styleName='${styleName()}'")
-    append(", has possibleContests=${style.possibleContests().contentToString()}")
+    append(", has possibleContests=${possibleContests().contentToString()}")
     if (votes() != null) append(" has vote contests=${votes()!!.keys.toList().sorted()})")
 }

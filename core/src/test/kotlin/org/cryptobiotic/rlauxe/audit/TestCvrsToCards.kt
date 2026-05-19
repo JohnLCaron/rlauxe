@@ -9,6 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class TestCvrsToCards {
 
@@ -24,12 +25,12 @@ class TestCvrsToCards {
 
         var cvr = cvrr.copy(poolId=null)
         // with no population, only the cvrs are present.
-        var target = mvrsToAuditableCardsTest(auditType, listOf(cvr), styles=null)
+        var target = mvrsToAuditableCardsTestM(auditType, listOf(cvr), styles=null)
         var card = target.first()
         testOneTarget("** clca complete cvrs", cvr, card, auditType, hasCardStyles, CardStyle.fromCvr)
 
         cvr = cvrr.copy(poolId=1)
-        target = mvrsToAuditableCardsTest(auditType, listOf(cvr), styles=null)
+        target = mvrsToAuditableCardsTestM(auditType, listOf(cvr), styles=null)
         card = target.first()
         testOneTarget("clca hasStyle and poolIds", cvr, card, auditType, hasCardStyles, expectStyle = CardStyle.fromCvr)
 
@@ -37,26 +38,26 @@ class TestCvrsToCards {
         // doesnt make sense to use; hasStyle means use cvr
         hasCardStyles = true
         cvr = cvrr.copy(poolId=1)
-        target = mvrsToAuditableCardsTest(auditType, listOf(cvr), styles=listOf(cardStyle))
+        target = mvrsToAuditableCardsTestM(auditType, listOf(cvr), styles=listOf(cardStyle))
         card = target.first()
         testOneTarget("clca hasStyle and poolIds and styles", cvr, card, auditType, hasCardStyles, cardStyle.name(), expectBatch = cardStyle)
 
         // noStyle means votes isnt complete, so you need cardStyles and poolIds. should test if votes cubset of cardpool contests
         hasCardStyles = true
         cvr = cvrr.copy(poolId=1)
-        target = mvrsToAuditableCardsTest(auditType, listOf(cvr), styles=listOf(cardStyle))
+        target = mvrsToAuditableCardsTestM(auditType, listOf(cvr), styles=listOf(cardStyle))
         card = target.first()
         testOneTarget("** clca incomplete cvrs", cvr, card, auditType, hasCardStyles, cardStyle.name(), expectBatch = cardStyle)
 
         // what if you dont supply the poolId?
         cvr = cvrr.copy(poolId=null)
-        target = mvrsToAuditableCardsTest(auditType, listOf(cvr), styles=listOf(cardStyle))
+        target = mvrsToAuditableCardsTestM(auditType, listOf(cvr), styles=listOf(cardStyle))
         card = target.first()
         assertEquals(CardStyle.fromCvr, card.styleName(), "no poolId")
 
         // what if you dont supply the cardStyles? FAIL
         cvr = cvrr.copy(poolId=1)
-        target = mvrsToAuditableCardsTest(auditType, listOf(cvr), styles=null)
+        target = mvrsToAuditableCardsTestM(auditType, listOf(cvr), styles=null)
         card = target.first()
         assertEquals(CardStyle.fromCvr, card.styleName(), "no pools")
     }
@@ -71,7 +72,7 @@ class TestCvrsToCards {
         // polling but no batches
         var cvr = cvrr.copy(poolId=null)  // no poolId
         var message = assertFailsWith<RuntimeException> {
-            mvrsToAuditableCardsTest(auditType, listOf(cvr), styles= null)
+            mvrsToAuditableCardsTestM(auditType, listOf(cvr), styles= null)
         }.message!!
         assertEquals("cardStyle '_fromCvr' must have non-null votes", message)
 
@@ -80,14 +81,14 @@ class TestCvrsToCards {
         // what happens if the poolId doesnt match ??
         cvr = cvrr.copy(poolId=2) // poolId doesnt match
         message = assertFailsWith<RuntimeException> {
-            mvrsToAuditableCardsTest(auditType, listOf(cvr), styles= listOf(batch))
+            mvrsToAuditableCardsTestM(auditType, listOf(cvr), styles= listOf(batch))
         }.message!!
         assertEquals("cardStyle '_fromCvr' must have non-null votes", message)
 
         // successfully use pool 1
         hasCardStyles = true
         cvr = cvrr.copy(poolId=1)
-        var target = mvrsToAuditableCardsTest(auditType, listOf(cvr), styles= listOf(batch))
+        var target = mvrsToAuditableCardsTestM(auditType, listOf(cvr), styles= listOf(batch))
         testOneTarget("** poll with pool", cvr, target.first(), auditType, hasCardStyles, batch.name(), expectBatch = batch)
     }
 
@@ -102,18 +103,18 @@ class TestCvrsToCards {
         var hasCardStyles = true
 
         val cardPool = CardPoolTest("oapool2", 2, intArrayOf(0, 1, 2), hasCardStyles, totalCards = 42)
-        var target = mvrsToAuditableCardsTest(auditType, cvrs, styles=listOf(cardPool), )
+        var target = mvrsToAuditableCardsTestM(auditType, cvrs, styles=listOf(cardPool), )
         testOneTarget("oa hasStyle", cvrc, target[0], auditType, hasCardStyles, CardStyle.fromCvr)
         testOneTarget("oa hasStyle pooled", cvrp, target[1], auditType, hasCardStyles, cardPool.name(), expectBatch = cardPool)
 
         // noStyle means must supply the list of possibleContests for pooled data and cvrs
         hasCardStyles = true
-        target = mvrsToAuditableCardsTest(auditType, cvrs, styles=listOf(cardPool), )
+        target = mvrsToAuditableCardsTestM(auditType, cvrs, styles=listOf(cardPool), )
         testOneTarget("oa noStyle", cvrc, target[0], auditType, hasCardStyles, CardStyle.fromCvr)
         testOneTarget("oa noStyle pooled", cvrp, target[1], auditType, hasCardStyles, cardPool.name(), expectBatch = cardPool)
     }
 
-    fun testOneTarget(what: String, cvr: Cvr, card: AuditableCard, auditType: AuditType, hasCardStyles: Boolean, expectStyle:String?, expectBatch:StyleIF?=null) {
+    fun testOneTarget(what: String, cvr: Cvr, card: AuditableCardM, auditType: AuditType, hasCardStyles: Boolean, expectStyle:String?, expectBatch:StyleIF?=null) {
         println("$what [$auditType hasCardStyles:$hasCardStyles]:")
         println("  ${cvr.show()}")
         println("  ${card.show()}")
@@ -122,8 +123,8 @@ class TestCvrsToCards {
         if (auditType.isClca()) {
             assertEquals(cvr, card.toCvr())
             assertNotNull(card.votes())
-            assertEquals(cvr.votes, card.votes())
-            assertEquals(null, card.poolId(), "card.poolId() should be null")
+            assertTrue(testVotesEqual(cvr.votes, card.votes()))
+            assertEquals(cvr.poolId(), card.poolId(), "card.poolId() should be null")
 
         } else if (auditType.isPolling()) {
             assertNull(card.votes())
@@ -161,7 +162,7 @@ fun Cvr.show() = buildString {
     append("} poolId=$poolId")
 }
 
-fun AuditableCard.show() = buildString {
+fun AuditableCardM.show() = buildString {
     append("$location phantom=$phantom")
     if (votes() != null) {
         append(" votes={")

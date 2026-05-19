@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.dominion.CvrExportConverter
+import org.cryptobiotic.rlauxe.dominion.CvrExportConverterM
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.irv.makeRaireOneAuditContest
 import org.cryptobiotic.rlauxe.irv.makeRaireContest
@@ -69,8 +69,8 @@ class CreateSfElection(
         // phantomCount = countPhantoms(allCvrTabs, contestNcs)
 
         // we need to know the diluted Nb before we can create the assertions: another pass through the cvrExports
-        val cards: CloseableIterator<CardWithStyleName> = createCards(auditType)
-        val auditableCardIter: CloseableIterator<AuditableCard> = MergeStylesIntoCards(cards, cardStyleMap.values.toList())
+        val cards: CloseableIterator<AuditableCardM> = createCards(auditType)
+        val auditableCardIter = MergeStylesIntoCardsM(cards, cardStyleMap.values.toList())
 
         val (manifestTabs, count) = tabulateCardsAndCount( auditableCardIter, infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated }
@@ -158,17 +158,16 @@ class CreateSfElection(
     override fun cards() = createCards(auditType)
     override fun ncards() = ncards
 
-    fun createCards(auditType: AuditType): CloseableIterator<CardWithStyleName> {
+    fun createCards(auditType: AuditType): CloseableIterator<AuditableCardM> {
         // pass 2 through cvrExport
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsvFile)
-        val cardIter: CloseableIterator<CardWithStyleName>
-            = CvrExportConverter(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
+        val cardIter: CloseableIterator<AuditableCardM>
+            = CvrExportConverterM(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
 
         // still need to remove cvrs for pooled data
-        val transformer = TransformingIterator<CardWithStyleName, CardWithStyleName>(cardIter) { org ->
+        val transformer = TransformingIterator<AuditableCardM, AuditableCardM>(cardIter) { org ->
             val hasCvr = auditType.isClca() || (auditType.isOA() && org.poolId == null)
-            val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
-            org.copy(votes = votes)
+            if (hasCvr) org else AuditableCardM.removeVotes(org)
         }
         return transformer
     }
@@ -176,13 +175,13 @@ class CreateSfElection(
     // TODO add optional fuzz or some other error method?
     // convert the cvrExports to the private mvrs; must be in same order as createCards
     override fun createUnsortedMvrsExternal() = null
-    override fun createUnsortedMvrsInternal(): List<CardWithStyleName> {
+    override fun createUnsortedMvrsInternal(): List<AuditableCardM> {
         // pass 3 through cvrExport
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsvFile)
-        val cardIter: CloseableIterator<CardWithStyleName>
-                = CvrExportConverter(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
+        val cardIter: CloseableIterator<AuditableCardM>
+                = CvrExportConverterM(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
 
-        val unsortedMvrs = mutableListOf<CardWithStyleName>()
+        val unsortedMvrs = mutableListOf<AuditableCardM>()
         cardIter.use { iter ->
             while( iter.hasNext()) { unsortedMvrs.add (iter.next()) }
         }

@@ -38,11 +38,11 @@ class BelgiumClca (
     override fun cards() = createCards()
     override fun ncards() = allCvrs.size
 
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, null)
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, null)
     override fun createUnsortedMvrsExternal() = null
 
-    fun createCards(): CloseableIterator<CardWithStyleName> {
-        return CvrsToCardsWithBatchNameIterator(
+    fun createCards(): CloseableIterator<AuditableCardM> {
+        return CvrsToCardStylesIterator(
             AuditType.CLCA,
             Closer(allCvrs.iterator()),
             makePhantomCvrs(contestsUA().map { it.contest }),
@@ -111,10 +111,12 @@ fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdi
     createBelgiumElection(topdir=topdir, contest, creation, round)
 
     val auditdir = "$topdir/audit"
-    val results = RunVerifyContests.runVerifyContests(auditdir, null, show = showVerify)
-    println()
-    print(results)
-    if (results.hasErrors) throw RuntimeException("createBelgiumElection failed to verify")
+    if (showVerify) {
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = showVerify)
+        println()
+        print(results)
+        if (results.hasErrors) throw RuntimeException("createBelgiumElection failed to verify")
+    }
 
     if (runRounds == false) return Pair(0, 0)
 

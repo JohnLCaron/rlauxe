@@ -1,11 +1,12 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
-import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
+import org.cryptobiotic.rlauxe.audit.CvrsToCardStylesIterator
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
@@ -18,7 +19,7 @@ import kotlin.test.assertEquals
 data class ContestMvrCardAndPops(
     val contestUA: ContestWithAssertions,
     val mvrs: List<Cvr>,
-    val cards: List<AuditableCard>,
+    val cards: List<AuditableCardIF>,
     val pools: List<CardPool>,
 )
 
@@ -178,22 +179,22 @@ fun makeMvrs(
 }
 
 // make the card manifest
-fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<AuditableCard> {
+fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<AuditableCardM> {
     // the union of the first two styles
     val expandedContestIds = pool.infos.keys.toList().toIntArray()
 
     // make the cards with the expanded card style
-    val cardsNoBatch = CvrsToCardsWithBatchNameIterator(
+    val cardsNoBatch = CvrsToCardStylesIterator(
         type = AuditType.ONEAUDIT,
         cvrs = Closer(mvrs.iterator()),
         phantomCvrs = null,
         listOf(pool),
     )
     // could also run it through MergeBatchesIntoCardManifestIterable
-    val cards = mutableListOf<AuditableCard>()
+    val cards = mutableListOf<AuditableCardM>()
     cardsNoBatch.forEach { card ->
-        val batch = if (card.poolId == 42) pool else CardStyle.fromCvrBatch
-        cards.add( AuditableCard(card, batch))
+        // val batch = if (card.poolId == 42) pool else CardStyle.fromCvrBatch
+        cards.add( card.copy(styleName=pool.name()).setStyle(pool))
     }
 
     // we need to populate the pool tab with the votes
@@ -216,7 +217,7 @@ fun makeOneAuditTestContests(
     infos: Map<Int, ContestInfo>, // all the contests in the pools
     contestsToAudit: List<Contest>, // the contests you want to audit
     cardStyles: List<StyleIF>,
-    cardManifest: List<AuditableCard>,
+    cardManifest: List<AuditableCardM>,
     mvrs: List<Cvr>, // this must be just for tests
 ): Pair<List<ContestWithAssertions>, List<OneAuditPoolFromCvrs>> {
 

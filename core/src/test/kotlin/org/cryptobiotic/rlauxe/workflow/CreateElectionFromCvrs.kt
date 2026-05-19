@@ -1,19 +1,17 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
+import org.cryptobiotic.rlauxe.audit.CvrsToCardStylesIterator
 import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.rlauxe.audit.PollingMode
-import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsList
+import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsListM
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 
 class CreateElectionFromCvrs (
@@ -30,7 +28,7 @@ class CreateElectionFromCvrs (
         electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
         mvrSource = mvrSource, pollingMode = PollingMode.withBatches
     )
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(cvrs, batches)
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(cvrs, batches)
     override fun createUnsortedMvrsExternal() = null
     override fun cardStyles() = batches
     override fun cardPools() = cardPools
@@ -38,21 +36,19 @@ class CreateElectionFromCvrs (
     override fun cards() = createCards()
     override fun ncards() = cvrs.size
 
-    fun createCards(): CloseableIterator<CardWithStyleName> {
-        return CvrsToCardsWithBatchNameIterator(
+    fun createCards() = CvrsToCardStylesIterator(
             auditType,
             Closer(cvrs.iterator()),
             phantomCvrs = null,
             styles = cardPools ?: batches,
         )
-    }
 }
 
 class CreateElectionFromCards (
     val electionName: String,
     val auditType: AuditType,
     val contestsUA: List<ContestWithAssertions>,
-    val cards: List<AuditableCard>, // includes phantoms
+    val cards: List<AuditableCardM>, // includes phantoms
     val cardPools: List<CardPool>? = null,
     val batches: List<StyleIF>? = null,
     val mvrSource: MvrSource? = null
@@ -68,15 +64,11 @@ class CreateElectionFromCards (
                 pollingMode = PollingMode.withBatches
             )
     }
-    override fun createUnsortedMvrsInternal() = cards.map { CardWithStyleName(it) }
+    override fun createUnsortedMvrsInternal() = cards
     override fun createUnsortedMvrsExternal() = null // Closer(createCards().iterator()) // for out-of-memory case
     override fun cardStyles() = batches
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
-    override fun cards() = Closer(createCards().iterator())
+    override fun cards() = Closer(cards.iterator() )
     override fun ncards() = cards.size
-
-    fun createCards(): List<CardWithStyleName> {
-        return cards.map { CardWithStyleName(it) }
-    }
 }

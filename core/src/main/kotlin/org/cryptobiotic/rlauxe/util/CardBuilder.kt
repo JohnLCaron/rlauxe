@@ -2,9 +2,9 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 
 // builds one AuditableCard
 class AuditableCardBuilder(
@@ -16,7 +16,7 @@ class AuditableCardBuilder(
     val poolId: Int? = null,
     votesIn: Map<Int, IntArray>? = null,
     val styleName: String,
-    val cardStyle: StyleIF?
+    val style: StyleIF?
 ) {
     val votes = mutableMapOf<Int, IntArray>()
 
@@ -38,7 +38,7 @@ class AuditableCardBuilder(
             id, location, index, prn, phantom,
             poolId = poolId,
             votes = votes,
-            style = cardStyle!! // TODO
+            style = style!! // TODO
         )
     }
 
@@ -58,16 +58,17 @@ class AuditableCardBuilder(
     }
 }
 
-// builds one AuditableCard
-class CardWithBatchNameBuilder(
+// builds one AuditableCardM
+class AuditableCardMBuilder(
     val id: String,
     val location: String?,
     val index: Int,
     val prn: Long,
     val phantom: Boolean,
+    val styleName: String? = null,
+    val poolId: Int? = null,
     votesIn: Map<Int, IntArray>?,
-    val poolId: Int?,
-    val cardStyle: String? = null,
+    val style: StyleIF? = null,
 ) {
     val votes = mutableMapOf<Int, IntArray>()
 
@@ -76,9 +77,9 @@ class CardWithBatchNameBuilder(
     }
 
     constructor(id: String, location: String?, index: Int, poolId: Int?, cardStyle: String?):
-            this(id, location, index, 0L, false, null,  poolId, cardStyle)
+            this(id, location, index, 0L, false, cardStyle, poolId, null)
 
-    fun replaceContestVotes(contestId: Int, contestVotes: IntArray): CardWithBatchNameBuilder  {
+    fun replaceContestVotes(contestId: Int, contestVotes: IntArray): AuditableCardMBuilder  {
         votes[contestId] = contestVotes
         return this
     }
@@ -87,40 +88,33 @@ class CardWithBatchNameBuilder(
         votes[id] = if (candidateId == null) intArrayOf() else intArrayOf(candidateId)
     }
 
-    fun build(poolId:Int? = null) : CardWithStyleName {
+    fun build() : AuditableCardM {
         val useBatchName: String = when {
-            cardStyle != null -> cardStyle
+            styleName != null -> styleName
             !votes.isEmpty() -> CardStyle.fromCvr
             else -> "unknown"
         }
-        // data class CardWithBatchName (
-        //    val location: String, // enough info to find the card for a manual audit.
-        //    val index: Int,  // index into the original, canonical list of cards
-        //    val prn: Long,   // psuedo random number
-        //    val phantom: Boolean,
-        //
-        //    val votes: Map<Int, IntArray>?,   // CVRs and phantoms
-        //    val poolId: Int?,                 // must be set if its from a CardPool  TODO verify batch name, poolId
-        //    val batchName: String,            // batch name: "fromCvr" if no batch and its from a CVR (then votes is non null)
-        //)
-        return CardWithStyleName(
+        val cardm = AuditableCardM.fromVotes(
             id, location, index, prn, phantom,
             votes = votes,
             poolId = poolId,
             styleName = useBatchName
         )
+        if (style != null) cardm.setStyle(style)
+        return cardm
     }
 
     companion object {
-        fun from(card: AuditableCard) = CardWithBatchNameBuilder(
-            card.id,
-            card.location,
-            card.index,
-            card.prn,
-            card.phantom,
-            card.votes,
-            card.poolId(),
+        fun fromCard(card: AuditableCardIF) = AuditableCardMBuilder(
+            card.id(),
+            if (card.id() == card.location()) null else card.location(),
+            card.index(),
+            card.prn(),
+            card.phantom(),
             card.styleName(),
+            card.poolId(),
+            card.votes(),
+            style=card.style(),
         )
 
     }

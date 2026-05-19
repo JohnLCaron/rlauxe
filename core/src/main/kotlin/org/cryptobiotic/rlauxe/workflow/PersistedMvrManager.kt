@@ -7,9 +7,12 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.readCardsAndMergeToList
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeCardIFCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
@@ -83,9 +86,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         require(resultSamples.isOk)
         val sampleNumbers = resultSamples.unwrap()
 
-        val mvrCardIter = readCardsCsvIterator(publisher.sortedMvrsFile())
-        val mergedMvrIter = MergeStylesIntoCards(mvrCardIter, styles ?: emptyList())
-
+        val mergedMvrIter = readCardsCsvIteratorM(publisher.sortedMvrsFile(), styles)
         val sampledMvrs = findSamples(sampleNumbers, mergedMvrIter)
         require(sampledMvrs.size == sampleNumbers.size)
 
@@ -101,15 +102,12 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     // it must be in the same order as the sorted cards
     // it is placed into publisher.sampleMvrsFile(round), and this method just reads from that file.
     // return complete list of mvrs used for this round
-    private fun readMvrsForRound(round: Int): List<AuditableCard> {
-        val mvrCardIter = readCardsCsvIterator(publisher.sampleMvrsFile(round))
-        val mergedMvrIter = MergeStylesIntoCards(mvrCardIter, styles ?: emptyList())
-        val mvrCards = mutableListOf<AuditableCard>()
-        while (mergedMvrIter.hasNext()) { mvrCards.add(mergedMvrIter.next())}
-        return mvrCards
+    private fun readMvrsForRound(round: Int): List<AuditableCardM> {
+        return readCardsAndMergeList(publisher.sampleMvrsFile(round))
     }
 
-    fun enterMvrsForRound(round: Int, mvrs: CloseableIterable<CardWithStyleName>, errs: ErrorMessages): Boolean {
+    // TODO findSamples wantst he mvrs in sorted order
+    fun enterMvrsForRound(round: Int, mvrs: CloseableIterable<AuditableCardM>, errs: ErrorMessages): Boolean {
         val sampledPrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))
         if (sampledPrnsResult.isErr) {
             logger.error{ "$sampledPrnsResult" } // needed?
@@ -120,9 +118,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         require(sampledPrnsResult.isOk)
         val sampledPrns = sampledPrnsResult.unwrap()
 
-        val mergedMvrIter = MergeStylesIntoCards(mvrs.iterator(), styles ?: emptyList())
-
-        val sampledMvrs = findSamples(sampledPrns, mergedMvrIter) // what does this do
+        val sampledMvrs = findSamples(sampledPrns, mvrs.iterator()) // what does this do
         require(sampledMvrs.size == sampledPrns.size)
 
         // validate
@@ -137,17 +133,12 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         return true
     }
 
-    fun readCardsAndMerge(filename: String): CloseableIterator<AuditableCard> {
-        val mvrCardIter = readCardsCsvIterator(filename)
-        return MergeStylesIntoCards(mvrCardIter, styles ?: emptyList())
+    fun readCardsAndMerge(filename: String): CloseableIterator<AuditableCardM> {
+        return readCardsCsvIteratorM(filename, styles)
     }
 
-    fun readCardsAndMergeList(filename: String): List<AuditableCard> {
-        val mvrCardIter = readCardsCsvIterator(filename)
-        val mergedMvrIter = MergeStylesIntoCards(mvrCardIter, styles ?: emptyList())
-        val mvrCards = mutableListOf<AuditableCard>()
-        while (mergedMvrIter.hasNext()) { mvrCards.add(mergedMvrIter.next())}
-        return mvrCards
+    fun readCardsAndMergeList(filename: String): List<AuditableCardM> {
+        return readCardsAndMergeToList(filename, styles)
     }
 
     companion object {

@@ -3,11 +3,11 @@ package org.cryptobiotic.rlauxe.audit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.bin.writeFastSamplingCards
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditCreationConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundConfigJsonFile
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIteratorM
 import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -37,7 +37,9 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: Strin
         } else {
             sortManifestExternal(externalSortDir, publisher, config.creation.seed)
         }
-        makeFastCards(publisher, election.cardStyles() ?: emptyList())  // TODO cant be optional styles I think
+        if (election.cardStyles() != null) { // TODO cant be optional styles I think
+            makeFastCards(publisher, election.cardStyles()!!)
+        }
 
         // save Mvrs for testing and diagnostics
         // cant write the sorted mvrs until after sortedCards is written
@@ -72,16 +74,16 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: Strin
 
 // assumes that the CardManifest has already been written
 fun sortManifestInternal(publisher: Publisher, seed: Long) {
-    val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile())
+    val unsortedCards = readCardsCsvIteratorM(publisher.cardManifestFile(), styles=null)
     val sortedCards = createSortedCardsInternal(unsortedCards, seed)
     val countCards = writeCardCsvFile(Closer(sortedCards.iterator()), publisher.sortedCardsFile())
     // createZipFile(publisher.sortedCardsFile(), delete = true)
     logger.info{"sortManifestInternal ${countCards} cards to ${publisher.sortedCardsFile()} seed= $seed"}
 }
 
-fun createSortedCardsInternal(unsortedCards: CloseableIterator<CardWithStyleName>, seed: Long) : List<CardWithStyleName> {
+fun createSortedCardsInternal(unsortedCards: CloseableIterator<AuditableCardM>, seed: Long) : List<AuditableCardM> {
     val prng = Prng(seed)
-    val cards = mutableListOf<CardWithStyleName>()
+    val cards = mutableListOf<AuditableCardM>()
     unsortedCards.use { cardIter ->
         while (cardIter.hasNext()) {
             val unsorted = cardIter.next()
@@ -94,7 +96,7 @@ fun createSortedCardsInternal(unsortedCards: CloseableIterator<CardWithStyleName
 
 // assumes that the CardManifest has already been written
 fun sortManifestExternal(topdir: String, publisher: Publisher, seed: Long) {
-    val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile())
+    val unsortedCards = readCardsCsvIteratorM(publisher.cardManifestFile(), styles=null)
     writeSortedCardsExternal(topdir, publisher.sortedCardsFile(), unsortedCards, seed)
 }
 
@@ -102,27 +104,27 @@ fun makeFastCards(publisher: Publisher, styles: List<StyleIF>) {
     val stopwatch = Stopwatch()
 
     // copy sortedCards csv to sortedCards proto file for better performance
-    val sortedCards = readCardsCsvIterator(publisher.sortedCardsFile())
+    val sortedCards = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles)
     writeProtoCards(sortedCards, publisher.sortedCardsProtoFile())
 
     // extract some info from sorted proto cards for a super compact "samplingCards" binary file
     val bufferSize = 100_000
-    val protoIter = ProtoCardIterator(publisher.sortedCardsProtoFile(), bufferSize, styles)  // dont actually need styles i think
+    val protoIter = ProtoCardIteratorM(publisher.sortedCardsProtoFile(), bufferSize, styles)  // dont actually need styles i think
     val ncards = writeFastSamplingCards(protoIter, publisher.fastSamplingFile(), styles)
 
     logger.info{"makeFastCards ${ncards} took ${stopwatch}"}
 }
 
-fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: CloseableIterator<CardWithStyleName>, seed: Long) {
-    val sorter = SortMerge<CardWithStyleName>("$topdir/sortChunks", outputFile = outputFile, seed = seed)
+fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCardM>, seed: Long) {
+    val sorter = SortMerge<AuditableCardM>("$topdir/sortChunks", outputFile = outputFile, seed = seed)
     sorter.run(
         cardIter = unsortedCards,
-        toCard = { from: CardWithStyleName, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
+        toCard = { from: AuditableCardM, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
     )
 }
 
-// internal sort of unsortedMvrs, must be in canonical order
-fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<CardWithStyleName>, batches: List<StyleIF>?, seed: Long) {
+// internal sort of unsortedMvrs (must be in canonical order) to sorted by prn
+fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<AuditableCardM>, styles: List<StyleIF>?, seed: Long) {
     validateOutputDirOfFile(publisher.sortedMvrsFile())
 
     // val mvrCardIter = MvrsToCardsWithBatchNameIterator( mvrIter, batches ?: emptyList(), phantomCvrs = null, seed = seed)
@@ -130,11 +132,12 @@ fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<CardWithSt
     // add the prn
     val prng = Prng(seed)
     val mvrIter = unsortedMvrs.iterator()
-    val mvrCards = mutableListOf<CardWithStyleName>()
-    while (mvrIter.hasNext()) { mvrCards.add( mvrIter.next().copy(prn=prng.next()) ) }
+    val mvrCards = mutableListOf<AuditableCardM>()
+    while (mvrIter.hasNext()) {
+        mvrCards.add( mvrIter.next().copy(prn=prng.next()) )
+    }
 
     val sortedMvrs = mvrCards.sortedBy { it.prn }
-
     val countMvrs = writeCardCsvFile(Closer(sortedMvrs.iterator()), publisher.sortedMvrsFile())
     logger.info{"writeSortedMvrs ${countMvrs} mvrs to ${publisher.sortedMvrsFile()}"}
 }

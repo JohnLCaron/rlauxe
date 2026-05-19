@@ -1,8 +1,5 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.test.Test
 import kotlin.test.assertEquals

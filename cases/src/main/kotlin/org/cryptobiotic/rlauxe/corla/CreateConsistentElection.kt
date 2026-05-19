@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
@@ -40,9 +40,7 @@ open class CreateConsistentElection (
         } else {
             // read them back in as an Iterator, so we dont have to read all into memory
             val infos = countyElection.contests.map { it.info() }.associateBy { it.id }
-            val mvrs: CloseableIterator<CardWithStyleName> = readCardsCsvIterator(publisher.unsortedMvrsFile())
-            val auditableCardIter: CloseableIterator<AuditableCard> =
-                MergeStylesIntoCards(mvrs, countyPools)
+            val auditableCardIter: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles=countyPools)
             // are we handling the batches correctly using mvrs?
             val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
             require(ncards == count)
@@ -65,26 +63,27 @@ open class CreateConsistentElection (
     override fun ncards() = ncards
 
     // TODO verify election creation, verify audit creation
-    override fun cards(): CloseableIterator<CardWithStyleName> {
-        val unsortedMvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
-        return TransformingIterator(unsortedMvrs) { mvr ->
+    override fun cards(): CloseableIterator<AuditableCardM> {
+        val unsortedMvrs: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
+
+        return TransformingIterator(unsortedMvrs) { cardm ->
             when {
-                mvr.phantom -> mvr
-                auditType.isClca() -> mvr.copy(poolId = null)
-                (auditType.isPolling() && pollingMode!!.withoutBatches()) -> mvr.copy(
-                    votes = null,
+                cardm.phantom -> cardm
+                auditType.isClca() -> cardm.copy(poolId = null)
+                (auditType.isPolling() && pollingMode!!.withoutBatches()) -> cardm.copy(
+                    contestIds = IntArray(0), // might be safer to provide a function to remove all three
                     styleName = "OneBatch",
                     poolId = 0
                 )
 
-                (auditType.isPolling()) -> mvr.copy(votes = null)
-                else -> throw IllegalStateException("Unknown what to do with mvr: $mvr")
+                (auditType.isPolling()) -> cardm.copy(contestIds = IntArray(0))
+                else -> throw IllegalStateException("Unknown what to do with mvr: $cardm")
             }
         }
     }
 
     // StartAuditFirstRound will create the sorted MVRs
-    override fun createUnsortedMvrsExternal() = readCardsCsvIterator(publisher.unsortedMvrsFile())
+    override fun createUnsortedMvrsExternal() = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
     override fun createUnsortedMvrsInternal() = null
 }
 
@@ -93,14 +92,14 @@ open class CreateConsistentElection (
 // Could put this into createAuditRecord(reverse = true) ??
 // return number of cards
 
-// TODO wed like to add a style name, but becuse we are using cvrs instead of mvrs, we have to place to put it without setting a pool Id.
+// TODO wed like to add a style name, but becuse we are using cvrs instead of mvrs, we have no place to put it without setting a pool Id.
 //   which maybe we could but seems lame
 fun createAndSaveUnsortedMvrs(
     contests: List<ContestIF>,
     cardPools: List<CardPoolIF>,
     publisher: Publisher
 ): Int {
-    val unsortedMvrIterator = MvrsToCardsWithBatchNameIterator(
+    val unsortedMvrIterator = MvrsToCardStylesIterator(
         Closer(CvrIteratorfromPools(cardPools.iterator())),
         cardPools,
         makePhantomCvrs(contests), // yes there are phantoms, heres where we need the contests' Nphantoms

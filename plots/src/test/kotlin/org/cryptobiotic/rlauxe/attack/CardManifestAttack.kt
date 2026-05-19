@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.audit.CardWithStyleName
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
@@ -20,7 +20,7 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.merge
-import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsList
+import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsListM
 import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.util.Closer
@@ -77,21 +77,20 @@ class CardManifestAttack {
         var index=0
         mvrCount = 0
         poolCount = 0
-        val mcards = mutableListOf<CardWithStyleName>()
+        val mcards = mutableListOf<AuditableCardM>()
 
         //// group A, mvr index 0-50 match real mvrs.
         repeat(50) {
             mcards.add(
-                CardWithStyleName(
+                AuditableCardM.fromVotes(
                     "mvr$mvrCount",
                     null,
                     index,
                     0L,
                     false,
-                    // intArrayOf(2),
-                    votes = mapOf(2 to intArrayOf(1)),
-                    poolId = null,
                     if (hasStyle) "cvr" else "incomplete",
+                    poolId = null,
+                    votes = mapOf(2 to intArrayOf(1)),
                 )
             )
             mvrCount++
@@ -102,16 +101,15 @@ class CardManifestAttack {
         // we move these 50 into the pool, when they sample the mvr, contestA is missing
         repeat(50) {
             mcards.add(
-                CardWithStyleName(
+                AuditableCardM.fromVotes(
                     "Pool1-$poolCount",
                     null,
                     index,
                     0L,
                     false,
-                    //groupBcontests,
-                    votes = null, // no votes when pooled
-                    poolId = 1,
                     if (hasStyle) "pool1" else "incomplete",
+                    poolId = 1,
+                    votes=null,
                 )
             )
             poolCount++
@@ -126,14 +124,13 @@ class CardManifestAttack {
             // mcards.add(AuditableCard("mvr$mvrCount", mvrCount, 0L, false, intArrayOf(2), votes = mapOf(1 to intArrayOf(1)), poolId=null))
 
             // substitute cards with contest 2 undervotes
-            mcards.add( CardWithStyleName("mvr$mvrCount", null,
+            mcards.add( AuditableCardM.fromVotes("mvr$mvrCount", null,
                 index,
                 0L,
                 false,
-                //intArrayOf(2),
-                votes = mapOf(2 to intArrayOf(1)),  // move the 50-100 votes to here
-                poolId=null,
                 if (hasStyle) "cvr" else "incomplete",
+                poolId=null,
+                votes = mapOf(2 to intArrayOf(1)),  // move the 50-100 votes to here
                 )
             )
             mvrCount++
@@ -143,18 +140,18 @@ class CardManifestAttack {
         // these are Bobs pooled votes that match the mvrs
         repeat(25) {
             // mvr has Bob's votes
-            mcards.add(CardWithStyleName("Pool1-$poolCount", null, index, 0L, false, votes = null, poolId = 1, "pool1"))
+            mcards.add(AuditableCardM.fromVotes("Pool1-$poolCount", null, index, 0L, false, "pool1", poolId = 1, null))
             poolCount++
             index++
         }
         // these are contestB pooled votes that match the mvrs
         repeat(25) {
             // mvr doesnt contain contest 1
-            mcards.add(CardWithStyleName("Pool1-$poolCount", null, index, 0L, false, votes = null, poolId = 1, "pool1"))
+            mcards.add(AuditableCardM.fromVotes("Pool1-$poolCount", null, index, 0L, false, "pool1", poolId = 1, null))
             poolCount++
             index++
         }
-        val cards = merge(mcards, null)
+        val cards = mcards // merge(mcards, null)
         require(mvrs.size == cards.size)
         ////////////////////////////////////////////////////////////////////////////////
 
@@ -269,14 +266,14 @@ class CardManifestAttack {
 
 class CreateElectionForAttack(
     val contestsUA: List<ContestWithAssertions>,
-    val cards: List<CardWithStyleName>,
+    val cards: List<AuditableCardM>,
     val mvrs: List<Cvr>,
     val populations: List<StyleIF>?,
     val cardPools: List<CardPool>?,
 ): ElectionBuilder {
 
     override fun electionInfo() = ElectionInfo("CardManifestAttack", AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true,)
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(mvrs, populations)
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(mvrs, populations)
     override fun createUnsortedMvrsExternal() = null
     override fun contestsUA() = contestsUA
     override fun cardStyles() = populations

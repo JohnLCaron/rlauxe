@@ -28,7 +28,7 @@ class VerifyAuditRoundCommitment(val auditRecordLocation: String) {
             logger.error{ auditRecordResult.toString() }
             throw RuntimeException( auditRecordResult.toString() )
         }
-        mvrManager = PersistedMvrManager(auditRecord as AuditRecord, false)
+        mvrManager = PersistedMvrManager(auditRecord, false)
 
         publisher = Publisher(auditRecordLocation)
         config = auditRecord.config
@@ -125,7 +125,7 @@ class VerifyAuditRoundCommitment(val auditRecordLocation: String) {
     }
 
     // TODO check mvrs
-    fun verifySamplingForContest(contest: ContestWithAssertions, cards: List<AuditableCard>, nextCards: List<AuditableCard>,
+    fun verifySamplingForContest(contest: ContestWithAssertions, cards: List<AuditableCardM>, nextCards: List<AuditableCardM>,
                                  round:Int, estCards: Int, result: VerifyResults): Boolean {
         val mycards = cards.filter { it.hasContest(contest.id) }.iterator()
         val nextcards = nextCards.filter { it.hasContest(contest.id) }.iterator()

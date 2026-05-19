@@ -1,8 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.Cvr
 
@@ -65,7 +64,7 @@ fun makePhantomCards(
     contests: List<ContestIF>,
     startIdx: Int,
     prefix: String = "phantom-",
-): List<AuditableCard> {
+): List<AuditableCardM> {
     var idx = startIdx
 
     val phantombs = mutableListOf<PhantomBuilder>()
@@ -79,28 +78,7 @@ fun makePhantomCards(
             phantombs[it].contests.add(contest.id)
         }
     }
-    return phantombs.map { it.buildCard() }
-}
-
-fun makePhantomNoBatch(
-    contests: List<ContestIF>,
-    startIdx: Int,
-    prefix: String = "phantom-",
-): List<CardWithStyleName> {
-    var idx = startIdx
-
-    val phantombs = mutableListOf<PhantomBuilder>()
-    for (contest in contests) {
-        val phantoms_needed = contest.Nphantoms()
-        while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
-            phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}", idx++))
-        }
-        // include this contest on the first n phantom CVRs
-        repeat(phantoms_needed) {
-            phantombs[it].contests.add(contest.id)
-        }
-    }
-    return phantombs.map { it.buildCardNoBatch() }
+    return phantombs.map { it.buildCardM() }
 }
 
 class PhantomBuilder(val id: String, val idx: Int) {
@@ -111,13 +89,11 @@ class PhantomBuilder(val id: String, val idx: Int) {
         return Cvr(id, votes, phantom = true)
     }
 
-    fun buildCard(): AuditableCard {
+    fun buildCardM(): AuditableCardM {
         val votes = contests.associateWith { IntArray(0) }
-        return AuditableCard(id = id, location = null, index = idx, prn = 0L, phantom = true, poolId = null, votes = votes, style=CardStyle.phantomBatch)
-    }
-    fun buildCardNoBatch(): CardWithStyleName {
-        val votes = contests.associateWith { IntArray(0) }
-        return CardWithStyleName(id = id, location = null, index = idx, prn = 0L, phantom = true, votes = votes, poolId = null, styleName=CardStyle.phantoms)
+       //  val (contestIds, contestStarts, candidates) = makeFromVotes(votes)
+        return AuditableCardM.fromVotes(id = id, location = null, index = idx, prn = 0L, phantom = true, styleName=CardStyle.phantoms, poolId = null,
+            votes).setStyle(CardStyle.phantomBatch)
     }
 
 }

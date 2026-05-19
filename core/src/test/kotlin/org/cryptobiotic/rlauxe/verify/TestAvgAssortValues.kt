@@ -1,9 +1,10 @@
 package org.cryptobiotic.rlauxe.verify
 
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.MergeStylesIntoCards
-import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsTest
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.MergeStylesIntoCardsM
+import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsTestM
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
@@ -32,8 +33,8 @@ class TestAvgAssortValues {
         println("contest = $contest")
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            mvrsToAuditableCardsTest( AuditType.CLCA, testCvrs, null).iterator()
+        val cardIterable: CloseableIterable<AuditableCardM> = CloseableIterable {
+            mvrsToAuditableCardsTestM( AuditType.CLCA, testCvrs, null).iterator()
         }
 
         if (showCvrs) {
@@ -76,8 +77,8 @@ class TestAvgAssortValues {
 
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            mvrsToAuditableCardsTest( AuditType.CLCA, testCvrs, null).iterator()
+        val cardIterable: CloseableIterable<AuditableCardM> = CloseableIterable {
+            mvrsToAuditableCardsTestM( AuditType.CLCA, testCvrs, null).iterator()
         }
 
         if (showCvrs) {
@@ -117,8 +118,8 @@ class TestAvgAssortValues {
         val testCvrs = test.makeCvrsFromContests()
 
         // TODO this looks wrong. use makeCardsFromContests ?
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            mvrsToAuditableCardsTest( AuditType.CLCA, testCvrs, null).iterator()
+        val cardIterable: CloseableIterable<AuditableCardM> = CloseableIterable {
+            mvrsToAuditableCardsTestM( AuditType.CLCA, testCvrs, null).iterator()
         }
 
         if (showCvrs) {
@@ -156,12 +157,10 @@ class TestAvgAssortValues {
         val testCards = test.makeCardsFromContests()
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
 
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            MergeStylesIntoCards(
+        val cardIterable: CloseableIterable<AuditableCardIF> =
+            CloseableIterable { MergeStylesIntoCardsM(
                 Closer(testCards.iterator()),
-                styles = test.cardStyleWithNcards,
-            )
-        }
+                styles = test.cardStyleWithNcards,) }
 
         if (showCvrs) {
             println("\n$CardHeader")
@@ -174,6 +173,7 @@ class TestAvgAssortValues {
             println()
         }
 
+        //         fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCardIF>, isClca: Boolean, hasStyle: Boolean): List<ContestWithAssertions> {
         val contestsUA = ContestWithAssertions.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle = true)
         contestsUA.forEach {
             println("$it : Npop diff = ${it.Npop != it.Nc}")
@@ -204,12 +204,10 @@ class TestAvgAssortValues {
         val testCards = test.makeCardsFromContests()
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
 
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            MergeStylesIntoCards(
+        val cardIterable: CloseableIterable<AuditableCardIF> =
+            CloseableIterable { MergeStylesIntoCardsM(
                 Closer(testCards.iterator()),
-                styles = modStyles,
-            )
-        }
+                styles = test.cardStyleWithNcards,) }
 
         if (showCvrs) {
             println("\n$CardHeader")

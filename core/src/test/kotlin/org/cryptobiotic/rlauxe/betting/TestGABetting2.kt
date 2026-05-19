@@ -1,11 +1,7 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.ClcaConfig
-import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.estSamplesFromMarginUpper
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 // exoplore this function
 // log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (assortValue_k - mui)) * p_k; over error type k }

@@ -25,6 +25,7 @@ fun merge(cards: List<CardWithStyleName>, styles: List<StyleIF>?) : List<Auditab
 }
 
 // read CardWithBatchName, add style, output AuditableCard as Iterator
+// replace with MergeStylesIntoCardsM
 class MergeStylesIntoCards(
     val cardsIter: CloseableIterator<CardWithStyleName>,
     styles: List<StyleIF>,
@@ -89,7 +90,7 @@ class MergeBatchesIntoCardManifestIterable(
 // used in CreateElectionIF
 // relies on cvrs having poolIds that match the style.id()
 // when it has a pool, use the pool name for the batchName
-
+// replace with CvrsToCardStylesIterator
 class CvrsToCardsWithBatchNameIterator(
     val type: AuditType,
     val cvrs: CloseableIterator<Cvr>,

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.persist.bin
 
-import org.cryptobiotic.rlauxe.audit.CardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -46,7 +46,7 @@ class FastSamplingCardIterator(inputFile: String, styles: List<StyleIF>, bufferS
     }
 }
 
-fun writeFastSamplingCards(cards: CloseableIterator<CardIF>, filenameOut: String, styles: List<StyleIF>, limit: Int? = null): Int {
+fun writeFastSamplingCards(cards: CloseableIterator<AuditableCardIF>, filenameOut: String, styles: List<StyleIF>, limit: Int? = null): Int {
     val outputStream: OutputStream = FileOutputStream(filenameOut)
 
     val styleMap = styles.associate { it.name() to it.id() }
@@ -54,7 +54,7 @@ fun writeFastSamplingCards(cards: CloseableIterator<CardIF>, filenameOut: String
 
     DataOutputStream(outputStream).use { dos ->
         while (cards.hasNext() && (limit == null || count < limit)) {
-            val card: CardIF = cards.next()
+            val card = cards.next()
             dos.writeLong(card.prn())
             val styleId = styleMap[card.styleName()]
             if (styleId == null)

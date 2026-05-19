@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
 import org.cryptobiotic.rlauxe.testdataDir
@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
 class TestFastSamplingCards {
+    val testFastSamplFile = "$testdataDir/temp/fastSampling.bin"
 
     @Test
     fun writeSamplingCards() {
@@ -29,10 +30,8 @@ class TestFastSamplingCards {
 
         val cardIter = cardManifest.cards.iterator()
 
-        val filenameOut = publisher.fastSamplingFile()
-
         val stopwatch = Stopwatch()
-        val ncards = writeFastSamplingCards(cardIter, filenameOut, styles)
+        val ncards = writeFastSamplingCards(cardIter, testFastSamplFile, styles)
         cardIter.close()
 
         println("writeSamplingCards ncards = $ncards, took $stopwatch")
@@ -107,8 +106,6 @@ class TestFastSamplingCards {
         val mvrManager = PersistedMvrManager(countyAudit)
 
         runConsistentSampling(Closer(mvrManager.samplingCards().iterator()))
-        runConsistentSampling(Closer(mvrManager.samplingCards().iterator()))
-        runConsistentSampling(Closer(mvrManager.samplingCards().iterator()))
         // ncards = 4982786, included = 142470869 that took 30.67 s= 0.006154789710013635 ms/card
         // ncards = 4982786, included = 142470869 that took 27.15 s= 0.005448357605564437 ms/card
         // ncards = 4982786, included = 142470869 that took 28.03 s= 0.0056261697773093205 ms/card
@@ -174,7 +171,7 @@ class TestFastSamplingCards {
         // copy sorted csv to a proto file for better performance
         val publisher = Publisher(auditdir)
 
-        val sortedCards = readCardsCsvIterator(publisher.sortedCardsFile())
+        val sortedCards = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles)
         writeProtoCards(sortedCards, publisher.sortedCardsProtoFile())
 
         // extract some info from sorted proto cards for a super compact "samplingCards" binary file

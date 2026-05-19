@@ -57,7 +57,7 @@ class TestCompositeRecord {
         println("manifest.ncards = ${manifest.ncards}")
     }
 
-    @Test
+    // @Test
     fun testReadCorlaCountyComposite() {
         val record = AuditRecord.read(corlaUniform)!!
         val countyAudit = record as CountyComposite

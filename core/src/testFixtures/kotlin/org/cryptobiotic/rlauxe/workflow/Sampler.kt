@@ -90,7 +90,7 @@ class ClcaSampler(
             val (mvr, card) = cvrPairs[permutedIndex[idx]]
             idx++
             if (card.hasContest(contestId)) {
-                val result = cassorter.bassort(mvr, card, card.hasStyle())
+                val result = cassorter.bassort(mvr, card, card.hasExactContests())
                 count++
                 return result
             }

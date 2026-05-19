@@ -63,7 +63,7 @@ data class AuditableCard (
     override fun poolId(): Int? = poolId
     override fun styleName() = style.name()
     override fun style() = style
-    override fun hasStyle() = style.hasExactContests()
+    override fun hasExactContests() = style.hasExactContests()
 
     override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
         val contestVotes = votes?.get(contestId)

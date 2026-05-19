@@ -72,7 +72,7 @@ class AuditableCardProto(
     override fun poolId(): Int? = poolId
     override fun styleName() = style.name()
     override fun style() = style
-    override fun hasStyle() = style.hasExactContests()
+    override fun hasExactContests() = style.hasExactContests()
 
     override fun toCvr(): Cvr {
         TODO("Not yet implemented")
@@ -170,7 +170,7 @@ fun ProtoCard.importP(styleMap: Map<String, StyleIF> ): AuditableCardProto {
     )
 }
 
-class ProtoCardIterator(filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCardProto> {
+class ProtoCardIterator(filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>?): CloseableIterator<AuditableCardProto> {
     val styleMap: Map<String, StyleIF> = styles?.associateBy{ it.name() } ?: emptyMap()
 
     val errs = ErrorMessages("readProtoCardsFile '${filename}'")

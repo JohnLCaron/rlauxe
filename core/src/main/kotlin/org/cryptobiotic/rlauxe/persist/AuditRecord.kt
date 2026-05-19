@@ -85,9 +85,9 @@ open class AuditRecord(
 
     override fun readCardStyles(): List<StyleIF>? {
         return if (!Files.exists(Path(publisher.cardStylesFile()))) null else {
-            val batchesResult = readCardStylesJsonFile(publisher.cardStylesFile())
-            if (batchesResult.isOk) batchesResult.unwrap() else {
-                logger.error{ "$batchesResult" }
+            val stylesResult = readCardStylesJsonFile(publisher.cardStylesFile())
+            if (stylesResult.isOk) stylesResult.unwrap() else {
+                logger.error{ "$stylesResult" }
                 null
             }
         }

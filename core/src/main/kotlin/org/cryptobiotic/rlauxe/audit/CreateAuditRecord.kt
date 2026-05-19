@@ -37,7 +37,9 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: Strin
         } else {
             sortManifestExternal(externalSortDir, publisher, config.creation.seed)
         }
-        makeFastCards(publisher, election.cardStyles() ?: emptyList())  // TODO cant be optional styles I think
+        if (election.cardStyles() != null) { // TODO cant be optional styles I think
+            makeFastCards(publisher, election.cardStyles()!!)
+        }
 
         // save Mvrs for testing and diagnostics
         // cant write the sorted mvrs until after sortedCards is written

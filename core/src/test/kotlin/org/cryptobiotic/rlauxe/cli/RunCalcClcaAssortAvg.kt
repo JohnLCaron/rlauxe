@@ -134,7 +134,7 @@ object RunCalcAssortAvg {
                 }
                 expectations.forEach { expect ->
                     if (card.hasContest(expect.id)) {
-                        val bassort = expect.cassorter.bassort(mvr, card, hasStyle = card.hasStyle())
+                        val bassort = expect.cassorter.bassort(mvr, card, hasStyle = card.hasExactContests())
                         expect.bwelford.update(bassort)
 
                         val mvrAssort = expect.assorter.assort(mvr, usePhantoms = false)

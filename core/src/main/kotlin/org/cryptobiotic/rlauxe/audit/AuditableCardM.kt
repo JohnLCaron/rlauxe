@@ -1,7 +1,11 @@
 package org.cryptobiotic.rlauxe.audit
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrIF
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.iterator
 
 interface AuditableCardIF: CvrIF, SamplingCardIF {
     fun location(): String // enough info to find the card for a manual audit.
@@ -14,7 +18,7 @@ interface AuditableCardIF: CvrIF, SamplingCardIF {
     fun possibleContests() : IntArray
     // TODO is hasStyle really card specific? contest? audit?
     //    is it the same as "consistentSampling" or something else ??
-    fun hasStyle(): Boolean // TODO
+    fun hasExactContests(): Boolean // TODO
 
     // fun show(): String
     fun toCvr(): Cvr  // TODO can we get rid of?
@@ -40,6 +44,8 @@ data class AuditableCardM (
     // you can change the style but not null it; could also prevent changing altogether after its set
     private var style: StyleIF? = null
     fun setStyle(style: StyleIF): AuditableCardM {
+        if (styleName != style.name())
+            print("wtf?")
         require(styleName == style.name())
         this.style = style
         return this
@@ -56,6 +62,8 @@ data class AuditableCardM (
                 val start = contestStarts[index]
                 val end = if (index < lastIndex) contestStarts[index + 1] else candidates.size
                 if (start > end || end > candidates.size)
+                    logger.error{ "illegal range start=$start end=$end "}
+                else
                     makeVotes[contestId] = candidates.sliceArray(start until end)
             }
             makeVotes.toMap()
@@ -91,17 +99,52 @@ data class AuditableCardM (
                 else if (contestVotes.contains(candidateId)) 1 else 0
     }
 
-    // TODO where is this used?
-    override fun hasStyle(): Boolean {
-        TODO("Not yet implemented")
+    override fun hasExactContests() = style?.hasExactContests() ?: false
+
+    override fun toCvr() = Cvr(id, votes!!, phantom, poolId()) // TODO can we get rid of?
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is AuditableCardM) return false
+
+        if (index != other.index) return false
+        if (prn != other.prn) return false
+        if (phantom != other.phantom) return false
+        if (poolId != other.poolId) return false
+        if (id != other.id) return false
+        if (location != other.location) return false
+        if (styleName != other.styleName) return false
+        if (!contestIds.contentEquals(other.contestIds)) return false
+        if (!contestStarts.contentEquals(other.contestStarts)) return false
+        if (!candidates.contentEquals(other.candidates)) return false
+        if (style != other.style) return false
+
+        return true
     }
 
-    // TODO where is this used?
-    override fun toCvr(): Cvr {
-        TODO("Not yet implemented")
+    override fun hashCode(): Int {
+        var result = index
+        result = 31 * result + prn.hashCode()
+        result = 31 * result + phantom.hashCode()
+        result = 31 * result + (poolId ?: 0)
+        result = 31 * result + id.hashCode()
+        result = 31 * result + (location?.hashCode() ?: 0)
+        result = 31 * result + styleName.hashCode()
+        result = 31 * result + contestIds.contentHashCode()
+        result = 31 * result + contestStarts.contentHashCode()
+        result = 31 * result + candidates.contentHashCode()
+        result = 31 * result + (style?.hashCode() ?: 0)
+        return result
     }
 
     companion object {
+        private val logger = KotlinLogging.logger("AuditableCardM")
+
+        fun fromCvr(cvr: Cvr, index: Int, prn: Long): AuditableCardM {
+            return fromVotes(cvr.id, null, index, prn, cvr.phantom, styleName = CardStyle.fromCvr,
+                poolId=cvr.poolId, votes=cvr.votes).setStyle(CardStyle.fromCvrBatch)
+        }
+
         fun fromVotes(id: String, // enough info to find the card for a manual audit.
                       location: String?, // enough info to find the card for a manual audit.
                       index: Int,  // index into the original, canonical list of cards
@@ -154,4 +197,15 @@ fun makeFromVotes(votes: Map<Int, IntArray>): Triple<IntArray, IntArray, IntArra
         start += cands.size
     }
     return Triple(contestIds, contestStarts.toIntArray(), candidates.toIntArray())
+}
+
+fun testVotesEqual(votes: Map<Int, IntArray>?, other: Map<Int, IntArray>?): Boolean {
+    if ((votes == null) != (other == null)) return false
+    if (votes != null) {
+        for ((contestId, candidates) in votes) {
+            val otherCands = other!![contestId]
+            if (!candidates.contentEquals(otherCands)) return false
+        }
+    }
+    return true
 }

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.verify
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 
@@ -22,7 +21,7 @@ fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCardIF, AuditableCardIF>
                 nested.add("*** Mvr contains contest ${mvrContestId} not contained in card $card")
             }
         }
-        if (card.hasStyle()) {
+        if (card.hasExactContests()) {
             card.possibleContests().forEach { batchContestId ->
                 if (!mvr.votes()!!.contains(batchContestId)) {
                     hasError = true

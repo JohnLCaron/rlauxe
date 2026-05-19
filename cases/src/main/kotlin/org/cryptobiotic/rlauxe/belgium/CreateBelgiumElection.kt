@@ -111,10 +111,12 @@ fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdi
     createBelgiumElection(topdir=topdir, contest, creation, round)
 
     val auditdir = "$topdir/audit"
-    val results = RunVerifyContests.runVerifyContests(auditdir, null, show = showVerify)
-    println()
-    print(results)
-    if (results.hasErrors) throw RuntimeException("createBelgiumElection failed to verify")
+    if (showVerify) {
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = showVerify)
+        println()
+        print(results)
+        if (results.hasErrors) throw RuntimeException("createBelgiumElection failed to verify")
+    }
 
     if (runRounds == false) return Pair(0, 0)
 

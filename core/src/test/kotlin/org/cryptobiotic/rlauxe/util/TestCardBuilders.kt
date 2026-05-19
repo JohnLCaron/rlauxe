@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.*
@@ -39,9 +38,6 @@ class TestCardBuilders {
         val cardbs = mutableListOf<AuditableCardMBuilder>()
         cards.forEach {
             val cb = AuditableCardMBuilder.fromCard(it)
-            if (it.votes() != null) {
-                it.votes()!!.forEach{ (contestId, votes) -> cb.replaceContestVotes(contestId, votes) }
-            }
             cardbs.add( cb)
         }
 

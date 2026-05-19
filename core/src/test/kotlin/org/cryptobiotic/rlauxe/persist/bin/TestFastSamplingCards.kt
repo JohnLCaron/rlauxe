@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
 class TestFastSamplingCards {
+    val testFastSamplFile = "$testdataDir/temp/fastSampling.bin"
 
     @Test
     fun writeSamplingCards() {
@@ -29,10 +30,8 @@ class TestFastSamplingCards {
 
         val cardIter = cardManifest.cards.iterator()
 
-        val filenameOut = publisher.fastSamplingFile()
-
         val stopwatch = Stopwatch()
-        val ncards = writeFastSamplingCards(cardIter, filenameOut, styles)
+        val ncards = writeFastSamplingCards(cardIter, testFastSamplFile, styles)
         cardIter.close()
 
         println("writeSamplingCards ncards = $ncards, took $stopwatch")
@@ -106,8 +105,6 @@ class TestFastSamplingCards {
         val countyAudit = AuditRecord.read(topdir) as CountyAudit
         val mvrManager = PersistedMvrManager(countyAudit)
 
-        runConsistentSampling(Closer(mvrManager.samplingCards().iterator()))
-        runConsistentSampling(Closer(mvrManager.samplingCards().iterator()))
         runConsistentSampling(Closer(mvrManager.samplingCards().iterator()))
         // ncards = 4982786, included = 142470869 that took 30.67 s= 0.006154789710013635 ms/card
         // ncards = 4982786, included = 142470869 that took 27.15 s= 0.005448357605564437 ms/card

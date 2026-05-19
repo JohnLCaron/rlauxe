@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.verify
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.makeCvr
 import org.cryptobiotic.rlauxe.util.ErrorMessages
@@ -31,11 +32,11 @@ class TestVerifyMvrs {
     @Test
     fun testDontMatch() {
         val N = 2
-        val cards = mutableListOf<AuditableCard>()
+        val cards = mutableListOf<AuditableCardM>()
         repeat(N) {
             val id = Random.nextInt()
             val cvr = makeCvr(id, 11, 15)
-            cards.add(AuditableCard(cvr, it, prn=it.toLong()))
+            cards.add(AuditableCardM.fromCvr(cvr, it, prn=it.toLong()))
         }
 
         val rcards = cards.reversed()
@@ -47,19 +48,19 @@ class TestVerifyMvrs {
     @Test
     fun testHasStyle() {
         val N = 5
-        val cards = mutableListOf<AuditableCard>()
+        val cards = mutableListOf<AuditableCardM>()
         repeat(N) {
             val id = Random.nextInt()
             val cvr = makeCvr(id, 11, 15)
-            cards.add(AuditableCard(cvr, it, prn=it.toLong()))
+            cards.add(AuditableCardM.fromCvr(cvr, it, prn=it.toLong()))
         }
 
         val rcards = listOf(
-            cards[0].copy(style=CardStyle("hasStyle", 1, cards[0].possibleContests(), true)),
-            cards[1].copy(style=CardStyle("hasStyle", 1, removeOne(cards[1].possibleContests()), true)),
-            cards[2].copy(style=CardStyle("noStyle", 1, removeOne(cards[2].possibleContests()), false)),
-            cards[3].copy(style=CardStyle("hasStyle", 1, addOne(cards[3].possibleContests()), true)),
-            cards[4].copy(style=CardStyle("noStyle", 1, addOne(cards[4].possibleContests()), false)),
+            cards[0].copy(styleName="hasStyle").setStyle(style=CardStyle("hasStyle", 1, cards[0].possibleContests(), true)),
+            cards[1].copy(styleName="hasStyle").setStyle(style=CardStyle("hasStyle", 1, removeOne(cards[1].possibleContests()), true)),
+            cards[2].copy(styleName="noStyle").setStyle(style=CardStyle("noStyle", 1, removeOne(cards[2].possibleContests()), false)),
+            cards[3].copy(styleName="hasStyle").setStyle(style=CardStyle("hasStyle", 1, addOne(cards[3].possibleContests()), true)),
+            cards[4].copy(styleName="noStyle").setStyle(style=CardStyle("noStyle", 1, addOne(cards[4].possibleContests()), false)),
         )
         val errs = ErrorMessages("testHasStyle")
         verifyMvrCardPairs(cards.zip(rcards), errs)

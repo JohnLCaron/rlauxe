@@ -107,13 +107,14 @@ class AuditableCardMBuilder(
     companion object {
         fun fromCard(card: AuditableCardIF) = AuditableCardMBuilder(
             card.id(),
-            card.location(),
+            if (card.id() == card.location()) null else card.location(),
             card.index(),
             card.prn(),
             card.phantom(),
             card.styleName(),
             card.poolId(),
             card.votes(),
+            style=card.style(),
         )
 
     }

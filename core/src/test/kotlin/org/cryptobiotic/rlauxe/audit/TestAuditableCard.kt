@@ -34,7 +34,7 @@ class TestAuditableCard {
             assertEquals(it.toLong(), card.prn)
             assertEquals(false, card.phantom)
             // assertEquals(cvr.votes.keys, card.possibleContests.toSet())
-            assertNotNull(card.votes)
+            assertNotNull(card.votes())
             assertNull(card.poolId())
         }
     }

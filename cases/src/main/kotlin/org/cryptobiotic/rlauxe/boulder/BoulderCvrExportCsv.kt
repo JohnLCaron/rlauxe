@@ -280,6 +280,10 @@ fun parseNCards(line:String): Int {
     return ncards
 }
 
+private val showDontMatch = false
+private val showBallotStyles = false
+private val showRedactedGroups = false
+
 data class BallotType(val name: String, val contests: Set<Int>, var count: Int = 0)
 
 class BallotStyles {
@@ -291,7 +295,7 @@ class BallotStyles {
         val ballotType = ballotTypes.getOrPut(cvr.ballotType) { BallotType(cvr.ballotType, cvrContests) }
         if (ballotType.contests == cvrContests)
             ballotType.count++
-        else {
+        else if (showDontMatch) {
             println("cvr $cvr doesnt match $ballotType")
         }
     }
@@ -304,7 +308,7 @@ class BallotStyles {
         } else {
             if (group.contests() == redacted.contests())
                 group.merge(redacted, voteForNmap)
-            else
+            else if (showDontMatch)
                 println("redacted $redacted doesnt match $group; c31 = ${redacted.contestVotes[31]}")
         }
     }
@@ -431,11 +435,15 @@ fun readDominionCvrExportCsv(filename: String, countyId: String): BoulderCvrExpo
     }
     if (rcvRedacted > 0) println("  read $rcvRedacted RCV Redacted votes")
 
-    println("Ballot Styles size=${ballotStyles.ballotTypes.size}")
-    ballotStyles.ballotTypes.toSortedMap().forEach { println(" ${it.key} ${it.value}")}
+    if (showBallotStyles) {
+        println("Ballot Styles size=${ballotStyles.ballotTypes.size}")
+        ballotStyles.ballotTypes.toSortedMap().forEach { println(" ${it.key} ${it.value}") }
+    }
 
-    println("Redacted Groups size = ${ballotStyles.redactedGroups.size}")
-    ballotStyles.redactedGroups.toSortedMap().forEach { println("  ${it.value}")}
+    if (showRedactedGroups) {
+        println("Redacted Groups size = ${ballotStyles.redactedGroups.size}")
+        ballotStyles.redactedGroups.toSortedMap().forEach { println("  ${it.value}") }
+    }
 
     return BoulderCvrExportCsv(countyId, electionName, versionName, filename, schema, cvrs,
         ballotStyles.redactedGroups.toSortedMap().values.toList(),

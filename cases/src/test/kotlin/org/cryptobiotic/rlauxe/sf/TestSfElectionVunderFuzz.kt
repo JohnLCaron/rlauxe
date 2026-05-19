@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.verify.AssortAvg
-import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import kotlin.collections.iterator
 import kotlin.test.Test
@@ -23,7 +23,7 @@ class TestSfElectionVunderFuzz {
     val publisher = Publisher(auditdir)
 
     val mvrManager: PersistedMvrManager
-    val cardManifest: CardManifest
+    val sortedManifest: SortedManifest
     val config: Config
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
@@ -34,7 +34,7 @@ class TestSfElectionVunderFuzz {
         val auditRecord = AuditRecord.read(auditdir) as AuditRecord
         mvrManager = PersistedMvrManager(auditRecord)
         val mvrManager = PersistedMvrManager(auditRecord)
-        cardManifest = mvrManager.sortedManifest()
+        sortedManifest = mvrManager.sortedManifest()
         config = auditRecord.config
         contests = auditRecord.contests
         infos = contests.map { it.contest.info() }.associateBy { it.id }
@@ -49,7 +49,7 @@ class TestSfElectionVunderFuzz {
         var countCards = 0
 
         // use the first 30_000 actual cards
-        cardManifest.cards.iterator().use { iter ->
+        sortedManifest.cards.iterator().use { iter ->
             while (iter.hasNext() && countCards < ncards) {
                 val card = iter.next()
                 contestCards.add(card)
@@ -128,20 +128,20 @@ class TestSfElectionVunderFuzz {
         println()
 
         // over all cards
-        val countCardsInPool = countCardsInPool(cardManifest.cards.iterator(), contestId, useCardPoolId)
+        val countCardsInPool = countCardsInPool(sortedManifest.cards.iterator(), contestId, useCardPoolId)
         println("countCardsInPool=${countCardsInPool}")
 
         val privateMvrs = mvrManager.readCardsAndMerge(publisher.sortedMvrsFile())
         val mvrPoolAvg = findPoolAverage(privateMvrs, contestId, useCardPoolId, passorter)
         println("mvr poolAvg = ${mvrPoolAvg}")
 
-        val cvrPoolAvg = findPoolAverage(cardManifest.cards.iterator(), contestId, useCardPoolId, passorter)
+        val cvrPoolAvg = findPoolAverage(sortedManifest.cards.iterator(), contestId, useCardPoolId, passorter)
         println("cvrPoolAvg = ${cvrPoolAvg}")
 
         // over all mvr, cvr pairs
         val privateMvrs2 = mvrManager.readCardsAndMerge(publisher.sortedMvrsFile())
         val clcaPoolAvg =
-            findPoolAverageB(privateMvrs2, cardManifest.cards.iterator(), contestId, useCardPoolId, cassorter)
+            findPoolAverageB(privateMvrs2, sortedManifest.cards.iterator(), contestId, useCardPoolId, cassorter)
         println("clcaPoolAvg = ${clcaPoolAvg}")
 
         // TODO what can we test?
@@ -150,7 +150,7 @@ class TestSfElectionVunderFuzz {
         val contestCards = mutableListOf<AuditableCardIF>()
         val ncards = 100_000 // all
         var countCards = 0
-        cardManifest.cards.iterator().use { iter ->
+        sortedManifest.cards.iterator().use { iter ->
             while (iter.hasNext() && countCards < ncards) {
                 val card = iter.next()
                 contestCards.add(card)

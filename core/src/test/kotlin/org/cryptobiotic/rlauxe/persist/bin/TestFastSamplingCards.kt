@@ -1,10 +1,10 @@
-package org.cryptobiotic.rlauxe.persist.csv
+package org.cryptobiotic.rlauxe.persist.bin
 
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
-import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
 import org.cryptobiotic.rlauxe.testdataDir
@@ -12,12 +12,10 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
-import java.io.FileOutputStream
-import java.io.OutputStream
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
-class TestSamplingCards {
+class TestFastSamplingCards {
 
     @Test
     fun writeSamplingCards() {
@@ -31,10 +29,10 @@ class TestSamplingCards {
 
         val cardIter = cardManifest.cards.iterator()
 
-        val filenameOut = publisher.samplingCardsFile()
+        val filenameOut = publisher.fastSamplingFile()
 
         val stopwatch = Stopwatch()
-        val ncards = writeSamplingCards(cardIter, filenameOut, styles)
+        val ncards = writeFastSamplingCards(cardIter, filenameOut, styles)
         cardIter.close()
 
         println("writeSamplingCards ncards = $ncards, took $stopwatch")
@@ -52,7 +50,7 @@ class TestSamplingCards {
         val stopwatch = Stopwatch()
 
         var ncards = 0
-        val cardIter = SamplingCardIterator(publisher.samplingCardsFile(), styles, 100_000)
+        val cardIter = FastSamplingCardIterator(publisher.fastSamplingFile(), styles, 100_000)
         while (cardIter.hasNext()) { //  && ncards < 1000_000) {
             val card = cardIter.next()
             ncards++
@@ -70,7 +68,7 @@ class TestSamplingCards {
         val countyAudit = AuditRecord.read(topdir) as CountyAudit
         val mvrManager = PersistedMvrManager(countyAudit)
         val styles = mvrManager.styles()!!
-        val cardIter = SamplingCardIterator(publisher.samplingCardsFile(), styles, 100_000)
+        val cardIter = FastSamplingCardIterator(publisher.fastSamplingFile(), styles, 100_000)
 
         runConsistentSampling(cardIter)
         // ncards = 4982786, included = 142470869 that took 37.95 s= 0.007615819744215385 ms/card
@@ -88,8 +86,8 @@ class TestSamplingCards {
         val stopwatch = Stopwatch()
         val styles = mvrManager.styles()!!
 
-        val cardIter = SamplingCardIterator(publisher.samplingCardsFile(), styles, 100_000)
-        val samplingCards = mutableListOf<SamplingCard>()
+        val cardIter = FastSamplingCardIterator(publisher.fastSamplingFile(), styles, 100_000)
+        val samplingCards = mutableListOf<FastSamplingCard>()
         while (cardIter.hasNext()) {
             samplingCards.add(cardIter.next())
         }
@@ -166,7 +164,7 @@ class TestSamplingCards {
 
     @Test
     fun testMakeFastCards() {
-        val auditdir = "$testdataDir/cases/sf2024/clca/audit"
+        val auditdir = "${testdataDir}/cases/sf2024/clca/audit"
         val auditRecord = AuditRecord.read(auditdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
         val styles = mvrManager.styles()!!
@@ -181,8 +179,12 @@ class TestSamplingCards {
 
         // extract some info from sorted proto cards for a super compact "samplingCards" binary file
         val bufferSize = 100_000
-        val protoIter = ProtoCardIterator(publisher.sortedCardsProtoFile(), bufferSize, styles)  // dont actually need styles i think
-        val ncards = writeSamplingCards(protoIter, publisher.samplingCardsFile(), styles)
+        val protoIter = ProtoCardIterator(
+            publisher.sortedCardsProtoFile(),
+            bufferSize,
+            styles
+        )  // dont actually need styles i think
+        val ncards = writeFastSamplingCards(protoIter, publisher.fastSamplingFile(), styles)
         println("ncards = $ncards that took $stopwatch= ${stopwatch.elapsed(TimeUnit.MILLISECONDS)/ncards.toDouble()} ms/card")
 
     }

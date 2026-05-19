@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.persist.CompositeRecordIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
@@ -34,7 +34,7 @@ open class CompositeMvrManager(
         TODO("Not yet implemented")
     }
 
-    override fun sortedManifest(): CardManifest {
+    override fun sortedManifest(): SortedManifest {
         return auditRecord.readSortedManifest(styles())
     }
 

@@ -5,19 +5,11 @@ import com.github.michaelbull.result.unwrapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.audit.SamplingCardIF
-import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.persist.csv.SamplingCard
-import org.cryptobiotic.rlauxe.persist.csv.SamplingCardIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
-import org.cryptobiotic.rlauxe.util.CloseableIterable
 import java.io.BufferedReader
 import java.io.File
-import java.nio.file.Files
 import kotlin.collections.forEach
-import kotlin.io.path.Path
 import kotlin.text.split
 
 class CountyAudit(

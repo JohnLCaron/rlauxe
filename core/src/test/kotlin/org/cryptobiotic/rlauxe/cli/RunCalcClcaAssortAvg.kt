@@ -16,7 +16,7 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import kotlin.String
@@ -120,12 +120,12 @@ object RunCalcAssortAvg {
 
     fun runCards(
         expectations: List<Expectation>,
-        cardManifest: CardManifest,
+        sortedManifest: SortedManifest,
         mvrIter: Iterator<AuditableCard>?,
         usePrivate: Boolean
     ) {
         var count = 0
-        cardManifest.cards.iterator().use { cardIter ->
+        sortedManifest.cards.iterator().use { cardIter ->
             while (cardIter.hasNext()) {
                 val card = cardIter.next()
                 val mvr = if (usePrivate) mvrIter!!.next() else card

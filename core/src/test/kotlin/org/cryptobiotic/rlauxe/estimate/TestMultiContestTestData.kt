@@ -99,7 +99,7 @@ class TestMultiContestTestData {
                     " rel=${abs(phantomPct - fcontest.phantomPct)/phantomPct}")
             if (nphantom > 5) assertEquals(fcontest.phantomPct, phantomPct, 5.0/Nc)
 
-            val nunder = testCards.count { it.hasContest(contest.id) && !it.phantom && it.votes!![contest.id]!!.isEmpty() }
+            val nunder = testCards.count { it.hasContest(contest.id) && !it.phantom && it.votes()!![contest.id]!!.isEmpty() }
             assertEquals(fcontest.underCount, nunder)
             val underPct = nunder/ Nc.toDouble()
             println("  nunder=$nunder == ${fcontest.underCount}; pct= $underPct =~ ${fcontest.undervotePct} abs=${abs(underPct - fcontest.undervotePct)} " +

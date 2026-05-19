@@ -121,12 +121,12 @@ class TestCvrsToCards {
 
         if (auditType.isClca()) {
             assertEquals(cvr, card.toCvr())
-            assertNotNull(card.votes)
-            assertEquals(cvr.votes, card.votes)
+            assertNotNull(card.votes())
+            assertEquals(cvr.votes, card.votes())
             assertEquals(null, card.poolId(), "card.poolId() should be null")
 
         } else if (auditType.isPolling()) {
-            assertNull(card.votes)
+            assertNull(card.votes())
 
         }  else if (auditType.isOA()) {
             assertEquals(cvr.poolId, card.poolId(), "poolId")
@@ -139,14 +139,14 @@ class TestCvrsToCards {
         val styleContests = expectBatch?.possibleContests()?.toList()?.toSet() ?: emptySet()
         val expectContests = when (auditType) {
             AuditType.ONEAUDIT -> {
-                if (card.votes != null)
-                    card.votes.keys.toSet() // not correct; noStyles means cvrs are incomplete,
+                if (card.votes() != null)
+                    card.votes()!!.keys.toSet() // not correct; noStyles means cvrs are incomplete,
                                             // but then we need poolId to see what pool; interferes with pooled vs nonpooled cards
                                             // so cant do this case with Cvr as input
                 else
                     styleContests
             }
-            AuditType.CLCA -> if (hasCardStyles) styleContests else card.votes!!.keys.toSet()
+            AuditType.CLCA -> if (hasCardStyles) styleContests else card.votes()!!.keys.toSet()
             AuditType.POLLING -> expectBatch?.possibleContests()?.toSet() ?: emptySet()
         }
         if (expectContests != card.possibleContests().toSet())
@@ -163,9 +163,9 @@ fun Cvr.show() = buildString {
 
 fun AuditableCard.show() = buildString {
     append("$location phantom=$phantom")
-    if (votes != null) {
+    if (votes() != null) {
         append(" votes={")
-        votes.toSortedMap().forEach { (id, cands) -> append("$id: ${cands.contentToString()}, ") }
+        votes()!!.toSortedMap().forEach { (id, cands) -> append("$id: ${cands.contentToString()}, ") }
         append("}")
     }
     append(" poolId=${poolId()}")

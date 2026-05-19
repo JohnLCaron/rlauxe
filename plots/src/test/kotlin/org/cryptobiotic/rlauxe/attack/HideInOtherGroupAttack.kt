@@ -164,10 +164,10 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         // now form the mvrs with the flips
         var countFlips = 0
         val mvrCards = modifiedCards.map { mcard ->
-            if (mcard.styleName() == "group2" && mcard.votes!!.contains(1)) { // find the flips
+            if (mcard.styleName() == "group2" && mcard.votes()!!.contains(1)) { // find the flips
                 countFlips++
                 val org = mcard
-                val mvotes = mcard.votes!!.toMutableMap()
+                val mvotes = mcard.votes()!!.toMutableMap()
                 mvotes[1] = intArrayOf(1) // switch vote to candidate A
                 org.copy(votes = mvotes)
             } else
@@ -228,13 +228,13 @@ class CardsWithStylesAttack(
 
         // original
         var style = if (org.hasContest(2)) poolMap["group2"]!! else poolMap["group1"]!!
-        if (org.hasContest(1) && org.votes!![1]!!.contains(2) && flipCount < wantFlips) {
+        if (org.hasContest(1) && org.votes()!![1]!!.contains(2) && flipCount < wantFlips) {
             style = poolMap["group2"]!!
             flipCount++
         }
 
         val contests = style.possibleContests()
-        val votes = if (hasCvr) org.votes else null
+        val votes = if (hasCvr) org.votes() else null
 
         return AuditableCard(org.id, org.location, cardIndex++, 0, phantom=org.phantom,
             org.poolId,

@@ -155,7 +155,7 @@ class ClcaSingleRoundWorkflowTaskGenerator(
         var countFlips = 0
         val wantFlips = (diff + 3) / 2
         val mvrs = cards.mapIndexed { idx, card ->
-            val cardVotes = card.votes!!
+            val cardVotes = card.votes()!!
             if (countFlips < wantFlips && cardVotes[1] != null && cardVotes[1]!!.contains(2)) {
                 countFlips++
                 val flippedVotes = cardVotes.toMutableMap()

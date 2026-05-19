@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.doublePrecision
-import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,13 +19,13 @@ class TestBelgiumContest {
     val contests: List<ContestWithAssertions>
     val rounds: List<AuditRound>
     val infos: Map<Int, ContestInfo>
-    val cardManifest: CardManifest
+    val sortedManifest: SortedManifest
 
     init {
         val auditdir = "$testdataDir/cases/belgium/2024limited/Anvers/audit"
         val auditRecord = AuditRecord.read(auditdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
-        cardManifest = mvrManager.sortedManifest()
+        sortedManifest = mvrManager.sortedManifest()
         config = auditRecord.config
         contests = auditRecord.contests
         rounds = auditRecord.rounds

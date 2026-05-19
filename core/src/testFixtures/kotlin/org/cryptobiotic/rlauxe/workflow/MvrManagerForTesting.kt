@@ -5,7 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -40,8 +40,8 @@ class MvrManagerForTesting(
         sortedMvrs = sortedCards.map { AuditableCard(mvrs[it.index], it.index, it.prn) }
     }
 
-    override fun sortedManifest(): CardManifest {
-        return CardManifest.createFromAList(sortedCards)
+    override fun sortedManifest(): SortedManifest {
+        return SortedManifest.createFromAList(sortedCards)
     }
 
     override fun pools() = pools
@@ -130,7 +130,7 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
 /////////////////////////////////////////////////////////////////
 // no AuditRecord, pass in publisher...
 
-fun readSortedManifest(publisher: Publisher, infos: Map<Int, ContestInfo>, ncards: Int): CardManifest {
+fun readSortedManifest(publisher: Publisher, infos: Map<Int, ContestInfo>, ncards: Int): SortedManifest {
     val batches = readBatches(publisher) ?: readCardPools(publisher, infos) ?: emptyList() // which is preferrred ?
     // merge batch references into the Card
     val mergedCards =
@@ -139,7 +139,7 @@ fun readSortedManifest(publisher: Publisher, infos: Map<Int, ContestInfo>, ncard
             batches,
         )
 
-    return CardManifest(mergedCards, ncards)
+    return SortedManifest(mergedCards, ncards)
 }
 
 fun readBatches(publisher: Publisher): List<CardStyle>? {

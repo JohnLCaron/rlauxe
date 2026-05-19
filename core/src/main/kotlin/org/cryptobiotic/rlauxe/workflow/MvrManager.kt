@@ -5,14 +5,14 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
-import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 
 // use MvrManager for auditing, not creating an audit
 interface MvrManager {
     // TODO why does mvrManager manage these ?? maybe let AuditWorkflow ??
-    fun sortedManifest(): CardManifest
+    fun sortedManifest(): SortedManifest
     fun pools(): List<CardPool>?
     fun styles(): List<StyleIF>?
 

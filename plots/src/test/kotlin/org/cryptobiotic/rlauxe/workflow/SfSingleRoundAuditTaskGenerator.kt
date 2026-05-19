@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.merge
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
-import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -62,7 +62,7 @@ class SfSingleRoundAuditTask(
                 val contestRound = ContestRound(contestUA, listOf(assertionRound), 1)
 
                 val skipper = AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run, batches)
-                val manifestWithSkipper = CardManifest(skipper, 0, )
+                val manifestWithSkipper = SortedManifest(skipper, 0, )
 
                 val sampler =
                     ClcaSamplerErrorTracker.withNoErrors(

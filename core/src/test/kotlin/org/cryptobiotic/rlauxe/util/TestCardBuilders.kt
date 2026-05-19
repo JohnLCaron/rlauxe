@@ -24,7 +24,7 @@ class TestCardBuilders {
         val card = AuditableCard ("cvr$42", null, 42, 4422L, false, // intArrayOf(1,2,3),
             null, mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), CardStyle.fromCvrBatch)
         val cb = AuditableCardBuilder.fromCard(card)
-        card.votes!!.forEach { (contestId, votes) -> cb.replaceContestVotes(contestId, votes) }
+        card.votes()!!.forEach { (contestId, votes) -> cb.replaceContestVotes(contestId, votes) }
         val back = cb.build()
         assertEquals(card, back)
     }
@@ -38,8 +38,8 @@ class TestCardBuilders {
         val cardbs = mutableListOf<AuditableCardBuilder>()
         cards.forEach {
             val cb = AuditableCardBuilder.fromCard(it)
-            if (it.votes != null) {
-                it.votes.forEach{ (contestId, votes) -> cb.replaceContestVotes(contestId, votes) }
+            if (it.votes() != null) {
+                it.votes()!!.forEach{ (contestId, votes) -> cb.replaceContestVotes(contestId, votes) }
             }
             cardbs.add( cb)
         }

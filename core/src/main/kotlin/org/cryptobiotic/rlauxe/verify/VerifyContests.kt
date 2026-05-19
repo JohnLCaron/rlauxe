@@ -19,7 +19,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateOneAuditPools
-import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -36,7 +36,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
     val config: Config
     val allContests: List<ContestWithAssertions>?
     val allInfos: Map<Int, ContestInfo>?
-    val cardManifest: CardManifest
+    val sortedManifest: SortedManifest
     val cardPools: List<CardPoolIF>?
 
     init {
@@ -51,7 +51,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
 
         val mvrManager = PersistedMvrManager(auditRecord)
 
-        cardManifest = mvrManager.sortedManifest()
+        sortedManifest = mvrManager.sortedManifest()
         cardPools = mvrManager.pools()
     }
 
@@ -68,14 +68,14 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         val infos = allInfos ?: contests.associate { it.id to it.contest.info() }
         preAuditContestCheck(contests, results)
         println("preAuditContestCheck done")
-        val contestSummary = verifyManifest(config, contests, cardManifest.cards, infos, results)
+        val contestSummary = verifyManifest(config, contests, sortedManifest.cards, infos, results)
         println("verifyManifest done")
 
         // OA
         if (config.isOA) {
             if (cardPools != null) {
                 verifyOAagainstCards(contests, contestSummary, cardPools, infos, results, show = show)
-                verifyOAassortAvg(contests, cardManifest.cards.iterator(), results, show = show)
+                verifyOAassortAvg(contests, sortedManifest.cards.iterator(), results, show = show)
                 verifyOApools(contests, contestSummary, cardPools, results, show = show)
             }
         }
@@ -85,7 +85,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
             verifyClcaAgainstCards(contests, contestSummary, results, show = show)
             println("verifyClcaAgainstCards done")
 
-            verifyClcaAssortAvg(contests, cardManifest.cards.iterator(), results, show = show)
+            verifyClcaAssortAvg(contests, sortedManifest.cards.iterator(), results, show = show)
             println("verifyClcaAssortAvg done")
 
         }

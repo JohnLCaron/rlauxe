@@ -12,18 +12,15 @@ private val logger = KotlinLogging.logger("Publisher")
 
     $auditdir/
         // election record - output of CreateElectionRecord
-        auditCreationConfig.json  // AuditCreationConfigJson
-        auditRoundPrototype.json // AuditRoundConfigJson
-        batches.json          // BatchesJson: PopulationIF -> Population
         cardManifest.csv      // AuditableCardCsv, may be zipped
-        cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool
+        cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool (optional)
+        cardStyles.json       // CardStylesJson: CardStyleIF -> CardStyle (optional)
         contests.json         // ContestsUnderAuditJson
         electionInfo.json     // ElectionInfoJson
-        sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
 
         // auditRecord - output of CreateAuditRecord
-        auditConfig.json      // AuditConfigJson
-        auditSeed.json        // PrnJson
+        auditCreationConfig.json  // AuditCreationConfigJson
+        auditRoundPrototype.json // AuditRoundConfigJson
         sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
 
         roundX/
@@ -53,7 +50,7 @@ class Publisher(val auditDir: String) {
     fun cardStylesFile() = "$auditDir/cardStyles.json"
     fun contestsFile() = "$auditDir/contests.json"
     fun electionInfoFile() = "$auditDir/electionInfo.json"
-    fun samplingCardsFile() = "$auditDir/samplingCards.bin" //make sampling fast
+    fun fastSamplingFile() = "$auditDir/fastSampling.bin" //make sampling fast
     fun sortedCardsFile() = "$auditDir/sortedCards.csv" // sorted cardManifest
     fun sortedCardsProtoFile() = "$auditDir/sortedCards.proto" // cardManifest
 

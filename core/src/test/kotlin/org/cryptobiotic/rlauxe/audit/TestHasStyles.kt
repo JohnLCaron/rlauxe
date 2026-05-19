@@ -160,7 +160,7 @@ class TestHasStyles {
         // now fix the batches
         val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
             Closer( testCards.iterator())) { card:AuditableCard ->
-            val contests = card.votes!!.keys.toList().sorted()
+            val contests = card.votes()!!.keys.toList().sorted()
             card.copy(style = fixBatches[contests]!!)
         }
         val newBatched = mutableListOf<AuditableCard>()
@@ -353,7 +353,7 @@ class TestHasStyles {
         // now fix the batches
         val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
             Closer( testCards.iterator())) { card:AuditableCard ->
-            val contests = card.votes!!.keys.toList().sorted()
+            val contests = card.votes()!!.keys.toList().sorted()
             card.copy(style = card12)
         }
         val newBatched = mutableListOf<AuditableCard>()

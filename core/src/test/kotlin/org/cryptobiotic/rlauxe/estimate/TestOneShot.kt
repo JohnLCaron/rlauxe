@@ -39,7 +39,7 @@ class TestOneShot {
             auditRound.contestRounds,
             pools = mvrManager.pools(),
             styles = mvrManager.styles(),
-            cardManifest = mvrManager.sortedManifest(),
+            sortedManifest = mvrManager.sortedManifest(),
         )
         estaudit.run()
     }

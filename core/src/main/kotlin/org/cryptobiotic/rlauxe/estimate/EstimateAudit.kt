@@ -21,7 +21,7 @@ import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.util.estSamplesFromNomargin
@@ -52,7 +52,7 @@ class EstimateAudit(
     val contests: List<ContestRound>,
     val pools: List<CardPool>?,
     val styles: List<StyleIF>?,
-    val cardManifest: CardManifest,
+    val sortedManifest: SortedManifest,
 ) {
     val auditType = config.auditType
 
@@ -71,7 +71,7 @@ class EstimateAudit(
         // each trial is running all the contests in the round (but only the minAssertion)
         val ntrials = if (auditType.isClca()) 1 else config.round.simulation.nsimTrials
         repeat(ntrials) { run ->
-            tasks.add(AuditTrialTask(auditdir, roundIdx, run+1, config, contestsToAudit, pools, styles, cardManifest))
+            tasks.add(AuditTrialTask(auditdir, roundIdx, run+1, config, contestsToAudit, pools, styles, sortedManifest))
         }
         val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunner<List<AssertionTrialIF>>().run(tasks, nthreads)
 
@@ -171,7 +171,7 @@ class AuditTrialTask(
     val contestsToAudit: List<ContestRound>,
     val pools: List<CardPool>?,
     val batches: List<StyleIF>?,
-    val cardManifest: CardManifest
+    val sortedManifest: SortedManifest
 ) : ConcurrentTask<List<AssertionTrialIF>> {
 
     override fun name() = "roundIdx $roundIdx Run $run"
@@ -200,7 +200,7 @@ class AuditTrialTask(
         var cardSortedIndex = 1 // 1 based
         var countEstimatedCards = 0
         var countPoolCards = 0
-        cardManifest.cards.iterator().use { sortedCardIter ->
+        sortedManifest.cards.iterator().use { sortedCardIter ->
             while (sortedCardIter.hasNext()) {
                 // does any contest need more cards ?
                 if (!contestTrials.any { it.wantsMore() }) break

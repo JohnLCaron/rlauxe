@@ -26,7 +26,7 @@ open class CompositeMvrManager(
         return readBatchesComposite(publisher)
     }
 
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>> {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCardIF>> {
         TODO("Not yet implemented")
     }
 

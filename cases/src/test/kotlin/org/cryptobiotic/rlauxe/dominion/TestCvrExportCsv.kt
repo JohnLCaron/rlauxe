@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.dominion
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-import org.cryptobiotic.rlauxe.audit.CardWithStyleName
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.util.createZipFile
 import kotlin.io.path.createTempFile
 
@@ -63,16 +63,16 @@ class TestCvrExportCsv {
             123, 11,
             mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
         )
-        val card = cvr.toCardNoBatch(42, 43L, true, mapOf("test1-2" to 99))
+        val card = cvr.toAuditableCard(42, 43L, true, mapOf("test1-2" to 99))
 
-        val target = CardWithStyleName (
+        val target = AuditableCardM.fromVotes (
             "test1-2-3", null,
             42,
             43L,
             true,
-            mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
-            99,
-            "test1-2"
+            votes = mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
+            poolId = 99,
+            styleName="test1-2"
         )
 
         assertEquals(target, card)
@@ -87,16 +87,16 @@ class TestCvrExportCsv {
             123, 11,
             votes,
         )
-        val card = cvr.toCardNoBatch(42, 43L, true, mapOf("test1-2" to 99), showPoolVotes=true)
+        val card = cvr.toAuditableCard(42, 43L, true, mapOf("test1-2" to 99), showPoolVotes=true)
 
-        val target = CardWithStyleName (
+        val target = AuditableCardM.fromVotes (
             "test1-2-3", null,
             42,
             43L,
             true,
-            votes,
-            99,
-            "test1-2"
+            votes=votes,
+            poolId=99,
+            styleName="test1-2"
         )
 
         assertEquals(target, card)

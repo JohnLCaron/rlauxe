@@ -1,12 +1,12 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
+import org.cryptobiotic.rlauxe.util.AuditableCardMBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import kotlin.collections.get
 
@@ -24,7 +24,7 @@ class VunderPools(pools: List<CardPool>) {
     }
 
     // for the given pooled card with no votes, simulate one with votes, staying within the pool vote totals.
-    fun simulatePooledCard(card: AuditableCardIF): AuditableCard {
+    fun simulatePooledCard(card: AuditableCardIF): AuditableCardM {
         val vunderPool = vunderPools[card.poolId()]
         return vunderPool!!.simulatePooledCard(card)
     }
@@ -37,9 +37,9 @@ class VunderPools(pools: List<CardPool>) {
 class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int, val hasExactContests: Boolean) {
     var vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
 
-    fun simulatePooledCard(card: AuditableCardIF): AuditableCard {
+    fun simulatePooledCard(card: AuditableCardIF): AuditableCardM {
         require (poolName == "all" || card.poolId() == poolId) // TODO
-        val cardb = AuditableCardBuilder.fromCard(card)
+        val cardb = AuditableCardMBuilder.fromCard(card)
 
         card.possibleContests().forEach { contestId ->
             val vunderPicker = vunderPickers[contestId]
@@ -110,7 +110,7 @@ class VunderBatches(batches: List<StyleIF>, val onePool: VunderPool) {
         if (card.phantom()) return card
 
         val batch = batchMap[card.styleName()]
-        val cardb = AuditableCardBuilder.fromCard(card)
+        val cardb = AuditableCardMBuilder.fromCard(card)
 
         if (batch == null) {
             println("batch ${card.styleName()} not found")

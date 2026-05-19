@@ -127,7 +127,7 @@ class TestDominionCvrExportJson {
             var index = 0
             while (csvIter.hasNext()) {
                 val cvrExport = csvIter.next()
-                val card = cvrExport.toCardNoBatch(index++, 0, false, mapOf("31-125" to 11))
+                val card = cvrExport.toAuditableCard(index++, 0, false, mapOf("31-125" to 11))
                 cardManifestWriter.write(writeCardCsv(card))
             }
         }

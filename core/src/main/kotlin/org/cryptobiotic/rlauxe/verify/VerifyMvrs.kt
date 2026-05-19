@@ -37,10 +37,10 @@ fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCardIF, AuditableCardIF>
     }
 }
 
-fun AuditableCard.show() = buildString {
-    append("AuditableCard(id='$id', index=$index, sampleNum=$prn, phantom=$phantom")
+fun AuditableCardIF.show() = buildString {
+    append("AuditableCardIF(id='${id()}', index=${index()}, sampleNum=${prn()}, phantom=${phantom()}")
     if (poolId() != null) append(", poolId=${poolId()}")
     append(", styleName='${styleName()}'")
-    append(", has possibleContests=${style.possibleContests().contentToString()}")
+    append(", has possibleContests=${possibleContests().contentToString()}")
     if (votes() != null) append(" has vote contests=${votes()!!.keys.toList().sorted()})")
 }

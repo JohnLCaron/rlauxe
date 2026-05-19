@@ -1,9 +1,11 @@
 package org.cryptobiotic.rlauxe.dominion
 
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.audit.StyleIF
+import org.cryptobiotic.rlauxe.audit.makeFromVotes
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
@@ -138,6 +140,40 @@ class CvrExportToCardAdapter(val cvrExportIterator: CloseableIterator<CvrExport>
     override fun close() = cvrExportIterator.close()
 }
 
+class CvrExportToCardAdapterM(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: List<CardPoolIF>?, val convertPoolIds: Boolean) : CloseableIterator<AuditableCardM> {
+    val poolMap = pools?.associateBy { it.name() } ?: emptyMap()
+    val poolCounts = mutableMapOf<String, Int>() // to assign index within the poool
+    var countIndex = 0
+
+    override fun hasNext() = cvrExportIterator.hasNext()
+    override fun next(): AuditableCardM {
+        val cvrExport = cvrExportIterator.next()
+        val pool = if (pools == null || cvrExport.group != 1) null else poolMap[ cvrExport.poolKey() ]
+
+        // TODO this is location. Perhaps we need to also store original id ?? So maybe output card ?
+        val location = if (!convertPoolIds || pool == null) null else {
+            val poolName = cvrExport.poolKey()
+            val poolCount =  poolCounts.getOrPut(poolName) { 0 }
+            poolCounts[poolName] = poolCount + 1
+            "pool ${pool.name()} position${poolCount+1}"
+        }
+        val result = AuditableCardM.fromVotes(
+            cvrExport.id,
+            location,
+            countIndex,
+            0,
+            phantom = false,
+            styleName = pool?.name() ?: CardStyle.fromCvr,
+            poolId = pool?.poolId,
+            votes = cvrExport.votes
+        )
+
+        countIndex++
+        return result
+    }
+    override fun close() = cvrExportIterator.close()
+}
+
 class CvrExportConverter(
     val cvrExportIterator: CloseableIterator<CvrExport>,
     val pools: List<CardPoolIF>?,
@@ -163,6 +199,47 @@ class CvrExportConverter(
         }
 
         val result = CardWithStyleName(
+            cvrExport.id,
+            location,
+            countIndex,
+            0,
+            phantom = false,
+            votes =  cvrExport.votes,
+            poolId = pool?.poolId,
+            styleName = style?.name() ?: CardStyle.fromCvr,
+        )
+
+        countIndex++
+        return result
+    }
+    override fun close() = cvrExportIterator.close()
+}
+
+class CvrExportConverterM(
+    val cvrExportIterator: CloseableIterator<CvrExport>,
+    val pools: List<CardPoolIF>?,
+    val styles: Map<Set<Int>, StyleIF>?,
+    val convertPoolIds: Boolean
+) : CloseableIterator<AuditableCardM> {
+    val poolMap = pools?.associateBy { it.name() } ?: emptyMap()
+    val poolCounts = mutableMapOf<String, Int>() // to assign index within the poool
+    var countIndex = 0
+
+    override fun hasNext() = cvrExportIterator.hasNext()
+    override fun next(): AuditableCardM {
+        val cvrExport = cvrExportIterator.next()
+        val pool = if (pools == null || cvrExport.group != 1) null else poolMap[ cvrExport.poolKey() ]
+        val style = if (styles == null) null else styles[ cvrExport.votes.keys ]
+
+        // TODO this is location. Perhaps we need to also store original id ?? So maybe output card ?
+        val location = if (!convertPoolIds || pool == null) null else {
+            val poolName = cvrExport.poolKey()
+            val poolCount =  poolCounts.getOrPut(poolName) { 0 }
+            poolCounts[poolName] = poolCount + 1
+            "pool ${pool.name()} position${poolCount+1}"
+        }
+
+        val result = AuditableCardM.fromVotes(
             cvrExport.id,
             location,
             countIndex,

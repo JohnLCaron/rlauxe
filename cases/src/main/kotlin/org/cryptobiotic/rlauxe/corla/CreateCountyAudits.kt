@@ -4,14 +4,12 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardWithStyleName
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
-import org.cryptobiotic.rlauxe.audit.MergeStylesIntoCards
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.audit.createElectionRecord
@@ -20,7 +18,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.TransformingIterator
@@ -34,6 +32,8 @@ import kotlin.io.path.Path
 private val logger = KotlinLogging.logger("CreateCountyAudits")
 
 private val debugUndervotes = true
+
+// TODO not used - delete ??
 
 class CreateCountyAudits(
     val countyName: String,
@@ -64,10 +64,8 @@ class CreateCountyAudits(
         ncards = createAndSaveUnsortedMvrs(contests, countyCardPools, publisher)
 
         // read them back in as an Iterator, so we dont have to read all into memory
-        val infos = contests.map { it.info() }.associateBy { it.id }
-        val mvrs: CloseableIterator<CardWithStyleName> = readCardsCsvIterator(publisher.unsortedMvrsFile())
-        val auditableCardIter: CloseableIterator<AuditableCard> =
-            MergeStylesIntoCards(mvrs, countyCardPools)
+        // val infos = contests.map { it.info() }.associateBy { it.id }
+        // val auditableCardIter: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = countyCardPools)
 
         /* are we handling the batches correctly using mvrs?
         val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
@@ -90,9 +88,9 @@ class CreateCountyAudits(
 
     override fun contestsUA() = contestsUA
 
-    override fun cards(): CloseableIterator<CardWithStyleName> {
+    override fun cards(): CloseableIterator<AuditableCardM> {
         val publisher = Publisher(auditdir)
-        val unsortedMvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
+        val unsortedMvrs: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
         return TransformingIterator(unsortedMvrs) { mvr ->
             when {
                 mvr.phantom -> mvr

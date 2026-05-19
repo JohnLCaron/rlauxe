@@ -1,12 +1,10 @@
 package org.cryptobiotic.rlauxe.persist.protobuf
 
-import kotlinx.serialization.decodeFromByteArray
-import kotlinx.serialization.encodeToByteArray
-import kotlinx.serialization.protobuf.ProtoBuf
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -25,30 +23,11 @@ import kotlin.test.assertTrue
 
 class TestProtoCard {
 
-    // @Test
-    fun testConvert(card: CardWithStyleName) {
-        val protoCard: ProtoCard = card.publishProto()
-        val bytes = ProtoBuf.encodeToByteArray(protoCard)
-        println(bytes.toHexString())
-        val obj = ProtoBuf.decodeFromByteArray<ProtoCard>(bytes)
-        println(obj)
-    }
-
-    /*
-    fun testProtoCardConversion(cards: List<CardIF>, filename: String) {
-        val json = contests.publishJson()
-        val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
-        FileOutputStream(filename).use { out ->
-            jsonReader.encodeToStream(json, out)
-            out.close()
-        }
-    } */
-
     @Test
     fun writeProtoFile () {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val publisher = Publisher("$topdir/audit")
-        val cardIter: CloseableIterator<CardWithStyleName> = readCardsCsvIterator(publisher.sortedCardsFile())
+        val cardIter: CloseableIterator<AuditableCardIF> = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles=null)
 
         val protoFilename = "${topdir}/audit/${publisher.sortedCardsProtoFile()}"
 
@@ -188,7 +167,7 @@ class TestProtoCard {
         val stopwatch = Stopwatch()
         var ncards = 0L
 
-        val currentCardIter: CloseableIterator<CardWithStyleName> = readCardsCsvIterator(publisher.cardManifestFile())
+        val currentCardIter: CloseableIterator<AuditableCardIF> = readCardsCsvIteratorM(publisher.cardManifestFile(), styles=null)
         while (currentCardIter.hasNext() && csvIter.hasNext() && ncards < 1000) {
             val c1 = csvIter.next()
             val c2 = currentCardIter.next()
@@ -229,7 +208,7 @@ class TestProtoCard {
     } */
 }
 
-fun checkEqual(c1: AuditableCardProto, c2: CardWithStyleName): Boolean {
+fun checkEqual(c1: AuditableCardProto, c2: AuditableCardIF): Boolean {
     assertEquals(c1.id(), c2.id())
     assertEquals(c1.location(), c2.location())
     assertEquals(c1.index(), c2.index())
@@ -237,11 +216,11 @@ fun checkEqual(c1: AuditableCardProto, c2: CardWithStyleName): Boolean {
     assertEquals(c1.poolId(), c2.poolId())
     assertEquals(c1.styleName(), c2.styleName())
 
-    assertEquals(c1.votes == null, c2.votes == null)
+    assertEquals(c1.votes == null, c2.votes() == null)
     if (c1.votes != null) {
         val c1votes = c1.votes
         for ((contestId, candidates) in c1.votes) {
-            val otherCands = c2.votes!![contestId]
+            val otherCands = c2.votes(contestId)
             assertTrue(candidates.contentEquals(otherCands))
         }
     }

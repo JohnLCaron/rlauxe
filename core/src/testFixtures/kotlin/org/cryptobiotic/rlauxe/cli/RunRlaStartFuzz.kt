@@ -182,7 +182,7 @@ class TestClcaElection(
 
     override fun electionInfo() = ElectionInfo(
         "TestClcaElection", AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true,)
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, cardStyles()) // for in-memory case
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, cardStyles()) // for in-memory case
     override fun createUnsortedMvrsExternal() = null
 
     override fun cardStyles() = null
@@ -190,8 +190,8 @@ class TestClcaElection(
     override fun contestsUA() = contestsUA
     override fun ncards() = allCvrs.size
 
-    override fun cards() : CloseableIterator<CardWithStyleName> {
-        return CvrsToCardsWithBatchNameIterator(
+    override fun cards() : CloseableIterator<AuditableCardIF> {
+        return CvrsToCardStylesIterator(
             AuditType.CLCA,
             Closer(allCvrs.iterator()),
             null, null,
@@ -256,8 +256,7 @@ class TestPollingElection(
     val contests: List<Contest>
     val testMvrs: List<Cvr>
     val batches: List<StyleIF>
-    // val pools: List<CardPoolIF>
-    val cards: List<CardWithStyleName>
+    val cards: List<AuditableCardM>
     val contestsUA: List<ContestWithAssertions>
 
     init {
@@ -275,7 +274,7 @@ class TestPollingElection(
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
         val mvrCardAndPops = testData.makeMvrCardAndPops()
         this.testMvrs  = mvrCardAndPops.mvrs
-        this.cards = mvrCardAndPops.cards.map { CardWithStyleName(it) }
+        this.cards = mvrCardAndPops.cards
         // this.pools = mvrCardAndPops.pools
         this.batches = mvrCardAndPops.batches
 
@@ -291,7 +290,7 @@ class TestPollingElection(
         "TestPollingElection", AuditType.POLLING, ncards(), contestsUA.size,
         cvrsContainUndervotes = true, pollingMode = pollingMode,
     )
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(testMvrs, cardStyles()) // for in-memory case
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(testMvrs, cardStyles()) // for in-memory case
     override fun createUnsortedMvrsExternal() = null
     override fun cardStyles() = batches
     override fun cardPools() = null
@@ -353,7 +352,7 @@ class TestOneAuditElection(
 ): ElectionBuilder {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val cardPools: List<CardPool>
-    val cards: List<AuditableCard>
+    val cards: List<AuditableCardIF>
     val fuzzedMvrs: List<Cvr>
 
     init {
@@ -379,7 +378,7 @@ class TestOneAuditElection(
     override fun electionInfo() = ElectionInfo(
         "TestOneAuditElection", AuditType.ONEAUDIT, ncards(), contestsUA.size, cvrsContainUndervotes = true,
     )
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(fuzzedMvrs, cardStyles()) // for in-memory case
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(fuzzedMvrs, cardStyles()) // for in-memory case
     override fun createUnsortedMvrsExternal() = null
     override fun cardStyles() = null
     override fun cardPools() = cardPools
@@ -388,8 +387,7 @@ class TestOneAuditElection(
 
     // override fun cards() = Closer ( cards.iterator())
 
-    override fun cards() : CloseableIterator<CardWithStyleName> {
-        return Closer( this.cards.map { CardWithStyleName(it) }.iterator())
-    }
+    // CloseableIterator<AuditableCardIF> 
+    override fun cards() = Closer(cards.iterator() )
 
 }

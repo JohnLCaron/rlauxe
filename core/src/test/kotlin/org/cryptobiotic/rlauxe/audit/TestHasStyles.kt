@@ -144,40 +144,6 @@ class TestHasStyles {
         assertTrue(ok)
     }
 
-    // use MultiContestCombineData to generate cards, then fix the batches
-    fun makeSingleCardHasStyleOld(auditType: AuditType) {
-        // hasStyle, single: Npop(B) = N, Npop(S) = p*N
-
-        val testData = MultiContestCombineData(contests, contestB.Nc, poolId = 1)
-        val (testCards, batches) = testData.makeCardsFromContests()
-
-        val fixBatches = mapOf(
-            listOf(1) to CardStyle("batchB", 1, intArrayOf(1), false),
-            listOf(2) to CardStyle("batchS", 2, intArrayOf(2), false),
-            listOf(1,2) to CardStyle("batchBS", 3, intArrayOf(1,2), false)
-        )
-
-        // now fix the batches
-        val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
-            Closer( testCards.iterator())) { card:AuditableCard ->
-            val contests = card.votes()!!.keys.toList().sorted()
-            card.copy(style = fixBatches[contests]!!)
-        }
-        val newBatched = mutableListOf<AuditableCard>()
-        while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }
-
-        val infos = contests.map{ it.info }.associateBy { it.id }
-        val tabs = tabulateAuditableCards(Closer(newBatched.iterator()), infos).toSortedMap()
-        contests.forEach { contest ->
-            assertEquals(contest.votes, tabs[contest.id]!!.votes)
-        }
-        // TODO Npop correct ??
-
-        val topdir = "$testdataDir/persist/hasStyle/makeSingleCardHasStyleOld.$auditType"
-        val ok = createAndRunTestAuditCards(auditType,"makeSingleCardHasStyle.$auditType", topdir, contests, newBatched, fixBatches.values.toList())
-        assertTrue(ok)
-    }
-
     fun makeSingleCardHasStyle(auditType: AuditType) {
         // hasStyle, single: Npop(B) = N, Npop(S) = p*N
 
@@ -317,59 +283,6 @@ class TestHasStyles {
         assertTrue(ok)
     }
 
-    fun makeMultiCardNoStylePolling() {
-        //   multicard: Npop(B) = N*c, Npop(S) = N   ??
-
-        val contestS3 = Contest(
-            ContestInfo("S", 2, mapOf("Del" to 1, "Mel" to 2), SocialChoiceFunction.PLURALITY),
-            mapOf(1 to 1650, 2 to 1350),
-            3000,
-            3000
-        )
-        assertEquals(0.1, contestS.reportedMargin(1, 2))
-
-        val contestT3 = Contest(
-            ContestInfo("T", 3, mapOf("Bill" to 1, "Til" to 2), SocialChoiceFunction.PLURALITY),
-            mapOf(1 to 1650, 2 to 1350),
-            3000,
-            3000
-        )
-        assertEquals(0.1, contestS.reportedMargin(1, 2))
-        val N = contestB.Nc
-
-        val contests = listOf(contestB, contestS3)
-
-        val card1 = CardStyle("card1", 1, intArrayOf(1), true)
-        val card2 = CardStyle("card2", 2, intArrayOf(2), true)
-        val card3 = CardStyle("card3", 3, intArrayOf(3), true)
-        val ballot123 = BallotStyle("style12", 4, false, listOf(card1, card2), N)
-        // val ballot13 = BallotStyle("style13", 5, false, listOf(card1, card3), N)
-
-        val testData = MultiContestFromBallotStyles(contests, listOf(ballot123), CSDtype.noStyles)
-        val (testCards, batches) = testData.makeCardsFromContests()
-
-        val card12 = CardStyle("card12", 3, intArrayOf(1,2), false)
-
-        // now fix the batches
-        val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
-            Closer( testCards.iterator())) { card:AuditableCard ->
-            val contests = card.votes()!!.keys.toList().sorted()
-            card.copy(style = card12)
-        }
-        val newBatched = mutableListOf<AuditableCard>()
-        while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }
-
-        val infos = contests.map{ it.info }.associateBy { it.id }
-        val tabs = tabulateAuditableCards(Closer(testCards.iterator()), infos).toSortedMap()
-        contests.forEach { contest ->
-            assertEquals(contest.votes, tabs[contest.id]!!.votes)
-        }
-
-        val topdir = "$testdataDir/persist/hasStyle/makeMultiCardNoStylePolling"
-        val ok = createAndRunTestAuditCards(AuditType.POLLING, "makeMultiCardNoStylePolling", topdir, contests, newBatched, listOf(card12))
-        assertTrue(ok)
-    }
-
     fun makeMultiCardNoStyle(auditType: AuditType) {
         // multicard: Npop(B) = N*c, Npop(S) = N*c
 
@@ -398,11 +311,11 @@ class TestHasStyles {
         // now fix the batches
         val all = CardStyle("all", 1, intArrayOf(1,2,3), false)
 
-        val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
-            Closer( testCards.iterator())) { card:AuditableCard ->
-            card.copy(style = all)
+        val newBatchedIter: CloseableIterator<AuditableCardM>  = TransformingIterator<AuditableCardM, AuditableCardM>(
+            Closer( testCards.iterator())) { card:AuditableCardM ->
+            card.setStyle(all)
         }
-        val newBatched = mutableListOf<AuditableCard>()
+        val newBatched = mutableListOf<AuditableCardM>()
         while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }
 
         val tabs = tabulateAuditableCards(Closer(testCards.iterator()), infos).toSortedMap()
@@ -417,7 +330,7 @@ class TestHasStyles {
     }
 
     fun createAndRunTestAuditCards(auditType: AuditType, name:String, topdir: String, contests: List<Contest>,
-                                   testCards: List<AuditableCard>, batches:List<StyleIF>): Boolean {
+                                   testCards: List<AuditableCardM>, batches:List<StyleIF>): Boolean {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )

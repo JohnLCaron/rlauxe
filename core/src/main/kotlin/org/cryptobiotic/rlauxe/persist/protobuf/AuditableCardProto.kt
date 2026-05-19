@@ -1,13 +1,22 @@
 package org.cryptobiotic.rlauxe.persist.protobuf
 
+import kotlinx.serialization.decodeFromByteArray
+import kotlinx.serialization.protobuf.ProtoBuf
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.ErrorMessages
+import java.io.BufferedInputStream
+import java.io.InputStream
+import java.nio.file.Files
+import java.nio.file.StandardOpenOption
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.contains
 import kotlin.collections.iterator
+import kotlin.io.path.Path
 import kotlin.ranges.until
 
 // aka CardWithArrays
@@ -121,3 +130,77 @@ class AuditableCardProto(
         appendLine("   candidates=${candidates.contentToString()}, style=$style, votes=$votes")
     }
 }
+
+
+// class AuditableCardProto(
+//    val id: String, // enough info to find the card for a manual audit.
+//    val location: String?, // enough info to find the card for a manual audit.
+//    val index: Int,  // index into the original, canonical list of cards
+//    val prn: Long,   // psuedo random number
+//    val phantom: Boolean,
+//    val poolId: Int?, // must be set if its from a CardPool
+//    val contestIds: IntArray,
+//    val contestStarts: IntArray,
+//    val candidates: IntArray,
+//    val style: StyleIF
+//): AuditableCardIF
+fun ProtoCard.importP(styleMap: Map<String, StyleIF> ): AuditableCardProto {
+
+    var style = styleMap[this.styleName]
+    if (style == null) {
+        if (this.phantom)
+            style = CardStyle.phantomBatch
+        else if (this.styleName == CardStyle.fromCvr)
+            style = CardStyle.fromCvrBatch
+        else
+            throw RuntimeException()
+    }
+
+    return AuditableCardProto(
+        this.id,
+        if (this.location == this.id) null else this.location,
+        this.index,
+        this.prn,
+        this.phantom,
+        this.poolId,
+        this.contestIds ?: intArrayOf(),
+        this.contestStarts ?: intArrayOf(),
+        this.candidates ?: intArrayOf(),
+        style,
+    )
+}
+
+class ProtoCardIterator(filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCardProto> {
+    val styleMap: Map<String, StyleIF> = styles?.associateBy{ it.name() } ?: emptyMap()
+
+    val errs = ErrorMessages("readProtoCardsFile '${filename}'")
+    val inputStream: InputStream
+    var nextMessageSize = -1
+
+    init {
+        val filepath = Path(filename)
+        if (!Files.exists(filepath)) {
+            throw RuntimeException("file does not exist")
+        }
+        val input = Files.newInputStream(filepath, StandardOpenOption.READ)
+        inputStream = BufferedInputStream(input, bufferSize)
+    }
+
+    override fun hasNext(): Boolean {
+        nextMessageSize = readVlen(inputStream)
+        return (nextMessageSize > 0)
+    }
+
+    override fun next(): AuditableCardProto {
+        val bytes = ByteArray(nextMessageSize)
+        val bytesRead = inputStream.read(bytes)
+        val protoCard = ProtoBuf.decodeFromByteArray<ProtoCard>(bytes)
+        return protoCard.importP(styleMap)
+    }
+
+    override fun close() {
+        inputStream.close()
+    }
+}
+
+

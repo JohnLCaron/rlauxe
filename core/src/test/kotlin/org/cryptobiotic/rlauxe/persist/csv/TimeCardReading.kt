@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
-import org.cryptobiotic.rlauxe.audit.readCsvAndMergeCards
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -127,7 +126,7 @@ class TimeCardReading {
         var ncards = 0
 
         // includes time to merge the styles
-        val cardIter: CloseableIterator<AuditableCardM> = readCsvAndMergeCards(publisher.sortedCardsFile(), styles)
+        val cardIter: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles)
         while (cardIter.hasNext()) { //  && ncards < 1000000) {
             val card = cardIter.next()
             ncards++

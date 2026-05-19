@@ -36,7 +36,7 @@ class ShowGAOneAuditBetting {
         // data class ContestMvrCardAndPops(
         //    val contestUA: ContestWithAssertions,
         //    val mvrs: List<Cvr>,
-        //    val cards: List<AuditableCard>,
+        //    val cards: List<AuditableCardM>,
         //    val pools: List<OneAuditPool>,
         //)
         val (oaContest, mvrs, cards, cardPools) =

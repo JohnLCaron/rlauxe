@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
+import org.cryptobiotic.rlauxe.util.AuditableCardMBuilder
 import kotlin.collections.toList
 import kotlin.random.Random
 
@@ -57,7 +57,7 @@ fun makeFuzzedCardFromCard(
     if (r > fuzzPct) return card
 
     require(card.votes() != null)
-    val cardb = AuditableCardBuilder.fromCard(card)
+    val cardb = AuditableCardMBuilder.fromCard(card)
     // TODO ?? cardb.possibleContests().forEach { contestId ->
     cardb.votes.forEach { (contestId, cands) ->
         val info = infos[contestId]

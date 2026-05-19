@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
 import org.cryptobiotic.rlauxe.testdataDir
@@ -174,7 +174,7 @@ class TestFastSamplingCards {
         // copy sorted csv to a proto file for better performance
         val publisher = Publisher(auditdir)
 
-        val sortedCards = readCardsCsvIterator(publisher.sortedCardsFile())
+        val sortedCards = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles)
         writeProtoCards(sortedCards, publisher.sortedCardsProtoFile())
 
         // extract some info from sorted proto cards for a super compact "samplingCards" binary file

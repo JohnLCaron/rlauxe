@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.AuditableCardM
-import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -39,7 +39,7 @@ class ProtoCard (
     fun contestIdSet(): Set<Int> = if (contestIds == null) emptySet() else contestIds.toList().toSet()
 }
 
-fun CardIF.publishProto() : ProtoCard {
+fun AuditableCardIF.publishProto() : ProtoCard {
     val votes = this.votes()
     if (votes != null) {
         val contestIds = votes.keys
@@ -83,44 +83,6 @@ fun CardIF.publishProto() : ProtoCard {
     }
 }
 
-// class AuditableCardProto(
-//    val id: String, // enough info to find the card for a manual audit.
-//    val location: String?, // enough info to find the card for a manual audit.
-//    val index: Int,  // index into the original, canonical list of cards
-//    val prn: Long,   // psuedo random number
-//    val phantom: Boolean,
-//    val poolId: Int?, // must be set if its from a CardPool
-//    val contestIds: IntArray,
-//    val contestStarts: IntArray,
-//    val candidates: IntArray,
-//    val style: StyleIF
-//): AuditableCardIF
-fun ProtoCard.import(styleMap: Map<String, StyleIF> ): AuditableCardProto {
-
-    var style = styleMap[this.styleName]
-    if (style == null) {
-        if (this.phantom)
-            style = CardStyle.phantomBatch
-        else if (this.styleName == CardStyle.fromCvr)
-            style = CardStyle.fromCvrBatch
-        else
-            throw RuntimeException()
-    }
-
-    return AuditableCardProto(
-        this.id,
-        if (this.location == this.id) null else this.location,
-        this.index,
-        this.prn,
-        this.phantom,
-        this.poolId,
-        this.contestIds ?: intArrayOf(),
-        this.contestStarts ?: intArrayOf(),
-        this.candidates ?: intArrayOf(),
-        style,
-    )
-}
-
 fun ProtoCard.importM(styleMap: Map<String, StyleIF> ): AuditableCardM {
 
     var style = styleMap[this.styleName]
@@ -147,22 +109,9 @@ fun ProtoCard.importM(styleMap: Map<String, StyleIF> ): AuditableCardM {
     ).setStyle(style)
 }
 
-fun makeVotes( contestIds: IntArray,  contestStarts: IntArray, candidates: IntArray): Map<Int, IntArray> {
-    val lastIndex = contestIds.size-1
-    val makeVotes = mutableMapOf<Int, IntArray>()
-    contestIds.forEachIndexed { index, contestId ->
-        val start = contestStarts[index]
-        val end = if (index < lastIndex) contestStarts[index+1] else candidates.size
-        if (start > end || end > candidates.size)
-            print("HEY")
-        makeVotes[contestId] = candidates.sliceArray(start until end)
-    }
-    return makeVotes.toMap()
-}
-
 /////////////////////////////////////////////////////////
 
-fun writeProtoCards(cards: CloseableIterator<CardIF>, protoFilename: String): Int {
+fun writeProtoCards(cards: CloseableIterator<AuditableCardIF>, protoFilename: String): Int {
     val outputStream: OutputStream = FileOutputStream(protoFilename)
 
     var count = 0
@@ -200,64 +149,6 @@ private fun writeVlenForProto(messageSize: Int, output: OutputStream) {
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-// TODO should styles be optional ?
-class ProtoCardIterator(filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCardProto> {
-    val styleMap: Map<String, StyleIF> = styles?.associateBy{ it.name() } ?: emptyMap()
-
-    val errs = ErrorMessages("readProtoCardsFile '${filename}'")
-    val inputStream: InputStream
-    var nextMessageSize = -1
-
-    init {
-        val filepath = Path(filename)
-        if (!Files.exists(filepath)) {
-            throw RuntimeException("file does not exist")
-        }
-        val input = Files.newInputStream(filepath, StandardOpenOption.READ)
-        inputStream = BufferedInputStream(input, bufferSize)
-    }
-
-    override fun hasNext(): Boolean {
-        nextMessageSize = readVlen(inputStream)
-        return (nextMessageSize > 0)
-    }
-
-    override fun next(): AuditableCardProto {
-        val bytes = ByteArray(nextMessageSize)
-        val bytesRead = inputStream.read(bytes)
-        val protoCard = ProtoBuf.decodeFromByteArray<ProtoCard>(bytes)
-        return protoCard.import(styleMap)
-    }
-
-    override fun close() {
-        inputStream.close()
-    }
-}
-
-fun readVlen(input: InputStream): Int {
-    var ib: Int = input.read()
-    if (ib == -1) {
-        return -1
-    }
-    var result = ib.and(0x7F)
-    var shift = 7
-    while (ib.and(0x80) != 0) {
-        ib = input.read()
-        if (ib == -1) {
-            return -1
-        }
-        val im = ib.and(0x7F).shl(shift)
-        result = result.or(im)
-        shift += 7
-    }
-    return result
-}
-
-
-//////////////////////////////////////////////////////////////
-
 class ProtoCardIteratorM(filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCardM> {
     val styleMap: Map<String, StyleIF> = styles?.associateBy{ it.name() } ?: emptyMap()
 
@@ -289,5 +180,24 @@ class ProtoCardIteratorM(filename: String, bufferSize: Int = 100_000, val styles
     override fun close() {
         inputStream.close()
     }
+}
+
+fun readVlen(input: InputStream): Int {
+    var ib: Int = input.read()
+    if (ib == -1) {
+        return -1
+    }
+    var result = ib.and(0x7F)
+    var shift = 7
+    while (ib.and(0x80) != 0) {
+        ib = input.read()
+        if (ib == -1) {
+            return -1
+        }
+        val im = ib.and(0x7F).shl(shift)
+        result = result.or(im)
+        shift += 7
+    }
+    return result
 }
 

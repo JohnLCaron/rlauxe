@@ -64,7 +64,7 @@ class TestAuditableCardsCsv {
         )
 
         val scratchFile = kotlin.io.path.createTempFile().toFile()
-        writeCardCsvFile(target, scratchFile.toString())
+        writeCardIFCsvFile(target, scratchFile.toString())
 
         val roundtrip = readCardCsvFile(scratchFile.toString())
         assertEquals(target, roundtrip)

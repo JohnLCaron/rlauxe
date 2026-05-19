@@ -1,12 +1,11 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.BallotPool
 import org.cryptobiotic.rlauxe.audit.BallotStyle
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.random.Random
@@ -29,11 +28,11 @@ data class MultiContestCombineData(
     // multicontest cvrs
     // create new partitions each time this is called
     // includes undervotes and phantoms, size = totalBallots + phantom count
-    fun makeCardsFromContests(startCvrId : Int = 0, cardStyle:String?=null): Pair<List<AuditableCard>, List<CardStyle>> {
+    fun makeCardsFromContests(startCvrId : Int = 0, cardStyle:String?=null): Pair<List<AuditableCardM>, List<CardStyle>> {
         contestVoteTrackers.forEach { it.resetTracker() } // startFresh
 
         var nextCardId = startCvrId
-        val result = mutableListOf<AuditableCard>()
+        val result = mutableListOf<AuditableCardM>()
         repeat(totalBallots) {
             // add regular Cvrs including undervotes and phantoms
             result.add( makeCard(nextCardId++, contestVoteTrackers, cardStyle))
@@ -45,10 +44,21 @@ data class MultiContestCombineData(
         return Pair(result, listOf(style))
     }
 
-    private fun makeCard(nextCardId: Int, fcontests: List<ContestVoteTracker>, cardStyle:String?): AuditableCard {
+    // class AuditableCardMBuilder(
+    //    val id: String,
+    //    val location: String?,
+    //    val index: Int,
+    //    val prn: Long,
+    //    val phantom: Boolean,
+    //    val styleName: String? = null,
+    //    val poolId: Int?,
+    //    votesIn: Map<Int, IntArray>?,
+    //    val style: StyleIF? = null,
+    //) {
+    private fun makeCard(nextCardId: Int, fcontests: List<ContestVoteTracker>, cardStyle:String?): AuditableCardM {
         //         constructor(location: String, index: Int, poolId: Int?, cardStyle: String?):
-        val cardBuilder = AuditableCardBuilder("card${nextCardId}", null, nextCardId, 0, false,
-            styleName=style.name(), cardStyle = style)
+        val cardBuilder = AuditableCardMBuilder("card${nextCardId}", null, nextCardId, 0, false,
+            styleName=style.name(), poolId, null, style=style)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build()
     }
@@ -83,7 +93,7 @@ data class ContestVoteTracker(
     }
 
     // choose Candidate, add contest, including undervote
-    fun addContestToCard(cvrb: AuditableCardBuilder) {
+    fun addContestToCard(cvrb: AuditableCardMBuilder) {
         if (votesLeft == 0)
             return
         val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
@@ -93,7 +103,7 @@ data class ContestVoteTracker(
             cvrb.replaceContestVote(info.id, info.candidateIds[candidateIdx])
         }
     }
-    fun addContestToCardNoBatch(cvrb: CardWithBatchNameBuilder) {
+    fun addContestToCardNoBatch(cvrb: AuditableCardMBuilder) {
         if (votesLeft == 0)
             return
         val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
@@ -143,28 +153,29 @@ data class MultiContestCombinePools(
     val poolMap = pools.associateBy { it.poolId }
 
     // multicontest cards
-    fun makeCardsFromContests(): Pair<List<AuditableCard>, List<StyleIF>> {
+    fun makeCardsFromContests(): Pair<List<AuditableCardM>, List<StyleIF>> {
         var nextCardId = 0
-        val result = mutableListOf<AuditableCard>()
+        val cards = mutableListOf<AuditableCardM>()
 
         vunderPools.forEach { vunderPool ->
             val pool = poolMap[vunderPool.poolId]!!
             repeat(pool.ncards()) {
                 // add regular Cvrs including undervotes and phantoms
-                result.add( makeCard(nextCardId++, vunderPool, pool))
+                cards.add( makeCard(nextCardId++, vunderPool, pool))
             }
         }
 
-        val phantoms = makePhantomCards(contests, startIdx = result.size)
-        result.addAll(phantoms)
-        return Pair(result, pools)
+        val phantoms = makePhantomCards(contests, startIdx = cards.size)
+        cards.addAll(phantoms)
+        return Pair(cards, pools)
     }
 
-    private fun makeCard(nextCardId: Int, vunderPool: VunderPool, pool:CardPool): AuditableCard {
+    private fun makeCard(nextCardId: Int, vunderPool: VunderPool, pool:CardPool): AuditableCardM {
         val cvrb2 = CvrBuilder2("card${nextCardId}", false, poolId = pool.id())
         vunderPool.simulatePooledCvr(cvrb2)
         val cvr = cvrb2.build()
-        return AuditableCard("card${nextCardId}", null, nextCardId, 0L, false, null, cvr.votes, style = pool)
+        return AuditableCardM.fromVotes("card${nextCardId}", null, nextCardId, 0L, false,
+            pool.name(), poolId=pool.poolId, cvr.votes).setStyle(pool)
 
     }
 }
@@ -228,10 +239,10 @@ data class MultiContestFromBallotStyles(
     }
 
     // multicontest cards
-    fun makeCardsFromContests(): Pair<List<AuditableCard>, List<StyleIF>> {
+    fun makeCardsFromContests(): Pair<List<AuditableCardM>, List<StyleIF>> {
         var nextCardIdx = 0
         var nextBallotIdx = 0
-        val result = mutableListOf<AuditableCard>()
+        val result = mutableListOf<AuditableCardM>()
 
         ballotPools.forEach { ballotPool ->
             val vunderPoolMap = vunderPoolsMap[ballotPool.poolId]!!
@@ -264,10 +275,23 @@ data class MultiContestFromBallotStyles(
         return Pair(result, cardStyles)
     }
 
-    private fun makeCard(cardName: String, cardId: Int, vunderPool: VunderPool, cardStyle:StyleIF): AuditableCard {
+    // data class AuditableCardM (
+    //    val id: String, // enough info to find the card for a manual audit.
+    //    val location: String?, // enough info to find the card for a manual audit.
+    //    val index: Int,  // index into the original, canonical list of cards
+    //    val prn: Long,   // psuedo random number
+    //    val phantom: Boolean,
+    //    val styleName: String,
+    //    val poolId: Int?, // must be set if its from a CardPool
+    //    val contestIds: IntArray,   // these form the votes map. set style if different
+    //    val contestStarts: IntArray,
+    //    val candidates: IntArray,
+    //): AuditableCardIF {
+    private fun makeCard(cardName: String, cardId: Int, vunderPool: VunderPool, cardStyle:StyleIF): AuditableCardM {
         val cvrb2 = CvrBuilder2(cardName, false, poolId = cardStyle.id())
         vunderPool.simulatePooledCvr(cvrb2)
         val cvr = cvrb2.build()
-        return AuditableCard(cardName, null, cardId, 0L, false, null, cvr.votes, style = cardStyle)
+        return AuditableCardM.fromVotes(cardName, null, cardId, 0L, false,
+            cardStyle.name(), poolId=null, cvr.votes).setStyle(cardStyle)
     }
 }

@@ -7,7 +7,7 @@ import com.github.michaelbull.result.unwrap
 import com.github.michaelbull.result.unwrapError
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CardStyle.Companion.useVotes
 import org.cryptobiotic.rlauxe.audit.StyleIF
@@ -68,7 +68,7 @@ class VerifyAuditCommitment(val auditDir: String, contestId: Int? = null, show: 
 data class AuditCommitment(val electionInfo: ElectionInfo, val auditCreationConfig: AuditCreationConfig,
                            val contests: List<ContestWithAssertions>, val batches: List<StyleIF>?,
                            val pools: List<CardPoolIF>?,
-                           val sortedManifest: CloseableIterable<AuditableCard> )
+                           val sortedManifest: CloseableIterable<AuditableCardIF> )
 
 // TODO: use AuditRecord
 fun readAuditCommitment(publisher: Publisher): Result<AuditCommitment, ErrorMessages> {
@@ -106,7 +106,7 @@ fun readAuditCommitment(publisher: Publisher): Result<AuditCommitment, ErrorMess
 
     val useBatches = batches ?: pools
 
-    val sortedManifest: CloseableIterable<AuditableCard> =
+    val sortedManifest: CloseableIterable<AuditableCardIF> =
         MergeBatchesIntoCardManifestIterable(
             CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
             useBatches!!,
@@ -119,7 +119,7 @@ fun readAuditCommitment(publisher: Publisher): Result<AuditCommitment, ErrorMess
 fun verifySortedCardManifest(
     auditType: AuditType,
     contestsUA: List<ContestWithAssertions>,
-    cards: CloseableIterable<AuditableCard>,
+    cards: CloseableIterable<AuditableCardIF>,
     infos: Map<Int, ContestInfo>,
     batchSet: Set<StyleIF>,
     seed: Long,
@@ -137,36 +137,36 @@ fun verifySortedCardManifest(
     val indexList = mutableListOf<Pair<Int, Long>>()
 
     var count = 0
-    var lastCard: AuditableCard? = null
+    var lastCard: AuditableCardIF? = null
 
     cards.iterator().use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
 
             // all card id, locations and indices are unique
-            if (!idSet.add(card.id)) {
-                results.addError("$count duplicate card.id ${card.id}")
+            if (!idSet.add(card.id())) {
+                results.addError("$count duplicate card.id ${card.id()}")
             }
             if (!locationSet.add(card.location())) {
                 results.addError("$count duplicate card.location ${card.location()}")
             }
-            if (!indexSet.add(card.index)) {
-                results.addError("$count duplicate card.index ${card.index}")
+            if (!indexSet.add(card.index())) {
+                results.addError("$count duplicate card.index ${card.index()}")
             }
 
             // card prns are in ascending order
             if (lastCard != null) {
-                if (card.prn <= lastCard.prn) {
+                if (card.prn() <= lastCard.prn()) {
                     results.addError("$count prn out of order lastCard = $lastCard card = ${card}")
                 }
             }
             lastCard = card
 
-            indexList.add(Pair(card.index, card.prn))
+            indexList.add(Pair(card.index(), card.prn()))
 
             // check that batch exists
-            if (!useVotes(card.style.name()) && !batchSet.contains(card.style)) {
-                results.addError("card $count ${card.id} batch ${card.style} not in batches")
+            if (!useVotes(card.styleName()) && !batchSet.contains(card.style())) {
+                results.addError("card $count ${card.id()} batch ${card.style()} not in batches")
             }
 
             infos.forEach { (contestId, info) ->
@@ -174,9 +174,9 @@ fun verifySortedCardManifest(
                 if (card.hasContest(contestId)) {
                     if (card.votes(contestId) != null) { // happens when cardStyle == all
                         val cands = card.votes(contestId)!!
-                        allTab.addVotes(cands, card.phantom)
+                        allTab.addVotes(cands, card.phantom())
                     } else {
-                        if (card.phantom) allTab.nphantoms++
+                        if (card.phantom()) allTab.nphantoms++
                         allTab.ncardsTabulated++
                     }
 
@@ -184,9 +184,9 @@ fun verifySortedCardManifest(
                         val nonpoolTab = nonpooled.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                         if (card.votes(contestId) != null) { // happens when cardStyle == all
                             val cands = card.votes(contestId)!!
-                            nonpoolTab.addVotes(cands, card.phantom)  // for IRV
+                            nonpoolTab.addVotes(cands, card.phantom())  // for IRV
                         } else {
-                            if (card.phantom) nonpoolTab.nphantoms++
+                            if (card.phantom()) nonpoolTab.nphantoms++
                             nonpoolTab.ncardsTabulated++
                         }
                     } else {

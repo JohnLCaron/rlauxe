@@ -6,7 +6,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import com.github.michaelbull.result.unwrapError
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CardStyle.Companion.useVotes
 import org.cryptobiotic.rlauxe.audit.StyleIF
@@ -34,7 +34,7 @@ class VerifyElectionCommitment(val auditDir: String) {
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
     val batchSet: Set<StyleIF>
-    val cardManifest: CloseableIterable<AuditableCard>
+    val cardManifest: CloseableIterable<AuditableCardIF>
 
     init {
         val result = readElectionCommitment(publisher)
@@ -81,7 +81,7 @@ class VerifyElectionCommitment(val auditDir: String) {
 }
 
 data class ElectionCommitment(val electionInfo: ElectionInfo, val contests: List<ContestWithAssertions>, val batches: List<StyleIF>?,
-                              val pools: List<CardPoolIF>?, val cardManifest: CloseableIterable<AuditableCard> )
+                              val pools: List<CardPoolIF>?, val cardManifest: CloseableIterable<AuditableCardIF> )
 
 // TODO: use AuditRecord
 fun readElectionCommitment(publisher: Publisher): Result<ElectionCommitment, ErrorMessages> {
@@ -112,7 +112,7 @@ fun readElectionCommitment(publisher: Publisher): Result<ElectionCommitment, Err
         }
 
     val useBatches = batches ?: pools
-    val cardManifest: CloseableIterable<AuditableCard> =
+    val cardManifest: CloseableIterable<AuditableCardIF> =
         MergeBatchesIntoCardManifestIterable(
             CloseableIterable { readCardsCsvIterator(publisher.cardManifestFile()) },
             useBatches!!,
@@ -125,7 +125,7 @@ fun readElectionCommitment(publisher: Publisher): Result<ElectionCommitment, Err
 fun verifyCardManifest(
     auditType: AuditType,
     contestsUA: List<ContestWithAssertions>,
-    cards: CloseableIterable<AuditableCard>,
+    cards: CloseableIterable<AuditableCardIF>,
     infos: Map<Int, ContestInfo>,
     batchSet: Set<StyleIF>,
     results: VerifyResults,
@@ -144,21 +144,21 @@ fun verifyCardManifest(
         while (cardIter.hasNext()) {
             val card = cardIter.next()
 
-            if (card.index != count) {
-                results.addError("card.index ${card.index} at $count must be sequential starting at 0")
+            if (card.index() != count) {
+                results.addError("card.index ${card.index()} at $count must be sequential starting at 0")
             }
 
             // 1. Check that all card locations and indices are unique
-            if (!locationSet.add(card.id)) {
-                results.addError("$count duplicate card.id ${card.id}")
+            if (!locationSet.add(card.id())) {
+                results.addError("$count duplicate card.id ${card.id()}")
             }
-            if (!indexSet.add(card.index)) {
-                results.addError("$count duplicate card.index ${card.index}")
+            if (!indexSet.add(card.index())) {
+                results.addError("$count duplicate card.index ${card.index()}")
             }
 
             // check that batch exists
-            if (!useVotes(card.style.name()) && !batchSet.contains(card.style)) {
-                results.addError("card $count ${card.id} batch ${card.style} not in batches")
+            if (!useVotes(card.styleName()) && !batchSet.contains(card.style())) {
+                results.addError("card $count ${card.id()} batch ${card.style()} not in batches")
             }
 
             // the same as tabulateAuditableCards(), replicate so we can do allCvrVotes, nonpooled, pooled
@@ -167,9 +167,9 @@ fun verifyCardManifest(
                 if (card.hasContest(contestId)) {
                     if (card.votes(contestId) != null) { // happens when cardStyle == all
                         val cands = card.votes(contestId)!!
-                        allTab.addVotes(cands, card.phantom)
+                        allTab.addVotes(cands, card.phantom())
                     } else {
-                        if (card.phantom) allTab.nphantoms++
+                        if (card.phantom()) allTab.nphantoms++
                         allTab.ncardsTabulated++
                     }
 
@@ -177,9 +177,9 @@ fun verifyCardManifest(
                         val nonpoolTab = nonpooled.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                         if (card.votes(contestId) != null) { // happens when cardStyle == all
                             val cands = card.votes(contestId)!!
-                            nonpoolTab.addVotes(cands, card.phantom)  // for IRV
+                            nonpoolTab.addVotes(cands, card.phantom())  // for IRV
                         } else {
-                            if (card.phantom) nonpoolTab.nphantoms++
+                            if (card.phantom()) nonpoolTab.nphantoms++
                             nonpoolTab.ncardsTabulated++
                         }
                     } else {

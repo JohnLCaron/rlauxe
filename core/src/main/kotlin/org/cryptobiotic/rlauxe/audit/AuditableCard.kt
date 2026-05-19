@@ -6,6 +6,19 @@ import org.cryptobiotic.rlauxe.core.CvrIF
 
 // The information we have on each physical card in the audit; the complete set is the CardManifest.
 
+// lets us serialize either CardNoStyle or AuditableCard
+interface CardIF {
+    fun id(): String // enough info to find the card for a manual audit.
+    fun location(): String // enough info to find the card for a manual audit.
+    fun index(): Int  // index into the original, canonical list of cards
+    fun prn(): Long   // psuedo random number
+    fun phantom(): Boolean
+
+    fun votes(): Map<Int, IntArray>?   // CVRs and phantoms
+    fun poolId(): Int?                 // must be set if its from a CardPool
+    fun styleName(): String            // "fromCvr" if no cardStyle and its from a CVR (then votes is non null)
+}
+
 data class AuditableCard (
     val id: String, // enough info to find the card for a manual audit.
     val location: String?, // enough info to find the card for a manual audit.

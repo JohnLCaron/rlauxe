@@ -2,7 +2,9 @@ package org.cryptobiotic.rlauxe.verify
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.MergeStylesIntoCards
+import org.cryptobiotic.rlauxe.audit.MergeStylesIntoCardsM
 import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsTest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -10,6 +12,7 @@ import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.persist.csv.CardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -156,12 +159,10 @@ class TestAvgAssortValues {
         val testCards = test.makeCardsFromContests()
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
 
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            MergeStylesIntoCards(
+        val cardIterable: CloseableIterable<AuditableCardIF> =
+            CloseableIterable { MergeStylesIntoCardsM(
                 Closer(testCards.iterator()),
-                styles = test.cardStyleWithNcards,
-            )
-        }
+                styles = test.cardStyleWithNcards,) }
 
         if (showCvrs) {
             println("\n$CardHeader")
@@ -174,6 +175,7 @@ class TestAvgAssortValues {
             println()
         }
 
+        //         fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCardIF>, isClca: Boolean, hasStyle: Boolean): List<ContestWithAssertions> {
         val contestsUA = ContestWithAssertions.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle = true)
         contestsUA.forEach {
             println("$it : Npop diff = ${it.Npop != it.Nc}")
@@ -204,12 +206,10 @@ class TestAvgAssortValues {
         val testCards = test.makeCardsFromContests()
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
 
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            MergeStylesIntoCards(
+        val cardIterable: CloseableIterable<AuditableCardIF> =
+            CloseableIterable { MergeStylesIntoCardsM(
                 Closer(testCards.iterator()),
-                styles = modStyles,
-            )
-        }
+                styles = test.cardStyleWithNcards,) }
 
         if (showCvrs) {
             println("\n$CardHeader")

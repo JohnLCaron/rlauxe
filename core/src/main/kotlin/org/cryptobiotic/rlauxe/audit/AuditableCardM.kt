@@ -1,16 +1,29 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.ZipReader
-import org.cryptobiotic.rlauxe.util.emptyCloseableIterator
-import java.io.BufferedReader
-import java.io.File
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.nio.file.Files
-import kotlin.io.path.Path
+import org.cryptobiotic.rlauxe.core.CvrIF
+
+interface AuditableCardIF: CvrIF, SamplingCardIF {
+    fun location(): String // enough info to find the card for a manual audit.
+    fun index(): Int  // index into the original, canonical list of cards
+
+    fun votes(): Map<Int, IntArray>?   // CVRs and phantoms
+    fun styleName(): String
+
+    fun style(): StyleIF?            // "fromCvr" if no cardStyle and its from a CVR (then votes is non null)
+    fun possibleContests() : IntArray
+    // TODO is hasStyle really card specific? contest? audit?
+    //    is it the same as "consistentSampling" or something else ??
+    fun hasStyle(): Boolean // TODO
+
+    // fun show(): String
+    fun toCvr(): Cvr  // TODO can we get rid of?
+}
+
+interface SamplingCardIF {
+    fun hasContest(contestId: Int): Boolean
+    fun prn(): Long
+}
 
 data class AuditableCardM (
     val id: String, // enough info to find the card for a manual audit.
@@ -31,7 +44,7 @@ data class AuditableCardM (
         this.style = style
         return this
     }
-    override fun style(): StyleIF = style!! // TODO
+    override fun style(): StyleIF? = style // TODO
 
     // TODO could ignore useCvr
     private val useCvr = CardStyle.useVotes(styleName)
@@ -88,102 +101,57 @@ data class AuditableCardM (
         TODO("Not yet implemented")
     }
 
+    companion object {
+        fun fromVotes(id: String, // enough info to find the card for a manual audit.
+                      location: String?, // enough info to find the card for a manual audit.
+                      index: Int,  // index into the original, canonical list of cards
+                      prn: Long,   // psuedo random number
+                      phantom: Boolean,
+                      styleName: String,
+                      poolId: Int?, // must be set if its from a CardPool
+                      votes: Map<Int, IntArray>?
+        ): AuditableCardM {
+            val (contestIds, contestStarts, candidates) = if (votes != null)
+                makeFromVotes(votes)
+            else
+                Triple(IntArray(0), IntArray(0),IntArray(0))
+
+            return AuditableCardM(id, location, index, prn, phantom, styleName, poolId, contestIds, contestStarts, candidates)
+        }
+
+        fun removeVotes(org: AuditableCardM): AuditableCardM {
+            return AuditableCardM(org.id, org.location, org.index, org.prn, org.phantom, org.styleName, org.poolId,
+                IntArray(0), IntArray(0),IntArray(0))
+        }
+    }
+
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-
-fun readCardCsvM(line: String): AuditableCardM {
-    val tokens = line.split(",")
-    val ttokens = tokens.map { it.trim() }
-
-    var idx = 0
-    val id = ttokens[idx++]
-    val locationToken = ttokens[idx++]
-    val location = locationToken.ifEmpty { null }
-    val index = ttokens[idx++].toInt()
-    val sampleNum = ttokens[idx++].toLong(radix=16)
-    val phantom = ttokens[idx++] == "yes"
-    val poolIdToken = ttokens[idx++]
-    val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()
-    val styleName = ttokens[idx++].trim()
-
-    // if clca, list of actual contests and their votes
-    if (idx < ttokens.size-1) {
-        val contestsStr = ttokens[idx++].trim()
-        val contestsTokenTrimmed = contestsStr.split(" ").map { it.trim() }
-
-        val contestIds = mutableListOf<Int>()
-        contestsTokenTrimmed.forEach { tok ->
-            if (tok.isNotEmpty()) contestIds.add(tok.toInt())
-        }
-
-        val candidates = mutableListOf<Int>()
-        val contestStarts = mutableListOf<Int>()
-        var start = 0
-
-        contestIds.forEach {
-            contestStarts.add(start)
-            val vtokens = ttokens[idx++]
-            val cands: List<Int> =
-                if (vtokens.isEmpty()) emptyList()
-                else vtokens.split(" ").map { it.trim().toInt() }
-            candidates.addAll(cands)
-            start += cands.size
-        }
-        return AuditableCardM(id, location, index, sampleNum, phantom, styleName, poolId,
-            contestIds.toIntArray(), contestStarts.toIntArray(), candidates.toIntArray())
+fun makeVotes( contestIds: IntArray,  contestStarts: IntArray, candidates: IntArray): Map<Int, IntArray> {
+    val lastIndex = contestIds.size-1
+    val makeVotes = mutableMapOf<Int, IntArray>()
+    contestIds.forEachIndexed { index, contestId ->
+        val start = contestStarts[index]
+        val end = if (index < lastIndex) contestStarts[index+1] else candidates.size
+        if (start > end || end > candidates.size)
+            print("HEY")
+        makeVotes[contestId] = candidates.sliceArray(start until end)
     }
-    return AuditableCardM(id, location, index, sampleNum, phantom, styleName, poolId,
-        intArrayOf(), intArrayOf(), intArrayOf())
+    return makeVotes.toMap()
 }
 
-class IteratorCardsCsvStreamM(input: InputStream, bufferSize: Int, val styles: List<StyleIF>?): CloseableIterator<AuditableCardM> {
-    val styleMap = if (styles == null) null else styles.associateBy { it.name() }
-    val reader = BufferedReader(InputStreamReader(input),bufferSize)
-    var nextLine: String? = null
-    var countLines  = 0
+//         val (contestIds, contestStarts, candidates) = makeFromVotes(cvrExport.votes)
+fun makeFromVotes(votes: Map<Int, IntArray>): Triple<IntArray, IntArray, IntArray> {
+    val contestIds = votes.keys.toList().sorted().toIntArray()
+    val candidates = mutableListOf<Int>()
+    val contestStarts = mutableListOf<Int>()
+    var start = 0
 
-    init {
-        reader.readLine() // get rid of header line
+    contestIds.forEach {
+        val cands = votes[it]!!
+        candidates.addAll(cands.toList())
+        contestStarts.add(start)
+        start += cands.size
     }
-
-    override fun hasNext() : Boolean {
-        if (nextLine == null) {
-            countLines++
-            nextLine = reader.readLine()
-        }
-        return nextLine != null
-    }
-
-    override fun next(): AuditableCardM {
-        if (!hasNext()) throw NoSuchElementException()
-        val cardm: AuditableCardM =  readCardCsvM(nextLine!!)
-        val style = styleMap?.get(cardm.styleName)
-        if (style != null)
-            cardm.setStyle(style)
-        nextLine = null
-        return cardm
-    }
-
-    override fun close() {
-        reader.close()
-    }
-}
-
-fun readCsvAndMergeCards(csvFile: String, styles: List<StyleIF>?): CloseableIterator<AuditableCardM> {
-    val useFilename: String = if (Files.exists(Path(csvFile))) csvFile
-        else if (Files.exists(Path("$csvFile.zip"))) "$csvFile.zip" // TODO unzip
-        else {
-            println("readAndMergeCards $csvFile or $csvFile.zip does not exist")
-            return emptyCloseableIterator()
-        }
-
-    // TODO time with and without zip
-    return if (useFilename.endsWith(".zip")) {
-            val reader = ZipReader(useFilename)
-            val input = reader.inputStream()
-            IteratorCardsCsvStreamM(input, 8192, styles)
-    } else {
-            IteratorCardsCsvStreamM(File(useFilename).inputStream(), 8192, styles)
-    }
+    return Triple(contestIds, contestStarts.toIntArray(), candidates.toIntArray())
 }

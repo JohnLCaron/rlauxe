@@ -5,7 +5,7 @@ import com.github.michaelbull.result.unwrapError
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -121,7 +121,7 @@ object RunCalcAssortAvg {
     fun runCards(
         expectations: List<Expectation>,
         sortedManifest: SortedManifest,
-        mvrIter: Iterator<AuditableCard>?,
+        mvrIter: Iterator<AuditableCardM>?,
         usePrivate: Boolean
     ) {
         var count = 0

@@ -1,12 +1,9 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.persist.csv.CardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.verify.VerifyResults
@@ -29,7 +26,7 @@ class TestOneAuditAssortAvg {
         if (showCards) mvrs.forEach { println("  $it") }
 
         // note: using the mvrs
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable { cards.iterator() }
+        val cardIterable: CloseableIterable<AuditableCardIF> = CloseableIterable { cards.iterator() }
 
         if (showCards) {
             println("\n$CardHeader")
@@ -66,7 +63,7 @@ class TestOneAuditAssortAvg {
         assertEquals(margin, oaContest.minMargin()!!, doublePrecision)
 
         // note: using the mvrs
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable { cards.iterator() }
+        val cardIterable: CloseableIterable<AuditableCardIF> = CloseableIterable { cards.iterator() }
 
         if (showCvrs) {
             println("\n$CardHeader")
@@ -96,7 +93,7 @@ class TestOneAuditAssortAvg {
         if (showCvrs) mvrs.subList(0, 10).forEach { println("  $it") }
 
         // note: using the mvrs
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable { cards.iterator() }
+        val cardIterable: CloseableIterable<AuditableCardIF> = CloseableIterable { cards.iterator() }
 
         if (showCvrs) {
             println("\n$CardHeader")

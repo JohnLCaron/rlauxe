@@ -13,7 +13,7 @@ class WorkflowTesterPolling(
     contestsToAudit: List<ContestIF>, // the contests you want to audit
     val mvrManager: MvrManager,
 ): AuditWorkflow() {
-    private val contestsUA: List<ContestWithAssertions> = contestsToAudit.map { ContestWithAssertions(it, isClca=false).addStandardAssertions() }
+    private val contestsUA: List<ContestWithAssertions> = contestsToAudit.map { ContestWithAssertions(it, isClca=false, hasStyle=true).addStandardAssertions() }
     private val auditRounds = mutableListOf<AuditRoundIF>()
 
     init {

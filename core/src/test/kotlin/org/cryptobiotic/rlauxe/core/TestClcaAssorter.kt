@@ -26,7 +26,6 @@ Possible assort values are bassort in [0, 1/2, 1, 3/2, 2] * noerror, where:
 
 // See SHANGRLA 3.2
 class TestClcaAssorter {
-
     @Test
     fun testBasics() {
         val info = ContestInfo(
@@ -55,20 +54,20 @@ class TestClcaAssorter {
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
-        val cassorter = ClcaAssorter(info, assorter)
+        val cassorter = ClcaAssorter(info, assorter, true)
         assertEquals(.01, mean2margin(awinnerAvg), doublePrecision)
         assertEquals(margin, cassorter.assorterMargin, doublePrecision)
-        assertEquals(0.0, cassorter.overstatementError(winnerCvr, winnerCvr, true))
-        assertEquals(-1.0, cassorter.overstatementError(winnerCvr, loserCvr, true))
-        assertEquals(-0.5, cassorter.overstatementError(winnerCvr, otherCvr, true))
+        assertEquals(0.0, cassorter.overstatementError(winnerCvr, winnerCvr))
+        assertEquals(-1.0, cassorter.overstatementError(winnerCvr, loserCvr))
+        assertEquals(-0.5, cassorter.overstatementError(winnerCvr, otherCvr))
 
-        assertEquals(1.0, cassorter.overstatementError(loserCvr, winnerCvr, true))
-        assertEquals(0.0, cassorter.overstatementError(loserCvr, loserCvr, true))
-        assertEquals(0.5, cassorter.overstatementError(loserCvr, otherCvr, true))
+        assertEquals(1.0, cassorter.overstatementError(loserCvr, winnerCvr))
+        assertEquals(0.0, cassorter.overstatementError(loserCvr, loserCvr))
+        assertEquals(0.5, cassorter.overstatementError(loserCvr, otherCvr))
 
-        assertEquals(0.5, cassorter.overstatementError(otherCvr, winnerCvr, true))
-        assertEquals(-0.5, cassorter.overstatementError(otherCvr, loserCvr, true))
-        assertEquals(0.0, cassorter.overstatementError(otherCvr, otherCvr, true))
+        assertEquals(0.5, cassorter.overstatementError(otherCvr, winnerCvr))
+        assertEquals(-0.5, cassorter.overstatementError(otherCvr, loserCvr))
+        assertEquals(0.0, cassorter.overstatementError(otherCvr, otherCvr))
         // overstatementError in [-1, -.5, 0, .5, 1]
 
         val noerror = 1.0 / (2.0 - margin)
@@ -78,17 +77,17 @@ class TestClcaAssorter {
 
         // bassort(mvr: Cvr, cvr:Cvr)
         // (1 − ωi /upper) / (2 − margin/upper), upper == assorter.upper
-        assertEquals(noerror, cassorter.bassort(winnerCvr, winnerCvr, true))         // no error
-        assertEquals(2 * noerror, cassorter.bassort(winnerCvr, loserCvr, true))      // cvr flipped vote from winner to loser
-        assertEquals(1.5 * noerror, cassorter.bassort(winnerCvr, otherCvr, true))    // flipped vote from winner to other
+        assertEquals(noerror, cassorter.bassort(winnerCvr, winnerCvr))         // no error
+        assertEquals(2 * noerror, cassorter.bassort(winnerCvr, loserCvr))      // cvr flipped vote from winner to loser
+        assertEquals(1.5 * noerror, cassorter.bassort(winnerCvr, otherCvr))    // flipped vote from winner to other
 
-        assertEquals(0.0, cassorter.bassort(loserCvr, winnerCvr, true))              // flipped vote from loser to winner
-        assertEquals(noerror, cassorter.bassort(loserCvr, loserCvr, true))           // no error
-        assertEquals(0.5 * noerror, cassorter.bassort(loserCvr, otherCvr, true))       // flipped vote from loser to other
+        assertEquals(0.0, cassorter.bassort(loserCvr, winnerCvr))              // flipped vote from loser to winner
+        assertEquals(noerror, cassorter.bassort(loserCvr, loserCvr))           // no error
+        assertEquals(0.5 * noerror, cassorter.bassort(loserCvr, otherCvr))       // flipped vote from loser to other
 
-        assertEquals(0.5 * noerror, cassorter.bassort(otherCvr, winnerCvr, true))      // flipped vote from other to winner
-        assertEquals(1.5 * noerror, cassorter.bassort(otherCvr, loserCvr, true))       // flipped vote from other to loser
-        assertEquals(noerror, cassorter.bassort(otherCvr, otherCvr, true))           // no error
+        assertEquals(0.5 * noerror, cassorter.bassort(otherCvr, winnerCvr))      // flipped vote from other to winner
+        assertEquals(1.5 * noerror, cassorter.bassort(otherCvr, loserCvr))       // flipped vote from other to loser
+        assertEquals(noerror, cassorter.bassort(otherCvr, otherCvr))           // no error
 
         // so bassort in [0, 2 / (2 - margin)] = [0, 2 / (3 - 2 * Aavg)] in {0, .5, 1, 1.5, 2} * noerror
         // so bassort in [0, 2*noerror], where noerror > .5. since margin > 0, since awinnerAvg > .5.
@@ -120,19 +119,19 @@ class TestClcaAssorter {
 
         val awinner = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
         val awinnerAvg = cvrs.map { awinner.assort(it) }.average()
-        val cwinner = ClcaAssorter(info, awinner)
-        val cwinnerAvg = cvrs.map { cwinner.bassort(it, it, true) }.average()
+        val cwinner = ClcaAssorter(info, awinner, true)
+        val cwinnerAvg = cvrs.map { cwinner.bassort(it, it) }.average()
         println("cwinnerAvg=$cwinnerAvg <= awinnerAvg=$awinnerAvg")
         assertTrue(cwinnerAvg <= awinnerAvg)
         assertTrue(cwinnerAvg > 0.5)
 
         val aloser = PluralityAssorter.makeWithVotes(contest, winner = 1, loser = 0)
         val aloserAvg = cvrs.map { aloser.assort(it) }.average()
-        val closer = ClcaAssorter(info, aloser, check=false)
+        val closer = ClcaAssorter(info, aloser, true, check=false)
         assertEquals(mean2margin(aloserAvg), closer.assorterMargin, doublePrecision)
         assertEquals(aloserAvg, margin2mean(closer.assorterMargin))
 
-        val closerAvg = cvrs.map { closer.bassort(it, it, true) }.average()
+        val closerAvg = cvrs.map { closer.bassort(it, it) }.average()
         println("closerAvg=$closerAvg < aloserAvg=$aloserAvg")
         assertTrue(closerAvg < 0.5)
     }
@@ -194,8 +193,8 @@ class TestClcaAssorter {
     fun testNwayPlurality(contest : Contest, cvrs: List<Cvr>, winner: Int, loser:Int): Double {
         val assort = PluralityAssorter.makeWithVotes(contest, winner, loser)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
-        val cwinner = ClcaAssorter(contest.info, assort, check=false)
-        val cwinnerAvg = cvrs.map { cwinner.bassort(it, it, true) }.average()
+        val cwinner = ClcaAssorter(contest.info, assort, true, check=false)
+        val cwinnerAvg = cvrs.map { cwinner.bassort(it, it) }.average()
         assertEquals(assortAvg, margin2mean(cwinner.assorterMargin), doublePrecision)
 
         println(" ($winner, $loser)= $cwinnerAvg")
@@ -278,42 +277,43 @@ class TestClcaAssorter {
         assertEquals(0.0, assorter.assort(phantomCvr, true))  // cvr is a phantom
         // so assort in {0, .5, 1}
 
-        val cassorter = ClcaAssorter(info, assorter)
+        val cassorter = ClcaAssorter(info, assorter, true)
+        val cassorterNo = ClcaAssorter(info, assorter, false)
         val noerror = cassorter.noerror()
         assertEquals(margin, cassorter.assorterMargin, doublePrecision)
         assertEquals(awinnerAvg, margin2mean(cassorter.assorterMargin))
 
-        assertEquals(0.0, cassorter.overstatementError(winnerCvr, winnerCvr, true))
-        assertEquals(-1.0, cassorter.overstatementError(winnerCvr, loserCvr, true))
-        assertEquals(-0.5, cassorter.overstatementError(winnerCvr, otherCvr, true))
-        assertEquals(-0.5, cassorter.overstatementError(winnerCvr, phantomCvr, true))
+        assertEquals(0.0, cassorter.overstatementError(winnerCvr, winnerCvr))
+        assertEquals(-1.0, cassorter.overstatementError(winnerCvr, loserCvr))
+        assertEquals(-0.5, cassorter.overstatementError(winnerCvr, otherCvr))
+        assertEquals(-0.5, cassorter.overstatementError(winnerCvr, phantomCvr))
 
-        assertEquals(1.0, cassorter.overstatementError(loserCvr, winnerCvr, true))
-        assertEquals(0.0, cassorter.overstatementError(loserCvr, loserCvr, true))
-        assertEquals(0.5, cassorter.overstatementError(loserCvr, otherCvr, true))
-        assertEquals(0.5, cassorter.overstatementError(loserCvr, phantomCvr, true))
+        assertEquals(1.0, cassorter.overstatementError(loserCvr, winnerCvr))
+        assertEquals(0.0, cassorter.overstatementError(loserCvr, loserCvr))
+        assertEquals(0.5, cassorter.overstatementError(loserCvr, otherCvr))
+        assertEquals(0.5, cassorter.overstatementError(loserCvr, phantomCvr))
 
-        assertEquals(0.5, cassorter.overstatementError(otherCvr, winnerCvr, true))
-        assertEquals(-0.5, cassorter.overstatementError(otherCvr, loserCvr, true))
-        assertEquals(0.0, cassorter.overstatementError(otherCvr, otherCvr, true))
+        assertEquals(0.5, cassorter.overstatementError(otherCvr, winnerCvr))
+        assertEquals(-0.5, cassorter.overstatementError(otherCvr, loserCvr))
+        assertEquals(0.0, cassorter.overstatementError(otherCvr, otherCvr))
 
-        assertEquals(1.0, cassorter.overstatementError(phantomCvr, winnerCvr, true)) // check
-        assertEquals(0.0, cassorter.overstatementError(phantomCvr, loserCvr, true)) // check
-        assertEquals(0.5, cassorter.overstatementError(phantomCvr, phantomCvr, true)) // check, usual case
+        assertEquals(1.0, cassorter.overstatementError(phantomCvr, winnerCvr)) // check
+        assertEquals(0.0, cassorter.overstatementError(phantomCvr, loserCvr)) // check
+        assertEquals(0.5, cassorter.overstatementError(phantomCvr, phantomCvr)) // check, usual case
         // so overstatementError in [-1, -.5, 0, .5, 1]
 
         val cvrs = listOf(winnerCvr, loserCvr, otherCvr, phantomCvr)
         for (mvr in cvrs) {
             for (cvr in cvrs) {
-                println("cvr-mvr overstatement ${cvr.id}-${mvr.id} = ${cassorter.overstatementError(mvr, cvr, true)} " +
-                        "bassort=${cassorter.bassort(mvr, cvr, true)/noerror}")
+                println("cvr-mvr overstatement ${cvr.id}-${mvr.id} = ${cassorter.overstatementError(mvr, cvr)} " +
+                        "bassort=${cassorter.bassort(mvr, cvr)/noerror}")
             }
         }
 
         // TODO hasStyle parameter doesnt matter unless mvr doesnt have the contest. See testHasStyles below.
         for (mvr in cvrs) {
             for (cvr in cvrs) {
-                assertEquals(cassorter.overstatementError(mvr, cvr, false), cassorter.overstatementError(mvr, cvr, true))
+                assertEquals(cassorterNo.overstatementError(mvr, cvr), cassorter.overstatementError(mvr, cvr))
             }
         }
 
@@ -322,25 +322,25 @@ class TestClcaAssorter {
         println("noerror = $noerror")
 
         // bassort in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]
-        assertEquals(noerror, cassorter.bassort(winnerCvr, winnerCvr, true))         // no error
-        assertEquals(2 * noerror, cassorter.bassort(winnerCvr, loserCvr, true))      // cvr flipped vote from winner to loser
-        assertEquals(1.5 * noerror, cassorter.bassort(winnerCvr, otherCvr, true))    // cvr flipped vote from winner to other
-        assertEquals(1.5 * noerror, cassorter.bassort(winnerCvr, phantomCvr, true))  // found winner: oneUnder
+        assertEquals(noerror, cassorter.bassort(winnerCvr, winnerCvr))         // no error
+        assertEquals(2 * noerror, cassorter.bassort(winnerCvr, loserCvr))      // cvr flipped vote from winner to loser
+        assertEquals(1.5 * noerror, cassorter.bassort(winnerCvr, otherCvr))    // cvr flipped vote from winner to other
+        assertEquals(1.5 * noerror, cassorter.bassort(winnerCvr, phantomCvr))  // found winner: oneUnder
 
-        assertEquals(0.0, cassorter.bassort(loserCvr, winnerCvr, true))              // cvr flipped vote from loser to winner
-        assertEquals(noerror, cassorter.bassort(loserCvr, loserCvr, true))           // no error
-        assertEquals(0.5*noerror, cassorter.bassort(loserCvr, otherCvr, true))       // cvr flipped vote from loser to other
-        assertEquals(0.5*noerror, cassorter.bassort(loserCvr, phantomCvr, true))     // found loser: oneOver
+        assertEquals(0.0, cassorter.bassort(loserCvr, winnerCvr))              // cvr flipped vote from loser to winner
+        assertEquals(noerror, cassorter.bassort(loserCvr, loserCvr))           // no error
+        assertEquals(0.5*noerror, cassorter.bassort(loserCvr, otherCvr))       // cvr flipped vote from loser to other
+        assertEquals(0.5*noerror, cassorter.bassort(loserCvr, phantomCvr))     // found loser: oneOver
 
-        assertEquals(0.5*noerror, cassorter.bassort(otherCvr, winnerCvr, true))      // cvr flipped vote from other to winner
-        assertEquals(1.5*noerror, cassorter.bassort(otherCvr, loserCvr, true))       // cvr flipped vote from other to loser
-        assertEquals(noerror, cassorter.bassort(otherCvr, otherCvr, true))           // no error
+        assertEquals(0.5*noerror, cassorter.bassort(otherCvr, winnerCvr))      // cvr flipped vote from other to winner
+        assertEquals(1.5*noerror, cassorter.bassort(otherCvr, loserCvr))       // cvr flipped vote from other to loser
+        assertEquals(noerror, cassorter.bassort(otherCvr, otherCvr))           // no error
 
-        assertEquals(0.0, cassorter.bassort(phantomCvr, winnerCvr, true))           // no mvr, cvr reported winner, : twoOver
-        assertEquals(noerror, cassorter.bassort(phantomCvr, loserCvr, true))                 // no mvr, cvr reported loser: nuetral
-        assertEquals(0.5*noerror, cassorter.bassort(phantomCvr, phantomCvr, true))  // no mvr, no cvr: oneOver (common case i assume)
-        assertEquals(1.5*noerror, cassorter.bassort(winnerCvr, phantomCvr, true))   // mvr reported winner, no cvr: oneUnder
-        assertEquals(.5*noerror, cassorter.bassort(loserCvr, phantomCvr, true))     // mvr reported lose, no cvr: oneOver
+        assertEquals(0.0, cassorter.bassort(phantomCvr, winnerCvr))           // no mvr, cvr reported winner, : twoOver
+        assertEquals(noerror, cassorter.bassort(phantomCvr, loserCvr))                 // no mvr, cvr reported loser: nuetral
+        assertEquals(0.5*noerror, cassorter.bassort(phantomCvr, phantomCvr))  // no mvr, no cvr: oneOver (common case i assume)
+        assertEquals(1.5*noerror, cassorter.bassort(winnerCvr, phantomCvr))   // mvr reported winner, no cvr: oneUnder
+        assertEquals(.5*noerror, cassorter.bassort(loserCvr, phantomCvr))     // mvr reported lose, no cvr: oneOver
     }
 
     @Test
@@ -359,36 +359,36 @@ class TestClcaAssorter {
         val contest = makeContestFromCvrs(info, cvrs)
 
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-        val cassorterHasStyle = ClcaAssorter(info, assorter)
+        val cassorterHasStyle = ClcaAssorter(info, assorter, true)
+        val cassorterNoStyle = ClcaAssorter(info, assorter, false)
         val noerror = cassorterHasStyle.noerror()
         println("  noerror = $noerror")
 
         val differentContest = Cvr("diff", mapOf(1 to IntArray(0)))
 
-        assertEquals(-0.5, cassorterHasStyle.overstatementError(winnerCvr, differentContest, false))
-        assertEquals(Double.NaN, cassorterHasStyle.overstatementError(winnerCvr, differentContest, true))
+        assertEquals(-0.5, cassorterNoStyle.overstatementError(winnerCvr, differentContest))
+        assertEquals(Double.NaN, cassorterHasStyle.overstatementError(winnerCvr, differentContest))
         /* val mess = assertFailsWith<RuntimeException> {
-            assertEquals(0.0, cassorterHasStyle.overstatementError(winnerCvr, differentContest, true))
+            assertEquals(0.0, cassorterHasStyle.overstatementError(winnerCvr, differentContest))
         }.message!!
         assertTrue(mess.contains("does not contain contest")) */
 
-        assertEquals(1.0, cassorterHasStyle.overstatementError(differentContest, winnerCvr, true))
-        assertEquals(0.0, cassorterHasStyle.overstatementError(differentContest, loserCvr, true))
-        assertEquals(0.5, cassorterHasStyle.overstatementError(differentContest, otherCvr, true))
+        assertEquals(1.0, cassorterHasStyle.overstatementError(differentContest, winnerCvr))
+        assertEquals(0.0, cassorterHasStyle.overstatementError(differentContest, loserCvr))
+        assertEquals(0.5, cassorterHasStyle.overstatementError(differentContest, otherCvr))
 
-        assertEquals(0.0 * noerror, cassorterHasStyle.bassort(differentContest, winnerCvr, true))
-        assertEquals(1.0 * noerror, cassorterHasStyle.bassort(differentContest, loserCvr, true))
-        assertEquals(0.5 * noerror, cassorterHasStyle.bassort(differentContest, otherCvr, true))
+        assertEquals(0.0 * noerror, cassorterHasStyle.bassort(differentContest, winnerCvr))
+        assertEquals(1.0 * noerror, cassorterHasStyle.bassort(differentContest, loserCvr))
+        assertEquals(0.5 * noerror, cassorterHasStyle.bassort(differentContest, otherCvr))
 
         // hasStyle = false
-        val cassorterNoStyle = ClcaAssorter(info, assorter)
-        assertEquals(0.5, cassorterNoStyle.overstatementError(differentContest, winnerCvr, false))
-        assertEquals(-0.5, cassorterNoStyle.overstatementError(differentContest, loserCvr, false))
-        assertEquals(0.0, cassorterNoStyle.overstatementError(differentContest, otherCvr, false))
+        assertEquals(0.5, cassorterNoStyle.overstatementError(differentContest, winnerCvr))
+        assertEquals(-0.5, cassorterNoStyle.overstatementError(differentContest, loserCvr))
+        assertEquals(0.0, cassorterNoStyle.overstatementError(differentContest, otherCvr))
 
-        assertEquals(0.5 * noerror, cassorterNoStyle.bassort(differentContest, winnerCvr, false))
-        assertEquals(1.5 * noerror, cassorterNoStyle.bassort(differentContest, loserCvr, false))
-        assertEquals(1.0 * noerror, cassorterNoStyle.bassort(differentContest, otherCvr, false))
+        assertEquals(0.5 * noerror, cassorterNoStyle.bassort(differentContest, winnerCvr))
+        assertEquals(1.5 * noerror, cassorterNoStyle.bassort(differentContest, loserCvr))
+        assertEquals(1.0 * noerror, cassorterNoStyle.bassort(differentContest, otherCvr))
     }
 
     @Test
@@ -440,6 +440,6 @@ class TestClcaAssorter {
 
 fun ClcaAssorter.calcClcaAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {
     val mean = cvrPairs.filter{ it.first.hasContest(info.id) }
-        .map { bassort(it.first, it.second, true) }.average()
+        .map { bassort(it.first, it.second) }.average()
     return mean2margin(mean)
 }

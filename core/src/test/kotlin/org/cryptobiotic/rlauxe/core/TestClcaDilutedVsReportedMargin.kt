@@ -1,23 +1,13 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.estimate.calcAssorterMargin
-import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.util.doublePrecision
-import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.estimate.partition
-import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
-import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
-import kotlin.test.assertNotNull
-
 
 class TestClcaDilutedVsReportedMargins {
 
     // isnt it a problem that we get noerror when the contest isnt even on the card? it should not count one way or another = 1/2
-
 
     // whether cassorter == assorter.reportedMargin() or assorter.dilutedMargin(). the average is noerror when hasStyle = false
     // so what determines whether assorter.reportedMargin() or assorter.dilutedMargin() is correct ??
@@ -55,14 +45,14 @@ class TestClcaDilutedVsReportedMargins {
         println(contest)
         assertEquals(cvrs.size, contest.Nc)
         // make dilutedMargin different than reportedMargin by setting NpopIn != contest.Nc
-        val contestUA = ContestWithAssertions(contest, isClca = true, NpopIn = contest.Nc + 2).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = true, NpopIn = contest.Nc + 2, hasStyle = false).addStandardAssertions()
         val assertions = contestUA.clcaAssertions
 
         assertions.forEach {
             val assorter = it.assorter
             val cassorter = it.cassorter
 
-            val assortAvg = cvrs.map { cvr -> cassorter.bassort(cvr, cvr, false) }.average()
+            val assortAvg = cvrs.map { cvr -> cassorter.bassort(cvr, cvr) }.average()
             println("${cassorter.shortName()}: cvrMean=${assortAvg} noerror = ${cassorter.noerror}")
             assertEquals(assortAvg, cassorter.noerror, doublePrecision)
         }
@@ -79,7 +69,7 @@ class TestClcaDilutedVsReportedMargins {
             val assorter = it.assorter
             val cassorter = it.cassorter
             showAverage(plusOtherCvrs, cassorter)
-            val assortAvg = plusOtherCvrs.map { cvr -> cassorter.bassort(cvr, cvr, false) }.average()
+            val assortAvg = plusOtherCvrs.map { cvr -> cassorter.bassort(cvr, cvr) }.average()
             println("${cassorter.shortName()}: cvrMean=${assortAvg} noerror = ${cassorter.noerror}")
             assertEquals(assortAvg, cassorter.noerror, doublePrecision)
         }
@@ -87,7 +77,7 @@ class TestClcaDilutedVsReportedMargins {
 
     fun showAverage(cvrs: List<Cvr>, cassorter: ClcaAssorter) {
         cvrs.forEach {
-            println("cvr=$it, bassort= ${cassorter.bassort(it, it, false)}")
+            println("cvr=$it, bassort= ${cassorter.bassort(it, it)}")
         }
     }
 

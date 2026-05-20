@@ -24,7 +24,7 @@ fun makeOneAuditContests(
 ): List<ContestWithAssertions> {
 
     val contestsUA = wantContests.filter{ !it.isIrv() }.map { contest ->
-        val cua = ContestWithAssertions(contest, true, NpopIn=npopMap[contest.id]).addStandardAssertions()
+        val cua = ContestWithAssertions(contest, true, NpopIn=npopMap[contest.id], hasStyle = false).addStandardAssertions()
         if (contest is DHondtContest) {
             cua.addAssertionsFromAssorters(contest.assorters)
         } else {

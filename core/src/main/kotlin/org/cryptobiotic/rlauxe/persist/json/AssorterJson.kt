@@ -28,7 +28,7 @@ data class ClcaAssorterJson(
     val assorter: AssorterIFJson, // replicating the passorter
     val poolAverages: AssortAvgsInPoolsJson?, // consider putting these in another file ??
     val oaAssortRates: OneAuditAssortValueRatesJson?, // TODO may be very large, perhaps rehydrate from cardPool.csv ??
-    val hasStyle: Boolean = true,
+    val hasStyle: Boolean,
 )
 
 fun ClcaAssorter.publishJson() : ClcaAssorterJson {
@@ -38,7 +38,7 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
             this.assorter.publishJson(),
             poolAverages.publishJson(),
             oaAssortRates.publishJson(),
-            this.hasStyle,
+            this.useReportedMargin,
         )
 
     } else {
@@ -47,7 +47,7 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
             this.assorter.publishJson(),
             null,
             null,
-            this.hasStyle,
+            this.useReportedMargin,
         )
     }
 }

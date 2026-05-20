@@ -19,7 +19,6 @@ open class CreateUniformElection (
     val stateElection: CountyContestBuilder,
     val auditType: AuditType,
     val auditdir: String,
-    val hasStyle: Boolean,
     val pollingMode: PollingMode?,
     val name: String? = null,
 ): ElectionBuilder {
@@ -34,7 +33,7 @@ open class CreateUniformElection (
         val builders: List<CorlaContestBuilder> = stateElection.corlaContestBuilders
         val npopMap: Map<Int, Int> = builders.associate { it.info.id to it.Npop!! }.toMap()
 
-        contestsUA = ContestWithAssertions.make(stateElection.contests, npopMap, auditType.isClca(), hasStyle)
+        contestsUA = ContestWithAssertions.make(stateElection.contests, npopMap, auditType.isClca(), hasStyle=false)
     }
 
     override fun electionInfo() =
@@ -83,14 +82,14 @@ fun createUniformElection(
     name: String? = null,
 ) {
     val stopwatch = Stopwatch()
+    require (roundConfig.sampling.sampling == Sampling.uniform)
 
     val (mergedContestInfo: List<MergedContestInfo>, mergedCountyInfo, statewideContests) = mergeContestInfo()
 
     val countyElection = CountyContestBuilder()
 
     val election =
-        CreateUniformElection(countyElection, creation.auditType, auditdir, pollingMode=null, name=name,
-        hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
+        CreateUniformElection(countyElection, creation.auditType, auditdir, pollingMode=null, name=name)
 
     // skip the simulated cvrs
     // createElectionRecord(election, auditDir = auditdir, clear = false)

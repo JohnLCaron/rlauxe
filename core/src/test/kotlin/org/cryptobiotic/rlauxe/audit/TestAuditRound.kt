@@ -17,7 +17,7 @@ class TestAuditRound {
     fun testAuditRound() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestWithAssertions> = test.contests.map {
-            ContestWithAssertions(it, isClca = true).addStandardAssertions()
+            ContestWithAssertions(it, isClca=true, hasStyle=true).addStandardAssertions()
         }
         val (mvrs, cards, pools, styles) = test.makeMvrCardAndPops()
         val mvrManager = MvrManagerForTesting(mvrs, mvrs, Random.nextLong())

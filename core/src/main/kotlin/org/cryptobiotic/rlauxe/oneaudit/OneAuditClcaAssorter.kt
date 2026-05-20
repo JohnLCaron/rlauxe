@@ -89,9 +89,6 @@ constraint by subtracting the minimum possible value then re-scaling so that the
 null mean is 1/2 once again, which reproduces the original assorter, A:
  */
 
-private val logger = KotlinLogging.logger("OneAuditClcaAssorter")
-
-
 // for a specific assorter, all the averages in each pool
 data class AssortAvgsInPools (
     val assortAverage: Map<Int, Double>, // poolId -> average assort value
@@ -101,8 +98,7 @@ class OneAuditClcaAssorter(
     info: ContestInfo,
     assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs
     val poolAverages: AssortAvgsInPools,
-    // hasStyle: Boolean, // always use diluted margin
-) : ClcaAssorter(info, assorter, false) {
+) : ClcaAssorter(info, assorter, false) { // always use diluted margin
 
     override fun classname() = this::class.simpleName
 
@@ -113,11 +109,10 @@ class OneAuditClcaAssorter(
     fun poolAverage(poolId: Int?) = poolAverages.assortAverage[poolId]
 
     // B(bi, ci)
-    override fun bassort(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean?): Double {
-        val useStyle = hasStyle ?: this.hasStyle
-        // TODO why not cvr: AuditableCard ??
-        if (cvr.poolId() == null) {
-            return super.bassort(mvr, cvr, hasStyle) // here we use the standard assorter
+    override fun bassort(mvr: CvrIF, cvr: CvrIF): Double {
+
+        if (cvr.poolId() == null) { // poolId discriminates OneAudit pools vs cvrs
+            return super.bassort(mvr, cvr)
         }
 
         // TODO add verifier of poolAvg existence
@@ -127,7 +122,7 @@ class OneAuditClcaAssorter(
             return 0.0
         }
 
-        val overstatement = overstatementPoolError(mvr, poolAverage, useStyle) // ωi
+        val overstatement = overstatementPoolError(mvr, poolAverage) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
 
         val result =  tau * noerror()  // Bi eq (7)
@@ -139,11 +134,11 @@ class OneAuditClcaAssorter(
         return result
     }
 
-    fun overstatementPoolError(mvr: CvrIF, poolAvgAssortValue: Double, hasStyle: Boolean): Double {
+    fun overstatementPoolError(mvr: CvrIF, poolAvgAssortValue: Double): Double {
         val mvr_assort =
             if (mvr.phantom()) 0.0
             else if (!mvr.hasContest(info.id)) {
-                if (hasStyle) 0.0 else 0.5
+                if (useReportedMargin) 0.0 else 0.5
             }
             else this.assorter.assort(mvr, usePhantoms = false)
 
@@ -225,17 +220,21 @@ class OneAuditClcaAssorter(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other !is OneAuditClcaAssorter) return false
         if (!super.equals(other)) return false
 
-        other as OneAuditClcaAssorter
+        if (poolAverages != other.poolAverages) return false
 
-        return info == other.info
+        return true
     }
 
     override fun hashCode(): Int {
         var result = super.hashCode()
-        result = 31 * result + info.hashCode()
+        result = 31 * result + poolAverages.hashCode()
         return result
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger("OneAuditClcaAssorter")
     }
 }

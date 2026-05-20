@@ -36,7 +36,7 @@ data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
         mvrs = mmvrs.toList()
 
         // TODO hasStyle ??
-        sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it, hasStyle=hasStyle)}.sum()
+        sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it)}.sum()
         sampleMean = sampleCount / N
     }
 
@@ -46,12 +46,12 @@ data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
             val cvr = cvrs[permutedIndex[idx]]
             val mvr = mvrs[permutedIndex[idx]]
             idx++
-            cassorter.bassort(mvr, cvr, hasStyle=hasStyle)
+            cassorter.bassort(mvr, cvr)
         } else {
             val chooseIdx = Random.nextInt(N) // with Replacement
             val cvr = cvrs[chooseIdx]
             val mvr = mvrs[chooseIdx]
-            cassorter.bassort(mvr, cvr, hasStyle=hasStyle)
+            cassorter.bassort(mvr, cvr)
         }
         count++
         return assortVal
@@ -96,7 +96,7 @@ data class ClcaFlipErrorsSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssort
         flippedVotes = flipExactVotes(mmvrs, mvrMean)
         mvrs = mmvrs.toList()
 
-        sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it, hasStyle=hasStyle)}.sum()
+        sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it)}.sum()
         sampleMean = sampleCount / cvrs.size
     }
 
@@ -106,12 +106,12 @@ data class ClcaFlipErrorsSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssort
             val cvr = cvrs[permutedIndex[idx]]
             val mvr = mvrs[permutedIndex[idx]]
             idx++
-            cassorter.bassort(mvr, cvr, hasStyle=hasStyle)
+            cassorter.bassort(mvr, cvr)
         } else {
             val chooseIdx = Random.nextInt(cvrs.size) // with Replacement
             val cvr = cvrs[chooseIdx]
             val mvr = mvrs[chooseIdx]
-            cassorter.bassort(mvr, cvr, hasStyle=hasStyle)
+            cassorter.bassort(mvr, cvr)
         }
         count++
         return assortVal

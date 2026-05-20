@@ -51,9 +51,8 @@ data class AuditableCardM (
         this.style = style
         return this
     }
-    override fun style(): StyleIF? = style // TODO
+    override fun style(): StyleIF? = style // could work harder so its not null
 
-    // TODO could ignore useCvr
     private val votes: Map<Int, IntArray>? by lazy {
         if (contestIds.isEmpty()) null else {
             val lastIndex = contestIds.size - 1
@@ -70,6 +69,7 @@ data class AuditableCardM (
         }
     }
 
+    // TODO could ignore useCvr
     private val useCvr = CardStyle.useVotes(styleName)
     init {
         if (useCvr && votes == null) {
@@ -86,7 +86,7 @@ data class AuditableCardM (
     override fun styleName() = styleName
 
     override fun votes(): Map<Int, IntArray>? = votes
-    override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
+    override fun votes(contestId: Int): IntArray? = votes?.get(contestId) // use instead of votes
 
     override fun hasContest(contestId: Int): Boolean {
         return if (!useCvr && style != null) style!!.hasContest(contestId)

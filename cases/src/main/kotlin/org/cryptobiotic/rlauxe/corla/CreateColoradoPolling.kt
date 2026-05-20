@@ -17,7 +17,7 @@ class CreateColoradoPolling (
 
     init {
         contestsPolling = contestsUA.map { contestClca ->
-            ContestWithAssertions(contestClca.contest, isClca=false, NpopIn=contestClca.Npop).addStandardAssertions()
+            ContestWithAssertions(contestClca.contest, isClca=false, NpopIn=contestClca.Npop, hasStyle=true).addStandardAssertions()
         }
     }
 

@@ -174,7 +174,7 @@ class TestClcaElection(
             allCvrs.addAll(rcvrs)
         }
 
-        val regularContests = testData.contests.map { ContestWithAssertions(it, isClca=true).addStandardAssertions() }
+        val regularContests = testData.contests.map { ContestWithAssertions(it, isClca=true, hasStyle=true).addStandardAssertions() }
         contestsUA.addAll(regularContests)
         contestsUA.forEach { println("  $it") }
         println()
@@ -280,7 +280,7 @@ class TestPollingElection(
 
         // testMvrs = makeFuzzedCvrsForClca(contests.map{ it.info() } , cvrs, fuzzMvrs)
 
-        contestsUA = testData.contests.map { ContestWithAssertions(it, isClca=false).addStandardAssertions() }
+        contestsUA = testData.contests.map { ContestWithAssertions(it, isClca=false, hasStyle=true).addStandardAssertions() }
         contestsUA.forEach { println("  $it") }
 
         println()

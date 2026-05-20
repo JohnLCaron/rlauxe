@@ -76,7 +76,7 @@ class TestOAShangrla {
         //
         // mvr_assort: 1.0, cvr_assort: 1.0
         //overstatement=0.7446845752661285 margin=0.6571495728340697
-        // assertEquals(0.6515990033578625, cassorter.overstatementError(otherNoCvr, winnerNoCvr, true), .0001)
+        // assertEquals(0.6515990033578625, cassorter.overstatementError(otherNoCvr, winnerNoCvr), .0001)
         // assertEquals(0.6515990033578625, cassorter.bassort(otherNoCvr, winnerNoCvr), .0001)
 
         val pool = pools[0]
@@ -116,15 +116,15 @@ class TestOAShangrla {
         println("poolAvgAssort=$poolAvgAssort loserVoteNoCvr=$loserVoteNoCvr winnerVoteNoCvr=$winnerVoteNoCvr otherVoteNoCvr=$otherVoteNoCvr")
 
         // mvr assort always return poolAvg because it has a poolId
-        println(" mvr winner bassort=${cassorter.bassort(winnerNoCvr, winnerNoCvr, true)} ")
-        println(" mvr loser bassort=${cassorter.bassort(loserNoCvr, winnerNoCvr, true)} ")
-        println(" mvr other bassort=${cassorter.bassort(otherNoCvr, winnerNoCvr, true)} ")
+        println(" mvr winner bassort=${cassorter.bassort(winnerNoCvr, winnerNoCvr)} ")
+        println(" mvr loser bassort=${cassorter.bassort(loserNoCvr, winnerNoCvr)} ")
+        println(" mvr other bassort=${cassorter.bassort(otherNoCvr, winnerNoCvr)} ")
 
-        assertEquals(winnerVoteNoCvr, cassorter.bassort(winnerNoCvr, winnerNoCvr, true), .0001)
-        assertEquals(loserVoteNoCvr, cassorter.bassort(loserNoCvr, winnerNoCvr, true), .0001)
-        assertEquals(otherVoteNoCvr, cassorter.bassort(otherNoCvr, winnerNoCvr, true), .0001)
+        assertEquals(winnerVoteNoCvr, cassorter.bassort(winnerNoCvr, winnerNoCvr), .0001)
+        assertEquals(loserVoteNoCvr, cassorter.bassort(loserNoCvr, winnerNoCvr), .0001)
+        assertEquals(otherVoteNoCvr, cassorter.bassort(otherNoCvr, winnerNoCvr), .0001)
 
-        val expect = """OneAuditClcaAssorter for contest OneAuditTest (1) hasStyle=false assorterMargin=0.6572 noerror=0.74471254
+        val expect = """OneAuditClcaAssorter for contest OneAuditTest (1) useReportedMargin=false assorterMargin=0.6572 noerror=0.74471254
   assorter= Plurality winner=0 loser=1 reportedMargin=65.7200% dilutedMargin=65.7200%
 """
         assertEquals(expect, cassorter.toString())

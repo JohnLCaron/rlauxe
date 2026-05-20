@@ -134,7 +134,7 @@ class TestAssertions {
         assertEquals(" Plurality winner=4 loser=0 reportedMargin=24.9160% dilutedMargin=24.9160%", firstAssertion.toString())
         assertEquals("contest 0 winner: 4 loser: 0 upper: 1.0", firstAssertion.id())
 
-        val expectShow = """ cassorter: ClcaAssorter for contest AvB (0) hasStyle=true assorterMargin=0.24915950691072095 noerror=0.57115426
+        val expectShow = """ cassorter: ClcaAssorter for contest AvB (0) useReportedMargin=true assorterMargin=0.24915950691072095 noerror=0.57115426
   assorter= Plurality winner=4 loser=0 reportedMargin=24.9160% dilutedMargin=24.9160%
 """
         assertEquals(expectShow, firstAssertion.show())

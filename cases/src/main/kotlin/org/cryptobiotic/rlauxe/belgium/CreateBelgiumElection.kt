@@ -24,7 +24,7 @@ class BelgiumClca (
     val allCvrs: List<Cvr>
 
     init {
-        val contestUA = ContestWithAssertions(contestd, isClca=true).addAssertionsFromAssorters(contestd.assorters)
+        val contestUA = ContestWithAssertions(contestd, isClca=true, hasStyle=true).addAssertionsFromAssorters(contestd.assorters)
         contestsUA = listOf(contestUA)
         infoMap = contestsUA.associate { it.id to it.contest.info() }
         allCvrs = contestd.createSimulatedCvrs()

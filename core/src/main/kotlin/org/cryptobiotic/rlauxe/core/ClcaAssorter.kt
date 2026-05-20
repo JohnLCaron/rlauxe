@@ -1,13 +1,10 @@
 package org.cryptobiotic.rlauxe.core
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.util.dfn
-import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.math.ln
 
-private val logger = KotlinLogging.logger("ClcaAssorter")
 
 /** See SHANGRLA Section 3.2.
  * Let bi denote the ith ballot, and let ci denote the cast-vote record for the ith ballot.
@@ -35,12 +32,12 @@ private val logger = KotlinLogging.logger("ClcaAssorter")
 open class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
-    val hasStyle: Boolean = true,
+    val useReportedMargin: Boolean, // aka useStyle
     check: Boolean = true,
 ) {
     // in SHANGRLA 3.2, we have "Define v ≡ 2Āc − 1, the reported assorter margin."
     // see docs/notes/clcaNotes.md
-    val assorterMargin = if (hasStyle) assorter.reportedMargin() else assorter.dilutedMargin()
+    val assorterMargin = if (useReportedMargin) assorter.reportedMargin() else assorter.dilutedMargin()
 
     open fun classname() = this::class.simpleName
 
@@ -139,8 +136,8 @@ open class ClcaAssorter(
     // [2, (fol+2)/(fol+1), (2*fol+1)/(fol+1),  1, fol/(fol+1), 1/(fol+1), 0] * noerror
 
     // TODO use instance variable for hasStyle vs card.hasStyle()
-    open fun bassort(mvr: CvrIF, cvr:CvrIF, hasStyle:Boolean? = null): Double {
-        val overstatement = overstatementError(mvr, cvr, hasStyle ?: this.hasStyle) // ωi eq (1)
+    open fun bassort(mvr: CvrIF, cvr:CvrIF): Double { // }, hasStyle:Boolean? = null): Double {
+        val overstatement = overstatementError(mvr, cvr) // ωi eq (1)
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
         return tau * noerror   // Bi eq (7)
     }
@@ -200,14 +197,14 @@ open class ClcaAssorter(
     // (0-u)        cvr has vote for loser, mvr has vote for winner : p2u = 2 vote understatement
     // could just use this.undervotes
 
-    fun overstatementError(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean): Double {
+    fun overstatementError(mvr: CvrIF, cvr: CvrIF): Double {
         // # SHANGRLA
         // if use_style and not cvr.has_contest(self.contest.id):
         //    raise ValueError(
         //      f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
         //    )
         // if hasStyle, we use the cvr as the populations, so how did this happen?
-        if (hasStyle and !cvr.hasContest(info.id)) {
+        if (useReportedMargin and !cvr.hasContest(info.id)) {
             //val trace = Throwable().stackTraceToString()
             //logger.error { "hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})\n$trace" }
             // TODO if we were using hasStyle in assorter.assort(), it would return 0.0 for cvr_assort, see Issue#552
@@ -227,7 +224,7 @@ open class ClcaAssorter(
         val mvr_assort =
             if (mvr.phantom()) 0.0
             else if (!mvr.hasContest(info.id)) {
-                if (hasStyle) 0.0 else 0.5
+                if (useReportedMargin) 0.0 else 0.5
             }
             else this.assorter.assort(mvr, usePhantoms = false)
 
@@ -241,7 +238,7 @@ open class ClcaAssorter(
     }
 
     override fun toString() = buildString {
-        append("${classname()} for contest ${info.name} (${info.id}) hasStyle=$hasStyle assorterMargin=${assorterMargin}")
+        append("${classname()} for contest ${info.name} (${info.id}) useReportedMargin=$useReportedMargin assorterMargin=${assorterMargin}")
         appendLine(" noerror=${dfn(noerror, 8)}")
         appendLine("  assorter=${assorter.desc()}")
     }
@@ -252,7 +249,7 @@ open class ClcaAssorter(
         if (this === other) return true
         if (other !is ClcaAssorter) return false
 
-        if (assorterMargin != other.assorterMargin) return false
+        if (useReportedMargin != other.useReportedMargin) return false
         if (info != other.info) return false
         if (assorter != other.assorter) return false
 
@@ -260,8 +257,8 @@ open class ClcaAssorter(
     }
 
     override fun hashCode(): Int {
-        var result = info.hashCode()
-        result = 31 * result + assorterMargin.hashCode()
+        var result = useReportedMargin.hashCode()
+        result = 31 * result + info.hashCode()
         result = 31 * result + assorter.hashCode()
         return result
     }

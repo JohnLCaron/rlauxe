@@ -31,7 +31,7 @@ fun simulateCvrsFromMargin(Nc: Int, margin: Double, undervotePct: Double, phanto
         Nc = Nc,
         Ncast = roundToClosest(nvotes + Nu)
     )
-    val cu = ContestWithAssertions(contest, true, NpopIn = Npop)
+    val cu = ContestWithAssertions(contest, true, NpopIn = Npop, hasStyle=true)
     val config = Config.from(AuditType.CLCA, contestSampleCutoff = limit)
     return Pair( cu, simulateCvrsForContest(cu, config))
 }

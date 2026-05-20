@@ -74,7 +74,7 @@ class TestCardBuilders {
                     var count = 0
                     fcvrs.forEachIndexed { idx, fcvr ->
                         if (fcvr.hasContest(contest.id)) {
-                            samples.addSample(minAssort.bassort(fcvr, cvrs[idx], true))
+                            samples.addSample(minAssort.bassort(fcvr, cvrs[idx]))
                             ccount++
                             if (cvrs[idx] != fcvr) count++
                         }

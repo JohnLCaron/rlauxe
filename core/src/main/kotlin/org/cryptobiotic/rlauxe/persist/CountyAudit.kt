@@ -6,7 +6,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import java.io.BufferedReader
 import java.io.File
 import kotlin.collections.forEach
@@ -31,10 +31,10 @@ class CountyAudit(
 
         // if you created the mvrs anyway you could what if without running the audit
         val mvrCount = mutableMapOf<String, Int>()
-        val mvrCardIter = readCardsCsvIterator(publisher.sampleMvrsFile(lastRound.roundIdx))
+        val mvrCardIter = readCardsCsvIteratorM(publisher.sampleMvrsFile(lastRound.roundIdx), styles=null)
         var count = 0
         mvrCardIter.forEach { mvr ->
-            val split = mvr.id.split("-",".")
+            val split = mvr.id().split("-",".")
             val countyName = split[0] // TODO change to 0 by getting rid of "pool"
             val accum = mvrCount.getOrPut(countyName) { 0 }
             mvrCount[countyName] = accum + 1

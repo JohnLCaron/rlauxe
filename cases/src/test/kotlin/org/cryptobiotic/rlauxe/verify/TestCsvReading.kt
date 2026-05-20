@@ -4,9 +4,8 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.dominion.writeCvrExportCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.CardCsvReader
-import org.cryptobiotic.rlauxe.persist.csv.readCardCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.writeCardIFCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCardsAndMergeToList
+import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.junit.jupiter.api.Assertions
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
@@ -18,11 +17,11 @@ class TestCsvReading {
     @Test
     fun testAuditableCardCsvFile() {
         val filenameIn = "$testdataDir/cases/sf2024/oa/audit/sortedCards.csv"
-        val original = CardCsvReader(filenameIn).iterator().asSequence().toList()
+        val original = readCardsAndMergeToList(filenameIn, null)
         val filenameOut = "$tempDir/sfCards.csv"
 
-        writeCardIFCsvFile(original, filenameOut)
-        val roundtrip = readCardCsvFile(filenameOut)
+        writeCardCsvFile(original, filenameOut)
+        val roundtrip = readCardsAndMergeToList(filenameOut, null)
         assertEquals(original, roundtrip)
     }
 

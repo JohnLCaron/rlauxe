@@ -3,73 +3,71 @@ package org.cryptobiotic.rlauxe.persist.csv
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-import org.cryptobiotic.rlauxe.audit.CardWithStyleName
+import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.util.createZipFile
 
 class TestAuditableCardsCsv {
 
     @Test
     fun testRoundtrip() {
-        val target = CardWithStyleName (
+        val target = AuditableCardM.fromVotes (
             "id to find card",
             "location to find card",
             42,
             43L,
             true,
-            //intArrayOf(19, 23, 99, 123456),
-            mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
+            "pool11",
             11,
-            "pool11"
+            votes=mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
         )
 
         val csv = writeCardCsv(target)
         print(CardHeader)
         println(csv)
 
-        val roundtrip = readCardCsv(csv)
+        val roundtrip = readCardCsvM(csv)
         assertEquals(target, roundtrip)
     }
 
     @Test
     fun testRoundtripNoVotes() {
-        val target = CardWithStyleName (
+        val target = AuditableCardM.fromVotes (
             "deets",
             "dots",
             42,
             43L,
             false,
-            // intArrayOf(19, 23, 99, 123456),
-            null,
-            null,
             styleName = "all",
+            null,
+            null,
         )
 
         val csv = writeCardCsv(target)
         print(CardHeader)
         println(csv)
 
-        val roundtrip = readCardCsv(csv)
+        val roundtrip = readCardCsvM(csv)
         assertEquals(target, roundtrip)
     }
 
     @Test
     fun testRoundtripIO() {
         val target = listOf(
-            CardWithStyleName ("deets", "dots", 42, 43L, false, null, 111, "pool111"),
-            CardWithStyleName ("deeks","docs",  42, 43L, false, null, null, styleName="all"),
-            CardWithStyleName ("id", "info to find card", 42, 43L, true,
-                mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), 11, "pool11"),
-            CardWithStyleName ("id1", "info2 to find card", 42, 43L, true,
-                mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), null, "cvr"),
+            AuditableCardM.fromVotes ("deets", "dots", 42, 43L, false, "pool111", 111, null),
+            AuditableCardM.fromVotes ("deeks","docs",  42, 43L, false, styleName="all", null, null),
+            AuditableCardM.fromVotes ("id", "info to find card", 42, 43L, true,
+                votes=mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), poolId=11, styleName="pool11"),
+            AuditableCardM.fromVotes ("id1", "info2 to find card", 42, 43L, true,
+                votes=mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), poolId=null, styleName="cvr"),
         )
 
         val scratchFile = kotlin.io.path.createTempFile().toFile()
-        writeCardIFCsvFile(target, scratchFile.toString())
+        writeCardCsvFile(target, scratchFile.toString())
 
-        val roundtrip = readCardCsvFile(scratchFile.toString())
+        val roundtrip = readCardsAndMergeToList(scratchFile.toString(), null)
         assertEquals(target, roundtrip)
 
-        readCardsCsvIterator(scratchFile.toString()).use { cardIter ->
+        readCardsCsvIteratorM(scratchFile.toString(), null).use { cardIter ->
             var count = 0
             while (cardIter.hasNext()) {
                 val roundtrip = cardIter.next()
@@ -79,7 +77,7 @@ class TestAuditableCardsCsv {
         }
 
         val zipFile = createZipFile(scratchFile.toString(), delete = true)
-        readCardsCsvIterator(zipFile.toString()).use { cardIter ->
+        readCardsCsvIteratorM(zipFile.toString(), null).use { cardIter ->
             var count = 0
             while (cardIter.hasNext()) {
                 val roundtrip = cardIter.next()

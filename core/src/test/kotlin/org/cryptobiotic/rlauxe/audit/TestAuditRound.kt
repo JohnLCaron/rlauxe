@@ -26,7 +26,7 @@ class TestAuditRound {
         contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
 
         val prng = Prng(Random.nextLong())
-        mvrs.mapIndexed { idx, it -> AuditableCard(it, idx, prng.next()) }
+        mvrs.mapIndexed { idx, it -> AuditableCardM.fromCvr(it, idx, prng.next()) }
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
         consistentSampling(auditRound, mvrManager.samplingCards())

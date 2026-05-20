@@ -1,23 +1,32 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
+import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.AuditableCardM
-import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
+import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterable
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIteratorM
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.CloseableIterableInline
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import java.io.BufferedInputStream
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
+
+//// results ntrials = 20
+//                    iterator: accum=1143043148 took 267.1 s = 13354.45 ms/trial count=20, mean=2.6801 stddev=0.0738 us/card  1.0
+//          CloseableIterable2: accum=1143043148 took 263.1 s = 13151.8  ms/trial count=20, mean=2.6394 stddev=0.1009 us/card   .98
+//     CloseableIterableInline: accum=1143043148 took 383.4 s = 19169.4  ms/trial count=20, mean=3.8471 stddev=0.0841 us/card  1.43 = 43% slower (!)
+// CloseableIterableNonGeneric: accum=1143043148 took 261.5 s = 13071.6  ms/trial count=20, mean=2.6233 stddev=0.0713 us/card   .98
 
 class TimeCardReading {
 
@@ -53,10 +62,9 @@ class TimeCardReading {
         var ncards = 0
 
         val publisher = Publisher("$topdir/audit")
-        val inputStream = File(publisher.sortedCardsFile()).inputStream()
 
         val bufferSize = 8096 // 100_000
-        val cardIter: CloseableIterator<CardWithStyleName> = IteratorCardsCsvStream(inputStream, 8096)
+        val cardIter = CardCsvReaderM(publisher.sortedCardsFile(), null).iterator()
         while (cardIter.hasNext()) { //  && ncards < 1000000) {
             val card = cardIter.next()
             ncards++
@@ -140,7 +148,7 @@ class TimeCardReading {
     }
 
     @Test
-    fun timeReadSortedCardsFromProto () {
+    fun timeReadProtoCardInline () {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
@@ -149,65 +157,163 @@ class TimeCardReading {
 
         val bufferSize = 100_000
         val protoFilename = publisher.sortedCardsProtoFile()
-
-        // also merges the styles
-        val protoCards = CloseableIterable { ProtoCardIterator(protoFilename, bufferSize, styles) }
+        val protoIterable = CloseableIterableInline { ProtoCardIteratorM(protoFilename, bufferSize, styles) }
 
         val stopwatch = Stopwatch()
-        var ncards = 0
+        var accum = 0
+        val welford = Welford()
 
-        val cardIter =  protoCards.iterator()
-        while (cardIter.hasNext()) { //  && ncards < 1000000) {
-            val card = cardIter.next()
-            ncards++
+        val ntrials = 20
+        repeat(ntrials) {
+            val trial = Stopwatch()
+            var ncards = 0
+
+            val protoIter = protoIterable.iterator()
+            while (protoIter.hasNext()) { //  && ncards < 1000_000) {
+                val card = protoIter.next()
+                accum += card.index() // prevent optimization
+                ncards++
+            }
+
+            welford.update(trial.elapsed(TimeUnit.MICROSECONDS) / ncards.toDouble())
         }
 
-        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ncards.toDouble()
-        val secPer = msPer / 1000
+        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ntrials.toDouble()
+        println("timeReadProtoCardInline: accum=$accum took $stopwatch = $msPer ms/trial ${welford.show()} us/card")
+        // timeReadProtoCardInline: accum=1143043148 took 383.4 s = 19169.4 ms/trial count=20, mean=3.8471 stddev=0.0841 us/card
 
-        println("timeReadSortedCardsFromProto ncards = $ncards, took $stopwatch = $msPer ms/card")
-        val totalCards = 4982747
-        println("time to read all cards = ${dfn(totalCards * secPer, 3)} secs")
-        // timeReadSortedCardsFromProto ncards = 4982786, took 15.35 s = 0.0030785990006394013 ms/card
-        // timeReadSortedCardsFromProto ncards = 4982786, took 15.39 s = 0.0030866266381899604 ms/card
-        // timeReadSortedCardsFromProto ncards = 4982786, took 14.49 s = 0.0029076103208124935 ms/card
-        // avg 15.08
-        // 20.1/15.08 = 1.33 = 33% faster than protobuf
-        // 53/15.08 = 3.5 faster than csv
-    }
 
-    @Test
-    fun timeReadSortedCardsMFromProto () {
-        val topdir = "${testdataDir}/cases/corla/consistent"
-        val auditRecord = AuditRecord.read(topdir) as AuditRecord
-        val mvrManager = PersistedMvrManager(auditRecord)
-        val publisher = Publisher("$topdir/audit")
-        val styles = mvrManager.styles()
-
-        val bufferSize = 100_000
-        val protoFilename = publisher.sortedCardsProtoFile()
-
-        // also merges the styles
-        val protoCards = CloseableIterable { ProtoCardIteratorM(protoFilename, bufferSize, styles) }
-
-        val stopwatch = Stopwatch()
-        var ncards = 0
-
-        val cardIter =  protoCards.iterator()
-        while (cardIter.hasNext()) { //  && ncards < 1000000) {
-            val card = cardIter.next()
-            ncards++
-        }
-
-        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ncards.toDouble()
-        val secPer = msPer / 1000
-
-        println("timeReadSortedCardsMFromProto ncards = $ncards, took $stopwatch = $msPer ms/card")
+        // TODO why is this slower than timeReadProto ??
         // timeReadSortedCardsMFromProto ncards = 4982795, took 19.92 s = 0.003995347992441993 ms/card
         // timeReadSortedCardsMFromProto ncards = 4982795, took 14.91 s = 0.002990289586467033 ms/card
         // timeReadSortedCardsMFromProto ncards = 4982795, took 21.64 s = 0.004341137855360295 ms/card
         // timeReadSortedCardsMFromProto ncards = 4982795, took 14.40 s = 0.0028887401548729178 ms/card
         // timeReadSortedCardsMFromProto ncards = 4982795, took 16.01 s = 0.0032104471486384648 ms/card
+
+        // timeReadSortedCardsMFromProto ncards = 4982774, took 15.11 s = 0.0030302397820972816 ms/card
+        // timeReadSortedCardsMFromProto ncards = 4982774, took 18.98 s = 0.0038075176598416868 ms/card
+        // timeReadSortedCardsMFromProto ncards = 4982774, took 20.09 s = 0.004030887212624935 ms/card
+    }
+
+    @Test
+    fun timeReadProto () {
+        val topdir = "${testdataDir}/cases/corla/consistent"
+        val publisher = Publisher("$topdir/audit")
+        val protoFilename = publisher.sortedCardsProtoFile()
+        val styles = readCardStylesJsonFile(publisher.cardStylesFile()).unwrap()
+
+        val bufferSize = 100_000
+        val stopwatch = Stopwatch()
+
+        var accum = 0
+        val welford = Welford()
+
+        val ntrials = 20
+        repeat(ntrials) {
+            val trial = Stopwatch()
+            var ncards = 0
+
+            val protoIter: CloseableIterator<AuditableCardM> = ProtoCardIteratorM(protoFilename, bufferSize, styles)
+            while (protoIter.hasNext()) { //  && ncards < 1000_000) {
+                val card = protoIter.next()
+                accum += card.index() // prevent optimization
+                ncards++
+            }
+
+            welford.update(trial.elapsed(TimeUnit.MICROSECONDS) / ncards.toDouble())
+        }
+
+        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ntrials.toDouble()
+        println("timeReadProto: accum=$accum took $stopwatch = $msPer ms/trial ${welford.show()} us/card")
+
+        // timeReadProto: accum=1143043148 took 267.1 s = 13354.45 ms/trial count=20, mean=2.6801 stddev=0.0738 us/card
+
+        // timeReadProto (100000):  ncards = 4982774, accum=1560390711 took 13.64 s = 0.002735825465895102 ms/card
+        // timeReadProto (100000):  ncards = 4982774, accum=1560390711 took 14.37 s = 0.0028825308954409734 ms/card
+        // timeReadProto (100000):  ncards = 4982774, accum=1560390711 took 14.57 s = 0.002921465031325924 ms/card
+        // timeReadProto (100000):  ncards = 4982774, accum=1560390711 took 13.66 s = 0.002739237220070587 ms/card
+        // avg 14.06
+    }
+
+    @Test
+    fun timeReadProtoIterable () {
+        val topdir = "${testdataDir}/cases/corla/consistent"
+        val publisher = Publisher("$topdir/audit")
+        val protoFilename = publisher.sortedCardsProtoFile()
+        val styles = readCardStylesJsonFile(publisher.cardStylesFile()).unwrap()
+
+        val bufferSize = 100_000
+        val stopwatch = Stopwatch()
+
+        var accum = 0
+
+        val protoIterable = CloseableIterable { ProtoCardIteratorM(protoFilename, bufferSize, styles) }
+        val welford = Welford()
+
+        val ntrials = 20
+        repeat(ntrials) {
+            val trial = Stopwatch()
+            var ncards = 0
+
+            val protoIter = protoIterable.iterator()
+            while (protoIter.hasNext()) { //  && ncards < 1000_000) {
+                val card = protoIter.next()
+                accum += card.index() // prevent optimization
+                ncards++
+            }
+
+            welford.update(trial.elapsed(TimeUnit.MICROSECONDS) / ncards.toDouble())
+        }
+
+        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ntrials.toDouble()
+        println("CloseableIterable2: accum=$accum took $stopwatch = $msPer ms/trial ${welford.show()} us/card")
+
+        // CloseableIterable2  accum=1143043148 took 275.2 s = 13757.3 ms/trial
+        // CloseableIterable2: accum=1143043148 took 263.1 s = 13151.8 ms/trial count=20, mean=2.6394 stddev=0.1009 us/card
+        //      timeReadProto: accum=1143043148 took 267.1 s = 13354.45 ms/trial count=20, mean=2.6801 stddev=0.0738 us/card
+
+        // CloseableIterable2 (100000):  ncards = 4982774, accum=1560390711 took 15.45 s = 0.003098274174184902 ms/card
+        // CloseableIterable2 (100000):  ncards = 4982774, accum=1560390711 took 14.44 s = 0.0028951744550324778 ms/card
+        // CloseableIterable2 (100000):  ncards = 4982774, accum=1560390711 took 14.17 s = 0.0028427939938676728 ms/card
+        // CloseableIterable2 (100000):  ncards = 4982774, accum=1560390711 took 15.37 s = 0.0030836237003725236 ms/card
+        // CloseableIterable2 (100000):  ncards = 4982774, accum=1560390711 took 14.90 s = 0.002988897349147282 ms/card
+        // CloseableIterable2 (100000):  ncards = 4982774, accum=1560390711 took 14.12 s = 0.002832558731341217 ms/card
+        // avg = 14.6866
+    }
+
+    @Test
+    fun timeReadProtoNonGeneric () {
+        val topdir = "${testdataDir}/cases/corla/consistent"
+        val publisher = Publisher("$topdir/audit")
+        val protoFilename = publisher.sortedCardsProtoFile()
+        val styles = readCardStylesJsonFile(publisher.cardStylesFile()).unwrap()
+
+        val bufferSize = 100_000
+        val stopwatch = Stopwatch()
+
+        var accum = 0
+
+        val protoIterable = ProtoCardIterable(protoFilename, bufferSize, styles) // non generic
+        val welford = Welford()
+
+        val ntrials = 20
+        repeat(ntrials) {
+            val trial = Stopwatch()
+            var ncards = 0
+
+            val protoIter = protoIterable.iterator()
+            while (protoIter.hasNext()) { //  && ncards < 1000_000) {
+                val card = protoIter.next()
+                accum += card.index() // prevent optimization
+                ncards++
+            }
+
+            welford.update(trial.elapsed(TimeUnit.MICROSECONDS) / ncards.toDouble())
+        }
+
+        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ntrials.toDouble()
+        println("timeReadProtoNonGeneric: accum=$accum took $stopwatch = $msPer ms/trial ${welford.show()} us/card")
+        // timeReadProtoNonGeneric: accum=1143043148 took 261.5 s = 13071.6 ms/trial count=20, mean=2.6233 stddev=0.0713 us/card
     }
 
     @Test

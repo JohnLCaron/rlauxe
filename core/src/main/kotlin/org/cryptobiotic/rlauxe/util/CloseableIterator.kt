@@ -4,9 +4,24 @@ interface CloseableIterable<out T> {
     fun iterator(): CloseableIterator<T>
 }
 
-inline fun <T> CloseableIterable(crossinline iterator: () -> Iterator<T>): CloseableIterable<T> = object : CloseableIterable<T> {
+// slows things down by 10-20 % why?
+inline fun <T> CloseableIterableInline(crossinline iterator: () -> Iterator<T>): CloseableIterable<T> = object : CloseableIterable<T> {
     override fun iterator(): CloseableIterator<T> = Closer(iterator())
 }
+
+// remove inline
+fun <T> CloseableIterable(iterator: () -> Iterator<T>): CloseableIterable<T> {
+    return object: CloseableIterable<T> {
+                override fun iterator(): CloseableIterator<T> = Closer(iterator())
+            }
+}
+
+/* recursion / stack overflow
+class CloseableIterable3<T>( val iterator: () -> Iterator<T>) : CloseableIterable<T> {
+    override fun iterator(): CloseableIterator<T> = iterator()
+
+    val wtf: Iterable<T>? = null
+} */
 
 interface CloseableIterator<out T> : Iterator<T>, AutoCloseable
 

@@ -13,14 +13,12 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.audit.MergeStylesIntoCardsM
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.persist.bin.FastSamplingCardIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.persist.json.*
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIteratorM
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.File
@@ -68,8 +66,8 @@ open class AuditRecord(
     // TODO should styles be optional ?
     override fun readSortedManifest(styles: List<StyleIF>?): SortedManifest {
         // first look for sortedCardsProtoFile, use if present, else use sortedCardsFile
-        if (Files.exists(Path(publisher.sortedCardsProtoFile()))) {
-            val sortedCardsIter = CloseableIterable { ProtoCardIterator(publisher.sortedCardsProtoFile(), styles = styles) }
+        if ( Files.exists(Path(publisher.sortedCardsProtoFile()))) {
+            val sortedCardsIter = CloseableIterable { ProtoCardIteratorM(publisher.sortedCardsProtoFile(), styles = styles) }
             return SortedManifest(sortedCardsIter, electionInfo.totalCardCount)
         }
 

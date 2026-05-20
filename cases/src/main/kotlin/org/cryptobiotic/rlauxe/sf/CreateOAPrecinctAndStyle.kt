@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapter
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapterM
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation

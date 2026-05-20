@@ -1,14 +1,10 @@
 package org.cryptobiotic.rlauxe.persist.bin
 
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
-import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.makeFastCards
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
-import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer

@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.persist.csv
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.AuditableCardM
-import org.cryptobiotic.rlauxe.audit.CardWithStyleName
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator

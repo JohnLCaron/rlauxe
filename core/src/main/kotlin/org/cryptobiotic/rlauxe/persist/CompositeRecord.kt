@@ -17,27 +17,6 @@ import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.isDirectory
 
-// interface AuditRecordIF {
-//    val location: String
-//    val electionInfo: ElectionInfo
-//    val config: Config
-//    val contests: List<ContestWithAssertions>
-//    val rounds: List<AuditRoundIF>
-//
-//    fun readSortedManifest(): CardManifest
-//    fun readSortedManifest(batches: List<StyleIF>?): CardManifest
-//    fun readOneShotMvrs(): Map<Int, Int>
-//    fun readCardStyles(): List<StyleIF>?
-//}
-// class AuditRecord(
-//    override val location: String,
-//    override val electionInfo: ElectionInfo,
-//    val auditCreationConfig: AuditCreationConfig,
-//    val auditRoundConfig: AuditRoundConfig,
-//    override val contests: List<ContestWithAssertions>,
-//    override val rounds: List<AuditRound>,
-//    val nmvrs: Int // number of mvrs already sampled
-//)
 
 // TODO can we get rid of ??
 interface CompositeRecordIF: AuditRecordIF {
@@ -45,6 +24,7 @@ interface CompositeRecordIF: AuditRecordIF {
     fun findComponentWithName(name: String): AuditRecord?
 }
 
+// used by Belgium. TODO can we make it a subclass of AuditRecord ??
 data class CompositeRecord(
     override val location: String,
     override val config: Config,

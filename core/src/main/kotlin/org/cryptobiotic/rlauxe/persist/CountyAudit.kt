@@ -12,6 +12,7 @@ import java.io.File
 import kotlin.collections.forEach
 import kotlin.text.split
 
+// Used by Corla
 class CountyAudit(
         location: String,
         config: Config,
@@ -19,7 +20,7 @@ class CountyAudit(
         rounds: List<AuditRound>,
         nmvrs: Int, // number of mvrs already sampled
         val countyData: List<CountyData>,
-        val countyContestData: List<CountyContestData>,
+        val countyContestData: List<CountyContestData>, // used by viewer
 ): AuditRecord(location, config, contests, rounds, nmvrs)  {
 
     override fun auditdir() = "$location/audit"
@@ -52,11 +53,6 @@ class CountyAudit(
         private val logger = KotlinLogging.logger("CountyAudit")
         val countyDataFile = "countyData.csv"
         val countyContestDataFile = "countyContestData.csv"
-
-        fun fromStateAndCounties(stateRecord: AuditRecord, countyRecords: List<AuditRecord>, countyData: List<CountyData>): CountyComposite {
-            return CountyComposite(stateRecord.location, stateRecord.config, stateRecord.contests, stateRecord.rounds,
-                stateRecord.nmvrs, countyRecords, countyData)
-        }
 
         // check CountyComposite exists
         fun checkExists(location: String?): Boolean {

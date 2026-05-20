@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.persist.csv
+package org.cryptobiotic.rlauxe.timing
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
@@ -6,6 +6,9 @@ import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.bin.FastSamplingCardIterator
+import org.cryptobiotic.rlauxe.persist.csv.CardCsvReaderM
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterable
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIteratorM
@@ -22,13 +25,17 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
-//// results ntrials = 20
-//                    iterator: accum=1143043148 took 267.1 s = 13354.45 ms/trial count=20, mean=2.6801 stddev=0.0738 us/card  1.0
-//          CloseableIterable2: accum=1143043148 took 263.1 s = 13151.8  ms/trial count=20, mean=2.6394 stddev=0.1009 us/card   .98
-//     CloseableIterableInline: accum=1143043148 took 383.4 s = 19169.4  ms/trial count=20, mean=3.8471 stddev=0.0841 us/card  1.43 = 43% slower (!)
-// CloseableIterableNonGeneric: accum=1143043148 took 261.5 s = 13071.6  ms/trial count=20, mean=2.6233 stddev=0.0713 us/card   .98
-
 class TimeCardReading {
+
+
+//// results ntrials = 20
+//          ProtoCardIteratorM: accum=1143043148 took 267.1 s = 13354.45 ms/trial count=20, mean=2.6801 stddev=0.0738 us/card  = 1.0
+//           CloseableIterable: accum=1143043148 took 263.1 s = 13151.8  ms/trial count=20, mean=2.6394 stddev=0.1009 us/card  =  .98
+//     CloseableIterableInline: accum=1143043148 took 383.4 s = 19169.4  ms/trial count=20, mean=3.8471 stddev=0.0841 us/card  = 1.43 = 43% slower (!)
+// CloseableIterableNonGeneric: accum=1143043148 took 261.5 s = 13071.6  ms/trial count=20, mean=2.6233 stddev=0.0713 us/card  =  .98
+//                 timeReadCsv: accum=1143043148 took 1068 s =  53387.0  ms/trial count=20, mean=10.7143 stddev=0.2442 us/card = 4.0 = 4x slower
+//            timeFastSampling: accum=1626482836 took 8.611 s =   429.0  ms/trial count=20, mean=0.0861 stddev=0.0118 us/card  = 31 times faster
+//      timeFastSamplingCached:                  took 1.120 s =    54.9  ms/trial count=20, mean=0.0110 stddev=0.0053 us/card  = 243 times faster
 
     @Test
     fun timeReadRawBytes () {
@@ -51,7 +58,8 @@ class TimeCardReading {
             if (bytesRead <= 0) break
         }
 
-        println("timeReadRawBytes with buffer= ($bufferSize), fileLength=$fileLength  fillRead = ${totalRead.equals(fileLength)}, took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} msec")
+        println("timeReadRawBytes with buffer= ($bufferSize), fileLength=$fileLength  fillRead = ${totalRead.equals(fileLength)}, took ${stopwatch.elapsed(
+            TimeUnit.MILLISECONDS)} msec")
     }
 
     @Test
@@ -83,31 +91,36 @@ class TimeCardReading {
     }
 
     @Test
-    fun timeReadSortedManifestFromCsv () {
+    fun timeReadCsv () {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
         val publisher = Publisher("$topdir/audit")
         val styles = mvrManager.styles()
 
-        val csvCards = CloseableIterable { readCardsCsvIteratorM(publisher.sortedCardsFile(), styles) }
-
+        var accum = 0
+        val welford = Welford()
         val stopwatch = Stopwatch()
-        var ncards = 0
 
-        // includes time to merge the styles
-        val cardIter =  csvCards.iterator()
-        while (cardIter.hasNext()) { //  && ncards < 1000000) {
-            val card = cardIter.next()
-            ncards++
+        val ntrials = 20
+        repeat(ntrials) {
+            val trial = Stopwatch()
+            var ncards = 0
+
+            val csvIter = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles)
+            while (csvIter.hasNext()) { //  && ncards < 1000_000) {
+                val card = csvIter.next()
+                accum += card.index() // prevent optimization
+                ncards++
+            }
+
+            welford.update(trial.elapsed(TimeUnit.MICROSECONDS) / ncards.toDouble())
         }
 
-        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ncards.toDouble()
-        val secPer = msPer / 1000
+        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ntrials.toDouble()
+        println("timeReadCsv: accum=$accum took $stopwatch = $msPer ms/trial ${welford.show()} us/card")
 
-        println("timeReadSortedManifestFromCsv ncards = $ncards, took $stopwatch = $msPer ms/card")
-        val totalCards = 4982747
-        println("time to read all cards = ${dfn(totalCards * secPer, 3)} secs")
+        // println("time to read all cards = ${dfn(totalCards * secPer, 3)} secs")
         // timeReadSortedManifestFromCsv ncards = 4982786, took 51.47 s = 0.010328157781610529 ms/card
         // timeReadSortedManifestFromCsv ncards = 4982786, took 53.13 s = 0.01066130473995873 ms/card
         // timeReadSortedManifestFromCsv ncards = 4982786, took 56.67 s = 0.011371148590366914 ms/card
@@ -315,6 +328,70 @@ class TimeCardReading {
         println("timeReadProtoNonGeneric: accum=$accum took $stopwatch = $msPer ms/trial ${welford.show()} us/card")
         // timeReadProtoNonGeneric: accum=1143043148 took 261.5 s = 13071.6 ms/trial count=20, mean=2.6233 stddev=0.0713 us/card
     }
+
+    @Test
+    fun timeFastSampling() {
+        val topdir = "${testdataDir}/cases/corla/consistent"
+        val publisher = Publisher("$topdir/audit")
+
+        val countyAudit = AuditRecord.read(topdir) as CountyAudit
+        val mvrManager = PersistedMvrManager(countyAudit)
+        val styles = mvrManager.styles()!!
+
+        val stopwatch = Stopwatch()
+        val welford = Welford()
+        var accum = 0
+
+        val ntrials = 20
+        repeat(ntrials) {
+            val trial = Stopwatch()
+            var ncards = 0
+
+            val cardIter = FastSamplingCardIterator(publisher.fastSamplingFile(), styles, 100_000)
+            while (cardIter.hasNext()) { //  && ncards < 1000_000) {
+                val card = cardIter.next()
+                accum += card.style.id() // prevent optimization
+                ncards++
+            }
+
+            welford.update(trial.elapsed(TimeUnit.MICROSECONDS) / ncards.toDouble())
+        }
+
+        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ntrials.toDouble()
+        println("timeFastSampling: accum=$accum took $stopwatch = $msPer ms/trial ${welford.show()} us/card")
+    }
+
+    @Test
+    fun timeFastSamplingCached() {
+        val topdir = "${testdataDir}/cases/corla/consistent"
+
+        val countyAudit = AuditRecord.read(topdir) as AuditRecord
+        val mvrManager = PersistedMvrManager(countyAudit)
+        val cachedFastSampling = mvrManager.samplingCards()
+
+        val stopwatch = Stopwatch()
+        val welford = Welford()
+        var accum = 0L
+
+        val ntrials = 20
+        repeat(ntrials) {
+            val trial = Stopwatch()
+            var ncards = 0
+
+            val cardIter = cachedFastSampling.iterator()
+            while (cardIter.hasNext()) { //  && ncards < 1000_000) {
+                val card = cardIter.next()
+                accum += card.prn() // prevent optimization
+                ncards++
+            }
+
+            welford.update(trial.elapsed(TimeUnit.MICROSECONDS) / ncards.toDouble())
+        }
+
+        val msPer = stopwatch.elapsed(TimeUnit.MILLISECONDS) / ntrials.toDouble()
+        println("timeFastSamplingCached: accum=$accum took $stopwatch = $msPer ms/trial ${welford.show()} us/card")
+    }
+
 
     @Test
     fun timeConsistentSampling () {

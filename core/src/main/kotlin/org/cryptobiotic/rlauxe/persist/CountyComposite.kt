@@ -9,27 +9,11 @@ import org.cryptobiotic.rlauxe.core.*
 import java.io.BufferedReader
 import java.io.File
 
-// interface AuditRecordIF {
-//    val location: String
-//    val electionInfo: ElectionInfo
-//    val config: Config
-//    val contests: List<ContestWithAssertions>
-//    val rounds: List<AuditRoundIF>
-//
-//    fun readSortedManifest(): CardManifest
-//    fun readSortedManifest(batches: List<StyleIF>?): CardManifest
-//    fun readOneShotMvrs(): Map<Int, Int>
-//    fun readCardStyles(): List<StyleIF>?
-//}
-// class AuditRecord(
-//    override val location: String,
-//    override val electionInfo: ElectionInfo,
-//    val auditCreationConfig: AuditCreationConfig,
-//    val auditRoundConfig: AuditRoundConfig,
-//    override val contests: List<ContestWithAssertions>,
-//    override val rounds: List<AuditRound>,
-//    val nmvrs: Int // number of mvrs already sampled
-//)
+// not used right now, but Corla may use it in the future
+// the idea is to have County Audits as subdirectories, to make a CompositeRecord
+// but corla/consistent audits the entire state, not by county.
+// corla/uniform doesnt run an audit, just shows the results of the colorado-rla audit.
+// so may not be needed
 
 class CountyComposite(
     location: String,

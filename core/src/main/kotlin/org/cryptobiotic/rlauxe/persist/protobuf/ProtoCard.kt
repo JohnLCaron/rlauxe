@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.AuditableCardM
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.BufferedInputStream
@@ -145,6 +146,12 @@ private fun writeVlenForProto(messageSize: Int, output: OutputStream) {
             value = value ushr 7
         }
     }
+}
+
+// see TimeCardReading
+class ProtoCardIterable(val protoFilename: String, val bufferSize: Int = 100_000, val styles: List<StyleIF>?) : CloseableIterable<AuditableCardM> {
+    override fun iterator(): CloseableIterator<AuditableCardM> =
+        ProtoCardIteratorM(protoFilename, bufferSize, styles)
 }
 
 class ProtoCardIteratorM(filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCardM> {

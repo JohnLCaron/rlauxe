@@ -1,5 +1,5 @@
 # Developer Notes
-_03/27/2026_
+_05/20/2026_
 
 <!-- TOC -->
 * [Developer Notes](#developer-notes)
@@ -16,6 +16,7 @@ _03/27/2026_
   * [rlauxe viewer](#rlauxe-viewer)
 * [Notes and stats](#notes-and-stats)
   * [Code Coverage (Lines of Codes)](#code-coverage-lines-of-codes)
+  * [Time reading card manifest](#time-reading-card-manifest)
   * [UML](#uml)
   * [Miscellaneous Notes](#miscellaneous-notes)
     * [Documents](#documents)
@@ -198,7 +199,24 @@ before viewing them.
 | 03/03/2026 | 90.1 % | 6497/7208       |
 | 03/27/2026 | 89.4 % | 6189/6919       |
 | 03/30/2026 | 90.5 % | 6355/7022       |
+| 05/20/2026 | 81.3 % | 6816/8383       |
 
+## Time reading card manifest
+
+
+````
+totalCardCount=4982774 (corla24 consistent)
+
+//// results ntrials = 20
+//          ProtoCardIteratorM: accum=1143043148 took 267.1 s = 13354.45 ms/trial count=20, mean=2.6801 stddev=0.0738 us/card  = 1.0
+//           CloseableIterable: accum=1143043148 took 263.1 s = 13151.8  ms/trial count=20, mean=2.6394 stddev=0.1009 us/card  =  .98
+//     CloseableIterableInline: accum=1143043148 took 383.4 s = 19169.4  ms/trial count=20, mean=3.8471 stddev=0.0841 us/card  = 1.43 = 43% slower (!)
+// CloseableIterableNonGeneric: accum=1143043148 took 261.5 s = 13071.6  ms/trial count=20, mean=2.6233 stddev=0.0713 us/card  =  .98
+//                 timeReadCsv: accum=1143043148 took 1068 s =  53387.0  ms/trial count=20, mean=10.714 stddev=0.2442 us/card  = 4.0 = 4x slower
+//            timeFastSampling:                  took 8.611 s =   429.0  ms/trial count=20, mean=0.0861 stddev=0.0118 us/card  = 31 times faster
+//      timeFastSamplingCached:                  took 1.120 s =    54.9  ms/trial count=20, mean=0.0110 stddev=0.0053 us/card  = 243 times faster
+
+````
 
 ## UML
 last changed: 01/07/2026

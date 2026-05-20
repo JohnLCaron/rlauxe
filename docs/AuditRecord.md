@@ -1,7 +1,12 @@
 # The AuditRecord
-_last changed 04/11/2026_
+_last changed 05/20/2026_
 
 An _Audit Record_ may have the following files in it:
+
+````
+$topdir/
+    countyData.csv  (county contests only)
+    countyContestData.csv (county contests only)
 
     $auditdir/
         // election record - output of createElectionRecord
@@ -15,8 +20,8 @@ An _Audit Record_ may have the following files in it:
         auditCreationConfig.json  // AuditCreationConfigJson 
         auditRoundPrototype.json  // auditRoundConfigJson ; prototype for auditRoundConfigX
         sortedCards.csv           // AuditableCardCsv, sorted by prn, may be zipped
-        sortedCards.proto         // duplicate sortedCards, protobuf format (make sampling fast)
-        fastSampling.bin           // match sortedCards, just prn and styleId (make sampling fast)
+        sortedCards.proto         // ProtoCard: same as sortedCards.csv in protobuf (4x faster than csv), optional
+        fastSampling.bin          // just prn, styleId in binary (30-240x faster than proto), optional
 
         roundX/
             auditEstX.json       // AuditRoundJson,  an audit state with estimation, ready for auditing
@@ -29,6 +34,7 @@ An _Audit Record_ may have the following files in it:
         private/                  (test only - not part of the public record)
             sortedMvrs.csv       // AuditableCardCsv, sorted by prn, matches sortedCards.csv, may be zipped
             unsortedMvrs.csv     // AuditableCardCsv (optional)
+````
 
 Also see _core/src/main/kotlin/org/cryptobiotic/rlauxe/persist/Publisher.kt_. 
 
@@ -55,6 +61,8 @@ The PRNG seed can only be chosen once and the cards immediately committed.
         auditCreationConfig.json  // AuditCreationConfigJson (contains the seed)
         auditRoundPrototype.json  // auditRoundConfigJson ; prototype for auditRoundConfigX
         sortedCards.csv           // AuditableCardCsv, sorted by prn, may be zipped
+        sortedCards.proto         // ProtoCard: same as sortedCards.csv in protobuf (4x faster than csv), optional
+        fastSampling.bin          // just prn, styleId in binary (30-240x faster than proto), optional
 
 3. Audit Round X Sample Estimation
 

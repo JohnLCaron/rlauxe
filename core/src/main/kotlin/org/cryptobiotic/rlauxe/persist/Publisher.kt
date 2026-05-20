@@ -10,6 +10,10 @@ private val logger = KotlinLogging.logger("Publisher")
 
 /* also see docs/AuditRecord.md
 
+$topdir/
+    countyData.csv (county contests only)
+    countyContestData.csv (county contests only)
+
     $auditdir/
         // election record - output of CreateElectionRecord
         cardManifest.csv      // AuditableCardCsv, may be zipped
@@ -22,6 +26,8 @@ private val logger = KotlinLogging.logger("Publisher")
         auditCreationConfig.json  // AuditCreationConfigJson
         auditRoundPrototype.json // AuditRoundConfigJson
         sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
+        sortedCards.proto     // ProtoCard: same as sortedCards.csv in protobuf (4x faster than csv), optional
+        fastSampling.bin      // just prn, styleId in binary (30-240x faster than proto), optional
 
         roundX/
             auditEstX.json       // AuditRoundJson,  an audit state with estimation, ready for auditing

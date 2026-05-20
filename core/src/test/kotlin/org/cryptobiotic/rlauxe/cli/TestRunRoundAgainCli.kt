@@ -23,7 +23,7 @@ class TestRunRoundAgainCli {
 
     @Test
     fun testRunRoundAgainClca() {
-        val auditdir = "$testdataDir/cases/corla/clca/audit"
+        val auditdir = "$testdataDir/cases/corla/consistent/audit"
 
         RunRoundAgainCli.main(
             arrayOf(

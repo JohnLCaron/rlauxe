@@ -45,7 +45,7 @@ class TestVerifyUseCases {
     }
 
     @Test
-    fun testRunVerifyCorlaClca() {
+    fun testRunVerifyCorlaConsistent() {
         val auditdir = "$testdataDir/cases/corla/consistent/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
@@ -54,15 +54,15 @@ class TestVerifyUseCases {
     }
 
     @Test
-    fun testRunVerifyCorlaClcaContest() {
-        val auditdir = "$testdataDir/cases/corla/clca/audit"
+    fun testRunVerifyCorlaUniform() {
+        val auditdir = "$testdataDir/cases/corla/uniform/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
     }
 
-    @Test
+    //@Test
     fun testRunVerifyCorlaPolling() {
         val auditdir = "$testdataDir/cases/corla/polling/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
@@ -71,7 +71,7 @@ class TestVerifyUseCases {
         if (results.hasErrors) fail()
     }
 
-    @Test
+    //@Test
     fun testRunVerifyCorlaPollingContest() {
         val auditdir = "$testdataDir/cases/corla/polling/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)

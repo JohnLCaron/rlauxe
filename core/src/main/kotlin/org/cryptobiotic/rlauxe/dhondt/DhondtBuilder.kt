@@ -11,7 +11,6 @@ import kotlin.math.max
 
 
 private val showDetails = false
-private val useBt = false // always use Bt; why?
 
 // f_e,s = Te /d(s)
 // e = partyId, s = seatno, score = Te /d(s)
@@ -125,12 +124,20 @@ data class DhondtBuilder(
                 // decide which is cheaper
                 val bt = BelowThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, this.Nc,)
 
+                // is this parties round1 vote larger than the lastwinner ?
                 val partyCopy = party.copy()
                 partyCopy.firstSeatLost = 1
-                val dh = DHondtAssorter.makeFrom(info, winner = lastWinner, loser = partyCopy, Nc)
+                val fw = lastWinner.votes / lastWinner.lastSeatWon!!.toDouble()
 
-                val useAssorter = if (useBt || (bt.noerror(true) > dh.noerror(true))) bt else dh
+                val useAssorter = if (party.votes > fw) bt else {
+                    val dh = DHondtAssorter.makeFrom(info, winner = lastWinner, loser = partyCopy, Nc)
+                    if (bt.noerror(true) > dh.noerror(true))
+                        bt
+                    else
+                        dh
+                }
                 contest.assorters.add(useAssorter)
+
             } else {
                 contest.assorters.add(AboveThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, this.Nc))
             }

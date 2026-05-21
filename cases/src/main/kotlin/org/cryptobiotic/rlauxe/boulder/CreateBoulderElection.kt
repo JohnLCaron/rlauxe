@@ -98,16 +98,16 @@ class CreateBoulderElection(
         // checkNpops(allCvrs, createCards(), infoList)
     }
 
-    fun makeCardStyles(cvrs: List<Cvr>): Map<Set<Int>, CardStyleProxy> {
-        val cardStyleMap = mutableMapOf<Set<Int>, CardStyleProxy>()
+    fun makeCardStyles(cvrs: List<Cvr>): Map<Set<Int>, CardStyle> {
+        val cardStyleMap = mutableMapOf<Set<Int>, CardStyle>()
         cvrs.forEach { cvr ->
-            val csc = cardStyleMap.getOrPut(cvr.votes.keys) { CardStyleProxy(cardStyleMap.size + 1, cvr.votes.keys) }
+            val csc = cardStyleMap.getOrPut(cvr.votes.keys) { CardStyle(cardStyleMap.size + 1, cvr.votes.keys) }
             csc.count++
         }
 
         if (showCardStyles) {
-            println("card styles  (${cardStyleMap.size})")
-            println("\nid  count contests")
+            println("\ncard styles  (${cardStyleMap.size})")
+            println("id  count contests")
             val sortedCardStyles = cardStyleMap.toList().sortedBy { it.second.count }
             sortedCardStyles.forEach { (_, pv) ->
                 println(pv)

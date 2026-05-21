@@ -20,7 +20,6 @@ import kotlin.use
 
 private val logger = KotlinLogging.logger("StartAudit")
 
-// TODO pass in creation, round config
 fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: String, externalSortDir: String? = null,
                       validate: Boolean = false, sortManifest: Boolean = true) {
     val publisher = Publisher(auditDir)

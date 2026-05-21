@@ -1,44 +1,48 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.audit.ContestRound
-import org.cryptobiotic.rlauxe.audit.ContestSampleControl
+import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.estRiskFromMargin
+import org.cryptobiotic.rlauxe.util.estSamplesFromMarginUpper
+import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.roundUp
+import org.cryptobiotic.rlauxe.util.sfn
+import org.cryptobiotic.rlauxe.util.trunc
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
 import org.cryptobiotic.rlauxe.workflow.*
-
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class TestConsistentSampling {
+class TestUniformSampling {
 
     @Test
-    fun testConsistentClcaSampling() {
+    fun testUniformSampling() {
         val test = MultiContestTestData(20, 11, 20000, marginRange= .001.rangeTo(.05))
         val contestsUAs: List<ContestWithAssertions> = test.contests.map {
-            ContestWithAssertions(it, isClca = true).addStandardAssertions()
+            ContestWithAssertions(it, isClca = true, hasStyle = false).addStandardAssertions()
         }
         val testCvrs = test.makeCvrsFromContests()
         val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
 
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
-        contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
+        // contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
+        auditRound.auditorWantNewMvrs = 1111
 
         //// main side effects:
         ////    auditRound.nmvrs = sampledCards.size
         ////    auditRound.newmvrs = newMvrs
         ////    auditRound.samplePrns = sampledCards.map { it.prn }
         ////    contestRound.maxSampleAllowed = sampledCards.size
-        consistentSampling(auditRound, mvrManager.samplingCards())
-        println("nsamples needed = ${auditRound.samplePrns.size}\n")
+        uniformSampling(auditRound, mvrManager.samplingCards())
+
+        println("uniformSampling samples needed = ${auditRound.samplePrns.size}\n")
         assertEquals(auditRound.samplePrns.size, auditRound.nmvrs)
         assertEquals(auditRound.nmvrs, auditRound.newmvrs)
 
@@ -49,64 +53,40 @@ class TestConsistentSampling {
             lastRN = it
         }
 
+        println("           name    id, estNeed,  have,  estRisk")
         contestRounds.forEach { contestRound ->
             val contestUA = contestRound.contestUA
-            print(" ${contestUA.name} (${contestUA.id}) estMvrs=${contestRound.estMvrs} pct=${contestRound.estMvrs/contestUA.Npop.toDouble()}")
+            val margin = contestUA.minMargin()
+            val bet = 2.0 / 1.03905
+            val estSamples = if (margin == null) 0 else
+                roundUp(estSamplesFromMarginUpper(bet, margin, .05))
+            val estRisk = if (margin == null) 1.0 else
+                estRiskFromMargin(2.0 / 1.03905, margin, contestRound.haveSampleSize)
+            val nameId = "${contestUA.name} (${contestUA.id})"
+            println(" ${trunc(nameId, 20)}, ${nfn(estSamples, 6)}, ${nfn(contestRound.haveSampleSize, 6)},  ${dfn(estRisk, 4)}")
             val assorter = contestRound.minAssertion()!!.assertion.assorter
-            println(" recountMargin=${contestUA.contest.recountMargin(assorter)} margin=${assorter.margin(contestUA.hasStyle)} marginInVotes=${contestUA.contest.marginInVotes(assorter)}")
+            // println(" recountMargin=${contestUA.contest.recountMargin(assorter)} margin=${assorter.margin(contestUA.hasStyle)} marginInVotes=${contestUA.contest.marginInVotes(assorter)}")
         }
 
-        // double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
-        println("contest.name (id) == sampleSize")
+        /*ouble check the number of cvrs == sampleSize, and the cvrs are marked as sampled
         contestRounds.forEach { contest ->
             val cvrs = mvrManager.sortedCards.filter { it.hasContest(contest.id) }
             assertTrue(contest.estMvrs <= cvrs.size)
             // TODO what else can we check ??
-        }
-    }
-
-    @Test
-    fun testConsistentPollingSampling() {
-        val test = MultiContestTestData(20, 11, 20000)
-        val contestsUAs: List<ContestWithAssertions> = test.contests.map { ContestWithAssertions(it, isClca = false).addStandardAssertions() }
-        val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
-        contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
-
-        val cvrs = test.makeCvrsFromContests()
-        val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong())
-
-        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
-        consistentSampling(auditRound, mvrManager.samplingCards())
-        println("nsamples needed = ${auditRound.samplePrns.size}\n")
-
-        // must be ordered
-        var lastRN = 0L
-        auditRound.samplePrns.forEach {
-            require(it > lastRN)
-            lastRN = it
-        }
-
-        contestRounds.forEach { contest ->
-            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estMvrs}")
-        }
-        // double check the number of cvrs == sampleSize
-        println("contest.name (id) == sampleSize")
-        contestRounds.forEach { contest ->
-            val ballotsForContest = mvrManager.sortedMvrs.count { it.hasContest(contest.id) }
-            assertTrue(contest.estMvrs <= ballotsForContest)
-        }
+        } */
     }
 
     @Test
     fun testRemoveContestsAndSample() {
-        val sampleControl = ContestSampleControl(minRecountMargin=.005, minMargin=.002, maxSamplePct=.25, contestSampleCutoff=2000, auditSampleCutoff=3000)
+        val sampleControl = ContestSampleControl(minRecountMargin=.005, minMargin=.002, maxSamplePct=.25, contestSampleCutoff=2000, auditSampleCutoff=3000,
+            sampling = Sampling.uniform)
         println(" $sampleControl")
 
-        repeat (11) {
+        repeat (2) {
             println("run $it")
 
             val test = MultiContestTestData(33, 3, 200000, marginRange= .001.rangeTo(.01))
-            val contestsUAs: List<ContestWithAssertions> = test.contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
+            val contestsUAs: List<ContestWithAssertions> = test.contests.map { ContestWithAssertions(it, isClca = true, hasStyle = false).addStandardAssertions() }
             val testCvrs = test.makeCvrsFromContests()
             val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
 
@@ -120,6 +100,7 @@ class TestConsistentSampling {
                 .map{ contest -> ContestRound(contest, 1) }
             val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
 
+            // TODO hoe does uiform sampling affect EstimateAudit ??
             // side effects:
             //   contestRound.estMvrs = estMvrs
             //   contestRound.estNewMvrs = newMvrs

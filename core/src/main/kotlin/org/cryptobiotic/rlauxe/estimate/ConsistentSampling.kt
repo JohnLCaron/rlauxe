@@ -277,6 +277,7 @@ fun consistentSampling(
     return sampledPrns
 }
 
+// we dont have an example of a uniform audit. Corla just using values from colorado-rla.
 fun uniformSampling(
     auditRound: AuditRoundIF,
     samplingCards: CloseableIterable<SamplingCardIF>,
@@ -327,7 +328,7 @@ fun uniformSampling(
                 if (!previousSamples.contains(card.prn())) {
                     contest.haveNewSampleSize++
                 }
-                contest.maxSampleAllowed = sampledPrns.size // probably not needed ??
+                // contest.maxSampleAllowed = sampledPrns.size // probably not needed ??
             }
         }
 

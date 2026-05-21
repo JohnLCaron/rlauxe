@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolTest
+import org.cryptobiotic.rlauxe.util.Prng
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
 import kotlin.random.Random
@@ -174,5 +175,43 @@ fun AuditableCardM.show() = buildString {
     append(" poolId=${poolId()}")
     append(" contests=${possibleContests().contentToString()}")
     append(" cardStyle=${styleName()}")
+}
 
+///////////////////////////////////////////////////////////////////////////////////
+
+// TODO only used in testing; remove and replace with mvrsToAuditableCardsList where needed
+fun mvrsToAuditableCardsTestM(
+    type: AuditType,
+    mvrs: List<Cvr>,
+    styles: List<StyleIF>?,
+    seed: Long? = null,
+): List<AuditableCardM> {
+
+    val styleMap = styles?.associateBy{ it.id() } ?: emptyMap()
+    val prng = if (seed != null) Prng(seed) else null
+
+    var cardIndex = 0 // 0 based index
+
+    return mvrs.map { org ->
+        val style = styleMap[org.poolId]  // hijack poolId
+        val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
+        val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
+
+        val useBatch = when {
+            org.phantom() -> CardStyle.phantomBatch
+            (style != null) -> style
+            else -> CardStyle.fromCvrBatch
+        }
+
+        AuditableCardM.fromVotes(
+            org.id,
+            null,
+            cardIndex++,
+            prng?.next() ?: 0,
+            phantom = org.phantom,
+            votes = votes,
+            poolId = org.poolId,
+            styleName = useBatch.name(),
+        ).setStyle(useBatch)
+    }
 }

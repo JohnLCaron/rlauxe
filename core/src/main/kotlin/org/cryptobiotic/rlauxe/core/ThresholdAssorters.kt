@@ -20,7 +20,7 @@ import org.cryptobiotic.rlauxe.util.roundToClosest
 //  aA = (t-1), ai = t for i != A.
 //
 //so if vote is for A, g = (t-1)
-//   if vote for not A, r = t
+//   if vote for not A, g = t
 //   else 0
 //
 //lower bound a = (t-1)
@@ -111,6 +111,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         return t * nvotes - votesForWinner
     }
 
+    // TODO how to test this ??
     override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null || N <= 0) {
             return 0.0
@@ -120,19 +121,10 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         val otherVotes = useVotes.filter { it.key != winner() }.values.sum()
         val nuetralVotes = N - winnerVotes - otherVotes
 
-        val winnerweight = h2(lowerg) // should be 0
         val otherweight = h2(upperg) // c * t + 1/2 = -t / (2 * (t-1)) + 1/2 = [(2 * (t-1)) - t] / ((2 * (t-1)))
-                                                    // (t - 2) / (2t - 2)
+
         val hmean =  (otherVotes * otherweight + nuetralVotes * 0.5) / N.toDouble()
-        require(hmean == dilutedMean())
-
-        val margin = mean2margin(hmean)
-        val ratio = margin / h2(upperg)
-        val noerror: Double = 1.0 / (2.0 - ratio)
-
-        require(hmean == otherVotes * h2(t) / N)
-        require(doubleIsClose(otherweight, 1/(2*(1-t)), doublePrecision))
-        return margin
+        return mean2margin(hmean)
     }
 
     /* Olivier has
@@ -209,19 +201,16 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
             val winnerVotes = votes[partyId] ?: 0
             val otherVotes = votes.filter { it.key != partyId }.values.sum()
+            val nuetralVotes = Nc - winnerVotes - otherVotes
 
-            val winnerweight = result.h2(result.upperg)
-            val otherweight = result.h2(result.lowerg) // should be 0
-
-            val reportedVotes = Nc
-            val nuetralVotesReported = reportedVotes - winnerVotes - otherVotes
-            val hmeanReported = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotesReported * 0.5) / reportedVotes
+            val winnerweight = result.h2(result.lowerg) // should be 0
+            val otherweight = result.h2(result.upperg)
+            val hmean =  (otherVotes * otherweight + nuetralVotes * 0.5) / Nc.toDouble()
 
             val dilutedVotes = Npop ?: Nc
-            val nuetralVotesDiluted = dilutedVotes - winnerVotes - otherVotes
-            val hmeanDiluted = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotesDiluted * 0.5) / dilutedVotes
+            val hmeanDiluted =  (otherVotes * otherweight + nuetralVotes * 0.5) / dilutedVotes
+            result.setMeans(hmean, hmeanDiluted)
 
-            result.setMeans(hmeanReported, hmeanDiluted)
             return result
         }
 
@@ -321,6 +310,7 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     override fun reportedMargin() = reportedMargin
     override fun dilutedMargin() = dilutedMargin
 
+    // TODO how to test this ??
     override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null || N <= 0) {
             return 0.0

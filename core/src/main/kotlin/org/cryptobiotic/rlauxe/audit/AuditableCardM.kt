@@ -17,12 +17,10 @@ interface AuditableCardIF: CvrIF, SamplingCardIF {
     fun style(): StyleIF?            // "fromCvr" if no cardStyle and its from a CVR (then votes is non null)
     fun possibleContests() : IntArray
 
-    // TODO is hasStyle really card specific? contest? audit?
-    //    is it the same as "consistentSampling" or something else ??
-    fun hasExactContests(): Boolean // TODO
+    fun hasExactContests(): Boolean // TODO is this needed?
 
     // fun show(): String
-    fun toCvr(): Cvr  // TODO can we get rid of?
+    fun toCvr(): Cvr
 }
 
 interface SamplingCardIF {
@@ -69,7 +67,6 @@ data class AuditableCardM (
         }
     }
 
-    // TODO could ignore useCvr
     private val useCvr = CardStyle.useVotes(styleName)
     init {
         if (useCvr && votes == null) {
@@ -103,12 +100,12 @@ data class AuditableCardM (
     override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
         val contestVotes = votes(contestId)
         return if (contestVotes == null) 0
-                else if (contestVotes.contains(candidateId)) 1 else 0
+               else if (contestVotes.contains(candidateId)) 1 else 0
     }
 
     override fun hasExactContests() = style?.hasExactContests() ?: false
 
-    override fun toCvr() = Cvr(id, votes!!, phantom, poolId()) // TODO can we get rid of?
+    override fun toCvr() = Cvr(id, votes!!, phantom, poolId())
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -191,7 +188,9 @@ fun makeVotes( contestIds: IntArray,  contestStarts: IntArray, candidates: IntAr
 }
 
 //         val (contestIds, contestStarts, candidates) = makeFromVotes(cvrExport.votes)
-fun makeFromVotes(votes: Map<Int, IntArray>): Triple<IntArray, IntArray, IntArray> {
+fun makeFromVotes(votes: Map<Int, IntArray>?): Triple<IntArray, IntArray, IntArray> {
+    if (votes == null) return Triple(IntArray(0), IntArray(0), IntArray(0))
+
     val contestIds = votes.keys.toList().sorted().toIntArray()
     val candidates = mutableListOf<Int>()
     val contestStarts = mutableListOf<Int>()

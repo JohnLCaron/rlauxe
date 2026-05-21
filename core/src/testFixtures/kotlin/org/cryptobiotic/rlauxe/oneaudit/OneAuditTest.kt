@@ -8,12 +8,15 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CvrsToCardStylesIterator
 import org.cryptobiotic.rlauxe.audit.StyleIF
+import org.cryptobiotic.rlauxe.audit.makeCardStylesFromCvrs
+import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsListM
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
+import kotlin.math.exp
 import kotlin.test.assertEquals
 
 data class ContestMvrCardAndPops(
@@ -121,7 +124,7 @@ fun makeOneAuditTest(
     info1.metadata["PoolPct"] = (100.0 * poolNcards / Nc).toString()
 
     val mvrs = makeMvrs(contest, cvrNc, cvrVotes, cvrUndervotes, pool, extraInPool)
-    val cardManifest = makeCardManifest(mvrs, pool)
+    val cardManifest = makeCardManifest2(mvrs, pool)
 
     val (oaUA, cardPools) = makeOneAuditTestContests(infos, listOf(contest), listOf(pool), cardManifest, mvrs)
 
@@ -205,6 +208,34 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<A
 
     // should be the same as pool, leave in as consistency check
     assertEquals(pool.voteTotals[1]?.votes, poolTabs.contestTabs[1]?.votes)
+
+    return cards
+}
+
+fun makeCardManifest2(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<AuditableCardM> {
+    // the union of the first two styles
+    val expandedContestIds = pool.infos.keys.toList().toIntArray()
+    val expanded = CardStyle("expanded", 42, expandedContestIds, false)
+
+    // make the cards with the expanded card style
+    val cards = mvrsToAuditableCardsListM(mvrs, listOf(expanded))
+
+    /*
+    val cards = mutableListOf<AuditableCardM>()
+    cardsNoBatch.forEach { card ->
+        // val batch = if (card.poolId == 42) pool else CardStyle.fromCvrBatch
+        cards.add( card.copy(styleName=pool.name()).setStyle(pool))
+    }
+
+    // we need to populate the pool tab with the votes
+    val poolTabs = OneAuditPoolFromCvrs("pool", 1, false, pool.infos)
+    expandedContestIds.forEach { id -> poolTabs.contestTabs[id] = ContestTabulation(pool.infos[id]!!) }
+    mvrs.forEach { mvr ->
+        if (mvr.poolId == pool.poolId) poolTabs.accumulateVotes(mvr)
+    }
+
+    // should be the same as pool, leave in as consistency check
+    assertEquals(pool.voteTotals[1]?.votes, poolTabs.contestTabs[1]?.votes) */
 
     return cards
 }

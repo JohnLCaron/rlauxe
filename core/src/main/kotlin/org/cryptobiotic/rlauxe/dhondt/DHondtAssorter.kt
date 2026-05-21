@@ -186,6 +186,23 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
             ).setMeans(hmeanReported, hmeanDiluted)
         }
 
+        fun calcReportedMargin(info: ContestInfo, winner: DhondtCandidate, loser: DhondtCandidate, Nc: Int, Npop: Int?=null): Double {
+
+            // Let f_e,s = Te/d(s) for entity e and seat s
+            // f_A,WA > f_B,LB, so e = A and s = Wa
+
+            val fw = winner.votes / winner.lastSeatWon!!.toDouble()
+            val fl = loser.votes / loser.firstSeatLost!!.toDouble()
+            val voteDiff = (fw - fl)
+
+            val lower = -1.0 / loser.firstSeatLost!!  // lower bound of g
+            val upper = 1.0 / winner.lastSeatWon!!  // upper bound of g
+            val c = -1.0 / (2 * lower)  // affine transform h = c * g + 1/2
+            val hmeanReported = c * voteDiff/Nc + 0.5
+            val hmeanDiluted = c * voteDiff/(Npop ?: Nc) + 0.5
+            return hmeanReported
+        }
+
     }
 
 }

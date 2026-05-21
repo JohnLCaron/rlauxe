@@ -5,8 +5,8 @@
             "id": 0,
             "possibleContests": [
                 1,
-                2,
-                3
+                3,
+                4
             ],
             "hasExactContests": false
         },
@@ -15,8 +15,7 @@
             "id": 1,
             "possibleContests": [
                 0,
-                3,
-                4
+                3
             ],
             "hasExactContests": false
         },
@@ -24,9 +23,8 @@
             "name": "style2",
             "id": 2,
             "possibleContests": [
-                1,
-                2,
-                4
+                0,
+                2
             ],
             "hasExactContests": false
         },

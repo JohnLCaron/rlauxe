@@ -2,13 +2,10 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.Prng
 import kotlin.collections.get
 import kotlin.sequences.plus
 
-
-
-// replace mvrsToAuditableCardsList
+// merge styles and mvrs -> cards list
 fun mvrsToAuditableCardsListM(
     mvrs: List<Cvr>,
     styles: List<StyleIF>?,
@@ -41,6 +38,7 @@ fun mvrsToAuditableCardsListM(
     }
 }
 
+// merge styles and mvrs + phantoms -> cards iterator
 class MvrsToCardStylesIterator(
     val mvrs: CloseableIterator<Cvr>,
     styles: List<StyleIF>, //  either CardPool or CardStyle
@@ -95,7 +93,8 @@ class MvrsToCardStylesIterator(
     override fun close() = mvrs.close()
 }
 
-// are we really supposed to remove votes?
+// merge styles and cvrs + phantoms -> cards iterator
+// removes votes for pooled data
 class CvrsToCardStylesIterator(
     val type: AuditType,
     val cvrs: CloseableIterator<Cvr>,
@@ -123,7 +122,7 @@ class CvrsToCardStylesIterator(
     override fun next(): AuditableCardM {
         val org = allCvrs.next()
         val style = styleMap[org.votes.keys]
-        val hasCvr = type.isClca() || (type.isOA() && org.poolId == null) // TODO really? always?
+        val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
         val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
 
         val styleName = when {
@@ -131,7 +130,7 @@ class CvrsToCardStylesIterator(
             org.phantom() -> CardStyle.phantoms
             else -> CardStyle.fromCvr
         }
-        val (contestIds, contestStarts, candidates) = makeFromVotes(org.votes)
+        val (contestIds, contestStarts, candidates) = makeFromVotes(votes)
         val cardm = AuditableCardM(
             id = org.id,
             location = null,
@@ -151,6 +150,7 @@ class CvrsToCardStylesIterator(
     override fun close() = cvrs.close()
 }
 
+// merge styles into cards iterator
 class MergeStylesIntoCardsM(
     val cardsIter: CloseableIterator<AuditableCardM>,
     styles: List<StyleIF>,
@@ -173,42 +173,5 @@ class MergeStylesIntoCardsM(
     }
 
     override fun close() { cardsIter.close() }
-}
-
-// TODO only used in testing; remove and replace with mvrsToAuditableCardsList where needed
-fun mvrsToAuditableCardsTestM(
-    type: AuditType,
-    mvrs: List<Cvr>,
-    styles: List<StyleIF>?,
-    seed: Long? = null,
-): List<AuditableCardM> {
-
-    val styleMap = styles?.associateBy{ it.id() } ?: emptyMap()
-    val prng = if (seed != null) Prng(seed) else null
-
-    var cardIndex = 0 // 0 based index
-
-    return mvrs.map { org ->
-        val style = styleMap[org.poolId]  // hijack poolId
-        val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
-        val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
-
-        val useBatch = when {
-            org.phantom() -> CardStyle.phantomBatch
-            (style != null) -> style
-            else -> CardStyle.fromCvrBatch
-        }
-
-        AuditableCardM.fromVotes(
-            org.id,
-            null,
-            cardIndex++,
-            prng?.next() ?: 0,
-            phantom = org.phantom,
-            votes = votes,
-            poolId = org.poolId,
-            styleName = useBatch.name(),
-        ).setStyle(useBatch)
-    }
 }
 

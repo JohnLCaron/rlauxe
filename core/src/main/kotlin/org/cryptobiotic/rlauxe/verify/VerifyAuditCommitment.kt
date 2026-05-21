@@ -40,8 +40,8 @@ class VerifyAuditCommitment(val location: String, contestId: Int? = null, show: 
         auditType = audit.electionInfo.auditType
         contests = audit.contests
         infos = contests.map{ it.contest.info() }.associateBy { it.id }
-        val useBatches = audit.styles ?: audit.pools!!
-        batchSet = useBatches.toSet()
+        val useBatches = audit.styles ?: audit.pools
+        batchSet = useBatches?.toSet() ?: emptySet()
     }
 
     fun verify(): VerifyResults {

@@ -90,7 +90,7 @@ class CreateSfElection(
 
     data class CardPoolsAndStyles(
         val cardPools: Map<String, OneAuditPoolFromCvrs>,
-        val cardStyleCounters: Map<Set<Int>, CardStyleProxy>,
+        val cardStyleCounters: Map<Set<Int>, CardStyle>,
         val cvrTabs: Map<Int, ContestTabulation>,
         val ncards: Int
     )
@@ -102,7 +102,7 @@ class CreateSfElection(
     ): CardPoolsAndStyles {
 
         val allCardPools: MutableMap<String, OneAuditPoolFromCvrs> = mutableMapOf()
-        val cardStyles = mutableMapOf<Set<Int>, CardStyleProxy>()
+        val cardStyles = mutableMapOf<Set<Int>, CardStyle>()
 
         val allCvrTabs = mutableMapOf<Int, ContestTabulation>()
         var cardCount = 0
@@ -118,7 +118,7 @@ class CreateSfElection(
                 pool.accumulateVotes(cvrExport.toCvr(null, cvrExport.id))
 
                 // styles
-                val csc = cardStyles.getOrPut(cvrExport.votes.keys) { CardStyleProxy(cardStyles.size + 1, cvrExport.votes.keys) }
+                val csc = cardStyles.getOrPut(cvrExport.votes.keys) { CardStyle(cardStyles.size + 1, cvrExport.votes.keys) }
                 csc.count++
 
                 // tabs

@@ -31,7 +31,7 @@ val toptopdir = "$testdataDir/cases/belgium/2024"
 class MakeBelgiumElections {
     @Test
     fun createBelgiumElection() {
-        val name = "Anvers"
+        val name = "Bruxelles"
         val filename = belgianElectionMap[name]!!
         createAndRunBelgiumElection(name, filename, toptopdir, contestId=5, showVerify=true)
     }

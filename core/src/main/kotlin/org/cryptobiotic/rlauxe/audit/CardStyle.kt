@@ -1,7 +1,9 @@
 package org.cryptobiotic.rlauxe.audit
 
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.nfn
 import java.util.BitSet
+import kotlin.collections.forEach
 
 /* From SamplePopulations.md
  * CardStyle = the full and exact list of contests on a card.
@@ -24,26 +26,6 @@ interface StyleIF {
     //   fun votesAndUndervotes(contestId: Int): Vunder
 }
 
-// TODO probably dont need
-// use Set<Int> to match with cards
-data class CardStyleProxy(val id: Int, val contests: Set<Int>): StyleIF {
-    var count = 0
-
-    override fun name() = "style$id"
-    override fun id() = id
-    override fun possibleContests(): IntArray {
-        return contests.toList().sorted().toIntArray()
-    }
-    override fun hasExactContests() = true
-    override fun hasContest(contestId: Int): Boolean {
-        return contests.contains(contestId)
-    }
-    override fun toString(): String {
-        val sortedContests = contests.toSortedSet()
-        return "${nfn(id, 3)} ${nfn(count, 5)} $sortedContests"
-    }
-}
-
 data class CardStyle(
     val name: String,
     val id: Int,
@@ -52,23 +34,19 @@ data class CardStyle(
 ) : StyleIF {
     val maxId = possibleContests.maxOrNull() ?: 1
     val bitset: BitSet
-    // val boolset: ByteArray
+    var count = 0
 
     init {
         bitset = BitSet(maxId)
         possibleContests.forEach { bitset.set(it) }
     }
-    /* init {
-        boolset = ByteArray(maxId+1)
-        possibleContests.forEach { boolset[it] = ONE_BYTE }
-    } */
+
+    constructor(id: Int, contestIds: Set<Int>): this("style$id", id, contestIds.toList().sorted().toIntArray(), true)
 
     override fun name() = name
     override fun id() = id
     override fun hasExactContests() = hasExactContests
-    // override fun hasContest(contestId: Int) = possibleContests.contains(contestId)
     override fun hasContest(contestId: Int) = bitset.get(contestId)
-    // override fun hasContest(contestId: Int): Boolean = (contestId <= maxId) && (boolset[contestId] == ONE_BYTE)
     override fun possibleContests() = possibleContests
 
     override fun equals(other: Any?): Boolean {
@@ -91,6 +69,10 @@ data class CardStyle(
         return result
     }
 
+    override fun toString(): String {
+        return "${nfn(id, 3)} ${nfn(count, 5)} ${possibleContests.contentToString()}"
+    }
+
     companion object {
         // dont use these names for other batches
         val fromCvr = "_fromCvr"
@@ -105,6 +87,24 @@ data class CardStyle(
         fun from(id: Int, contests: Set<Int>) = CardStyle(
             "cardStyle$id", id, contests.toList().sorted().toIntArray(), true)
     }
+}
+
+fun makeCardStylesFromCvrs(cvrs: List<Cvr>, show: Boolean = false): Map<Set<Int>, CardStyle> {
+    val cardStyleMap = mutableMapOf<Set<Int>, CardStyle>()
+    cvrs.forEach { cvr ->
+        val csc = cardStyleMap.getOrPut(cvr.votes.keys) { CardStyle(cardStyleMap.size + 1, cvr.votes.keys) }
+        csc.count++
+    }
+
+    if (show) {
+        println("\ncard styles  (${cardStyleMap.size})")
+        println("id  count contests")
+        val sortedCardStyles = cardStyleMap.toList().sortedBy { it.second.count }
+        sortedCardStyles.forEach { (_, pv) ->
+            println(pv)
+        }
+    }
+    return cardStyleMap
 }
 
 /*

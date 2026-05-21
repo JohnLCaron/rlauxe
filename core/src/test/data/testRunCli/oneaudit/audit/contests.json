@@ -31,7 +31,7 @@
                     "assorter": {
                         "className": "PluralityAssorter",
                         "reportedMargin": 0.04,
-                        "dilutedMargin": 0.039603960396039604,
+                        "dilutedMargin": 0.04,
                         "winner": 0,
                         "loser": 1
                     }
@@ -44,7 +44,7 @@
                         "assorter": {
                             "className": "PluralityAssorter",
                             "reportedMargin": 0.04,
-                            "dilutedMargin": 0.039603960396039604,
+                            "dilutedMargin": 0.04,
                             "winner": 0,
                             "loser": 1
                         },
@@ -55,19 +55,19 @@
                         },
                         "oaAssortRates": {
                             "rates": {
-                                "0.24646380471380466": 0.023504950495049505,
-                                "0.5015143097643097": 0.010396039603960397,
-                                "0.7565648148148146": 0.025504950495049503
+                                "0.24651360544217685": 0.02374,
+                                "0.5016156462585034": 0.0105,
+                                "0.7567176870748299": 0.02576
                             },
                             "totalInPools": 3000
                         },
-                        "hasStyle": false
+                        "useReportedMargin": false
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 50500,
-            "hasStyle": true
+            "Npop": 50000,
+            "hasStyle": false
         }
     ],
     "rcontestsUnderAudit": []

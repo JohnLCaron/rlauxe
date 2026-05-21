@@ -34,7 +34,7 @@ class TestPersistedWorkflow {
 
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01)
 
-        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir, validate = true)
         startFirstRound(auditdir)
 
         runPersistedAudit(topdir)
@@ -60,7 +60,7 @@ class TestPersistedWorkflow {
         createElectionRecord(election, auditDir = auditdir)
 
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01)
-        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir, validate = true)
         startFirstRound(auditdir)
 
         runPersistedAudit(topdir)
@@ -98,7 +98,7 @@ class TestPersistedWorkflow {
 
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 20000, simFuzzPct = .01)
 
-        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir, validate = true)
         startFirstRound(auditdir)
 
         runPersistedAudit(topdir, maxRounds=10)
@@ -141,7 +141,7 @@ class TestPersistedWorkflow {
             cardPools = pools, mvrSource=MvrSource.testPrivateMvrs)
         createElectionRecord(election, auditDir = auditdir)
 
-        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir, validate=true)
         startFirstRound(auditdir)
 
         runPersistedAudit(topdir, maxRounds=10)

@@ -39,7 +39,7 @@ class TimeCardReading {
 
     @Test
     fun timeReadRawBytes () {
-        val topdir = "${testdataDir}/cases/corla/clca"
+        val topdir = "${testdataDir}/cases/corla/consistent"
 
         val stopwatch = Stopwatch()
         var totalRead = 0L

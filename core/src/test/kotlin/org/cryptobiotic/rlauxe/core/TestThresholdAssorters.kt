@@ -163,7 +163,7 @@ class TestThresholdAssorters {
     }
 
     @Test
-    fun testUnderThresholdValues() {
+    fun testBelowThresholdValues() {
         val f = 0.40
         val info = ContestInfo(
             name = "ABC",

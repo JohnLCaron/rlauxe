@@ -220,7 +220,7 @@ data class ContestUnderAuditJson(
     var clcaAssertions: List<ClcaAssertionJson>,
     val status: TestH0Status,
     val Npop: Int? = null,
-    val hasStyle: Boolean = false,
+    val hasStyle: Boolean,
 )
 
 fun ContestWithAssertions.publishJson() : ContestUnderAuditJson {

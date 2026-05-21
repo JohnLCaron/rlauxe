@@ -4,12 +4,13 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
+import kotlin.test.Test
 
 class TestOneShot {
 
-    // @Test
+    @Test
     fun testOneShot() {
-        val auditdir = "$testdataDir/cases/sf2024oasp/audit20"
+        val auditdir = "$testdataDir/cases/corla/consistent/audit"
         val record = AuditRecord.read(auditdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)

@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.betting.TestH0Status
+import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
@@ -24,7 +25,6 @@ import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
-import org.cryptobiotic.rlauxe.util.estSamplesFromNomargin
 import kotlin.Double
 import kotlin.Int
 import kotlin.math.abs
@@ -143,8 +143,9 @@ class EstimateAudit(
                 // TODO kludge
                 contestRound.assertionRounds.filter { it != useAssertionRound}.forEach { round ->
                     val noerror = round.assertion.assorter.noerror(contestRound.contestUA.hasStyle)
-                    val nomargin = 2.0 * noerror - 1.0
-                    val estMvrs = roundUp(estSamplesFromNomargin(2.0 / 1.03905, nomargin, config.creation.riskLimit))
+                    // val nomargin = 2.0 * noerror - 1.0
+                    // fun estSampleSize(Npop: Int, bet:Double, margin: Double, upper: Double, alpha: Double): Int {
+                    val estMvrs = estSampleSizeStandardBet(contestRound.contestUA.Npop, noerror, config.creation.riskLimit)
                     val prevNmrs = round.prevAssertionRound?.auditResult?.samplesUsed ?: 0
                     val newMvrs = estMvrs - prevNmrs
                     round.estMvrs = estMvrs

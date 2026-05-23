@@ -86,7 +86,8 @@ data class CompositeRecord(
             val path = Path(location)
             if (path.isDirectory()) {
                 path.listDirectoryEntries().sorted().forEach { entry ->
-                    if (entry.isDirectory()) {
+                    val filename = entry.fileName.toString()
+                    if (entry.isDirectory()  && filename != "private" && !filename.startsWith("round")) {
                         val auditDir = "${entry.toAbsolutePath()}/audit"
                         val publisher = Publisher(auditDir)
                         if (exists(publisher.electionInfoFile()) &&
@@ -109,7 +110,8 @@ data class CompositeRecord(
             val path = Path(location)
             if (path.isDirectory()) {
                 path.listDirectoryEntries().sorted().forEach { entry ->
-                    if (entry.isDirectory()) {
+                    val filename = entry.fileName.toString()
+                    if (entry.isDirectory()  && filename != "private" && !filename.startsWith("round")) {
                         val auditDir = "${entry.toAbsolutePath()}/audit"
                         if (Path(auditDir).exists()) {
                             val result: Result<AuditRecordIF, ErrorMessages> = AuditRecord.readWithResult(auditDir)

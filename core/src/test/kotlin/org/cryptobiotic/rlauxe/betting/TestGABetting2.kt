@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.util.estSamplesFromMarginUpper
 import kotlin.test.Test
 
 // exoplore this function
@@ -13,16 +12,18 @@ class TestGABetting2 {
     @Test
     fun testStuff() {
         val diff = 27538
-        val Npop = 396121.0
-        val Nc = 44675.0
+        val Npop = 396121
+        val Nc = 44675
         val bet = 2/1.03905
         val alpha = .03
-        val margin = diff / Nc
-        val dmargin = diff / Npop
-        println("margin=$margin samples=${estSamplesFromMarginUpper(bet, margin, alpha)}")
-        println("dmargin=$dmargin samples=${estSamplesFromMarginUpper(bet, dmargin, alpha)}")
-
+        val margin = diff / Nc.toDouble()
+        val dmargin = diff / Npop.toDouble()
         val noerror: Double = 1.0 / (2.0 - margin)
+        val noerrord: Double = 1.0 / (2.0 - dmargin)
+
+        println("margin=$margin samples=${estSampleSizeStandardBet(Nc, noerror, alpha)}")
+        println("dmargin=$dmargin samples=${estSampleSizeStandardBet(Npop, noerrord, alpha)}")
+
 
         val audit = PushAudit(
             eta = 0.5,

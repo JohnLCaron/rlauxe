@@ -26,14 +26,14 @@ val belgianElectionMap = mapOf(
     "BrabantFlamant" to "$belgiumData/2024_chambre-des-représentants_Circonscription du Brabant flamand.json",
     "BrabantWallon" to "$belgiumData/2024_chambre-des-représentants_Circonscription du Brabant wallon.json",
 )
-val toptopdir = "$testdataDir/cases/belgium/2024"
+val toptopdir = "$testdataDir/cases/belgium/belgium2024"
 
 class MakeBelgiumElections {
     @Test
     fun createBelgiumElection() {
         val name = "Bruxelles"
         val filename = belgianElectionMap[name]!!
-        createAndRunBelgiumElection(name, filename, toptopdir, contestId=5, showVerify=true)
+        createAndRunBelgiumElection(name, filename, toptopdir, contestId=5, showVerify=true) { null }
     }
 
     @Test
@@ -46,7 +46,8 @@ class MakeBelgiumElections {
         val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
         belgianElectionMap.keys.forEachIndexed { idx, name ->
             val filename = belgianElectionMap[name]!!
-            allmvrs[name] = createAndRunBelgiumElection(name, filename, toptopdir, contestId = idx+1)
+            allmvrs[name] = createAndRunBelgiumElection(name, filename, toptopdir, contestId = idx+1,
+                            runRounds=false) { null }
         }
         allmvrs.forEach {
             val pct = (100.0 * it.value.second) / it.value.first.toDouble()

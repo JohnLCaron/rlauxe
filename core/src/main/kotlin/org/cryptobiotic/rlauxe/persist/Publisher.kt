@@ -43,10 +43,6 @@ $topdir/
  */
 
 class Publisher(val auditDir: String) {
-    init {
-        validateOutputDir(Path.of(auditDir), ErrorMessages("Publisher"))
-    }
-
     // fun auditConfigFile() = "$auditDir/auditConfig.json"
     fun auditCreationConfigFile() = "$auditDir/auditCreationConfig.json"
     fun auditRoundProtoFile() = "$auditDir/auditRoundConfig.json"

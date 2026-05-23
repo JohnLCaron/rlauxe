@@ -55,8 +55,8 @@ class BelgiumClca (
 fun createBelgiumElection(
     topdir: String,
     contestd: DHondtContest,
-    creation: AuditCreationConfig,
-    round: AuditRoundConfig,
+    creationConfig: AuditCreationConfig,
+    roundConfig: AuditRoundConfig,
     clear: Boolean = true): Result<AuditRoundIF, ErrorMessages>
 {
     val auditdir = "$topdir/audit"
@@ -66,8 +66,8 @@ fun createBelgiumElection(
     createElectionRecord(election, auditDir = auditdir, clear = clear)
     println("createBelgiumElection took $stopwatch")
 
-    val config = Config(election.electionInfo(), creation, round)
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+    val config = Config(election.electionInfo(), creationConfig, roundConfig)
+    createAuditRecord(config, election, auditDir = auditdir) // , externalSortDir=topdir)
 
     val result = startFirstRound(auditdir)
     if (result.isErr) logger.error{ result.toString() }
@@ -79,10 +79,11 @@ fun createBelgiumElection(
 // create election, run all rounds
 // return ntotalVotes from Json and finalRound.nmvrs
 fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdir: String, contestId: Int,
-                          riskMeasuringSampleLimit: Int? = null,
                           runRounds:Boolean = true,
                           stopRound:Int=0,
-                          showVerify:Boolean = false): Pair<Int, Int> {
+                          showVerify:Boolean = false,
+                          sampleLimitFun: (Int) -> Int?,
+): Pair<Int, Int> {
     println("======================================================")
     println("electionName $electionName")
     val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
@@ -102,7 +103,7 @@ fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdi
     val contest = makeDhondtContest(electionName, contestId, dhondtParties, nwinners, totalVotes, belgiumElection.NrOfBlankVotes,.05)
 
     val topdir = "$toptopdir/$electionName"
-    val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, riskMeasuringSampleLimit=riskMeasuringSampleLimit)
+    val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, riskMeasuringSampleLimit=sampleLimitFun(contestId))
     val round = AuditRoundConfig(
         SimulationControl(nsimTrials = 1),  // why only 1 ??
         ContestSampleControl.NONE,

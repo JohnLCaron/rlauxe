@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.noerror
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 
@@ -136,8 +137,21 @@ open class ContestWithAssertions(
 
     fun minMargin(): Double? {
         return if (isClca) minClcaAssertion()?.cassorter?.assorterMargin
-            else if (hasStyle) minPollingAssertion()?.assorter?.reportedMargin()
-            else minPollingAssertion()?.assorter?.dilutedMargin()
+        else if (hasStyle) minPollingAssertion()?.assorter?.reportedMargin()
+        else minPollingAssertion()?.assorter?.dilutedMargin()
+    }
+    
+    fun minNoerror(): Double? {
+        return if (isClca) {
+            minClcaAssertion()?.cassorter?.assorterMargin
+        } else { // is this useful for polling ??
+            val assorter = minPollingAssertion()?.assorter ?: return null
+            if (hasStyle) {
+                noerror(assorter.reportedMargin(), assorter.upperBound())
+            } else {
+                noerror(assorter.dilutedMargin(), assorter.upperBound())
+            }
+        }
     }
 
     fun minRecountMargin(): Double? {

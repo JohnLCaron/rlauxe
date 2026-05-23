@@ -9,10 +9,13 @@ import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeElectionInfoJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeCardStylesJsonFile
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.verify.VerifyElectionCommitment
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
+import java.nio.file.Path
 import kotlin.io.path.Path
 
 interface ElectionBuilder {
@@ -37,6 +40,11 @@ private val logger = KotlinLogging.logger("CreateElectionRecord")
 fun createElectionRecord(election: ElectionBuilder, auditDir: String, clear: Boolean = true, validate: Boolean = false) {
     if (clear) clearDirectory(Path(auditDir))
 
+    val errs = validateOutputDir(Path.of(auditDir))
+    if (errs.hasErrors()) {
+        logger.error { errs.toString() }
+        throw RuntimeException(errs.toString())
+    }
     val publisher = Publisher(auditDir)
     val electionInfo = election.electionInfo()
     writeElectionInfoJsonFile(electionInfo, publisher.electionInfoFile())

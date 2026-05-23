@@ -2,13 +2,11 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
+import org.cryptobiotic.rlauxe.betting.estRiskStandardBet
+import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.dfn
-import org.cryptobiotic.rlauxe.util.estRiskFromMargin
-import org.cryptobiotic.rlauxe.util.estSamplesFromMarginUpper
 import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
@@ -56,15 +54,14 @@ class TestUniformSampling {
         println("           name    id, estNeed,  have,  estRisk")
         contestRounds.forEach { contestRound ->
             val contestUA = contestRound.contestUA
-            val margin = contestUA.minMargin()
-            val bet = 2.0 / 1.03905
-            val estSamples = if (margin == null) 0 else
-                roundUp(estSamplesFromMarginUpper(bet, margin, .05))
-            val estRisk = if (margin == null) 1.0 else
-                estRiskFromMargin(2.0 / 1.03905, margin, contestRound.haveSampleSize)
+            val noerror = contestUA.minNoerror()
+            val estSamples = if (noerror == null) 0 else
+                estSampleSizeStandardBet(contestRound.contestUA.Npop, noerror, .05)
+            val estRisk = if (noerror == null) 1.0 else
+                estRiskStandardBet(contestRound.contestUA.Npop, noerror, contestRound.haveSampleSize)
             val nameId = "${contestUA.name} (${contestUA.id})"
             println(" ${trunc(nameId, 20)}, ${nfn(estSamples, 6)}, ${nfn(contestRound.haveSampleSize, 6)},  ${dfn(estRisk, 4)}")
-            val assorter = contestRound.minAssertion()!!.assertion.assorter
+            // val assorter = contestRound.minAssertion()!!.assertion.assorter
             // println(" recountMargin=${contestUA.contest.recountMargin(assorter)} margin=${assorter.margin(contestUA.hasStyle)} marginInVotes=${contestUA.contest.marginInVotes(assorter)}")
         }
 

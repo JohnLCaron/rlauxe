@@ -23,7 +23,7 @@ class TestBelgiumContest {
     val sortedManifest: SortedManifest
 
     init {
-        val auditdir = "$testdataDir/cases/belgium/2024/Bruxelles/audit"
+        val auditdir = "$testdataDir/cases/belgium/belgium2024/Bruxelles/audit"
         val auditRecord = AuditRecord.read(auditdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
         sortedManifest = mvrManager.sortedManifest()
@@ -36,15 +36,6 @@ class TestBelgiumContest {
     @Test
     fun testAssorters() {
         testAssorters(contests.first())
-    }
-
-    @Test
-    fun testShowRelaxedAssertions() {
-        contests.forEach{ contestUA ->
-            println("${contestUA.contest}\n")
-            val result = (contestUA.contest as DHondtContest).showRelaxedAssertions(rounds)
-            println(result)
-        }
     }
 
     fun testAssorters(contestUA: ContestWithAssertions) {

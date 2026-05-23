@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
+import org.cryptobiotic.rlauxe.betting.estSampleSize
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.math.ln
@@ -69,18 +70,20 @@ open class ClcaAssorter(
     fun assorter() = assorter
 
     // expected sample size if there are no errors
-    open fun sampleSizeNoErrors(bet: Double, alpha: Double): Int {
-        // payoff = 1 + λ_i * (x - mui)
-        val payoff = 1 + bet * (noerror - 0.5)  // mui ~= 1/2
-        return roundUp((-ln(alpha) / ln(payoff)))
+    open fun sampleSizeNoErrors(Npop: Int, bet: Double, alpha: Double): Int {
+        return  estSampleSize(Npop, bet, noerror, alpha) // use WOR
+
+       // payoff = 1 + λ_i * (x - mui)
+        //val payoff = 1 + bet * (noerror - 0.5)  // mui ~= 1/2
+        //return roundUp((-ln(alpha) / ln(payoff)))
     }
 
-    // expected sample size if there are clca errors
+    // expected sample size if there are clca errors, using WR
+    // TODO modify this for WOR
     // for clcaErrorCounts with phantoms added, use AssertionRound.calcNewMvrsNeeded()
-    open fun sampleSizeWithErrors(bet: Double, alpha: Double, clcaErrorRates: ClcaErrorRates): Int {
+    open fun sampleSizeWithErrors(Npop: Int, bet: Double, alpha: Double, clcaErrorRates: ClcaErrorRates): Int {
         val p0 = 1.0 - clcaErrorRates.sumRates()
         val noerrorTerm = ln(1.0 + bet * (noerror - 0.5)) * p0
-
         var sumErrors = 0.0
         clcaErrorRates.errorRates.forEach { (assortValue: Double, rate: Double) ->
             sumErrors += ln(1.0 + bet * (assortValue - 0.5)) * rate

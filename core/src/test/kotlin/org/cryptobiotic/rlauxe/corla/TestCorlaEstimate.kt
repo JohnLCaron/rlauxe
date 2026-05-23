@@ -107,7 +107,7 @@ fun corlaCalc(config: Config, contestRound: ContestRound): SampleEst? {
 
     val maxLoss = 1.0 / 1.03905
     val cassertion = minAssertion.assertion as ClcaAssertion
-    val  est3 = cassertion.cassorter.sampleSizeWithErrors(2 * maxLoss, config.riskLimit,
+    val  est3 = cassertion.cassorter.sampleSizeWithErrors(contestRound.contestUA.Npop, 2 * maxLoss, config.riskLimit,
         clcaErrorRates = errorCounts.clcaErrorRates())
 
     // not oracle, needs phantoms added to apriori

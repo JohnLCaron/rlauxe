@@ -151,8 +151,8 @@ class TestOABasics {
         val oaAssorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(oaAssorter)
         println("oaAssortRates = ${oaAssorter.oaAssortRates.show()}")
-        println("sampleSizeNoErrors = ${oaAssorter.sampleSizeNoErrors( 2 * 0.9, .05)}")
-        println("sampleSizeWithErrors = ${oaAssorter.sampleSizeWithErrors(2 * 0.9, .05, 
+        println("sampleSizeNoErrors = ${oaAssorter.sampleSizeNoErrors(contestUA.Npop, 2 * 0.9, .05)}")
+        println("sampleSizeWithErrors = ${oaAssorter.sampleSizeWithErrors(contestUA.Npop, 2 * 0.9, .05, 
             ClcaErrorRates.empty(0.505, 1.0))}")
     }
 

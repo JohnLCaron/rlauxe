@@ -1,29 +1,36 @@
 package org.cryptobiotic.rlauxe.belgium
 
-import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.runRound
-import org.cryptobiotic.rlauxe.dhondt.CandSeatRanges
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
-import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 
 class MakeBelgiumAuditSampleLimit {
     val topdirLimited = "$testdataDir/cases/belgium/2024limited"
 
+    fun sampleLimitFun(contestId: Int): Int? {
+        return when (contestId) {
+            1 -> 1884
+            2 -> 1759
+            4 -> 800
+            5 -> 550
+            6 -> 640
+            else -> null
+        }
+    }
+
     @Test
     fun createOneElectionLimited() {
-        val electionName = "Limbourg"
+        val electionName = "Liège"
         println("createBelgiumElectionLimited with electionName $electionName")
         val filename = belgianElectionMap[electionName]!!
-        createAndRunBelgiumElection(electionName, filename, topdirLimited, contestId=7, riskMeasuringSampleLimit=1000, runRounds=false)
+        createAndRunBelgiumElection(electionName, filename, topdirLimited, contestId=6, runRounds=false) { sampleLimitFun(it) }
     }
 
     @Test
     fun createAllElectionsLimited() {
         belgianElectionMap.keys.forEachIndexed { idx, electionName ->
             val filename = belgianElectionMap[electionName]!!
-            createAndRunBelgiumElection(electionName, filename, topdirLimited, contestId=idx+1, riskMeasuringSampleLimit=1000, runRounds=false)
+            createAndRunBelgiumElection(electionName, filename, topdirLimited, contestId=idx+1, runRounds=false) { sampleLimitFun(it) }
         }
     }
 
@@ -31,28 +38,10 @@ class MakeBelgiumAuditSampleLimit {
     fun runAllElectionsLimited() {
         belgianElectionMap.keys.forEach { electionName ->
             val auditdir = "$topdirLimited/$electionName/audit"
-            runBelgiumElection(electionName, auditdir, stopRound=1)
+            runRound(auditdir)
         }
     }
 
-    @Test
-    fun showCandRangeAcrossContests() {
-        print(CandSeatRanges.showSeatRanges(topdirLimited))
-    }
 }
 
-private fun runBelgiumElection(electionName: String, auditdir: String, stopRound:Int=0): Int {
-    var done = false
-    var finalRound: AuditRoundIF? = null
-    while (!done) {
-        val lastRound = runRound(inputDir = auditdir)
-        if (lastRound != null) finalRound = lastRound
-        done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx >= stopRound
-    }
-
-    return if (finalRound != null) {
-        println("runBelgiumElection $electionName lastRound: ${finalRound.show()}")
-        finalRound.nmvrs
-    } else 0
-}
 

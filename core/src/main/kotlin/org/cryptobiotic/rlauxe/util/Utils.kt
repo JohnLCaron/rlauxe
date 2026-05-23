@@ -46,7 +46,9 @@ fun margin2mean(margin: Double) = (margin + 1.0) / 2.0
 fun mean2margin(mean: Double) = 2.0 * mean - 1.0
 fun noerror(margin: Double, upper: Double) = 1.0 / (2.0 - margin / upper)
 
-// these are the number of ballots needed
+//// TODO replace with estSampleSize, estRisk in betting/Utils
+
+/* these are the number of ballots needed
 fun estSamplesFromNomargin(bet:Double, nomargin:Double, alpha: Double) =  -ln(alpha) / ln(1.0 + bet * nomargin/2)
 fun estSamplesFromNoerror(bet:Double, noerror:Double, alpha: Double): Double {
     val nomargin = 2.0 * noerror - 1.0
@@ -58,6 +60,43 @@ fun estSamplesFromMarginUpper(bet:Double, marginUpper:Double, alpha: Double): Do
     val nomargin = 2.0 * noerror - 1.0
     return -ln(alpha) / ln(1.0 + bet * nomargin / 2)
 }
+
+// payoff ^ n
+fun payoff(marginUpper:Double, nsamples: Int): Double {
+    val noerror = 1.0 / (2.0 - marginUpper)
+    val nomargin = 2.0 * noerror - 1.0
+    return estRisk(2.0 / 1.03905, nomargin, nsamples)
+}
+
+// this is the estimate risk when you have nsamples, for the standard bet
+fun estRisk(marginUpper:Double, nsamples: Int): Double {
+    val noerror = 1.0 / (2.0 - marginUpper)
+    val nomargin = 2.0 * noerror - 1.0
+    return estRisk(2.0 / 1.03905, nomargin, nsamples)
+}
+// payoff^n = 1/risk; risk = 1/(payoff^n)
+fun estRisk(bet:Double, nomargin:Double, nsamples: Int): Double {
+    val payoff = 1.0 + bet * nomargin/2
+    val payoffn = payoff.pow(nsamples.toDouble())
+    val result =  1.0 / payoffn
+    return result
+}
+fun payoff(bet:Double, noerror:Double,): Double {
+    val nomargin = 2.0 * noerror - 1.0
+    return 1.0 + bet * nomargin/2
+}
+
+// marginUpper = margin/upper
+fun estRiskFromMargin(bet:Double, marginUpper:Double, nsamples: Int): Double {
+    val noerror = 1.0 / (2.0 - marginUpper)
+    val payoff = 1.0 + bet * (noerror - 0.5)  // 0.5 is an approximation to mu = populationMeanIfH0()
+    val payoffn = payoff.pow(nsamples.toDouble())
+    val result =  1.0 / payoffn
+    return result
+} */
+
+//// TODO end of replace with estSampleSize, estRisk in betting/Utils
+
 // work backwards, if samples are needed to satisfy risk limit, what must the margin be?
 fun estMarginUpperFromSamples(bet:Double, samples:Int, alpha: Double): Double {
     // payoff^n = 1/alpha
@@ -82,28 +121,6 @@ fun estMarginUpperFromSamples(bet:Double, samples:Int, alpha: Double): Double {
     val term = exp(-ln(alpha) / samples)
     val den = (2.0*term - 2.0 + bet)
     return 2.0 - 2.0 * bet / den
-}
-
-// this is the estimate risk when you have nsamples, for the standard bet
-fun estRisk(marginUpper:Double, nsamples: Int): Double {
-    val noerror = 1.0 / (2.0 - marginUpper)
-    val nomargin = 2.0 * noerror - 1.0
-    return estRisk(2.0 / 1.03905, nomargin, nsamples)
-}
-// payoff^n = 1/risk; risk = 1/(payoff^n)
-fun estRisk(bet:Double, nomargin:Double, nsamples: Int): Double {
-    val payoff = 1.0 + bet * nomargin/2
-    val payoffn = payoff.pow(nsamples.toDouble())
-    val result =  1.0 / payoffn
-    return result
-}
-// marginUpper = margin/upper
-fun estRiskFromMargin(bet:Double, marginUpper:Double, nsamples: Int): Double {
-    val noerror = 1.0 / (2.0 - marginUpper)
-    val payoff = 1.0 + bet * (noerror - 0.5)  // 0.5 is an approximation to mu = populationMeanIfH0()
-    val payoffn = payoff.pow(nsamples.toDouble())
-    val result =  1.0 / payoffn
-    return result
 }
 
 // this is duplicated in PluralityAssorter.calcMarginFromRegVotes

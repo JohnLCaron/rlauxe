@@ -147,8 +147,9 @@ class OneAuditClcaAssorter(
         return cvr_assort - mvr_assort
     }
 
+    // TODO modify this for WOR
     // expected sample size if there are no clca errors
-    override fun sampleSizeNoErrors(bet: Double, alpha: Double): Int {
+    override fun sampleSizeNoErrors(Npop: Int, bet: Double, alpha: Double): Int {
         val p0 = 1.0 - oaAssortRates.sumRates
         val noerrorTerm = ln(1.0 + bet * (noerror - 0.5)) * p0
 
@@ -163,9 +164,10 @@ class OneAuditClcaAssorter(
         return N
     }
 
+    // TODO modify this for WOR
     // expected sample size if there are clca errors
     // for clcaErrorCounts with phantoms added, use AssertionRound.calcNewMvrsNeeded()
-    override fun sampleSizeWithErrors(bet: Double, alpha: Double, clcaErrorRates: ClcaErrorRates): Int {
+    override fun sampleSizeWithErrors(Npop: Int, bet: Double, alpha: Double, clcaErrorRates: ClcaErrorRates): Int {
         val p0 = 1.0 - clcaErrorRates.sumRates()
         val noerrorTerm = ln(1.0 + bet * (noerror - 0.5)) * p0
 
@@ -197,8 +199,8 @@ class OneAuditClcaAssorter(
         )
         val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
 
-        val estSampleSize = if (clcaErrorRates == null) sampleSizeNoErrors(optimalBet, alpha) else
-            sampleSizeWithErrors(optimalBet, alpha, clcaErrorRates)
+        val estSampleSize = if (clcaErrorRates == null) sampleSizeNoErrors(contest.Npop, optimalBet, alpha) else
+            sampleSizeWithErrors(contest.Npop, optimalBet, alpha, clcaErrorRates)
 
         return Pair(estSampleSize, optimalBet)
     }

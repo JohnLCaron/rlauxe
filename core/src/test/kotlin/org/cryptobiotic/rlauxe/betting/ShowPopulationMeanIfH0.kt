@@ -41,9 +41,7 @@ class ShowPopulationMeanIfH0 {
             tracker.addSample(noerror)
             val mj = populationMeanIfH0(N = N, true, tracker)
             if (show) println(
-                "${nfn(tracker.numberOfSamples(), 3)}: m=${dfn(mj, 6)} diff from 1/2 = ${
-                    dfn(0.5 - mj, 6)
-                }"
+                "${nfn(tracker.numberOfSamples(), 3)}: m=${dfn(mj, 6)} diff from 1/2 = ${dfn(0.5 - mj, 6)}"
             )
             if ((diff1 == 0) && (0.5 - mj > .01)) diff1 = it     // how many samples before mj is 1% different from 1/2
             if ((hitZero == 0) && (mj <= 0.0)) hitZero = it       // first time (mj <= 0.0) "true mean certainly greater than hypothesized"

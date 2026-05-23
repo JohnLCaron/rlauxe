@@ -40,7 +40,7 @@ interface AssorterIF {
     fun reportedMean(): Double = margin2mean(reportedMargin())
     fun dilutedMean(): Double = margin2mean(dilutedMargin())
 
-    // only used for CLCA
+    // only needed for CLCA, but can still use for polling
     fun noerror(hasStyle: Boolean): Double  {
         val ratio = margin(hasStyle) / upperBound()
         return 1.0 / (2.0 - ratio)

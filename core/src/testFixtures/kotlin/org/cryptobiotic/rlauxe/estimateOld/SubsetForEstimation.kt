@@ -181,9 +181,6 @@ fun estSamplesNeeded(config: Config, contestRound: ContestRound, ncards: Int): I
         return 0
     }
 
-    if (contestRound.contestUA.id == 15)
-        print("")
-
     val minAssertion = minAssertionRound.assertion
     val cassorter = (minAssertion as ClcaAssertion).cassorter
 
@@ -225,7 +222,7 @@ fun estSamplesNeeded(config: Config, contestRound: ContestRound, ncards: Int): I
                 "nsamples=${nsamples}, stddev=$stddev" }
 
         val lastPvalue = minAssertionRound.auditResult?.plast ?: config.riskLimit
-        est =  cassorter.sampleSizeNoErrors(2 * config.round.clcaConfig!!.maxLoss, lastPvalue)
+        est =  cassorter.sampleSizeNoErrors(contestUA.Npop,2 * config.round.clcaConfig!!.maxLoss, lastPvalue)
         if (est < 0) { // barf
             est = 0
             contestRound.status = TestH0Status.FailMaxSamplesAllowed

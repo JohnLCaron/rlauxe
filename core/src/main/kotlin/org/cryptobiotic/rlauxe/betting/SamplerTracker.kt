@@ -16,6 +16,19 @@ interface Tracker {
     fun variance(): Double
 }
 
+class TrackerImpl: Tracker {
+    private val welford = Welford()
+
+    fun update(sample: Double) {
+        welford.update(sample)
+    }
+
+    override fun numberOfSamples()= welford.count
+    override fun sum() = welford.sum()
+    override fun mean() = welford.mean
+    override fun variance() = welford.variance()
+}
+
 interface ErrorTracker: Tracker {
     fun measuredClcaErrorCounts(): ClcaErrorCounts
     fun noerror(): Double

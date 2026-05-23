@@ -62,14 +62,13 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     }
 
     override fun desc() = buildString {
-        append("${shortName()}: winner '${info.candidateIdToName[winner()]}'/$firstSeatLost")
-        append(" loser ${info.candidateIdToName[loser()]}/$lastSeatWon upperBound=${df(upperBound())}")
+        append("${shortName()}: upperBound=${df(upperBound())}")
     }
-    override fun shortName() = "DHondt w/l='${info.candidateIdToName[winner()]}'/'${info.candidateIdToName[loser()]}'"
+    override fun shortName() = "DHondt w/l=${winnerNameRound()}/${loserNameRound()}"
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
 
-    fun winnerNameRound() =  "${info.candidateIdToName[winner()]}/$lastSeatWon"
-    fun loserNameRound() =  "${info.candidateIdToName[loser()]}/$firstSeatLost"
+    fun winnerNameRound() =  "${info.candidateIdToName[winner()]}-$lastSeatWon"
+    fun loserNameRound() =  "${info.candidateIdToName[loser()]}-$firstSeatLost"
 
     fun showAssertionDifficulty(votesForWinner: Int, votesForLoser: Int): String {
         val winnerScore = votesForWinner / lastSeatWon.toDouble()

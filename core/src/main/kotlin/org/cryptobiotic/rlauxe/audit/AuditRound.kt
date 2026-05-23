@@ -86,7 +86,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
 
     var haveSampleSize: Int = 0
     var haveNewSampleSize: Int = 0
-    var auditorWantNewMvrs: Int? = null // TODO remove I think
+    var auditorWantNewMvrs: Int? = null
 
     init {
         if (status.complete) {
@@ -129,7 +129,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     }
 
     fun risk(): Double {
-        return assertionRounds.minOfOrNull { it.auditResult?.pmin ?: 1.0 } ?: 1.0
+        return assertionRounds.maxOfOrNull { it.auditResult?.pmin ?: 1.0 } ?: 1.0
     }
 
     /* called by viewer
@@ -242,7 +242,26 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
             pair.first
         } else {
             val maxBet = 2 * clcaConfig.maxLoss // TODO ??
-            cassorter.sampleSizeWithErrors(maxBet, alpha, ClcaErrorRates(noerror, upper, ratesWithPhantoms))
+            cassorter.sampleSizeWithErrors(contest.Npop, maxBet, alpha, ClcaErrorRates(noerror, upper, ratesWithPhantoms))
+        }
+    }
+
+    fun calcMvrsNeeded(contest: ContestWithAssertions, config : Config): Int {
+        require(assertion is ClcaAssertion)
+        val cassorter = assertion.cassorter
+        val clcaConfig = config.round.clcaConfig!!
+        val alpha = config.creation.riskLimit
+
+        val aprioriRates = clcaConfig.apriori.makeErrorRates(noerror, upper)
+        val ratesWithPhantoms =  makeAprioriErrorRates(aprioriRates, contest.Nphantoms/contest.Npop.toDouble())
+
+        return if (cassorter is OneAuditClcaAssorter) {
+            val clcaErrorRates =  ClcaErrorRates(noerror, upper, ratesWithPhantoms)
+            val pair = assertion.cassorter.estWithOptimalBet2(contest, clcaConfig.maxLoss, alpha, clcaErrorRates)
+            pair.first
+        } else {
+            val maxBet = 2 * clcaConfig.maxLoss // TODO ??
+            cassorter.sampleSizeWithErrors(contest.Npop, maxBet, alpha, ClcaErrorRates(noerror, upper, ratesWithPhantoms))
         }
     }
 

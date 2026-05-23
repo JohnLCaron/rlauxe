@@ -28,6 +28,7 @@ Possible assort values are bassort in [0, 1/2, 1, 3/2, 2] * noerror, where:
 class TestClcaAssorter {
     @Test
     fun testBasics() {
+        val Npop = 1_000_000
         val info = ContestInfo(
             name = "AvB",
             id = 0,
@@ -98,11 +99,11 @@ class TestClcaAssorter {
         val assortValuesN = assortValues.map { it / noerror / 2 }
         println(" assortValuesN in $assortValuesN")
 
-        println(" sampleSize = ${cassorter.sampleSizeNoErrors(2 * 0.9, .05)} for alpha = .05")
-        println(" sampleSize = ${cassorter.sampleSizeNoErrors(2 * 0.9, .025)} for alpha = .025")
-        println(" sampleSize = ${cassorter.sampleSizeNoErrors(2 * 0.9, .1)} for alpha = .1")
+        println(" sampleSize = ${cassorter.sampleSizeNoErrors(Npop, 2 * 0.9, .05)} for alpha = .05")
+        println(" sampleSize = ${cassorter.sampleSizeNoErrors(Npop, 2 * 0.9, .025)} for alpha = .025")
+        println(" sampleSize = ${cassorter.sampleSizeNoErrors(Npop, 2 * 0.9, .1)} for alpha = .1")
 
-        val estSize = cassorter.sampleSizeWithErrors(2 * 0.9, .05, ClcaErrorRates.empty(noerror, 1.0));
+        val estSize = cassorter.sampleSizeWithErrors(Npop, 2 * 0.9, .05, ClcaErrorRates.empty(noerror, 1.0));
         println(" estSize = $estSize")
     }
 

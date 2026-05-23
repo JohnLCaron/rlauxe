@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.betting.TestH0Status
+import org.cryptobiotic.rlauxe.betting.estRiskStandardBet
+import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.junit.Assert.assertTrue
 import kotlin.math.abs
 import kotlin.math.ln
@@ -14,13 +16,14 @@ class TestUtils {
 
     @Test
     fun problem() {
-        val bet = 2/1.03905
+        val Npop = 1_000_000
         val margin = .164003
         val alpha = .03
 
-        println("margin=$margin samples=${estSamplesFromMarginUpper(bet, margin, alpha)}")
+        println("margin=$margin samples=${estSampleSizeStandardBet(Npop, noerror(margin, 1.0), alpha)}")
+        // println("margin=$margin samples=${estSamplesFromMarginUpper(bet, margin, alpha)}")
 
-        val estRisk = estRiskFromMargin(2.0 / 1.03905, margin, 42)
+        val estRisk = estRiskStandardBet(Npop, margin, 42)
         println("dmargin=$margin risk=$estRisk")
     }
 
@@ -51,16 +54,17 @@ class TestUtils {
     @Test
     fun calcStuff() {
         val diff = 27538
-        val Npop = 396121.0
-        val Nc = 44675.0
+        val Npop = 396121
+        val Nc = 44675
         val bet = 2/1.03905
         val alpha = .03
-        val margin = diff / Nc
-        val dmargin = diff / Npop
-        println("margin=$margin samples=${estSamplesFromMarginUpper(bet, margin, alpha)}")
-        println("dmargin=$dmargin samples=${estSamplesFromMarginUpper(bet, dmargin, alpha)}")
-        println("dmargin=.105 samples=${estSamplesFromMarginUpper(bet, .105, alpha)}")
-        println("dmargin=.105 risk=${estRiskFromMargin(bet, .105, 269)}")
+        val margin = diff / Nc.toDouble()
+        val dmargin = diff / Npop.toDouble()
+
+        println("margin=$margin samples=${estSampleSizeStandardBet(Nc, noerror(margin, 1.0), alpha)}")
+        println("dmargin=$dmargin samples=${estSampleSizeStandardBet(Npop, noerror(dmargin, 1.0), alpha)}")
+        println("dmargin=.105 samples=${estSampleSizeStandardBet(Npop, noerror(.105, 1.0), alpha)}")
+        println("dmargin=.105 risk=${estRiskStandardBet(Npop, noerror(.105, 1.0), 269)}")
     }
 
     @Test
@@ -186,14 +190,18 @@ class TestUtils {
 
     @Test
     fun calcSamplesFromMarginUpper() {
+        val Npop = 1_000_000 // i guess make it irrelevent
         val bet = 2/1.03905
         val alpha = .03
         val marginUpper = .02
-        val samples = estSamplesFromMarginUpper(bet, marginUpper, alpha)
-        println("margin=$marginUpper samples=$samples ")
-        println("margin=${marginUpper/2} samples=${estSamplesFromMarginUpper(bet, marginUpper/2, alpha)} ")
-
         val noerror = 1.0 / (2.0 - marginUpper)
+
+        val samples = estSampleSizeStandardBet(Npop, noerror, alpha)
+        println("margin=$marginUpper samples=$samples ")
+        val noerror2 = 1.0 / (2.0 - marginUpper/2)
+
+        println("margin=${marginUpper/2} samples=${estSampleSizeStandardBet(Npop, noerror2, alpha)} ")
+
         val nomargin = 2.0 * noerror - 1.0
         val n =  -ln(alpha) / ln(1.0 + bet * nomargin / 2)
         println("-ln(alpha) = ${-ln(alpha)}")

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlauxe.betting.estRiskStandardBet
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
@@ -7,7 +8,6 @@ import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
-import org.cryptobiotic.rlauxe.util.estRiskFromMargin
 import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
 import org.jetbrains.kotlinx.kandy.util.color.Color
 import kotlin.io.path.Path
@@ -93,8 +93,9 @@ class CompareCorlaSampling {
             val minAssertion = it.contestUA.minAssertion()
             if (minAssertion != null) {
                 val margin = minAssertion.assorter.margin(it.contestUA.hasStyle)
+                val noerror = it.contestUA.minNoerror()!! // TODO always valid ??
                 val haveMvrs = it.haveSampleSize
-                val estRisk = estRiskFromMargin(2.0 / 1.03905, margin, haveMvrs)
+                val estRisk = estRiskStandardBet(it.Npop, noerror, haveMvrs)
                 plotData.add(PlotData(it.id, margin, estRisk, cat))
             }
         }
@@ -107,13 +108,12 @@ class CompareCorlaSampling {
 
         val plotData = mutableListOf<PlotData>()
         countyAudit.contests.forEach {
-            val minAssertion = it.minAssertion()
-            if (minAssertion != null) {
-                val margin = minAssertion.assorter.margin(it.hasStyle)
+            val noerror = it.minNoerror()
+            if (noerror != null) {
                 val haveMvrss: String = it.contest.info().metadata.get("CORLAhaveMvrs")!!
                 val haveMvrs = haveMvrss.toInt()
-                val estRisk = estRiskFromMargin(2.0 / 1.03905, margin, haveMvrs)
-                plotData.add(PlotData(it.id, margin, estRisk, cat))
+                val estRisk = estRiskStandardBet(it.Npop, noerror, haveMvrs)
+                plotData.add(PlotData(it.id, noerror, estRisk, cat)) // TODO margin vs noerror ??
             }
         }
         return plotData
@@ -155,7 +155,7 @@ fun makePlot(name: String, dirName: String, data: List<PlotData>) {
         subtitleS = subtitle,
         writeFile="$dirName/${name}${scaleType.name}",
         data = data,
-        xname = "margin",
+        xname = "noerror",
         yname = "risk (%)",
         catName = "sampling",
         xfld = { it.margin },

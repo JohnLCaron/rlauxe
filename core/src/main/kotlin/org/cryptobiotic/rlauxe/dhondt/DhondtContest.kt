@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.dhondt
 
-import org.cryptobiotic.rlauxe.audit.AuditRoundIF
+import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 
@@ -197,7 +197,7 @@ class DHondtContest(
         }
         appendLine()
 
-        info.candidateIds.forEach { id ->
+        info.candidateNames.toSortedMap().forEach { (name, id) ->
             val rounds = sortedScores.filter { it.candidate == id }.map { Dround(id, it.score, it.divisor, it.winningSeat) }
             val below = if (belowMinPct.contains(id)) "*" else " "
             val candName = "${nfn(id, 2)} ${trunc(info.candidateIdToName[id]!!, width0)}$below"
@@ -225,17 +225,18 @@ class DHondtContest(
 
     data class Dround(val candId: Int, val score: Double, val round: Int, val winningSeat: Int?)
 
-    fun showRelaxedAssertions(rounds: List<AuditRoundIF>): String {
-        val relax = RelaxedAssertions(this)
-        return relax.showAssertions(rounds)
+    //// lazy cache RelaxedAssertions
+    fun showRelaxedAssertions(contestRound: ContestRound): String {
+        val relax = RelaxedAssertions(this, contestRound)
+        return relax.showAssertions()
     }
 
-    fun makeSeatRanges(rounds: List<AuditRoundIF>): CandSeatRanges {
-        val relax = RelaxedAssertions(this)
-        return relax.makeSeatRanges(rounds)
+    fun showContestedSeats(contestRound: ContestRound): Pair<Int, String> {
+        val relax = RelaxedAssertions(this, contestRound)
+        return relax.contestedSeatReport()
     }
 
-    // create a cvr for each vote
+        // create a cvr for each vote
     fun createSimulatedCvrs(): List<Cvr> {
         val cvrs = mutableListOf<Cvr>()
         var count=0

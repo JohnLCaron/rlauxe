@@ -242,12 +242,13 @@ class TestGenerateAllUseCases {
         )
     }
 
+    // maybe just always make them Limited
     @Test
     fun createAllBelgiumElections() {
         val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
         belgianElectionMap.keys.forEachIndexed { idx, name ->
             val filename = belgianElectionMap[name]!!
-            allmvrs[name] = createAndRunBelgiumElection(name, filename, toptopdir, contestId = idx+1)
+            allmvrs[name] = createAndRunBelgiumElection(name, filename, toptopdir, contestId = idx+1) { null }
         }
         allmvrs.forEach {
             val pct = (100.0 * it.value.second) / it.value.first.toDouble()

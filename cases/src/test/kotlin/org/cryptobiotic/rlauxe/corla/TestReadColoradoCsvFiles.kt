@@ -1,8 +1,9 @@
 package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.util.dfn
-import org.cryptobiotic.rlauxe.util.estSamplesFromMarginUpper
 import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.noerror
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -207,7 +208,9 @@ class TestReadColoradoCsvFiles {
         println()
         println("${TargetedContestsCsv.header}, calcNeeded")
         targets.forEach {
-            val calcNeeded = estSamplesFromMarginUpper(2 / 1.03905, it.dilutedMargin/100, it.riskLimit/100).toInt()
+            val noerror = noerror(it.dilutedMargin/100, 1.0)
+            val calcNeeded = estSampleSizeStandardBet(it.numberOfCvrs, noerror, it.riskLimit/100)
+            // val calcNeeded = estSamplesFromMarginUpper(2 / 1.03905, it.dilutedMargin/100, it.riskLimit/100).toInt()
             println("$it,    $calcNeeded")
         }
         println()
@@ -289,13 +292,14 @@ class TestReadColoradoCsvFiles {
                     "${nfn(choices[0], 7)}, ${nfn(choices[1], 7)}, ${nfn(choices[0] - choices[1], 6)}"
 
                 val contestRoundDesc = if (roundContest != null) {
-                    val npop = roundContest.ballotCardCount
+                    val Npop = roundContest.ballotCardCount
                     val voteMargin = roundContest.minMargin
                     val nsamples = roundContest.optimisticSamplesToAudit
-                    val calcMargin = voteMargin / npop.toDouble()
-                    val calcNeeded = estSamplesFromMarginUpper(2 / 1.03905, calcMargin, roundContest.riskLimit).toInt()
+                    val calcMargin = voteMargin / Npop.toDouble()
+                    val noerror = noerror(calcMargin, 1.0)
+                    val calcNeeded = estSampleSizeStandardBet(Npop, noerror, roundContest.riskLimit)
 
-                    "${nfn(voteMargin, 7)}, ${nfn(npop, 7)}, ${dfn(calcMargin, 3)},     ${nfn(nsamples, 6)},    $calcNeeded"
+                    "${nfn(voteMargin, 7)}, ${nfn(Npop, 7)}, ${dfn(calcMargin, 3)},     ${nfn(nsamples, 6)},    $calcNeeded"
 
                 } else ""
 

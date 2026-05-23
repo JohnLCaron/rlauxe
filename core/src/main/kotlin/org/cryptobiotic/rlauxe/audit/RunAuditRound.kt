@@ -168,12 +168,13 @@ fun resampleAndSaveResults(auditRecord: AuditRecord, lastRound: AuditRound): Boo
         writeAuditRoundJsonFile(lastRound, publisher.auditEstFile(lastRound.roundIdx))
         logger.info {"resampleAndRun writeAuditEstimation to ${publisher.auditEstFile(lastRound.roundIdx)}"}
 
+        // TODO maybe write prns as (prns, poolId/countyId)) ??
         writeSamplePrnsJsonFile(lastRound.samplePrns, publisher.samplePrnsFile(lastRound.roundIdx))
         logger.info {"resampleAndRun wrote ${lastRound.samplePrns.size} samplePrns written to ${publisher.samplePrnsFile(lastRound.roundIdx)}"}
 
-        val workflow = PersistedWorkflow(auditRecord)
-
+        // TODO move this back to workflow.runAuditRound (probably) to speed this up
         // write matching mvrs if needed
+        val workflow = PersistedWorkflow(auditRecord)
         if (auditRecord.config.election.mvrSource == MvrSource.testPrivateMvrs) {
             val ncards = workflow.writeMvrsForRound(lastRound.roundIdx)
             logger.info{"resampleAndRun writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(lastRound.roundIdx)}"}

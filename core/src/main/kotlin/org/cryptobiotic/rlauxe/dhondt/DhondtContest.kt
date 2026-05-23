@@ -225,19 +225,15 @@ class DHondtContest(
 
     data class Dround(val candId: Int, val score: Double, val round: Int, val winningSeat: Int?)
 
+    //// lazy cache RelaxedAssertions
     fun showRelaxedAssertions(contestRound: ContestRound): String {
         val relax = RelaxedAssertions(this, contestRound)
         return relax.showAssertions()
     }
 
-    fun countContestedSeats(contestRound: ContestRound): Int {
+    fun showContestedSeats(contestRound: ContestRound): Pair<Int, String> {
         val relax = RelaxedAssertions(this, contestRound)
-        return relax.countContestedSeats()
-    }
-
-    fun showContestedSeats(contestRound: ContestRound): String {
-        val relax = RelaxedAssertions(this, contestRound)
-        return relax.showContestedSeats()
+        return relax.contestedSeatReport()
     }
 
         // create a cvr for each vote

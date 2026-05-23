@@ -73,10 +73,9 @@ nseats=150 ncands=30
         contests.forEach{ contestUA ->
             val contestRound = lastRound.contestRounds.find { it.contestUA.id == contestUA.id }
             if (contestRound != null) {
-                val count = (contestUA.contest as DHondtContest).countContestedSeats(contestRound)
-                totalCount += count
-                val result = (contestUA.contest as DHondtContest).showContestedSeats(contestRound)
-                print(result)
+                val (count, report) = (contestRound.contestUA.contest as DHondtContest).showContestedSeats(contestRound)
+                println("count = $count")
+                println(report)
             }
         }
         println("\ntotalCount = $totalCount")
@@ -84,12 +83,11 @@ nseats=150 ncands=30
 
     @Test
     fun problem() {
-        val contestRound = lastRound.contestRounds.find { it.contestUA.id == 5 } // Hainut
+        val contestRound = lastRound.contestRounds.find { it.contestUA.id == 1 }
         if (contestRound != null) {
-            val count = (contestRound.contestUA.contest as DHondtContest).countContestedSeats(contestRound)
+            val (count, report) = (contestRound.contestUA.contest as DHondtContest).showContestedSeats(contestRound)
             println("count = $count")
-            val result = (contestRound.contestUA.contest as DHondtContest).showContestedSeats(contestRound)
-            println(result)
+            println(report)
             println("=======================================================================================================")
         }
     }

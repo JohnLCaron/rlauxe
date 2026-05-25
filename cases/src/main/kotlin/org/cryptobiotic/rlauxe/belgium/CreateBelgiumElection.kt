@@ -90,7 +90,8 @@ fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdi
     val belgiumElection = if (result.isOk) result.unwrap()
         else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")
 
-    val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, idx+1, it.NrOfVotes) }
+    val partyIds: Map<String, Int> = readPartyTxtFile("$toptopdir/parties.txt")
+    val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, partyIds[it.PartyLabel]!!, it.NrOfVotes) }
     val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
     val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes // TODO undervotes = belgiumElection.NrOfBlankVotes
 

@@ -11,7 +11,7 @@ class TestCompositeRecord {
 
     @Test
     fun testReadFrom() {
-        val compositeRecord = CompositeRecord.readFrom(belgiumData)!!
+        val compositeRecord = CompositeAuditRecord.readFrom(belgiumData)!!
         println(compositeRecord)
 
         val workflow = PersistedWorkflow(compositeRecord, mvrWrite = false)
@@ -29,7 +29,7 @@ class TestCompositeRecord {
     fun testRead() {
         val compositeRecord = AuditRecord.read(belgiumData)!!
         println(compositeRecord)
-        assertTrue(compositeRecord is CompositeRecord)
+        assertTrue(compositeRecord is CompositeAuditRecord)
 
         val workflow = PersistedWorkflow(compositeRecord, mvrWrite = false)
         val manager = workflow.mvrManager()
@@ -38,7 +38,7 @@ class TestCompositeRecord {
         val manifest = manager.sortedManifest()
         println("manifest.ncards = ${manifest.ncards}")
 
-        val anvers = (compositeRecord as CompositeRecord).findComponentWithName("Anvers")
+        val anvers = (compositeRecord as CompositeAuditRecord).findComponentWithName("Anvers")
         println(anvers)
     }
 

@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.CompositeRecord
+import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
@@ -16,13 +16,13 @@ import kotlin.test.Test
 // comnpare audit variance across SF, SFoa and SFaNS
 class BelgiumResultsScatter {
     val belgiumDataDir = "$testdataDir/cases/belgium/2024"
-    val belgiumData : CompositeRecord
+    val belgiumData : CompositeAuditRecord
 
     val name = "BelgiumResultsScatter"
     val dirName = "$testdataDir/plots/cases"
 
     init {
-        belgiumData = CompositeRecord.readFrom(belgiumDataDir) as CompositeRecord
+        belgiumData = CompositeAuditRecord.readFrom(belgiumDataDir) as CompositeAuditRecord
 
         validateOutputDir(Path(dirName))
     }
@@ -62,7 +62,7 @@ class BelgiumResultsScatter {
 
 data class SampleAndCat(val sampleSize: Int, val cat: String, val noerror: Double)
 
-fun readSampleAndCat(belgiumData : CompositeRecord): List<SampleAndCat> {
+fun readSampleAndCat(belgiumData : CompositeAuditRecord): List<SampleAndCat> {
     val result = mutableListOf<SampleAndCat>()
     belgiumData.componentRecords.forEach { auditRecord: AuditRecord ->
         val lastRound = auditRecord.rounds.last()

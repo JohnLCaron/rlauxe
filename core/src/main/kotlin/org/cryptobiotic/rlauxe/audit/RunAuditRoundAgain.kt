@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.CompositeRecord
+import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
@@ -46,7 +46,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         }
         logger.info { "runRoundAgain in $auditDir for round $roundIdx, contest '$contestName', and assertion $assertion" }
 
-        val useAuditRecord = if (auditRecord is CompositeRecord) {
+        val useAuditRecord = if (auditRecord is CompositeAuditRecord) {
             auditRecord.findComponentWithName(contestRound.contestUA.name)
         } else auditRecord
         if (useAuditRecord == null) return "Cant find contest named ${contestRound.contestUA.name}"

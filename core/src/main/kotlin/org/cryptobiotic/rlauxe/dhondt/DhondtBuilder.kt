@@ -100,7 +100,6 @@ data class DhondtBuilder(
     }
 
     fun build(): DHondtContest {
-
         val votes = parties.associate { Pair(it.id, it.votes) }
 
         val contest = DHondtContest(

@@ -1,12 +1,14 @@
 package org.cryptobiotic.rlauxe.dhondt
 
-import org.cryptobiotic.rlauxe.dhondt.CandSeatRanges.Companion.showSeatRanges
+import org.cryptobiotic.rlauxe.dhondt.CandSeatRanges.Companion.showMergedSeatRanges
+import org.cryptobiotic.rlauxe.dhondt.CandSeatRanges.Companion.showSeatRange
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 
 class TestRelaxedAssertions {
-    val auditdir = "$testdataDir/cases/belgium/2024limited/"
+    val auditdir = "$testdataDir/cases/belgium/belgium2024/"
     val auditRecord = AuditRecord.read(auditdir)!!
     val contests = auditRecord.contests
     val lastRound = auditRecord.rounds.last()
@@ -14,49 +16,76 @@ class TestRelaxedAssertions {
     val sampleLimit = config.creation.riskMeasuringSampleLimit
 
     @Test
-    fun testAssorters() {
-        print( showSeatRanges(auditdir))
+    fun testCoalitionReport() {
+        print( showCoalitionReport(auditRecord as CompositeAuditRecord))
     }
 
-/*
-|                party   | min | reported | max |
-|------------------------|-----|----------|-----|
-|                  N-VA  | 24  |    24    | 25  |
-|         VLAAMS BELANG  | 20  |    20    | 21  |
-|                    MR  | 20  |    20    | 21  |
-|                    PS  | 14  |    16    | 17  |
-|           LES ENGAGÉS  | 12  |    14    | 14  |
-|               Vooruit  | 11  |    13    | 13  |
-|                  CD&V  | 10  |    11    | 12  |
-|              open vld  |  7  |     7    |  7  |
-|                  PVDA  |  6  |     6    |  7  |
-|                 GROEN  |  6  |     6    |  6  |
-|                   PTB  |  5  |     6    |  6  |
-|                 ECOLO  |  3  |     3    |  4  |
-|              PTB-PVDA  |  3  |     3    |  3  |
-|                  DéFI  |  1  |     1    |  1  |
-|     Team Fouad Ahidar  |  0  |     0    |  1  |
-|           Volt Europa  |  0  |     0    |  0  |
-|                Voor U  |  0  |     0    |  0  |
-|            DierAnimal  |  0  |     0    |  0  |
-|         Partij BLANCO  |  0  |     0    |  0  |
-|         BELG.UNIE-BUB  |  0  |     0    |  0  |
-|                l'Unie  |  0  |     0    |  0  |
-|                 Agora  |  0  |     0    |  0  |
-|     COLLECTIF CITOYEN  |  0  |     0    |  0  |
-|             CHEZ NOUS  |  0  |     0    |  0  |
-|                   RMC  |  0  |     0    |  0  |
-|                BLANCO  |  0  |     0    |  0  |
-|    Voor U / Pour Vous  |  0  |     0    |  0  |
-|        Parti.j BLANCO  |  0  |     0    |  0  |
-|        LUTTE OUVRIERE  |  0  |     0    |  0  |
-|    GV-GEZOND VERSTAND  |  0  |     0    |  0  |
+    @Test
+    fun testMergeSeatRanges() {
+        print( showMergedSeatRanges(lastRound))
+    }
 
-nseats=150 ncands=30
-*/
+    @Test
+    fun testAltContest() {
+        val contestRound = lastRound.contestRounds.find { it.id == 5 }!!
+        print( showSeatRange(contestRound))
+    }
 
     @Test
     fun testShowRelaxedAssertions() {
+        val contestRound = lastRound.contestRounds.find { it.id == 5 }!!
+        val dhondt = contestRound.contestUA.contest as DHondtContest
+        println( "dhondt.showRelaxedAssertions(contestRound)")
+        println( dhondt.showRelaxedAssertions(contestRound))
+    }
+
+    @Test
+    fun testShowContestedSeats() {
+        val contestRound = lastRound.contestRounds.find { it.id == 5 }!!
+        val dhondt = contestRound.contestUA.contest as DHondtContest
+        println( "dhondt.showContestedSeats(contestRound)")
+        println( dhondt.showContestedSeats(contestRound))
+    }
+
+    /*
+    |                party   | min | reported | max |
+    |------------------------|-----|----------|-----|
+    |                  N-VA  | 24  |    24    | 25  |
+    |         VLAAMS BELANG  | 20  |    20    | 21  |
+    |                    MR  | 20  |    20    | 21  |
+    |                    PS  | 14  |    16    | 17  |
+    |           LES ENGAGÉS  | 12  |    14    | 14  |
+    |               Vooruit  | 11  |    13    | 13  |
+    |                  CD&V  | 10  |    11    | 12  |
+    |              open vld  |  7  |     7    |  7  |
+    |                  PVDA  |  6  |     6    |  7  |
+    |                 GROEN  |  6  |     6    |  6  |
+    |                   PTB  |  5  |     6    |  6  |
+    |                 ECOLO  |  3  |     3    |  4  |
+    |              PTB-PVDA  |  3  |     3    |  3  |
+    |                  DéFI  |  1  |     1    |  1  |
+    |     Team Fouad Ahidar  |  0  |     0    |  1  |
+    |           Volt Europa  |  0  |     0    |  0  |
+    |                Voor U  |  0  |     0    |  0  |
+    |            DierAnimal  |  0  |     0    |  0  |
+    |         Partij BLANCO  |  0  |     0    |  0  |
+    |         BELG.UNIE-BUB  |  0  |     0    |  0  |
+    |                l'Unie  |  0  |     0    |  0  |
+    |                 Agora  |  0  |     0    |  0  |
+    |     COLLECTIF CITOYEN  |  0  |     0    |  0  |
+    |             CHEZ NOUS  |  0  |     0    |  0  |
+    |                   RMC  |  0  |     0    |  0  |
+    |                BLANCO  |  0  |     0    |  0  |
+    |    Voor U / Pour Vous  |  0  |     0    |  0  |
+    |        Parti.j BLANCO  |  0  |     0    |  0  |
+    |        LUTTE OUVRIERE  |  0  |     0    |  0  |
+    |    GV-GEZOND VERSTAND  |  0  |     0    |  0  |
+
+    nseats=150 ncands=30
+    */
+
+    @Test
+    fun testShowAllRelaxedAssertions() {
         contests.forEach{ contestUA ->
             val contestRound = lastRound.contestRounds.find { it.contestUA.id == contestUA.id }
             if (contestRound != null) {
@@ -68,7 +97,7 @@ nseats=150 ncands=30
     }
 
     @Test
-    fun testContestedSeats() {
+    fun testShowAllContestedSeats() {
         var totalCount = 0
         contests.forEach{ contestUA ->
             val contestRound = lastRound.contestRounds.find { it.contestUA.id == contestUA.id }

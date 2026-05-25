@@ -12,6 +12,10 @@ import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.util.sfn
+import java.io.BufferedReader
+import java.io.File
+import java.nio.file.Files
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
@@ -24,14 +28,26 @@ interface CompositeRecordIF: AuditRecordIF {
     fun findComponentWithName(name: String): AuditRecord?
 }
 
-// used by Belgium. TODO can we make it a subclass of AuditRecord ??
-data class CompositeRecord(
+// used by Belgium. TODO can we make it a subclass of AuditRecord ?? Can we call it BelgiumAudit ?
+data class CompositeAuditRecord(
     override val location: String,
     override val config: Config,
     override val contests: List<ContestWithAssertions>,
     override val rounds: List<AuditRoundIF>,
     override val componentRecords: List<AuditRecord>,
 ): CompositeRecordIF  {
+
+    fun readPartyNames(): Map<Int, String> {
+        return readCanonicalPartyTxtFile("$location/$canonicalPartiesFilename")
+    }
+
+    fun readSampleLimits(): List<SampleLimit> {
+        return readLimitsTxtFile("$location/$limitsFilename")
+    }
+
+    fun readCoalitions(): List<CoalitionList> {
+        return readCoalitionTxtFile("$location/$coalitionFilename")
+    }
 
     override fun auditdir() = "$location/audit"
 
@@ -79,6 +95,9 @@ data class CompositeRecord(
 
     companion object {
         private val logger = KotlinLogging.logger("CompositeRecord")
+        val limitsFilename = "sampleLimits.txt"
+        val canonicalPartiesFilename = "canonicalParties.txt"
+        val coalitionFilename = "coalitions.txt"
 
         // used by viewer
         // look for subdirectories with an audit subdirectory
@@ -100,7 +119,7 @@ data class CompositeRecord(
         }
 
         // used by viewer
-        fun readFrom(location: String): CompositeRecord? {
+        fun readFrom(location: String): CompositeAuditRecord? {
             val components = mutableListOf<AuditRecord>()
             val contests = mutableListOf<ContestWithAssertions>()
             var config: Config? = null
@@ -128,10 +147,11 @@ data class CompositeRecord(
                     }
                 }
             }
+
             return if (config != null) {
                 // contests.sortBy { it.name }
                 val auditRounds = makeAuditRounds(components)
-                CompositeRecord(location, config, contests, auditRounds, components)
+                CompositeAuditRecord(location, config, contests, auditRounds, components)
             } else {
                 null
             }
@@ -231,5 +251,72 @@ data class ProxyAuditRound(
             appendLine("    ${it.name}")
         }
     }
+}
+
+data class SampleLimit(val name: String, val id: Int, val limit: Int) {
+    override fun toString(): String {
+        return "${sfn(name, 20)}:  id=$id, limit=$limit"
+    }
+}
+
+fun readLimitsTxtFile(filename: String): List<SampleLimit> {
+    if (!Files.exists(Path(filename))) return emptyList()
+    val reader: BufferedReader = File(filename).bufferedReader()
+    reader.readLine() // get rid of header line
+
+    val limits = mutableListOf<SampleLimit>()
+    while (true) {
+        val line = reader.readLine() ?: break
+        val tokens = line.split(",")
+        val ttokens = tokens.map { it.trim() }
+        val name = ttokens[0]
+        val id = ttokens[1].toInt()
+        val limit = ttokens[2].toInt()
+        limits.add(SampleLimit(name, id, limit))
+    }
+    reader.close()
+    return limits
+}
+
+data class CoalitionList(val name: String, val candidates: List<Int>) {
+    override fun toString(): String {
+        return "${sfn(name, 20)}:  candidates=$candidates"
+    }
+}
+
+fun readCoalitionTxtFile(filename: String): List<CoalitionList> {
+    if (!Files.exists(Path(filename))) return emptyList()
+    val reader: BufferedReader = File(filename).bufferedReader()
+    reader.readLine() // get rid of header line
+
+    val coalitions = mutableListOf<CoalitionList>()
+    while (true) {
+        val line = reader.readLine() ?: break
+        val tokens = line.split(",")
+        val ttokens = tokens.map { it.trim() }
+        val name = ttokens[0]
+        val ctokens = ttokens.drop(1)
+        val candidates = ctokens.map { it.toInt() }
+        coalitions.add(CoalitionList(name, candidates))
+    }
+    reader.close()
+    return coalitions
+}
+
+fun readCanonicalPartyTxtFile(filename: String): Map<Int, String> {
+    val reader: BufferedReader = File(filename).bufferedReader()
+    reader.readLine() // get rid of header line
+
+    val parties = mutableListOf<Pair<Int, String>>()
+    while (true) {
+        val line = reader.readLine() ?: break
+        val tokens = line.split(",")
+        val ttokens = tokens.map { it.trim() }
+        val id = ttokens[0].toInt()
+        val name = ttokens[1]
+        parties.add(Pair(id, name))
+    }
+    reader.close()
+    return parties.toMap()
 }
 

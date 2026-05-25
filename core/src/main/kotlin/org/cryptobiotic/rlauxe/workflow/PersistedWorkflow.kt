@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.AuditRecordIF
-import org.cryptobiotic.rlauxe.persist.CompositeRecord
+import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
@@ -35,7 +35,7 @@ class PersistedWorkflow(
         auditRounds.addAll(auditRecord.rounds)
 
         mvrManager = when {
-            (auditRecord is CompositeRecord) -> CompositeMvrManager(auditRecord, config, auditContests)
+            (auditRecord is CompositeAuditRecord) -> CompositeMvrManager(auditRecord, config, auditContests)
             (mvrSource == MvrSource.testClcaSimulated) -> PersistedMvrManagerTest(auditRecord as AuditRecord)
             else -> PersistedMvrManager(auditRecord as AuditRecord, mvrWrite=mvrWrite)
         }

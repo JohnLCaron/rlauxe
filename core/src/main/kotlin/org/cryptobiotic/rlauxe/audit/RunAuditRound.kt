@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.estimate.chooseSamples
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.AuditRecordIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
@@ -179,6 +180,23 @@ fun resampleAndSaveResults(auditRecord: AuditRecord, lastRound: AuditRound): Boo
             val ncards = workflow.writeMvrsForRound(lastRound.roundIdx)
             logger.info{"resampleAndRun writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(lastRound.roundIdx)}"}
         }
+        return true
+
+    } catch (t: Throwable) {
+        logger.error(t) { "runRoundResult Exception" }
+        return false
+    }
+}
+
+// for viewer
+fun saveAuditRound(auditRecord: AuditRecordIF, lastRound: AuditRoundIF): Boolean {
+    try {
+
+        // writeAuditState
+        val publisher = Publisher(auditRecord.location)
+        writeAuditRoundJsonFile(lastRound, publisher.auditEstFile(lastRound.roundIdx))
+        logger.info {"saveAuditRound to ${publisher.auditEstFile(lastRound.roundIdx)}"}
+
         return true
 
     } catch (t: Throwable) {

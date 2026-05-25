@@ -151,7 +151,7 @@ class DHondtContest(
     fun difficulty(assorter: AssorterIF): Double {
         return when (assorter) {
             is DHondtAssorter -> {
-                assorter.difficulty(votes[assorter.winner()]!!, votes[assorter.loser()]!!)
+                assorter.voteDiff(votes[assorter.winner()]!!, votes[assorter.loser()]!!)
             }
             is BelowThreshold -> {
                 // val nvotes = votes.values.sum() does not include undervotes
@@ -168,7 +168,7 @@ class DHondtContest(
     override fun marginInVotes(assorter: AssorterIF): Int {
         return when (assorter) {
             is DHondtAssorter -> {
-                roundToClosest(assorter.difficulty(votes[assorter.winner()]!!, votes[assorter.loser()]!!))
+                roundToClosest(assorter.voteDiff(votes[assorter.winner()]!!, votes[assorter.loser()]!!))
             }
             is BelowThreshold -> {
                 roundToClosest(assorter.t * nvotes- votes[assorter.winner()]!!)

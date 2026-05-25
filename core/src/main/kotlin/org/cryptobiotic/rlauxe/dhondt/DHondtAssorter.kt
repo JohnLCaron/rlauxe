@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 // winner,loser: candidate ids
 // lastSeatWon: last seat won by winner
 // firstSeatLost: last seat lost by loser
+// why do different DHondts have different upper limits ?? = (first/last+1)/2
 data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int):
     AssorterIF {
     val upperg = 1.0 / lastSeatWon  // upper bound of g = 1/d(WA)  = 1/lastSeatWon   (highest loser)
@@ -61,11 +62,14 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 
-    override fun desc() = buildString {
-        append("${shortName()}: upperBound=${df(upperBound())}")
-    }
+    override fun desc() = "${shortName()}: upperBound=${df(upperBound())}"
     override fun shortName() = "DHondt w/l=${winnerNameRound()}/${loserNameRound()}"
-    override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
+
+    // Youd like to be able to add new assorters as needed, but the factoring out into contests.json makes that harder
+    // we could add new assertionRound, but dont have the new assorters in contests.json
+    // TODO I think you need both the candidate and the round to be unique.
+    //    val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int
+    override fun hashcodeDesc() = "${winnerNameRound()}/${loserNameRound()} ${info.name}" // must be unique for serialization
 
     fun winnerNameRound() =  "${info.candidateIdToName[winner()]}-$lastSeatWon"
     fun loserNameRound() =  "${info.candidateIdToName[loser()]}-$firstSeatLost"
@@ -76,7 +80,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         return "fw=${dfn(winnerScore, 1)} fl=${dfn(loserScore, 1)} fw-fl=${dfn(winnerScore - loserScore, 0)}"
     }
 
-    fun difficulty(votesForWinner: Int, votesForLoser: Int): Double {
+    fun voteDiff(votesForWinner: Int, votesForLoser: Int): Double {
         val winnerScore = votesForWinner / lastSeatWon.toDouble()
         val loserScore = votesForLoser / firstSeatLost.toDouble()
         return winnerScore - loserScore

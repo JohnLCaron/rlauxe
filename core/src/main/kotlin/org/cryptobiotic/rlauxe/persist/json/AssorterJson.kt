@@ -100,6 +100,7 @@ data class AssorterIFJson(
     val winner: Int,
     val loser: Int? = null,
     val minFraction: Double? = null,
+
     val rassertion: RaireAssertionJson? = null,
     val lastSeatWon: Int? = null,
     val firstSeatLost: Int? = null,

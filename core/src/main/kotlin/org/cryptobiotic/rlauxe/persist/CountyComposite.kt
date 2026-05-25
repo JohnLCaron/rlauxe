@@ -6,8 +6,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.*
-import java.io.BufferedReader
-import java.io.File
 
 // not used right now, but Corla may use it in the future
 // the idea is to have County Audits as subdirectories, to make a CompositeRecord
@@ -74,8 +72,8 @@ class CountyComposite(
                 return null
             }
 
-            val components = if (CompositeRecord.checkExists(location)) {
-                CompositeRecord.readFrom(location)!!.componentRecords
+            val components = if (CompositeAuditRecord.checkExists(location)) {
+                CompositeAuditRecord.readFrom(location)!!.componentRecords
             } else emptyList()
 
             val countyData = readCountyData("$location/$countyDataFile")

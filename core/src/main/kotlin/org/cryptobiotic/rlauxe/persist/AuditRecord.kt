@@ -131,7 +131,7 @@ open class AuditRecord(
             if (location == null) return false
             if (CountyAudit.checkExists(location)) return true
             if (CountyComposite.checkExists(location)) return true
-            if (CompositeRecord.checkExists(location)) return true
+            if (CompositeAuditRecord.checkExists(location)) return true
             if (checkAuditRecordExists(location)) return true
             return false
         }
@@ -159,8 +159,8 @@ open class AuditRecord(
                 if (countyComposite != null) return countyComposite
             }
 
-            if (CompositeRecord.checkExists(location)) {
-                val compositeRecord = CompositeRecord.readFrom(location)
+            if (CompositeAuditRecord.checkExists(location)) {
+                val compositeRecord = CompositeAuditRecord.readFrom(location)
                 if (compositeRecord != null) return compositeRecord
             }
 

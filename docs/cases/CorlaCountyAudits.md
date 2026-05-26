@@ -92,9 +92,9 @@ contests that span multiple counties.
 
 The downside is that there is less "opportunistic sampling" in consistent sampling than for uniform samping. In consistent sampling,
 each contest has a canonical sequence of ballots that must be used, in order to eliminate possible sampling bias.
-So opportunistic contests (ones not expicityle included in the audit) can only use samples until the canonical sequence 
-is broken because a card in its sequene is not included in the sample. This differs from uniform sampling where all mvrs
-in the strata count in the risk measurement, even when they dont include the contest (per private conversation with Phillip Stark).
+So opportunistic contests (ones not expicitly targeted) can only use samples until the canonical sequence 
+is broken because a card in its sequence is not included in the sample. This differs from uniform sampling where all mvrs
+in the strata count in the risk measurement, even when they don't include the contest (per private conversation with Phillip Stark).
 
 ## Results
 

@@ -23,7 +23,7 @@ class TestOneShot {
         println(oneshotNmvrs)
     }
 
-    // @Test dont use for unit tests
+    // @Test dont use for unit tests TODO WHY NOT?
     fun testEstimatePollingAudit() {
         val auditdir = "/home/stormy/rla/cases/corla/polling/audit"
         val record = AuditRecord.read(auditdir)

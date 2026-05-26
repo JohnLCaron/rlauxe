@@ -73,8 +73,8 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
             if (seq != null) {
                 val pvalues = seq.pvalues()
                 val count = seq.xs.size
-                append("${sfn("idx", 4)}, ${sfn("xs", 8)}, ${sfn("bet", 8)}, ${sfn("payoff", 8)}, ${sfn("Tj", 8)}, ${sfn("pvalue", 8)}, ")
-                appendLine("${sfn("location", 25)}, ${sfn("mvr votes", 10)}, ${sfn("card", 10)}")
+                append("${sfn("idx", 4)},   ${sfn("xs", 8)},   ${sfn("bet", 8)},   ${sfn("payoff", 8)}, ${sfn("Tj", 8)}, ${sfn("pvalue", 8)}, ")
+                appendLine("${sfn("location", 25)}, ${sfn("mvr votes", 10)}, ${sfn("card votes", 10)}")
                 repeat(count) {
                     val x = seq.xs[it]
                     val pair = sampler.next()

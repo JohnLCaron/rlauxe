@@ -41,6 +41,7 @@ fun removeContestsAndSample(
         // enforce sample limits
         val removeContests = checkSampleLimits(sampling, auditRound, contestsNotDone)
         if (removeContests.isEmpty()) break
+        logger.info{"*** remove ${removeContests.size} contests and resample"}
         removeContests.forEach { contestsNotDone.remove(it) }
         // do it again
     }
@@ -81,25 +82,31 @@ private fun checkSampleLimits(
         contestsNotDone.forEach { contestRound ->
             val contestUA = contestRound.contestUA
             if ((contestUA.minRecountMargin() ?: 0.0) <= sampleControl.minRecountMargin) {
-                logger.warn { "*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${sampleControl.minRecountMargin}" }
-                contestUA.preAuditStatus = TestH0Status.MinMargin
+                logger.info { "*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${sampleControl.minRecountMargin}" }
+                contestRound.status = TestH0Status.MinMargin
+                contestRound.included = false
+                contestRound.done = true
+                removeContests.add(contestRound)
             }
             if ((contestUA.minMargin() ?: 0.0) <= sampleControl.minMargin) {
-                logger.warn { "*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minMargin()} <= ${sampleControl.minMargin}" }
-                contestUA.preAuditStatus = TestH0Status.MinMargin
+                logger.info { "*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minMargin()} <= ${sampleControl.minMargin}" }
+                contestRound.status = TestH0Status.MinMargin
+                contestRound.included = false
+                contestRound.done = true
+                removeContests.add(contestRound)
             }
         }
     }
 
     // limit contest samples to maxSamplePct
     if (sampleControl.maxSamplePct > 0.0) {
-        contestsNotDone.forEach { contestRound ->
+        contestsNotDone.filter{ it.status == TestH0Status.InProgress }.forEach { contestRound ->
             val pct = contestRound.estMvrs / contestRound.contestUA.Npop.toDouble()
             if (pct > sampleControl.maxSamplePct) {
                 contestRound.status = TestH0Status.FailMaxSamplesAllowed
                 contestRound.included = false
                 contestRound.done = true
-                logger.warn{"*** remove contest ${contestRound.id} with status FailMaxSamplesAllowed: maxSamplePct ${pct} > ${sampleControl.maxSamplePct}"}
+                logger.info{"*** remove contest ${contestRound.id} with status FailMaxSamplesAllowed: maxSamplePct ${pct} > ${sampleControl.maxSamplePct}"}
                 removeContests.add(contestRound)
             }
         }
@@ -107,12 +114,12 @@ private fun checkSampleLimits(
 
     // limit each contest sample to be less than contestSampleCutoff
     if (sampleControl.contestSampleCutoff != null && sampleControl.contestSampleCutoff > 0) {
-        contestsNotDone.forEach { contestRound ->
+        contestsNotDone.filter{ it.status == TestH0Status.InProgress }.forEach { contestRound ->
             if (contestRound.estMvrs > sampleControl.contestSampleCutoff) {
                 contestRound.status = TestH0Status.FailMaxSamplesAllowed
                 contestRound.included = false
                 contestRound.done = true
-                logger.warn{" *** too many samples for contest ${contestRound.id}: ${contestRound.estMvrs} > ${sampleControl.contestSampleCutoff}, "}
+                logger.info{" *** too many samples for contest ${contestRound.id}: ${contestRound.estMvrs} > ${sampleControl.contestSampleCutoff}, "}
                 removeContests.add(contestRound)
             }
         }
@@ -130,7 +137,7 @@ private fun checkSampleLimits(
             maxContest.status = TestH0Status.FailMaxSamplesAllowed
             maxContest.included = false
             maxContest.done = true
-            logger.warn {
+            logger.info {
                 "*** too many samples in audit: ${auditRound.samplePrns.size} > ${sampleControl.auditSampleCutoff}, " +
                         "remove contest ${maxContest.id} with largest sample size = ${maxContest.estMvrs}; set to FailMaxSamplesAllowed"
             }
@@ -191,7 +198,7 @@ fun consistentSampling(
     val sampledPrns = mutableListOf<Long>()
     var cardIndex = 0  // track maximum index (not done yet)
 
-    var maxNewSamples = auditRound.auditorWantNewMvrs
+    var maxNewSamples = auditRound.auditorMaxNewMvrs // TODO test
     if (maxNewSamples == null || maxNewSamples < 0) maxNewSamples = Int.MAX_VALUE
 
     val samplingCardIter = samplingCards.iterator()
@@ -300,7 +307,7 @@ fun uniformSampling(
     val sampledPrns = mutableListOf<Long>()
     var cardIndex = 0  // track maximum index (not done yet)
 
-    val maxNewSamples = auditRound.auditorWantNewMvrs
+    val maxNewSamples = auditRound.auditorMaxNewMvrs // TODO test
     if (maxNewSamples == null || maxNewSamples < 0) {
         logger.warn{" You must set auditRound.auditorWantNewMvrs for uniform sampling"}
         return emptyList()

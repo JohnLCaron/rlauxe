@@ -15,8 +15,6 @@ import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.verify.VerifyAuditRoundCommitment
-import org.cryptobiotic.rlauxe.verify.VerifyResults
-import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import java.nio.file.Files.notExists
@@ -25,8 +23,8 @@ import java.nio.file.Path
 private val logger = KotlinLogging.logger("RunAuditRound")
 
 // called from cli and rlauxe-viewer
-fun runRound(inputDir: String, onlyTask: OnlyTask? = null, auditorWantNewMvrs: Int? = null): AuditRoundIF? {
-    val roundResult = runRoundResult(inputDir, onlyTask, auditorWantNewMvrs)
+fun runRound(inputDir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvrs: Int? = null): AuditRoundIF? {
+    val roundResult = runRoundResult(inputDir, onlyTask, auditorMaxNewMvrs)
     if (roundResult.isErr) {
         logger.error{"runRoundResult failed ${roundResult.component2()}"}
         return null
@@ -35,7 +33,7 @@ fun runRound(inputDir: String, onlyTask: OnlyTask? = null, auditorWantNewMvrs: I
 }
 
 // run one round and get ready to run the next round; or get ready to run the first round.
-fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null, auditorWantNewMvrs: Int? = null): Result<AuditRoundIF, ErrorMessages> {
+fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvrs: Int? = null): Result<AuditRoundIF, ErrorMessages> {
     val errs = ErrorMessages("runRoundResult")
 
     try {
@@ -46,15 +44,18 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null, auditorWantNewM
         if (auditRecord == null) {
             return errs.add("directory '$auditDir' does not contain an audit record")
         }
-        require(auditRecord is AuditRecord)
+        require(auditRecord is AuditRecord) // TODO
 
         val workflow = PersistedWorkflow(auditRecord)
         var roundIdx = 0
         var complete = false
         var auditWasRun = false
 
-        // run the audit on the last round, if there is one
-        if (!workflow.auditRounds().isEmpty()) {
+        if (workflow.auditRounds().isEmpty()) {
+            return startFirstRound(auditDir, onlyTask, auditorMaxNewMvrs)
+
+        } else {
+            // run the audit on the last round, if it wasnt done
             val lastRound = workflow.auditRounds().last()
             roundIdx = lastRound.roundIdx
 
@@ -77,22 +78,11 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null, auditorWantNewM
         // start a new round by estimating the mvrs needed
         if (!complete && !waitOnRisk ) {
             roundIdx++
+
             // start next round and estimate sample sizes
             logger.info { "Start startNewRound $roundIdx using ${workflow}" }
             val roundStopwatch = Stopwatch()
-
-            if (roundIdx == 1) {
-                //// heres where we can remove contests as needed
-                // this may change the auditStatus to misformed.
-                val results = VerifyResults()
-                preAuditContestCheck(auditRecord.contests, results)
-                if (results.hasErrors) {
-                    logger.warn{ results.toString() }
-                } else {
-                    logger.info{ results.toString() }
-                }
-            }
-            val nextRound = workflow.startNewRound(quiet = false, onlyTask, auditorWantNewMvrs)
+            val nextRound = workflow.startNewRound(quiet = false, onlyTask, auditorMaxNewMvrs)
 
             // get matching mvrs if needed
             if (!nextRound.auditIsComplete && auditRecord.config.election.mvrSource == MvrSource.testPrivateMvrs) {

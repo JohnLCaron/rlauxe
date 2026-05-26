@@ -19,18 +19,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestProtoCard {
-    val testFastSamplFile = "$testdataDir/temp/sortedCards.proto"
-
-    @Test
-    fun writeProtoFile () {
-        val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
-        val cardIter: CloseableIterator<AuditableCardIF> = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles=null)
-
-        val stopwatch = Stopwatch()
-        val ncards = writeProtoCards(cardIter, testFastSamplFile)
-        println("writeProtoFile ncards = $ncards, took $stopwatch")
-    }
 
     @Test
     fun testProtoAndCsvAgree () {

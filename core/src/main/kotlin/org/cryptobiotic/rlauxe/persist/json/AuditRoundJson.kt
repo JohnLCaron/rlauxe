@@ -44,7 +44,7 @@ data class AuditRoundJson(
     var newmvrs: Int,
     var mvrsUnused: Int,
     var mvrsUsed: Int,
-    var auditorWantNewMvrs: Int? = null,
+    var auditorMaxNewMvrs: Int? = null,
 )
 
 fun AuditRoundIF.publishJson() : AuditRoundJson {
@@ -57,7 +57,7 @@ fun AuditRoundIF.publishJson() : AuditRoundJson {
         this.newmvrs,
         this.mvrsUsed,
         this.mvrsUnused,
-        this.auditorWantNewMvrs,
+        this.auditorMaxNewMvrs,
     )
 }
 
@@ -78,7 +78,7 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
         this.mvrsUsed,
         this.mvrsUnused,
     )
-    auditRound.auditorWantNewMvrs = this.auditorWantNewMvrs
+    auditRound.auditorMaxNewMvrs = this.auditorMaxNewMvrs
     return auditRound
 }
 

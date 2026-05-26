@@ -21,7 +21,7 @@ interface AuditRoundIF {
     var newmvrs: Int    // number of new mvrs in round
     var mvrsUsed: Int
     var mvrsUnused: Int
-    var auditorWantNewMvrs: Int?
+    var auditorMaxNewMvrs: Int?  // maximum new samples in audit; set by auditor
 
     fun show(): String
     fun createNextRound(): AuditRound
@@ -41,7 +41,7 @@ data class AuditRound(
     override var mvrsUnused: Int = 0,
     override var mvrsUsed: Int = 0,
 ) : AuditRoundIF {
-    override var auditorWantNewMvrs: Int? = null
+    override var auditorMaxNewMvrs: Int? = null
 
     override fun toString() = show()
 
@@ -86,7 +86,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
 
     var haveSampleSize: Int = 0
     var haveNewSampleSize: Int = 0
-    var auditorWantNewMvrs: Int? = null
+    var auditorWantNewMvrs: Int? = null // auditorMaxNewMvrs ??
 
     init {
         if (status.complete) {
@@ -131,35 +131,6 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     fun risk(): Double {
         return assertionRounds.maxOfOrNull { it.auditResult?.pmin ?: 1.0 } ?: 1.0
     }
-
-    /* called by viewer
-    fun corlaCalc(alpha: Double): Int {
-        val minAssertion = minAssertion()
-        if (minAssertion == null) return 0
-        val lastResult = minAssertion.auditResult ?: minAssertion.prevAuditResult
-        if (lastResult == null) return 0
-
-        val errorCounts = lastResult.clcaErrorTracker.measuredClcaErrorCounts()
-
-        // fun estimateSampleSizeSimple(
-        //    riskLimit: Double,
-        //    dilutedMargin: Double,
-        //    gamma: Double = 1.03905,
-        //    twoOver: Int = 0,
-        //    oneOver: Int = 0,
-        //    oneUnder: Int = 0,
-        //    twoUnder: Int = 0,
-        //)
-
-        return estimateCorla(
-            alpha,
-            dilutedMargin = minAssertion.assertion.assorter.dilutedMargin(),
-            twoOver = errorCounts.getNamedCount("p2o") ?: 0,
-            oneOver = errorCounts.getNamedCount("p1o") ?: 0,
-            oneUnder = errorCounts.getNamedCount("p1u") ?: 0,
-            twoUnder = errorCounts.getNamedCount("p2u") ?: 0,
-        )
-    } */
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

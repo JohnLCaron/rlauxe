@@ -223,7 +223,7 @@ data class ProxyAuditRound(
     override var mvrsUsed: Int = 0,
     override var mvrsUnused: Int = 0,
 ) : AuditRoundIF {
-    override var auditorWantNewMvrs: Int? = null
+    override var auditorMaxNewMvrs: Int? = null
 
     init {
         auditWasDone = auditRounds.all { it.auditWasDone }

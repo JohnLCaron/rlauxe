@@ -31,7 +31,7 @@ class TestUniformSampling {
         // contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
-        auditRound.auditorWantNewMvrs = 1111
+        auditRound.auditorMaxNewMvrs = 1111
 
         //// main side effects:
         ////    auditRound.nmvrs = sampledCards.size

@@ -15,7 +15,7 @@ import org.cryptobiotic.rlauxe.util.ErrorMessages
 import kotlin.String
 
 /** Run first estimate round of an election that has already been created and auditConfig exists. */
-object StartAuditFirstRound {
+object StartAuditFirstRoundCli {
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -62,15 +62,15 @@ object RunRlaRoundCli {
             shortName = "quiet",
             description = "dont show progress messages"
         ).default(false)
-        val auditorWantNewMvrs by parser.option(
+        val auditorMaxNewMvrs by parser.option(
             ArgType.Int,
-            shortName = "uniform",
-            description = "set mu,ber of mvrs for uniform sample"
+            shortName = "maxMvrs",
+            description = "maximum number of new samples for this round"
         )
 
         try {
             parser.parse(args)
-            runRound(inputDir, OnlyTask.parse(onlyTask), auditorWantNewMvrs)
+            runRound(inputDir, OnlyTask.parse(onlyTask), auditorMaxNewMvrs)
         } catch (t: Throwable) {
             println(t.message)
         }

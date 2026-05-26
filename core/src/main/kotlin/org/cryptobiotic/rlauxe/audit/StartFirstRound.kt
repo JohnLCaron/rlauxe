@@ -17,7 +17,7 @@ import java.nio.file.Path
 
 private val logger = KotlinLogging.logger("StartAudit")
 
-fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRoundIF, ErrorMessages> {
+fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvrs: Int? = null): Result<AuditRoundIF, ErrorMessages> {
     val errs = ErrorMessages("startFirstRound")
 
     try {
@@ -58,7 +58,7 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditR
         // start next round and estimate sample sizes
         logger.info { "startFirstRound using ${workflow}" }
         val roundStopwatch = Stopwatch()
-        val nextRound = workflow.startNewRound(quiet = false, onlyTask)
+        val nextRound = workflow.startNewRound(quiet = false, onlyTask, auditorMaxNewMvrs)
 
         // get matching mvrs if needed
         if (auditRecord.config.mvrSource == MvrSource.testPrivateMvrs) {

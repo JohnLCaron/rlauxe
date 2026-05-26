@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import kotlin.test.Test
 
 class TestCompositeRecord {
-    val belgiumData = "$testdataDir/cases/belgium/2024limited"
+    val belgiumData = "$testdataDir/cases/belgium/belgium2024"
     val corlaUniform = "$testdataDir/cases/corla/uniform"
 
     @Test

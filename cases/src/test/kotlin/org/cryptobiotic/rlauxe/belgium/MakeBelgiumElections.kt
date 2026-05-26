@@ -32,8 +32,8 @@ val toptopdir = "$testdataDir/cases/belgium/belgium2024"
 TODO
    1. read in parties.txt and pass into createAndRunBelgiumElection to get consistent party ids. DONE
    2. change merge across contests to use Ids, not names DONE
-   3. read in sampleLimits to set into contestRound.haveSamples
-   4. read in coalitions for showMergedSeatRanges()
+   3. read in sampleLimits to set into contestRound.haveSamples DONE
+   4. read in coalitions for showMergedSeatRanges() OBSOLETE
    5. allow adding assertions to contestRounds and save them.
  */
 class MakeBelgiumElections {

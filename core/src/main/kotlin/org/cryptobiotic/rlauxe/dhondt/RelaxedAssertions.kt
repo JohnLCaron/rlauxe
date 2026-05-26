@@ -483,6 +483,7 @@ data class Coalition(val name: String, val candidates: Set<Int>) {
     }
 }
 
+// obsolete
 fun showCoalitionReport(auditRecord : CompositeAuditRecord) = buildString {
     val coalitions = auditRecord.readCoalitions().map { Coalition(it.name, it.candidates.toSet()) }
     val lastRound = auditRecord.rounds.last()

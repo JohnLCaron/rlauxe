@@ -21,7 +21,7 @@ import org.cryptobiotic.rlauxe.verify.verifyMvrCardPairs
 // skip writing when doing runRoundAgain
 open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boolean = true): MvrManager {
     val config = auditRecord.config
-    val contestsUA = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress }
+    val contestsUA = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress } // note: only InProgress
     val publisher = Publisher(auditRecord.location)
 
     val styles by lazy { auditRecord.readCardStyles() ?: auditRecord.readCardPools() } // styles are preferred

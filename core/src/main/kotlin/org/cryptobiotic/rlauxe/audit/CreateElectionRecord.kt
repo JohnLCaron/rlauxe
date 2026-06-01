@@ -11,7 +11,6 @@ import org.cryptobiotic.rlauxe.persist.json.writeElectionInfoJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeCardStylesJsonFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.verify.VerifyElectionCommitment
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
@@ -37,7 +36,7 @@ interface ElectionBuilder {
 
 private val logger = KotlinLogging.logger("CreateElectionRecord")
 
-fun createElectionRecord(election: ElectionBuilder, auditDir: String, clear: Boolean = true, validate: Boolean = false) {
+fun createElectionRecord(election: ElectionBuilder, auditDir: String, control: ContestSampleControl? = null, clear: Boolean = true, validate: Boolean = false) {
     if (clear) clearDirectory(Path(auditDir))
 
     val errs = validateOutputDir(Path.of(auditDir))
@@ -68,12 +67,13 @@ fun createElectionRecord(election: ElectionBuilder, auditDir: String, clear: Boo
     logger.info { "createElectionRecord write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
 
     // by calling preAuditContestCheck here, we change the contest.preAuditStatus before the contests are written
-    // but we dont have the ContestSampleControl yet. TODO ??
+    // but we dont have the ContestSampleControl yet.
+    // TODO move minMargin checks to electionInfo? Or skip that here, but allow to change later ??
     val contestsUA = election.contestsUA()
 
     val results = VerifyResults()
     results.addMessage("---VerifyElection on $auditDir")
-    preAuditContestCheck(contestsUA, results)
+    preAuditContestCheck(contestsUA, control, results)
 
     // write contests
     writeContestsJsonFile(contestsUA, publisher.contestsFile())

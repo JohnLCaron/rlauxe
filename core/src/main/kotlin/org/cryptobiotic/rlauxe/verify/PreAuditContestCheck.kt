@@ -9,7 +9,7 @@ import kotlin.collections.component2
 import kotlin.math.min
 
 
-fun preAuditContestCheck(contestsUA: List<ContestWithAssertions>, results: VerifyResults) {
+fun preAuditContestCheck(contestsUA: List<ContestWithAssertions>, control: ContestSampleControl?, results: VerifyResults) {
     val logger = KotlinLogging.logger("preAuditContestCheck")
 
     results.addMessage("checkContestsCorrectlyFormed")
@@ -29,6 +29,22 @@ fun preAuditContestCheck(contestsUA: List<ContestWithAssertions>, results: Verif
                 if (contestUA.contest.Nphantoms() >= marginInVotes) {
                     logger.warn { "***TooManyPhantoms contest ${contestUA.id} nphantoms ${contestUA.contest.Nphantoms()} >= $marginInVotes margin in votes" }
                     contestUA.preAuditStatus = TestH0Status.TooManyPhantoms
+                }
+            }
+        }
+    }
+
+    // remove contests if fail minRecountMargin, minMargin
+    if (control != null) {
+        if (control.minRecountMargin > 0.0 || control.minMargin > 0.0) {
+            contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress }.forEach { contestUA ->
+                if ((contestUA.minRecountMargin() ?: 0.0) <= control.minRecountMargin) {
+                    logger.info { "*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${control.minRecountMargin}" }
+                    contestUA.preAuditStatus = TestH0Status.MinMargin
+                }
+                if ((contestUA.minMargin() ?: 0.0) <= control.minMargin) {
+                    logger.info { "*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minMargin()} <= ${control.minMargin}" }
+                    contestUA.preAuditStatus = TestH0Status.MinMargin
                 }
             }
         }

@@ -169,6 +169,8 @@ open class ContestWithAssertions(
         return if (minAssertion != null)  contest.showAssertionDifficulty(minAssertion.assorter) else "N/A"
     }
 
+    fun population() = if (hasStyle) Nc else Npop
+
     fun phantomRate() = contest.Nphantoms() / Npop.toDouble()
 
     override fun toString() = showShort()

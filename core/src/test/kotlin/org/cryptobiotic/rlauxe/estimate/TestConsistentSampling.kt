@@ -109,9 +109,10 @@ class TestConsistentSampling {
             val contestsUAs: List<ContestWithAssertions> = test.contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
             val testCvrs = test.makeCvrsFromContests()
             val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
+            val config = Config.from(AuditType.CLCA)
 
             val results = VerifyResults()
-            preAuditContestCheck(contestsUAs, results) // contestUA.preAuditStatus is set
+            preAuditContestCheck(contestsUAs, config.sampling, results) // contestUA.preAuditStatus is set
             if (results.hasErrors) println( results.toString() )
             val countCheckRemoved = contestsUAs.count { it.preAuditStatus != TestH0Status.InProgress }
             println(" checkContestsCorrectlyFormed removed ${countCheckRemoved} / ${contestsUAs.size}")
@@ -129,7 +130,7 @@ class TestConsistentSampling {
             //   assertionRound.estimationResult = estimationResult
             val estimate = EstimateAudit(
                 mvrManager.auditdir(),
-                Config.from(AuditType.CLCA),
+                config,
                 auditRound.roundIdx,
                 auditRound.contestRounds,
                 mvrManager.pools(),

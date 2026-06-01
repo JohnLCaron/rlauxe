@@ -52,6 +52,10 @@ and then may not be changed.
         contests.json         // ContestsUnderAuditJson
         electionInfo.json     // ElectionInfoJson
 
+        round1/
+            auditRoundEst1.json  // the configuration parameters for round 1
+            auditEst1.json       // the estimation of sample sizes of the contests for round 1
+
 2. createAuditRecord : PRNG seed chosen, cards assigned PRNs
 
 The PRNG seed is chosen, and all the cards in the card manifest are assigned a PRN in sequence by the PRNG.

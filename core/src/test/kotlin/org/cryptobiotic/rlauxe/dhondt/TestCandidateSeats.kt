@@ -4,9 +4,10 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
 import org.junit.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class TestCands2 {
+class TestCandidateSeats {
     val auditdir = "$testdataDir/cases/belgium/belgium2024/"
     val auditRecord = AuditRecord.read(auditdir)!! as CompositeAuditRecord
     val contests = auditRecord.contests
@@ -65,8 +66,9 @@ class TestCands2 {
 
         val allContests = partyNames.map { it.key }.toSet()
         val coal = all.calcCoalition(allContests, partyNames)
-        // if all are in teh coalition, there are no coalition failures
+        // if all are in the coalition, there are no coalition failures
         println("sumFail = $sumFail; allCandsFail = $allCandsFail; coalAllFail = ${coal.nfailures}; coalFailures = ${coal.failures.size}; ")
+        assertEquals(0, coal.failures.size)
     }
 
     @Test

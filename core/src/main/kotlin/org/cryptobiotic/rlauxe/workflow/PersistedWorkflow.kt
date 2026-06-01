@@ -31,7 +31,7 @@ class PersistedWorkflow(
         config = auditRecord.config
         mvrSource = config.election.mvrSource
         // skip contests that have been removed
-        auditContests = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress }
+        auditContests = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress } // note InProgress only
         auditRounds.addAll(auditRecord.rounds)
 
         mvrManager = when {

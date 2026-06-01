@@ -66,7 +66,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
 
         // all
         val infos = allInfos ?: contests.associate { it.id to it.contest.info() }
-        preAuditContestCheck(contests, results)
+        preAuditContestCheck(contests, config.sampling, results)
         println("preAuditContestCheck done")
         val contestSummary = verifyManifest(config, contests, sortedManifest.cards, infos, results)
         println("verifyManifest done")

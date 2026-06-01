@@ -46,26 +46,6 @@ fun removeContestsAndSample(
         // do it again
     }
 
-    /* debug
-    // lastCardsUsed = consistentSampling( auditRound, sortedManifest, previousSamples)
-
-    if (verifyMaxIndex) { // debugging, probably dont need this anymore
-        val countSamples = mutableMapOf<Int, Int>()
-        contestsNotDone.forEach { countSamples[it.id] = 0}
-        lastCardsUsed.forEach { cardUsed ->
-            contestsNotDone.forEach { contest ->
-                val count = countSamples[contest.id]!!
-                if (cardUsed.hasContest(contest.id) && count < contest.maxSampleAllowed!!) {
-                    countSamples[contest.id] = count + 1
-                }
-            }
-        }
-        contestsNotDone.forEach {
-            println("contest ${it.id} countInSample=${countSamples[it.id]} maxSampleAllowed=${it.maxSampleAllowed} est=${it.estMvrs} estNew=${it.estNewMvrs}")
-            require (countSamples[it.id]!! >= it.estMvrs )
-        }
-    } */
-
     logger.debug{"sampleAndRemoveContests success on ${auditRound.contestRounds.count { !it.done }} contests: round ${auditRound.roundIdx} took ${stopwatch}"}
 }
 
@@ -77,31 +57,10 @@ private fun checkSampleLimits(
 ): List<ContestRound> {
     val removeContests = mutableListOf<ContestRound>()
 
-    // limit contest samples to minRecountMargin, minMargin
-    if (sampleControl.minRecountMargin > 0.0 || sampleControl.minMargin > 0.0) {
-        contestsNotDone.forEach { contestRound ->
-            val contestUA = contestRound.contestUA
-            if ((contestUA.minRecountMargin() ?: 0.0) <= sampleControl.minRecountMargin) {
-                logger.info { "*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${sampleControl.minRecountMargin}" }
-                contestRound.status = TestH0Status.MinMargin
-                contestRound.included = false
-                contestRound.done = true
-                removeContests.add(contestRound)
-            }
-            if ((contestUA.minMargin() ?: 0.0) <= sampleControl.minMargin) {
-                logger.info { "*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minMargin()} <= ${sampleControl.minMargin}" }
-                contestRound.status = TestH0Status.MinMargin
-                contestRound.included = false
-                contestRound.done = true
-                removeContests.add(contestRound)
-            }
-        }
-    }
-
     // limit contest samples to maxSamplePct
     if (sampleControl.maxSamplePct > 0.0) {
         contestsNotDone.filter{ it.status == TestH0Status.InProgress }.forEach { contestRound ->
-            val pct = contestRound.estMvrs / contestRound.contestUA.Npop.toDouble()
+            val pct = contestRound.estMvrs / contestRound.contestUA.population().toDouble()
             if (pct > sampleControl.maxSamplePct) {
                 contestRound.status = TestH0Status.FailMaxSamplesAllowed
                 contestRound.included = false
@@ -185,7 +144,7 @@ fun consistentSampling(
     if (contestsIncluded.isEmpty()) return emptyList()
 
     // how many samples are wanted for each contest
-    contestsIncluded.forEach { if (it.auditorWantNewMvrs != null && it.auditorWantNewMvrs!! < 0) it.auditorWantNewMvrs = null } // TODO fix in viewerr
+    // contestsIncluded.forEach { if (it.auditorWantNewMvrs != null && it.auditorWantNewMvrs!! < 0) it.auditorWantNewMvrs = null } // TODO fix in viewerr
     // val wantSampleSize = contestsIncluded.associate { it.id to (it.auditorWantNewMvrs ?: it.estMvrs) }
     // require(wantSampleSize.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
 
@@ -295,8 +254,6 @@ fun uniformSampling(
     val contestsIncluded = auditRound.contestRounds.filter { !it.done }
     if (contestsIncluded.isEmpty()) return emptyList()
 
-    // how many samples are wanted for each contest
-    contestsIncluded.forEach { if (it.auditorWantNewMvrs != null && it.auditorWantNewMvrs!! < 0) it.auditorWantNewMvrs = null } // TODO fix in viewerr
 
     var newMvrs = 0 // count when this card not in previous samples
     auditRound.contestRounds.forEach {
@@ -307,6 +264,8 @@ fun uniformSampling(
     val sampledPrns = mutableListOf<Long>()
     var cardIndex = 0  // track maximum index (not done yet)
 
+    // how many samples are wanted for each contest
+    contestsIncluded.forEach { if (it.auditorWantNewMvrs != null && it.auditorWantNewMvrs!! < 0) it.auditorWantNewMvrs = null } // TODO fix in viewer
     val maxNewSamples = auditRound.auditorMaxNewMvrs // TODO test
     if (maxNewSamples == null || maxNewSamples < 0) {
         logger.warn{" You must set auditRound.auditorWantNewMvrs for uniform sampling"}

@@ -97,7 +97,7 @@ fun createUniformElection(
 
     val results = VerifyResults()
     results.addMessage("---VerifyElection on $auditdir")
-    preAuditContestCheck(contestsUA, results)
+    preAuditContestCheck(contestsUA, roundConfig.sampling, results)
 
     // write contests
     val publisher = Publisher(auditdir)

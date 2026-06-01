@@ -176,7 +176,7 @@ data class ElectionInfo(
 
 data class AuditCreationConfig(
     val auditType: AuditType, // must agree with ElectionInfo
-    val riskLimit: Double = 0.05,
+    val riskLimit: Double = 0.05, // TODO can we allow this to relax ??
 
     val seed: Long = secureRandom.nextLong(),
     val riskMeasuringSampleLimit: Int? = null, // the number of samples we are willing to audit; this turns the audit into a "risk measuring" audit

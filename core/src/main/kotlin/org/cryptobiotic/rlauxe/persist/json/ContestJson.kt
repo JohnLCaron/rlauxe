@@ -218,7 +218,7 @@ data class ContestUnderAuditJson(
     val isComparison: Boolean,
     var pollingAssertions: List<AssertionIFJson>,
     var clcaAssertions: List<ClcaAssertionJson>,
-    val status: TestH0Status,
+    val status: TestH0Status, // TODO change to preAuditStatus
     val Npop: Int? = null,
     val hasStyle: Boolean,
 )

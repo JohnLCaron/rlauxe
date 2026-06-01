@@ -175,7 +175,8 @@ fun createConsistentElection(
         else
             CreateColoradoPolling(countyElection, auditdir, pollingMode!!) // TODO hasExact = false ??
 
-    createElectionRecord(election, auditDir = auditdir, clear = false)
+    // TODO kludge in sampleControl for the moment
+    createElectionRecord(election, auditDir = auditdir, roundConfig.sampling, clear = false)
     val config = Config(election.electionInfo(), creation, roundConfig)
 
     createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir)

@@ -86,7 +86,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
 
     var haveSampleSize: Int = 0
     var haveNewSampleSize: Int = 0
-    var auditorWantNewMvrs: Int? = null // auditorMaxNewMvrs ??
+    var auditorWantNewMvrs: Int? = null // should be auditorMaxNewMvrs ?? TODO not used ?? seems like it should be, eg Belgium ???
 
     init {
         if (status.complete) {

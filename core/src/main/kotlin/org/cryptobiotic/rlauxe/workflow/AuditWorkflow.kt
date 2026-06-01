@@ -24,7 +24,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
         val config = config()
         val auditRound = if (previousRound == null) {
             // first time, create the round
-            val contestRounds = contestsUA()
+            val contestRounds = contestsUA() // these have been filtered to InProgress only
                 .filter{ onlyTask == null || it.id == onlyTask.contestId }
                 .map { ContestRound(it, roundIdx) }
             AuditRound(roundIdx, contestRounds = contestRounds, samplePrns = emptyList())

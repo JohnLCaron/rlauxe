@@ -42,13 +42,15 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null, auditorMaxNewM
         }
         require(auditRecord is AuditRecord)
 
+        val config = auditRecord.config
         val workflow = PersistedWorkflow(auditRecord)
         val roundIdx = 1
 
+        // TODO not needed here ?? Done in CreateElectionRecord
         //// heres where we can remove contests as needed
         // this may change the auditStatus to misformed.
         val results = VerifyResults()
-        preAuditContestCheck(auditRecord.contests, results)
+        preAuditContestCheck(auditRecord.contests,  config.sampling, results)
         if (results.hasErrors) {
             logger.warn{ results.toString() }
         } else {

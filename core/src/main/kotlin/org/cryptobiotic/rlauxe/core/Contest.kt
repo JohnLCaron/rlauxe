@@ -229,7 +229,7 @@ open class Contest(
     }
 
     override fun show() = buildString {
-        appendLine("'$name' ($id) $choiceFunction voteForN=${info.voteForN} votes=${votes()} undervotes=$undervotes, voteForN=${info.voteForN}")
+        appendLine("'$name' ($id) $choiceFunction voteForN=${info.voteForN} votes=${votes()} undervotes=$undervotes")
         append("   winners=${winners()} Nc=${Nc()} Nphantoms=${Nphantoms()} Nu=${Nundervotes()} sumVotes=${votes.values.sum()}")
     }
 
@@ -238,7 +238,7 @@ open class Contest(
             val win = if (winners().contains(id)) " (winner)" else ""
             appendLine("   $id '$name': votes=${votes[id]} $win")
         }
-        append("    Total=${votes.values.sum()}")
+        appendLine("    Total=${votes.values.sum()}")
     }
 
     override fun toString() = buildString {

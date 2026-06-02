@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.noerror
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
@@ -116,8 +117,8 @@ open class ContestWithAssertions(
     fun minClcaAssertion(): ClcaAssertion? {
         if (clcaAssertions.isEmpty()) return null
         val margins = clcaAssertions.map { Pair(it, it.cassorter.noerror())  }
-        val minMargin = margins.sortedBy { it.second }
-        return minMargin.first().first
+        val minNoerror = margins.sortedBy { it.second }
+        return minNoerror.first().first
     }
 
     // assertion with the minimum margin
@@ -176,13 +177,12 @@ open class ContestWithAssertions(
     override fun toString() = showShort()
 
     open fun show() = buildString {
-        appendLine("${contest::class.simpleName} ${contest.show()} hasStyle=$hasStyle")
+        appendLine("${contest::class.simpleName} ${contest.show()} Npop=$Npop hasStyle=$hasStyle")
         val minAssertion = minAssertion()
         if (minAssertion != null) {
             val minAssorter = minAssertion.assorter
-            append("   ${contest.showAssertionDifficulty(minAssertion.assorter)}")
-            append(" Npop=$Npop minMargin=${pfn(minMargin())}")
-            appendLine(" recountMargin=${pfn(contest.recountMargin(minAssorter))} ")
+            append("   minAssertion= ${contest.showAssertionDifficulty(minAssertion.assorter)}")
+            appendLine(" noerror=${dfn(noerror(minAssorter.dilutedMargin(), minAssorter.upperBound()), 4)}")
             appendLine()
         }
         append(contest.showCandidates())

@@ -186,8 +186,8 @@ and immediately see the likely number of samples the county would need to audit.
 satisfied with the cost and benefits.
 
 Here is an example from the "targeted plus important contests" scenario,
-the column labeled **nmvrsConsistent** is the number of samples needed for each county. These reflect whether the county has
-close contests, not the size of the county:
+the column labeled **nmvrsConsistent** is the number of samples needed for each county (these reflect whether the county has
+close contests, not the size of the county):
 
 <img src="../images/CorlaCountyView.png" alt="Corla County View">
 

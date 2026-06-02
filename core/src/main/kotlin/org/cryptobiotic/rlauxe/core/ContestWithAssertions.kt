@@ -176,7 +176,7 @@ open class ContestWithAssertions(
     override fun toString() = showShort()
 
     open fun show() = buildString {
-        appendLine("${contest::class.simpleName} ${contest.show()}")
+        appendLine("${contest::class.simpleName} ${contest.show()} hasStyle=$hasStyle")
         val minAssertion = minAssertion()
         if (minAssertion != null) {
             val minAssorter = minAssertion.assorter

@@ -79,6 +79,7 @@ fun createUniformElection(
     auditdir: String,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
+    startFirstRound: Boolean = true,
     name: String? = null,
 ) {
     val stopwatch = Stopwatch()
@@ -115,6 +116,12 @@ fun createUniformElection(
     writeCountyData(topdir, Colorado2024Input.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
     writeCountyContestData(topdir, contestMap, Colorado2024Input.countyContestMap)
+
+    if (startFirstRound) {
+        val result = startFirstRound(auditdir)
+        if (result.isErr) logger.error { result.toString() }
+        logger.info { "createCorla took $stopwatch" }
+    }
 
     println("that took $stopwatch")
 }

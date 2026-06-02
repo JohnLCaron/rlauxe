@@ -4,7 +4,8 @@ _last updated 06/02/2026_
 
 * 4,767,518 cards cast (Colorado 2024 General Election) in 63 Counties.
 * 723 contests, no IRV.
-* 4897 sampled MVRs and corresponding CVRs are available.
+* 65 contests targeted for the RLA, to generate the sample sets
+* 4897 sampled ballot cards, and thus their corresponding CVRs and  Manual Vote Records (MVRs).
 * risk limit =  3%
 * This report based on subtotals by County, not CVRs
 

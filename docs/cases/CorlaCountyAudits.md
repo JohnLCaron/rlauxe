@@ -4,9 +4,9 @@ _last updated 06/02/2026_
 
 * 4,767,518 cards cast (Colorado 2024 General Election) in 63 Counties.
 * 723 contests, no IRV.
-* No CVRs, just subtotals by County.
 * 4897 sampled MVRS and corresponding CVRS are available.
 * risk limit =  3%
+* This report based on subtotals by County, not CVRs
 
 ## Colorado-RLA (Corla) uniform sampling
 
@@ -18,21 +18,31 @@ Corla chooses a _targeted_ contest in each county to audit, and estimates the nu
 uniform (not consistent) sampling. It uniformly samples estNmvrs cards (aka _sheets_) across all the cards in the county.
 
 Independently, it chooses two statewide contests to audit, calculates estNmvrs, and uniformly samples across all the cards in the state.
+Corla chooses a "targeted" contest in each county to audit, and estimates the number of samples needed (aka _estNmvrs_) when doing
+uniform sampling (but not Rivest's consistent sampling). It uniformly samples estNmvrs ballots across all the ballots in the county.
+
+Independently, two statewide contests were targeted for audit, and CORLA calculates estNmvrs, and uniformly samples across all the ballots in the state.
 
 ### Risk estimation for uniform sampling
 
 Because the sampling is uniform for both county and state, provisionally we think that we can combine both county and state
-samples together. We also think that we can estimate the risk from these samples for all contests, not just the targeted ones,
+samples together. We also think that we can estimate the risk level based on these samples for all contests, not just the targeted ones,
 aka _opportunistic auditing_.
 
 We group the combined samples by county, based on which county the card was cast in. When a contest lies within a single county, the RLA is straightforwad, using the _fully diluted margin_:
 
     dilutedMargin = (margin in votes) / (total cards in the county)
+We group the combined samples by county, based on which county the ballot was cast in. When a contest lies within a single county,
+the RLA is straightforward, using the _fully diluted margin_ which handles the fact that sometimes there are multiple ballot
+cards per ballot:
+
+    dilutedMargin = (margin in votes) / (total ballot cards in the county)
 
 When a contest lies within multiple counties, provisionally we think the following algorithm can be used: For each county
 that the contest is in, calculate the county sample rate as
 
     countySampleRate = (number of samples in the county) / (total cards in the county)
+    countySampleRate = (number of samples in the county) / (total ballot cards in the county)
 
 Then we find the minimum countySampleRate over all counties. Conceptually, for each county we randomly choose and discard 
 extra samples, until all counties have the same sample rate. Now sum the number of remaining samples over all counties, and 
@@ -41,6 +51,7 @@ independent of the contest, but the set of counties used depends on each contest
 
     dilutedMargin = (margin in votes over all counties with the contest) / 
                     (total cards in all counties with the contest)
+                    (total ballot cards in all counties with the contest)
 
 Given the contest dilutedMargin and the number of samples in the contest's stratum, we can calculate the estimated risk from the betting martingale as:
 
@@ -74,6 +85,9 @@ described in the "More style, less work" paper.
 We dont have CVRS available so we have to simulate them from the county vote subtotals, taken from _tabulateCounty.csv_.
 Unfortunately, these subtotals do not include undervotes or number of cards for each contest. So we estimate those as 
 best we can, and hope that in the future we can work with the real CVRS, or at least county vote subtotals that include undervotes.
+We dont have CVRs available so we have to simulate them from the county vote subtotals, taken from _tabulateCounty.csv_.
+Unfortunately, these subtotals do not include undervotes or number of ballots for each contest. So we estimate those as
+best we can, and hope that in the future we can work with the real CVRs, or at least county vote subtotals that include undervotes.
 
 The accuracy of the simulation depends on knowing what contests appear together on what cards. If we had CSD for each card in the 
 county manifests, we could do a very accurate simulation even without the actual CVRs. To proceed, we examined the 5000 sampled MVRS, and 
@@ -97,6 +111,10 @@ each contest has a canonical sequence of cards that must be used, in order to el
 So opportunistic contests (ones not expicityle included in the audit) can only use samples until the canonical sequence 
 is broken because a card in its sequene is not included in the sample. This differs from uniform sampling where all mvrs
 in the strata count in the risk measurement, even when they dont include the contest (per private conversation with Phillip Stark).
+each contest has a canonical sequence of ballots that must be used, in order to eliminate possible sampling bias.
+So opportunistic contests (ones not expicitly targeted) can only use samples until the canonical sequence 
+is broken because a card in its sequence is not included in the sample. This differs from uniform sampling where all mvrs
+in the strata count in the risk measurement, even when they don't include the contest (per private conversation with Phillip Stark).
 
 ## Results
 

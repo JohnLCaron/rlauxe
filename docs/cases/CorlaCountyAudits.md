@@ -1,4 +1,5 @@
 # Colorado Statewide election by Counties 2024
+
 _last updated 06/02/2026_
 
 * 4,767,518 cards cast (Colorado 2024 General Election) in 63 Counties.

@@ -1,5 +1,5 @@
 [versions]
-rlauxe = "0.9.4"
+rlauxe = "0.9.5"
 
 # main dependency versions
 kotlin = "2.3.20"

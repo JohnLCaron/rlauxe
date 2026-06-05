@@ -9,11 +9,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestReadBelgiumElection {
-    val partyFilename = "/home/stormy/rla/cases/belgium/belgium2024/parties.txt"
-    val limitsFilename = "/home/stormy/rla/cases/belgium/belgium2024/sampleLimits.txt"
-    val coalitionsFilename = "/home/stormy/rla/cases/belgium/belgium2024/coalitions.txt"
-    val canonicalPartiesFilename = "/home/stormy/rla/cases/belgium/belgium2024/canonicalParties.txt"
-    val royaumeFilename =  "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/belgium2024/2024_chambre-des-représentants_Royaume.csv"
+    val partyFilename = "src/test/data/belgium2024/parties.txt"
+    val limitsFilename = "src/test/data/belgium2024/sampleLimits.txt"
+    val canonicalPartiesFilename = "src/test/data/belgium2024/canonicalParties.txt"
+    val royaumeFilename =  "src/test/data/belgium2024/2024_chambre-des-représentants_Royaume.csv"
 
     @Test
     fun testReadPartyTxtFile() {
@@ -54,12 +53,6 @@ class TestReadBelgiumElection {
     @Test
     fun testReadLimitsTxtFile() {
         val result = readLimitsTxtFile(limitsFilename)
-        result.forEach { println(it) }
-    }
-
-    @Test
-    fun testReadCoalitionsTxtFile() {
-        val result = readCoalitionTxtFile(coalitionsFilename)
         result.forEach { println(it) }
     }
 

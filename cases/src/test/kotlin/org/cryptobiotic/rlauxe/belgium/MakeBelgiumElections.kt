@@ -189,7 +189,7 @@ private fun showBelgiumElection(electionName: String): Triple<Int, Int, Assorter
     val minAssorter = minAssertion!!.assorter
     println("minAssorter: ${minAssorter}")
     println("  ${contestUA.minAssertionDifficulty()}")
-    println(contestUA.contest.showCandidates())
+    print(contestUA.contest.showCandidates())
 
     if (auditRecord.rounds.isEmpty())
         print("")

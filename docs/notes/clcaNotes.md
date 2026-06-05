@@ -173,6 +173,38 @@ the risk is satisfied by 10 random ballots that dont even contain the contest.
 Can you reconcile samples from different strata by calculating the minimum sampling rate across all counties, and throwing out those that exceed that. All of the strata  are uniformly random within each county.
 
 
+///////////////////////////////////////////////
+6/2/26
+Hi Philip, Jake:
+
+Im trying to squeeze whatever efficiency I can out of large multi-contest CSD contests. At the moment Im simulating the Colorado 2024 General Election (4-5 million cards, 725 contests), and comparing the existing software using uniform sampling to what CSD sampling might get.
+
+Im letting the auditors choose which contests they want to audit (and perhaps letting them set each contest's risk limit). Then they see how many samples they need based on the vote margins of the selected contests (currently assuming no errors or phantoms). Then I can show them the measured risk limits of all the contests, whether selected or not, and they can iterate and try different scenarios.
+
+The question I have is whether its legitimate to allow this "what-if" iteration to happen after the PRNG seed has been chosen, and the sequence of cards for each contest is fixed. Then I can predict (modulo errors) exact sample sizes and measured risks. Note that this is only used for setting consistent sampling sizes, not for anything to do with the actual audit or sample selection.
+
+Or does that constitute some kind of subtle "looking ahead" that would invalidate the "predictable plug-in" requirement? Then Ill have to use random distributions of the CVRs and give them probabilistic estimates.
+
+Thanks, I hope that I'm stating the question clearly enough.
+
+Regards,
+- John
+
+Hi John--
+
+Several different levels to this question.
+
+At a high level, SOS should be discouraged from picking which contests to audit on the basis of workload. It undermines the whole enterprise and ensures that the contests whose outcomes are most likely to be altered by error are never audited.
+
+At the next level, the audit should start as soon as the seed is generated. Otherwise, there's an opportunity for mischief, since it is then known what the sequence of card selections will be. That is especially a risk in jurisdictions that don't imprint identifiers on the cards, since cards can be re-ordered within or across batches to make the audit data favorable. It makes more sense to do **expected** sample size calculations before the seed is generated. That said, for comparison audits, if there are no CVR errors, the sample size is deterministic. (And *that* said, it does make sense to check whether, on the assumption that the CVRs have no errors [or some assumed error rate], the audit will be able to stop after the first round, and to increase the initial sample size if not.) SHANGRLA supports those kinds of calculations.
+
+At the technical level, what you propose doesn't violate the predictability constraint, for more than one reason: (1) you are not actually looking at the cards, just assuming that they will match the CVRs when somebody does look at them. And (2) you are not using "later to be drawn" cards to pick the bets for "earlier to be drawn" cards: the betting scheme still doesn't look into the future in what you propose.
+
+Best wishes,
+Philip
+
+///////////////////////////////////////////////
+
 
 
 

@@ -115,6 +115,7 @@ data class ContestRoundJson(
     val haveSampleSize: Int = 0,
     val haveNewSampleSize: Int = 0,
     val auditorWantNewMvrs: Int? = null,
+    val auditorWantRisk: Double? = null,
 )
 
 fun ContestRound.publishJson() : ContestRoundJson {
@@ -131,6 +132,7 @@ fun ContestRound.publishJson() : ContestRoundJson {
         this.haveSampleSize,
         this.haveNewSampleSize,
         this.auditorWantNewMvrs,
+        this.auditorWantRisk,
     )
 }
 
@@ -158,6 +160,7 @@ fun ContestRoundJson.import(contestUA: ContestWithAssertions, prevContestRound: 
     contestRound.haveSampleSize = this.haveSampleSize
     contestRound.haveNewSampleSize = this.haveNewSampleSize
     contestRound.auditorWantNewMvrs = this.auditorWantNewMvrs
+    contestRound.auditorWantRisk = this.auditorWantRisk
 
     return contestRound
 }

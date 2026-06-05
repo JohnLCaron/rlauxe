@@ -1,0 +1,6 @@
+contest name, contest id, mvrLimit
+Anvers, 1, 1884
+Bruxelles, 2, 1760
+FlandreEast, 4, 800
+Hainut, 5, 550
+Liege, 6, 640

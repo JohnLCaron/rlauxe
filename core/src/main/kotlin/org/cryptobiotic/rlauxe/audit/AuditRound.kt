@@ -87,6 +87,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     var haveSampleSize: Int = 0
     var haveNewSampleSize: Int = 0
     var auditorWantNewMvrs: Int? = null // should be auditorMaxNewMvrs ?? TODO not used ?? seems like it should be, eg Belgium ???
+    var auditorWantRisk: Double? = null
 
     init {
         if (status.complete) {
@@ -128,7 +129,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         return assertionRounds.maxOfOrNull { it.auditResult?.samplesUsed ?: 0 } ?: 0
     }
 
-    fun risk(): Double {
+    fun measuredRisk(): Double {
         return assertionRounds.maxOfOrNull { it.auditResult?.pmin ?: 1.0 } ?: 1.0
     }
 
@@ -188,6 +189,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         return prevAuditResult?.clcaErrorTracker?.copyAll() ?: ClcaErrorTracker(assertion.noerror, assertion.assorter.upperBound())
     }
 
+    // TODO use contestRound.auditorWantsRisk
     // same algorithm as GeneralAdaptiveBetting
     fun calcNewMvrsNeeded(contest: ContestWithAssertions, config : Config): Int {
         require(assertion is ClcaAssertion)
@@ -217,6 +219,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         }
     }
 
+    // TODO use contestRound.auditorWantsRisk
     fun calcMvrsNeeded(contest: ContestWithAssertions, config : Config): Int {
         require(assertion is ClcaAssertion)
         val cassorter = assertion.cassorter

@@ -66,11 +66,11 @@ Both support phantom CVRs and MVRs with appropriate assorter treatment. rlauxe h
 
 ### rlauxe
 
-- Much larger (~tens of thousands of lines of Kotlin across a structured module hierarchy: `audit`, `betting`, `cli`, `core`, `dhondt`, `estimate`, `irv`, `oneaudit`, `persist`, `util`, `verify`, `workflow`).
+- **75,124 total lines of Kotlin across 452 files** (32,130 production lines + 42,994 test lines), organized across a structured module hierarchy: `audit`, `betting`, `cli`, `core`, `dhondt`, `estimate`, `irv`, `oneaudit`, `persist`, `util`, `verify`, `workflow`.
 - Idiomatic Kotlin: data classes, sealed types, extension functions, coroutine-friendly structure.
 - Clear separation of concerns between layers.
 - Has a CLI (`cli` package) for command-line use.
-- Explicit audit commitment model with digital signing intent.
+- Explicit audit commitment model with PRNG-based verifiability (see deep dive below).
 - More mature engineering overall, though still self-labeled "WORK IN PROGRESS."
 
 ---
@@ -138,7 +138,7 @@ Neither repository has formal code coverage reporting (no `coverage.py`, no JaCo
 | Tests | Ad-hoc functions, not automated | Full JUnit suite with cross-validation |
 | Coverage | Low (partial, informal) | Better structured (no metrics) |
 | Documentation | Good for research use | Extensive for implementors |
-| Code size | ~3,200 lines | Substantially larger (10,000s of lines) |
+| Code size | ~3,200 lines | 75,124 lines Kotlin (32,130 production + 42,994 test) |
 | Production readiness | Research prototype | More mature, though still WIP |
 
 **Bottom line:** SHANGRLA is the authoritative Python research prototype from Stark et al., excellent for understanding the mathematical foundations and for reproducing specific pilots. rlauxe is a more ambitious, production-oriented Kotlin reimplementation that adds OneAudit, D'Hondt, a complete audit workflow, and the newer betting-based risk functions — at the cost of being a much larger, more complex, still-evolving codebase. The two are complementary: rlauxe explicitly cross-validates against SHANGRLA in its test suite, treating SHANGRLA as the mathematical ground truth.
@@ -189,9 +189,50 @@ Each audit round adds three sub-commits:
 2. **After hand audit**: `sampleMvrsX.csv` (the human-read ballots) + `sampleCardsX.csv` (the matched manifest cards) — locked before the audit algorithm runs.
 3. **After algorithm runs**: `auditStateX.json` (the p-values and which contests passed) — the public result.
 
+#### Example Election Commitment artifacts
+
+The repository includes a complete worked example of a CLCA election commitment in
+[`core/src/test/data/testRunCli/clca/audit/`](../core/src/test/data/testRunCli/clca/audit/).
+The Stage 1 files are:
+
+- [`electionInfo.json`](../core/src/test/data/testRunCli/clca/audit/electionInfo.json) — election name, audit type (`CLCA`), total card count, number of contests
+- [`contests.json`](../core/src/test/data/testRunCli/clca/audit/contests.json) — full contest descriptions with candidate names, reported vote counts, and Nc bounds
+- [`cardManifest.csv`](../core/src/test/data/testRunCli/clca/audit/cardManifest.csv) — every physical ballot card's unique ID, location, and index (before the seed is drawn, `prn` column is 0)
+
+After the seed is drawn, [`auditCreationConfig.json`](../core/src/test/data/testRunCli/clca/audit/auditCreationConfig.json) records the published seed:
+
+```json
+{
+    "auditType": "CLCA",
+    "riskLimit": 0.05,
+    "seed": "-8405a348931706"
+}
+```
+
+The `sortedCards.csv` file then contains every card re-sorted by its PRNG-derived PRN. A round-1 example shows the three sub-commits in [`round1/`](../core/src/test/data/testRunCli/clca/audit/round1/): `auditRoundConfig1.json`, `samplePrns1.json` (listing the hex PRNs of the sampled cards), `sampleCards1.csv`, `sampleMvrs1.csv`, and `auditState1.json` (final p-values).
+
+#### How to check the "signatures"
+
+rlauxe's commitment integrity relies on **PRNG recomputation rather than external cryptographic file signing**. The PRNG is implemented in [`Prng.kt`](../core/src/main/kotlin/org/cryptobiotic/rlauxe/util/Prng.kt) using **HmacSHA256** keyed on the published seed:
+
+```
+PRN(i) = HmacSHA256(seed_bytes, index_bytes)[0..8]   // truncated to Long, then absolute value
+```
+
+Any verifier can independently reproduce every PRN by running this deterministic function on the published seed, then confirm that `sortedCards.csv` lists cards in ascending PRN order and that `samplePrnsX.json` for each contest contains the lexicographically smallest PRNs for cards in that contest.
+
+The verification logic is implemented in [`VerifyAuditCommitment.kt`](../core/src/main/kotlin/org/cryptobiotic/rlauxe/verify/VerifyAuditCommitment.kt), which checks:
+
+1. All card IDs, locations, and indices in the manifest are unique.
+2. Cards in `sortedCards.csv` are in ascending PRN order.
+3. The PRNs match HmacSHA256 output from the published seed assigned by index (i.e., no card was swapped in or out).
+4. Contest `Npop` and `Nphantoms` counts agree between `contests.json` and the manifest.
+
+The `AuditRecord.md` spec states that the Stage 1 files should be "digitally signed and published publicly" before the seed is drawn. In the current implementation the integrity guarantee is provided by: (a) public publication of all files before sampling begins, (b) the deterministic PRNG check described above, and (c) re-computation of p-values from committed MVRs. External PKI-based file signing (e.g., GPG) is the intended future enhancement.
+
 #### Independent verification
 
-Because every file is signed and published, anyone (opposition parties, journalists, academic researchers) can:
+Because every file is published (and can be signed externally), anyone (opposition parties, journalists, academic researchers) can:
 
 - Recompute the PRN sequence from the published seed using the specified PRNG and verify `sortedCards.csv`
 - Verify that `samplePrnsX.json` contains the smallest PRNs for each contest (i.e., no cherry-picking)

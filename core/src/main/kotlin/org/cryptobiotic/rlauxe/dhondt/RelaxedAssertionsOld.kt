@@ -87,7 +87,7 @@ class RelaxedAssertionsOld(val dcontest: DHondtContest, val contestRound: Contes
         return Pair(countDhondtFailures + countThresholdFailures, report)
     }
 
-    fun showDhondtRiskFailures(sortedGroups: List<DhondtLoserGroup>) = buildString {
+    fun showDhondtRiskFailures(sortedGroups: List<DhondtLoserGroupOld>) = buildString {
 
         appendLine("Contested       loser-round   nvotes,  score, voteDiff,  noerror, estSamples, actSamples, estRisk, assertion")
 
@@ -110,7 +110,7 @@ class RelaxedAssertionsOld(val dcontest: DHondtContest, val contestRound: Contes
         }
     }
 
-    fun showAltFailures(thrashers: List<CandSeatRangeBuilderOld.ThresholdRiskFailure>, alt: DHondtContest, altFailures: Map<Int, DhondtLoserGroup>) = buildString {
+    fun showAltFailures(thrashers: List<CandSeatRangeBuilderOld.ThresholdRiskFailure>, alt: DHondtContest, altFailures: Map<Int, DhondtLoserGroupOld>) = buildString {
         appendLine("------------------------------------------------------------------------------")
         appendLine("Thresholds             marginInVotes, noerror, estSamples, actSamples,   risk")
         thrashers.forEach {  thrasher ->
@@ -155,7 +155,7 @@ class RelaxedAssertionsOld(val dcontest: DHondtContest, val contestRound: Contes
         appendLine()
     }
 
-    fun showAltDhondtRiskFailures(altFailures: List<DhondtLoserGroup>) = buildString {
+    fun showAltDhondtRiskFailures(altFailures: List<DhondtLoserGroupOld>) = buildString {
         appendLine("Alternate Contest Assertion Failures")
         appendLine("Contested ${sfn("loser-round", candNameWidth)}    nvotes,  score, voteDiff,  noerror, estSamples, actSamples,    estRisk, alreadyExists, assertion")
 
@@ -187,7 +187,7 @@ class RelaxedAssertionsOld(val dcontest: DHondtContest, val contestRound: Contes
 ///////////////////////////////////////////////////////////////////
 
 // specific to a contest and a losing candidate in the contest
-data class DhondtLoserGroup(val loserId: Int) {
+data class DhondtLoserGroupOld(val loserId: Int) {
     val arms = mutableListOf<DhondtRiskFailure>()
     fun highScore(): Double {
         val wtf = arms.maxOfOrNull { it.loserScore.score }
@@ -206,16 +206,16 @@ class CandSeatRangeBuilderOld(val dcontest: DHondtContest, val contestRound: Con
     val Npop = contestRound.contestUA.Npop
     val nsamples = contestRound.haveSampleSize
 
-    val dhondtFailures: List<DhondtLoserGroup>
+    val dhondtFailures: List<DhondtLoserGroupOld>
     val orgRanges: CandSeatRanges
     val mergedRanges: CandSeatRanges
     val thrashers: List<ThresholdRiskFailure>
     val altContest: DHondtContest?
-    val altFailures: Map<Int, DhondtLoserGroup>?
+    val altFailures: Map<Int, DhondtLoserGroupOld>?
 
     init {
         //// dhondt failures = contested seats
-        val dhondtFailuresMap = mutableMapOf<Int, DhondtLoserGroup>() // loser candidate -> DhondtLoserGroup
+        val dhondtFailuresMap = mutableMapOf<Int, DhondtLoserGroupOld>() // loser candidate -> DhondtLoserGroupOld
         contestRound.assertionRounds.forEach { ar ->
             val assorter = ar.assertion.assorter
             val risk = if (ar.auditResult != null) ar.auditResult!!.pmin else {
@@ -226,7 +226,7 @@ class CandSeatRangeBuilderOld(val dcontest: DHondtContest, val contestRound: Con
                 val loser = assorter.loser()
                 val winnerScore = dcontest.sortedScores.find { it.divisor == assorter.lastSeatWon && it.candidate == winner }!!
                 val loserScore = dcontest.sortedScores.find { it.divisor == assorter.firstSeatLost && it.candidate == loser }!!
-                val group = dhondtFailuresMap.getOrPut(loser) { DhondtLoserGroup(loser) }
+                val group = dhondtFailuresMap.getOrPut(loser) { DhondtLoserGroupOld(loser) }
                 group.arms.add( DhondtRiskFailure(Npop, assorter, winnerScore, loserScore, risk, nsamples, true) )
             }
         }
@@ -261,7 +261,7 @@ class CandSeatRangeBuilderOld(val dcontest: DHondtContest, val contestRound: Con
         this.mergedRanges = mergeCandSeatRanges(orgRanges, threshRanges)
     }
 
-    fun getFailures(): List<DhondtLoserGroup> {
+    fun getFailures(): List<DhondtLoserGroupOld> {
         return if (altFailures != null) dhondtFailures + altFailures.values.toList() else dhondtFailures
     }
 
@@ -278,7 +278,7 @@ class CandSeatRangeBuilderOld(val dcontest: DHondtContest, val contestRound: Con
         //    belowMinPctIn: Set<Int>?  // candidateIds under minFraction
 
         // TODO not going through the builder, so parties arent complete
-        val alt = DHondtContest.fromVotes(orgInfo, votes, dcontest.Nc, dcontest.Ncast, belowMinPct - thrasherIds)
+        val alt = DHondtContest.fromVotes(orgInfo, votes, dcontest.Nc, dcontest.Ncast)
 
         // recalc assorters
         alt.assorters.addAll(DHondtAssorter.makeDhondtAssorters(orgInfo, alt.Nc, alt.parties))
@@ -286,8 +286,8 @@ class CandSeatRangeBuilderOld(val dcontest: DHondtContest, val contestRound: Con
         return alt // Pair(alt, makeAltRiskFailures(alt))
     }
 
-    fun makeAltRiskFailures(alt: DHondtContest): Map<Int, DhondtLoserGroup> {
-        val altFailures = mutableMapOf<Int, DhondtLoserGroup>()
+    fun makeAltRiskFailures(alt: DHondtContest): Map<Int, DhondtLoserGroupOld> {
+        val altFailures = mutableMapOf<Int, DhondtLoserGroupOld>()
         alt.assorters.forEach { assorter ->
             require(assorter is DHondtAssorter)
             val winnerId = assorter.winner()
@@ -299,7 +299,7 @@ class CandSeatRangeBuilderOld(val dcontest: DHondtContest, val contestRound: Con
             val alreadyExists = dcontest.assorters.find { it.hashcodeDesc() == assorter.hashcodeDesc() } != null
             val arm = DhondtRiskFailure(Npop, assorter, winnerScore, loserScore!!, risk, nsamples, alreadyExists)
             if (arm.risk > alphaFudge) {
-                val armGroup = altFailures.getOrPut(loserId) { DhondtLoserGroup(loserId) }
+                val armGroup = altFailures.getOrPut(loserId) { DhondtLoserGroupOld(loserId) }
                 armGroup.arms.add(arm)
             }
         }

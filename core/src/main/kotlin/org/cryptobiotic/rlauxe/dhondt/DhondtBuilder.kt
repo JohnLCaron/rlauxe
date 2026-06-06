@@ -107,7 +107,6 @@ data class DhondtBuilder(
             votes,
             this.Nc,
             this.validVotes + this.undervotes,
-            null,
         )
 
         // TODO why do we add the assorters after the constructor? probably not needed anymore
@@ -152,13 +151,13 @@ fun assignWinners(
     nseats: Int,
     validVotes: Int,        // denominator for minFraction
     minFraction: Double,
-    belowMinPctIn: Set<Int>?,  // candidateIds under minFraction, if null then calculate TODO used where ?
+    thresholdOverride: Set<Int>? = null,
     flip: Boolean = false,
 ): List<DhondtScore> {
 
     val sortedScores = mutableListOf<DhondtScore>()
 
-    val belowMinPct = belowMinPctIn ?: parties.filter { it.votes / validVotes.toDouble() < minFraction }.map { it.id }.toSet()
+    val belowMinPct = thresholdOverride ?: parties.filter { it.votes / validVotes.toDouble() < minFraction }.map { it.id }.toSet()
     // remove threshold failures before winners are assigned
     parties.forEach { it.isBelowMin = belowMinPct.contains(it.id)  }
 

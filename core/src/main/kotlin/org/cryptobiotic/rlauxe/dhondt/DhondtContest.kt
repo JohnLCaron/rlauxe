@@ -54,8 +54,9 @@ class DHondtContest(
     voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
     Nc: Int,                    // trusted maximum ballots/cards that contain this contest
     Ncast: Int,                 // number of cast ballots containing this Contest, including undervotes
-    val parties: List<DhondtCandidate>,     // the candidate parties
+    partiesIn: List<DhondtCandidate>,     // the candidate parties
     val sortedScores: List<DhondtScore>,
+    thresholdOverride: Set<Int>? = null,
 ): Contest(info, voteInput, Nc, Ncast) {
     val nvotes = votes.values.sum()
 
@@ -67,6 +68,7 @@ class DHondtContest(
     override fun winners() = winners
     override fun losers() = losers
 
+    val parties = partiesIn.toList()
     val nseats: Int
     val partiesBelowThreshold: Set<Int> // candidateIds under minFraction
     val winnerSeats: Map<Int, Int>
@@ -80,7 +82,7 @@ class DHondtContest(
         val nvotes = votes.values.sum()
 
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
-        partiesBelowThreshold = parties.filter { it.votes / nvotes.toDouble() < info.minFraction }.map { it.id }.toSet()
+        partiesBelowThreshold = thresholdOverride ?: parties.filter { it.votes / nvotes.toDouble() < info.minFraction }.map { it.id }.toSet()
 
         // last / first
         val winnerScores = sortedScores.subList(0, nseats)
@@ -232,22 +234,26 @@ class DHondtContest(
 
     // show altContests tree with this assertion as the root
     fun showRelaxedAssertion(contestRound: ContestRound, cassertion: ClcaAssertion): String {
-        return ""
-        /* val cands = CandSeatRangeBuilder(contestRound)
+        val cands = CandSeatRangeBuilder(contestRound)
         val relax = RelaxedAssertionReport(cands)
-        val failure = cands.failureNodes.find { it.assorter == cassertion.assorter }!!
-        val altContest = cands.makeAltContest(this, failure)
+        if (cassertion.assorter !is DHondtAssorter) {
+            val thrasher = cands.thrashers.find { it.thrasher.assorter.hashcodeDesc() == cassertion.assorter.hashcodeDesc() }
+            if (thrasher != null) return relax.showAltThrasherAssertions(thrasher.altContest)
+        }
+
+        val failure = cands.failureNodes.find { it.failure.assorter == cassertion.assorter }
+        if (failure == null) return "Not a failure: $cassertion"
 
         val done = mutableSetOf<String>()
-        val result = relax.showAltFailureContestRecurse(altContest, done)
+        val result = relax.showAltFailureContestRecurse(failure.altContest, done)
         println("assertions done:")
         done.forEach{ println("   $it") }
-        return result */
+        return result
     }
 
     fun countContestedSeats(contestRound: ContestRound): Int {
         val cands = CandSeatRangeBuilder(contestRound)
-        return 0 // cands.failureNodes.size + cands.thrashers.size
+        return cands.countContestedSeats() // + cands.thrashers.size
     }
 
     fun showContestedSeats(contestRound: ContestRound): Pair<Int, String> {
@@ -299,12 +305,12 @@ class DHondtContest(
 
     companion object {
 
-        fun fromVotes(info: ContestInfo, votes: Map<Int, Int>, Nc: Int, Ncast: Int, belowMinPctIn: Set<Int>?): DHondtContest {
+        fun fromVotes(info: ContestInfo, votes: Map<Int, Int>, Nc: Int, Ncast: Int): DHondtContest {
             // recreate the parties from the votes
             val parties = info.candidateIds.map { id ->
                 DhondtCandidate(info.candidateIdToName[id]!!, id, votes[id]!!)
             }
-            val sortedScoresCalc = assignWinners(parties, info.nwinners, Nc, info.minFraction!!, belowMinPctIn)
+            val sortedScoresCalc = assignWinners(parties, info.nwinners, Nc, info.minFraction!!, thresholdOverride = null)
 
             return DHondtContest(info, votes, Nc, Ncast, parties, sortedScoresCalc)
         }

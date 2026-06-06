@@ -13,15 +13,15 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
 
     init {
         val dhondtLoserGroups = mutableMapOf<Int, DhondtLoserGroup>() // loser candidate -> DhondtLoserGroup
-        builder.failureNodes.forEach { altNode ->
+        /* builder.failureNodes.forEach { altNode ->
             val assorter = altNode.failure.assorter
             val winner = assorter.winner()
             val loser = assorter.loser()
-            val winnerScore = dcontest.sortedScores.find { it.divisor == assorter.lastSeatWon && it.candidate == winner }!!
-            val loserScore = dcontest.sortedScores.find { it.divisor == assorter.firstSeatLost && it.candidate == loser }!!
+            val winnerScore = dcontest.sortedScores.find { it.divisor == assorter.lastSeatWon && it.candidate == winner }
+            val loserScore = dcontest.sortedScores.find { it.divisor == assorter.firstSeatLost && it.candidate == loser }
             val group = dhondtLoserGroups.getOrPut(loser) { DhondtLoserGroup(loser) }
             group.failures.add(DhondtRiskFailure(builder.Npop, assorter, winnerScore, loserScore, altNode.failure.risk, builder.nsamples, true))
-        }
+        } */
         sortedLoserGroups = dhondtLoserGroups.values.toList().sortedByDescending { it.highScore() }
     }
 
@@ -55,9 +55,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
         }
         appendLine()
 
-        if (sortedLoserGroups.isNotEmpty()) {
-            append( showDhondtRiskFailures(sortedLoserGroups) )
-        }
+        append( showDhondtRiskFailures() )
         appendLine()
 
         // threshold assertion failures
@@ -67,6 +65,41 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
         //appendLine()
     }
 
+    // not crazy about these DhondtLoserGroup
+    fun showDhondtRiskFailures() = buildString {
+
+        appendLine("Contested       loser-round   nvotes,  score, scoreDiff,  noerror, estSamples, actSamples, estRisk, assertion")
+
+        var idx = 0
+        builder.failureNodes.forEach {  node ->
+            val failure = node.failure
+            val assorter = failure.assorter
+            val candId = assorter.loser()
+            val winningSeat = failure.winnerScore.winningSeat
+            if (winningSeat == null)
+                append("       ")
+            else
+                append(" (${nfn(winningSeat!!, 2)})  ")
+
+            if (idx == 0) {
+                append(failure.loserScore.showLoser(
+                    trunc(
+                        builder.orgInfo.candidateIdToName[candId]!!,
+                        candNameWidth - 4
+                    ), builder.votes[candId]!!))
+            } else {
+                append("                                       ")
+            }
+
+            append(" ${nfn(dcontest.marginInVotes(assorter), 7)}, ${dfn(failure.noerror, 6)}, ")
+            append(" ${nfn(failure.estMvrs(), 8)}, ${nfn(failure.samplesUsed, 8)},     ${dfn(failure.risk, 4)},")
+            append(" winner ${assorter.winnerNameRound()} loser ${assorter.loserNameRound()}")
+            appendLine()
+            idx++
+        }
+    }
+
+    // not crazy about these DhondtLoserGroup
     fun showDhondtRiskFailures(sortedGroups: List<DhondtLoserGroup>) = buildString {
 
         appendLine("Contested       loser-round   nvotes,  score, scoreDiff,  noerror, estSamples, actSamples, estRisk, assertion")
@@ -75,17 +108,22 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
             group.sortedArms().forEachIndexed { idx, arm ->
                 val assorter = arm.assorter
                 val candId = assorter.loser()
+                val winningSeat = arm.winnerScore.winningSeat
+                if (winningSeat == null)
+                    append("       ")
+                else
+                    append(" (${nfn(winningSeat!!, 2)})  ")
+
                 if (idx == 0) {
-                    append(" (${nfn(arm.winnerScore.winningSeat!!, 2)})  ")
                     append(arm.loserScore.showLoser(
                         trunc(
                             builder.orgInfo.candidateIdToName[candId]!!,
                             candNameWidth - 4
                         ), builder.votes[candId]!!))
                 } else {
-                    append(" (${nfn(arm.winnerScore.winningSeat!!, 2)})  ")
                     append("                                       ")
                 }
+
                 append(" ${nfn(dcontest.marginInVotes(assorter), 7)}, ${dfn(arm.noerror, 6)}, ")
                 append(" ${nfn(arm.estMvrs(), 8)}, ${nfn(arm.samplesUsed, 8)},     ${dfn(arm.risk, 4)},")
                 append(" winner ${assorter.winnerNameRound()} loser ${assorter.loserNameRound()}")
@@ -94,16 +132,14 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
         }
     }
 
-    fun showAltThrashContest(altThrashContest: CandSeatRangeBuilder.AltContest) = buildString {
+    fun showAltThrasherAssertions(altThrashContest: CandSeatRangeBuilder.AltContest) = buildString {
         appendLine("------------------------------------------------------------------------------")
-        appendLine("Thresholds             marginInVotes, noerror, estSamples, actSamples,   risk")
         appendLine(altThrashContest.thrasher)
         appendLine()
-        showAltContest(altThrashContest)
+        appendLine(showAltContest(altThrashContest))
     }
 
     fun showAltFailureContestRecurse(altContest: CandSeatRangeBuilder.AltContest, done: MutableSet<String>): String {
-
         return buildString {
             appendLine(showAltFailureContest(altContest))
             done.add(altContest.failure!!.assorter.shortName())
@@ -122,7 +158,6 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
                 } */
             }
         }
-
     }
 
     fun showAltFailureContest(altContest: CandSeatRangeBuilder.AltContest) = buildString {
@@ -163,7 +198,6 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
         }
         // appendLine("winners=${alt.winnerSeats}")
         appendLine()
-
 
         //// dhondt failures = contested seats
         val dhondtLoserGroups = mutableMapOf<Int, DhondtLoserGroup>() // loser candidate -> DhondtLoserGroup

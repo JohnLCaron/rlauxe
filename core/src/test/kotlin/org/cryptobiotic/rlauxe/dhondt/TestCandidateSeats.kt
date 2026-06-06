@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.dhondt
 
+import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
@@ -29,7 +30,7 @@ class TestCandidateSeats {
         assertTrue(dcontest.assorters.isEmpty()) // wtf ??
         val builder = CandSeatRangeBuilder(contestRound)
         // builder.mergedRanges.candidates.forEach { println(it) }
-        println(builder.mergedRanges.showSeatRanges())
+        println(builder.partyRanges.showSeatRanges())
     }
 
     @Test
@@ -45,8 +46,8 @@ class TestCandidateSeats {
 
         // works anyway because it gets assorters from AssertionRound
         val builder = CandSeatRangeBuilder(contestRound)
-        builder.mergedRanges.candidates.forEach { println(it) }
-        println(builder.mergedRanges.showSeatRanges())
+        builder.partyRanges.candidates.forEach { println(it) }
+        println(builder.partyRanges.showSeatRanges())
     }
 
     @Test
@@ -64,16 +65,15 @@ class TestCandidateSeats {
         val cands = CandSeatRangeBuilder(contestRound)
         val relax = RelaxedAssertionReport(cands)
 
-        /* cands.failureNodes.forEach {
-            val altContest = cands.makeAltContest(dcontest, it)
-            println(altContest.alt)
-            println(relax.showAltFailureContest(altContest))
-        } */
+        cands.failureNodes.forEach { altFailure ->
+            println(altFailure.altContest.alt)
+            println(relax.showAltFailureContest(altFailure.altContest))
+        }
     }
 
     @Test
     fun testShowRelaxedAssertion() {
-        val contestRound = lastRound.contestRounds.find { it.id == 6 }!!
+        val contestRound = lastRound.contestRounds.find { it.id == 5 }!!
         val sampleLimit = sampleLimitMap[contestRound.id]
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit.limit
@@ -81,15 +81,14 @@ class TestCandidateSeats {
         // interesting: the dcontest assorters didnt make it through the serialization..... TODO ??
         val dcontest = contestRound.contestUA.contest as DHondtContest
 
-        val cassertion = contestRound.contestUA.clcaAssertions.find { it.assorter.shortName() == "DHondt w/l=LES ENGAGÉS-3/PS-4" }!!
+        val cassertion = contestRound.contestUA.clcaAssertions.find { it.assorter.shortName() == "BelowThreshold for 'ECOLO'" }!!
         println( "Contest ${contestRound.contestUA.id} assertion ${cassertion.assorter.shortName()}")
         println( dcontest.showRelaxedAssertion(contestRound, cassertion) )
-
     }
 
     @Test
     fun testThresholdFailure() {
-        val contestRound = lastRound.contestRounds.find { it.id == 5 }!!
+        val contestRound = lastRound.contestRounds.find { it.id == 5 }!! // Hainut with threshold failure
         val sampleLimit = sampleLimitMap[contestRound.id]
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit.limit
@@ -98,8 +97,24 @@ class TestCandidateSeats {
         val dcontest = contestRound.contestUA.contest as DHondtContest
         assertTrue(dcontest.assorters.isEmpty())
         val builder = CandSeatRangeBuilder(contestRound)
-        builder.mergedRanges.candidates.forEach { println(it) }
-        println(builder.mergedRanges.showSeatRanges())
+        builder.partyRanges.candidates.forEach { println(it) }
+        println(builder.partyRanges.showSeatRanges())
+    }
+
+    @Test
+    fun testAltThrasherAssertions() {
+        val contestRound = lastRound.contestRounds.find { it.id == 5 }!! // Hainut with threshold failure
+        val sampleLimit = sampleLimitMap[contestRound.id]
+        if (sampleLimit != null) {
+            contestRound.haveSampleSize = sampleLimit.limit
+        }
+        val cassertion = contestRound.contestUA.clcaAssertions.find { it.assorter is BelowThreshold && it.assorter.candId == 9}!!
+
+        // interesting: the dcontest assorters didnt make it through the serialization..... TODO ??
+        val dcontest = contestRound.contestUA.contest as DHondtContest
+        assertTrue(dcontest.assorters.isEmpty())
+        println( dcontest.showRelaxedAssertion(contestRound, cassertion) )
+
     }
 
     @Test

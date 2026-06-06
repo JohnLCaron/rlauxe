@@ -52,9 +52,10 @@ import org.cryptobiotic.rlauxe.util.*
 class DHondtContest(
     info: ContestInfo,
     voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-    Nc: Int,                // trusted maximum ballots/cards that contain this contest
-    Ncast: Int,             // number of cast ballots containing this Contest, including undervotes
-    belowMinPctIn: Set<Int>?  // candidateIds under minFraction
+    Nc: Int,                    // trusted maximum ballots/cards that contain this contest
+    Ncast: Int,                 // number of cast ballots containing this Contest, including undervotes
+    val parties: List<DhondtCandidate>,     // the candidate parties
+    val sortedScores: List<DhondtScore>,
 ): Contest(info, voteInput, Nc, Ncast) {
     val nvotes = votes.values.sum()
 
@@ -66,29 +67,20 @@ class DHondtContest(
     override fun winners() = winners
     override fun losers() = losers
 
-    val winnerSeats : Map<Int, Int> // candId -> nseats
-
+    val nseats: Int
+    val partiesBelowThreshold: Set<Int> // candidateIds under minFraction
+    val winnerSeats: Map<Int, Int>
     // dhondts and threshold assorters; these are set at creation, but not serialized, so cant assume they exist
     // can we put the generation of these inside? problem is ContestUA is serialized seperately, would have to rejigger that
     val assorters = mutableListOf<AssorterIF>()
 
-    val parties: List<DhondtCandidate>
-    val sortedScores: List<DhondtScore>
-    val belowMinPct: Set<Int> // candidateIds under minFraction
-
     init {
-        // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         require(info.minFraction != null)
+        nseats = info.nwinners
+        val nvotes = votes.values.sum()
 
-        // recreate the parties
-        parties = info.candidateIds.map { id ->
-            DhondtCandidate(info.candidateIdToName[id]!!, id, votes[id]!!)
-        }
-        val nseats = info.nwinners
-
-        val (sortedScoresCalc, belowMinPctCalc) = assignWinners(parties, nseats, Nc, info.minFraction, belowMinPctIn)
-        sortedScores = sortedScoresCalc
-        belowMinPct = belowMinPctCalc
+        // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
+        partiesBelowThreshold = parties.filter { it.votes / nvotes.toDouble() < info.minFraction }.map { it.id }.toSet()
 
         // last / first
         val winnerScores = sortedScores.subList(0, nseats)
@@ -104,7 +96,6 @@ class DHondtContest(
             winnerSeatsM[it.candidate] = count + 1
         }
         winnerSeats = winnerSeatsM.toMap()
-
         // fields in superclass
         winners = winnerSeats.keys.toList()
         losers = info.candidateIds.filter { !winners.contains(it) }
@@ -182,7 +173,7 @@ class DHondtContest(
 
     override fun show() = buildString {
         appendLine(super.show())
-        append("   nseats=${winnerSeats.values.sum()} winners=${winnerSeats} belowMin=${belowMinPct} threshold=${info.minFraction} minVotes=${roundUp(info.minFraction!! * nvotes)}")
+        append("   nseats=$nseats winnerSeats=${winnerSeats} belowMin=${partiesBelowThreshold} threshold=${info.minFraction} minVotes=${roundUp(info.minFraction!! * nvotes)}")
     }
 
     override fun showCandidates() = buildString {
@@ -199,7 +190,7 @@ class DHondtContest(
 
         info.candidateNames.toSortedMap().forEach { (name, id) ->
             val rounds = sortedScores.filter { it.candidate == id }.map { Dround(id, it.score, it.divisor, it.winningSeat) }
-            val below = if (belowMinPct.contains(id)) "*" else " "
+            val below = if (partiesBelowThreshold.contains(id)) "*" else " "
             val candName = "${nfn(id, 2)} ${trunc(info.candidateIdToName[id]!!, width0)}$below"
             append(showCandidate(candName, votes[id]!!, maxRound, rounds, width))
         }
@@ -225,18 +216,46 @@ class DHondtContest(
 
     data class Dround(val candId: Int, val score: Double, val round: Int, val winningSeat: Int?)
 
-    //// lazy cache RelaxedAssertions
+    // this needs to be recalculated as the mvrLimit might change
+/*     private var candSeats: CandSeatRangeBuilder2? = null
+    private fun getCandSeats(contestRound: ContestRound): CandSeatRangeBuilder2 {
+        if (candSeats != null) return candSeats!!
+        candSeats = CandSeatRangeBuilder2(contestRound)
+        return candSeats!!
+    } */
+
     fun showRelaxedAssertions(contestRound: ContestRound): String {
-        val relax = RelaxedAssertions(this, contestRound)
-        return relax.showAssertions()
+        val cands = CandSeatRangeBuilder(contestRound)
+        val relax = RelaxedAssertionReport(cands)
+        return relax.showRelaxedAssertions()
+    }
+
+    // show altContests tree with this assertion as the root
+    fun showRelaxedAssertion(contestRound: ContestRound, cassertion: ClcaAssertion): String {
+        return ""
+        /* val cands = CandSeatRangeBuilder(contestRound)
+        val relax = RelaxedAssertionReport(cands)
+        val failure = cands.failureNodes.find { it.assorter == cassertion.assorter }!!
+        val altContest = cands.makeAltContest(this, failure)
+
+        val done = mutableSetOf<String>()
+        val result = relax.showAltFailureContestRecurse(altContest, done)
+        println("assertions done:")
+        done.forEach{ println("   $it") }
+        return result */
+    }
+
+    fun countContestedSeats(contestRound: ContestRound): Int {
+        val cands = CandSeatRangeBuilder(contestRound)
+        return 0 // cands.failureNodes.size + cands.thrashers.size
     }
 
     fun showContestedSeats(contestRound: ContestRound): Pair<Int, String> {
-        val relax = RelaxedAssertions(this, contestRound)
+        val relax = RelaxedAssertionsOld(this, contestRound)
         return relax.contestedSeatReport()
     }
 
-        // create a cvr for each vote
+    //// create a cvr for each vote
     fun createSimulatedCvrs(): List<Cvr> {
         val cvrs = mutableListOf<Cvr>()
         var count=0
@@ -264,7 +283,7 @@ class DHondtContest(
         if (!super.equals(other)) return false
 
         if (sortedScores != other.sortedScores) return false
-        if (belowMinPct != other.belowMinPct) return false
+        if (partiesBelowThreshold != other.partiesBelowThreshold) return false
         if (winnerSeats != other.winnerSeats) return false
 
         return true
@@ -273,8 +292,22 @@ class DHondtContest(
     override fun hashCode(): Int {
         var result = super.hashCode()
         result = 31 * result + sortedScores.hashCode()
-        result = 31 * result + belowMinPct.hashCode()
+        result = 31 * result + partiesBelowThreshold.hashCode()
         result = 31 * result + winnerSeats.hashCode()
         return result
+    }
+
+    companion object {
+
+        fun fromVotes(info: ContestInfo, votes: Map<Int, Int>, Nc: Int, Ncast: Int, belowMinPctIn: Set<Int>?): DHondtContest {
+            // recreate the parties from the votes
+            val parties = info.candidateIds.map { id ->
+                DhondtCandidate(info.candidateIdToName[id]!!, id, votes[id]!!)
+            }
+            val sortedScoresCalc = assignWinners(parties, info.nwinners, Nc, info.minFraction!!, belowMinPctIn)
+
+            return DHondtContest(info, votes, Nc, Ncast, parties, sortedScoresCalc)
+        }
+
     }
 }

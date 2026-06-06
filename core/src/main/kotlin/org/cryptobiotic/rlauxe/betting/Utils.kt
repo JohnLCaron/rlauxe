@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.betting
 
+val stdBet = 2.0 / 1.03905
+
 // SmithRamdas eq 33
 //   m_t(WOR) = N * µ - Sum {Xi, i=1..t-1 } / (N - (t - 1))
 // Notice that constructing a WoR test martingale only relies on changing the fixed conditional mean µ

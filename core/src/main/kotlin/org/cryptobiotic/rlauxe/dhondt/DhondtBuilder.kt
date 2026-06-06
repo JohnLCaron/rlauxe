@@ -88,7 +88,7 @@ data class DhondtBuilder(
         val totalVotes = validVotes + undervotes
         require (Nc == totalVotes) { "DhondtBuilder2 $Nc != $totalVotes" }
 
-        val (sortedScores, belowMinPctIn) = assignWinners(parties, nseats, validVotes, minFraction, null)
+        val sortedScores = assignWinners(parties, nseats, validVotes, minFraction, null)
 
         winnerScores = sortedScores.subList(0, nseats)
         val loserScores = sortedScores.subList(nseats, sortedScores.size)
@@ -102,7 +102,7 @@ data class DhondtBuilder(
     fun build(): DHondtContest {
         val votes = parties.associate { Pair(it.id, it.votes) }
 
-        val contest = DHondtContest(
+        val contest = DHondtContest.fromVotes(
             info,
             votes,
             this.Nc,
@@ -146,24 +146,22 @@ data class DhondtBuilder(
     }
 }
 
-// side effect is to set party.isBelowMin
+// return sortedScores and set of contests that didnt make threshold
 fun assignWinners(
     parties: List<DhondtCandidate>,
     nseats: Int,
     validVotes: Int,        // denominator for minFraction
     minFraction: Double,
-    belowMinPctIn: Set<Int>?,  // candidateIds under minFraction, if null then calculate
-): Pair<List<DhondtScore>, Set<Int>> {
+    belowMinPctIn: Set<Int>?,  // candidateIds under minFraction, if null then calculate TODO used where ?
+    flip: Boolean = false,
+): List<DhondtScore> {
 
     val sortedScores = mutableListOf<DhondtScore>()
-    val sortedRawScores = mutableListOf<DhondtScore>() // ??
 
-    val belowMinPct = belowMinPctIn ?:
-                      parties.filter { it.votes / validVotes.toDouble() < minFraction }.map { it.id }.toSet()
-    // have to do this before winners are assigned
-    parties.forEach { it.isBelowMin = belowMinPct.contains( it.id)  }
+    val belowMinPct = belowMinPctIn ?: parties.filter { it.votes / validVotes.toDouble() < minFraction }.map { it.id }.toSet()
+    // remove threshold failures before winners are assigned
+    parties.forEach { it.isBelowMin = belowMinPct.contains(it.id)  }
 
-    // recreate the winners and losers
     parties.filter { !it.isBelowMin }.forEach { party ->
         repeat(nseats) { idx ->
             val seatno = idx + 1
@@ -173,6 +171,13 @@ fun assignWinners(
     }
     sortedScores.sortByDescending { it.score }
 
+    if (flip) {
+        val save1 = sortedScores[nseats-1]
+        val save2 = sortedScores[nseats]
+        sortedScores[nseats-1] = save2
+        sortedScores[nseats] = save1
+    }
+
     var maxRound = 0
     repeat(nseats) { idx ->
         val score = sortedScores[idx]
@@ -180,15 +185,5 @@ fun assignWinners(
         maxRound = max(maxRound, idx + 1)
     }
 
-    // recreate the raw scores TODO why ?
-    parties.forEach { party ->
-        repeat(maxRound) { idx ->
-            val seatno = idx + 1
-            val divisor = seatno.toDouble()
-            sortedRawScores.add( DhondtScore(party.id, party.votes / divisor, seatno) )
-        }
-    }
-    sortedRawScores.sortByDescending { it.score }
-
-    return Pair(sortedScores, belowMinPct)
+    return sortedScores
 }

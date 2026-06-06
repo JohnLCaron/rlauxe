@@ -1,0 +1,293 @@
+6/4/2026
+
+sudo lsblk -f
+[sudo] password for stormy:
+NAME   FSTYPE   FSVER LABEL    UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
+loop0  squashfs 4.0                                                       0   100% /snap/bare/5
+loop1  squashfs 4.0                                                       0   100% /snap/canonical-livepatch/393
+loop2  squashfs 4.0                                                       0   100% /snap/canonical-livepatch/406
+loop3  squashfs 4.0                                                       0   100% /snap/core18/2979
+loop4  squashfs 4.0                                                       0   100% /snap/core18/2999
+loop5  squashfs 4.0                                                       0   100% /snap/core20/2769
+loop6  squashfs 4.0                                                       0   100% /snap/core20/2866
+loop7  squashfs 4.0                                                       0   100% /snap/core22/2339
+loop8  squashfs 4.0                                                       0   100% /snap/core22/2411
+loop9  squashfs 4.0                                                       0   100% /snap/core24/1643
+loop10 squashfs 4.0                                                       0   100% /snap/core24/1587
+loop12 squashfs 4.0                                                       0   100% /snap/firefox/8364
+loop13 squashfs 4.0                                                       0   100% /snap/firmware-updater/224
+loop14 squashfs 4.0                                                       0   100% /snap/firmware-updater/226
+loop15 squashfs 4.0                                                       0   100% /snap/gnome-42-2204/226
+loop16 squashfs 4.0                                                       0   100% /snap/gnome-42-2204/247
+loop17 squashfs 4.0                                                       0   100% /snap/gnome-46-2404/153
+loop18 squashfs 4.0                                                       0   100% /snap/gtk-common-themes/1535
+loop19 squashfs 4.0                                                       0   100% /snap/kf5-5-110-qt-5-15-11-core22/3
+loop20 squashfs 4.0                                                       0   100% /snap/kf6-core22/42
+loop21 squashfs 4.0                                                       0   100% /snap/kf6-core22/43
+loop22 squashfs 4.0                                                       0   100% /snap/kf6-core24/34
+loop23 squashfs 4.0                                                       0   100% /snap/kf6-core24/36
+loop24 squashfs 4.0                                                       0   100% /snap/ksystemlog/35
+loop25 squashfs 4.0                                                       0   100% /snap/ksystemlog/46
+loop26 squashfs 4.0                                                       0   100% /snap/lxqt-support-core24/13
+loop27 squashfs 4.0                                                       0   100% /snap/lxqt-support-core24/16
+loop28 squashfs 4.0                                                       0   100% /snap/mesa-2404/1165
+loop29 squashfs 4.0                                                       0   100% /snap/mesa-2404/912
+loop30 squashfs 4.0                                                       0   100% /snap/snap-store/1338
+loop31 squashfs 4.0                                                       0   100% /snap/snap-store/1367
+loop32 squashfs 4.0                                                       0   100% /snap/snapd/26382
+loop33 squashfs 4.0                                                       0   100% /snap/snapd/26865
+loop34 squashfs 4.0                                                       0   100% /snap/snapd-desktop-integration/343
+loop35 squashfs 4.0                                                       0   100% /snap/snapd-desktop-integration/361
+loop36 squashfs 4.0                                                       0   100% /snap/thunderbird/1104
+loop37 squashfs 4.0                                                       0   100% /snap/thunderbird/1117
+loop38 squashfs 4.0                                                       0   100% /snap/firefox/8417
+sda
+├─sda1 vfat     FAT32 BOOT     A474-F924                             463.5M     6% /boot/efi
+├─sda2
+├─sda3 ntfs           Windows  FEE081D5E0819515                      819.3G    13% /media/stormy/Windows
+└─sda4 ntfs           Recovery ACA884FAA884C474
+sdb
+├─sdb1
+├─sdb2 vfat     FAT32          15E9-B53F
+└─sdb3 ext4     1.0            4ac75c10-3b25-4881-bfcc-8d94bee9a8e4  407.3G    51% /var/snap/firefox/common/host-hunspell
+                                                                                   /
+sdc
+└─sdc1
+sdd
+└─sdd1
+
+=========================================================
+~:$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           7.9G  3.8M  7.9G   1% /run
+/dev/sdb3       938G  483G  408G  55% /
+tmpfs            40G  215M   40G   1% /dev/shm
+tmpfs           5.0M   12K  5.0M   1% /run/lock
+efivarfs        120K   89K   27K  77% /sys/firmware/efi/efivars
+tmpfs            40G     0   40G   0% /run/qemu
+/dev/sda1       495M   32M  464M   7% /boot/efi
+tmpfs           7.9G  164K  7.9G   1% /run/user/1000
+/dev/sda3       944G  125G  820G  14% /media/stormy/Windows
+
+===========================================================
+~:$ sudo fdisk -l /dev/sda
+Disk /dev/sda: 953.87 GiB, 1024209543168 bytes, 2000409264 sectors
+Disk model: SAMSUNG MZ7LN1T0
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 4096 bytes
+I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+Disklabel type: gpt
+Disk identifier: BC86BCF1-9A91-491E-98FC-A4D035EAB2A6
+
+Device          Start        End    Sectors   Size Type
+/dev/sda1        2048    1023999    1021952   499M EFI System
+/dev/sda2     1024000    1286143     262144   128M Microsoft reserved
+/dev/sda3     1286144 1980407807 1979121664 943.7G Microsoft basic data
+/dev/sda4  1980407808 2000408575   20000768   9.5G Windows recovery environment
+
+~:$ sudo fdisk -l /dev/sdb
+Disk /dev/sdb: 953.87 GiB, 1024209543168 bytes, 2000409264 sectors
+Disk model: MTFDDAK1T0TBN-1A
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 4096 bytes
+I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+Disklabel type: gpt
+Disk identifier: 4FDB2B91-64BE-4E2D-ABD8-1E2885D3159C
+
+Device       Start        End    Sectors   Size Type
+/dev/sdb1       34      32767      32734    16M Microsoft reserved
+/dev/sdb2    32768    1083391    1050624   513M EFI System
+/dev/sdb3  1083392 2000408575 1999325184 953.4G Linux filesystem
+
+Partition 1 does not start on physical sector boundary.
+
+~:$ sudo fdisk -l /dev/sdc
+Disk /dev/sdc: 953.87 GiB, 1024209543168 bytes, 2000409264 sectors
+Disk model: MTFDDAK1T0TBN-1A
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 4096 bytes
+I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+Disklabel type: gpt
+Disk identifier: 3B8127DD-6CFE-4C7B-A4B8-D8711B495B4E
+
+Device     Start   End Sectors Size Type
+/dev/sdc1     34 32767   32734  16M Microsoft reserved
+
+Partition 1 does not start on physical sector boundary.
+
+=============
+
+findmnt
+TARGET                             SOURCE                         FSTYPE          OPTIONS
+/                                  /dev/sdb3                      ext4            rw,relatime,errors=remount-ro
+├─/sys                             sysfs                          sysfs           rw,nosuid,nodev,noexec,relatime
+│ ├─/sys/kernel/security           securityfs                     securityfs      rw,nosuid,nodev,noexec,relatime
+│ ├─/sys/fs/cgroup                 cgroup2                        cgroup2         rw,nosuid,nodev,noexec,relatime,nsdelegate,memory_recursivep
+│ ├─/sys/fs/pstore                 pstore                         pstore          rw,nosuid,nodev,noexec,relatime
+│ ├─/sys/firmware/efi/efivars      efivarfs                       efivarfs        rw,nosuid,nodev,noexec,relatime
+│ ├─/sys/fs/bpf                    bpf                            bpf             rw,nosuid,nodev,noexec,relatime,mode=700
+│ ├─/sys/kernel/tracing            tracefs                        tracefs         rw,nosuid,nodev,noexec,relatime
+│ ├─/sys/kernel/debug              debugfs                        debugfs         rw,nosuid,nodev,noexec,relatime
+│ ├─/sys/fs/fuse/connections       fusectl                        fusectl         rw,nosuid,nodev,noexec,relatime
+│ └─/sys/kernel/config             configfs                       configfs        rw,nosuid,nodev,noexec,relatime
+├─/proc                            proc                           proc            rw,nosuid,nodev,noexec,relatime
+│ └─/proc/sys/fs/binfmt_misc       systemd-1                      autofs          rw,relatime,fd=32,pgrp=1,timeout=0,minproto=5,maxproto=5,dir
+│   └─/proc/sys/fs/binfmt_misc     binfmt_misc                    binfmt_misc     rw,nosuid,nodev,noexec,relatime
+├─/dev                             udev                           devtmpfs        rw,nosuid,relatime,size=41135368k,nr_inodes=10283842,mode=75
+│ ├─/dev/pts                       devpts                         devpts          rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=000
+│ ├─/dev/shm                       tmpfs                          tmpfs           rw,nosuid,nodev,inode64
+│ ├─/dev/mqueue                    mqueue                         mqueue          rw,nosuid,nodev,noexec,relatime
+│ └─/dev/hugepages                 hugetlbfs                      hugetlbfs       rw,nosuid,nodev,relatime,pagesize=2M
+├─/run                             tmpfs                          tmpfs           rw,nosuid,nodev,noexec,relatime,size=8235812k,mode=755,inode
+│ ├─/run/lock                      tmpfs                          tmpfs           rw,nosuid,nodev,noexec,relatime,size=5120k,inode64
+│ ├─/run/qemu                      tmpfs                          tmpfs           rw,nosuid,nodev,relatime,mode=755,inode64
+│ ├─/run/user/1000                 tmpfs                          tmpfs           rw,nosuid,nodev,relatime,size=8235812k,nr_inodes=2058953,mod
+│ │ ├─/run/user/1000/doc           portal                         fuse.portal     rw,nosuid,nodev,relatime,user_id=1000,group_id=1000
+│ │ └─/run/user/1000/gvfs          gvfsd-fuse                     fuse.gvfsd-fuse rw,nosuid,nodev,relatime,user_id=1000,group_id=1000
+│ └─/run/snapd/ns                  tmpfs[/snapd/ns]               tmpfs           rw,nosuid,nodev,noexec,relatime,size=8235812k,mode=755,inode
+│   ├─/run/snapd/ns/canonical-livepatch.mnt
+│   │                              nsfs[mnt:[4026533034]]         nsfs            rw
+│   ├─/run/snapd/ns/snapd-desktop-integration.mnt
+│   │                              nsfs[mnt:[4026533095]]         nsfs            rw
+│   ├─/run/snapd/ns/firmware-updater.mnt
+│   │                              nsfs[mnt:[4026532938]]         nsfs            rw
+│   ├─/run/snapd/ns/ksystemlog.mnt nsfs[mnt:[4026532933]]         nsfs            rw
+│   └─/run/snapd/ns/firefox.mnt    nsfs[mnt:[4026532935]]         nsfs            rw
+├─/snap/bare/5                     /dev/loop0                     squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/canonical-livepatch/393    /dev/loop1                     squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/canonical-livepatch/406    /dev/loop2                     squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/core18/2979                /dev/loop3                     squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/core18/2999                /dev/loop4                     squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/core20/2769                /dev/loop5                     squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/core20/2866                /dev/loop6                     squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/core22/2339                /dev/loop7                     squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/core22/2411                /dev/loop8                     squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/core24/1643                /dev/loop9                     squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/core24/1587                /dev/loop10                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/media/stormy/Windows            /dev/sda3                      ntfs3           rw,nosuid,nodev,relatime,uid=1000,gid=1000,iocharset=utf8
+├─/snap/firefox/8364               /dev/loop12                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/firmware-updater/224       /dev/loop13                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/firmware-updater/226       /dev/loop14                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/gnome-42-2204/226          /dev/loop15                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/gnome-42-2204/247          /dev/loop16                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/gnome-46-2404/153          /dev/loop17                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/gtk-common-themes/1535     /dev/loop18                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/kf5-5-110-qt-5-15-11-core22/3
+│                                  /dev/loop19                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/kf6-core22/42              /dev/loop20                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/kf6-core22/43              /dev/loop21                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/kf6-core24/34              /dev/loop22                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/kf6-core24/36              /dev/loop23                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/ksystemlog/35              /dev/loop24                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/ksystemlog/46              /dev/loop25                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/lxqt-support-core24/13     /dev/loop26                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/lxqt-support-core24/16     /dev/loop27                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/mesa-2404/1165             /dev/loop28                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/mesa-2404/912              /dev/loop29                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/snap-store/1338            /dev/loop30                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/snap-store/1367            /dev/loop31                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/snapd/26382                /dev/loop32                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/snapd/26865                /dev/loop33                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/snapd-desktop-integration/343
+│                                  /dev/loop34                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/snapd-desktop-integration/361
+│                                  /dev/loop35                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/snap/thunderbird/1104           /dev/loop36                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/var/snap/firefox/common/host-hunspell
+│                                  /dev/sdb3[/usr/share/hunspell] ext4            ro,noexec,noatime,errors=remount-ro
+├─/snap/thunderbird/1117           /dev/loop37                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+├─/boot/efi                        /dev/sda1                      vfat            rw,relatime,fmask=0077,dmask=0077,codepage=437,iocharset=iso
+└─/snap/firefox/8417               /dev/loop38                    squashfs        ro,nodev,relatime,errors=continue,threads=single
+~:$
+
+///////////////////////////////////////////
+
+~:$ sudo sudo parted /dev/sdc mklabel gpt
+[sudo] password for stormy:
+Warning: The existing disk label on /dev/sdc will be destroyed and all data on this disk will be lost. Do you want to continue?
+Yes/No? Yes
+Information: You may need to update /etc/fstab.
+
+~:$ sudo parted -a optimal /dev/sdc mkpart primary ext4 0% 100%
+Information: You may need to update /etc/fstab.
+
+~:$ sudo mkfs.ext4 /dev/sdc1
+mke2fs 1.47.0 (5-Feb-2023)
+Discarding device blocks: done
+Creating filesystem with 250050816 4k blocks and 62513152 inodes
+Filesystem UUID: 97ffa75d-f15d-48d3-950b-8ec3a42079e1
+Superblock backups stored on blocks:
+	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208,
+	4096000, 7962624, 11239424, 20480000, 23887872, 71663616, 78675968,
+	102400000, 214990848
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (262144 blocks): done
+Writing superblocks and filesystem accounting information: done
+
+~:$ sudo mkdir -p /mnt/datadrive
+~:$ sudo mount /dev/sdc1 /mnt/
+~:$ sudo mount /dev/sdc1 /mnt/datadrive
+mount: /mnt/datadrive: mount point does not exist.
+       dmesg(1) may have more information after failed mount system call.
+~:$ sudo umount /dev/sdc1
+~:$ sudo mount /dev/sdc1 /mnt/datadrive
+
+////////////////
+
+ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           7.9G  3.8M  7.9G   1% /run
+/dev/sdb3       938G  483G  408G  55% /
+tmpfs            40G  140M   40G   1% /dev/shm
+tmpfs           5.0M   12K  5.0M   1% /run/lock
+efivarfs        120K   89K   27K  77% /sys/firmware/efi/efivars
+tmpfs            40G     0   40G   0% /run/qemu
+/dev/sda1       495M   32M  464M   7% /boot/efi
+tmpfs           7.9G  164K  7.9G   1% /run/user/1000
+/dev/sda3       944G  125G  820G  14% /media/stormy/Windows
+/dev/sdc1       938G   28K  891G   1% /mnt/datadrive
+
+/////////// make it permanent
+
+~:$ sudo blkid /dev/sdc1
+/dev/sdc1: UUID="97ffa75d-f15d-48d3-950b-8ec3a42079e1" BLOCK_SIZE="4096" TYPE="ext4" PARTLABEL="primary" PARTUUID="ae2fad1c-987a-438f-a5f2-a480ef616764"
+/dev/sdc1: UUID="1216d547-2345-4214-aae3-c4fe9154acaf" BLOCK_SIZE="4096" TYPE="ext4" PARTLABEL="primary" PARTUUID="ae2fad1c-987a-438f-a5f2-a480ef616764"
+
+finally worked
+
+///////////////
+from Neal:
+
+wget --mirror --no-parent --no-host-directories --cut-dirs=2 --reject="index.html*" https://votedatabase.com/cvr/Colorado/
+wget --mirror --no-parent --no-host-directories --reject="index.html*" https://votedatabase.com/cvr/Colorado/
+
+Neal McBurnett
+Attachments
+to Lori, me
+
+I asked some questions about the online CO 2020 CVR data with the attached notes as a result.
+Apparently the Baca data is actually missing, and duplicate Huerfano data is substituted.
+And a few other issues with vote counts e.g. in Larimer county. I reported that one via
+
+  https://github.com/kuriwaki/cvr_harvard-mit_scripts/issues/349
+
+On Wed, Jun 3, 2026 at 4:40 Lori Stevens <lori.stevens77@gmail.com> wrote:
+Thanks, I'm just checking this out.  I need to figure out how to make use of them in an orderly way. There's a lot there!
+
+On Wed, Jun 3, 2026 at 4:38 Neal McBurnett <nealmcb@gmail.com> wrote:
+FWIW this seems to have worked for me to mirror them, though I guess it gets some extra copies etc.
+
+wget --mirror --no-parent --no-host-directories --cut-dirs=2 --reject="index.html*" https://votedatabase.com/cvr/Colorado/
+
+On Wed, Jun 3, 2026 at 4:03 PM Neal McBurnett <nealmcb@gmail.com> wrote:
+Check out https://votedatabase.com/cvr/
+
+It seems to have CVRs in the format we want from 2020. Better test cases for our software!
+I think it is the original source for some of the parquet data we've worked on.
+
+If we can combine it along with vote count / election result data we could get possible aggregation data when that is missing and learn even more!
+
+
+

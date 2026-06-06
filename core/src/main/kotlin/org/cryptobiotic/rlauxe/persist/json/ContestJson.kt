@@ -154,7 +154,7 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
         }
         "DHondtContest",
         "ContestDHondt" -> {
-            DHondtContest(
+            DHondtContest.fromVotes(
                 info,
                 this.votes!!,
                 this.Nc,

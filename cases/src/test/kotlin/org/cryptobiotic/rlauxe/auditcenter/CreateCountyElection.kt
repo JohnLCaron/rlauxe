@@ -1,15 +1,14 @@
-package org.cryptobiotic.rlauxe.datadrive
+package org.cryptobiotic.rlauxe.auditcenter
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.DominionCvrConverter
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
-import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.utils.tabulateNpops
 import org.cryptobiotic.rlauxe.utils.tabulateNpopsFromCards
 import kotlin.collections.map
 import kotlin.collections.plus
@@ -19,10 +18,12 @@ private val logger = KotlinLogging.logger("CreateCountyElection")
 private val debugUndervotes = false
 private val showCardStyles = true
 
-// Use OneAudit; redacted ballots are in pools. Cant do IRV because we dont have VoteConsolidators
-// this version does a bunch of baloney to estimate the redacted undervotes
+// Probably obsolete
+// How does this differ from CreateColoradoElectionWithCvrs ??
+// make ContestInfo from export.schema.contests
 class CreateCountyElection(
     val county: String,
+    val coloradoInput: ColoradoInput,
     val auditType: AuditType,
     val dominionExport: DominionCvrExport,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
@@ -50,7 +51,7 @@ class CreateCountyElection(
         contests = makeContests()
         simulatedCvrs = emptyList() // makeRedactedCvrs()
 
-        val dominionConverter = DominionCvrConverter(dominionExport, contests, Colorado2020Input, styleNameMap)
+        val dominionConverter = DominionCvrConverter(dominionExport, contests, coloradoInput, styleNameMap)
         val exportCards = dominionExport.cvrs.map { dominionConverter.convertToCard(it) }
 
         val infos = contests.map { it.info() }
@@ -167,6 +168,7 @@ class CreateCountyElection(
 // OA: Create a OneAudit where pools are from the redacted cvrs.
 fun createCountyElection(
     county: String,
+    coloradoInput: ColoradoInput,
     cvrExportFile: String,
     auditdir: String,
     creation: AuditCreationConfig,
@@ -178,7 +180,7 @@ fun createCountyElection(
     val stopwatch = Stopwatch()
     val export: DominionCvrExport = readDominionCvrExportCsv(cvrExportFile, county)
 
-    val election = CreateCountyElection(county, creation.auditType, export, mvrSource = mvrSource,
+    val election = CreateCountyElection(county, coloradoInput, creation.auditType, export, mvrSource = mvrSource,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
 
     createElectionRecord(election, auditDir = auditdir)

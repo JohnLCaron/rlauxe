@@ -125,7 +125,7 @@ data class ChoiceVote(
     val countyVote: Int,
 )
 
-fun readCountyTabulateCsv(filename: String, cleanupContest: (String) -> String, cleanupCandidate: (String) -> String): Map<String, ContestTabByCounty> {
+fun readCountyTabulateCsv(filename: String): Map<String, ContestTabByCounty> {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
@@ -144,8 +144,8 @@ fun readCountyTabulateCsv(filename: String, cleanupContest: (String) -> String, 
             var idx = 0
             val choiceVote = ChoiceVote(
                 line.get(idx++).trim(),
-                cleanupContest(line.get(idx++).trim()),
-                cleanupCandidate(line.get(idx++).trim()),
+                line.get(idx++).trim(),
+                line.get(idx++).trim(),
                 line.get(idx).toInt(),
             )
             val contest = contests.getOrPut(choiceVote.contestName) { ContestTabByCounty(choiceVote.contestName) }

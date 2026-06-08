@@ -33,7 +33,7 @@ private val logger = KotlinLogging.logger("CreateCountyAudits")
 
 private val debugUndervotes = true
 
-// TODO not used - delete ??
+// TODO is this obsolete ??
 
 class CreateCountyAudits(
     val countyName: String,
@@ -161,6 +161,7 @@ class CreateCountyAudits(
 fun createCountyAudits(
     topdir: String,
     wantCounties: List<String>,
+    coloradoInput: ColoradoInput,
     creationConfig: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     startFirstRound: Boolean,
@@ -168,10 +169,10 @@ fun createCountyAudits(
     val stopwatch = Stopwatch()
 
     // misc data by county
-    writeCountyAuditData(topdir)
+    writeCountyAuditData(topdir, coloradoInput)
 
-    val countyElection = CountyContestBuilder(Colorado2024Input)
-    val contestTabByCounty: Map<String, CountyContestTab> = convertToCountyContestTabs(Colorado2024Input.contestTabsByCounty.values.toList())
+    val countyElection = CountyContestBuilder(coloradoInput)
+    val contestTabByCounty: Map<String, CountyContestTab> = convertToCountyContestTabs(coloradoInput.contestTabsByCounty.values.toList())
         .associateBy { it.countyName }
 
     /* createColoradoElection(
@@ -204,9 +205,9 @@ fun createCountyAudits(
     logger.info { "createCountyAudits for $wantCounties took $stopwatch" }
 }
 
-fun writeCountyAuditData(topdir: String) {
+fun writeCountyAuditData(topdir: String, coloradoInput: ColoradoInput) {
     // misc data by county
-    val countyMvrs = Colorado2024Input.countyMvrs
+    val countyMvrs = coloradoInput.countyMvrs
 
     val outputFilename = "$topdir/countyData.csv"
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()

@@ -11,7 +11,7 @@ import kotlin.math.abs
 import kotlin.test.Test
 
 class TestReadColoradoCsvFiles {
-    val input: ColoradoInput = Colorado2024Input
+    val input: ColoradoInput = Colorado2024Input()
 
     // data class CanonicalContest(
     //    val contestName: String,
@@ -31,7 +31,7 @@ class TestReadColoradoCsvFiles {
             sizedist[it.counties.size] = count+1
         }
         println("There are ${canonical.size} contests")
-        println("There are ${input.canonicalContests.size} canonicalContests")
+        println("There are ${input.canonicalContests().size} canonicalContests")
 
         println("\nMulticounty contests")
         sizedist.toSortedMap().forEach { println("  ${nfn(it.value, 3)} contests are in ${it.key} counties") }
@@ -53,7 +53,7 @@ class TestReadColoradoCsvFiles {
     @Test
     fun readColoradoContestRoundFile() {
         // no name cleanup
-        val contests = readColoradoContestRoundCsv(input.contestRoundFile) { it }
+        val contests = readColoradoContestRoundCsv(input.contestRoundFile)
         // val contests = readColoradoContestRoundCsv(input.contestRoundFile) { contestNameCleanup(it) }
         println("read ${contests.size} contests from ${input.contestRoundFile}")
 
@@ -68,7 +68,7 @@ class TestReadColoradoCsvFiles {
     @Test
     fun readCountyTabulateFile() {
         // no name cleanup
-        val contests = readCountyTabulateCsv(input.tabulateCountyFile, { it}, { it })
+        val contests = readCountyTabulateCsv(input.tabulateCountyFile)
         // val contests = readCountyTabulateCsv(input.tabulateCountyFile, { contestNameCleanup(it)}, { candidateNameCleanup(it) })
 
         println("read ${contests.size} contests from ${input.tabulateCountyFile} (${contests.values.sumOf { it.choices.size }} choices)")
@@ -90,7 +90,7 @@ class TestReadColoradoCsvFiles {
 
     @Test
     fun readContestComparison() {
-        val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile) { it  }
+        val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile)
         // val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile) { contestNameCleanup(it) }
         println("read ${countyStyles.size} counties from ${input.mvrComparisonFile}; totalStyles=${countyStyles.sumOf { it.styles.size }} totalCards=${ countyStyles.sumOf{it.cardCount} }")
 
@@ -147,7 +147,7 @@ class TestReadColoradoCsvFiles {
     //)
     @Test
     fun showMergeContestInfo() {
-        val (mergedContestInfo, mergedCountyInfo, statewideContests) = mergeContestInfo(Colorado2024Input)
+        val (mergedContestInfo, mergedCountyInfo, statewideContests) = mergeContestInfo(Colorado2024Input())
 
         println("\nMerged Contest Info")
         println("\n${trunc("contest", -50)}    Npop,      Nc, voteMargin, countyMvrs, stateMvrs, Ncounties, auditReason")
@@ -223,11 +223,7 @@ class TestReadColoradoCsvFiles {
     fun compareTargetedContestsAndTabulateCounty() {
         val targets: List<TargetedContestsCsv> = readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv") { input.contestNameCleanup(it) }
 
-        val contestTabsByCounty: Map<String, ContestTabByCounty> =
-            readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv",
-                { input.contestNameCleanup(it) },
-                { input.candidateNameCleanup(it) },
-                )
+        val contestTabsByCounty: Map<String, ContestTabByCounty> = readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv")
 
         val ccts: Map<String, CountyContestTab> = convertToCountyContestTabs(contestTabsByCounty.values.toList()).associateBy { clean(it.countyName) }
 
@@ -261,14 +257,12 @@ class TestReadColoradoCsvFiles {
     @Test
     fun compareTabulateCountyAndRoundContest() {
         // use targetedContests only for the county and contest name
-        val targets: List<TargetedContestsCsv> = readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv") { input.contestNameCleanup(it) }
+        val targets: List<TargetedContestsCsv> = readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv",
+            { input.contestNameCleanup(it) } )
 
-        val roundContests:  Map<String, CorlaContestRoundCsv> = readColoradoContestRoundCsv( "src/test/data/corla/2024audit/round1/contest.csv") { input.contestNameCleanup(it) }
+        val roundContests = input.roundContests
 
-        val contestTabsByCounty: Map<String, ContestTabByCounty> = readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv",
-            { input.contestNameCleanup(it) },
-            { input.candidateNameCleanup(it) })
-
+        val contestTabsByCounty = input.contestTabsByCounty
         val ccts: Map<String, CountyContestTab> = convertToCountyContestTabs(contestTabsByCounty.values.toList()).associateBy { it.countyName }
 
         println()

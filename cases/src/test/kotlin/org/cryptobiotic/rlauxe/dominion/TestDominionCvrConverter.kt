@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.dominion
 
 
 import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
-import org.cryptobiotic.rlauxe.datadrive.Colorado2020Input
+import org.cryptobiotic.rlauxe.auditcenter.Colorado2020AuditCenterInput
 import kotlin.collections.forEach
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,7 +19,7 @@ class TestDominionCvrConverter {
         val export: DominionCvrExport = readDominionCvrExportCsv(filename, county)
         val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
 
-        val coloradoInput = Colorado2020Input
+        val coloradoInput = Colorado2020AuditCenterInput()
         val contestBuilder = CountyContestBuilder(coloradoInput)
         val contests = contestBuilder.contests
         val contestMap = contests.associateBy{ it.name }

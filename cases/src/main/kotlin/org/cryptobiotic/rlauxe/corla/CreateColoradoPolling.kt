@@ -8,10 +8,11 @@ private val logger = KotlinLogging.logger("ColoradoPolling")
 
 // // Create polling audits where precincts are used to calculate Nb and simulated mvrs
 class CreateColoradoPolling (
+    coloradoInput: ColoradoInput,
     countyElection: CountyContestBuilder,
     auditdir: String,
     pollingMode: PollingMode,
-): CreateCorlaElection(countyElection, AuditType.POLLING, auditdir, pollingMode=pollingMode, hasStyle = true) {
+): CreateCorlaElection(coloradoInput, countyElection, AuditType.POLLING, auditdir, pollingMode=pollingMode, hasStyle = true) {
 
     val contestsPolling: List<ContestWithAssertions>
 

@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.datadrive
+package org.cryptobiotic.rlauxe.auditcenter
 
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -32,11 +32,11 @@ class TestElectionSchema {
         println(CastVoteRecord.header)
         val export: DominionCvrExport = readDominionCvrExportCsv(filename, "", 10)
 
-        val coloradoInput = Colorado2020Input
+        val coloradoInput = Colorado2020AuditCenterInput()
         val schemaInfos: List<ContestInfo> = export.makeContestInfo()
 
         var count = 0
-        val canonicalMap: Map<String, CanonicalContest> = coloradoInput.canonicalContests
+        val canonicalMap: Map<String, CanonicalContest> = coloradoInput.canonicalContests()
         schemaInfos.forEach { info ->
             val schemaName = coloradoInput.contestNameCleanup(info.name)
             val can = canonicalMap[schemaName]
@@ -57,7 +57,7 @@ class TestElectionSchema {
     fun compareCvrSchemaVsContestBuilder(filename: String) {
         val export: DominionCvrExport = readDominionCvrExportCsv(filename, "")
 
-        val coloradoInput = Colorado2020Input
+        val coloradoInput = Colorado2020AuditCenterInput()
         val contestBuilder = CountyContestBuilder(coloradoInput)
         val schemaInfos: List<ContestInfo> = export.makeContestInfo()
         val contests = contestBuilder.contests

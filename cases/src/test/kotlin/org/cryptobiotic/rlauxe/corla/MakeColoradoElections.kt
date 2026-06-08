@@ -20,7 +20,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
-class MakeColoradoElection {
+class MakeColoradoElections {
 
     // @Test
     fun makeCountyAudits25() {
@@ -33,8 +33,8 @@ class MakeColoradoElection {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
             ClcaConfig(), null)
 
-        createCountyAudits(topdir,
-            wantCounties, creationConfig, roundConfig,
+        createCountyAudits(topdir, wantCounties, Colorado2024Input(),
+            creationConfig, roundConfig,
             startFirstRound = false
         )
     }
@@ -51,9 +51,8 @@ class MakeColoradoElection {
                 sampling = Sampling.uniform),
             ClcaConfig(), null)
 
-        createCountyAudits(topdir,
-            wantCounties, creationConfig, roundConfig,
-            startFirstRound = false
+        createCountyAudits(topdir, wantCounties, Colorado2024Input(),
+            creationConfig, roundConfig, startFirstRound = false
         )
     }
 
@@ -68,7 +67,7 @@ class MakeColoradoElection {
                 sampling = Sampling.uniform),
             ClcaConfig(), null)
 
-        createUniformElection(topdir, "$topdir/audit",
+        createUniformElection(topdir, "$topdir/audit", Colorado2024Input(),
             creation, round, name = "Corla24Uniform")
     }
 
@@ -83,7 +82,7 @@ class MakeColoradoElection {
                 sampling = Sampling.consistent),
             ClcaConfig(), null)
 
-        createCorlaElection(topdir, "$topdir/audit",
+        createCorlaElection(topdir, "$topdir/audit", Colorado2024Input(),
             null, creation, round, name = "Corla24Consistent", startFirstRound = true)
     }
 
@@ -97,7 +96,7 @@ class MakeColoradoElection {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createCorlaElection(topdir, "$topdir/audit",
+        createCorlaElection(topdir, "$topdir/audit", Colorado2024Input(),
             pollingMode=PollingMode.withPools, creation, round)
     }
 
@@ -111,7 +110,7 @@ class MakeColoradoElection {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createCorlaElection(topdir, "$topdir/audit",
+        createCorlaElection(topdir, "$topdir/audit", Colorado2024Input(),
             pollingMode=PollingMode.withBatches, creation, round)
     }
 
@@ -125,7 +124,7 @@ class MakeColoradoElection {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createCorlaElection(topdir, "$topdir/audit",
+        createCorlaElection(topdir, "$topdir/audit", Colorado2024Input(),
             pollingMode=PollingMode.withoutBatches, creation, round)
     }
 

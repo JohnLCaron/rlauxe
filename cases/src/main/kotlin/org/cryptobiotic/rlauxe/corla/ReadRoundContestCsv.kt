@@ -6,6 +6,8 @@ import org.apache.commons.csv.CSVRecord
 import java.io.File
 import java.nio.charset.Charset
 
+// contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
+
 // Read Colorado Audit Round Contest CSV files, eg
 //   https://www.coloradosos.gov/pubs/elections/RLA/2024/general/round1/contest.csv
 //   corla/src/test/data/2024audit/round1/contest.csv
@@ -48,12 +50,15 @@ fun getAuditReason(s: String): AuditReason {
     return reason ?: AuditReason.none
 }
 
+// contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
+// Adams County Assessor - DEM, opportunistic_benefits, not_auditable, 1,72075,37328,"""Ken Musso""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
+
 data class CorlaContestRoundCsv(
     val contestName: String,
     val auditReason: AuditReason,
     val nwinners: Int,
-    val ballotCardCount: Int,
-    val contestBallotCardCount: Int,
+    val ballotCardCount: Int,         // population size = county size when uniform audit
+    val contestBallotCardCount: Int,  // Nc = number of cards with this contest on it
     val winners: String,
     val minMargin: Int,
     val riskLimit: Double,
@@ -62,7 +67,7 @@ data class CorlaContestRoundCsv(
     val estimatedSamplesToAudit: Int,
 )
 
-fun readColoradoContestRoundCsv(filename: String, cleanup: (String) -> String): Map<String, CorlaContestRoundCsv> {
+fun readColoradoContestRoundCsv(filename: String): Map<String, CorlaContestRoundCsv> {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
@@ -82,7 +87,7 @@ fun readColoradoContestRoundCsv(filename: String, cleanup: (String) -> String): 
         while (records.hasNext()) {
             line = records.next()!!
             val bmi = CorlaContestRoundCsv(
-                contestName = cleanup(line.get(0).trim()),         // contest_name,
+                contestName = line.get(0).trim(),         // contest_name,
                 auditReason = getAuditReason(line.get(1).trim()),
                 nwinners = line.get(3).toInt(),   // winners_allowed,
                 ballotCardCount = line.get(4)

@@ -154,12 +154,11 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
         }
         "DHondtContest",
         "ContestDHondt" -> {
-            DHondtContest(
+            DHondtContest.fromVotes(
                 info,
                 this.votes!!,
                 this.Nc,
                 this.Ncast,
-                null,
             )
         }
         else -> throw RuntimeException("unknown class name ${this.className}")

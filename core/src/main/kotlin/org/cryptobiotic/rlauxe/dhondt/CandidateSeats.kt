@@ -14,14 +14,10 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.text.appendLine
 
-// TODO better to look at the AssertionRounds and use the ones not proven, rather than sampleLimit (??)
+val candNameWidth = 20
+val alpha = .05
+val alphaFudge = .05
 
-private val candNameWidth = 20
-private val alpha = .05
-private val alphaFudge = .05
-
-// TODO same as DhondtRiskFailure
-// each failed assorter, thus contest specific
 data class DhondtRiskFailure(
     val Npop: Int,
     val assorter: DHondtAssorter,
@@ -29,7 +25,7 @@ data class DhondtRiskFailure(
     val loserScore: DhondtScore,
     val risk: Double,
     val samplesUsed: Int,
-    val alreadyExists: Boolean,
+    val alreadyExists: Boolean, // ??
 ) {
     val noerror = assorter.noerror(true)
 
@@ -48,177 +44,352 @@ data class DhondtRiskFailure(
     }
 }
 
-///////////////////////////////////////////////////////////////////
+class ThresholdRiskFailure(
+    val dcontest: DHondtContest,
+    val Npop: Int,
+    val assorter: AssorterIF, // always BelowThreshold?
+    val risk: Double, 
+    val samplesUsed: Int?
+) {
+    val noerror = assorter.noerror(true)
+    val nmvrs = samplesUsed ?: 0
 
-// this is for a single contest, doh!
-class CandSeatRangeBuilder2(val contestRound: ContestRound) {
+    fun estMvrs(): Int {
+        return estSampleSizeStandardBet(Npop, noerror, alpha)
+    }
+
+    override fun toString() = buildString {
+        append("${assorter.shortName()}: ")
+        append(" ${nfn(dcontest.marginInVotes(assorter), 7)}, ${dfn(noerror, 6)}, ")
+        append(" ${nfn(estMvrs(), 8)}, ${nfn(nmvrs, 8)},    ${dfn(risk, 4)},")
+    }
+}
+
+///////////////////////////////////////////////////////////////////
+// this is for one contest
+
+class CandSeatRangeBuilder(val contestRound: ContestRound) {
     val dcontest = contestRound.contestUA.contest as DHondtContest
     val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }
     val orgInfo = dcontest.info
-    val belowMinPct = dcontest.belowMinPct
+    val belowMinPct = dcontest.partiesBelowThreshold
     val votes = dcontest.votes
     val Npop = contestRound.contestUA.Npop
-    val nsamples = contestRound.haveSampleSize
+    val nsamples = contestRound.haveSampleSize // if this changes, need to redo
 
-    val altContest: DHondtContest?
-    val altFailures: List<DhondtRiskFailure>?
+    val failureNodes: Tree<AltFailure>
+    val thrashers: List<AltThrasher>
 
-    val threshRanges: ContestSeats?
-    val mergedRanges: ContestSeats
+    val partyRanges: ContestSeats // contest/party seat ranges from all failed assertions
 
     init {
-        val dhondtFailures = makeRiskFailures(assorters)
-        val dhondtRanges = makeCandSeatRanges2(dcontest, dhondtFailures)
+        // dhondt assertion failures
+        failureNodes = makeFailureNodes(assorters)
 
-        //// threshold assertion failures -> alternate scores
-        val wthrashers = mutableListOf<ThresholdRiskFailure2>()
-        contestRound.assertionRounds.forEach { ar ->
-            val nsamples = contestRound.haveSampleSize
-            val assorter = ar.assertion.assorter
-            val risk = if (ar.auditResult != null) ar.auditResult!!.pmin else {
-                estRiskStandardBet(Npop, assorter.noerror(true), nsamples)
-            }
-            if (risk > alphaFudge && assorter !is DHondtAssorter) {
-                wthrashers.add(ThresholdRiskFailure2(assorter, risk, nsamples))
+        // threshold assertion failures
+        thrashers = makeAltTrashers(assorters)
+
+        val assertionsDone = mutableSetOf<String>()
+
+        //  the children of the thrashers are AltFailures. Add them to the root
+        thrashers.forEach { thrasher ->
+            check(thrasher.altContest.alt)
+            val childFailures: List<AltFailure> = thrasher.addChildren(assertionsDone)
+            check(thrasher.altContest.alt)
+
+            childFailures.forEach {
+                val tfailureNode = TreeNode(thrasher.name, it)
+                failureNodes.add(tfailureNode)
             }
         }
 
-        // if any thresholds fail, then generate an alternate contest
-        // TODO this assumes only one thrasher I think
-        if (wthrashers.size > 1) throw RuntimeException("can only have one tfailed hreshold assorter per contest")
-
-        // TODO: if there are n thrashers, there are 2^n possible alternative scores. Generate each and take the min and max over all
-        if (wthrashers.isNotEmpty()) {
-            altContest = makeAltContest(wthrashers)
-            altFailures = makeAltRiskFailures(altContest)
-            threshRanges = makeCandSeatRanges2(altContest, altFailures)
-            this.mergedRanges = mergeCandSeatRanges(dhondtRanges, threshRanges)
-
-        } else {
-            altContest = null
-            altFailures = null
-            threshRanges = null
-            mergedRanges = dhondtRanges
+        // now add the childFailures, breadth first, skipping already done assertions
+        var targetDepth = 0
+        var childrenAtDepth: List<TreeNode<AltFailure>> = failureNodes.nodesAtDepth(targetDepth)
+        while (childrenAtDepth.isNotEmpty()) {
+            childrenAtDepth.forEach { childNode ->
+                val childFailures = childNode.value.addChildren(assertionsDone)
+                childFailures.forEach { childNode.addChild(TreeNode(it.name, it)) }
+            }
+            targetDepth++
+            childrenAtDepth = failureNodes.nodesAtDepth(targetDepth)
         }
+
+        partyRanges = makePartySeatRanges(dcontest, failureNodes)
     }
 
-    // do we have to do this for each or all ?
-    // thrashers are the thresholds that didnt make their risk limit
-    fun makeAltContest(thrashers: List<ThresholdRiskFailure2>): DHondtContest {
-        val thrasherIds = thrashers.map { it.assorter.winner() }.toSet()
-
-        // TODO not going through DhondtBuilder, so parties arent complete WHAT THE FUCK ??
-        val alt = DHondtContest(orgInfo, votes, dcontest.Nc, dcontest.Ncast, belowMinPct - thrasherIds)
-        // recalc assorters
-        alt.assorters.addAll(DHondtAssorter.makeDhondtAssorters(orgInfo, alt.Nc, alt.parties))
-        return alt
+    fun countContestedSeats(): Int {
+        return failureNodes.count()
     }
 
-    fun makeRiskFailures(assorters:List<AssorterIF>): List<DhondtRiskFailure> {
+    fun makeFailureNodes(assorters: List<AssorterIF>): Tree<AltFailure> {
+
         val failures = mutableListOf<DhondtRiskFailure>()
-        assorters.filter { it is DHondtAssorter } .forEach { assorter ->
+        assorters.filter { it is DHondtAssorter }.forEach { assorter ->
             val dassorter = assorter as DHondtAssorter
             val risk = estRiskStandardBet(Npop, dassorter.noerror(true), nsamples)
             if (risk > alphaFudge) {
                 val winnerId = dassorter.winner()
                 val loserId = dassorter.loser()
-                val winnerScore = dcontest.sortedScores.find { it.divisor == dassorter.lastSeatWon && it.candidate == winnerId }!!
-                val loserScore = dcontest.sortedScores.find { it.divisor == dassorter.firstSeatLost && it.candidate == loserId }
+                val winnerScore =
+                    dcontest.sortedScores.find { it.divisor == dassorter.lastSeatWon && it.candidate == winnerId }!!
+                val loserScore =
+                    dcontest.sortedScores.find { it.divisor == dassorter.firstSeatLost && it.candidate == loserId }!!
 
                 val alreadyExists = assorters.find { it.hashcodeDesc() == dassorter.hashcodeDesc() } != null // ??
-                failures.add( DhondtRiskFailure(Npop, dassorter, winnerScore, loserScore!!, risk, nsamples, alreadyExists) )
+                failures.add(DhondtRiskFailure(Npop, dassorter, winnerScore, loserScore, risk, nsamples, alreadyExists))
             }
         }
-        return failures
+
+        val resultTree = Tree<AltFailure>()
+        failures.forEachIndexed { idx, failure ->
+            val altContest = makeAltContestFromFlippedAssertion(dcontest, failure)
+            val child = AltFailure("root.node${idx+1}", failure, altContest)
+            resultTree.add(TreeNode("root.node${idx+1}", child))
+        }
+        return resultTree
     }
 
-    // why always dhondt ??
-    fun makeAltRiskFailures(alt: DHondtContest): List<DhondtRiskFailure> {
-        val altFailures = mutableListOf<DhondtRiskFailure>()
-        alt.assorters.forEach { assorter ->
-            require(assorter is DHondtAssorter)
+    fun makeAltTrashers(assorters: List<AssorterIF>): List<AltThrasher> {
+        val thrashers = mutableListOf<ThresholdRiskFailure>()
+        assorters.filter { it !is DHondtAssorter }.forEach { assorter ->
+            val nsamples = contestRound.haveSampleSize
             val risk = estRiskStandardBet(Npop, assorter.noerror(true), nsamples)
             if (risk > alphaFudge) {
-                val winnerId = assorter.winner()
-                val loserId = assorter.loser()
-                val winnerScore = alt.sortedScores.find { it.divisor == assorter.lastSeatWon && it.candidate == winnerId }!!
-                val loserScore = alt.sortedScores.find { it.divisor == assorter.firstSeatLost && it.candidate == loserId }
-
-                val alreadyExists = dcontest.assorters.find { it.hashcodeDesc() == assorter.hashcodeDesc() } != null
-                altFailures.add(DhondtRiskFailure(Npop, assorter, winnerScore, loserScore!!, risk, nsamples, alreadyExists))
+                thrashers.add(ThresholdRiskFailure(dcontest, Npop, assorter, risk, nsamples))
             }
         }
-
-        return altFailures
+        // TODO: if there are n thrashers, there are 2^n possible alternative scores. Generate each and take the min and max over all
+        // TODO this assumes only one thrasher for now
+        if (thrashers.size > 1) throw RuntimeException("currently can only have one failed threshold assorter per contest")
+        return thrashers.mapIndexed { idx, it -> AltThrasher("root.node${idx + 1}", dcontest, it) }
     }
 
-    fun makeCandSeatRanges2(dc: DHondtContest, failures: List<DhondtRiskFailure>): ContestSeats {
-        val candSeats = mutableMapOf<Int, CandidateSeats>() // one for each candidate
+    fun makePartySeatRanges(dc: DHondtContest, failureNodes: Tree<AltFailure>): ContestSeats {
+        val partySeats = mutableMapOf<Int, CandidateSeats>() // one for each candidate
         dc.info.candidateIdToName.forEach { (candId, name) ->
-            candSeats[candId] = CandidateSeats(candId, name)
+            partySeats[candId] = CandidateSeats(candId, name)
         }
         dc.winnerSeats.forEach { (candId, nseats) ->
-            candSeats[candId]!!.reportedSeats = nseats
-            candSeats[candId]!!.minSeats = nseats
-            candSeats[candId]!!.maxSeats = nseats
+            partySeats[candId]!!.reportedSeats = nseats
+            partySeats[candId]!!.minSeats = nseats
+            partySeats[candId]!!.maxSeats = nseats
         }
 
-        failures.forEach { failure ->
-            candSeats[failure.assorter.winner()]!!.failures.add(failure)
-            candSeats[failure.assorter.loser()]!!.failures.add(failure)
+        failureNodes.forEach {
+            val failure = it.failure
+            partySeats[failure.assorter.winner()]!!.failures.add(failure)
+            partySeats[failure.assorter.loser()]!!.failures.add(failure)
         }
 
         // for each seat, can only win 1 or lose 1
         val winners = mutableSetOf<Int>()
         val losers = mutableSetOf<Int>()
-        failures.forEach { failure ->
-            winners.add(failure.winnerScore.candidate)
-            losers.add(failure.loserScore.candidate)
+        failureNodes.forEach { altNode ->
+            winners.add(altNode.failure.winnerScore.candidate)
+            losers.add(altNode.failure.loserScore.candidate)
         }
         winners.forEach {
-            val win = candSeats[it]!!
+            val win = partySeats[it]!!
             win.minSeats--
         }
         losers.forEach {
-            val lose = candSeats[it]!!
+            val lose = partySeats[it]!!
             lose.maxSeats++
         }
 
-        return ContestSeats(dc.id, candSeats.values.toList())
+        return ContestSeats(dc.id, partySeats.values.toList())
     }
 
-    // union of threshRanges into orgRanges
-    fun mergeCandSeatRanges(orgRanges: ContestSeats, threshRanges: ContestSeats): ContestSeats {
-        if (threshRanges.candidates.isEmpty()) return orgRanges
-        orgRanges.candidates.forEach { mergeRange -> // do we know that this has all candidates ??
-            val threshRange = threshRanges.candidates.find { it.candId == mergeRange.candId }!! // ??
-            mergeRange.minSeats = min(mergeRange.minSeats, threshRange.minSeats)
-            mergeRange.maxSeats = max(mergeRange.maxSeats, threshRange.maxSeats)
-            mergeRange.failures.addAll(threshRange.failures)
+    inner class AltThrasher(val name: String, fromContest: DHondtContest, val thrasher: ThresholdRiskFailure) {
+        val altContest: AltContest
+
+        init {
+            // make altContest by removing the threshold failure
+            val parties = fromContest.parties.toList()
+            val party = parties.find { it.id == thrasher.assorter.winner() }!!
+            party.isBelowMin = false
+            val thresholdOverride = parties.filter { it.isBelowMin }.map{ it.id} .toSet()
+
+            val nseats = fromContest.info.nwinners
+            val sortedScoresCalc =
+                assignWinners(parties, nseats, fromContest.Nc, fromContest.info.minFraction!!, thresholdOverride)
+
+            val dalt = DHondtContest(
+                fromContest.info, fromContest.votes, fromContest.Nc, fromContest.Ncast,
+                parties,
+                sortedScoresCalc,
+                thresholdOverride
+            )
+            check(dalt.partiesBelowThreshold)
+
+            val assorters = DHondtAssorter.makeDhondtAssorters(fromContest.info, dalt.Nc, dalt.parties)
+            dalt.assorters.addAll(assorters)
+
+            altContest = AltContest(dalt, thrasher = thrasher)
         }
 
-        return orgRanges
+        // add all the failures from altContest. Note these are DHondt failures, not more Threshold failures
+        fun addChildren(alreadyDone: MutableSet<String>): List<AltFailure> {
+            //alreadyDone.add(altContest.thrasher!!.assorter.shortName())
+            //alreadyDone.add(altContest.thrasher!!.assorter.reverseName())
+
+            val children = mutableListOf<AltFailure>()
+            var idx = 1
+            altContest.dhondtFailures.forEach { failure ->
+                val skip = alreadyDone.contains(failure.assorter.shortName())
+
+                if (!skip) {
+                    val altContest = makeAltContestFromFlippedAssertion(altContest.alt, failure)
+                    val child = AltFailure("${this.name}-$idx", failure, altContest)
+                    alreadyDone.add(failure.assorter.shortName())
+                    alreadyDone.add(failure.assorter.reverseName())
+                    children.add(child)
+                    idx++
+                }
+            }
+            return children
+        }
     }
 
-    // thrashers are the threshold assorters that didnt make their risk limit
-    inner class ThresholdRiskFailure2(val assorter: AssorterIF, val risk: Double, val samplesUsed: Int?) {
-        val noerror = assorter.noerror(true)
-        val nmvrs = samplesUsed ?: 0
-        fun estMvrs(): Int {
-            // payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (µ_i is approximately 1/2)
-            // payoff_noerror^n > 1/alpha
-            // n = 1/ln(alpha) / ln(λ * (noerror − 1/2)); noerror − 1/2 = nomargin/2
-            return estSampleSizeStandardBet(Npop, noerror, alpha)
+    inner class AltFailure(val name: String, val failure: DhondtRiskFailure, val altContest: AltContest) {
+
+        // add all the failures from altContest
+        fun addChildren(alreadyDone: MutableSet<String>): List<AltFailure> {
+            alreadyDone.add(altContest.failure!!.assorter.shortName())
+            alreadyDone.add(altContest.failure!!.assorter.reverseName())
+
+            val children = mutableListOf<AltFailure>()
+            var idx = 1
+            altContest.dhondtFailures.forEach { failure ->
+                val skip = alreadyDone.contains(failure.assorter.shortName())
+
+                if (!skip) {
+                    val altContest = makeAltContestFromFlippedAssertion(altContest.alt, failure)
+                    val child = AltFailure("${this.name}-$idx", failure, altContest)
+                    alreadyDone.add(failure.assorter.shortName())
+                    alreadyDone.add(failure.assorter.reverseName())
+                    children.add(child)
+                    idx++
+                }
+            }
+            return children
         }
 
-        override fun toString() = buildString {
-            append("${assorter.shortName()}: ")
-            append(" ${nfn(dcontest.marginInVotes(assorter), 7)}, ${dfn(noerror, 6)}, ")
-            append(" ${nfn(estMvrs(), 8)}, ${nfn(nmvrs, 8)},    ${dfn(risk, 4)},")
+    }
+
+    fun makeAltContestFromFlippedAssertion(fromContest: DHondtContest, failure: DhondtRiskFailure): AltContest {
+        // in order to flip the winner/loser assertion, youd have to change the reported votes / margin
+        // and all the changed assertions would depend on what the score gap is.
+
+        // lets just manipuate the lastSeatWon/firstSeatLost
+        val winner = failure.assorter.winner()
+        val loser = failure.assorter.loser()
+
+        val parties = fromContest.parties.toList()
+        val winnerParty = parties.find { it.id == winner }!!
+        val loserParty = parties.find { it.id == loser }!!
+        if (winnerParty.lastSeatWon == null || loserParty.firstSeatLost == null)
+            print("hey")
+
+        winnerParty.firstSeatLost = winnerParty.lastSeatWon
+        winnerParty.lastSeatWon = if (winnerParty.lastSeatWon!! > 0) winnerParty.lastSeatWon!! - 1 else null
+
+        loserParty.lastSeatWon = loserParty.firstSeatLost
+        loserParty.firstSeatLost = loserParty.firstSeatLost!! + 1
+
+        // then we have to manipulate the sortedScores (!)
+        val nseats = fromContest.info.nwinners
+        val sortedScoresCalc =
+            assignWinners(parties, nseats, fromContest.Nc, fromContest.info.minFraction!!, fromContest.partiesBelowThreshold, flip = true)
+
+        val dalt = DHondtContest(
+            fromContest.info, fromContest.votes, fromContest.Nc, fromContest.Ncast,
+            parties,
+            sortedScoresCalc,
+            fromContest.partiesBelowThreshold
+        )
+
+        val assorters = DHondtAssorter.makeDhondtAssorters(fromContest.info, dalt.Nc, dalt.parties)
+        dalt.assorters.addAll(assorters)
+
+        return AltContest(dalt, failure = failure)
+    }
+
+    fun check(dh: DHondtContest) {
+        val parties = dh.parties.toList()
+        val winnerParty = parties.find { it.id == 9 }!!
+        if (winnerParty.lastSeatWon == null)
+            print("hey")
+    }
+
+    fun check(parties: List<DhondtCandidate>) {
+        val winnerParty = parties.find { it.id == 9 }!!
+        if (winnerParty.lastSeatWon == null)
+            print("hey")
+    }
+
+    fun check(below: Set<Int>) {
+        if (below.contains(9))
+            print("hey")
+    }
+
+    inner class AltContest(
+        val alt: DHondtContest,
+        val failure: DhondtRiskFailure? = null,
+        val thrasher: ThresholdRiskFailure? = null
+    ) {
+        val dhondtFailures: List<DhondtRiskFailure>
+        //val threshRanges: ContestSeats
+        // val mergedRanges = ContestSeats(0, emptyList())
+
+        init {
+            dhondtFailures = makeAltRiskFailures()
+            // threshRanges = makeCandSeatRanges(alt, dhondtFailures)
+            // this.mergedRanges = mergeCandSeatRanges(dhondtRanges, threshRanges)
+        }
+
+        fun makeAltRiskFailures(): List<DhondtRiskFailure> {
+            val altFailures = mutableListOf<DhondtRiskFailure>()
+            alt.assorters.forEach { assorter ->
+                require(assorter is DHondtAssorter)
+                val risk = estRiskStandardBet(Npop, assorter.noerror(true), nsamples)
+                if (risk > alphaFudge) {
+                    val winnerId = assorter.winner()
+                    val loserId = assorter.loser()
+                    val winnerScore =
+                        alt.sortedScores.find { it.divisor == assorter.lastSeatWon && it.candidate == winnerId }!!
+                    val loserScore =
+                        alt.sortedScores.find { it.divisor == assorter.firstSeatLost && it.candidate == loserId }
+
+                    val alreadyExists = dcontest.assorters.find { it.hashcodeDesc() == assorter.hashcodeDesc() } != null
+                    altFailures.add(
+                        DhondtRiskFailure(Npop, assorter, winnerScore, loserScore!!, risk, nsamples, alreadyExists)
+                    )
+                }
+            }
+            return altFailures
+        }
+
+        // union of threshRanges into orgRanges
+        fun mergeCandSeatRanges(orgRanges: ContestSeats, threshRanges: ContestSeats): ContestSeats {
+            if (threshRanges.candidates.isEmpty()) return orgRanges
+            orgRanges.candidates.forEach { mergeRange -> // do we know that this has all candidates ??
+                val threshRange = threshRanges.candidates.find { it.candId == mergeRange.candId }!! // ??
+                mergeRange.minSeats = min(mergeRange.minSeats, threshRange.minSeats)
+                mergeRange.maxSeats = max(mergeRange.maxSeats, threshRange.maxSeats)
+                mergeRange.failures.addAll(threshRange.failures)
+            }
+            return orgRanges
         }
     }
+
 }
 
+///////////////////////////////////////////////////////////////////
+// this is for all contests
+
+// one candidate min/max/reported for this contest
 data class CandidateSeats(val candId: Int, val candName: String) {
     var minSeats = 0
     var reportedSeats = 0
@@ -231,6 +402,7 @@ data class CandidateSeats(val candId: Int, val candName: String) {
     }
 }
 
+// all candidates min/max/reported for this contest
 data class ContestSeats(val contestId:Int, val candidates: List<CandidateSeats>) {
 
     fun showSeatRanges() = buildString {
@@ -243,25 +415,27 @@ data class ContestSeats(val contestId:Int, val candidates: List<CandidateSeats>)
             appendLine("  ${nfn(it.failures.size, 6)}   |")
         }
     }
+
+    fun nfailures(): Int {
+        return candidates.map { it.failures.size }.sum()
+    }
 }
 
-///////////////////////////////////////////////////////////////////
-// this is for all contests
-
-fun makeContestAndCandidateSeats(auditRound: AuditRoundIF, contestLimits: List<SampleLimit>): AllSeats {
+fun makeAllSeats(auditRound: AuditRoundIF, contestLimits: List<SampleLimit>): AllSeats {
     val contestLimitsMap = contestLimits.associateBy { it.id }
     val contestSeats = auditRound.contestRounds.map { contestRound ->
         val sampleLimit = contestLimitsMap[contestRound.id]
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit.limit
         }
-        val builder = CandSeatRangeBuilder2(contestRound)
-        builder.mergedRanges
+        val builder = CandSeatRangeBuilder(contestRound)
+        builder.partyRanges
     }
 
     return AllSeats(contestSeats)
 }
 
+// all candidates min/max/reported for all contests
 data class AllSeats(val contestSeats: List<ContestSeats>)  {
     val candidateSums: List<CandidateSeats>
 
@@ -279,25 +453,39 @@ data class AllSeats(val contestSeats: List<ContestSeats>)  {
         candidateSums = sum.values.toList()
     }
 
-    fun calcCoalition(candidates: Set<Int>, candNames: Map<Int, String>): Coalition2 {
-        val coalition = Coalition2(candidates, candNames)
+    fun calcCoalition(candidates: Set<Int>, candNames: Map<Int, String>): Coalition {
+        val coalition = Coalition(candidates, candNames)
         contestSeats.forEach {
             coalition.addContestSeats(it)
         }
         return coalition
     }
+
+    fun showAllPartySeats() = buildString {
+        appendLine("|                party      | min | reported | max |")
+        appendLine("|---------------------------|-----|----------|-----|")
+        candidateSums.sortedByDescending { it.maxSeats }.forEach {
+            append("|  ${trunc("${it.candName} (${nfn(it.candId, 2)})", candNameWidth+4)} | ${nfn(it.minSeats, 2)}")
+            appendLine("  |    ${nfn(it.reportedSeats, 2)}    | ${nfn(it.maxSeats, 2)}  |")
+        }
+        val nseats = candidateSums.sumOf { it.reportedSeats }
+        appendLine("\nnseats=$nseats ncands=${candidateSums.size} ")
+    }
 }
 
-data class Coalition2(val candidates: Set<Int>, val candNames: Map<Int, String>) {
+data class Coalition(val candidates: Set<Int>, val candNames: Map<Int, String>) {
     var reportedSeats = 0
     var seatsLost = 0
     var seatsGained = 0
-    val failures = mutableListOf<DhondtRiskFailure>() // may want to see where each loss came from
+    val losers = mutableListOf<DhondtRiskFailure>() // may want to see where each loss came from
+    val winners = mutableListOf<DhondtRiskFailure>() // may want to see where each loss came from
+    val nuetral = mutableListOf<DhondtRiskFailure>() // may want to see where each loss came from
     var nfailures = 0
 
     fun reportedSeats() = reportedSeats
     fun minSeats() = reportedSeats - seatsLost
     fun maxSeats() = reportedSeats + seatsGained
+    fun all() = losers + winners + nuetral
 
     fun addContestSeats(contest: ContestSeats) {
         contest.candidates.forEach { candSeats ->
@@ -308,19 +496,22 @@ data class Coalition2(val candidates: Set<Int>, val candNames: Map<Int, String>)
         }
     }
 
-    fun addLoserResult(loser: DhondtRiskFailure) {
-        val winnerCand = loser.assorter.winner()
-        val loserCand = loser.assorter.loser()
+    fun addLoserResult(failure: DhondtRiskFailure) {
+        val winnerCand = failure.assorter.winner()
+        val loserCand = failure.assorter.loser()
 
         // if the switch stays in the coalition, ignore.
         if (candidates.contains(winnerCand) && !candidates.contains(loserCand)) {
             seatsLost++
-            failures.add(loser)
+            winners.add(failure)
         }
         if (!candidates.contains(winnerCand) && candidates.contains(loserCand)) {
             seatsGained++
-            failures.add(loser)
+            losers.add(failure)
+        } else {
+            nuetral.add(failure)
         }
+
         nfailures++
     }
 
@@ -329,7 +520,24 @@ data class Coalition2(val candidates: Set<Int>, val candNames: Map<Int, String>)
         appendLine("Coalition Parties: $names ($candidates)")
         appendLine("   minSeats=${minSeats()}, reportedSeats=$reportedSeats, maxSeats=${maxSeats()}")
         appendLine("   Contested Assertions")
-        appendLine("        contest,      winner,      loser")
-        failures.forEach { appendLine("${trunc(it.assorter.info.name, 15)}, ${trunc(it.assorter.winnerNameRound(), 11)}, ${trunc(it.assorter.loserNameRound(), 11)}") }
+        appendLine("        contest,      winner,      loser,    seatChange")
+        losers.forEach {
+            append("${trunc(it.assorter.info.name, 15)}, ")
+            append("${trunc(it.assorter.winnerNameRound(), 11)}, ")
+            append("${trunc(it.assorter.loserNameRound(), 11)}")
+            appendLine(",     1")
+        }
+        winners.forEach {
+            append("${trunc(it.assorter.info.name, 15)}, ")
+            append("${trunc(it.assorter.winnerNameRound(), 11)}, ")
+            append("${trunc(it.assorter.loserNameRound(), 11)}")
+            appendLine(",    -1")
+        }
+        nuetral.forEach {
+            append("${trunc(it.assorter.info.name, 15)}, ")
+            append("${trunc(it.assorter.winnerNameRound(), 11)}, ")
+            append("${trunc(it.assorter.loserNameRound(), 11)}")
+            appendLine(",     0")
+        }
     }
 }

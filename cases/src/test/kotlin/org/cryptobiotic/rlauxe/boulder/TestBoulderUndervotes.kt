@@ -25,7 +25,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun testBoulderBallotType() {
-        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrFilename, "Boulder")
         // println(export.summary())
 
         var count = 0
@@ -96,7 +96,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showSovoContestDetail2() {
-        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrFilename, "Boulder")
 
         val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
         println()
@@ -108,7 +108,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showPoolVotes() {
-        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrFilename, "Boulder")
 
         println("votes, undervotes")
 
@@ -130,7 +130,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showRedactedUndervotes2() {
-        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrFilename, "Boulder")
         // val election1 = BoulderElectionOAsim(export, sovo)
         val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
 
@@ -195,7 +195,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showRedactedNcards() {
-        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrFilename, "Boulder")
         val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
@@ -264,7 +264,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showNcards() {
-        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrFilename, "Boulder")
         val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }

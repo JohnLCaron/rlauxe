@@ -1,13 +1,17 @@
-package org.cryptobiotic.rlauxe.boulder
+package org.cryptobiotic.rlauxe.dominion
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.boulder.RedactedGroup.Companion.makeAccumulator
+import org.cryptobiotic.rlauxe.boulder.isEmpty
+import org.cryptobiotic.rlauxe.boulder.parseContestNameAndVoteFor
+import org.cryptobiotic.rlauxe.boulder.parseIrvContestName
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.ZipReader
+import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundUp
+import org.cryptobiotic.rlauxe.util.trunc
 import java.io.File
 import java.io.InputStreamReader
 import java.io.Reader
@@ -16,11 +20,9 @@ import java.nio.charset.Charset
 import kotlin.collections.set
 import kotlin.math.max
 
-// TODO remove in favor of DominionCvrExportCsv
-
-// this reads csv files from "Dominion CVR export files", maybe standard Dominion csv format ?
-// We are getting these files from Boulder County, used by createBoulderElection()
-// Note these record the cvr undervotes, but not for the redacted votes
+// this reads csv files from "Dominion CVR export files", a standard Dominion csv format.
+// Note these record the cvr undervotes, but not for the redacted votes; a col is left empty when the ballot doesnt have that contest.
+// how to deal with the names??
 
 // 2024 Boulder County GE Recounts,5.17.17.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 //,,,,,,,Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Representative to the 119th United States Congress - District 2 (Vote For=1),Representative to the 119th United States Congress - District 2 (Vote For=1),Representative to the 119th United States Congress - District 2 (Vote For=1),Representative to the 119th United States Congress - District 2 (Vote For=1),Representative to the 119th United States Congress - District 2 (Vote For=1),Representative to the 119th United States Congress - District 2 (Vote For=1),Representative to the 119th United States Congress - District 2 (Vote For=1),State Board of Education Member - Congressional District 2 (Vote For=1),State Board of Education Member - Congressional District 2 (Vote For=1),State Board of Education Member - Congressional District 2 (Vote For=1),Regent of the University of Colorado - At Large (Vote For=1),Regent of the University of Colorado - At Large (Vote For=1),Regent of the University of Colorado - At Large (Vote For=1),Regent of the University of Colorado - At Large (Vote For=1),State Senator - District 17 (Vote For=1),State Senator - District 17 (Vote For=1),State Senator - District 18 (Vote For=1),State Senator - District 18 (Vote For=1),State Representative - District 10 (Vote For=1),State Representative - District 10 (Vote For=1),State Representative - District 11 (Vote For=1),State Representative - District 11 (Vote For=1),State Representative - District 12 (Vote For=1),State Representative - District 12 (Vote For=1),State Representative - District 19 (Vote For=1),State Representative - District 19 (Vote For=1),State Representative - District 49 (Vote For=1),State Representative - District 49 (Vote For=1),District Attorney - 20th Judicial District (Vote For=1),Regional Transportation District Director - District I (Vote For=1),Boulder County Commissioner - District 1 (Vote For=1),Boulder County Commissioner - District 1 (Vote For=1),Boulder County Commissioner - District 1 (Vote For=1),Boulder County Commissioner - District 2 (Vote For=1),Boulder County Commissioner - District 2 (Vote For=1),Boulder County Coroner (Vote For=1),City of Louisville City Council Ward 1 (Vote For=1),City of Louisville City Council Ward 1 (Vote For=1),Town of Erie - Mayor (Vote For=1),Town of Erie - Mayor (Vote For=1),Town of Erie - Council Member District 1 (Vote For=2),Town of Erie - Council Member District 1 (Vote For=2),Town of Erie - Council Member District 1 (Vote For=2),Town of Erie - Council Member District 1 (Vote For=2),Town of Erie - Council Member District 2 (Vote For=2),Town of Erie - Council Member District 2 (Vote For=2),Town of Erie - Council Member District 2 (Vote For=2),Town of Erie - Council Member District 2 (Vote For=2),Town of Superior - Trustee (Vote For=3),Town of Superior - Trustee (Vote For=3),Town of Superior - Trustee (Vote For=3),Town of Superior - Trustee (Vote For=3),Town of Superior - Trustee (Vote For=3),Town of Superior - Trustee (Vote For=3),Town of Superior - Trustee (Vote For=3),Justice of the Colorado Supreme Court - Berkenkotter (Vote For=1),Justice of the Colorado Supreme Court - Berkenkotter (Vote For=1),Justice of the Colorado Supreme Court - Boatright (Vote For=1),Justice of the Colorado Supreme Court - Boatright (Vote For=1),Justice of the Colorado Supreme Court - Marquez (Vote For=1),Justice of the Colorado Supreme Court - Marquez (Vote For=1),Colorado Court of Appeals Judge - Dunn (Vote For=1),Colorado Court of Appeals Judge - Dunn (Vote For=1),Colorado Court of Appeals Judge - Jones (Vote For=1),Colorado Court of Appeals Judge - Jones (Vote For=1),Colorado Court of Appeals Judge - Kuhn (Vote For=1),Colorado Court of Appeals Judge - Kuhn (Vote For=1),Colorado Court of Appeals Judge - Roman (Vote For=1),Colorado Court of Appeals Judge - Roman (Vote For=1),Colorado Court of Appeals Judge - Schutz (Vote For=1),Colorado Court of Appeals Judge - Schutz (Vote For=1),District Court Judge - 20th Judicial District - Collins (Vote For=1),District Court Judge - 20th Judicial District - Collins (Vote For=1),District Court Judge - 20th Judicial District - Gunning (Vote For=1),District Court Judge - 20th Judicial District - Gunning (Vote For=1),District Court Judge - 20th Judicial District - Lindsey (Vote For=1),District Court Judge - 20th Judicial District - Lindsey (Vote For=1),District Court Judge - 20th Judicial District - Mulvahill (Vote For=1),District Court Judge - 20th Judicial District - Mulvahill (Vote For=1),Boulder County Court - Martin (Vote For=1),Boulder County Court - Martin (Vote For=1),Amendment G (Constitutional) (Vote For=1),Amendment G (Constitutional) (Vote For=1),Amendment H (Constitutional) (Vote For=1),Amendment H (Constitutional) (Vote For=1),Amendment I (Constitutional) (Vote For=1),Amendment I (Constitutional) (Vote For=1),Amendment J (Constitutional) (Vote For=1),Amendment J (Constitutional) (Vote For=1),Amendment K (Constitutional) (Vote For=1),Amendment K (Constitutional) (Vote For=1),Amendment 79 (Constitutional) (Vote For=1),Amendment 79 (Constitutional) (Vote For=1),Amendment 80 (Constitutional) (Vote For=1),Amendment 80 (Constitutional) (Vote For=1),Proposition JJ (Statutory) (Vote For=1),Proposition JJ (Statutory) (Vote For=1),Proposition KK (Statutory) (Vote For=1),Proposition KK (Statutory) (Vote For=1),Proposition 127 (Statutory) (Vote For=1),Proposition 127 (Statutory) (Vote For=1),Proposition 128 (Statutory) (Vote For=1),Proposition 128 (Statutory) (Vote For=1),Proposition 129 (Statutory) (Vote For=1),Proposition 129 (Statutory) (Vote For=1),Proposition 130 (Statutory) (Vote For=1),Proposition 130 (Statutory) (Vote For=1),Proposition 131 (Statutory) (Vote For=1),Proposition 131 (Statutory) (Vote For=1),City of Boulder Ballot Question 2C (Vote For=1),City of Boulder Ballot Question 2C (Vote For=1),City of Boulder Ballot Question 2D (Vote For=1),City of Boulder Ballot Question 2D (Vote For=1),City of Boulder Ballot Question 2E (Vote For=1),City of Boulder Ballot Question 2E (Vote For=1),City of Lafayette Ballot Question 2A (Vote For=1),City of Lafayette Ballot Question 2A (Vote For=1),City of Longmont Ballot Issue 3A (Vote For=1),City of Longmont Ballot Issue 3A (Vote For=1),Town of Erie Ballot Issue 3C (Vote For=1),Town of Erie Ballot Issue 3C (Vote For=1),Town of Lyons Ballot Question 2B (Vote For=1),Town of Lyons Ballot Question 2B (Vote For=1),Town of Superior Ballot Issue 3B (Vote For=1),Town of Superior Ballot Issue 3B (Vote For=1),St. Vrain Valley School District RE-1J Ballot Issue 5C (Vote For=1),St. Vrain Valley School District RE-1J Ballot Issue 5C (Vote For=1),Thompson School District R2-J Ballot Issue 5A (Vote For=1),Thompson School District R2-J Ballot Issue 5A (Vote For=1),Thompson School District R2-J Ballot Issue 5B (Vote For=1),Thompson School District R2-J Ballot Issue 5B (Vote For=1),Eldorado Springs Public Improvement District Ballot Question 6C (Vote For=1),Eldorado Springs Public Improvement District Ballot Question 6C (Vote For=1),Homestead Public Improvement District of Boulder County Ballot Issue 6D (Vote For=1),Homestead Public Improvement District of Boulder County Ballot Issue 6D (Vote For=1),Lafayette Downtown Development Authority Ballot Question 6A (Vote For=1),Lafayette Downtown Development Authority Ballot Question 6A (Vote For=1),Lafayette Downtown Development Authority Ballot Issue 6B (Vote For=1),Lafayette Downtown Development Authority Ballot Issue 6B (Vote For=1),Regional Transportation District Ballot Issue 7A (Vote For=1),Regional Transportation District Ballot Issue 7A (Vote For=1),St. Vrain and Left Hand Water Conservancy District Ballot Issue 7C (Vote For=1),St. Vrain and Left Hand Water Conservancy District Ballot Issue 7C (Vote For=1)
@@ -42,14 +44,14 @@ import kotlin.math.max
 private val showHeader = false
 private val showLines = false
 
-data class BoulderCvrExportCsv(
+data class DominionCvrExport(
     val countyId: String,
     val electionName: String,
     val versionName: String,
     val filename: String,
     val schema: Schema,
     val cvrs: List<CastVoteRecord>, // includes both regular and IRV votes, but not redacted groups
-    val redacted: List<RedactedGroup>,
+    val redacted: List<DominionRedactedGroup>,
     val ballotTypes: List<BallotType>,
 ) {
     fun show() = buildString {
@@ -88,7 +90,7 @@ data class CastVoteRecord(
     val batchId: String,
     val recordId: Int,
     val imprintedId: String,
-    val ballotType: String,
+    val ballotType: String, // might have to generate this ourself
 ) {
     var precinctPortion: String? = null
     var contestVotes =  mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
@@ -124,12 +126,13 @@ data class CastVoteRecord(
         append("$recordId, ")
         append("$imprintedId, ")
         append("$precinctPortion, ")
-        appendLine("$ballotType")
+        append("$ballotType, ")
         contestVotes.forEach {
-            appendLine("    ${it.contestId} ${it.candVotes.joinToString(",")}")
+            append("${it.contestId}: ${it.candVotes.joinToString(",")}, ")
         }
     }
 
+    /*
     // this assumes that you have a single schema you use for the ContestInfo....
     fun convertToCvr(): Cvr {
         val cvrb = CvrBuilder2(this.imprintedId,  false)
@@ -137,19 +140,23 @@ data class CastVoteRecord(
             cvrb.replaceContestVotes(it.contestId, it.candVotes.toIntArray())
         }
         return cvrb.build()
+    } */
+
+    companion object {
+        val header = "cvrNumber, tabulatorNum, batchId, recordId, imprintedId, ballotType, contest:votes"
     }
 
 }
 
+// note that these contestIds are internal to this file (!)
 // contestIdx = contestId. Need to cross reference with contest name in the header to get that right
 // use colIdx to eliminate write-ins.
 data class ContestVotes(val contestId: Int, val candVotes: List<Int>)
 
-
 // raw data from Boulder, before we start to adjust it. Turn into a CardPool,
 // TODO check this: unfortunately, we dont know how many ballots this group represents, nor the number of undervotes
 // TODO merge groups of the same ballotType
-class RedactedGroup(var ballotType: String) {
+class DominionRedactedGroup(var ballotType: String) {
     // dont have ContestInfos yet
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
     private var csvRecord : CSVRecord? = null // debugging
@@ -157,7 +164,7 @@ class RedactedGroup(var ballotType: String) {
 
     fun contests() = contestVotes.keys.toSet()
 
-    fun addVotes(schema: Schema, line: CSVRecord): RedactedGroup {
+    fun addVotes(schema: Schema, line: CSVRecord): DominionRedactedGroup {
         var colidx = schema.nheaders // skip over the first 6 or 7 columns
         while (colidx < line.size()) {
             val valueAtIdx = line.get(colidx)
@@ -187,7 +194,7 @@ class RedactedGroup(var ballotType: String) {
         return this
     }
 
-    fun merge(other: RedactedGroup, voteForNmap: Map<Int, Int>): RedactedGroup {
+    fun merge(other: DominionRedactedGroup, voteForNmap: Map<Int, Int>): DominionRedactedGroup {
         other.contestVotes.forEach { (contestId, otherCands) ->
             val mycands = contestVotes.getOrPut(contestId, { mutableMapOf() })
 
@@ -260,8 +267,8 @@ class RedactedGroup(var ballotType: String) {
 
     companion object {
 
-        fun makeAccumulator(starting: RedactedGroup, accumName:String, voteForNmap: Map<Int, Int>): RedactedGroup {
-            val accum = RedactedGroup(accumName)
+        fun makeAccumulator(starting: DominionRedactedGroup, accumName:String, voteForNmap: Map<Int, Int>): DominionRedactedGroup {
+            val accum = DominionRedactedGroup(accumName)
             accum.merge(starting, voteForNmap)
 
             // override with method #2
@@ -290,24 +297,20 @@ private val showRedactedGroups = false
 data class BallotType(val name: String, val contests: Set<Int>, var count: Int = 0)
 
 class BallotStyles {
-    val ballotTypes = mutableMapOf<String, BallotType>()
-    val redactedGroups = mutableMapOf<String, RedactedGroup>()
+    val ballotTypes = mutableMapOf<Set<Int>, BallotType>()
+    val redactedGroups = mutableMapOf<String, DominionRedactedGroup>()
 
     fun add(cvr:CastVoteRecord) {
         val cvrContests = cvr.contestVotes.map { it.contestId }.toSet()
-        val ballotType = ballotTypes.getOrPut(cvr.ballotType) { BallotType(cvr.ballotType, cvrContests) }
-        if (ballotType.contests == cvrContests)
-            ballotType.count++
-        else if (showDontMatch) {
-            println("cvr $cvr doesnt match $ballotType")
-        }
+        val ballotType = ballotTypes.getOrPut(cvrContests) { BallotType(cvr.ballotType, cvrContests) }
+        ballotType.count++
     }
 
-    fun add(redacted:RedactedGroup, voteForNmap: Map<Int, Int>) {
+    fun add(redacted:DominionRedactedGroup, voteForNmap: Map<Int, Int>) {
         val rname = if (redacted.contestVotes.contains(31)) "r${redacted.ballotType}+31" else "r${redacted.ballotType}"
         val group = redactedGroups[rname]
         if (group == null) {
-            redactedGroups[rname] = makeAccumulator(redacted, rname, voteForNmap)
+            redactedGroups[rname] = DominionRedactedGroup.makeAccumulator(redacted, rname, voteForNmap)
         } else {
             if (group.contests() == redacted.contests())
                 group.merge(redacted, voteForNmap)
@@ -338,7 +341,7 @@ class BallotStyles {
 // TODO add the ncards foreach Redacted group. that lets us calculate the missing votes in the pool.
 
 
-fun readBoulderCvrExportCsv(filename: String, countyId: String): BoulderCvrExportCsv {
+fun readDominionCvrExportCsv(filename: String, countyId: String, showFirst: Int? = null): DominionCvrExport {
     val ballotStyles = BallotStyles()
 
     val parser = if (filename.endsWith(".zip")) {
@@ -362,8 +365,8 @@ fun readBoulderCvrExportCsv(filename: String, countyId: String): BoulderCvrExpor
     val electionLine = records.next()
     if (showHeader) showLine("electionName", electionLine)
     lineNum++
-    val electionName = electionLine.get(0)
-    val versionName = electionLine.get(1)
+    val electionName = electionLine.get(0).trim()
+    val versionName = electionLine.get(1).trim()
 
     // 2) the contest name for that column
     val contestLine = records.next()
@@ -400,6 +403,7 @@ fun readBoulderCvrExportCsv(filename: String, countyId: String): BoulderCvrExpor
 
     val cvrs = mutableListOf<CastVoteRecord>()
 
+    var countCvrs = 0
     var rcvRedacted = 0
     while (records.hasNext()) {
         val line = records.next()
@@ -408,7 +412,7 @@ fun readBoulderCvrExportCsv(filename: String, countyId: String): BoulderCvrExpor
             val isA =  line.get(0).contains("A cards")
             val isB =  line.get(0).contains("B cards")
             val ballotStyle = line.get(ballotTypeIdx) + if (isA) "-A" else if (isB) "-B" else ""
-            val redactedGroup = RedactedGroup(ballotStyle).addVotes(schema, line)
+            val redactedGroup = DominionRedactedGroup(ballotStyle).addVotes(schema, line)
             ballotStyles.add(redactedGroup, nvotesMap)
 
         } else if (line.get(0).startsWith("RCV Redacted")) {
@@ -441,23 +445,21 @@ fun readBoulderCvrExportCsv(filename: String, countyId: String): BoulderCvrExpor
             )
             cvrs.add(cvr.addVotes(schema, line)) // regular vote
             ballotStyles.add(cvr)
+            if (showFirst != null && countCvrs < showFirst) println(cvr.show())
         }
+        countCvrs++
     }
     if (rcvRedacted > 0) println("  read $rcvRedacted RCV Redacted votes")
-
-    if (showBallotStyles) {
-        println("Ballot Styles size=${ballotStyles.ballotTypes.size}")
-        ballotStyles.ballotTypes.toSortedMap().forEach { println(" ${it.key} ${it.value}") }
-    }
 
     if (showRedactedGroups) {
         println("Redacted Groups size = ${ballotStyles.redactedGroups.size}")
         ballotStyles.redactedGroups.toSortedMap().forEach { println("  ${it.value}") }
     }
 
-    return BoulderCvrExportCsv(countyId, electionName, versionName, filename, schema, cvrs,
+    val ballotTypes = ballotStyles.ballotTypes.values.sortedBy { it.count }.reversed()
+    return DominionCvrExport(countyId, electionName, versionName, filename, schema, cvrs,
         ballotStyles.redactedGroups.toSortedMap().values.toList(),
-        ballotStyles.ballotTypes.toSortedMap().values.toList())
+        ballotTypes)
 }
 
 val d3f = "%3d"
@@ -501,7 +503,7 @@ fun makeIrvVotes(schema: Schema, line: CSVRecord, exportContest: ExportContestIn
 
 fun makeRegularVotes(schema: Schema, line: CSVRecord, exportContest: ExportContestInfo): List<Int> {
     val votes = mutableListOf<Int>()
-    for (i in 0 until exportContest.ncols) {
+    for (i in 0 until exportContest.ncols) { // so i in [0..ncands)
         val colno = exportContest.startCol + i
         if (!schema.writeIns.contains(colno)) { // dont record write-ins
             val colValue = line.get(colno).toInt()
@@ -548,11 +550,20 @@ class Schema(val columns: List<ColumnInfo>, val nheaders: Int, val contests: Lis
     }
 }
 
-class ColumnInfo(val colno:Int, val contest: String, val choice: String, val header: String) {
-    var contestIdx: Int = -1
+private val contestWidth = 50
+private val choiceWidth = 20
+data class ColumnInfo(val colno:Int, val contest: String, val choice: String, val header: String, var contestIdx: Int = -1) {
+
+    fun show(): String {
+        return "${nfn(colno, 5)}, ${trunc(contest, contestWidth)}, ${trunc(choice, choiceWidth)}, $header, $contestIdx)"
+    }
+
+    companion object {
+        val header = "colno, ${trunc("contest", contestWidth)}, ${trunc("choice", choiceWidth)}, header, contestIdx)"
+    }
 }
 
-class ExportContestInfo(val contestIdx: Int, val contestName: String, val startCol: Int, val ncols: Int) {
+data class ExportContestInfo(val contestIdx: Int, val contestName: String, val startCol: Int, val ncols: Int) {
     val isIRV: Boolean
     val nchoices: Int
     val voteForN: Int
@@ -561,7 +572,7 @@ class ExportContestInfo(val contestIdx: Int, val contestName: String, val startC
         isIRV = contestName.contains("Number of ranks=")
         nchoices = if (isIRV) {
             // val pos = contestName.("Number of ranks=") + "Number of ranks=".length
-            sqrt(ncols.toDouble()).toInt()
+            sqrt(ncols.toDouble()).toInt() // WTF ?
         } else ncols
         val (name, nwinners) = if (isIRV) parseIrvContestName(contestName) else parseContestNameAndVoteFor(contestName)
         voteForN = nwinners

@@ -28,6 +28,7 @@ interface SamplingCardIF {
     fun prn(): Long
 }
 
+// mutable style, so we dont need multiple classes
 data class AuditableCardM (
     val id: String, // enough info to find the card for a manual audit.
     val location: String?, // enough info to find the card for a manual audit.

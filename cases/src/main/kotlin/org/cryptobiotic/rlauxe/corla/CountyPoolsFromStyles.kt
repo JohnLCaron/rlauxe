@@ -21,8 +21,8 @@ private val debugNvotes = false
 
 class CountyPoolsFromStyles(
     val corlaContestBuilders: List<CorlaContestBuilder>,
+    val coloradoInput: ColoradoInput
 ) {
-    val corlaInput = Colorado2024Input
     val builders = corlaContestBuilders.associateBy { it.info.name }
     val countyPools: List<CountyPoolFromStyle>
 
@@ -33,8 +33,8 @@ class CountyPoolsFromStyles(
 
         // convert from Contest -> County to County -> Contest
         val contestTabByCounty: Map<String, CountyContestTab> =
-            convertToCountyContestTabs(corlaInput.contestTabsByCounty.values.toList()).associateBy { it.countyName }
-        val stylesByCounty: Map<String, CountyStyles> = corlaInput.countyStyles.associateBy { it.countyName }
+            convertToCountyContestTabs(coloradoInput.contestTabsByCounty.values.toList()).associateBy { it.countyName }
+        val stylesByCounty: Map<String, CountyStyles> = coloradoInput.countyStyles.associateBy { it.countyName }
 
         // merge the styles into the CountyContestTabs, pick out the contestTabs that dont have styles
         val tabsMissingStyles = mutableMapOf<String, MutableList<ContestTab>>()
@@ -129,7 +129,7 @@ class CountyPoolsFromStyles(
     fun distributeNc(): Map<String, Map<String, Int>> { // county -> contest -> Nc
         // for each contest, distribte Nc to the counties it is in, proportional to votesInCounty / totalVotes
         val countyNc = mutableMapOf<String, MutableMap<String, Int>>() // county -> contest -> Nc
-        corlaInput.contestTabsByCounty.values.forEach { contestTabByCounty ->
+        coloradoInput.contestTabsByCounty.values.forEach { contestTabByCounty ->
             val contestName = contestTabByCounty.contestName
             val builder = builders[contestName]
             if (builder == null)
@@ -154,7 +154,7 @@ class CountyPoolsFromStyles(
                 contestSum[contestName] = contestAccum + contestVotes
             }
         }
-        corlaInput.contestTabsByCounty.values.forEach { contestTab ->
+        coloradoInput.contestTabsByCounty.values.forEach { contestTab ->
             val contestName = contestTab.contestName
             val sum = contestSum[contestName]!!
             val builder = builders[contestName]!!
@@ -474,7 +474,7 @@ fun distributeExpectedOvervotes(refContest: CorlaContestBuilder, cardPools: List
     }
 } */
 
-
+/*
 fun convertPrecinctsToCardPools(
     precinctFile: String,
     infoMap: Map<Int, ContestInfo>,
@@ -509,6 +509,6 @@ fun convertPrecinctsToCardPools(
             hasExactContests = hasExactContests, contestTabs, infoMap
         )
     }
-}
+} */
 
 

@@ -48,9 +48,9 @@ class CreateCountyAudits(
     val countyCardPools: List<CardPoolIF>
 
     init {
-        val builders: List<CountyContestBuilder> =
+        val builders: List<CountyContestBuilderOld> =
             stateElection.corlaContestBuilders.filter { it.counties.contains(countyName) }
-                .map { CountyContestBuilder(it, countyContestTab.contests[it.info.name]!!) }
+                .map { CountyContestBuilderOld(it, countyContestTab.contests[it.info.name]!!) }
 
         countyCardPools = emptyList() // stateElection.cardPools.filter { it.poolName.lowercase().startsWith(countyName.lowercase()) }
 
@@ -109,7 +109,7 @@ class CreateCountyAudits(
     }
 
     // for one county, one contest
-    class CountyContestBuilder(corlaContestBuilder: CorlaContestBuilder, contestTab: ContestTab) {
+    class CountyContestBuilderOld(corlaContestBuilder: CorlaContestBuilder, contestTab: ContestTab) {
         val info = corlaContestBuilder.info
         val Nc: Int     // taken from contestRound.contestBallotCardCount
         var Npop: Int = 0
@@ -170,7 +170,7 @@ fun createCountyAudits(
     // misc data by county
     writeCountyAuditData(topdir)
 
-    val countyElection = CountyContestBuilder()
+    val countyElection = CountyContestBuilder(Colorado2024Input)
     val contestTabByCounty: Map<String, CountyContestTab> = convertToCountyContestTabs(Colorado2024Input.contestTabsByCounty.values.toList())
         .associateBy { it.countyName }
 

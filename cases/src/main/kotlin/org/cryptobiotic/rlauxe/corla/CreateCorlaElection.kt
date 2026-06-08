@@ -15,7 +15,9 @@ import kotlin.String
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
-open class CreateConsistentElection (
+//// corla election with consistent sampling
+
+open class CreateCorlaElection (
     val countyElection: CountyContestBuilder,
     val auditType: AuditType,
     val auditdir: String,
@@ -29,7 +31,7 @@ open class CreateConsistentElection (
     val countyPools: List<CountyPoolFromStyle>
 
     init {
-        countyPools = CountyPoolsFromStyles(countyElection.corlaContestBuilders).countyPools
+        countyPools = CountyPoolsFromStyles(countyElection.corlaContestBuilders, Colorado2024Input).countyPools
 
         // have to save the mvrs and generate the cardManifest from them.
         ncards = createAndSaveUnsortedMvrs(countyElection.contests, countyPools, publisher)
@@ -156,7 +158,7 @@ class CardsFromPool(val cardPool: CardPoolIF) : Iterator<Cvr> {
 
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
-fun createConsistentElection(
+fun createCorlaElection(
     topdir: String,
     auditdir: String,
     pollingMode: PollingMode? = null,
@@ -167,10 +169,10 @@ fun createConsistentElection(
 ) {
     val stopwatch = Stopwatch()
 
-    val countyElection = CountyContestBuilder()
+    val countyElection = CountyContestBuilder(Colorado2024Input)
 
     val election = if (creation.auditType.isClca())
-            CreateConsistentElection(countyElection, creation.auditType, auditdir, pollingMode=null, name=name,
+            CreateCorlaElection(countyElection, creation.auditType, auditdir, pollingMode=null, name=name,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
         else
             CreateColoradoPolling(countyElection, auditdir, pollingMode!!) // TODO hasExact = false ??

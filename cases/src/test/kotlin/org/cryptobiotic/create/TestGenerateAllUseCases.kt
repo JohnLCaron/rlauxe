@@ -19,7 +19,7 @@ import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
 import org.cryptobiotic.rlauxe.belgium.createAndRunBelgiumElection
 import org.cryptobiotic.rlauxe.belgium.toptopdir
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
-import org.cryptobiotic.rlauxe.corla.createConsistentElection
+import org.cryptobiotic.rlauxe.corla.createCorlaElection
 import org.cryptobiotic.rlauxe.corla.createUniformElection
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.sf.CreatePrecinctAndStyle
@@ -102,7 +102,7 @@ class TestGenerateAllUseCases {
                 sampling = Sampling.consistent),
             ClcaConfig(), null)
 
-        createConsistentElection(topdir, "$topdir/audit",
+        createCorlaElection(topdir, "$topdir/audit",
             null, creation, round, name = "Corla24Consistent", startFirstRound = true)
     }
 
@@ -116,7 +116,7 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
             ClcaConfig(), null)
 
-        createConsistentElection(topdir, "$topdir/audit", null, creation, round)
+        createCorlaElection(topdir, "$topdir/audit", null, creation, round)
     }
 
    //  @Test
@@ -129,7 +129,7 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createConsistentElection(topdir, "$topdir/audit",
+        createCorlaElection(topdir, "$topdir/audit",
             pollingMode=PollingMode.withPools, creation, round)
     }
 
@@ -143,7 +143,7 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createConsistentElection(topdir, "$topdir/audit",
+        createCorlaElection(topdir, "$topdir/audit",
             pollingMode=PollingMode.withBatches, creation, round)
     }
 
@@ -157,7 +157,7 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createConsistentElection(topdir, "$topdir/audit",
+        createCorlaElection(topdir, "$topdir/audit",
             pollingMode=PollingMode.withoutBatches, creation, round,
             startFirstRound = false,
         )

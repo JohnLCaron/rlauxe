@@ -14,7 +14,7 @@ class TestBoulderElectionOneAudit {
         )
 
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(filename, "Boulder")
 
         val election = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
         val infos = election.boulderContestBuilders.mapValues { it.value.info }

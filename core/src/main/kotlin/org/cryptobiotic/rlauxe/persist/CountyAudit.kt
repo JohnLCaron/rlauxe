@@ -12,6 +12,7 @@ import java.io.File
 import kotlin.collections.forEach
 import kotlin.text.split
 
+// CountyAudit assume existence of countyDataFile and countyContestDataFile. does not use nested county directories (yet)
 // Used by Corla
 class CountyAudit(
         location: String,
@@ -26,17 +27,18 @@ class CountyAudit(
     override fun auditdir() = "$location/audit"
 
     // for viewer
+    // TODO HEY assuming that the ids are in some canonical format.
     fun countMvrsByCounty(): Map<String, CountyData> {
         if (rounds.isEmpty()) return emptyMap()
         val lastRound = rounds.last() // TODO last round that has results
 
-        // if you created the mvrs anyway you could what if without running the audit
         val mvrCount = mutableMapOf<String, Int>()
+        // styleNames should already be added
         val mvrCardIter = readCardsCsvIteratorM(publisher.sampleMvrsFile(lastRound.roundIdx), styles=null)
         var count = 0
         mvrCardIter.forEach { mvr ->
-            val split = mvr.id().split("-",".")
-            val countyName = split[0] // TODO change to 0 by getting rid of "pool"
+            val split = mvr.styleName.split("-",".") // county is the first token of the style name HAHAHAHAH
+            val countyName = split[0]
             val accum = mvrCount.getOrPut(countyName) { 0 }
             mvrCount[countyName] = accum + 1
             count++

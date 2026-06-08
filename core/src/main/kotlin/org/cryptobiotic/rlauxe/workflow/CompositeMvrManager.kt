@@ -18,7 +18,8 @@ open class CompositeMvrManager(
     val auditRecord: CompositeRecordIF,
     val config: Config,
     val contestsUA: List<ContestWithAssertions>,
-    val mvrWrite: Boolean = true): MvrManager {
+    val mvrWrite: Boolean = true
+): MvrManager {
 
     val publisher = Publisher(auditRecord.componentRecords.first().location)
 
@@ -41,34 +42,6 @@ open class CompositeMvrManager(
     override fun pools(): List<CardPool>? {
         return readPoolsComposite(publisher)
     }
-
-    /*
-    private fun auditableCards(): CloseableIterator<AuditableCard> {
-        val cardManifest = readCardManifestComposite(publisher)
-        return cardManifest.cards.iterator()
-    }
-
-    private fun readCardManifestComposite(publisher: Publisher): CardManifest {
-        val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
-
-        if (Files.exists(Path(publisher.batchesFile()))) {
-            val populations = readBatchesJsonFileUnwrapped(publisher.batchesFile())
-            if (populations.isNotEmpty()) {
-                // merge population references into the Card
-                val mergedCards =
-                    MergeBatchesIntoCardIterable(
-                        sortedCards,
-                        populations,
-                    )
-
-                // TODO ncards ??
-                return CardManifest(mergedCards, 0, populations)
-            }
-        }
-
-        // TODO ncards ??
-        return CardManifest(CloseableIterable { sortedCards.iterator() }, 0, emptyList())
-    } */
 
     private fun readBatchesComposite(publisher: Publisher): List<StyleIF>? {
         return if (!Files.exists(Path(publisher.cardStylesFile()))) null else

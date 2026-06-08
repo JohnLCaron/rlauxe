@@ -21,7 +21,7 @@ class TestBoulder2025Cvrs {
     fun parseBoulder25cvrs() {
         val stopwatch = Stopwatch()
         // redaction lines are present
-        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrFilename, "Boulder")
         // println(export.summary())
         println("took = $stopwatch")
 
@@ -46,7 +46,7 @@ class TestBoulder2025Cvrs {
     fun testCreateBoulderElection() {
         val stopwatch = Stopwatch()
         // redaction lines are present
-        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrFilename, "Boulder")
         // println(export.summary())
         println("took = $stopwatch")
 
@@ -106,7 +106,7 @@ class TestBoulder2025Cvrs {
     fun testMakeRedactedCvrs() {
         val stopwatch = Stopwatch()
         // redaction lines are present
-        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
+        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrFilename, "Boulder")
 
         val electionSimCvrs = CreateBoulderElection(AuditType.CLCA, export, sovo)
         val infos = electionSimCvrs.makeContestInfo()

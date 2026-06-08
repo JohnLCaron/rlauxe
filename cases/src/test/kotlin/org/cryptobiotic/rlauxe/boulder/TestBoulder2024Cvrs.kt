@@ -23,7 +23,7 @@ class TestBoulder2024Cvrs {
         val stopwatch = Stopwatch()
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(filename, "Boulder")
         // println(export.summary())
         println("took = $stopwatch")
 
@@ -88,7 +88,7 @@ class TestBoulder2024Cvrs {
         val stopwatch = Stopwatch()
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: BoulderCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(filename, "Boulder")
 
         val sovo = readBoulderStatementOfVotes(
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",

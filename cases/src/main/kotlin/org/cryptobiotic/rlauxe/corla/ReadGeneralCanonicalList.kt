@@ -33,7 +33,9 @@ data class CanonicalContest(
     }
 
     override fun toString(): String {
-        return "CanonicalContest(\"$contestName\", choices=listOf($choices)).addCounties(listOf($counties))"
+        val s1 = buildString{ choices.forEach { append("\"$it\",") } }
+        val s2 = buildString{ counties.forEach { append("\"$it\",") } }
+        return "CanonicalContest(\"$contestName\", choices=listOf($s1)).addCounties(listOf($s2))"
     }
 }
 

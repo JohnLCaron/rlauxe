@@ -7,9 +7,17 @@ import java.io.File
 import java.nio.charset.Charset
 import kotlin.text.appendLine
 
+// auditcenter 2020 has no "audit reason"
+// county_name,contest_name,imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,timestamp,cvr_id
+// county_name,contest_name,imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,timestamp,cvr_id,audit_reason
+
+
+// auditcenter 2020
+// county_name,contest_name,imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,timestamp,cvr_id
+// Adams,Adams County Ballot Issue 1A,3-69-79,Type 34,"""Yes/For""","""Yes/For""",YES,uploaded,"",2020-11-17 13:41:22.174,3762242
+
 // cases/src/test/data/corla/2024audit/round1/contestComparison.csv
-// county_name,contest_name,imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,
-//      timestamp,cvr_id,audit_reason
+// county_name,contest_name,imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,timestamp,cvr_id,audit_reason
 // Adams,17th Judicial District Ballot Question 7B,101-101-7,52,"""Yes/For""","""Yes/For""",YES,uploaded,"",2024-11-19 09:44:18.62646,178977,
 // Adams,17th Judicial District Ballot Question 7B,101-130-14,14,"""Yes/For""","""Yes/For""",YES,uploaded,"",2024-11-19 09:49:44.148182,240137,
 // Adams,17th Judicial District Ballot Question 7B,101-146-54,65,"""No/Against""","""No/Against""",YES,uploaded,"",2024-11-19 09:54:41.65526,250284,
@@ -119,7 +127,8 @@ fun readContestComparisonCsv(filename: String, cleanup: (String) -> String): Car
             line = records.next()!!
             try {
                 // 0 county_name,contest_name,imprinted_id,ballot_type, choice_per_voting_computer,audit_board_selection,
-                // 6 consensus,record_type,audit_board_comment,timestamp,cvr_id,audit_reason
+                // 6 consensus,record_type,audit_board_comment,timestamp,cvr_id,
+                // 11 audit_reason (optional)
                 val compareLine = ComparisonLine(
                     line.get(0).trim(),
                     cleanup(line.get(1).trim()),
@@ -128,7 +137,7 @@ fun readContestComparisonCsv(filename: String, cleanup: (String) -> String): Car
                     line.get(4).trim(),
                     line.get(5).trim(),
                     line.get(10).toInt(),
-                    (line.get(11).trim() == "STATE_WIDE_CONTEST"),
+                    if (line.size() > 11) (line.get(11).trim() == "STATE_WIDE_CONTEST") else false,
                     )
                 val card = cards.getOrPut(compareLine.cvrId) { Card(compareLine.cvrId) }
                 card.add(compareLine)
@@ -137,8 +146,7 @@ fun readContestComparisonCsv(filename: String, cleanup: (String) -> String): Car
             } catch (e: Exception) {
                 println(line)
                 println(line.size())
-                println(e)
-                println()
+                e.printStackTrace()
             }
         }
     } catch (ex: Exception) {
@@ -146,7 +154,7 @@ fun readContestComparisonCsv(filename: String, cleanup: (String) -> String): Car
         ex.printStackTrace()
     }
     cards.values.forEach { card: Card -> card.validate() }
-    println("statewide cards ${cards.values.count { it.statewide() } } total ${cards.size}")
+    // println("statewide cards ${cards.values.count { it.statewide() } } total ${cards.size}")
 
     // accumulate mvr counts by County, skip statewide
     val countyMvrs = mutableMapOf<String, CountyMvrs>()

@@ -11,7 +11,7 @@ class CreateColoradoPolling (
     countyElection: CountyContestBuilder,
     auditdir: String,
     pollingMode: PollingMode,
-): CreateConsistentElection(countyElection, AuditType.POLLING, auditdir, pollingMode=pollingMode, hasStyle = true) {
+): CreateCorlaElection(countyElection, AuditType.POLLING, auditdir, pollingMode=pollingMode, hasStyle = true) {
 
     val contestsPolling: List<ContestWithAssertions>
 

@@ -350,7 +350,7 @@ fun createBoulderElection(
 
     val variation = if (version == "2023") "Boulder2023" else "Boulder2024"
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
-    val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
+    val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrExportFile, "Boulder")
 
     val election = if (version == "2025")
         CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource, hasStyle = true)
@@ -384,7 +384,7 @@ fun createBoulderElectionWithSovo(
 
     val stopwatch = Stopwatch()
 
-    val export: BoulderCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
+    val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrExportFile, "Boulder")
 
     val election = if (version == "2025")
         CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource, hasStyle = true)

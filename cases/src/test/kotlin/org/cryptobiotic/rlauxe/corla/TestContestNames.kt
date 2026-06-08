@@ -1,105 +1,146 @@
 package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlauxe.datadrive.Colorado2020Input
 import kotlin.collections.contains
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class TestContestNames {
-    val filename = "src/test/data/corla/2024audit/2024GeneralCanonicalList.csv"
-    val canonical = readGeneralCanonicalList(filename).associateBy { it.contestName }
-    val extra = mutableListOf<CanonicalContest>()
+    val input: ColoradoInput = Colorado2024Input
 
-    // @Test
+    val canonical = readGeneralCanonicalList(input.generalCanonicalFile).associateBy { it.contestName }
+
+    @Test
     fun showGeneralCanonicalList() {
-        canonical.values.forEach { println(it.contestName)}
+        canonical.values.forEach { println( it.contestName )}
+        println("there are ${canonical.size} canonical contests")
     }
 
     //        these have been tested to agree with tabulateCountyFile, contestRoundFile, mvrComparisonFile
 
     @Test
     fun checkCanonicalHasCountyTabulate() {
-        val filename = "src/test/data/corla/2024audit/tabulateCounty.csv"
-        val contests = readCountyTabulateCsv(filename, { it }, { it })
-        println("CountyTabulateCsv $filename missing")
-        contests.values.forEach {
-            if (!canonical.contains(it.contestName)) {
-                println("  '${it}'")
-                val addIt = CanonicalContest(it.contestName, it.choices.keys.toList())
-                addIt.counties.addAll(it.counties())
-                extra.add(addIt)
+        val extras = mutableListOf<CanonicalContest>()
+
+        val contests = readCountyTabulateCsv(input.tabulateCountyFile, { it }, { it })
+        println("\n--------------------------------------------------------------------------")
+        println("generalCanonicalFile missing contests/choices from tabulateCountyFile ${input.tabulateCountyFile}:")
+        contests.values.forEach { contest ->
+            if (!canonical.contains(contest.contestName)) {
+                println("  missing contest '${contest.contestName}'")
+                val addIt = CanonicalContest(contest.contestName, contest.choices.keys.toList())
+                addIt.counties.addAll(contest.counties())
+                extras.add(addIt)
             } else {
-                val canonicalChoices: Set<String> = canonical[it.contestName]!!.choices.toSet()
-                it.choices.forEach {
-                    if (!canonicalChoices.contains(it.key)) println(" missing choice '${it.key}'")
+                val canonicalChoices: Set<String> = canonical[contest.contestName]!!.choices.toSet()
+                contest.choices.forEach {
+                    if (!canonicalChoices.contains(it.key)) println("    missing choice  '${it.key}' in contest '${contest.contestName}'")
                 }
             }
         }
-        println("add these:")
-        extra.forEach { println(it) }
+
+        println("\nadd the following to canonicalContests")
+        extras.forEach { println("  $it") }
         println()
-        //  ''Bannock Ballot Issue 6A'
-        //  'Yes'= 14 [Douglas=14, ]
-        //  'No'= 9 [Douglas=9, ]
-        //'
-        //  ''Spring Canyon Ballot Issue 6B'
-        //  'Yes'= 29 [Douglas=29, ]
-        //  'No'= 19 [Douglas=19, ]
-        //'
-        //add these:
-        //CanonicalContest('Bannock Ballot Issue 6A', choices=[Yes, No], counties=[Douglas])
-        //CanonicalContest('Spring Canyon Ballot Issue 6B', choices=[Yes, No], counties=[Douglas])
     }
 
     @Test
     fun checkCountyTabulateHasCanonical() {
-        val filename = "src/test/data/corla/2024audit/tabulateCounty.csv"
-        val contests = readCountyTabulateCsv(filename, { it }, { it })
+        println("\n--------------------------------------------------------------------------")
+        val missing = mutableListOf<String>()
+        val contests = readCountyTabulateCsv(input.tabulateCountyFile, { it }, { it })
         canonical.values.forEach {
             if (!contests.contains(it.contestName)) {
-                println("countyTabulate missing canonical '${it}'")
+                println("countyTabulate missing canonical '${it.contestName}'")
+                missing.add(it.contestName)
             }
         }
+        println()
+        missing.forEach { println("result.remove(\"$it\")") }
     }
+    //countyTabulate missing canonical 'Gunnison County Commissioner - District 1'
+    //countyTabulate missing canonical 'Gunnison County Commissioner - District 2'
+    //countyTabulate missing canonical 'Gunnison County Court Judge - Burgemeister'
+    //countyTabulate missing canonical 'Town of Marble - Board of Trustees'
+    //countyTabulate missing canonical 'Town of Marble Ballot Issue 2A'
+    //countyTabulate missing canonical 'San Juan County Commissioner - District 1'
+    //countyTabulate missing canonical 'San Juan County Commissioner - District 2'
+    //countyTabulate missing canonical 'San Juan County Court Judge - Edwards'
 
     @Test
     fun checkCanonicalHasContestRound() {
-        val filename = "src/test/data/corla/2024audit/round1/contest.csv"
-        val contests = readColoradoContestRoundCsv(filename) { it }
-        println("ColoradoContestRoundCsv $filename missing")
+        println("\n--------------------------------------------------------------------------")
+        val contests = readColoradoContestRoundCsv(input.contestRoundFile) { it }
+        println("generalCanonicalFile ${input.contestRoundFile} missing roundContest:")
         contests.values.forEach {
             if (!canonical.contains(it.contestName)) {
                 println("  '${it.contestName}'")
             }
         }
-        //   'Bannock Ballot Issue 6A'
-        //  'Spring Canyon Ballot Issue 6B'
+        //  'Adams County Ballot Issue 1A'
     }
 
     @Test
     fun checkContestRoundHasCanonical() {
-        val filename = "src/test/data/corla/2024audit/round1/contest.csv"
-        val contests = readColoradoContestRoundCsv(filename) { it }
+        println("\n--------------------------------------------------------------------------")
+        val contests = readColoradoContestRoundCsv(input.contestRoundFile) { it }
         canonical.values.forEach {
             if (!contests.contains(it.contestName)) {
                 println("countyRound missing canonical '${it.contestName}'")
             }
         }
     }
+    //countyRound missing canonical 'Gunnison County Commissioner - District 1'
+    //countyRound missing canonical 'Gunnison County Commissioner - District 2'
+    //countyRound missing canonical 'Gunnison County Court Judge - Burgemeister'
+    //countyRound missing canonical 'Town of Marble - Board of Trustees'
+    //countyRound missing canonical 'Town of Marble Ballot Issue 2A'
+    //countyRound missing canonical 'San Juan County Commissioner - District 1'
+    //countyRound missing canonical 'San Juan County Commissioner - District 2'
+    //countyRound missing canonical 'San Juan County Court Judge - Edwards'
 
     @Test
     fun checkCanonicalHasContestComparison() {
-        val filename = "src/test/data/corla/2024audit/round3/contestComparison.csv"
-        val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(filename) { it  }
+        println("\n--------------------------------------------------------------------------")
+        val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile) { it  }
 
-        println("ContestComparisonCsv $filename missing")
+        println("generalCanonicalFile ${input.mvrComparisonFile} missing mvrComparisonContest")
         contestMvrs.forEach {
             if (!canonical.contains(it.contestName)) println("  '${it.contestName}'")
         }
     }
 
+    // now correct the canonical files and run this
     @Test
+    fun checkCorrectedCanonicalContests() {
+        val canonical = input.canonicalContests
+
+        val contestTabs = input.contestTabsByCounty
+        contestTabs.forEach {
+            assertTrue (canonical.contains(it.key))
+        }
+
+        val roundContests = input.roundContests
+        roundContests.forEach {
+            assertTrue (canonical.contains(it.key), "canonical missing roundContest '${it.key}'")
+        }
+
+        val (contestMvrs, _, _) = input.cardComparison
+        contestMvrs.forEach {
+            assertTrue (canonical.contains(it.contestName))
+        }
+
+        canonical.forEach {
+            assertTrue (contestTabs.contains(it.key))
+            assertTrue (roundContests.contains(it.key))
+        }
+
+    }
+
+    // @Test comparision contests are a subset
     fun checkContestComparisonHasCanonical() {
-        val filename = "src/test/data/corla/2024audit/round3/contestComparison.csv"
-        val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(filename) { it  }
+        println("\n--------------------------------------------------------------------------")
+        val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile) { it  }
         val mvrMap = contestMvrs.associateBy{ it.contestName }
         var count = 0
         canonical.values.forEach {
@@ -111,9 +152,10 @@ class TestContestNames {
         println("missing $count")
     }
 
-    // not needed
 
-    //@Test
+    //// not needed
+
+    // @Test
     fun checkResultsReportContest() {
         val filename = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
         val contests = readResultsReportContest(filename) { it }
@@ -162,76 +204,9 @@ class TestContestNames {
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val detail = readColoradoElectionDetail(detailXmlFile)
 
-        println("ColoradoElectionDetail $filename missing")
+        println("ColoradoElectionDetail missing")
         detail.contests.forEach {
             if (!canonical.contains(it.text)) println("  '${it.text}'")
         }
-        //  'Colorado Supreme Court Justice - Márquez'
-        //  'Colorado Court of Appeals Judge - Román'
-        //  'District Court Judge - 2nd Judicial District - Bailey'
-        //  'District Court Judge - 2nd Judicial District - Espinosa'
-        //  'District Court Judge - 2nd Judicial District - Grant'
-        //  'District Court Judge - 2nd Judicial District - Moses'
-        //  'District Court Judge - 2nd Judicial District - Myers'
-        //  'District Court Judge - 2nd Judicial District - Schutte'
-        //  'District Court Judge - 2nd Judicial District - Scoville'
-        //  'District Court Judge - 2nd Judicial District - Trujillo'
-        //  'Arapahoe County Court Judge - Hernandez'
-        //  'Arapahoe County Court Judge - Williford'
-        //  'Bent County Court Judge - Clark'
-        //  'Boulder County Court Judge - Martin'
-        //  'Broomfield County Court Judge - DeWick'
-        //  'Chaffee County Court Judge - Bull'
-        //  'Cheyenne County Court Judge - Eiring'
-        //  'Clear Creek County Court Judge - Jones'
-        //  'Conejos County Court Judge - Kelly'
-        //  'Delta County Court Judge - Zeerip'
-        //  'Denver County Court Judge - Blackett'
-        //  'Denver County Court Judge - Cherry'
-        //  'Denver County Court Judge - Faragher'
-        //  'Denver County Court Judge - Goble'
-        //  'Denver County Court Judge - Pallares'
-        //  'Denver County Court Judge - Rodarte'
-        //  'Denver County Court Judge - Rudolph'
-        //  'Denver County Court Judge - Schwartz'
-        //  'Denver County Court Judge - Simonet'
-        //  'Denver County Court Judge - Spahn'
-        //  'Douglas County Court Judge - Waidler'
-        //  'El Paso County Court Judge - Ankeny'
-        //  'El Paso County Court Judge - Fennick'
-        //  'El Paso County Court Judge - Gerhart'
-        //  'El Paso County Court Judge - Katzman'
-        //  'El Paso County Court Judge - McKedy'
-        //  'Garfield County Court Judge - Roff'
-        //  'Gunnison County Court Judge - Burgemeister'
-        //  'Jefferson County Court Judge - Burback'
-        //  'Jefferson County Court Judge - Carpenter'
-        //  'Jefferson County Court Judge - Goman'
-        //  'Jefferson County Court Judge - Peper'
-        //  'Jefferson County Court Judge - Wheeler'
-        //  'Mesa County Court Judge - Grattan'
-        //  'Montrose County Court Judge - Beckenhauer'
-        //  'Montrose County Court Judge - Harvell'
-        //  'Ouray County Court Judge - Thomasson'
-        //  'Pitkin County Court Judge - Andrews'
-        //  'Pueblo County Court Judge - Silva'
-        //  'Pueblo County Court Judge - Vellar'
-        //  'Rio Grande County Court Judge - Stenger'
-        //  'Routt County Court Judge - Wilson'
-        //  'Saguache County Court Judge - Schuenemann'
-        //  'San Juan County Court Judge - Edwards'
-        //  'Sedgwick County Court Judge - Landry'
-        //  'Yuma County Court Judge - Jones'
-        //  'City of Aurora Ballot Question 3A'
-        //  'Town of Erie Council Member - District 2'
-        //  'Byers School District 32J Ballot Issue 5C'
-        //  'Holyoke School District RE-1J Ballot Issue 5K'
-        //  'Montrose County School District RE-1J Ballot Issue 5A'
-        //  'Norwood School District R-2J Ballot Issue 5B'
-        //  'Weld County School District RE-8 Ballot Issue 5G'
-        //  'Weld County School District RE-8 Ballot Issue 5H'
-        //  'Weld County School District RE-10J Ballot Issue 5D'
-        //  'Weld County School District RE-3J Ballot Issue 5F'
-        //  'Brush Rural Fire Protection District Ballot Issue 7A'
     }
 }

@@ -7,12 +7,9 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
 import kotlin.String
 
-private val logger = KotlinLogging.logger("ColoradoOneAudit")
+private val logger = KotlinLogging.logger("CountyContestBuilder")
 
-private val debugUndervotes = false
-
-open class CountyContestBuilder {
-    val corlaInput = Colorado2024Input
+open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
     val corlaContestBuilders: List<CorlaContestBuilder> = makeContestBuilders() // 181
     val contests: List<ContestIF>
 
@@ -58,9 +55,9 @@ open class CountyContestBuilder {
         //    val strataInfo: List<StrataInfo>,
         //    val statewideContests: List<CorlaContestRoundCsv>,
         //)
-        val mergedContestMap = Colorado2024Input.mergedContestMap
-        val strataMap = Colorado2024Input.strataMap
-        val contestTabs = corlaInput.contestTabsByCounty
+        val mergedContestMap = coloradoInput.mergedContestMap
+        val strataMap = coloradoInput.strataMap
+        val contestTabs = coloradoInput.contestTabsByCounty
 
         val contestBuilders = mutableListOf<CorlaContestBuilder>()
 
@@ -118,18 +115,22 @@ open class CountyContestBuilder {
     fun computeStrataMinRate(name: String, counties: Set<String>, strataMap: Map<String, StrataInfo>): StrataInfo {
         var orgSamples = 0
         val minRate = counties.map {
-            val s = strataMap[it]!!
-            orgSamples += s.nmvrs
-            s.nmvrs / s.Npop.toDouble()
+            val s = strataMap[it]
+            if (s == null) 1.0 else {
+                orgSamples += s.nmvrs
+                s.nmvrs / s.Npop.toDouble()
+            }
         }.min()
 
         var npop = 0
         var nmvrs = 0
         counties.forEach {
-            val strata = strataMap[it]!!
-            npop += strata.Npop
-            val truncSamples = roundToClosest(strata.Npop * minRate)
-            nmvrs += truncSamples
+            val strata = strataMap[it]
+            if (strata != null) {
+                npop += strata.Npop
+                val truncSamples = roundToClosest(strata.Npop * minRate)
+                nmvrs += truncSamples
+            }
         }
         return StrataInfo(name, nmvrs, npop)
     }
@@ -152,7 +153,7 @@ class CorlaContestBuilder(val info: ContestInfo, val contest: MergedContestInfo,
     init {
 
         candidateVotes = contestTab.choices.map { (name, choice) ->
-            Pair(info.candidateNames[name]!!, choice.totalVotes)
+            Pair( info.candidateNames[name] ?: 0, choice.totalVotes)
         }.toMap()
 
         // candidateVotes = contestTab.choices.values.mapIndexed { idx, choice -> Pair(idx, choice.totalVotes) }.toMap()

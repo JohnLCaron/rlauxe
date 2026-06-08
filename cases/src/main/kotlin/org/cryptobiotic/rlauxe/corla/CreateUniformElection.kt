@@ -85,9 +85,7 @@ fun createUniformElection(
     val stopwatch = Stopwatch()
     require (roundConfig.sampling.sampling == Sampling.uniform)
 
-    val (mergedContestInfo: List<MergedContestInfo>, mergedCountyInfo, statewideContests) = mergeContestInfo()
-
-    val countyElection = CountyContestBuilder()
+    val countyElection = CountyContestBuilder(Colorado2024Input)
 
     val election =
         CreateUniformElection(countyElection, creation.auditType, auditdir, pollingMode=null, name=name)

@@ -83,7 +83,7 @@ class MakeColoradoElection {
                 sampling = Sampling.consistent),
             ClcaConfig(), null)
 
-        createConsistentElection(topdir, "$topdir/audit",
+        createCorlaElection(topdir, "$topdir/audit",
             null, creation, round, name = "Corla24Consistent", startFirstRound = true)
     }
 
@@ -97,7 +97,7 @@ class MakeColoradoElection {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createConsistentElection(topdir, "$topdir/audit",
+        createCorlaElection(topdir, "$topdir/audit",
             pollingMode=PollingMode.withPools, creation, round)
     }
 
@@ -111,7 +111,7 @@ class MakeColoradoElection {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createConsistentElection(topdir, "$topdir/audit",
+        createCorlaElection(topdir, "$topdir/audit",
             pollingMode=PollingMode.withBatches, creation, round)
     }
 
@@ -125,7 +125,7 @@ class MakeColoradoElection {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createConsistentElection(topdir, "$topdir/audit",
+        createCorlaElection(topdir, "$topdir/audit",
             pollingMode=PollingMode.withoutBatches, creation, round)
     }
 

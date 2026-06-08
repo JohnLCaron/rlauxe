@@ -13,11 +13,13 @@ import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import kotlin.Int
 import kotlin.String
 
-private val logger = KotlinLogging.logger("ColoradoOneAudit")
+private val logger = KotlinLogging.logger("CreateCorlaElection")
 
 //// corla election with consistent sampling
+// simulate the Cvrs
 
 open class CreateCorlaElection (
+    val coloradoInput: ColoradoInput,
     val countyElection: CountyContestBuilder,
     val auditType: AuditType,
     val auditdir: String,
@@ -31,7 +33,7 @@ open class CreateCorlaElection (
     val countyPools: List<CountyPoolFromStyle>
 
     init {
-        countyPools = CountyPoolsFromStyles(countyElection.corlaContestBuilders, Colorado2024Input).countyPools
+        countyPools = CountyPoolsFromStyles(countyElection.corlaContestBuilders, coloradoInput).countyPools
 
         // have to save the mvrs and generate the cardManifest from them.
         ncards = createAndSaveUnsortedMvrs(countyElection.contests, countyPools, publisher)
@@ -161,6 +163,7 @@ class CardsFromPool(val cardPool: CardPoolIF) : Iterator<Cvr> {
 fun createCorlaElection(
     topdir: String,
     auditdir: String,
+    coloradoInput: ColoradoInput,
     pollingMode: PollingMode? = null,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
@@ -169,13 +172,14 @@ fun createCorlaElection(
 ) {
     val stopwatch = Stopwatch()
 
-    val countyElection = CountyContestBuilder(Colorado2024Input)
+    val countyElection = CountyContestBuilder(coloradoInput)
 
     val election = if (creation.auditType.isClca())
-            CreateCorlaElection(countyElection, creation.auditType, auditdir, pollingMode=null, name=name,
-            hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
+            CreateCorlaElection(coloradoInput, countyElection,
+                creation.auditType, auditdir, pollingMode=null, name=name,
+                hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
         else
-            CreateColoradoPolling(countyElection, auditdir, pollingMode!!) // TODO hasExact = false ??
+            CreateColoradoPolling(coloradoInput, countyElection, auditdir, pollingMode!!) // TODO hasExact = false ??
 
     // TODO kludge in sampleControl for the moment
     createElectionRecord(election, auditDir = auditdir, roundConfig.sampling, clear = false)
@@ -183,14 +187,14 @@ fun createCorlaElection(
 
     createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir)
 
-    writeCountyData(topdir, Colorado2024Input.strataMap.values.toList())
+    writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, Colorado2024Input.countyContestMap)
+    writeCountyContestData(topdir, contestMap, coloradoInput.countyContestMap)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)
         if (result.isErr) logger.error { result.toString() }
-        logger.info { "createCorla took $stopwatch" }
+        logger.info { "createCorlaElection took $stopwatch" }
     }
 }
 

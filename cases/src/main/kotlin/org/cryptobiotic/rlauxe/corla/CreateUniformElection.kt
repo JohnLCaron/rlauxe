@@ -16,6 +16,7 @@ import kotlin.String
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
 open class CreateUniformElection (
+    val coloradoInput: ColoradoInput,
     val stateElection: CountyContestBuilder,
     val auditType: AuditType,
     val auditdir: String,
@@ -77,6 +78,7 @@ open class CreateUniformElection (
 fun createUniformElection(
     topdir: String,
     auditdir: String,
+    coloradoInput: ColoradoInput,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     startFirstRound: Boolean = true,
@@ -85,10 +87,10 @@ fun createUniformElection(
     val stopwatch = Stopwatch()
     require (roundConfig.sampling.sampling == Sampling.uniform)
 
-    val countyElection = CountyContestBuilder(Colorado2024Input)
+    val countyElection = CountyContestBuilder(coloradoInput)
 
     val election =
-        CreateUniformElection(countyElection, creation.auditType, auditdir, pollingMode=null, name=name)
+        CreateUniformElection(coloradoInput, countyElection, creation.auditType, auditdir, pollingMode=null, name=name)
 
     // skip the simulated cvrs
     // createElectionRecord(election, auditDir = auditdir, clear = false)
@@ -111,9 +113,9 @@ fun createUniformElection(
     val config = Config(election.electionInfo(), creation, roundConfig)
     createAuditRecord(config, election, auditDir = auditdir, externalSortDir = null, sortManifest = false)
 
-    writeCountyData(topdir, Colorado2024Input.strataMap.values.toList())
+    writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, Colorado2024Input.countyContestMap)
+    writeCountyContestData(topdir, contestMap, coloradoInput.countyContestMap)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

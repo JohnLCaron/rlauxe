@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.datadrive
+package org.cryptobiotic.rlauxe.auditcenter
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
@@ -18,7 +18,7 @@ import kotlin.String
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
-open class CreateColoradoElection (
+open class CreateColoradoElectionWithCvrs (
     val county: String,
     val coloradoInput: ColoradoInput,
     val export: DominionCvrExport, // TODO use interator, currently only Boulder County
@@ -39,7 +39,6 @@ open class CreateColoradoElection (
 
         val contests = contestBuilder.contests
         val dominionConverter = DominionCvrConverter(export, contests, coloradoInput, styleNameMap)
-        // why cvrs, why not cards ??
         val exportCvrs: List<AuditableCardM> = export.cvrs.map { dominionConverter.convertToCard(it) }
 
         val infos = contests.map { it.info() }
@@ -81,8 +80,9 @@ open class CreateColoradoElection (
 
 ////////////////////////////////////////////////////////////////////
 
-fun createColorado2020(
+fun createElectionWithCvrs(
     county: String,
+    coloradoInput: ColoradoInput,
     topdir: String,
     cvrExportFile: String,
     creation: AuditCreationConfig,
@@ -93,11 +93,11 @@ fun createColorado2020(
     val stopwatch = Stopwatch()
     val auditdir = "$topdir/audit"
 
-    val contestBuilder = CountyContestBuilder(Colorado2020Input)
+    val contestBuilder = CountyContestBuilder(coloradoInput)
     val export: DominionCvrExport = readDominionCvrExportCsv(cvrExportFile, county)
 
     val election =
-        CreateColoradoElection(county,Colorado2020Input, export, contestBuilder,
+        CreateColoradoElectionWithCvrs(county, coloradoInput, export, contestBuilder,
             auditdir, name=name, hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
 
     createElectionRecord(election, auditDir = auditdir, roundConfig.sampling, clear = false)
@@ -105,9 +105,9 @@ fun createColorado2020(
 
     createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir)
 
-    writeCountyData(topdir, Colorado2020Input.strataMap.values.toList())
+    writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, Colorado2020Input.countyContestMap)
+    writeCountyContestData(topdir, contestMap, coloradoInput.countyContestMap)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

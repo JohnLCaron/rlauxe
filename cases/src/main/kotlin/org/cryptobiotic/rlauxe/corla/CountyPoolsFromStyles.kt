@@ -231,7 +231,7 @@ class CountyPoolsFromStyles(
     }
 }
 
-// where do we get ncards per county per contest? all we "know" total contest Nc across counties
+// where do we get ncards per county per contest? all we "know" is total contest Nc across counties
 // look across all counties that have that contest and divide Nc in proportion to countyContest.totalVotes
 
 // each countyStyle generates a Pool
@@ -271,8 +271,10 @@ data class CountyPools(
                 val votes = mutableMapOf<Int, Int>() // this contest
                 val contestTab = cct.contests[contestName]!!
                 contestTab.choices.forEach { (choiceName, choiceVote) ->
-                    val candId = info.candidateNames[choiceName]!!
-                    votes[candId] = (stylePct * choiceVote).roundToInt() // scale by stylePct
+                    val candId = info.candidateNames[choiceName]
+                    if (candId != null) { // might be write in
+                        votes[candId] = (stylePct * choiceVote).roundToInt() // scale by stylePct
+                    }
                 }
                 // needs to be ajusted across the styles in proportion to how many cards used it
                 val Nc = adjContestNc[contestName]!!  // total Nc for this contest over all styles

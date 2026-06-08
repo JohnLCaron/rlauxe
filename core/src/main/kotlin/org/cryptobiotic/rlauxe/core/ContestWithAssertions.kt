@@ -144,7 +144,7 @@ open class ContestWithAssertions(
     
     fun minNoerror(): Double? {
         return if (isClca) {
-            minClcaAssertion()?.cassorter?.assorterMargin
+            minClcaAssertion()?.cassorter?.noerror
         } else { // is this useful for polling ??
             val assorter = minPollingAssertion()?.assorter ?: return null
             if (hasStyle) {

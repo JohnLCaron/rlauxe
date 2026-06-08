@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.datadrive
+package org.cryptobiotic.rlauxe.auditcenter
 
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.testdataDir
 
 import kotlin.test.Test
 
-class TestCreateElections {
+class MakeElectionsWithCvrs {
     val show = false
 
     // this one is following CreateBoulderElection
@@ -30,7 +30,7 @@ class TestCreateElections {
             ClcaConfig(fuzzMvrs = .001), null // TOFO is fuzz implemented ??
         )
 
-        createCountyElection("Boulder", exportFile, auditdir, creation, round)
+        createCountyElection("Boulder", Colorado2020AuditCenterInput(), exportFile, auditdir, creation, round)
     }
 
     // this one is following CreateCorlaElection, but now we have real cvrs
@@ -47,7 +47,7 @@ class TestCreateElections {
             ClcaConfig(), null)
 
         // TODO topdir vs auditdir !!
-        createColorado2020("Boulder", topdir, exportFile,
+        createElectionWithCvrs("Boulder", Colorado2020AuditCenterInput(), topdir, exportFile,
              creation, round, name = "Colorado2020", startFirstRound = true)
     }
 

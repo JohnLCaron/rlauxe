@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
+import org.cryptobiotic.rlauxe.betting.estRiskStandardBet
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
 import kotlin.String
@@ -79,7 +80,7 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
                 mcontest.voteForN
             )
 
-            val strata = when{
+            val strata = when {
                 (mcontest.counties.size == 1) -> strataMap[mcontest.counties.first()]!!
                 /* (mcontest.counties.size > 60) -> {
                     val contestsPlus = mcontest.counties // + listOf("Statewide")
@@ -88,7 +89,6 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
                 else -> computeStrataMinRate(mcontest.contestName, mcontest.counties, strataMap)
             }
             info.metadata["CORLAhaveMvrs"] = strata.nmvrs.toString()
-
             info.metadata["CORLAsample"] = mcontest.nsamples.toString()
             info.metadata["CORLAauditReason"] = mcontest.auditReason.toString()
             info.metadata["CORLAmarginInVotes"] = mcontest.marginInVotes.toString()

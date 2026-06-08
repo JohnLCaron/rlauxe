@@ -109,7 +109,7 @@ data class ComparisonLine(
     val statewide: Boolean,
 )
 
-fun readContestComparisonCsv(filename: String, cleanup: (String) -> String): CardComparisonResults {
+fun readContestComparisonCsv(filename: String): CardComparisonResults {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT) // TODO
     val records = parser.iterator()
@@ -131,7 +131,7 @@ fun readContestComparisonCsv(filename: String, cleanup: (String) -> String): Car
                 // 11 audit_reason (optional)
                 val compareLine = ComparisonLine(
                     line.get(0).trim(),
-                    cleanup(line.get(1).trim()),
+                    line.get(1).trim(),
                     line.get(2).trim(),
                     line.get(3).trim(),
                     line.get(4).trim(),

@@ -1,0 +1,158 @@
+package org.cryptobiotic.rlauxe.auditcenter
+
+import org.cryptobiotic.rlauxe.corla.CanonicalContest
+import org.cryptobiotic.rlauxe.corla.ColoradoInput
+import org.cryptobiotic.rlauxe.corla.ElectionDetailXml
+import org.cryptobiotic.rlauxe.corla.ResultsReportContest
+import org.cryptobiotic.rlauxe.corla.readColoradoElectionDetail
+import org.cryptobiotic.rlauxe.corla.readGeneralCanonicalList
+import org.cryptobiotic.rlauxe.corla.readResultsReportContest
+
+class Colorado2024AuditCenterInput: ColoradoInput(
+    generalCanonicalFile = "$auditcenter/2024GeneralCanonicalList.csv",
+    contestRoundFile = "$auditcenter/round1/contest.csv",
+    tabulateCountyFile = "$auditcenter/tabulateCounty.csv",
+    mvrComparisonFile = "$auditcenter/round3/contestComparison.csv"
+) {
+    // canonical contests and choices
+    override fun canonicalContests(): Map<String, CanonicalContest> = canonicalContests
+    private val canonicalContests by lazy {
+        val result: MutableMap<String, CanonicalContest> =
+            readGeneralCanonicalList(generalCanonicalFile).associateBy { it.contestName }.toMutableMap()
+
+        //add these missing contests:
+        val extras = listOf(
+            CanonicalContest("Bannock Ballot Issue 6A", choices = listOf("Yes", "No")).addCounties(listOf("Douglas")),
+            CanonicalContest(
+                "Spring Canyon Ballot Issue 6B",
+                choices = listOf("Yes", "No")
+            ).addCounties(listOf("Douglas")),
+        )
+        extras.forEach { result[it.contestName] = it }
+
+        // remove these contests
+        result.remove("La Plata County Surveyor")
+
+        result.toSortedMap()
+    }
+
+    //// not used
+    val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
+
+    val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
+    val detailXmlContests: ElectionDetailXml by lazy { readColoradoElectionDetail(detailXmlFile) }
+
+    val resultsReportSummaryFile = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
+    val resultsContests: List<ResultsReportContest> by lazy {
+        readResultsReportContest(resultsReportSummaryFile) { it }
+    }
+
+    // TODO County specific?
+    override fun contestNameCleanup(name: String): String {
+        var working = name
+        // if (working.contains(" -")) working = working.replace(" -", "")
+        // if (working.contains("-")) working = working.replace("-", " ")
+        if (working.contains("Colorado Court of Appeals Judge - Román")) working =
+            working.replace("Colorado Court of Appeals Judge - Román", "Colorado Court of Appeals Judge Roman")
+        if (working.contains("County Court Judge Cheyenne")) working =
+            working.replace("County Court Judge Cheyenne", "Cheyenne County Court Judge")
+        if (working.contains("County Court Judge Denver")) working =
+            working.replace("County Court Judge Denver", "Denver County Court Judge")
+        if (working.contains("County Court Judge Jefferson")) working =
+            working.replace("County Court Judge Jefferson", "Jefferson County Court Judge")
+        if (working.contains("County Court Judge Gunnison")) working =
+            working.replace("County Court Judge Gunnison", "Gunnison County Court Judge")
+        if (working.contains("County Court Judge Routt")) working =
+            working.replace("County Court Judge Routt", "Routt County Court Judge")
+        if (working.contains("Jefferson County Court- ")) working =
+            working.replace("Jefferson County Court- ", "Jefferson County Court ")
+        if (working.contains("Jefferson County Court-")) working =
+            working.replace("Jefferson County Court-", "Jefferson County Court ")
+        if (working.equals("BRUSH RURAL FIRE PROTECTION DISTRICT BALLOT ISSUE 7A")) working =
+            "Brush Rural Fire Protection District Ballot Issue 7A"
+        if (working.equals("Cheyenne County Court Judge")) working = "Cheyenne County Court Judge Eiring"
+        if (working.equals("Gunnison County Court Judge")) working = "Gunnison County Court Judge Burgemeister"
+        if (working.equals("Mesa County Court Judge Grattan III")) working = "Mesa County Court Judge Grattan"
+        if (working.equals("Routt County Court Judge")) working = "Routt County Court Judge Wilson"
+        if (working.equals("City of Aurora Question 3A")) working = "City of Aurora Ballot Question 3A"
+        if (working.equals("Byers School District No. 32J Ballot Issue 5C")) working =
+            "Byers School District 32J Ballot Issue 5C"
+        if (working.equals("Holyoke School District RE-1J Ballot Issue 5K Bonds")) working =
+            "Holyoke School District RE-1J Ballot Issue 5K"
+        if (working.equals("Montrose School District RE-1J Ballot Issue 5A")) working =
+            "Montrose County School District RE-1J Ballot Issue 5A"
+        if (working.equals("Norwood School District R-2J Issue 5B")) working =
+            "Norwood School District R-2J Ballot Issue 5B"
+        if (working.equals("Weld County School District RE-8 Ballot Issue 5G Override")) working =
+            "Weld County School District RE-8 Ballot Issue 5G"
+        if (working.equals("Weld County School District RE-8 Ballot Issue 5H Bonds")) working =
+            "Weld County School District RE-8 Ballot Issue 5H"
+        if (working.equals("Weld County School District RE-10J Ballot Issue 5D Bonds")) working =
+            "Weld County School District RE-10J Ballot Issue 5D"
+        if (working.equals("Weld County School District RE-3J Ballot Issue 5F Override")) working =
+            "Weld County School District RE-3J Ballot Issue 5F"
+        if (working.equals("Weld County School District No. RE-9 Ballot Issue 4C Bonds")) working =
+            "Weld County School District No. RE-9 Ballot Issue 4C"
+        if (working.equals("Weld County School District No. RE-7 Ballot Issue 4B Bonds")) working =
+            "Weld County School District No. RE-7 Ballot Issue 4B"
+        if (working.equals("Weld County School District No. RE-7 Ballot Issue 4A Mill Levy Override")) working =
+            "Weld County School District No. RE-7 Ballot Issue 4A"
+        // these are from corla/2024audit/targetedContests.csv 11 out of 63 mistyped
+        if (working.equals("City and County of Broomfield Ballot Question 2G")) working =
+            "Broomfield Ballot Question 2G"
+        if (working.equals("Custer County Commissioner District 2")) working =
+            "Custer County Board of County Commissioners District 2"
+        if (working.equals("City and County of Denver Ballot Issue 2Q")) working = "Denver Ballot Issue 2Q"
+        if (working.equals("Fremont County Commissioner District 3")) working =
+            "Fremont County Board of County Commissioners District 3"
+        if (working.equals("County Commissioner District 2")) working = "Garfield County Commissioner District 2"
+        if (working.equals("NORTH PARK SCHOOL DISTRICT R 1 BALLOT ISSUE 4A")) working =
+            "North Park School District R 1 Ballot Issue 4A"
+        // if (working.equals("Proposition 130 (STATUTORY) - Kit Carson")) working = "Proposition 130 (STATUTORY)"
+        if (working.equals("Montezuma County Ballot Issue 1 A")) working = "Montezuma County Ballot Issue 1A"
+        if (working.equals("Pitkin County Ballot Issue 1A")) working =
+            "Pitkin County Ballot Issue 1A: Affordable and Workforce Housing Mill Levy"
+        // if (working.equals("Amendment 80 (CONSTITUTIONAL) - Rio Blanco")) working = "Amendment 80 (CONSTITUTIONAL)"
+        if (working.equals("San Miguel County Ballot Measure 1A")) working = "San Miguel County Ballot Question 1A"
+        if (working.equals("Bent County Commissioner-District 1")) working = "Bent County Commissioner - District 1"
+        if (working.equals("Cheyenne,County Court Judge - Cheyenne")) working = "Cheyenne County Court - Eiring"
+
+        return working.trim()
+    }
+
+// Weld County School District No. RE-7 Ballot Issue 4A Mill Levy Override,opportunistic_benefits,in_progress,1,182397,2729,"""Yes/For""",731,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1819,1819
+//Weld County School District No. RE-7 Ballot Issue 4B Bonds,opportunistic_benefits,in_progress,1,182397,2729,"""Yes/For""",720,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1847,1847
+
+    override fun candidateNameCleanup(name: String): String {
+        var working = name
+        if (working.contains("''")) working = working.replace("''", "'")
+        if (working.contains("\"")) working = working.replace("\"", "'")
+        if (working.equals("Seth Ryan")) working = "Anna Cooling"  // WTF ?
+        return mutatisMutandi(working.trim())
+    }
+
+    private fun mutatisMutandi(choiceName: String): String {
+        return when (choiceName) {
+            "Randall Terry / Stephen E. Broden" -> "Randall Terry / Stephen E Broden"
+            "Claudia De la Cruz / Karina García" -> "Claudia De la Cruz / Karina Garcia"
+            "Colorado Supreme Court Justice Márquez" -> "Colorado Supreme Court Justice Marquez"
+            "Colorado Court of Appeals Judge Román" -> "Colorado Court of Appeals Judge Roman"
+            "Daniel Campaña" -> "Daniel Campana"
+            "Yes/For" -> "Yes"
+            "No/Against" -> "No"
+            "Yes" -> "Yes/For"
+            "No" -> "No/Against"
+            else -> {
+                if (choiceName.contains("Judge ")) choiceName.replace("Judge ", "")
+                else {
+                    // println("HEY $choiceName")
+                    choiceName
+                }
+            }
+        }
+    }
+    companion object {
+        private val auditcenter = "/home/stormy/dev/github/rla/nealmcb/auditcenter/2024/general"
+    }
+
+}

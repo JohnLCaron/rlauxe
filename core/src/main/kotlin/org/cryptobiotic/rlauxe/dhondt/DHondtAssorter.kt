@@ -5,6 +5,8 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.estMarginUpperFromSamples
+import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 // winner,loser: candidate ids
@@ -64,6 +66,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
 
     override fun desc() = "${shortName()}: upperBound=${df(upperBound())}"
     override fun shortName() = "DHondt w/l=${winnerNameRound()}/${loserNameRound()}"
+    fun reverseName() = "DHondt w/l=${loserNameRound()}/${winnerNameRound()}"
 
     // Youd like to be able to add new assorters as needed, but the factoring out into contests.json makes that harder
     // we could add new assertionRound, but dont have the new assorters in contests.json
@@ -84,6 +87,16 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         val winnerScore = votesForWinner / lastSeatWon.toDouble()
         val loserScore = votesForLoser / firstSeatLost.toDouble()
         return winnerScore - loserScore
+    }
+
+    fun getScoreRange(Npop: Int, nsamples: Int, alpha: Double) : Int {
+        val stdBet = 2.0 / 1.03905
+        val marginUpper = estMarginUpperFromSamples(stdBet, nsamples, alpha)
+        val margin = marginUpper * upperBound()
+        val hmean = margin2mean(margin)
+
+        val gmean = (hmean - .5) / c
+        return (Npop * gmean).toInt()
     }
 
     override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
@@ -156,7 +169,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
                 if (winner.lastSeatWon != null) {
                     parties.filter { it.id != winner.id }.forEach { loser ->
                         if (loser.firstSeatLost != null) {
-                            val passorter = makeFrom(info, winner, loser, Nc) // TODO Npop
+                            val passorter = makeFrom(info, winner, loser, Nc) // TODO use Npop
                             assorters.add(passorter)
                         }
                     }

@@ -101,7 +101,7 @@ fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdi
     //    nseats: Int,
     //    undervotes: Int,
     //    minFraction: Double,
-    val contest = makeDhondtContest(electionName, contestId, dhondtParties, nwinners, totalVotes, belgiumElection.NrOfBlankVotes,.05)
+    val dcontest = makeDhondtContest(electionName, contestId, dhondtParties, nwinners, totalVotes, belgiumElection.NrOfBlankVotes,.05)
 
     val topdir = "$toptopdir/$electionName"
     val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, riskMeasuringSampleLimit=sampleLimitFun(contestId))
@@ -110,7 +110,7 @@ fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdi
         ContestSampleControl.NONE,
         ClcaConfig(), null)
 
-    createBelgiumElection(topdir=topdir, contest, creation, round)
+    createBelgiumElection(topdir=topdir, dcontest, creation, round)
 
     val auditdir = "$topdir/audit"
     if (showVerify) {

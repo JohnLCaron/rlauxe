@@ -36,18 +36,23 @@ class MakeElectionsWithoutCvrs {
     @Test
     fun openColorado2022Primary() {
         val topdir = "$testdataDir/cases/auditcenter/Colorado2022Primary"
-        val countyRecord = AuditRecord.read("$topdir/audit") as CountyAudit
+        val auditRecord = AuditRecord.read("$topdir")
+        val countyRecord =  auditRecord as CountyAudit
 
         println("countyRecord.countyData")
-        countyRecord.countyData.forEach { println( it) }
+        countyRecord.countyData.forEach { println( "  $it") }
+        val sum1 = countyRecord.countyData.filter { it.countyName != "Statewide"}.sumOf { it.npop }
+        println("countyRecord.countyData total pop = $sum1}")
         println()
 
-        println("countyRecord.countyContestData")
-        countyRecord.countyContestData.forEach { println( it) }
+        //println("countyRecord.countyContestData")
+        // countyRecord.countyContestData.forEach { println( it) }
+        //println()
 
         val mvrCounts = countyRecord.countMvrsByCounty()
         println("countyRecord.countMvrsByCounty")
-        mvrCounts.forEach { println( it) }
+        mvrCounts.forEach { println( it ) }
+        println("mvrCounts total nmvrs = ${mvrCounts.values.sumOf { it.nmvrs }}")
         println()
     }
 }

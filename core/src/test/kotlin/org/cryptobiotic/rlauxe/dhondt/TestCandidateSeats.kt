@@ -175,8 +175,8 @@ class TestCandidateSeats {
         val allContests = partyNames.map { it.key }.toSet()
         val coal = all.calcCoalition(allContests, partyNames)
         // if all are in the coalition, there are no coalition failures
-        println("sumFail = $sumFail; allCandsFail = $allCandsFail; coalAllFail = ${coal.nfailures}; coalFailures = ${coal.failures.size}; ")
-        assertEquals(0, coal.failures.size)
+        println("sumFail = $sumFail; allCandsFail = $allCandsFail; coalAllFail = ${coal.nfailures}; coalFailures = ${coal.all().size}; ")
+        assertEquals(0, coal.all().size)
     }
 
     @Test
@@ -187,7 +187,7 @@ class TestCandidateSeats {
         val sumFail = all.candidateSums.sumOf{ it.failures.size }
         val allCands = all.contestSeats.map { it.candidates }.flatten()
         val allCandsFail = allCands.sumOf{ it.failures.size }
-        println("sumFail = $sumFail; allCandsFail = $allCandsFail; coalAllFail = ${coal.nfailures}; coalFailures = ${coal.failures.size}; ")
+        println("sumFail = $sumFail; allCandsFail = $allCandsFail; coalAllFail = ${coal.nfailures}; coalFailures = ${coal.all().size}; ")
 
         println(coal)
     }

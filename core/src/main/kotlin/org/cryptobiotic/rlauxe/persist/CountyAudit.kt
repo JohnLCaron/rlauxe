@@ -27,7 +27,7 @@ class CountyAudit(
     override fun auditdir() = "$location/audit"
 
     // for viewer
-    // TODO HEY assuming that the ids are in some canonical format.
+    // TODO assumes that we can see what county an mvr is from its styleName
     fun countMvrsByCounty(): Map<String, CountyData> {
         if (rounds.isEmpty()) return emptyMap()
         val lastRound = rounds.last() // TODO last round that has results
@@ -44,7 +44,7 @@ class CountyAudit(
             count++
         }
         val countyData = mvrCount.mapValues {
-            CountyData(it.key, it.value, 0)
+            CountyData(it.key, it.value, 0) // hijack CountyData
         }
         logger.info{ "countMvrsByCounty mvrs=$count sumCounties = ${ countyData.values.sumOf { it.nmvrs } }"}
 

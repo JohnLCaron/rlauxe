@@ -15,8 +15,9 @@ import java.io.OutputStreamWriter
         val contestRoundFile =   "2024/general/round1/contest.csv"
         val mvrComparisonFile =  "2024/general/round3/contestComparison.csv"
 
-        we need to make possible adjustments to the contest names to get them to match.
         use TestContestNames to cross check names
+
+        additionally, we may need to make adjustments for cvrExport files, which tend to be divergent.
 
  */
 
@@ -138,9 +139,11 @@ fun mergeContestInfo(input: ColoradoInput): MergedInfo {
         }
     }
 
-    val totalCards = strataInfo.sumOf { it.Npop }
-    val stateMvrCount = mergedContestInfo.filter { it.auditReason == AuditReason.state_wide_contest}.maxOf { it.statewideMvrs }
-    strataInfo.add(StrataInfo("Statewide", nmvrs = stateMvrCount, Npop= totalCards, ))
+    val statewideBallots = if (statewideContests.size > 0) statewideContests.first().ballotCardCount else 0
+    val stateMvrCount = mergedContestInfo.filter { it.auditReason == AuditReason.state_wide_contest}.maxOf {
+        it.statewideMvrs
+    }
+    strataInfo.add(StrataInfo("Statewide", nmvrs = stateMvrCount, Npop= statewideBallots, ))
 
     return MergedInfo(mergedContestInfo, strataInfo, statewideContests)
 }

@@ -6,8 +6,6 @@ import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.boulder.isEmpty
 import org.cryptobiotic.rlauxe.boulder.parseContestNameAndVoteFor
 import org.cryptobiotic.rlauxe.boulder.parseIrvContestName
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.ZipReader
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -52,7 +50,7 @@ data class DominionCvrExport(
     val schema: Schema,
     val cvrs: List<CastVoteRecord>, // includes both regular and IRV votes, but not redacted groups
     val redacted: List<DominionRedactedGroup>,
-    val ballotTypes: List<BallotType>,
+    val exportCardStyles: List<ExportCardStyle>,
 ) {
     fun show() = buildString {
         appendLine("filename = $filename")
@@ -294,15 +292,15 @@ private val showDontMatch = false
 private val showBallotStyles = false
 private val showRedactedGroups = false
 
-data class BallotType(val name: String, val contests: Set<Int>, var count: Int = 0)
+data class ExportCardStyle(val name: String, val contests: Set<Int>, var count: Int = 0)
 
 class BallotStyles {
-    val ballotTypes = mutableMapOf<Set<Int>, BallotType>()
+    val ballotTypes = mutableMapOf<Set<Int>, ExportCardStyle>()
     val redactedGroups = mutableMapOf<String, DominionRedactedGroup>()
 
     fun add(cvr:CastVoteRecord) {
         val cvrContests = cvr.contestVotes.map { it.contestId }.toSet()
-        val ballotType = ballotTypes.getOrPut(cvrContests) { BallotType(cvr.ballotType, cvrContests) }
+        val ballotType = ballotTypes.getOrPut(cvrContests) { ExportCardStyle(cvr.ballotType, cvrContests) }
         ballotType.count++
     }
 

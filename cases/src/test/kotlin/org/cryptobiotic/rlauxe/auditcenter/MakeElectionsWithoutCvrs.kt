@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
-import org.cryptobiotic.rlauxe.corla.Colorado2024Input
 import org.cryptobiotic.rlauxe.corla.createCorlaElection
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
@@ -17,6 +16,21 @@ import kotlin.test.Test
 
 class MakeElectionsWithoutCvrs {
     val show = false
+
+    @Test
+    fun makeColorado2024General() {
+        val topdir = "$testdataDir/cases/auditcenter/Colorado2024General"
+
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
+        val round = AuditRoundConfig(
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 200000,
+                sampling = Sampling.consistent),
+            ClcaConfig(), null)
+
+        createElectionSimulateCvrs(topdir, "$topdir/audit", Colorado2024AuditCenterInput(),
+            creation, round, name = "Colorado2024General", startFirstRound = true)
+    }
 
     @Test
     fun makeColorado2022Primary() {

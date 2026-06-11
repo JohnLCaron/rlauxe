@@ -20,7 +20,7 @@ private val showCardStyles = true
 
 // Probably obsolete
 // How does this differ from CreateColoradoElectionWithCvrs ??
-// make ContestInfo from export.schema.contests
+// make ContestInfo from export.schema.contests, so can only be for one county
 class CreateCountyElection(
     val county: String,
     val coloradoInput: ColoradoInput,
@@ -43,16 +43,13 @@ class CreateCountyElection(
     val cardStyles: List<StyleIF>
 
     init {
-        val cardStyleMap = makeCardStyles()
-        cardStyles = cardStyleMap.values.toList()
-        val styleNameMap = cardStyleMap.mapValues { it.value.name }
-
         // we need to know the diluted Nb before we can create the UAs
         contests = makeContests()
         simulatedCvrs = emptyList() // makeRedactedCvrs()
 
-        val dominionConverter = DominionCvrConverter(dominionExport, contests, coloradoInput, styleNameMap)
+        val dominionConverter = DominionCvrConverter(county, dominionExport, contests, coloradoInput)
         val exportCards = dominionExport.cvrs.map { dominionConverter.convertToCard(it) }
+        cardStyles = dominionConverter.cardStyles.values.toList()
 
         val infos = contests.map { it.info() }
         val phantoms = makePhantomCards(contests, 0)
@@ -68,7 +65,7 @@ class CreateCountyElection(
 
     fun makeCardStyles(): Map<Set<Int>, CardStyle> {
         val result = mutableMapOf<Set<Int>, CardStyle>()
-        dominionExport.ballotTypes.forEachIndexed { idx, bs ->
+        dominionExport.exportCardStyles.forEachIndexed { idx, bs ->
             result[bs.contests] = CardStyle(bs.name, idx + 1, bs.contests.toIntArray(), true)
         }
         return result

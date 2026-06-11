@@ -38,8 +38,8 @@ private val debugUndervotes = true
 class CreateCountyAudits(
     val countyName: String,
     val auditdir: String,
-    val stateElection: org.cryptobiotic.rlauxe.corla.CountyContestBuilder,
-    val countyContestTab: CountyContestTab,
+    val stateElection: CountyContestBuilder,
+    val countyContestTab: CountyContestTabs,
     val hasStyle: Boolean,
 ): ElectionBuilder {
     val publisher = Publisher(auditdir)
@@ -109,7 +109,7 @@ class CreateCountyAudits(
     }
 
     // for one county, one contest
-    class CountyContestBuilderOld(corlaContestBuilder: CorlaContestBuilder, contestTab: ContestTab) {
+    class CountyContestBuilderOld(corlaContestBuilder: CorlaContestBuilder, contestTab: CountyContestTab) {
         val info = corlaContestBuilder.info
         val Nc: Int     // taken from contestRound.contestBallotCardCount
         var Npop: Int = 0
@@ -172,7 +172,7 @@ fun createCountyAudits(
     writeCountyAuditData(topdir, coloradoInput)
 
     val countyElection = CountyContestBuilder(coloradoInput)
-    val contestTabByCounty: Map<String, CountyContestTab> = convertToCountyContestTabs(coloradoInput.contestTabsByCounty.values.toList())
+    val contestTabByCounty: Map<String, CountyContestTabs> = convertToCountyContestTabs(coloradoInput.contestTabsByCounty.values.toList())
         .associateBy { it.countyName }
 
     /* createColoradoElection(

@@ -36,14 +36,16 @@ class CardStyleJson(
     val name: String,
     val id: Int,
     val possibleContests: IntArray,
-    val hasExactContests: Boolean
+    val hasExactContests: Boolean,
+    val ncards: Int
 )
 
 fun StyleIF.publishJson() = CardStyleJson(
     this.name(),
     this.id(),
     this.possibleContests(),
-    this.hasExactContests()
+    this.hasExactContests(),
+    this.ncards(),
 )
 
 fun CardStyleJson.import() = CardStyle(
@@ -51,7 +53,7 @@ fun CardStyleJson.import() = CardStyle(
         this.id,
         this.possibleContests,
         this.hasExactContests,
-    )
+    ).setNcards(ncards)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 

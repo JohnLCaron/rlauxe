@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeCountyCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeElectionInfoJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeCardStylesJsonFile
@@ -29,6 +30,7 @@ interface ElectionBuilder {
     // So dont write batches if there are pools. Also its up to the reader to prefer pools.
     fun cardStyles(): List<StyleIF>?
     fun cardPools(): List<CardPoolIF>?
+    fun countyCardPools(): List<CountyPoolMultipleStyles>? = null
 
     fun createUnsortedMvrsInternal(): List<AuditableCardM>? // for in-memory case, poolId used also as batch name?
     fun createUnsortedMvrsExternal(): CloseableIterator<AuditableCardM>? // for out-of-memory case
@@ -49,16 +51,22 @@ fun createElectionRecord(election: ElectionBuilder, auditDir: String, control: C
     writeElectionInfoJsonFile(electionInfo, publisher.electionInfoFile())
     logger.info{"createElectionRecord writeElectionInfoJsonFile to ${publisher.electionInfoFile()}\n  $electionInfo"}
 
-    val batches = election.cardStyles()
-    if (!batches.isNullOrEmpty()) {
-        writeCardStylesJsonFile(batches, publisher.cardStylesFile())
-        logger.info { "createElectionRecord write ${batches.size} batches to ${publisher.cardStylesFile()}" }
+    val cardStyles = election.cardStyles()
+    if (!cardStyles.isNullOrEmpty()) {
+        writeCardStylesJsonFile(cardStyles, publisher.cardStylesFile())
+        logger.info { "createElectionRecord write ${cardStyles.size} cardStyles to ${publisher.cardStylesFile()}" }
     }
 
     val cardPools = election.cardPools()
     if (!cardPools.isNullOrEmpty()) {
         writeCardPoolCsvFile(cardPools, publisher.cardPoolsFile())
-        logger.info { "createElectionRecord ${cardPools.size} pools to ${publisher.cardPoolsFile()}" }
+        logger.info { "createElectionRecord ${cardPools.size} cardPools to ${publisher.cardPoolsFile()}" }
+    }
+
+    val countyCardPools = election.countyCardPools()
+    if (!countyCardPools.isNullOrEmpty()) {
+        writeCountyCardPoolCsvFile(countyCardPools, publisher.countyCardPoolsFile())
+        logger.info { "createElectionRecord ${countyCardPools.size} countyCardPoolsFile to ${publisher.countyCardPoolsFile()}" }
     }
 
     val cards = election.cards()

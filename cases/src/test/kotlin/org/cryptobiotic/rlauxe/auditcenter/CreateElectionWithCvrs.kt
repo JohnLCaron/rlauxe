@@ -9,19 +9,18 @@ import org.cryptobiotic.rlauxe.corla.writeCountyContestData
 import org.cryptobiotic.rlauxe.corla.writeCountyData
 import org.cryptobiotic.rlauxe.dominion.DominionCvrConverter
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
-import org.cryptobiotic.rlauxe.dominion.makeCardStyles
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.utils.tabulateNpopsFromCards
 import kotlin.Int
 import kotlin.String
 
-private val logger = KotlinLogging.logger("ColoradoOneAudit")
+private val logger = KotlinLogging.logger("CreateColoradoElectionWithCvrs")
 
 open class CreateColoradoElectionWithCvrs (
     val county: String,
     val coloradoInput: ColoradoInput,
-    val export: DominionCvrExport, // TODO use interator, currently only Boulder County
+    val export: DominionCvrExport, // TODO use iterator, currently only works with one county
     val contestBuilder: CountyContestBuilder, // TODO how does export schema compare to this?
     val auditdir: String,
     val hasStyle: Boolean,
@@ -33,13 +32,10 @@ open class CreateColoradoElectionWithCvrs (
     val allCards: List<AuditableCardM>
 
     init {
-        val cardStyleMap = export.makeCardStyles(county)
-        cardStyles = cardStyleMap.values.toList()
-        val styleNameMap = cardStyleMap.mapValues { it.value.name }
-
         val contests = contestBuilder.contests
-        val dominionConverter = DominionCvrConverter(export, contests, coloradoInput, styleNameMap)
+        val dominionConverter = DominionCvrConverter(county, export, contests, coloradoInput)
         val exportCvrs: List<AuditableCardM> = export.cvrs.map { dominionConverter.convertToCard(it) }
+        cardStyles = dominionConverter.cardStyles.values.toList()
 
         val infos = contests.map { it.info() }
         val phantoms = makePhantomCards(contests, 0)
@@ -107,7 +103,7 @@ fun createElectionWithCvrs(
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, coloradoInput.countyContestMap)
+    writeCountyContestData(topdir, contestMap, coloradoInput.countyContestTabs)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

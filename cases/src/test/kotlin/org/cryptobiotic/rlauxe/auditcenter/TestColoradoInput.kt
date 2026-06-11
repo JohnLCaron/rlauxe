@@ -12,8 +12,8 @@ import org.cryptobiotic.rlauxe.corla.readTargetedContestsCsv
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-class TestContestNames {
-    val input: ColoradoInput = Colorado2022Primary()
+class TestColoradoInput {
+    val input: ColoradoInput = Colorado2024AuditCenterInput()
 
     val canonical = readGeneralCanonicalList(input.generalCanonicalFile).associateBy { it.contestName }
 
@@ -131,8 +131,7 @@ class TestContestNames {
             assertTrue(canonical.contains(it.key), "canonical missing roundContest '${it.key}'")
         }
 
-        val (contestMvrs, _, _) = input.cardComparison
-        contestMvrs.forEach {
+        input.contestMvrs.forEach {
             assertTrue(canonical.contains(it.contestName))
         }
 

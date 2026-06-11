@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlauxe.auditcenter.Colorado2024AuditCenterInput
 import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
@@ -11,7 +12,7 @@ import kotlin.math.abs
 import kotlin.test.Test
 
 class TestReadColoradoCsvFiles {
-    val input: ColoradoInput = Colorado2024Input()
+    val input: ColoradoInput = Colorado2024AuditCenterInput()
 
     // data class CanonicalContest(
     //    val contestName: String,
@@ -147,7 +148,7 @@ class TestReadColoradoCsvFiles {
     //)
     @Test
     fun showMergeContestInfo() {
-        val (mergedContestInfo, mergedCountyInfo, statewideContests) = mergeContestInfo(Colorado2024Input())
+        val (mergedContestInfo, mergedCountyInfo, statewideContests) = mergeContestInfo(Colorado2024AuditCenterInput())
 
         println("\nMerged Contest Info")
         println("\n${trunc("contest", -50)}    Npop,      Nc, voteMargin, countyMvrs, stateMvrs, Ncounties, auditReason")
@@ -162,7 +163,7 @@ class TestReadColoradoCsvFiles {
         println("\nStrata Info")
         println("\ncounty      nmvrs,  npop")
         mergedCountyInfo.sortedBy { it.strataName }.forEach {
-            println("${sfn(it.strataName, -10)}  ${nfn(it.nmvrs, 5)}, ${nfn(it.Npop, 7)}")
+            println("${sfn(it.strataName, -10)}  ${nfn(it.nmvrs, 5)}, ${nfn(it.ncards, 7)}")
         }
         println()
 
@@ -225,7 +226,7 @@ class TestReadColoradoCsvFiles {
 
         val contestTabsByCounty: Map<String, ContestTabByCounty> = readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv")
 
-        val ccts: Map<String, CountyContestTab> = convertToCountyContestTabs(contestTabsByCounty.values.toList()).associateBy { clean(it.countyName) }
+        val ccts: Map<String, CountyContestTabs> = convertToCountyContestTabs(contestTabsByCounty.values.toList()).associateBy { clean(it.countyName) }
 
         println()
         println(trunc("from tabulateCounty", 113))
@@ -263,7 +264,7 @@ class TestReadColoradoCsvFiles {
         val roundContests = input.roundContests
 
         val contestTabsByCounty = input.contestTabsByCounty
-        val ccts: Map<String, CountyContestTab> = convertToCountyContestTabs(contestTabsByCounty.values.toList()).associateBy { it.countyName }
+        val ccts: Map<String, CountyContestTabs> = convertToCountyContestTabs(contestTabsByCounty.values.toList()).associateBy { it.countyName }
 
         println()
         println("${trunc("---from tabulateCounty---", 100)}     --------from contestRound-----")

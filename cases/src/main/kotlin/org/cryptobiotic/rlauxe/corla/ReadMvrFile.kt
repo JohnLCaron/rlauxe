@@ -23,12 +23,12 @@ import kotlin.text.appendLine
 // Adams,17th Judicial District Ballot Question 7B,101-146-54,65,"""No/Against""","""No/Against""",YES,uploaded,"",2024-11-19 09:54:41.65526,250284,
 // Adams,17th Judicial District Ballot Question 7B,101-285-1,16,"""No/Against""","""No/Against""",YES,uploaded,"",2024-11-19 10:02:29.59411,379206,
 
-data class CountyStyles(val countyName: String) {
-    val styles = mutableMapOf<Set<String>, Style>()
+data class CountyStylesFromMvrs(val countyName: String) {
+    val styles = mutableMapOf<Set<String>, MvrStyle>()
     var cardCount = 0
 
     fun add(contests:Set<String>) {
-        val style = styles.getOrPut(contests) { Style(styles.size, contests) }
+        val style = styles.getOrPut(contests) { MvrStyle(styles.size, contests) }
         style.cardCount++
         cardCount++
     }
@@ -43,23 +43,30 @@ data class CountyStyles(val countyName: String) {
     }
 }
 
-data class Style(val id: Int, val contests: Set<String>) {
+data class MvrStyle(val id: Int, val contests: Set<String>) {
     var cardCount = 0
     override fun toString()= buildString {
         append("style $id has ${contests.size} contests cardCount=$cardCount")
     }
+
+    fun show(contestNameToId: Map<String, Int>, sort:Boolean = true): String {
+        val contestIds = contests.map { contestNameToId[it]!! }
+        val useIds = if (sort) contestIds.sorted() else contestIds
+        return "  MvrStyle(${id}, contests=${useIds}, count= ${cardCount}"
+    }
+
 }
 
 ///////////////////////////////////////////////////////////////
 
 // for each contest, total mvrs over all counties
-data class ContestMvrs(val contestName: String) {
+data class ContestMvrCount(val contestName: String) {
     var countMvr = 0
     var countStatewide = 0
 }
 
 // for each county, over all contests
-data class CountyMvrs(val countyName: String) {
+data class CountyMvrCount(val countyName: String) {
     var countMvr = 0
 }
 
@@ -157,28 +164,28 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
     // println("statewide cards ${cards.values.count { it.statewide() } } total ${cards.size}")
 
     // accumulate mvr counts by County, skip statewide
-    val countyMvrs = mutableMapOf<String, CountyMvrs>()
+    val countyMvrs = mutableMapOf<String, CountyMvrCount>()
     // cards.values.filter { !it.statewide() }.forEach { card: Card ->
     cards.values.forEach { card: Card ->
         val line = card.lines.first()
-        val countyMvrs = countyMvrs.getOrPut(line.countyName) { CountyMvrs(line.countyName) }
+        val countyMvrs = countyMvrs.getOrPut(line.countyName) { CountyMvrCount(line.countyName) }
         countyMvrs.countMvr++
     }
 
     // accumulate mvr counts by Contest
-    val contestMvrs = mutableMapOf<String, ContestMvrs>()
+    val contestMvrs = mutableMapOf<String, ContestMvrCount>()
     cards.values.forEach { card: Card ->
         card.lines.forEach { line ->
-            val contestMvr = contestMvrs.getOrPut(line.contestName) { ContestMvrs(line.contestName) }
+            val contestMvr = contestMvrs.getOrPut(line.contestName) { ContestMvrCount(line.contestName) }
             if (card.statewide()) contestMvr.countStatewide++
                                   else contestMvr.countMvr++
         }
     }
 
     // create the CountyStyles
-    val stylesByCounty = mutableMapOf<String, CountyStyles>()
+    val stylesByCounty = mutableMapOf<String, CountyStylesFromMvrs>()
     cards.values.forEach { card: Card ->
-        val countyStyles = stylesByCounty.getOrPut(card.county()) { CountyStyles(card.county()) }
+        val countyStyles = stylesByCounty.getOrPut(card.county()) { CountyStylesFromMvrs(card.county()) }
         countyStyles.add(card.contests())
     }
 
@@ -186,7 +193,7 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
 }
 
 data class CardComparisonResults(
-    val contestMvrs: List<ContestMvrs>,
-    val countyMvrs: List<CountyMvrs>,
-    val stylesByCounty: List<CountyStyles>
+    val contestMvrs: List<ContestMvrCount>,
+    val countyMvrs: List<CountyMvrCount>,
+    val stylesByCounty: List<CountyStylesFromMvrs>
 )

@@ -37,6 +37,8 @@ class VunderPools(pools: List<CardPool>) {
 class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int, val hasExactContests: Boolean) {
     var vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
 
+    // pass in a card from the manifest, and generate an Mvr from it with votes constrained by the contest tabs in Vunder
+    // used in Estimation
     fun simulatePooledCard(card: AuditableCardIF): AuditableCardM {
         require (poolName == "all" || card.poolId() == poolId) // TODO
         val cardb = AuditableCardMBuilder.fromCard(card)
@@ -84,7 +86,7 @@ class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId
     }
 }
 
-// for viewer
+// for viewer: ContestPoolsTable.showSimulatedCards.
 fun makeCvrsForVunderPool(pool: CardPool, vunderpool: VunderPool): List<Cvr> {
     vunderpool.reset()
     val rcvrs = mutableListOf<Cvr>()
@@ -101,11 +103,13 @@ fun makeCvrsForVunderPool(pool: CardPool, vunderpool: VunderPool): List<Cvr> {
     return rcvrs
 }
 
+// TODO may not need batches anymore, card should have the style attached.
 // for multiple batches, multiple contests and one "pool" of subtotaled votes
+// used for estimation for OneAudit
 class VunderBatches(batches: List<StyleIF>, val onePool: VunderPool) {
     val batchMap = batches.associateBy { it.name() }
 
-    // for the given pooled card with no votes, simulate one with votes, staying within the onePool vote totals.
+    // for the given pooled card with no votes, simulate one with votes, using card.styleName
     fun simulatePooledCard(card: AuditableCardIF): AuditableCardIF {
         if (card.phantom()) return card
 

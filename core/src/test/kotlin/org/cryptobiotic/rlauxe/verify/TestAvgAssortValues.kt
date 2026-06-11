@@ -152,7 +152,7 @@ class TestAvgAssortValues {
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
 
         println()
-        test.cardStyleWithNcards.forEach { println(it) }
+        test.cardStyles.forEach { println(it) }
 
         val testCards = test.makeCardsFromContests()
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
@@ -160,7 +160,7 @@ class TestAvgAssortValues {
         val cardIterable: CloseableIterable<AuditableCardIF> =
             CloseableIterable { MergeStylesIntoCardsM(
                 Closer(testCards.iterator()),
-                styles = test.cardStyleWithNcards,) }
+                styles = test.cardStyles,) }
 
         if (showCvrs) {
             println("\n$CardHeader")
@@ -197,9 +197,9 @@ class TestAvgAssortValues {
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
 
         println()
-        test.cardStyleWithNcards.forEach { println(it) }
+        test.cardStyles.forEach { println(it) }
 
-        val modStyles = test.cardStyleWithNcards.map { it.copy(contests=intArrayOf(0,1,2,3,4)) }
+        val modStyles = test.cardStyles.map { it.copy(possibleContests=intArrayOf(0,1,2,3,4)) }
 
         val testCards = test.makeCardsFromContests()
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
@@ -207,7 +207,7 @@ class TestAvgAssortValues {
         val cardIterable: CloseableIterable<AuditableCardIF> =
             CloseableIterable { MergeStylesIntoCardsM(
                 Closer(testCards.iterator()),
-                styles = test.cardStyleWithNcards,) }
+                styles = test.cardStyles,) }
 
         if (showCvrs) {
             println("\n$CardHeader")

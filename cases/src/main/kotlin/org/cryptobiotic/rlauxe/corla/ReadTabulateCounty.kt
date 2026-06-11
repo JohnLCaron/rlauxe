@@ -3,56 +3,15 @@ package org.cryptobiotic.rlauxe.corla
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import java.io.File
 import java.nio.charset.Charset
+import kotlin.Int
 import kotlin.String
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.text.appendLine
-
-fun convertToCountyContestTabs(contestTabs: List<ContestTabByCounty>): List<CountyContestTab> {
-    val counties = mutableMapOf<String, CountyContestTab>()
-
-    contestTabs.forEach { contestTab ->
-        contestTab.choices.values.forEach { choice: CountyTabulateChoice  ->
-            choice.counties.forEach {
-                val county = counties.getOrPut(it.countyName ) { CountyContestTab(it.countyName)}
-                county.addChoice(it.contestName, it.choiceName, it.countyVote)
-            }
-        }
-    }
-    return counties.values.toList()
-}
-
-data class CountyContestTab(val countyName: String) {
-    val contests = mutableMapOf<String, ContestTab>()
-
-    override fun toString() = buildString {
-        appendLine("'$countyName'")
-        contests.values.forEach{ appendLine("  $it") }
-    }
-
-    fun addChoice(contestName: String, choiceName: String, choiceVote: Int) {
-        val contest = contests.getOrPut(contestName ) { ContestTab(contestName) }
-        contest.addChoice(choiceName, choiceVote)
-    }
-}
-
-data class ContestTab(val contestName: String) {
-    val choices = mutableMapOf<String, Int>() // choice name -> contest choice vote in this county
-    val stylesForContest = mutableListOf<Style>()
-
-    fun addChoice(choiceName: String, choiceVote: Int) {
-        require( choices[choiceName] == null )
-        choices[choiceName] = choiceVote
-    }
-
-    fun contestVotes() = choices.values.sumOf { it }
-
-    override fun toString() = buildString {
-        append("'$contestName': $choices")
-        //choices.forEach{ append("$it, ") }
-        //append(")")
-    }
-}
 
 //////////////////////////////////////////////////////////
 // corla/src/test/data/2024audit/tabulateCounty.csv
@@ -159,6 +118,60 @@ fun readCountyTabulateCsv(filename: String): Map<String, ContestTabByCounty> {
     return contests.toSortedMap()
 }
 
+fun convertToCountyContestTabs(contestTabs: List<ContestTabByCounty>): List<CountyContestTabs> {
+    val counties = mutableMapOf<String, CountyContestTabs>()
+
+    contestTabs.forEach { contestTab ->
+        contestTab.choices.values.forEach { choice: CountyTabulateChoice  ->
+            choice.counties.forEach {
+                val county = counties.getOrPut(it.countyName ) { CountyContestTabs(it.countyName)}
+                county.addChoice(it.contestName, it.choiceName, it.countyVote)
+            }
+        }
+    }
+    return counties.values.toList()
+}
+
+// for one county, all contests
+data class CountyContestTabs(val countyName: String) {
+    val contests = mutableMapOf<String, CountyContestTab>()
+
+    override fun toString() = buildString {
+        appendLine("'$countyName'")
+        contests.values.forEach{ appendLine("  $it") }
+    }
+
+    fun addChoice(contestName: String, choiceName: String, choiceVote: Int) {
+        val contest = contests.getOrPut(contestName ) { CountyContestTab(contestName) }
+        contest.addChoice(choiceName, choiceVote)
+    }
+}
+
+// for one county, one contest
+data class CountyContestTab(val contestName: String) {
+    val choices = mutableMapOf<String, Int>() // choice name -> contest choice vote in this county
+    // val stylesForContest = mutableListOf<Style>() // these get attached in MakeCountyPools
+
+    fun addChoice(choiceName: String, choiceVote: Int) {
+        require( choices[choiceName] == null )
+        choices[choiceName] = choiceVote
+    }
+
+    fun contestVotes() = choices.values.sumOf { it }
+
+    override fun toString() = buildString {
+        append("'$contestName': $choices")
+        //choices.forEach{ append("$it, ") }
+        //append(")")
+    }
+
+    fun makeContestTabulation(info: ContestInfo, ncards: Int): ContestTabulation {
+        val votes = choices.map { (choice, vote) ->
+            Pair(info.candidateNames[choice] ?: 0, vote)
+        }.toMap()
+        return ContestTabulation(info, votes, ncards)
+    }
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // NOT USED

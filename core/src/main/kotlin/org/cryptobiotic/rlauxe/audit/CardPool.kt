@@ -14,13 +14,15 @@ interface CardPoolIF: StyleIF {
     val poolId: Int
     fun contestTab(contestId: Int): ContestTabulation?
     fun votesAndUndervotes(contestId: Int): Vunder // throws exception if bad contest id
-    fun ncards(): Int
 }
 
+// A card pool could have multiple card styles, but doesnt know what they are.
+// Its main feature is that it knows the contest subtotals for the cards it contains.
+// So it was mainly developed for OneAudit pools.
 data class CardPool(
     override val poolName: String,
     override val poolId: Int,
-    val hasExactContests: Boolean,
+    val hasExactContests: Boolean,    // aka single style
     val infos: Map<Int, ContestInfo>, // do we really need this ??
     val contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
     val totalCards: Int,
@@ -76,6 +78,22 @@ data class CardPool(
         result = 31 * result + infos.hashCode()
         result = 31 * result + contestTabs.hashCode()
         return result
+    }
+}
+
+// CountyPool: pool with multiple CardStyles
+data class CountyPoolMultipleStyles (
+    val countyName: String,
+    val countyPoolId: Int,
+    val contestTabs: List<ContestTabulation>,  // contestId -> ContestTabulation
+    val totalCards: Int,
+    val styles: List<StyleIF>,
+    // val cardStylesCount: List<Int>, // or CardStyleWithNCards ??
+) {
+    override fun toString() = buildString {
+        appendLine("CountyPoolMultipleStyles(countyName='$countyName', countyPoolId=$countyPoolId, totalCards=$totalCards")
+        styles.forEach{ appendLine("cardStyle:  $it")}
+        contestTabs.forEach{ appendLine("  $it")}
     }
 }
 

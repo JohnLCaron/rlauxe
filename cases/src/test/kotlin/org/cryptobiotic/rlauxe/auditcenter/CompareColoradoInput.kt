@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.corla.Colorado2024Input
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.corla.readColoradoContestRoundCsv
 import org.cryptobiotic.rlauxe.corla.readContestComparisonCsv
@@ -8,9 +7,9 @@ import org.cryptobiotic.rlauxe.corla.readCountyTabulateCsv
 import org.cryptobiotic.rlauxe.corla.readGeneralCanonicalList
 import kotlin.test.Test
 
-// all identical names
+// compare two sources of ColoradoInput supposedly identical
 class CompareContestNames {
-    val input1: ColoradoInput = Colorado2024Input()
+    val input1: ColoradoInput = Colorado2024AuditCenterInput()
     val input2: ColoradoInput = Colorado2024AuditCenterInput()
 
     @Test

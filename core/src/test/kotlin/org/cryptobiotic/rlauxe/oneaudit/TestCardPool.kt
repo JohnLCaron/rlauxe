@@ -79,7 +79,7 @@ class TestCardPool {
         val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, test.hasExactContests)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
 
-        val cardPools = calcOneAuditPoolsFromMvrs(infos, test.cardStyleWithNcards, cvrs)
+        val cardPools = calcOneAuditPoolsFromMvrs(infos, test.cardStyles, cvrs)
         // was val cardPools = CardPoolFromCvrs.makeCardPools(cvrs.iterator(), infos)
         val cardPool = cardPools.first()
 

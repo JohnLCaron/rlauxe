@@ -37,7 +37,7 @@ fun writeCardPoolCsvFile(pool: List<CardPoolIF>, outputFilename: String) {
     writer.close()
 }
 
-fun readCardPoolCsv(line: String, infos: Map<Int, ContestInfo>): OneAuditPoolBuilder {
+fun readCardPoolCsv(line: String, infos: Map<Int, ContestInfo>): CardPoolBuilder {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
@@ -51,14 +51,14 @@ fun readCardPoolCsv(line: String, infos: Map<Int, ContestInfo>): OneAuditPoolBui
 
     try {
         val totalCards = ttokens[idx].toInt()
-        return OneAuditPoolBuilder(poolName, poolId, hasExactContests, infos, totalCards)
+        return CardPoolBuilder(poolName, poolId, hasExactContests, infos, totalCards)
     } catch (e:Throwable) {
         println("whu")
         throw e
     }
 }
 
-fun readCardPoolContinuation(line: String, current: OneAuditPoolBuilder): Boolean {
+fun readCardPoolContinuation(line: String, current: CardPoolBuilder): Boolean {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
@@ -79,24 +79,24 @@ fun readCardPoolCsvFile(filename: String, infos: Map<Int, ContestInfo>): List<Ca
 
     val pools = mutableListOf<CardPool>()
     var line = reader.readLine()
-    var currentPool: OneAuditPoolBuilder?
+    var currentBuilder: CardPoolBuilder?
 
     outerLoop@
     while (true) {
-        currentPool = readCardPoolCsv(line, infos)
+        currentBuilder = readCardPoolCsv(line, infos)
         // read more contestTabs for current pool
-        while (readCardPoolContinuation(line, currentPool)) {
+        while (readCardPoolContinuation(line, currentBuilder)) {
             line = reader.readLine() ?: break@outerLoop
         }
-        pools.add(currentPool.build())
+        pools.add(currentBuilder.build())
     }
-    pools.add(currentPool.build())
+    pools.add(currentBuilder.build())
 
     reader.close()
     return pools
 }
 
-class OneAuditPoolBuilder(
+class CardPoolBuilder(
     val poolName: String,
     val poolId: Int,
     val hasExactContests: Boolean,

@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.CountyPoolMultipleStyles
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -15,6 +16,7 @@ interface MvrManager {
     fun sortedManifest(): SortedManifest
     fun pools(): List<CardPool>?
     fun styles(): List<StyleIF>?
+    fun countyPools(): List<CountyPoolMultipleStyles>? = null
 
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCardIF>>  // Pair(mvr, cvr)
     fun writeMvrsForRound(round: Int): Int

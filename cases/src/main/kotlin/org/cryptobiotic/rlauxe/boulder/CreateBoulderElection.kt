@@ -102,13 +102,13 @@ class CreateBoulderElection(
         val cardStyleMap = mutableMapOf<Set<Int>, CardStyle>()
         cvrs.forEach { cvr ->
             val csc = cardStyleMap.getOrPut(cvr.votes.keys) { CardStyle(cardStyleMap.size + 1, cvr.votes.keys) }
-            csc.count++
+            csc.ncards++
         }
 
         if (showCardStyles) {
             println("\ncard styles  (${cardStyleMap.size})")
             println("id  count contests")
-            val sortedCardStyles = cardStyleMap.toList().sortedBy { it.second.count }
+            val sortedCardStyles = cardStyleMap.toList().sortedBy { it.second.ncards }
             sortedCardStyles.forEach { (_, pv) ->
                 println(pv)
             }

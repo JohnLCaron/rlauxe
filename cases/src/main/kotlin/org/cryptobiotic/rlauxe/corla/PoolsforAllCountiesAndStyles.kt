@@ -1,23 +1,15 @@
 package org.cryptobiotic.rlauxe.corla
 
-import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.CardPoolIF
-import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.util.nfz
-import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.math.abs
-import kotlin.math.max
 import kotlin.math.roundToInt
 
 private val debugNvotes = false
 
+// deprecated
 // seperate pool for each style in each county.
 class PoolsforAllCountiesAndStyles(
     val corlaContestBuilders: List<CorlaContestBuilder>,
@@ -51,8 +43,8 @@ class PoolsforAllCountiesAndStyles(
 
         val missingPools: Map<String, CountyPoolFromStyle> = makeMissingPools(tabsMissingStyles)
 
-        val countyPools: List<CountyPools> = contestTabByCounty.map { (countyName, countyContest) ->
-            CountyPools(
+        val countyPools: List<CountyPoolsBuilder> = contestTabByCounty.map { (countyName, countyContest) ->
+            CountyPoolsBuilder(
                 countyName, stylesByCounty[countyName]!!, countyContest,
                 missingPools[countyName], countyNc[countyName]!!, infos)
         }
@@ -221,198 +213,8 @@ class PoolsforAllCountiesAndStyles(
         //    val ncards: Int? = null
         //)
         return CountyPoolFromStyle(
-            countyName, countyName, CountyPools.nextPoolId++, hasExactContests = true,
+            countyName, countyName, CountyPoolsBuilder.nextPoolId++, hasExactContests = true,
             voteTotals = votesForStyle, infos
         )
     }
 }
-
-// where do we get ncards per county per contest? all we "know" is total contest Nc across counties
-// look across all counties that have that contest and divide Nc in proportion to countyContest.totalVotes
-
-// each countyStyle generates a Pool
-// we have county styles and subtotals, which get distributed to the various county styles in (rough) proportion to their cardCount.
-// as usual, we dont know the undervotes, so we will distribute that also in proportion
-data class CountyPools(
-    val countyName: String,
-    val mvrStyles: CountyStylesFromMvrs, // Set<contestId> and reletive count within county
-    val cct: CountyContestTabs, // the votes subtotal for each contest in the county
-    val missingPool: CountyPoolFromStyle?,
-    val contestNc: Map<String, Int>, // contest name -> contest Nc for the county
-    val infos: Map<String, ContestInfo> // contest name -> ContestInfo
-) {
-    val missingNcards = missingPool?.ncards() ?: 0
-    val adjContestNc = contestNc.mapValues { it.value - missingNcards}
-
-    // TODO i think the missingPool is missing ....
-    // also from the styles
-    // divide up the votes among styles to create a pool, from which cvrs can be synthesized
-    fun makePools(): List<CountyPoolFromStyle>  {
-        val total = mvrStyles.styles.values.sumOf { it.cardCount }
-        if (total != mvrStyles.cardCount)
-            logger.warn { "total != countyStyles.cardCount"}
-
-        val contestPcts = mutableMapOf<String, Double>()
-
-        val pools = mvrStyles.styles.values.map { style ->
-            val votesForStyle = mutableMapOf<Int, ContestTabulation>() // all contests, this style
-
-            style.contests.forEach { contestName: String ->
-                // the denominator is sum of cardCounts of Style's that contain this contest; could do once above
-                val totalCardsForContest = mvrStyles.styles.values.filter{ it.contests.contains(contestName) }.sumOf{ it.cardCount }
-                val stylePct = style.cardCount / totalCardsForContest.toDouble()
-                val contestPct = contestPcts.getOrDefault(contestName, 0.0)
-                contestPcts[contestName] = contestPct + stylePct
-
-                val info = infos[contestName]!!
-                val votes = mutableMapOf<Int, Int>() // this contest
-                val contestTab = cct.contests[contestName]!!
-                contestTab.choices.forEach { (choiceName, choiceVote) ->
-                    val candId = info.candidateNames[choiceName]
-                    if (candId != null) { // might be write in
-                        votes[candId] = (stylePct * choiceVote).roundToInt() // scale by stylePct
-                    }
-                }
-                // needs to be adjusted across the styles in proportion to how many cards used it
-                val Nc = adjContestNc[contestName]!!  // total Nc for this contest over all styles
-                val ncards = (stylePct * Nc).roundToInt() // scale by stylePct
-
-                votesForStyle[info.id] = ContestTabulation(info, votes, ncards)
-            }
-            nextPoolId++
-
-            CountyPoolFromStyle( countyName,
-                "${countyName}-${nfz(style.id,2)}", nextPoolId,
-                hasExactContests = true, voteTotals=votesForStyle, infos.mapKeys { it.value.id } )
-        }
-        // check
-        contestPcts.forEach { contestName, pct ->
-            if (!doubleIsClose(pct, 1.0))
-                logger.warn { "$contestName sum of style pctTotal ${pct} != 1.0"}
-        }
-
-        return pools
-    }
-
-    companion object {
-        private val logger = KotlinLogging.logger("CountyPools")
-        var nextPoolId = 0
-    }
-}
-
-// a pool of cards based on a card style
-// we dont know ncards - initial estimate from voteTotals, then can adjust cards
-data class CountyPoolFromStyle(
-    val countyName: String,
-    override val poolName: String,
-    override val poolId: Int,
-    val hasExactContests: Boolean,
-    val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests and candidates with no votes
-    val infos: Map<Int, ContestInfo>,
-    // val Ncs:  Map<Int, Int> // contestName, Nc
-): CardPoolIF, StyleIF {
-    val minCardsNeeded = mutableMapOf<Int, Int>()
-    val maxMinCardsNeeded: Int
-    var adjustCards = 0 // adjusted number of cards, using distributeExpectedOvervotes() on one or more contests
-
-    init {
-         // contestId -> minCardsNeeded
-        voteTotals.forEach { (contestId, contestTab) ->
-            val voteSum = contestTab.nvotes()
-            val info = infos[contestId]!!
-            // based on the contest's votes, you need at least this many cards for this contest
-            minCardsNeeded[contestId] = roundUp(voteSum.toDouble() / info.voteForN)
-        }
-        // you need at least this many cards for this pool
-        val fromMaxMin = minCardsNeeded.values.max()
-        val fromTabs = voteTotals.values.maxOf { it.nvotes() }
-        maxMinCardsNeeded = fromMaxMin
-    }
-
-    override fun name() = poolName
-    override fun id() = poolId
-    override fun hasExactContests() = hasExactContests
-
-    override fun hasContest(contestId: Int) = voteTotals.contains(contestId)
-    override fun possibleContests() = voteTotals.map { it.key }.toSortedSet().toIntArray()
-
-    override fun ncards() = (maxMinCardsNeeded + adjustCards)
-
-    fun adjustCards(adjust: Int, contestId : Int) {
-        if (!hasContest(contestId)) throw RuntimeException("NO CONTEST")
-        adjustCards = max( adjust, adjustCards)
-    }
-
-    override fun contestTab(contestId: Int) = voteTotals[contestId]
-
-    //        val result = if (hasExactContests) {
-    //            // if hasExactContests, then missing has to be zero
-    //            // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
-    //            // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
-    //            val undervotes = npop * voteForN - voteSum
-    //            Vunder(contestId, poolId, voteCounts, undervotes, 0, voteForN)
-    //        } else {
-    //            val missing = npop - (this.undervotes + voteSum) / voteForN
-    //            Vunder(contestId, poolId, voteCounts, this.undervotes, missing, voteForN)
-    //        }
-
-    // TODO how to distinguish between undervotes and missing ?? You need independent setting for pool ncards
-    // this assumes missing = 0; but then should set SingleBallotStyle = true ?
-    fun undervoteForContest(contestId: Int): Int {
-        val contestTab = voteTotals[contestId] ?: return 0
-        val voteSum = contestTab.nvotes()
-        val info = infos[contestId]!!
-        return ncards() * info.voteForN - voteSum
-    }
-
-    // TODO IRV allowed ?
-    override fun votesAndUndervotes(contestId: Int): Vunder {
-        val poolUndervotes = undervoteForContest(contestId)
-        val contestTab = voteTotals[contestId]!!
-
-        // TODO why not use contestTab.votesAndUndervotes() ??
-
-        val voteCounts = contestTab.votes.map { Pair(intArrayOf(it.key), it.value) }
-        val voteSum = contestTab.votes.values.sum()
-
-        return if (hasExactContests) {
-            // if hasExactContests, then missing has to be zero
-            // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
-            // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
-            val undervotes = ncards() * contestTab.voteForN - voteSum
-            Vunder(contestId, poolId, voteCounts, undervotes, 0, contestTab.voteForN)
-        } else {
-            val missing = ncards() - (poolUndervotes + voteSum) / contestTab.voteForN
-            Vunder(contestId, poolId, voteCounts, poolUndervotes, missing, contestTab.voteForN)
-        }
-    }
-
-    override fun toString(): String {
-        return "CountyPoolFromStyles(poolName='$poolName', poolId=$poolId, #contests=${voteTotals.size}, maxMinCardsNeeded=$maxMinCardsNeeded)"
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is CountyPoolFromStyle) return false
-
-        if (poolId != other.poolId) return false
-        if (hasExactContests != other.hasExactContests) return false
-        if (maxMinCardsNeeded != other.maxMinCardsNeeded) return false
-        if (adjustCards != other.adjustCards) return false
-        if (poolName != other.poolName) return false
-        if (voteTotals != other.voteTotals) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = poolId
-        result = 31 * result + hasExactContests.hashCode()
-        result = 31 * result + maxMinCardsNeeded
-        result = 31 * result + adjustCards
-        result = 31 * result + poolName.hashCode()
-        result = 31 * result + voteTotals.hashCode()
-        return result
-    }
-}
-

@@ -5,8 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
-import org.cryptobiotic.rlauxe.corla.CountyPoolFromStyle
-import org.cryptobiotic.rlauxe.audit.CountyPoolMultipleStyles
+import org.cryptobiotic.rlauxe.corla.CountyPoolsWithStyles
 import org.cryptobiotic.rlauxe.corla.MakeCountyPools
 import org.cryptobiotic.rlauxe.corla.writeCountyContestData
 import org.cryptobiotic.rlauxe.corla.writeCountyData
@@ -37,16 +36,18 @@ open class CreateElectionSimulateCvrs (
     val publisher = Publisher(auditdir)
     val ncards: Int
     val contestsUA: List<ContestWithAssertions>
-    val countyPoolsMS: List<CountyPoolMultipleStyles>
+    val countyPoolsMS: List<CountyPoolsWithStyles>
     val styles: List<StyleIF>
+    val pools: List<CardPoolIF>
 
     init {
         val makePools = MakeCountyPools(countyElection.corlaContestBuilders, coloradoInput)
         countyPoolsMS = makePools.countyPoolsMS
         styles = countyPoolsMS.map { it.styles }.flatten()
+        pools = styles
 
         // have to save the mvrs and generate the cardManifest from them.
-        // ncards = createAndSaveUnsortedMvrs(countyElection.contests, countyPools, publisher)
+        ncards = createAndSaveUnsortedMvrs(countyElection.contests, pools, publisher)
 
         // TODO Npop >= Nc
         // read them back in as an Iterator, so we dont have to read all into memory
@@ -54,7 +55,6 @@ open class CreateElectionSimulateCvrs (
         val auditableCardIter: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles=styles)
         // are we handling the batches correctly using mvrs?
         val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
-        ncards = count
         val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
 
         contestsUA = ContestWithAssertions.make(countyElection.contests, npopMap, auditType.isClca(), hasStyle)
@@ -69,7 +69,7 @@ open class CreateElectionSimulateCvrs (
 
     override fun cardStyles(): List<StyleIF>? = styles
     override fun cardPools(): List<CardPoolIF>? = null
-    override fun countyCardPools(): List<CountyPoolMultipleStyles>? = countyPoolsMS
+    override fun countyCardPools(): List<CountyPoolsIF>? = countyPoolsMS
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
 
@@ -187,12 +187,10 @@ fun createElectionSimulateCvrs(
                 creation.auditType, auditdir, pollingMode=null, name=name,
                 hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
 
-    // TODO kludge in sampleControl for the moment
-    createElectionRecord(election, auditDir = auditdir, roundConfig.sampling, clear = false)
+    createElectionRecord(election, auditDir = auditdir, roundConfig.sampling, clear = false) // cants clear because we have the mvrs written
     val config = Config(election.electionInfo(), creation, roundConfig)
 
-    // disable sorted for the moment
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir, sortManifest = false)
+    createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir, sortManifest = true)
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }

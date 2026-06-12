@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CountyPoolMultipleStyles
+import org.cryptobiotic.rlauxe.audit.CountyPools
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.makeContestsWithUndervotesAndPhantoms
@@ -24,7 +24,7 @@ class TestCountyCardPoolCsv {
         val csvFile = "$testdataDir/tests/scratch/countyCardPoolCsvFile.csv"
         writeCountyCardPoolCsvFile(target, csvFile)
 
-        val roundtrip = readCountyCardPoolCsvFile(csvFile, target.first().styles)
+        val roundtrip = readCountyPoolsCsvFile(csvFile, target.first().styles)
         assertEquals(target.size, roundtrip.size)
 
         roundtrip.forEachIndexed { pidx, rpool ->
@@ -45,7 +45,7 @@ class TestCountyCardPoolCsv {
     }
 
     var poolId = 0
-    fun makeRegPool(infos: MutableMap<Int, ContestInfo>): CountyPoolMultipleStyles {
+    fun makeRegPool(infos: MutableMap<Int, ContestInfo>): CountyPools {
         val candVotes = mutableListOf<Map<Int, Int>>()
         candVotes.add(mapOf(0 to 200, 1 to 123, 2 to 17))
         candVotes.add(mapOf(0 to 71, 1 to 123, 2 to 0, 3 to 77, 4 to 99))
@@ -65,7 +65,7 @@ class TestCountyCardPoolCsv {
         infos.putAll(myinfos)
 
         poolId++
-        return CountyPoolMultipleStyles(
+        return CountyPools(
             "testRegVotes", poolId, tabs.values.toList(), 42,
             listOf(style)
         )

@@ -81,17 +81,24 @@ data class CardPool(
     }
 }
 
+interface CountyPoolsIF {
+    val countyName: String
+    val countyPoolId: Int
+    val contestTabs: List<ContestTabulation>
+    val totalCards: Int
+    val styles: List<StyleIF>
+}
+
 // CountyPool: pool with multiple CardStyles
-data class CountyPoolMultipleStyles (
-    val countyName: String,
-    val countyPoolId: Int,
-    val contestTabs: List<ContestTabulation>,  // contestId -> ContestTabulation
-    val totalCards: Int,
-    val styles: List<StyleIF>,
-    // val cardStylesCount: List<Int>, // or CardStyleWithNCards ??
-) {
+data class CountyPools (
+    override val countyName: String,
+    override val countyPoolId: Int,
+    override val contestTabs: List<ContestTabulation>,
+    override val totalCards: Int,
+    override val styles: List<StyleIF>,
+): CountyPoolsIF {
     override fun toString() = buildString {
-        appendLine("CountyPoolMultipleStyles(countyName='$countyName', countyPoolId=$countyPoolId, totalCards=$totalCards")
+        appendLine("CountyPools(countyName='$countyName', countyPoolId=$countyPoolId, totalCards=$totalCards")
         styles.forEach{ appendLine("cardStyle:  $it")}
         contestTabs.forEach{ appendLine("  $it")}
     }

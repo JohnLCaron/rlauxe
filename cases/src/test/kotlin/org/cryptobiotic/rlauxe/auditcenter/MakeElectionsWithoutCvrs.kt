@@ -48,8 +48,8 @@ class MakeElectionsWithoutCvrs {
     }
 
     @Test
-    fun openColorado2022Primary() {
-        val topdir = "$testdataDir/cases/auditcenter/Colorado2022Primary"
+    fun openColoradowithoutCvrs() {
+        val topdir = "$testdataDir/cases/auditcenter/Colorado2024General"
         val auditRecord = AuditRecord.read("$topdir")
         val countyRecord =  auditRecord as CountyAudit
 

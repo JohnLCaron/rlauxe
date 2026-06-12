@@ -30,7 +30,7 @@ interface ElectionBuilder {
     // So dont write batches if there are pools. Also its up to the reader to prefer pools.
     fun cardStyles(): List<StyleIF>?
     fun cardPools(): List<CardPoolIF>?
-    fun countyCardPools(): List<CountyPoolMultipleStyles>? = null
+    fun countyCardPools(): List<CountyPoolsIF>? = null
 
     fun createUnsortedMvrsInternal(): List<AuditableCardM>? // for in-memory case, poolId used also as batch name?
     fun createUnsortedMvrsExternal(): CloseableIterator<AuditableCardM>? // for out-of-memory case

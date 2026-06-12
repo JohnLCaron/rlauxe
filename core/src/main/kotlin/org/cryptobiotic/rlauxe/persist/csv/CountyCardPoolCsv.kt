@@ -1,7 +1,8 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.CountyPoolMultipleStyles
+import org.cryptobiotic.rlauxe.audit.CountyPools
+import org.cryptobiotic.rlauxe.audit.CountyPoolsIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import java.io.*
@@ -9,7 +10,7 @@ import java.io.*
 private val logger = KotlinLogging.logger("CountyCardPoolCsv")
 
 // // CountyPool: pool with multiple CardStyles
-//data class CountyPoolMultipleStyles (
+//data class CountyPools (
 //    val countyName: String,
 //    val countyPoolId: Int,
 //    val contestTabs: List<ContestTabulation>,  // contestId -> ContestTabulation
@@ -20,7 +21,7 @@ private val logger = KotlinLogging.logger("CountyCardPoolCsv")
 
 val CountyCardPoolHeader = "countyPoolId, countyName, totalCards, cardStyles, contestId, voteForN, cands, ncards, novote, undervotes, overvotes, nphantoms, isIrv, votes:count ... \n"
 
-fun writeCountyCardPoolCsv(pool: CountyPoolMultipleStyles) = buildString {
+fun writeCountyCardPoolCsv(pool: CountyPoolsIF) = buildString {
     val styleIds = pool.styles.map{ it.id() }.joinToString(" ")
     append("${pool.countyPoolId}, ${pool.countyName}, ${pool.totalCards}, $styleIds, ")
     pool.contestTabs.forEachIndexed { index, contestTab ->
@@ -29,7 +30,7 @@ fun writeCountyCardPoolCsv(pool: CountyPoolMultipleStyles) = buildString {
     }
 }
 
-fun writeCountyCardPoolCsvFile(pools: List<CountyPoolMultipleStyles>, outputFilename: String) {
+fun writeCountyCardPoolCsvFile(pools: List<CountyPoolsIF>, outputFilename: String) {
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     writer.write(CountyCardPoolHeader)
     pools.forEach {
@@ -38,7 +39,7 @@ fun writeCountyCardPoolCsvFile(pools: List<CountyPoolMultipleStyles>, outputFile
     writer.close()
 }
 
-fun readCountyCardPoolCsv(line: String): CountyCardPoolBuilder {
+fun readCountyCardPoolCsv(line: String): CountyPoolBuilder {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
@@ -52,14 +53,14 @@ fun readCountyCardPoolCsv(line: String): CountyCardPoolBuilder {
     val cardStyles = ttokens[idx++]
 
     try {
-        return CountyCardPoolBuilder(poolName, poolId, totalCards, cardStyles)
+        return CountyPoolBuilder(poolName, poolId, totalCards, cardStyles)
     } catch (e:Throwable) {
         println("whu")
         throw e
     }
 }
 
-fun readCountyCardPoolContinuation(line: String, current: CountyCardPoolBuilder): Boolean {
+fun readCountyCardPoolContinuation(line: String, current: CountyPoolBuilder): Boolean {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
@@ -74,14 +75,14 @@ fun readCountyCardPoolContinuation(line: String, current: CountyCardPoolBuilder)
     return true
 }
 
-fun readCountyCardPoolCsvFile(filename: String, styles: List<StyleIF>): List<CountyPoolMultipleStyles> {
+fun readCountyPoolsCsvFile(filename: String, styles: List<StyleIF>): List<CountyPools> {
     val styleMap = styles.associateBy { it.id() }
     val reader: BufferedReader = File(filename).bufferedReader()
     reader.readLine() // get rid of header line
 
-    val pools = mutableListOf<CountyPoolMultipleStyles>()
+    val pools = mutableListOf<CountyPools>()
     var line = reader.readLine()
-    var currentBuilder: CountyCardPoolBuilder?
+    var currentBuilder: CountyPoolBuilder?
 
     outerLoop@
     while (true) {
@@ -98,7 +99,7 @@ fun readCountyCardPoolCsvFile(filename: String, styles: List<StyleIF>): List<Cou
     return pools
 }
 
-class CountyCardPoolBuilder(
+class CountyPoolBuilder(
     val poolName: String,
     val poolId: Int,
     val totalCards: Int,
@@ -106,7 +107,7 @@ class CountyCardPoolBuilder(
 ) {
     val contestTabs = mutableMapOf<Int, ContestTabulation>()
 
-    // data class CountyPoolMultipleStyles (
+    // data class CountyPools (
     //    val countyName: String,
     //    val countyPoolId: Int,
     //    val contestTabs: List<ContestTabulation>,  // contestId -> ContestTabulation
@@ -115,11 +116,11 @@ class CountyCardPoolBuilder(
     //    // val cardStylesCount: List<Int>, // or CardStyleWithNCards ??
     //)
 
-    fun build(styleMap: Map<Int, StyleIF>): CountyPoolMultipleStyles {
+    fun build(styleMap: Map<Int, StyleIF>): CountyPools {
         val cardStyleIds =
             if (cardStyless.isEmpty()) emptyList() else cardStyless.split(" ").map { it.trim().toInt() }
         val cardStyles = cardStyleIds.map { styleMap[it]!! }
-        return CountyPoolMultipleStyles(poolName, poolId, contestTabs.values.toList(), totalCards, cardStyles, )
+        return CountyPools(poolName, poolId, contestTabs.values.toList(), totalCards, cardStyles, )
     }
 }
 

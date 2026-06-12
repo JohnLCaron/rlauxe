@@ -13,12 +13,12 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.audit.CountyPoolMultipleStyles
+import org.cryptobiotic.rlauxe.audit.CountyPools
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.persist.bin.FastSamplingCardIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
-import org.cryptobiotic.rlauxe.persist.csv.readCountyCardPoolCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCountyPoolsCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIteratorM
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -93,9 +93,9 @@ open class AuditRecord(
                else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
     }
 
-    fun readCountyCardPools(styles: List<StyleIF>): List<CountyPoolMultipleStyles>? {
+    fun readCountyCardPools(styles: List<StyleIF>): List<CountyPools>? {
         return if (!Files.exists(Path(publisher.countyCardPoolsFile()))) null
-                else readCountyCardPoolCsvFile(publisher.countyCardPoolsFile(), styles)
+                else readCountyPoolsCsvFile(publisher.countyCardPoolsFile(), styles)
     }
 
     // return contestId -> nmvrs

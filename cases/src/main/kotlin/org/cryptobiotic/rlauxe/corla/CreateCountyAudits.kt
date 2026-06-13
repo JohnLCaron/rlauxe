@@ -33,8 +33,7 @@ private val logger = KotlinLogging.logger("CreateCountyAudits")
 
 private val debugUndervotes = true
 
-// TODO is this obsolete ??
-
+// obsolete
 class CreateCountyAudits(
     val countyName: String,
     val auditdir: String,

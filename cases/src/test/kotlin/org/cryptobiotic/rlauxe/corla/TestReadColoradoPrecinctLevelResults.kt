@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.util.ZipReader
 import kotlin.test.Test
 
+// obsolete
 class TestReadColoradoPrecinctLevelResults {
 
     @Test

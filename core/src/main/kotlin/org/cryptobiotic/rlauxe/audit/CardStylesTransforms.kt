@@ -87,7 +87,6 @@ class MvrsToCardStylesIterator(
         )
         if (style != null) cardm.setStyle(style)
         return cardm
-
     }
 
     override fun close() = mvrs.close()

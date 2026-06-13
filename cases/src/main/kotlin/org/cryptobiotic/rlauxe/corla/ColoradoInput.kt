@@ -15,7 +15,7 @@ import java.io.OutputStreamWriter
         val contestRoundFile =   "2024/general/round1/contest.csv"
         val mvrComparisonFile =  "2024/general/round3/contestComparison.csv"
 
-   use TestColoradoInput to cross check names with generalCanonicalFile
+   use TestColoradoInputNames to cross check names with generalCanonicalFile
 
    additionally, we may need to make adjustments for cvrExport files, which tend to be divergent.
    subclasses provide contestNameCleanup and candidateNameCleanup

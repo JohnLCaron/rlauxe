@@ -12,7 +12,8 @@ import org.cryptobiotic.rlauxe.corla.readTargetedContestsCsv
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-class TestColoradoInput {
+// check name consistency in ColoradoInput
+class TestColoradoInputNames {
     val input: ColoradoInput = Colorado2024AuditCenterInput()
 
     val canonical = readGeneralCanonicalList(input.generalCanonicalFile).associateBy { it.contestName }

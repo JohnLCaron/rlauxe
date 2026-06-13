@@ -171,7 +171,7 @@ class AuditTrialTask(
     val config: Config,
     val contestsToAudit: List<ContestRound>,
     val pools: List<CardPool>?,
-    val batches: List<StyleIF>?,
+    val styles: List<StyleIF>?,
     val sortedManifest: SortedManifest
 ) : ConcurrentTask<List<AssertionTrialIF>> {
 
@@ -190,8 +190,8 @@ class AuditTrialTask(
         val onePool = if (vunderPools == null && config.isPolling) VunderPool.fromContests(contestsToAudit.map { it.contestUA }, 42) else null
 
         // Use Batches if available
-        val vunderBatches = if (onePool != null && batches != null && config.election.pollingMode?.withBatches() == true)
-            VunderBatches(batches, onePool) else null
+        val vunderBatches = if (onePool != null && styles != null && config.election.pollingMode?.withBatches() == true)
+            VunderBatches(styles, onePool) else null
 
         val contestTrials: List<AssertionTrialIF> = contestsToAudit.map {
             if (config.isPolling) ContestPollingTrial(run, config.creation.riskLimit, config.round.pollingConfig!!, it.contestUA, it.minAssertion()!!)

@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.corla.readGeneralCanonicalList
 import kotlin.test.Test
 
 // compare two sources of ColoradoInput supposedly identical
-class CompareContestNames {
+class CompareContestInput {
     val input1: ColoradoInput = Colorado2024AuditCenterInput()
     val input2: ColoradoInput = Colorado2024AuditCenterInput()
 

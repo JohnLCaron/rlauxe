@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.persist.readCountyData
 import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 
+// obsolete
 class TestWriteData {
 
     @Test

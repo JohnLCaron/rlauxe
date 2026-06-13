@@ -167,6 +167,10 @@ data class AuditableCardM (
             return AuditableCardM(id, location, index, prn, phantom, styleName, poolId, contestIds, contestStarts, candidates)
         }
 
+        fun empty(id: String, phantom: Boolean, styleName: String): AuditableCardM {
+            return fromVotes(id, null, 0, 0, phantom, styleName, null, null)
+        }
+
         fun removeVotes(org: AuditableCardM): AuditableCardM {
             return AuditableCardM(org.id, org.location, org.index, org.prn, org.phantom, org.styleName, org.poolId,
                 IntArray(0), IntArray(0),IntArray(0))

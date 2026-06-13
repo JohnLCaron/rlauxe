@@ -21,6 +21,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
+// obsolete
 class MakeColoradoElections {
 
     // @Test

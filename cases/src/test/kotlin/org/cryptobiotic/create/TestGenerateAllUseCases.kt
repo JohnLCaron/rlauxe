@@ -77,7 +77,8 @@ class TestGenerateAllUseCases {
         )
     }
 
-    @Test
+    // obsolete
+    // @Test
     fun makeColoradoClcaUniform() {
         val topdir = "$testdataDir/cases/corla/uniform"
 
@@ -92,7 +93,7 @@ class TestGenerateAllUseCases {
             Colorado2024AuditCenterInput(), creation, round, name = "Corla24Uniform")
     }
 
-    @Test
+    // @Test
     fun makeColoradoClcaConsistent() {
         val topdir = "$testdataDir/cases/corla/consistent"
 

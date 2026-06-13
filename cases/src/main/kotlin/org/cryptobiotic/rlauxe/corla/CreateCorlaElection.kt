@@ -15,9 +15,7 @@ import kotlin.String
 
 private val logger = KotlinLogging.logger("CreateCorlaElection")
 
-//// corla election with consistent sampling
-// simulate the Cvrs
-
+// obsolete
 open class CreateCorlaElection (
     val coloradoInput: ColoradoInput,
     val countyElection: CountyContestBuilder,

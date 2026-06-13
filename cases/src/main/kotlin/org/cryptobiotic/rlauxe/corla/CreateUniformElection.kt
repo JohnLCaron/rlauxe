@@ -15,6 +15,7 @@ import kotlin.String
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
+// TODO replicate in CountyElection
 open class CreateUniformElection (
     val coloradoInput: ColoradoInput,
     val stateElection: CountyContestBuilder,

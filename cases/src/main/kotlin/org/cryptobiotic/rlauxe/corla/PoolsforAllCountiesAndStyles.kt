@@ -9,8 +9,7 @@ import kotlin.math.roundToInt
 
 private val debugNvotes = false
 
-// deprecated
-// seperate pool for each style in each county.
+// obsolete but used by createCorlaElection
 class PoolsforAllCountiesAndStyles(
     val corlaContestBuilders: List<CorlaContestBuilder>,
     val coloradoInput: ColoradoInput
@@ -43,9 +42,9 @@ class PoolsforAllCountiesAndStyles(
 
         val missingPools: Map<String, CountyPoolFromStyle> = makeMissingPools(tabsMissingStyles)
 
-        val countyPools: List<CountyPoolsBuilder> = contestTabByCounty.map { (countyName, countyContest) ->
-            CountyPoolsBuilder(
-                countyName, stylesByCounty[countyName]!!, countyContest,
+        val countyPools: List<CountyPoolsBuilderOld> = contestTabByCounty.map { (countyName, countyContest) ->
+            CountyPoolsBuilderOld(
+                countyName, countyContest, stylesByCounty[countyName]!!,
                 missingPools[countyName], countyNc[countyName]!!, infos)
         }
 
@@ -213,7 +212,7 @@ class PoolsforAllCountiesAndStyles(
         //    val ncards: Int? = null
         //)
         return CountyPoolFromStyle(
-            countyName, countyName, CountyPoolsBuilder.nextPoolId++, hasExactContests = true,
+            countyName, countyName, CountyPoolsBuilderOld.nextPoolId++, hasExactContests = true,
             voteTotals = votesForStyle, infos
         )
     }

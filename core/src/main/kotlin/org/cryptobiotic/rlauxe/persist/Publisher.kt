@@ -61,6 +61,7 @@ class Publisher(val auditDir: String) {
     fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"   // TODO make proto ??
     fun privateOneshotFile() = "$auditDir/private/oneshot.txt"
     fun unsortedMvrsFile() = "$auditDir/private/unsortedMvrs.csv"
+    fun unsortedMvrsDirectory() = "$auditDir/private"
 
     fun auditRoundConfigFile(round: Int): String {
         val dir = "$auditDir/round$round"

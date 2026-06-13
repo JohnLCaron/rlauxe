@@ -103,30 +103,30 @@ fun makeCvrsForVunderPool(pool: CardPool, vunderpool: VunderPool): List<Cvr> {
     return rcvrs
 }
 
-// TODO may not need batches anymore, card should have the style attached.
-// for multiple batches, multiple contests and one "pool" of subtotaled votes
+// TODO use this for CountyPools?
+// for multiple styles, multiple contests and one "pool" of subtotaled votes
 // used for estimation for OneAudit
-class VunderBatches(batches: List<StyleIF>, val onePool: VunderPool) {
-    val batchMap = batches.associateBy { it.name() }
+class VunderBatches(styles: List<StyleIF>, val onePool: VunderPool) {
+    val styleMap = styles.associateBy { it.name() }
 
     // for the given pooled card with no votes, simulate one with votes, using card.styleName
     fun simulatePooledCard(card: AuditableCardIF): AuditableCardIF {
         if (card.phantom()) return card
 
-        val batch = batchMap[card.styleName()]
+        val style = styleMap[card.styleName()]
         val cardb = AuditableCardMBuilder.fromCard(card)
 
-        if (batch == null) {
-            println("batch ${card.styleName()} not found")
+        if (style == null) {
+            println("style ${card.styleName()} not found")
             return cardb.build()
         }
 
-        batch.possibleContests().forEach { contestId ->
+        style.possibleContests().forEach { contestId ->
             val vunderPicker = onePool.vunderPickers[contestId]
             // only contests still needed to audit are in OnePool
             if (vunderPicker != null) {
                 if (vunderPicker.isEmpty()) {
-                    if (batch.hasExactContests()) cardb.replaceContestVotes(
+                    if (style.hasExactContests()) cardb.replaceContestVotes(
                         contestId,
                         intArrayOf()
                     ) // missing not allowed

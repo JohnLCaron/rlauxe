@@ -135,7 +135,7 @@ class CorlaContestBuilder(val info: ContestInfo, val contest: MergedContestInfo,
         poolTotalVotes = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.contestTab(info.id)!!.nvotes() }
     }
 
-    fun expectedPoolNCards() = Nc // TODO ??
+    fun expectedPoolNCards() = Nc
 
     fun makeContest(): Contest {
         val candVotes = candidateVotes.filter { info.candidateIds.contains(it.key) } // get rid of writeins?

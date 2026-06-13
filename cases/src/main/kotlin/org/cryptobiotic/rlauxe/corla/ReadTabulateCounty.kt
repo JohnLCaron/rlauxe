@@ -134,7 +134,7 @@ fun convertToCountyContestTabs(contestTabs: List<ContestTabByCounty>): List<Coun
 
 // for one county, all contests
 data class CountyContestTabs(val countyName: String) {
-    val contests = mutableMapOf<String, CountyContestTab>()
+    val contests = mutableMapOf<String, CountyContestTab>() // contestName -> CountyContestTab
 
     override fun toString() = buildString {
         appendLine("'$countyName'")
@@ -146,7 +146,7 @@ data class CountyContestTabs(val countyName: String) {
         contest.addChoice(choiceName, choiceVote)
     }
 }
-
+// we only know votes, not ncards or undervotes.
 // for one county, one contest
 data class CountyContestTab(val contestName: String) {
     val choices = mutableMapOf<String, Int>() // choice name -> contest choice vote in this county

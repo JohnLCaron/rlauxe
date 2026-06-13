@@ -20,9 +20,9 @@ interface StyleIF {
     fun hasExactContests(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests()
     fun hasContest(contestId: Int): Boolean // "is in possibleContests()"
     fun contestIdSet(): Set<Int> = possibleContests().toList().toSet()
+    fun ncards(): Int
 
     // if you have these, then you're a CardPool
-    //   fun ncards(): Int
     //   fun votesAndUndervotes(contestId: Int): Vunder
 }
 
@@ -34,7 +34,7 @@ data class CardStyle(
 ) : StyleIF {
     val maxId = possibleContests.maxOrNull() ?: 1
     val bitset: BitSet
-    var count = 0
+    var ncards = 0  // optional
 
     init {
         bitset = BitSet(maxId)
@@ -42,6 +42,12 @@ data class CardStyle(
     }
 
     constructor(id: Int, contestIds: Set<Int>): this("style$id", id, contestIds.toList().sorted().toIntArray(), true)
+
+    override fun ncards() = ncards
+    fun setNcards(ncards:Int): CardStyle {
+        this.ncards = ncards
+        return this
+    }
 
     override fun name() = name
     override fun id() = id
@@ -69,8 +75,13 @@ data class CardStyle(
         return result
     }
 
+    fun show(): String {
+        return "${nfn(id, 3)} ${nfn(ncards, 5)} ${possibleContests.contentToString()}"
+    }
+
     override fun toString(): String {
-        return "${nfn(id, 3)} ${nfn(count, 5)} ${possibleContests.contentToString()}"
+        val sortedContests = possibleContests.toList().sorted()
+        return "CardStyle(name=$name, ncards= $ncards, contests=${sortedContests}"
     }
 
     companion object {
@@ -93,13 +104,13 @@ fun makeCardStylesFromCvrs(cvrs: List<Cvr>, show: Boolean = false): Map<Set<Int>
     val cardStyleMap = mutableMapOf<Set<Int>, CardStyle>()
     cvrs.forEach { cvr ->
         val csc = cardStyleMap.getOrPut(cvr.votes.keys) { CardStyle(cardStyleMap.size + 1, cvr.votes.keys) }
-        csc.count++
+        csc.ncards++
     }
 
     if (show) {
         println("\ncard styles  (${cardStyleMap.size})")
         println("id  count contests")
-        val sortedCardStyles = cardStyleMap.toList().sortedBy { it.second.count }
+        val sortedCardStyles = cardStyleMap.toList().sortedBy { it.second.ncards }
         sortedCardStyles.forEach { (_, pv) ->
             println(pv)
         }

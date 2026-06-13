@@ -93,7 +93,7 @@ class ContestTabulation(
         this.overvotes += other.overvotes
     }
 
-    fun votesAndUndervotes(poolId: Int, npop: Int, hasExactContests: Boolean): Vunder {
+    fun votesAndUndervotes(poolId: Int?, npop: Int, hasExactContests: Boolean): Vunder {
         if (isIrv) return votesAndUndervotesIrv(poolId, npop, hasExactContests)
 
         val voteCounts = votes.map { Pair(intArrayOf(it.key), it.value) }
@@ -113,7 +113,7 @@ class ContestTabulation(
         return result
     }
 
-    fun votesAndUndervotesIrv(poolId: Int, npop: Int, hasExactContests: Boolean): Vunder {
+    fun votesAndUndervotesIrv(poolId: Int?, npop: Int, hasExactContests: Boolean): Vunder {
 
         val voteCounts = this.irvVotes.votes.map { (hIntArray, count) ->
             // convert indices back to ids

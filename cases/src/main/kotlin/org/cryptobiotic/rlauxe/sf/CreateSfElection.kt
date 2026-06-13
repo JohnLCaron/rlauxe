@@ -119,7 +119,7 @@ class CreateSfElection(
 
                 // styles
                 val csc = cardStyles.getOrPut(cvrExport.votes.keys) { CardStyle(cardStyles.size + 1, cvrExport.votes.keys) }
-                csc.count++
+                csc.ncards++
 
                 // tabs
                 cvrExport.votes.forEach { (id, cands) ->

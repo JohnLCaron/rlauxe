@@ -49,6 +49,7 @@ class Publisher(val auditDir: String) {
     // fun auditSeedFile() = "$auditDir/auditSeed.json"
     fun cardManifestFile() = "$auditDir/cardManifest.csv" // cardManifest
     fun cardPoolsFile() = "$auditDir/cardPools.csv"
+    fun countyCardPoolsFile() = "$auditDir/countyCardPools.csv"
     fun cardStylesFile() = "$auditDir/cardStyles.json"
     fun contestsFile() = "$auditDir/contests.json"
     fun electionInfoFile() = "$auditDir/electionInfo.json"
@@ -60,6 +61,7 @@ class Publisher(val auditDir: String) {
     fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"   // TODO make proto ??
     fun privateOneshotFile() = "$auditDir/private/oneshot.txt"
     fun unsortedMvrsFile() = "$auditDir/private/unsortedMvrs.csv"
+    fun unsortedMvrsDirectory() = "$auditDir/private"
 
     fun auditRoundConfigFile(round: Int): String {
         val dir = "$auditDir/round$round"

@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
-import org.cryptobiotic.rlauxe.betting.estRiskStandardBet
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
 import kotlin.String
@@ -19,43 +18,6 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
     }
 
     private fun makeContestBuilders(): List<CorlaContestBuilder> {
-
-        /* val canonical = corlaInput.canonicalContests
-        val resultsContestMap = corlaInput.resultsContests.associateBy { it.contestName }
-        val roundContestMap = corlaInput.roundContests
-        val xmlDetailMap = corlaInput.detailXmlContests.contests.associateBy { it.text }
-        val contestMvrs = corlaInput.contestMvrs.associateBy { it.contestName } */
-
-        // data class MergedContestInfo(
-        //    // canonical
-        //    val contestName: String,
-        //    val choices: List<String>,
-        //    val counties: Set<String>,
-        //
-        //    // contestRound
-        //    val auditReason: AuditReason,
-        //    val npop:Int,
-        //    val nc:Int,
-        //    val voteForN: Int,
-        //    val nsamples: Int,
-        //    val marginInVotes: Int,
-        //
-        //    // mvr file
-        //    val countyMvrs: Int,
-        //    val statewideMvrs: Int,
-        //)
-        //
-        //data class StrataInfo(
-        //    val strataName: String,
-        //    val nmvrs: Int,
-        //    val Npop: Int,
-        //)
-        //
-        //data class MergedInfo(
-        //    val mergedContestInfo: List<MergedContestInfo>,
-        //    val strataInfo: List<StrataInfo>,
-        //    val statewideContests: List<CorlaContestRoundCsv>,
-        //)
         val mergedContestMap = coloradoInput.mergedContestMap
         val strataMap = coloradoInput.strataMap
         val contestTabs = coloradoInput.contestTabsByCounty
@@ -118,7 +80,7 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
             val s = strataMap[it]
             if (s == null) 1.0 else {
                 orgSamples += s.nmvrs
-                s.nmvrs / s.Npop.toDouble()
+                s.nmvrs / s.ncards.toDouble()
             }
         }.min()
 
@@ -127,8 +89,8 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
         counties.forEach {
             val strata = strataMap[it]
             if (strata != null) {
-                npop += strata.Npop
-                val truncSamples = roundToClosest(strata.Npop * minRate)
+                npop += strata.ncards
+                val truncSamples = roundToClosest(strata.ncards * minRate)
                 nmvrs += truncSamples
             }
         }
@@ -165,13 +127,15 @@ class CorlaContestBuilder(val info: ContestInfo, val contest: MergedContestInfo,
             useNc = minCardsNeeded
         }
         Nc = useNc
-        Npop = strata.Npop
+        Npop = strata.ncards
     }
 
     fun setTotalCardsFromPools(cardPools: List<CardPoolIF>){
         poolTotalCards = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.ncards() }
         poolTotalVotes = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.contestTab(info.id)!!.nvotes() }
     }
+
+    fun expectedPoolNCards() = Nc
 
     fun makeContest(): Contest {
         val candVotes = candidateVotes.filter { info.candidateIds.contains(it.key) } // get rid of writeins?

@@ -19,6 +19,7 @@ import kotlin.random.Random
 // vunder = "votes and undervotes and missing votes"
 // missing votes = the cards in the population that dont contain the contest
 // voteCounts: Pair(candsVoteFor, count); candsVoteFor is immutable
+// TODO what is poolId for ??
 data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
     val nvotes = voteCounts.sumOf { it.second } // candVotes.values.sum()
     val ncards = missing + (undervotes + nvotes) / voteForN
@@ -70,6 +71,7 @@ class Choice(val vunderIdx: Int, val cands: IntArray, var remaining: Int)
 class VunderPicker(val vunder: Vunder) {
     val vunderRemaining = mutableListOf<Choice>()  // candId, nvotes
     fun vunderLeft() = vunderRemaining.sumOf { it.remaining }
+    var pickedFrom = 0
 
     init {
         vunder.vunder.forEachIndexed { idx, it -> vunderRemaining.add(Choice(idx,it.first, it.second)) }
@@ -94,6 +96,7 @@ class VunderPicker(val vunder: Vunder) {
         } else {
             chooseCandidatesAndDecrement(vunder.voteForN)
         }
+
         return result
     }
 
@@ -125,6 +128,7 @@ class VunderPicker(val vunder: Vunder) {
         } else {
             println("  *** no votesLeft for $choice")
         }
+        pickedFrom++
     }
 
     // select multiple votes over the remaining votes and undervotes

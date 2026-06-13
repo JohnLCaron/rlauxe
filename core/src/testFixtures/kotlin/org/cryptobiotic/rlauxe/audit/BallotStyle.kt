@@ -31,7 +31,7 @@ data class BallotStyle(
     override fun hasExactContests() = hasExactContests
     override fun hasContest(contestId: Int) = contests.contains(contestId)
     override fun possibleContests() = contests.toList().sorted().toIntArray()
-    fun ncards() = cardStyles.size
+    override fun ncards() = cardStyles.size
 }
 
 // multicard ballot pool

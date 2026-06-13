@@ -15,6 +15,7 @@ import kotlin.String
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
+// TODO replicate in CountyElection
 open class CreateUniformElection (
     val coloradoInput: ColoradoInput,
     val stateElection: CountyContestBuilder,
@@ -115,7 +116,7 @@ fun createUniformElection(
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, coloradoInput.countyContestMap)
+    writeCountyContestData(topdir, contestMap, coloradoInput.countyContestTabs)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

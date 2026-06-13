@@ -24,11 +24,7 @@ class TestDominionCvrConverter {
         val contests = contestBuilder.contests
         val contestMap = contests.associateBy{ it.name }
 
-        val cardStyleMap = export.makeCardStyles(county, 0)
-        val cardStyles = cardStyleMap.values.toList()
-        val styleNameMap = cardStyleMap.mapValues { it.value.name }
-
-        val dominionConverter = DominionCvrConverter(export, contests, coloradoInput, styleNameMap)
+        val dominionConverter = DominionCvrConverter(county, export, contests, coloradoInput)
         var count = 0
         var countBad = 0
         export.cvrs.map {

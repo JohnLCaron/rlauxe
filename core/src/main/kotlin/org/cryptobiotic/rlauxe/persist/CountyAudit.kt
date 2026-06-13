@@ -7,6 +7,8 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import java.io.BufferedReader
 import java.io.File
 import kotlin.collections.forEach
@@ -49,6 +51,18 @@ class CountyAudit(
         logger.info{ "countMvrsByCounty mvrs=$count sumCounties = ${ countyData.values.sumOf { it.nmvrs } }"}
 
         return countyData.toSortedMap()
+    }
+
+    // for viewer
+    fun readCountyMvrsAndTabulate(countyName: String) : Map<Int, ContestTabulation> {
+        val countyMvrFile = "${publisher.unsortedMvrsDirectory()}/$countyName.csv"
+        logger.debug { "readCountyMvrsAndTabulate on $countyMvrFile (exists=${exists(countyMvrFile)}"}
+        if (!exists(countyMvrFile)) return emptyMap()
+        val mvrs = readCardsCsvIteratorM(countyMvrFile, styles = null)
+        val infos = contests.associate{ it.id to it.contest.info() }
+        val tabs =  tabulateAuditableCards(mvrs, infos)
+        logger.debug { "got ${tabs.size} tabulations"}
+        return tabs
     }
 
     companion object {

@@ -15,9 +15,7 @@ import kotlin.String
 
 private val logger = KotlinLogging.logger("CreateCorlaElection")
 
-//// corla election with consistent sampling
-// simulate the Cvrs
-
+// obsolete
 open class CreateCorlaElection (
     val coloradoInput: ColoradoInput,
     val countyElection: CountyContestBuilder,
@@ -33,7 +31,7 @@ open class CreateCorlaElection (
     val countyPools: List<CountyPoolFromStyle>
 
     init {
-        countyPools = CountyPoolsFromStyles(countyElection.corlaContestBuilders, coloradoInput).countyPools
+        countyPools = PoolsforAllCountiesAndStyles(countyElection.corlaContestBuilders, coloradoInput).countyPools
 
         // have to save the mvrs and generate the cardManifest from them.
         ncards = createAndSaveUnsortedMvrs(countyElection.contests, countyPools, publisher)
@@ -118,6 +116,7 @@ fun createAndSaveUnsortedMvrs(
 
 // dont load into memory all at once, just one pool at a time
 // this is random, cant do more than once. must do mvrs first
+// TODO can we use  VunderBatches(batches: List<StyleIF>, val onePool: VunderPool)?
 class CvrIteratorfromPools(val cardPoolIter: Iterator<CardPoolIF>) : Iterator<Cvr> {
     var innerIter: CardsFromPool
 
@@ -139,6 +138,7 @@ class CvrIteratorfromPools(val cardPoolIter: Iterator<CardPoolIF>) : Iterator<Cv
     }
 }
 
+// heres where we simulate the cards from the pools
 // these are chosen randomly, so in order for mvrs and cvrs to match, the cvrs have to be made from the mvrs.
 class CardsFromPool(val cardPool: CardPoolIF) : Iterator<Cvr> {
     val cvrs: Iterator<Cvr>
@@ -189,7 +189,7 @@ fun createCorlaElection(
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, coloradoInput.countyContestMap)
+    writeCountyContestData(topdir, contestMap, coloradoInput.countyContestTabs)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

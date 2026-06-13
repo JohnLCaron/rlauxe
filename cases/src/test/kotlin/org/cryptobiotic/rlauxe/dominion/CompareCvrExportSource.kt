@@ -1,17 +1,10 @@
-package org.cryptobiotic.rlauxe.auditcenter
-
-import org.cryptobiotic.rlauxe.dominion.BallotType
-import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
-import org.cryptobiotic.rlauxe.dominion.ColumnInfo
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
-import org.cryptobiotic.rlauxe.dominion.ExportContestInfo
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
+package org.cryptobiotic.rlauxe.dominion
 
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestDominionCvrExport {
+class CompareCvrExportSources {
     val show = false
 
     @Test
@@ -57,8 +50,8 @@ class TestDominionCvrExport {
 
         // exp1 is missing ballot style names
         println("\nCompare CardStyle")
-        val styles2 = exp2.ballotTypes.iterator()
-        exp1.ballotTypes.forEachIndexed { idx, style1 ->
+        val styles2 = exp2.exportCardStyles.iterator()
+        exp1.exportCardStyles.forEachIndexed { idx, style1 ->
             val style2 = styles2.next()
             val same = compare(style1, style2)
             val star = if (same) "  " else "**"
@@ -86,9 +79,9 @@ class TestDominionCvrExport {
         exp2.schema.contests.forEach { println(it) }
 
         println("\nBallotTypes 1")
-        exp1.ballotTypes.forEach { println(it) }
+        exp1.exportCardStyles.forEach { println(it) }
         println("\nBallotTypes 2")
-        exp2.ballotTypes.forEach { println(it) }
+        exp2.exportCardStyles.forEach { println(it) }
     }
 
     fun compare(col1: ColumnInfo, col2: ColumnInfo): Boolean {
@@ -108,7 +101,7 @@ class TestDominionCvrExport {
     }
 
     // data class BallotType(val name: String, val contests: Set<Int>, var count: Int = 0)
-    fun compare(col1: BallotType, col2: BallotType): Boolean {
+    fun compare(col1: ExportCardStyle, col2: ExportCardStyle): Boolean {
         if (col1.contests != col2.contests) return false
         if (col1.count != col2.count) return false
         return true

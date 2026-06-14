@@ -66,16 +66,15 @@ abstract class ColoradoInput(
     //    val contestName: String
     //    val choices = mutableMapOf<String, CountyTabulateChoice>()
     //
+    val contestTabsByCounty: Map<String, ContestTabByCounty> by lazy {
+        readCountyTabulateCsv(tabulateCountyFile)
+    }
     // data class CountyContestTabs(
     //    val countyName: String
     //    val contests = mutableMapOf<String, CountyContestTab>()
     // data class CountyContestTab(
     //    val contestName: String) {
     //    val choices = mutableMapOf<String, Int>() // choice name -> nvotes in this county
-
-    val contestTabsByCounty: Map<String, ContestTabByCounty> by lazy {
-        readCountyTabulateCsv(tabulateCountyFile)
-    }
     val countyContestTabs: List<CountyContestTabs> by lazy { convertToCountyContestTabs(contestTabsByCounty.values.toList()) }
 
     //////////
@@ -135,8 +134,54 @@ abstract class ColoradoInput(
     val statewideContests: List<CorlaContestRoundCsv> by lazy { mergedInfo.statewideContests }
 
     // use these on the export contest names, to match the canonical contest names contained in generalCanonicalFile
-    abstract fun contestNameCleanup(name: String): String
-    abstract fun candidateNameCleanup(name: String): String
+    // abstract fun contestNameCleanup(name: String): String
+    // abstract fun candidateNameCleanup(name: String): String
+
+    open fun contestNameCleanup(county: String, name: String) = name
+    open fun candidateNameCleanup(county: String, name: String) = name
+
+    // dont use these directly, use matchCanonicalContest() and matchCanonicalCandidate()
+    fun matchCanonicalContest(county: String, exportContestName: String): CanonicalContest? {
+        val transform = contestNameCleanup(county, exportContestName)
+        val cleanup = nameMunging(transform)
+        return canonicalContestMungedNames[cleanup]
+    }
+
+    /*
+    fun matchExportContest(county: String, canonContest: CanonicalContest): String? {
+        val transform = contestNameCleanup(county, exportContestName)
+        val cleanup = nameMunging(transform)
+        return canonicalContestMungedNames[cleanup]
+    } */
+
+    // return canonical candidate name
+    fun matchCanonicalCandidate(county: String, contest: CanonicalContest, exportCandidateName: String): String? {
+        val transform = candidateNameCleanup(county, exportCandidateName)
+        var match = contest.choices.find { nameMunging(it) == nameMunging(transform) }
+        if (match == null) match = contest.choices.find { it == yesno(exportCandidateName) }
+        return match
+    }
+
+    private val canonicalContestMungedNames: Map<String, CanonicalContest> by lazy {
+        canonicalContests().mapKeys { nameMunging(it.key) }
+    }
+}
+
+private val alphnumRE = "[^A-Za-z0-9]".toRegex()
+fun nameMunging(name: String): String {
+    var munge = name.replace(alphnumRE, "").lowercase()
+    // println("'$name' -> '$munge'")
+    return munge
+}
+
+fun yesno(candName:String):String {
+    return when (candName) {
+        "Yes/For" -> "Yes"
+        "No/Against" -> "No"
+        "Yes" -> "Yes/For"
+        "No" -> "No/Against"
+        else -> candName
+    }
 }
 
 data class MergedContestInfo(

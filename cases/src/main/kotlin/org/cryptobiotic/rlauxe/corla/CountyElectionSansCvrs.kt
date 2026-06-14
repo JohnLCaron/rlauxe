@@ -21,7 +21,7 @@ private val logger = KotlinLogging.logger("CreateCorlaElection")
 // County election has the cards divided into disjoint county pools
 // Each county has its own set of card styles
 // Contests may be shared across counties.
-open class CountyElectionSimulateCvrs (
+open class CountyElectionSansCvrs (
     val coloradoInput: ColoradoInput,
     val countyElection: CountyContestBuilder,
     val auditType: AuditType,
@@ -34,12 +34,12 @@ open class CountyElectionSimulateCvrs (
     val publisher = Publisher(auditdir)
     val ncards: Int
     val contestsUA: List<ContestWithAssertions>
-    val countyPools: List<CountyPoolsWithStyles>
+    val countyPools: List<CountyPools>
     val styles: List<StyleIF>
 
     init {
-        val makePools = MakeCountyPools2(countyElection.corlaContestBuilders, coloradoInput, onlyCounty)
-        val countyPoolBuilders: List<CountyPoolsBuilder2> = makePools.countyPools
+        val makePools = MakeCountyPools(countyElection.corlaContestBuilders, coloradoInput, onlyCounty)
+        val countyPoolBuilders: List<CountyPoolsBuilder> = makePools.countyPools
         styles = countyPoolBuilders.map { it.pools }.flatten()  // use the pools as styles
         countyPools = countyPoolBuilders.map { it.build() }
 
@@ -80,7 +80,7 @@ open class CountyElectionSimulateCvrs (
     override fun createUnsortedMvrsInternal() = null
 
     class CardIteratorfromCountyFiles(
-        countyPools: List<CountyPoolsWithStyles>,
+        countyPools: List<CountyPools>,
         publisher: Publisher,
         val styles: List<StyleIF>
     ) : CloseableIterator<AuditableCardM> {
@@ -108,7 +108,7 @@ open class CountyElectionSimulateCvrs (
     }
 
     fun createAndSaveUnsortedMvrs(
-        countyPools: List<CountyPoolsWithStyles>,
+        countyPools: List<CountyPools>,
         publisher: Publisher
     ): Int {
         val dir = publisher.unsortedMvrsDirectory()
@@ -116,7 +116,7 @@ open class CountyElectionSimulateCvrs (
         var totalCards = 0
         countyPools.forEach { countyPool ->
             val outfile = "$dir/${countyPool.countyName}.csv"
-            val poolIterator = CvrIteratorfromPools2(countyPool, totalCards)
+            val poolIterator = CvrIteratorfromPools(countyPool, totalCards)
 
             // TODO makePhantomCvrs(contests)
             val unsortedMvrIterator = Closer(poolIterator)
@@ -133,10 +133,10 @@ open class CountyElectionSimulateCvrs (
     // to use the county Tabs, which are the only real tabs;  AdjustableStylePool are guesses.
     // but we want to use the AdjustableStylePool ncards to generate cards for each style
     // and use the undervotes as variable; but the vote totals should match.
-    class CvrIteratorfromPools2(val countyPool: CountyPoolsWithStyles, val startCardno: Int) : Iterator<AuditableCardIF> {
+    class CvrIteratorfromPools(val countyPool: CountyPools, val startCardno: Int) : Iterator<AuditableCardIF> {
         val vunderBatches: VunderBatches
         var cardPoolIter = countyPool.styles.iterator()
-        var innerIter = CardsFromPool2(cardPoolIter.next())
+        var innerIter = CardsFromPool(cardPoolIter.next())
         var cardno = startCardno
 
         init {
@@ -154,7 +154,7 @@ open class CountyElectionSimulateCvrs (
         override fun hasNext(): Boolean {
             if (innerIter.hasNext()) return true
             if (cardPoolIter.hasNext()) {
-                innerIter = CardsFromPool2(cardPoolIter.next())
+                innerIter = CardsFromPool(cardPoolIter.next())
                 return hasNext()
             }
             // should be all done with this county
@@ -171,7 +171,7 @@ open class CountyElectionSimulateCvrs (
             return false
         }
 
-        inner class CardsFromPool2(val cardPool: CardPoolIF) : Iterator<AuditableCardIF> {
+        inner class CardsFromPool(val cardPool: StyleIF) : Iterator<AuditableCardIF> {
             var countCards = 0
             val poolName = cardPool.name()
 
@@ -188,7 +188,7 @@ open class CountyElectionSimulateCvrs (
 
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
-fun createCountyElectionSimulateCvrs(
+fun createCountyElectionSansCvrs(
     topdir: String,
     auditdir: String,
     coloradoInput: ColoradoInput,
@@ -204,7 +204,7 @@ fun createCountyElectionSimulateCvrs(
     val countyElection = CountyContestBuilder(coloradoInput)
 
     val election =
-        CountyElectionSimulateCvrs(coloradoInput, countyElection,
+        CountyElectionSansCvrs(coloradoInput, countyElection,
             creation.auditType, auditdir, pollingMode=null, name=name,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent,
             onlyCounty = onlyCounty)

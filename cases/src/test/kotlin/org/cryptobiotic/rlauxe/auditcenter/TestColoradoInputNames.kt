@@ -14,21 +14,22 @@ import kotlin.test.assertTrue
 
 // check name consistency in ColoradoInput
 class TestColoradoInputNames {
-    val input: ColoradoInput = Colorado2024AuditCenterInput()
+    val input: ColoradoInput = Colorado2020General()
 
     val canonical = readGeneralCanonicalList(input.generalCanonicalFile).associateBy { it.contestName }
+    val canonicalContestNames = canonical.map{ it.key }
 
     @Test
     fun showCanonicalContests() {
         canonical.values.forEach { println( it.contestName )}
-        println("there are ${canonical.size} canonical contests")
+        println("there are ${canonical.size} auditcenter contests")
     }
 
     @Test
     fun showCanonicalCounties() {
         val counties = canonical.values.map { it.counties }.flatten().toSet().toList().sorted()
         counties.forEach { println( it )}
-        println("there are ${counties.size} canonical counties")
+        println("there are ${counties.size} auditcenter counties")
     }
 
     @Test
@@ -73,70 +74,55 @@ class TestColoradoInputNames {
     }
 
     @Test
-    fun checkCountyTabulateHasCanonicalContests() {
+    fun checkCountyTabulateAndCanonicalContests() {
         println("\n--------------------------------------------------------------------------")
         val countyTabs = readCountyTabulateCsv(input.tabulateCountyFile)
         val countiesFromTab = countyTabs.values.map { it.counties() }.flatten().toSet().toList()
 
-        println("compare canonical counties and countiesFromTabs")
-        compareLists(input.counties(), countiesFromTab, "canonical", "countiesFromTabs")
+        println("compare canonical contest counties and CountyTabulateCsv")
+        compareLists(input.counties(), countiesFromTab, "canonical", "countyTabulateCsv")
     }
 
     @Test
-    fun checkCanonicalHasContestRound() {
+    fun checkContestRoundAndCanonicalContests() {
         println("\n--------------------------------------------------------------------------")
-        val contests = readColoradoContestRoundCsv(input.contestRoundFile)
-        println("generalCanonicalFile ${input.contestRoundFile} missing roundContest:")
-        contests.values.forEach {
-            if (!canonical.contains(it.contestName)) {
-                println("  '${it.contestName}'")
-            }
-        }
-        //  'Adams County Ballot Issue 1A'
-    }
+        val contestRounds = input.roundContests.values.map { it.contestName }
 
-    @Test
-    fun checkContestRoundHasCanonical() {
-        println("\n--------------------------------------------------------------------------")
-        val contests = readColoradoContestRoundCsv(input.contestRoundFile)
-        canonical.values.forEach {
-            if (!contests.contains(it.contestName)) {
-                println("countyRound missing canonical '${it.contestName}'")
-            }
-        }
+        println("compare canonical contests and ContestRoundCsv")
+        compareLists(canonicalContestNames, contestRounds, "canonical", "ContestRoundCsv")
     }
 
     @Test
     fun checkCanonicalHasContestComparison() {
         println("\n--------------------------------------------------------------------------")
-        val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile)
+        val contestMvrs = input.contestMvrs.map { it.contestName }
 
-        println("generalCanonicalFile ${input.mvrComparisonFile} missing mvrComparisonContest")
+        println("generalCanonicalFile missing mvrComparisonContest")
         contestMvrs.forEach {
-            if (!canonical.contains(it.contestName)) println("  '${it.contestName}'")
+            if (!canonical.contains(it)) println("  '${it}'")
         }
     }
 
-    // now correct the canonical files and run this
+    // now correct the auditcenter files and run this
     @Test
     fun checkCorrectedCanonicalContests() {
-        val canonical = input.canonicalContests()
+        val auditcenter = input.canonicalContests()
 
         val contestTabs = input.contestTabsByCounty
         contestTabs.forEach {
-            assertTrue(canonical.contains(it.key))
+            assertTrue(auditcenter.contains(it.key))
         }
 
         val roundContests = input.roundContests
         roundContests.forEach {
-            assertTrue(canonical.contains(it.key), "canonical missing roundContest '${it.key}'")
+            assertTrue(auditcenter.contains(it.key), "canonical missing roundContest '${it.key}'")
         }
 
         input.contestMvrs.forEach {
-            assertTrue(canonical.contains(it.contestName))
+            assertTrue(auditcenter.contains(it.contestName))
         }
 
-        canonical.forEach {
+        auditcenter.forEach {
             assertTrue(contestTabs.contains(it.key))
             assertTrue(roundContests.contains(it.key))
         }

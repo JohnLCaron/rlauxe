@@ -9,15 +9,14 @@ import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.util.AuditableCardMBuilder
 import kotlin.collections.set
 
-
-// each export is specific to a County; but we will call it a pool
-class DominionCvrConverter(val poolName: String, export: DominionCvrExport, contests: List<ContestIF>, coloradoInput: ColoradoInput) {
+// each export is specific to a County
+class DominionCvrConverter(val county: String, export: DominionCvrExport, contests: List<ContestIF>, coloradoInput: ColoradoInput) {
                            //val styleNameMap: Map<Set<Int>, String>) {
     private val exportToCanonLookup = mutableMapOf<Int, SchemaToCanonLookup>() // export contestId -> SchemaToCanonLookup
-     val cardStyles: Map<Set<Int>, CardStyle>
+     val cardStyles: Map<Set<Int>, CardStyle> // canonicalContestIdSet -> cardStyle
 
     init {
-        val canonicalMap: Map<String, ContestIF> = contests.associateBy { it.name }
+        val contestMap: Map<String, ContestIF> = contests.associateBy { it.name }
         val schemaInfos: List<ContestInfo> = export.makeContestInfo() // specific to this exported file
 
         val gotCanon = mutableSetOf<Int>()
@@ -25,26 +24,25 @@ class DominionCvrConverter(val poolName: String, export: DominionCvrExport, cont
         var countMissing = 0
         var countMissingCand = 0
         schemaInfos.forEach { schemaInfo ->
-            val schemaName = coloradoInput.contestNameCleanup(schemaInfo.name) // clean up your act, sheesh
-            val canonicalContest = canonicalMap[schemaName] // find matching contest
+            val canonicalContest = coloradoInput.matchCanonicalContest(county, schemaInfo.name) // clean up your act, sheesh
             if (canonicalContest == null) {
-                println("canonical doesnt have this schema contest: '${schemaName}'")
+                println("  ** missing schema contest: '${schemaInfo.name}' in county $county")
                 countMissing++
             } else {
-                // println("schema ${schemaInfo.id} -> canon ${canonicalContest.id} ")
-                //println("                       '$schemaName' -> '${canonicalContest.name}'")
-                if (gotCanon.contains(canonicalContest.id))
-                    print("BAD")
-                gotCanon.add(canonicalContest.id)
+                val contest = contestMap[canonicalContest.contestName]!!
+                if (gotCanon.contains(contest.id))
+                    print("BAD DUPLICATE")
+                gotCanon.add(contest.id)
 
                 val candPairs = mutableListOf<Pair<Int, Int>>()
-                val canonInfo = canonicalContest.info()
-                schemaInfo.candidateNames.forEach { (name, schemaCandId) ->
+                val info = contest.info()
+                schemaInfo.candidateNames.forEach { (exportCandidate, schemaCandId) ->
                     // dont bother making a map
-                    val schemaName = coloradoInput.candidateNameCleanup(name)
-                    val canonCandId = canonInfo.candidateNames[schemaName] // what if this fails ??
+                    // val schemaCandidateName = coloradoInput.candidateNameCleanup(name)
+                    val canonCandidateName = coloradoInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
+                    val canonCandId = info.candidateNames[canonCandidateName] // what if this fails ??
                     if (canonCandId == null) {
-                        println("dont have this schema candidate: '${schemaName}' in contest ${canonicalContest.id}")
+                        println("  ** missing export candidate: '${exportCandidate}' in contest '${contest.name}' county $county")
                         countMissingCand++
                     } else {
                         candPairs.add ( Pair(schemaCandId, canonCandId))
@@ -53,7 +51,7 @@ class DominionCvrConverter(val poolName: String, export: DominionCvrExport, cont
                 val lookupSize = schemaInfo.candidateNames.map { it.value }.max()
                 val candLookup = IntArray(lookupSize+1) { 0 }
                 candPairs.forEach{ (schemaCandId, canonCandId) -> candLookup.set(schemaCandId, canonCandId) }
-                exportToCanonLookup[schemaInfo.id] = SchemaToCanonLookup(canonicalContest.id, candLookup)
+                exportToCanonLookup[schemaInfo.id] = SchemaToCanonLookup(contest.id, candLookup)
             }
         }
 
@@ -65,46 +63,44 @@ class DominionCvrConverter(val poolName: String, export: DominionCvrExport, cont
         // TODO pass in startIdx
         val startIdx = 0
         cardStyles = export.exportCardStyles.mapIndexed { idx, it ->
-            val canonicalContests = convertCardStyleToCanonical(it)
-            val cardStyle = CardStyle("$poolName-${it.name}", startIdx + idx, canonicalContests.toIntArray(), true)
+            val canonicalContestIdSet = convertExportCardStyleToCanonical(it)
+            val cardStyle = CardStyle("$county-${it.name}", startIdx + idx, canonicalContestIdSet.toIntArray(), true)
             cardStyle.ncards = it.count
-            Pair(canonicalContests, cardStyle)
+            Pair(canonicalContestIdSet, cardStyle)
         }.toMap()
-
     }
 
     // return corresponding contest Ids in canonical
-    fun convertCardStyleToCanonical(exportCardStyle: ExportCardStyle): Set<Int> {
-        val convert = exportCardStyle.contests.map { exportContestId ->
-            val lookup = exportToCanonLookup[exportContestId]!!
-            lookup.canonContestId
+    fun convertExportCardStyleToCanonical(exportCardStyle: ExportCardStyle): Set<Int> {
+        val convert = mutableSetOf<Int>()
+        exportCardStyle.contests.forEach { exportContestId ->
+            val lookup = exportToCanonLookup[exportContestId]
+            if (lookup != null) convert.add(lookup.canonContestId)
         }
-        println("$exportCardStyle -> $convert")
+        // println("$exportCardStyle -> $convert")
         val got = mutableSetOf<Int>()
         convert.forEach {
-            if (got.contains(it))
-                print("")
             got.add(it)
         }
         return got
     }
 
-        // or to CvrExport ??
-    fun convertToCard(dcvr: CastVoteRecord): AuditableCardM {
-        //     val id: String,
-        //    val location: String?,
-        //    val index: Int,
-        //    val prn: Long,
-        //    val phantom: Boolean,
-        //    val styleName: String? = null,
-        //    val poolId: Int? = null,
-        //    votesIn: Map<Int, IntArray>?,
-        //    val style: StyleIF? = null,
+    fun convertExportContestIdSetToCanonical(exportContestIdSet: Set<Int>): Set<Int> {
+        val convert = mutableSetOf<Int>()
+        exportContestIdSet.forEach { exportContestId ->
+            val lookup = exportToCanonLookup[exportContestId]
+            if (lookup != null) convert.add(lookup.canonContestId)
+        }
+        return convert.toSet()
+    }
 
-        val contestSet = dcvr.contestVotes.map { it.contestId }.toSet()
-        val cardStyle = cardStyles[contestSet]
-        val styleName = cardStyle?.name ?: "missing"
-        val cvrb = AuditableCardMBuilder(dcvr.imprintedId, null,  0, 0L, false, styleName, null, null)
+    // or to CvrExport ??
+    fun convertToCard(dcvr: CastVoteRecord): AuditableCardM {
+        // must convert to canincal contestIDs to use cardStyles
+        val contestSchemaIdSet = dcvr.contestVotes.map { it.contestId }.toSet()
+        val canonicalIdSet = convertExportContestIdSetToCanonical(contestSchemaIdSet)
+        val cardStyle = cardStyles[canonicalIdSet]!!
+        val cvrb = AuditableCardMBuilder(dcvr.imprintedId, null,  0, 0L, false, cardStyle.name, null, null)
         // have to map both contestId and candVotes
         dcvr.contestVotes.forEach{ contestVote ->
             val lookup = exportToCanonLookup[contestVote.contestId]
@@ -155,6 +151,10 @@ fun DominionCvrExport.makeContestInfo(): List<ContestInfo> {
 }
 
 fun parseContestNameAndVoteFor(name: String) : Pair<String, Int> {
+    if (name.contains("(Vote For1")) {
+        val clean = name.substringBefore("(")
+        return Pair(clean.trim(), 1)
+    }
     if (!name.contains("(Vote For=")) return Pair(name.trim(), 1)
 
     val tokens = name.split("(Vote For=")

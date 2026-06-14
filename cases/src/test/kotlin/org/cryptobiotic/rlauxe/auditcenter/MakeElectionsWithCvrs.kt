@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.testdataDir
@@ -30,14 +31,18 @@ class MakeElectionsWithCvrs {
             ClcaConfig(fuzzMvrs = .001), null // TOFO is fuzz implemented ??
         )
 
-        createCountyElection("Boulder", Colorado2020AuditCenterInput(), exportFile, auditdir, creation, round)
+        createCountyElection("Boulder", Colorado2020General(), exportFile, auditdir, creation, round)
     }
 
-    // this one is following CreateCorlaElection, but now we have real cvrs
     @Test
     fun makeColorado2020() {
-        val topdir = "$testdataDir/cases/datadrive/Colorado2020/"
-        val exportFile = "/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/Boulder CO.csv"
+        val topdir = "$cases/corla/Colorado2020-4counties/"
+        val counties = mapOf (
+            "Adams" to "/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/Adams_2020G_CVR_REDACTED.csv", // or cvr.csv
+            "Arapahoe" to "/home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/cvr.csv",
+            "Boulder" to "/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/Boulder CO.csv", // or cvr.csv
+            "Eagle" to "/home/stormy/datadrive/votedatabase/cvr/Colorado/Eagle/cvr.csv",
+        )
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -47,13 +52,13 @@ class MakeElectionsWithCvrs {
             ClcaConfig(), null)
 
         // TODO topdir vs auditdir !!
-        createElectionWithCvrs("Boulder", Colorado2020AuditCenterInput(), topdir, exportFile,
+        countyElectionWithCvrs(counties, Colorado2020General(), topdir,
              creation, round, name = "Colorado2020", startFirstRound = true)
     }
 
     @Test
     fun openColorado2020() {
-        val auditdir = "$testdataDir/cases/datadrive/Colorado2020"
+        val auditdir = "$cases/corla/Colorado2020/audit"
         val countyRecord = AuditRecord.read(auditdir) as CountyAudit
 
         println("countyRecord.countyData")

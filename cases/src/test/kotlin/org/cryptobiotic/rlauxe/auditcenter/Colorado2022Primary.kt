@@ -1,14 +1,15 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import org.cryptobiotic.rlauxe.auditcenter
 import org.cryptobiotic.rlauxe.corla.CanonicalContest
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.corla.readGeneralCanonicalList
 
 class Colorado2022Primary(): ColoradoInput(
-    generalCanonicalFile = "$auditcenter/2022PrimaryRLACounty-CandidateList.csv",
-    contestRoundFile = "$auditcenter/round_1/contest.csv",
-    tabulateCountyFile = "$auditcenter/tabulate_county.csv",
-    mvrComparisonFile = "$auditcenter/round_2/contest_comparison.csv"
+    generalCanonicalFile = "$primary2022/2022PrimaryRLACounty-CandidateList.csv",
+    contestRoundFile = "$primary2022/round_1/contest.csv",
+    tabulateCountyFile = "$primary2022/tabulate_county.csv",
+    mvrComparisonFile = "$primary2022/round_2/contest_comparison.csv"
 ) {
     // canonical contests and choices
     override fun canonicalContests() = canonicalContests
@@ -36,11 +37,7 @@ class Colorado2022Primary(): ColoradoInput(
     // Douglas,State Senator - District 27 - DEM,Tom Sullivan
     // Douglas,State Senator - District 27 - REP,"Tom Kim, JulieMarie A. Shepherd Macklin"
 
-    override fun contestNameCleanup(name: String) = name
-
-    override fun candidateNameCleanup(candName: String) = candName
-
     companion object {
-        private val auditcenter = "/home/stormy/dev/github/rla/nealmcb/auditcenter/2022/primary"
+        private val primary2022 = "$auditcenter/2022/primary"
     }
 }

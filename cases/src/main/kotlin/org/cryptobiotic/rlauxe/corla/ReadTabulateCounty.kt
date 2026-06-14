@@ -146,6 +146,7 @@ data class CountyContestTabs(val countyName: String) {
         contest.addChoice(choiceName, choiceVote)
     }
 }
+
 // we only know votes, not ncards or undervotes.
 // for one county, one contest
 data class CountyContestTab(val contestName: String) {

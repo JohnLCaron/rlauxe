@@ -1,0 +1,200 @@
+package org.cryptobiotic.rlauxe.votedatabase
+
+import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.corla.ColoradoInput
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportReader
+import org.cryptobiotic.rlauxe.dominion.makeContestInfo
+import org.cryptobiotic.rlauxe.dominion.testCvrSchema
+import org.cryptobiotic.rlauxe.persist.CountyData
+import org.junit.jupiter.api.Test
+import java.io.BufferedReader
+import java.io.File
+import kotlin.io.path.Path
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.test.assertEquals
+import kotlin.text.split
+
+val votedatabase = "/home/stormy/datadrive/votedatabase"
+val colorado2020 = "$votedatabase/cvr/Colorado"
+
+class TestMatchCanonical {
+
+    @Test
+    fun testRedactionProblem() {
+        var errs = matchNames("Larimer", "$colorado2020/Larimer/cvr.csv", Colorado2020General())
+        assertEquals(0, errs)
+    }
+
+    @Test
+    fun testGarfield() { // wont read any of them
+        var errs = matchNames("Garfield", "$colorado2020/Garfield/cvr.csv", Colorado2020General())
+        assertEquals(0, errs)
+    }
+
+    @Test
+    fun problem() { // redaction
+        // val filename = "$colorado2020/Lincoln/cvr.csv"  had a misquoted quote that commons-csv was barfing on
+        val filename = "$colorado2020/Garfield/cvr.csv" // might be older version of export file ??
+        val reader: BufferedReader = File(filename).bufferedReader()
+        var idx = 0
+        while (idx < 10) {
+            var line = reader.readLine()
+            if (line == null) break
+            println("$idx ${line.length}")
+
+            val tokens = line.split(",")
+            tokens.forEach {
+                // if (it.contains("\""))
+                    println(it)
+            }
+            idx++
+        }
+        reader.close()
+
+        var errs = matchNames("Monroe", "$colorado2020/Monroe/cvr.csv", Colorado2020General())
+        // assertEquals(0, errs)
+    }
+
+    @Test
+    fun testSuggest() {
+        val contest = "Candidates for Town Council"
+        val suggest = suggest("Eagle", contest, Colorado2020General())
+        println("$contest -> $suggest")
+    }
+
+    // reading all counties but Gunnison, which is not in contestCounty tabulation
+    @Test
+    fun allColorado2020Counties() {
+        val path = Path(colorado2020)
+        path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202")}.forEach { subdir ->
+            val county = subdir.fileName.toString()
+            /* subdir.listDirectoryEntries().filter { !it.isDirectory() && it.fileName.toString().endsWith(".csv")
+                    && it.fileName.toString() != "summary.csv"
+                    && !it.fileName.toString().contains("Manifest")
+            }.forEach { entry -> */
+            if (county != "Monroe" && county != "Garfield") { // no such county in Colorado && earlier format TODO
+                try {
+                    val filename = "${subdir.toString()}/cvr.csv" // entry.toString()
+                    val errs = matchNames(county, filename, Colorado2020General())
+                    assertEquals(0, errs)
+                } catch (e: Exception) {
+                    println(e.message)
+                    throw e
+                }
+            }
+            //}
+        }
+    }
+
+    @Test
+    fun showAllColorado2020Counties() {
+        val path = Path(colorado2020)
+        path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202") }
+            .forEach { subdir ->
+                val county = subdir.fileName.toString()
+                println("$county")
+                subdir.listDirectoryEntries().filter {
+                    !it.isDirectory() && it.fileName.toString().endsWith(".csv")
+                            && it.fileName.toString() != "summary.csv"
+                            && !it.fileName.toString().contains("Manifest")
+                }.forEach { entry ->
+                    if (county != "Monroe" && county != "Garfield") { // no such county in Colorado && earlier format && Baca has copy of Heurfano
+                        try {
+                            val filename = entry.toString()
+                            val reader = DominionCvrExportReader(filename)
+                            val star = if (reader.electionName.contains(county)) "" else "**"
+                            println("  $star ${reader.electionName} : ${filename}")
+                        } catch (e: Exception) {
+                            println(e.message)
+                            throw e
+                        }
+                    }
+                }
+            }
+    }
+
+    // could allow contained contests to be defined by the county
+
+    fun matchNames(county: String, exportFile: String, input: ColoradoInput): Int {
+        println("\n-----------------------------------")
+        println("county=$county csvfile = $exportFile")
+
+        val export: DominionCvrExport = DominionCvrExportReader(exportFile).read()
+        val sinfoList: List<ContestInfo> = export.makeContestInfo()
+        val infos = sinfoList.associateBy { it.name }
+        var errs = 0
+
+        // test every export contest has a match in canon, along with each choice
+        sinfoList.map { sinfo ->
+            val contest = input.matchCanonicalContest(county, sinfo.name)
+            if (contest == null) {
+                println("   \"${sinfo.name}\" -> \"${suggest(county, sinfo.name, input)}\"")
+                errs++
+            } else {
+                sinfo.candidateNames.keys.filter { it != "Write-In"}.forEach { cand ->
+                    val match = input.matchCanonicalCandidate(county, contest, cand)
+                    if (match == null) {
+                        println("*** didnt match candidate '$cand' for contest '${contest.contestName}'")
+                        contest.choices.forEach { println(" $it")}
+                        errs++
+                    }
+                }
+            }
+        }
+
+        /* test every canon contest has a match in export TODO
+        val countyContestTabs = input.countyContestTabs.find { it.countyName == county }!!
+        countyContestTabs.contests.keys.forEach { canonContest ->
+            val exportContest = input.matchExportContest(county, canonContest)
+            if (infos[exportContest] == null) {
+                println("*** didnt find canonicalContest named '${canonContest}' in export file")
+                errs++
+            }
+        } */
+
+        return errs
+    }
+}
+
+fun suggest(county: String, contest: String, input: ColoradoInput): String {
+    val countyContestTabs = input.countyContestTabs.find { it.countyName == county }!!
+    for (canonContest in countyContestTabs.contests.keys) {
+        if (canonContest.contains(contest)) return canonContest
+        if (canonContest.contains(extractIssueName(contest))) return canonContest
+        if (canonContest.contains(mutatis(contest))) return canonContest
+        if (canonContest.contains(judge(contest))) return canonContest
+    }
+    return "unknown"
+}
+
+fun extractIssueName(name: String): String {
+    val toks = name.split(" ", ":").filter{ it != "No."}
+    for (idx in 0 until toks.size-2) {
+        if (toks[idx] == "Ballot" && (toks[idx+1] == "Issue" || toks[idx+1] == "Question"))
+            return "${toks[idx]} ${toks[idx+1]} ${toks[idx+2]}"
+        //if (toks[idx] == "County" && toks[idx+1] == "Court" && toks[idx+2] == "-")
+        //    return "County Court Judge ${toks[idx+1]}"
+    }
+    for (idx in 0 until toks.size-1) {
+        if (toks[idx] == "Town" && toks[idx+1] == "Council")
+            return "${toks[idx]} ${toks[idx+1]}"
+    }
+    return "gobbleygook"
+}
+
+fun mutatis(name: String): String {
+    val tok = name.split("-").map{ it.trim() }
+    if (tok[0] == "Colorado Supreme Court Justice") return "Justice of the Colorado Supreme Court - ${tok[1]}"
+    return "gobbleygook"
+}
+
+fun judge(name: String): String {
+    if (name.contains("County Court -"))
+        return name.replace("County Court -", "County Court Judge -")
+
+    return "gobbleygook"
+}

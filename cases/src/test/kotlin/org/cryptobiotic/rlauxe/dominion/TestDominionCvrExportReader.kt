@@ -11,10 +11,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
+// TODO convert to use DominionCvrReader
 class TestDominionCvrReader {
+
     @Test
     fun parseThreeCandidatesTenVotesSucceeds() {
-        val filename = "src/test/data/corla/ThreeCandidatesTenVotes.csv"
+        val filename = "src/test/data/corla/1misc/ThreeCandidatesTenVotes.csv"
         val result: BoulderCvrExportCsv = readBoulderCvrExportCsv(filename, "Saguache")
         println(result.show())
 

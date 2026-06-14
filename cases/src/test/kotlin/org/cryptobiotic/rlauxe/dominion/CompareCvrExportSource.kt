@@ -7,14 +7,40 @@ import kotlin.test.assertEquals
 class CompareCvrExportSources {
     val show = false
 
+    val adams = "/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/cvr.csv"
+
+    // HEY theres redacted at the ends of the files, sometimes in the middle, like Eagle
+
     @Test
     fun compareBoulder20cvrs() {
-        val exp1 = DominionCvrExportCsv("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv", show)
-        val exp2 = DominionCvrExportCsv("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/Boulder CO.csv", show)
+        compareDominionCvrExport(
+            DominionCvrExportReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv").read(),
+            DominionCvrExportReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/Boulder CO.csv").read()
+        )
+    }
 
-        assertEquals(exp1.countyId, exp2.countyId)
-        // assertEquals(exp1.electionName, exp2.electionName)
-        assertEquals(exp1.versionName, exp2.versionName)
+    @Test
+    fun compareAdams20cvrs() {
+        compareDominionCvrExport(
+            DominionCvrExportReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/cvr.csv").read(),
+            DominionCvrExportReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/Adams_2020G_CVR_REDACTED.csv").read()
+        )
+    }
+
+    @Test // breakdown
+    fun compareArapahoe20cvrs() {
+        compareDominionCvrExport(
+            DominionCvrExportReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/cvr.csv").read(),
+            DominionCvrExportReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/CVR_EDITED.csv").read()
+        )
+    }
+
+    fun compareDominionCvrExport(exp1: DominionCvrExport, exp2: DominionCvrExport) {
+        println("electionName = '${exp1.electionName}', '${exp2.electionName}'")
+        assertEquals(exp1.electionName, exp2.electionName)
+
+        assertEquals(exp1.electionName, exp2.electionName)
+        // assertEquals(exp1.versionName, exp2.versionName)
         assertEquals(exp1.schema.contests.size, exp2.schema.contests.size)
         assertEquals(exp1.cvrs.size, exp2.cvrs.size)
         assertEquals(exp1.redacted.size, exp2.redacted.size)
@@ -28,7 +54,7 @@ class CompareCvrExportSources {
             val same = compare(col1, col2)
             val star = if (same) "  " else "**"
             if (show || !same) {
-                println("$star $col1 == $col2 ($idx)")
+                println("$star $col1 =!= $col2 ($idx)")
             }
             skip = !same
         }
@@ -52,11 +78,13 @@ class CompareCvrExportSources {
         println("\nCompare CardStyle")
         val styles2 = exp2.exportCardStyles.iterator()
         exp1.exportCardStyles.forEachIndexed { idx, style1 ->
-            val style2 = styles2.next()
-            val same = compare(style1, style2)
-            val star = if (same) "  " else "**"
-            if (show || !same) {
-                println("($idx) $star $style1 =? $contest2")
+            if (styles2.hasNext()) {
+                val style2 = styles2.next()
+                val same = compare(style1, style2)
+                val star = if (same) "  " else "**"
+                if (show || !same) {
+                    println("($idx) $star $style1 =? $contest2")
+                }
             }
         }
 
@@ -73,14 +101,15 @@ class CompareCvrExportSources {
             if (idx % 1000 == 0) print(" $idx")
             if (idx % 10000 == 0) println()
         }
-        println("ncvrs = ${exp2.cvrs.size}")
+        println("\nncvrs = ${exp2.cvrs.size}")
 
-        println("\nContests size = ${exp2.schema.contests.size}")
+        println("\nContests (size = ${exp2.schema.contests.size})")
         exp2.schema.contests.forEach { println(it) }
 
-        println("\nBallotTypes 1")
+        println("\nBallotTypes 1 (size = ${exp1.exportCardStyles.size})")
         exp1.exportCardStyles.forEach { println(it) }
-        println("\nBallotTypes 2")
+
+        println("\nBallotTypes 2 (size = ${exp2.exportCardStyles.size})")
         exp2.exportCardStyles.forEach { println(it) }
     }
 
@@ -129,11 +158,10 @@ class CompareCvrExportSources {
 fun DominionCvrExportCsv(filename:String, show: Boolean): DominionCvrExport {
     val stopwatch = Stopwatch()
     // redaction lines are present
-    val export: DominionCvrExport = readDominionCvrExportCsv(filename, "Boulder")
+    val export: DominionCvrExport = DominionCvrExportReader(filename).read()
     if (show) println(export.summary())
     println("took = $stopwatch")
 
-    assertEquals("Boulder", export.countyId)
     // assertEquals("2020 Boulder County General Election", export.electionName)
     assertEquals("5.11.3.1", export.versionName)
     assertEquals(49, export.schema.contests.size)

@@ -19,7 +19,7 @@ import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
 import org.cryptobiotic.rlauxe.belgium.createAndRunBelgiumElection
 import org.cryptobiotic.rlauxe.belgium.toptopdir
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
-import org.cryptobiotic.rlauxe.auditcenter.Colorado2024AuditCenterInput
+import org.cryptobiotic.rlauxe.auditcenter.Colorado2024General
 import org.cryptobiotic.rlauxe.corla.createCorlaElection
 import org.cryptobiotic.rlauxe.corla.createUniformElection
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
@@ -90,7 +90,7 @@ class TestGenerateAllUseCases {
             ClcaConfig(), null)
 
         createUniformElection(topdir, "$topdir/audit",
-            Colorado2024AuditCenterInput(), creation, round, name = "Corla24Uniform")
+            Colorado2024General(), creation, round, name = "Corla24Uniform")
     }
 
     // @Test
@@ -104,7 +104,7 @@ class TestGenerateAllUseCases {
                 sampling = Sampling.consistent),
             ClcaConfig(), null)
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024AuditCenterInput(),
+        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(),
             null, creation, round, name = "Corla24Consistent", startFirstRound = true)
     }
 
@@ -118,7 +118,7 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
             ClcaConfig(), null)
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024AuditCenterInput(), null, creation, round)
+        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(), null, creation, round)
     }
 
    //  @Test
@@ -131,7 +131,7 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024AuditCenterInput(),
+        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(),
             pollingMode=PollingMode.withPools, creation, round)
     }
 
@@ -145,7 +145,7 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024AuditCenterInput(),
+        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(),
             pollingMode=PollingMode.withBatches, creation, round)
     }
 
@@ -159,7 +159,7 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024AuditCenterInput(),
+        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(),
             pollingMode=PollingMode.withoutBatches, creation, round,
             startFirstRound = false,
         )

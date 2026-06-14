@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.auditcenter.Colorado2024AuditCenterInput
+import org.cryptobiotic.rlauxe.auditcenter.Colorado2024General
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.CountyContestData
@@ -19,7 +19,7 @@ class TestWriteData {
         val topdir = "$testdataDir/cases/corla/consistent"
         val countyAudit = AuditRecord.readWithResult("$topdir/audit").unwrap()
         val contestMap = countyAudit.contests.associate { it.contest.info().name to it }
-        writeCountyContestData(topdir, contestMap, Colorado2024AuditCenterInput().countyContestTabs)
+        writeCountyContestData(topdir, contestMap, Colorado2024General().countyContestTabs)
 
         val roundtrip: List<CountyContestData> = readCountyContestData("$topdir/${CountyAudit.countyContestDataFile}")
         roundtrip.forEach { println(it) }
@@ -28,7 +28,7 @@ class TestWriteData {
     @Test
     fun testWriteCountyData() {
         val topdir = "$testdataDir/cases/corla/consistent"
-        writeCountyData(topdir, Colorado2024AuditCenterInput().strataMap.values.toList())
+        writeCountyData(topdir, Colorado2024General().strataMap.values.toList())
 
         val roundtrip: List<CountyData> = readCountyData("$topdir/${CountyAudit.countyDataFile}")
         roundtrip.forEach { println(it) }

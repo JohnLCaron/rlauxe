@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.DominionCvrConverter
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportReader
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.utils.tabulateNpopsFromCards
 import kotlin.collections.map
@@ -175,7 +175,7 @@ fun createCountyElection(
 ) {
 
     val stopwatch = Stopwatch()
-    val export: DominionCvrExport = readDominionCvrExportCsv(cvrExportFile, county)
+    val export: DominionCvrExport = DominionCvrExportReader(cvrExportFile).read()
 
     val election = CreateCountyElection(county, coloradoInput, creation.auditType, export, mvrSource = mvrSource,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent)

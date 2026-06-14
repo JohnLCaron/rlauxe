@@ -9,9 +9,10 @@ import kotlin.String
 
 private val logger = KotlinLogging.logger("CountyContestBuilder")
 
+// Build the Contests from ColoradoInput
 open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
     val corlaContestBuilders: List<CorlaContestBuilder> = makeContestBuilders() // 181
-    val contests: List<ContestIF>
+    val contests: List<Contest>
 
     init {
         contests = corlaContestBuilders.map { it.makeContest() }
@@ -67,8 +68,7 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
             contestBuilders.add(contest)
         }
 
-        println("number of contestBuilders = ${contestBuilders.size}")
-
+        // println("number of contestBuilders = ${contestBuilders.size}")
         return contestBuilders
     }
 

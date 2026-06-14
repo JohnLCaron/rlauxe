@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.auditcenter
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
@@ -9,47 +10,59 @@ import org.cryptobiotic.rlauxe.corla.writeCountyContestData
 import org.cryptobiotic.rlauxe.corla.writeCountyData
 import org.cryptobiotic.rlauxe.dominion.DominionCvrConverter
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportReader
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.utils.tabulateNpopsFromCards
+import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import kotlin.Int
 import kotlin.String
 
 private val logger = KotlinLogging.logger("CreateColoradoElectionWithCvrs")
 
-open class CreateColoradoElectionWithCvrs (
-    val county: String,
+open class CountyElectionWithCvrs (
+    val counties: Map<String, String>, // countyName -> exportFile
     val coloradoInput: ColoradoInput,
-    val export: DominionCvrExport, // TODO use iterator, currently only works with one county
     val contestBuilder: CountyContestBuilder, // TODO how does export schema compare to this?
     val auditdir: String,
     val hasStyle: Boolean,
-    val name: String? = null,
+    val name: String,
 ): ElectionBuilder {
     val ncards: Int
     val contestsUA: List<ContestWithAssertions>
-    val cardStyles: List<CardStyle>
-    val allCards: List<AuditableCardM>
+    val cardStyles = mutableListOf<CardStyle>()
+    val countyCardPools = mutableListOf<CountyPoolsIF>()
 
     init {
         val contests = contestBuilder.contests
-        val dominionConverter = DominionCvrConverter(county, export, contests, coloradoInput)
-        val exportCvrs: List<AuditableCardM> = export.cvrs.map { dominionConverter.convertToCard(it) }
-        cardStyles = dominionConverter.cardStyles.values.toList()
+        val infos = contests.map { it.info() }.associateBy{ it.id }
+        val phantoms = makePhantomCards(contests, 0) // TODO
+        var totalCardCount = 0
+        val totalTabs = mutableMapOf<Int, ContestTabulation>()
 
-        val infos = contests.map { it.info() }
-        val phantoms = makePhantomCards(contests, 0)
-        allCards = exportCvrs + phantoms
-        this.ncards = allCards.size
+        counties.forEach { (county, exportFile) ->
+            val export: DominionCvrExport = DominionCvrExportReader(exportFile).read()
+            val dominionConverter = DominionCvrConverter(county, export, contests, coloradoInput)
 
-        val cardIter = Closer (allCards.iterator() )
-        val (npopMap, count) = tabulateNpopsFromCards(cardIter, infos) // TODO check this, seems wrong
+            val exportCvrs: List<AuditableCardM> = export.cvrs.map { dominionConverter.convertToCard(it) }
+            val cardIter = Closer (exportCvrs.iterator() )
+            val (tabs, cardCount) = tabulateCardsAndCount(cardIter, infos)
+
+            totalCardCount += cardCount
+            totalTabs.sumContestTabulations(tabs)
+
+            cardStyles.addAll(dominionConverter.cardStyles.values.toList())
+            countyCardPools.add(
+                CountyPools(county, 1, tabs.values.toList(), cardCount, cardStyles)
+            )
+        }
+
+        this.ncards = totalCardCount
+        val npopMap = totalTabs.mapValues { it.value.ncardsTabulated }
         contestsUA = ContestWithAssertions.make(contestBuilder.contests, npopMap, true, hasStyle)
     }
 
     override fun electionInfo() =
         ElectionInfo(
-            name ?: "Colorado2020", AuditType.CLCA, ncards(),
+            name, AuditType.CLCA, ncards(),
             contestsUA.size,
             mvrSource = MvrSource.testPrivateMvrs
         )
@@ -57,43 +70,33 @@ open class CreateColoradoElectionWithCvrs (
     override fun contestsUA() = contestsUA
     override fun cardStyles() = cardStyles
     override fun cardPools() = null
-    override fun createUnsortedMvrsInternal() = allCards // mvrsToAuditableCardsListM(allCvrs, cardStyles)
+    override fun countyCardPools(): List<CountyPoolsIF>? = countyCardPools
+
+    override fun createUnsortedMvrsInternal() = null // allCards // mvrsToAuditableCardsListM(allCvrs, cardStyles)
     override fun createUnsortedMvrsExternal() = null
 
-    override fun cards() = Closer (allCards.iterator() )
+    override fun cards() = Closer (emptyList<AuditableCardIF>().iterator() )
     override fun ncards() = ncards
-
-    /* fun createCards(): CloseableIterator<AuditableCardM> {
-        // same cvrs for CLCA and OneAudit
-        return CvrsToCardStylesIterator(
-            AuditType.CLCA,
-            Closer(allCvrs.iterator()), // use the mvrs as the cvrs
-            null,
-            styles = cardStyles // if (auditType.isClca()) null else cardPoolBuilders // integrate OA pools
-        )
-    } */
 }
 
 ////////////////////////////////////////////////////////////////////
 
-fun createElectionWithCvrs(
-    county: String,
+fun countyElectionWithCvrs(
+    counties: Map<String, String>, // countyName -> exportFile
     coloradoInput: ColoradoInput,
     topdir: String,
-    cvrExportFile: String,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     startFirstRound: Boolean = true,
-    name: String? = null,
+    name: String,
 ) {
     val stopwatch = Stopwatch()
     val auditdir = "$topdir/audit"
 
     val contestBuilder = CountyContestBuilder(coloradoInput)
-    val export: DominionCvrExport = readDominionCvrExportCsv(cvrExportFile, county)
 
     val election =
-        CreateColoradoElectionWithCvrs(county, coloradoInput, export, contestBuilder,
+        CountyElectionWithCvrs(counties, coloradoInput, contestBuilder,
             auditdir, name=name, hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
 
     createElectionRecord(election, auditDir = auditdir, roundConfig.sampling, clear = false)

@@ -2,7 +2,8 @@ package org.cryptobiotic.rlauxe.dominion
 
 
 import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
-import org.cryptobiotic.rlauxe.auditcenter.Colorado2020AuditCenterInput
+import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
+import org.cryptobiotic.rlauxe.votedatabase.colorado2020
 import kotlin.collections.forEach
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -11,50 +12,46 @@ class TestDominionCvrConverter {
 
     @Test
     fun testDominionCvrConverter() {
-        testDominionCvrConverter("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/Boulder CO.csv")
+        val filename = "$colorado2020/Denver/cvr.csv"
+        testDominionCvrConverter(filename)
     }
 
     fun testDominionCvrConverter(filename: String) {
         val county = "Boulder"
-        val export: DominionCvrExport = readDominionCvrExportCsv(filename, county)
+        val export: DominionCvrExport = DominionCvrExportReader(filename).read()
         val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
 
-        val coloradoInput = Colorado2020AuditCenterInput()
+        val coloradoInput = Colorado2020General()
         val contestBuilder = CountyContestBuilder(coloradoInput)
         val contests = contestBuilder.contests
         val contestMap = contests.associateBy{ it.name }
 
         val dominionConverter = DominionCvrConverter(county, export, contests, coloradoInput)
         var count = 0
-        var countBad = 0
-        export.cvrs.map {
-            val card = dominionConverter.convertToCard(it)
-            assertEquals(it.imprintedId, card.id)
-            it.contestVotes.forEach { contestVote: ContestVotes ->
-                val sinfo = schemaInfoMap[contestVote.contestId]
-                // println("  dcvr ${sinfo?.name} has vote ${contestVote.candVotes}")
-                val cleanName = coloradoInput.contestNameCleanup(sinfo!!.name)
-                val contest = contestMap[cleanName]
+        var countOutOfOrder = 0
+        export.cvrs.map { cvr: CastVoteRecord ->
+            val card = dominionConverter.convertToCard(cvr)
+            assertEquals(cvr.imprintedId, card.id)
+            cvr.contestVotes.forEach { contestVote: ContestVotes ->
+                val sinfo = schemaInfoMap[contestVote.contestId]!!
+                val canonicalContest = coloradoInput.matchCanonicalContest(county, sinfo.name)!!
+                val contest = contestMap[canonicalContest.contestName]
                 val cvrVotes = card.votes(contest!!.id)
-                // println("  cvr  ${contest.name} has vote ${cvrVotes.contentToString()}")
-                // print("")
                 if (contestVote.candVotes != cvrVotes!!.toList()) {
-                    //println(it.show())
-                    //println(card)
-                    //println("($count) ${contestVote} != ${contest.id}:  ${cvrVotes.toList()}")
-
                     val info = contest.info()
                     val candNames = cvrVotes.map { info.candidateIdToName[it]!! }
-                    //println()
-                    val scandNames = contestVote.candVotes.map { coloradoInput.candidateNameCleanup(sinfo.candidateIdToName[it]!!) }
-                    //println()
+                    val scandNames = contestVote.candVotes.map {
+                        // coloradoInput.candidateNameCleanup(sinfo.candidateIdToName[it]!!)
+                        coloradoInput.matchCanonicalCandidate(county, canonicalContest, sinfo.candidateIdToName[it]!!)
+                    }
+                    // not a problem to be out of order as long as the names agree
                     assertEquals(candNames, scandNames)
-                    countBad++
+                    countOutOfOrder++
                 }
                 count++
             }
         }
-        println("$count exported cvrs, $countBad index off")
+        println("$count exported cvrs, $countOutOfOrder out of order")
     }
 }
 

@@ -212,7 +212,7 @@ class PoolsforAllCountiesAndStyles(
         //    val ncards: Int? = null
         //)
         return CountyPoolFromStyle(
-            countyName, countyName, CountyPoolsBuilderOld.nextPoolId++, hasExactContests = true,
+            countyName, CountyPoolsBuilderOld.nextPoolId++, hasExactContests = true,
             voteTotals = votesForStyle, infos
         )
     }

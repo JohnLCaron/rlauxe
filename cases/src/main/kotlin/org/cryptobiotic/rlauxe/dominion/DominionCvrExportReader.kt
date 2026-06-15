@@ -154,24 +154,21 @@ class DominionCvrExportReader(val filename: String, showHeaders: Boolean = false
         while (records.hasNext()) {
             val line = records.next()
             if (line.isEmpty()) break
-
-            if (!redaction(line)) { // normal ballot card
-                try {
-                    line.get(0).toInt()
-                } catch (e: Exception) {
-                    // println(line) // assume thats the end TODO cant be right to get an exception....
-                    break
-                }
+            if (!redaction(line)) {
                 val cvr = CastVoteRecord(
-                    cvrNumber = line.get(0).toInt(),
-                    tabulatorNum = line.get(1).toInt(),
-                    batchId = line.get(2),
-                    recordId = line.get(3).toInt(),
-                    imprintedId = line.get(4),
+                    cvrNumber = removeLeadingEquals(line.get(0)).toInt(),
+                    tabulatorNum = removeLeadingEquals(line.get(1)).toInt(),
+                    batchId = removeLeadingEquals(line.get(2)),
+                    recordId = removeLeadingEquals(line.get(3)).toInt(),
+                    imprintedId = removeLeadingEquals(line.get(4)),
                     ballotType = line.get(ballotTypeIdx),
-                )
-                cvrs.add(cvr.addVotes(schema, line, lineno)) // regular vote
-                ballotStyles.add(cvr)
+                ).addVotes(schema, line, lineno)
+
+                if (cvr.contestVotes.isNotEmpty()) {
+                    cvrs.add(cvr)
+                    ballotStyles.add(cvr)
+                }
+
                 if (showFirst != null && cvrCount < showFirst) println(cvr.show())
                 if (showAfter != null && cvrCount >= showAfter) println(cvr.show())
             }
@@ -193,6 +190,12 @@ class DominionCvrExportReader(val filename: String, showHeaders: Boolean = false
         )
     }
 
+    // 6/15/2026
+    // some counties have first 5 fields of the vote rows as ="field". The quoting seems typical, the mistake is the leading =
+    // "CvrNumber","TabulatorNum","BatchId","RecordId","ImprintedId","CountingGroup","PrecinctPortion","BallotType","","","","","","","","","","","","","","","","","","","","","","","","","","DEM","REP","APV","UNI","LBR","","","","","REP","DEM","LBR","UNI","DEM","REP","REP","DEM","DEM","REP","DEM","REP","DEM","DEM","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+    //="1",="2",="1",="24",="2-1-24","Mail","3356255005 (3356255005)","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","1","0","1","0","0","1","0","1","1","0","1","0","1","0","0","1","0","1","0","1","1","0","",""
+    //="2",="2",="1",="23",="2-1-23","Mail","3356255005
+
     fun showLine(what: String, line: CSVRecord) {
         println(what)
         val elems: List<String> = line.toList()
@@ -204,8 +207,7 @@ class DominionCvrExportReader(val filename: String, showHeaders: Boolean = false
     // "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
     // "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv"
     fun redaction(line: CSVRecord): Boolean {
-        // Boulder
-        if (line.get(0).startsWith("Redacted")) { // but not "RCV Redacted ..." which can be treated like a normal CVR
+        if (line.get(0).startsWith("Redacted")) { // Boulder >= 2024?; but not "RCV Redacted ..." which can be treated like a normal CVR
             val isA = line.get(0).contains("A cards")
             val isB = line.get(0).contains("B cards")
             val ballotStyle = line.get(ballotTypeIdx) + if (isA) "-A" else if (isB) "-B" else ""
@@ -213,7 +215,7 @@ class DominionCvrExportReader(val filename: String, showHeaders: Boolean = false
             ballotStyles.add(redactedGroup, nvotesMap)
             return true
 
-        } else if (line.get(0).startsWith("RCV Redacted")) {
+        } else if (line.get(0).startsWith("RCV Redacted")) { // Boulder >= 2024? IRV
             val cvr = CastVoteRecord(
                 rcvRedacted,
                 0,
@@ -226,15 +228,43 @@ class DominionCvrExportReader(val filename: String, showHeaders: Boolean = false
             cvrs.add(cvr.addVotes(schema, line, lineno))  // IRV redacted vote
             ballotStyles.add(cvr)
             return true
-        } else if (line.get(schema.nheaders).lowercase().startsWith("redacted") ||
-                   line.get(schema.nheaders).startsWith("X") ||
-                   line.get(schema.nheaders).startsWith("*")
-            ) {
+
+        } else if (line.get(0).isEmpty()) { // Boulder, Dolores; has votes presumably of the sum of the redactions
             val ballotStyle = line.get(ballotTypeIdx)
+            val redactedGroup = DominionRedactedGroup(ballotStyle).addVotes(schema, line)
+            ballotStyles.add(redactedGroup, nvotesMap)
+            return true
+
+        } else if (line.get(schema.nheaders).lowercase().startsWith("redacted")) { // Eagle, Jefferson, Larimer
+            val ballotStyle = line.get(ballotTypeIdx) + "fromRedacted"
+            val redactedGroup = DominionRedactedGroup(ballotStyle)
+            ballotStyles.add(redactedGroup, nvotesMap)
+            return true
+        }  else if (line.get(schema.nheaders).startsWith("X")) { // Douglas, Pitkin
+            val ballotStyle = line.get(ballotTypeIdx) + "fromX"
+            val redactedGroup = DominionRedactedGroup(ballotStyle)
+            ballotStyles.add(redactedGroup, nvotesMap)
+            return true
+        }  else if (line.get(schema.nheaders).startsWith("*")) { // El Paso
+            val ballotStyle = line.get(ballotTypeIdx) + "fromStar"
             val redactedGroup = DominionRedactedGroup(ballotStyle)
             ballotStyles.add(redactedGroup, nvotesMap)
             return true
         }
         return false
     }
+}
+
+private val regexLE = Regex("[=\"]") // matches a quote or equals
+fun removeLeadingEquals(input: String): String {
+    val result = if (input.startsWith("=")) input.replace(regexLE, "") else input
+    return result
+}
+
+private val regexComma = Regex("[,]") // matchs a comma
+fun removeCommas(originalString: String) = originalString.replace(regexComma, "")
+
+fun truncateCommas(originalString: String): String {
+    val commaPos = originalString.indexOf(",")
+    return if (commaPos < 0) originalString else originalString.substring(0, commaPos)
 }

@@ -113,7 +113,7 @@ class CompareCvrExportSources {
         exp2.exportCardStyles.forEach { println(it) }
     }
 
-    fun compare(col1: ColumnInfo, col2: ColumnInfo): Boolean {
+    fun compare(col1: SchemaColumnInfo, col2: SchemaColumnInfo): Boolean {
         if (col1.contest != col2.contest) return false
         if (col1.choice != col2.choice) return false
         if (col1.header != col2.header) return false
@@ -121,7 +121,7 @@ class CompareCvrExportSources {
         return true
     }
 
-    fun compare(col1: ExportContestInfo, col2: ExportContestInfo): Boolean {
+    fun compare(col1: SchemaContestInfo, col2: SchemaContestInfo): Boolean {
         if (col1.contestName != col2.contestName) return false
         if (col1.ncols != col2.ncols) return false
         if (col1.nchoices != col2.nchoices) return false
@@ -174,7 +174,7 @@ fun DominionCvrExportCsv(filename:String, show: Boolean): DominionCvrExport {
     }
     if (show) {
         println("ncolumns = ${export.schema.columns.size}")
-        println(ColumnInfo.header)
+        println(SchemaColumnInfo.header)
         export.schema.columns.forEach { println(it) }
     }
     return export

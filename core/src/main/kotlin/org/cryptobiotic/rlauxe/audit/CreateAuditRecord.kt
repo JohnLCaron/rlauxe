@@ -31,23 +31,23 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: Strin
     logger.info{"writeAuditRoundProto to ${publisher.auditRoundProtoFile()}\n  ${config.round}"}
 
     if (sortManifest) { // sortManifest false for uniform sampling
-        if (externalSortDir == null) {
+        if (externalSortDir == null) { // TODO make explicit
             sortManifestInternal(publisher, config.creation.seed)
         } else {
             sortManifestExternal(externalSortDir, publisher, config.creation.seed)
         }
-        if (election.cardStyles() != null) { // TODO cant be optional styles I think
+        if (election.cardStyles() != null) { // TODO styles cant be optional
             makeFastCards(publisher, election.cardStyles()!!)
         }
 
         // save Mvrs for testing and diagnostics
         // cant write the sorted mvrs until after sortedCards is written
         if (config.election.mvrSource == MvrSource.testPrivateMvrs) {
-            val unsortedMvrs = election.createUnsortedMvrsInternal() // make electionBuilder add the batches ??
+            val unsortedMvrs = election.unsortedMvrsInternal() // make electionBuilder add the batches ??
             if (unsortedMvrs != null) {
                 writePrivateMvrsInternal(publisher, unsortedMvrs, election.cardStyles(), seed = config.creation.seed)
             } else {
-                val unsortedCards = election.createUnsortedMvrsExternal()
+                val unsortedCards = election.unsortedMvrsExternal()
                 if (unsortedCards != null && externalSortDir != null) {
                     writeSortedCardsExternal(
                         externalSortDir,

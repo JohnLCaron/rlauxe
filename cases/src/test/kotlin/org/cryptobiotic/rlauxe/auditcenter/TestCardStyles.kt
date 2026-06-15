@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.auditcenter
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
 import org.cryptobiotic.rlauxe.corla.CountyStylesFromMvrs
-import org.cryptobiotic.rlauxe.dominion.DominionCvrConverter
+import org.cryptobiotic.rlauxe.dominion.DominionConverter
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportReader
 import org.cryptobiotic.rlauxe.dominion.makeContestInfo
@@ -36,7 +36,7 @@ class TestCardStyles {
 
         val contestBuilder = CountyContestBuilder(coloradoInput)
         val contests = contestBuilder.contests
-        val dominionConverter = DominionCvrConverter("test", export, contests, coloradoInput, )
+        val dominionConverter = DominionConverter("test", export, contests, coloradoInput, )
 
         println("dominionConverter.ExportCardStyles")
         dominionConverter.cardStyles.values.forEach {

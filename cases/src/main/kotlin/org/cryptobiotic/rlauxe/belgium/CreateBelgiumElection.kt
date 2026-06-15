@@ -38,8 +38,8 @@ class BelgiumClca (
     override fun cards() = createCards()
     override fun ncards() = allCvrs.size
 
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, null)
-    override fun createUnsortedMvrsExternal() = null
+    override fun unsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, null)
+    override fun unsortedMvrsExternal() = null
 
     fun createCards(): CloseableIterator<AuditableCardM> {
         return CvrsToCardStylesIterator(

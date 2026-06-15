@@ -1,44 +1,49 @@
 package org.cryptobiotic.rlauxe.votedatabase
 
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportReader
 import org.cryptobiotic.rlauxe.dominion.makeContestInfo
-import org.cryptobiotic.rlauxe.dominion.testCvrSchema
-import org.cryptobiotic.rlauxe.persist.CountyData
-import org.junit.jupiter.api.Test
-import java.io.BufferedReader
-import java.io.File
 import kotlin.io.path.Path
-import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.text.split
+
+// votedatabase missing San Juan;  cant read Garfield (yet); has Monroe and Roosevelt from some other state
+//   Baca has Huerfano, remove
+//   Las Animas has 106 cards out of ~8000
+// Garfield has an earler format
+// Broomfield, Huerfano, Montrose, Saquache appear to have a differrent earlier format same version 5.11.3.1
+//    first 5 cols have the field as ="field" otherwise look ok FIXED
+
+// auditcenter tabulate_county.csv missing Gunnison, San Juan
+
+// overall we are missing Baca, Garfield, Gunnison, San Juan counties
 
 val votedatabase = "/home/stormy/datadrive/votedatabase"
 val colorado2020 = "$votedatabase/cvr/Colorado"
 
-class TestMatchCanonical {
+class CompareVoteDatabaseAndAuditCenter {
 
     @Test
     fun testRedactionProblem() {
-        var errs = matchNames("Larimer", "$colorado2020/Larimer/cvr.csv", Colorado2020General())
+        val errs = matchNames("Larimer", "$colorado2020/Larimer/cvr.csv", Colorado2020General())
         assertEquals(0, errs)
     }
 
     @Test
-    fun testGarfield() { // wont read any of them
-        var errs = matchNames("Garfield", "$colorado2020/Garfield/cvr.csv", Colorado2020General())
+    fun testGarfield() { // also Roosevelt
+        val errs = matchNames("Garfield", "$colorado2020/Garfield/cvr.csv", Colorado2020General())
         assertEquals(0, errs)
     }
 
     @Test
     fun problem() { // redaction
         // val filename = "$colorado2020/Lincoln/cvr.csv"  had a misquoted quote that commons-csv was barfing on
-        val filename = "$colorado2020/Garfield/cvr.csv" // might be older version of export file ??
+        /* val filename = "$colorado2020/Roosevelt/cvr.csv" // might be older version of export file ??
         val reader: BufferedReader = File(filename).bufferedReader()
         var idx = 0
         while (idx < 10) {
@@ -53,9 +58,9 @@ class TestMatchCanonical {
             }
             idx++
         }
-        reader.close()
+        reader.close() */
 
-        var errs = matchNames("Monroe", "$colorado2020/Monroe/cvr.csv", Colorado2020General())
+        matchNames("Roosevelt", "$colorado2020/Roosevelt/cvr.csv", Colorado2020General())
         // assertEquals(0, errs)
     }
 
@@ -66,7 +71,6 @@ class TestMatchCanonical {
         println("$contest -> $suggest")
     }
 
-    // reading all counties but Gunnison, which is not in contestCounty tabulation
     @Test
     fun allColorado2020Counties() {
         val path = Path(colorado2020)
@@ -76,7 +80,7 @@ class TestMatchCanonical {
                     && it.fileName.toString() != "summary.csv"
                     && !it.fileName.toString().contains("Manifest")
             }.forEach { entry -> */
-            if (county != "Monroe" && county != "Garfield") { // no such county in Colorado && earlier format TODO
+            if (county !in listOf("Monroe", "Roosevelt", "Garfield")) { // no such county in Colorado && earlier format TODO
                 try {
                     val filename = "${subdir.toString()}/cvr.csv" // entry.toString()
                     val errs = matchNames(county, filename, Colorado2020General())
@@ -124,8 +128,7 @@ class TestMatchCanonical {
         println("county=$county csvfile = $exportFile")
 
         val export: DominionCvrExport = DominionCvrExportReader(exportFile).read()
-        val sinfoList: List<ContestInfo> = export.makeContestInfo()
-        val infos = sinfoList.associateBy { it.name }
+        val sinfoList = export.makeContestInfo()
         var errs = 0
 
         // test every export contest has a match in canon, along with each choice
@@ -161,7 +164,9 @@ class TestMatchCanonical {
 }
 
 fun suggest(county: String, contest: String, input: ColoradoInput): String {
-    val countyContestTabs = input.countyContestTabs.find { it.countyName == county }!!
+    val countyContestTabs = input.countyContestTabs.find { it.countyName == county }
+    if (countyContestTabs == null) return "unknown"
+
     for (canonContest in countyContestTabs.contests.keys) {
         if (canonContest.contains(contest)) return canonContest
         if (canonContest.contains(extractIssueName(contest))) return canonContest
@@ -176,8 +181,6 @@ fun extractIssueName(name: String): String {
     for (idx in 0 until toks.size-2) {
         if (toks[idx] == "Ballot" && (toks[idx+1] == "Issue" || toks[idx+1] == "Question"))
             return "${toks[idx]} ${toks[idx+1]} ${toks[idx+2]}"
-        //if (toks[idx] == "County" && toks[idx+1] == "Court" && toks[idx+2] == "-")
-        //    return "County Court Judge ${toks[idx+1]}"
     }
     for (idx in 0 until toks.size-1) {
         if (toks[idx] == "Town" && toks[idx+1] == "Council")

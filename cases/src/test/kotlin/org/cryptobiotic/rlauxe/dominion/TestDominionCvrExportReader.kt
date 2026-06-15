@@ -15,6 +15,13 @@ import kotlin.test.assertNull
 class TestDominionCvrReader {
 
     @Test
+    fun testRemoveLeadingChar() {
+        val inp = "=\"42\""
+        val result = removeLeadingEquals(inp)
+        assertEquals("42", result)
+    }
+
+    @Test
     fun parseThreeCandidatesTenVotesSucceeds() {
         val filename = "src/test/data/corla/1misc/ThreeCandidatesTenVotes.csv"
         val result: BoulderCvrExportCsv = readBoulderCvrExportCsv(filename, "Saguache")

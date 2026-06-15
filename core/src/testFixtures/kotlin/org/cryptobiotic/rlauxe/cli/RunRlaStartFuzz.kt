@@ -182,8 +182,8 @@ class TestClcaElection(
 
     override fun electionInfo() = ElectionInfo(
         "TestClcaElection", AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true,)
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, cardStyles()) // for in-memory case
-    override fun createUnsortedMvrsExternal() = null
+    override fun unsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, cardStyles()) // for in-memory case
+    override fun unsortedMvrsExternal() = null
 
     override fun cardStyles() = null
     override fun cardPools() = null
@@ -290,8 +290,8 @@ class TestPollingElection(
         "TestPollingElection", AuditType.POLLING, ncards(), contestsUA.size,
         cvrsContainUndervotes = true, pollingMode = pollingMode,
     )
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(testMvrs, cardStyles()) // for in-memory case
-    override fun createUnsortedMvrsExternal() = null
+    override fun unsortedMvrsInternal() = mvrsToAuditableCardsListM(testMvrs, cardStyles()) // for in-memory case
+    override fun unsortedMvrsExternal() = null
     override fun cardStyles() = batches
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
@@ -378,8 +378,8 @@ class TestOneAuditElection(
     override fun electionInfo() = ElectionInfo(
         "TestOneAuditElection", AuditType.ONEAUDIT, ncards(), contestsUA.size, cvrsContainUndervotes = true,
     )
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(fuzzedMvrs, cardStyles()) // for in-memory case
-    override fun createUnsortedMvrsExternal() = null
+    override fun unsortedMvrsInternal() = mvrsToAuditableCardsListM(fuzzedMvrs, cardStyles()) // for in-memory case
+    override fun unsortedMvrsExternal() = null
     override fun cardStyles() = null
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA

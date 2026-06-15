@@ -143,7 +143,7 @@ abstract class ColoradoInput(
     // dont use these directly, use matchCanonicalContest() and matchCanonicalCandidate()
     fun matchCanonicalContest(county: String, exportContestName: String): CanonicalContest? {
         val transform = contestNameCleanup(county, exportContestName)
-        val cleanup = nameMunging(transform)
+        val cleanup = munge(transform)
         return canonicalContestMungedNames[cleanup]
     }
 
@@ -157,18 +157,18 @@ abstract class ColoradoInput(
     // return canonical candidate name
     fun matchCanonicalCandidate(county: String, contest: CanonicalContest, exportCandidateName: String): String? {
         val transform = candidateNameCleanup(county, exportCandidateName)
-        var match = contest.choices.find { nameMunging(it) == nameMunging(transform) }
+        var match = contest.choices.find { munge(it) == munge(transform) }
         if (match == null) match = contest.choices.find { it == yesno(exportCandidateName) }
         return match
     }
 
     private val canonicalContestMungedNames: Map<String, CanonicalContest> by lazy {
-        canonicalContests().mapKeys { nameMunging(it.key) }
+        canonicalContests().mapKeys { munge(it.key) }
     }
 }
 
 private val alphnumRE = "[^A-Za-z0-9]".toRegex()
-fun nameMunging(name: String): String {
+fun munge(name: String): String {
     var munge = name.replace(alphnumRE, "").lowercase()
     // println("'$name' -> '$munge'")
     return munge

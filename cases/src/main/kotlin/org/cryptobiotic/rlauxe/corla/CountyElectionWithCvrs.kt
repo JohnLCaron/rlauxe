@@ -1,22 +1,26 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
-import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
-import org.cryptobiotic.rlauxe.corla.writeCountyContestData
-import org.cryptobiotic.rlauxe.corla.writeCountyData
-import org.cryptobiotic.rlauxe.dominion.DominionCvrConverter
+import org.cryptobiotic.rlauxe.dominion.DominionConverter
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportReader
+import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
+import java.nio.file.Path
 import kotlin.Int
 import kotlin.String
+import kotlin.io.path.Path
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
 
-private val logger = KotlinLogging.logger("CreateColoradoElectionWithCvrs")
+private val logger = KotlinLogging.logger("CountyElectionWithCvrs")
 
 open class CountyElectionWithCvrs (
     val counties: Map<String, String>, // countyName -> exportFile
@@ -30,6 +34,7 @@ open class CountyElectionWithCvrs (
     val contestsUA: List<ContestWithAssertions>
     val cardStyles = mutableListOf<CardStyle>()
     val countyCardPools = mutableListOf<CountyPoolsIF>()
+    val publisher = Publisher(auditdir)
 
     init {
         val contests = contestBuilder.contests
@@ -37,22 +42,27 @@ open class CountyElectionWithCvrs (
         val phantoms = makePhantomCards(contests, 0) // TODO
         var totalCardCount = 0
         val totalTabs = mutableMapOf<Int, ContestTabulation>()
+        var countyPoolId = 1
 
         counties.forEach { (county, exportFile) ->
             val export: DominionCvrExport = DominionCvrExportReader(exportFile).read()
-            val dominionConverter = DominionCvrConverter(county, export, contests, coloradoInput)
+            val dominionConverter = DominionConverter(county, export, contests, coloradoInput)
 
+            // read into memory
             val exportCvrs: List<AuditableCardM> = export.cvrs.map { dominionConverter.convertToCard(it) }
-            val cardIter = Closer (exportCvrs.iterator() )
-            val (tabs, cardCount) = tabulateCardsAndCount(cardIter, infos)
+            val (tabs, cardCount) = tabulateCardsAndCount(Closer (exportCvrs.iterator() ), infos)
 
+            // write them out while we have them
+            val ncards = writeUnsortedMvrs(county, publisher,Closer (exportCvrs.iterator() ))
+            require(ncards == cardCount)
             totalCardCount += cardCount
             totalTabs.sumContestTabulations(tabs)
 
-            cardStyles.addAll(dominionConverter.cardStyles.values.toList())
+            val countyCardStyles = dominionConverter.cardStyles.values.toList()
             countyCardPools.add(
-                CountyPools(county, 1, tabs.values.toList(), cardCount, cardStyles)
+                CountyPools(county, countyPoolId++, tabs.values.toList(), cardCount, countyCardStyles)
             )
+            cardStyles.addAll(countyCardStyles)
         }
 
         this.ncards = totalCardCount
@@ -69,14 +79,62 @@ open class CountyElectionWithCvrs (
 
     override fun contestsUA() = contestsUA
     override fun cardStyles() = cardStyles
+
     override fun cardPools() = null
     override fun countyCardPools(): List<CountyPoolsIF>? = countyCardPools
 
-    override fun createUnsortedMvrsInternal() = null // allCards // mvrsToAuditableCardsListM(allCvrs, cardStyles)
-    override fun createUnsortedMvrsExternal() = null
+    override fun unsortedMvrsInternal() = null
+    override fun unsortedMvrsExternal() = CardIteratorfromCountyMvrs(publisher, styles = cardStyles)
 
-    override fun cards() = Closer (emptyList<AuditableCardIF>().iterator() )
+    // TODO do we need to munge the mvrs for the card manifest? Add the card styles ??
+    override fun cards() = CardIteratorfromCountyMvrs(publisher, styles = cardStyles)
     override fun ncards() = ncards
+}
+
+fun writeUnsortedMvrs(
+    county: String,
+    publisher: Publisher,
+    countyMvrs: CloseableIterator<AuditableCardM>
+): Int {
+    val dir = publisher.unsortedMvrsDirectory()
+    validateOutputDir(Path(dir))
+    val outfile = "$dir/${county}.csv"
+
+    // TODO makePhantomCvrs(contests)
+    val cardsWritten = writeCardCsvFile(countyMvrs, outfile)
+    logger.info { "write $cardsWritten UnsortedMvrs for $county to ${outfile}" }
+
+    return cardsWritten
+}
+
+class CardIteratorfromCountyMvrs(
+    publisher: Publisher,
+    val styles: List<StyleIF>
+) : CloseableIterator<AuditableCardM> {
+
+    val dir = publisher.unsortedMvrsDirectory()
+    val path = Path(dir)
+    val countyPaths: List<Path> = path.listDirectoryEntries().filter { !it.isDirectory() && it.fileName.toString().endsWith(".csv")}
+
+    val counties = countyPaths.iterator()
+    var innerIter = readCardsCsvIteratorM(counties.next().toString(), styles = styles)  // TODO do we need styles ??
+
+    override fun next(): AuditableCardM {
+        return innerIter.next()
+    }
+
+    override fun hasNext(): Boolean {
+        if (innerIter.hasNext()) return true
+        if (counties.hasNext()) {
+            innerIter = readCardsCsvIteratorM(counties.next().toString(), styles = styles)
+            return hasNext()
+        }
+        return false
+    }
+
+    override fun close() {
+        // NOOP
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -92,6 +150,7 @@ fun countyElectionWithCvrs(
 ) {
     val stopwatch = Stopwatch()
     val auditdir = "$topdir/audit"
+    clearDirectory(Path(topdir))
 
     val contestBuilder = CountyContestBuilder(coloradoInput)
 

@@ -29,43 +29,44 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
         mergedContestMap.values.forEach{ mcontest ->
             val contestTab = contestTabs[mcontest.contestName]
             if (contestTab == null) {
-                logger.warn{"*** Cant find contestTab for '${mcontest.contestName}'" }
-                throw RuntimeException()
-            }
+                logger.warn{"*** Cant find contestTab for '${mcontest.contestName}': remove from audit" }
+                // throw RuntimeException()
+            } else {
 
-            val candidateNames = mcontest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
+                val candidateNames = mcontest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
 
-            val info = ContestInfo(
-                mcontest.contestName,
-                contestBuilders.size + 1,
-                candidateNames,
-                SocialChoiceFunction.PLURALITY, // TODO
-                mcontest.voteForN
-            )
+                val info = ContestInfo(
+                    mcontest.contestName,
+                    contestBuilders.size + 1,
+                    candidateNames,
+                    SocialChoiceFunction.PLURALITY, // TODO
+                    mcontest.voteForN
+                )
 
-            val strata = when {
-                (mcontest.counties.size == 1) -> strataMap[mcontest.counties.first()]!!
-                /* (mcontest.counties.size > 60) -> {
+                val strata = when {
+                    (mcontest.counties.size == 1) -> strataMap[mcontest.counties.first()]!!
+                    /* (mcontest.counties.size > 60) -> {
                     val contestsPlus = mcontest.counties // + listOf("Statewide")
                     computeStrataMinRate(mcontest.contestName, contestsPlus, strataMap)
                 } */
-                else -> computeStrataMinRate(mcontest.contestName, mcontest.counties, strataMap)
-            }
-            info.metadata["CORLAhaveMvrs"] = strata.nmvrs.toString()
-            info.metadata["CORLAsample"] = mcontest.nsamples.toString()
-            info.metadata["CORLAauditReason"] = mcontest.auditReason.toString()
-            info.metadata["CORLAmarginInVotes"] = mcontest.marginInVotes.toString()
-            info.metadata["CORLAcounties"] = mcontest.counties.toList().toString()
-            info.metadata["CORLAcountyMvrs"] = mcontest.countyMvrs.toString()
-            info.metadata["CORLAstatewideNmvrs"] = mcontest.statewideMvrs.toString()
+                    else -> computeStrataMinRate(mcontest.contestName, mcontest.counties, strataMap)
+                }
+                info.metadata["CORLAhaveMvrs"] = strata.nmvrs.toString()
+                info.metadata["CORLAsample"] = mcontest.nsamples.toString()
+                info.metadata["CORLAauditReason"] = mcontest.auditReason.toString()
+                info.metadata["CORLAmarginInVotes"] = mcontest.marginInVotes.toString()
+                info.metadata["CORLAcounties"] = mcontest.counties.toList().toString()
+                info.metadata["CORLAcountyMvrs"] = mcontest.countyMvrs.toString()
+                info.metadata["CORLAstatewideNmvrs"] = mcontest.statewideMvrs.toString()
 
-            val contest = CorlaContestBuilder(
-                info,
-                mcontest,
-                strata,
-                contestTab,
-            )
-            contestBuilders.add(contest)
+                val contest = CorlaContestBuilder(
+                    info,
+                    mcontest,
+                    strata,
+                    contestTab,
+                )
+                contestBuilders.add(contest)
+            }
         }
 
         // println("number of contestBuilders = ${contestBuilders.size}")

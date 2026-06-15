@@ -2,6 +2,9 @@ package org.cryptobiotic.rlauxe.dominion
 
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.votedatabase.colorado2020
+import kotlin.io.path.Path
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -82,5 +85,32 @@ class TestCvrExportRedaction {
         export.redacted.forEach { group ->
             println("  $group")
         }
+    }
+
+    @Test
+    fun allColorado2020Counties() {
+        val path = Path(colorado2020)
+        path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202") }
+            .forEach { subdir ->
+                val county = subdir.fileName.toString()
+                if (county !in listOf("Monroe", "Roosevelt", "Garfield")) {
+                    subdir.listDirectoryEntries().filter {
+                        !it.isDirectory() && it.fileName.toString().endsWith(".csv")
+                                && it.fileName.toString() != "summary.csv"
+                                && !it.fileName.toString().contains("Manifest")
+                    }.forEach { entry ->
+                        try {
+                            val filename = entry.toString()
+                            println(filename)
+                            val export: DominionCvrExport = DominionCvrExportReader(filename).read()
+                            export.redacted.forEach { group -> println("  $group") }
+
+                        } catch (e: Exception) {
+                            println(e.message)
+                            throw e
+                        }
+                    }
+                }
+            }
     }
 }

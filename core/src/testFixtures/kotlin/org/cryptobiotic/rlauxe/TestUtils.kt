@@ -12,8 +12,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 val testdataDir = "/home/stormy/rla"
-val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter/"
-val cases = "/home/stormy/datadrive/rla/cases/"
+val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
+val cases = "/home/stormy/datadrive/rla/cases"
 
 fun doublesAreClose(a: List<Double>, b: List<Double>, rtol: Double=1.0e-5, atol:Double=1.0e-8): Boolean {
     //    For finite values, isclose uses the following equation to test whether

@@ -53,7 +53,7 @@ class TestRunRoundCli {
 
     @Test
     fun testStartAuditFirstRound() {
-        val auditdir = "${testdataDir}/cases/corla/consistent/audit"
+        val auditdir = "/home/stormy/datadrive/rla/cases/corla/Colorado2020all"
 
         StartAuditFirstRoundCli.main(
             arrayOf(

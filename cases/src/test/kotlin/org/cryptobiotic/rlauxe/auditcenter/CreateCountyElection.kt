@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.dominion.ContestVotes
-import org.cryptobiotic.rlauxe.dominion.DominionCvrConverter
+import org.cryptobiotic.rlauxe.dominion.DominionConverter
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportReader
 import org.cryptobiotic.rlauxe.util.*
@@ -18,7 +18,7 @@ private val logger = KotlinLogging.logger("CreateCountyElection")
 private val debugUndervotes = false
 private val showCardStyles = true
 
-// Probably obsolete
+// obsolete
 // How does this differ from CreateColoradoElectionWithCvrs ??
 // make ContestInfo from export.schema.contests, so can only be for one county
 class CreateCountyElection(
@@ -47,7 +47,7 @@ class CreateCountyElection(
         contests = makeContests()
         simulatedCvrs = emptyList() // makeRedactedCvrs()
 
-        val dominionConverter = DominionCvrConverter(county, dominionExport, contests, coloradoInput)
+        val dominionConverter = DominionConverter(county, dominionExport, contests, coloradoInput)
         val exportCards = dominionExport.cvrs.map { dominionConverter.convertToCard(it) }
         cardStyles = dominionConverter.cardStyles.values.toList()
 
@@ -143,8 +143,8 @@ class CreateCountyElection(
     override fun contestsUA() = contestsUA
     override fun cardStyles() = cardStyles
     override fun cardPools() = null
-    override fun createUnsortedMvrsInternal() = allCards // mvrsToAuditableCardsListM(allCvrs, cardPools())
-    override fun createUnsortedMvrsExternal() = null
+    override fun unsortedMvrsInternal() = allCards // mvrsToAuditableCardsListM(allCvrs, cardPools())
+    override fun unsortedMvrsExternal() = null
 
     override fun cards() = Closer( allCards.iterator() )
     override fun ncards() = ncards
@@ -214,7 +214,4 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
     return Pair(namet, ncand)
 }
 
-
-private val regex = Regex("[,]") // Matches '!', ',' or any digit
-fun cleanCsvString(originalString: String) = originalString.replace(regex, "")
 

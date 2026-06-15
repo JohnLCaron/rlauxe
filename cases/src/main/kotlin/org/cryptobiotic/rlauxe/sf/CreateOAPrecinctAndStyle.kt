@@ -191,8 +191,8 @@ class CreatePrecinctAndStyle(
 
     // TODO add optional fuzz or some other error method?
     // the cvrExports are the private mvrs; must be in same order as createCards
-    override fun createUnsortedMvrsExternal() = null
-    override fun createUnsortedMvrsInternal(): List<AuditableCardM> {
+    override fun unsortedMvrsExternal() = null
+    override fun unsortedMvrsInternal(): List<AuditableCardM> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cardIter = CvrExportToCardAdapterM(cvrExportIter, cardPools(), auditType.isOA())
 

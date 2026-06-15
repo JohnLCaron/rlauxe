@@ -54,7 +54,7 @@ fun testCvrSchema(county: String, filename: String, coloradoInput: ColoradoInput
 }
 
 fun compareExportSchemaVsAuditCenter(county: String, export: DominionCvrExport, coloradoInput: ColoradoInput): Int {
-    val sinfos: List<ContestInfo> = export.makeContestInfo()
+    val sinfos = export.makeContestInfo()
 
     var countErrs = 0
     sinfos.forEach { sinfo ->
@@ -78,7 +78,7 @@ fun compareExportSchemaVsAuditCenter(county: String, export: DominionCvrExport, 
 }
 
 fun compareCvrSchemaVsContestBuilder(county: String, export: DominionCvrExport, coloradoInput: ColoradoInput): Int {
-    val exportContestInfos: List<ContestInfo> = export.makeContestInfo()
+    val exportContestInfos = export.makeContestInfo()
 
     // CountyContestBuilder only uses coloradoInput
     val contestBuilder = CountyContestBuilder(coloradoInput)
@@ -108,7 +108,7 @@ fun compareCvrSchemaVsContestBuilder(county: String, export: DominionCvrExport, 
             assertEquals(info.name, canonicalContest.contestName)
             assertEquals(contestCands, schemaCands)
             assertEquals(info.nwinners, schemaInfo.nwinners)
-            assertEquals(info.voteForN, schemaInfo.voteForN)
+            assertEquals(info.voteForN, schemaInfo.nwinners)
             assertEquals(info.isIrv, schemaInfo.isIrv)
         }
     }

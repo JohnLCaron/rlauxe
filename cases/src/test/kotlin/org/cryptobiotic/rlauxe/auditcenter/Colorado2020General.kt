@@ -47,11 +47,11 @@ class Colorado2020General: ColoradoInput(
         //result.remove("San Juan County Court Judge - Edwards")
 
         // these are from checkCountyTabulateHasCanonical() and checkContestRoundHasCanonical()
-        result.remove("Gunnison County Commissioner - District 1")
+        /* result.remove("Gunnison County Commissioner - District 1")
         result.remove("Gunnison County Commissioner - District 2")
         result.remove("Gunnison County Court Judge - Burgemeister") // ?? check, also signal when not present in file
         result.remove("Town of Marble - Board of Trustees")
-        result.remove("Town of Marble Ballot Issue 2A")
+        result.remove("Town of Marble Ballot Issue 2A") */
         result.remove("San Juan County Commissioner - District 1")
         result.remove("San Juan County Commissioner - District 2")
         result.remove("San Juan County Court Judge - Edwards")
@@ -253,7 +253,11 @@ class Colorado2020General: ColoradoInput(
                 "Gilpin County Library District Issue 6A" -> "Gilpin County Library District Ballot Issue 6A"
                 else -> name
             }
-            "Grand" -> when (name) {
+            "Gunnison" -> when (name) {
+                "Gunnison County Commissioner - District 1" -> "Gunnison County Commissioner - District 1"
+                "Gunnison County Commissioner - District 2" -> "Gunnison County Commissioner - District 2"
+                "Town of Marble - Board of Trustees" -> "Town of Marble - Board of Trustees"
+                "County Court Judge - Gunnison County - Burgemeister" -> "Gunnison County Court Judge - Burgemeister"
                 else -> name
             }
             "Jackson" -> when (name) {

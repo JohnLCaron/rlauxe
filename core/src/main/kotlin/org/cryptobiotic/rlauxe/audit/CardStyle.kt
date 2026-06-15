@@ -88,6 +88,7 @@ data class CardStyle(
         // dont use these names for other batches
         val fromCvr = "_fromCvr"
         val phantoms = "_phantoms"
+        // val unknown = CardStyle("unknown", -1, intArrayOf(), true) // kludge
 
         //  assumes cvrsContainUndervotes, use regular batch if not.
         val fromCvrBatch = CardStyle(fromCvr, -1, intArrayOf(), true)

@@ -16,7 +16,7 @@ import kotlin.Int
 import kotlin.String
 import kotlin.io.path.Path
 
-private val logger = KotlinLogging.logger("CreateCorlaElection")
+private val logger = KotlinLogging.logger("CountyElectionSansCvrs")
 
 // County election has the cards divided into disjoint county pools
 // Each county has its own set of card styles
@@ -75,9 +75,8 @@ open class CountyElectionSansCvrs (
         return CardIteratorfromCountyFiles(countyPools, publisher, styles = styles)
     }
 
-    // StartAuditFirstRound will create the sorted MVRs
-    override fun createUnsortedMvrsExternal() = CardIteratorfromCountyFiles(countyPools, publisher, styles = styles)
-    override fun createUnsortedMvrsInternal() = null
+    override fun unsortedMvrsInternal() = null
+    override fun unsortedMvrsExternal() = CardIteratorfromCountyFiles(countyPools, publisher, styles = styles)
 
     class CardIteratorfromCountyFiles(
         countyPools: List<CountyPools>,

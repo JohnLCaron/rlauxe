@@ -317,7 +317,7 @@ data class CountyPoolsBuilder(
 
         return CountyPools(
             countyName, countyPoolId++,
-            contestTabs = tabs, styles = pools, totalCards = totalCards
+            contestTabs = tabs, styles = pools, cardCount = totalCards
         )
     }
 

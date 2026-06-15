@@ -23,7 +23,7 @@ val CountyCardPoolHeader = "countyPoolId, countyName, totalCards, cardStyles, co
 
 fun writeCountyCardPoolCsv(pool: CountyPoolsIF) = buildString {
     val styleIds = pool.styles.map{ it.id() }.joinToString(" ")
-    append("${pool.countyPoolId}, ${pool.countyName}, ${pool.totalCards}, $styleIds, ")
+    append("${pool.countyPoolId}, ${pool.countyName}, ${pool.cardCount}, $styleIds, ")
     pool.contestTabs.forEachIndexed { index, contestTab ->
         if (index > 0) { append("${pool.countyPoolId},,,, ") }
         append(writeContestTabulationCsv(contestTab))

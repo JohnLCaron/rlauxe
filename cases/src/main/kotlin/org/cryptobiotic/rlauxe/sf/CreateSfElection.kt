@@ -174,8 +174,8 @@ class CreateSfElection(
 
     // TODO add optional fuzz or some other error method?
     // convert the cvrExports to the private mvrs; must be in same order as createCards
-    override fun createUnsortedMvrsExternal() = null
-    override fun createUnsortedMvrsInternal(): List<AuditableCardM> {
+    override fun unsortedMvrsExternal() = null
+    override fun unsortedMvrsInternal(): List<AuditableCardM> {
         // pass 3 through cvrExport
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsvFile)
         val cardIter: CloseableIterator<AuditableCardM>

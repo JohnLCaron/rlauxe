@@ -70,8 +70,8 @@ open class CreateUniformElection (
     }
 
     // StartAuditFirstRound will create the sorted MVRs
-    override fun createUnsortedMvrsExternal() = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
-    override fun createUnsortedMvrsInternal() = null
+    override fun unsortedMvrsExternal() = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
+    override fun unsortedMvrsInternal() = null
 }
 
 ////////////////////////////////////////////////////////////////////

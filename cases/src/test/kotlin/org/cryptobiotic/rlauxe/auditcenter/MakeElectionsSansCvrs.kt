@@ -7,14 +7,16 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
-import org.cryptobiotic.rlauxe.corla.createCountyElectionSimulateCvrs
+import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.corla.countyElectionWithCvrs
+import org.cryptobiotic.rlauxe.corla.createCountyElectionSansCvrs
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.testdataDir
 
 import kotlin.test.Test
 
-class MakeElectionsWithoutCvrs {
+class MakeElectionsSansCvrs {
     val show = false
 
     @Test
@@ -28,7 +30,7 @@ class MakeElectionsWithoutCvrs {
                 sampling = Sampling.consistent),
             ClcaConfig(), null)
 
-        createCountyElectionSimulateCvrs(topdir, "$topdir/audit", Colorado2024AuditCenterInput(),
+        createCountyElectionSansCvrs(topdir, "$topdir/audit", Colorado2024General(),
             creation, round, name = "County2024OnlyTeller", startFirstRound = true, onlyCounty="Teller")
     }
 
@@ -43,7 +45,7 @@ class MakeElectionsWithoutCvrs {
                 sampling = Sampling.consistent),
             ClcaConfig(), null)
 
-        createCountyElectionSimulateCvrs(topdir, "$topdir/audit", Colorado2024AuditCenterInput(),
+        createCountyElectionSansCvrs(topdir, "$topdir/audit", Colorado2024General(),
             creation, round, name = "County2024General", startFirstRound = true)
     }
 
@@ -58,8 +60,23 @@ class MakeElectionsWithoutCvrs {
                 sampling = Sampling.consistent),
             ClcaConfig(), null)
 
-        createCountyElectionSimulateCvrs(topdir, "$topdir/audit", Colorado2022Primary(),
+        createCountyElectionSansCvrs(topdir, "$topdir/audit", Colorado2022Primary(),
             creation, round, name = "Colorado2022Primary", startFirstRound = true)
+    }
+
+    @Test
+    fun makeColorado2020General() {
+        val topdir = "$cases/corla/sansCvrs/Colorado2020sans/"
+
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
+        val round = AuditRoundConfig(
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 200000,
+                sampling = Sampling.consistent),
+            ClcaConfig(), null)
+
+        createCountyElectionSansCvrs(topdir, "$topdir/audit", Colorado2020General(),
+            creation, round, name = "Colorado2020sans", startFirstRound = true)
     }
 
     @Test

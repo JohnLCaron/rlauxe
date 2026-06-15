@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.persist.bin
 
 import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -56,9 +57,9 @@ fun writeFastSamplingCards(cards: CloseableIterator<AuditableCardIF>, filenameOu
         while (cards.hasNext() && (limit == null || count < limit)) {
             val card = cards.next()
             dos.writeLong(card.prn())
-            val styleId = styleMap[card.styleName()]
-            if (styleId == null)
-                throw RuntimeException()
+            val styleId = styleMap[card.styleName()] ?: 0 // TODO
+            //if (styleId == null)
+             //   throw RuntimeException()
             dos.writeInt(styleId)
             count++
         }

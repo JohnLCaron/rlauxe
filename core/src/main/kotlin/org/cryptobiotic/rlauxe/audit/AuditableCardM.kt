@@ -46,7 +46,7 @@ data class AuditableCardM (
     fun setStyle(style: StyleIF): AuditableCardM {
         if (styleName != style.name())
             logger.warn{"AuditableCardM.setStyle $styleName != ${style.name()}"}
-        require(styleName == style.name())
+        require(styleName == style.name()) //  || style.name() == "unknown")
         this.style = style
         return this
     }

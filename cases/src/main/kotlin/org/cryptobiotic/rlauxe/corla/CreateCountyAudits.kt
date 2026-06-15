@@ -101,8 +101,8 @@ class CreateCountyAudits(
     override fun ncards() = ncards
     override fun cardStyles() = countyCardPools
     override fun cardPools() = countyCardPools
-    override fun createUnsortedMvrsInternal() = null
-    override fun createUnsortedMvrsExternal() = null
+    override fun unsortedMvrsInternal() = null
+    override fun unsortedMvrsExternal() = null
     override fun toString(): String {
         return "CorlaElectionBuilder(countyName='$countyName', auditdir='$auditdir')"
     }

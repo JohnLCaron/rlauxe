@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import org.cryptobiotic.rlauxe.auditcenter
 import org.cryptobiotic.rlauxe.corla.CanonicalContest
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.corla.ElectionDetailXml
@@ -8,11 +9,11 @@ import org.cryptobiotic.rlauxe.corla.readColoradoElectionDetail
 import org.cryptobiotic.rlauxe.corla.readGeneralCanonicalList
 import org.cryptobiotic.rlauxe.corla.readResultsReportContest
 
-class Colorado2024AuditCenterInput: ColoradoInput(
-    generalCanonicalFile = "$auditcenter/2024GeneralCanonicalList.csv",
-    contestRoundFile = "$auditcenter/round1/contest.csv",
-    tabulateCountyFile = "$auditcenter/tabulateCounty.csv",
-    mvrComparisonFile = "$auditcenter/round3/contestComparison.csv"
+class Colorado2024General: ColoradoInput(
+    generalCanonicalFile = "$general2024/2024GeneralCanonicalList.csv",
+    contestRoundFile = "$general2024/round1/contest.csv",
+    tabulateCountyFile = "$general2024/tabulateCounty.csv",
+    mvrComparisonFile = "$general2024/round3/contestComparison.csv"
 ) {
     // canonical contests and choices
     override fun canonicalContests(): Map<String, CanonicalContest> = canonicalContests
@@ -48,7 +49,7 @@ class Colorado2024AuditCenterInput: ColoradoInput(
     }
 
     // TODO County specific?
-    override fun contestNameCleanup(name: String): String {
+    fun contestNameCleanup(name: String): String {
         var working = name
         // if (working.contains(" -")) working = working.replace(" -", "")
         // if (working.contains("-")) working = working.replace("-", " ")
@@ -123,7 +124,7 @@ class Colorado2024AuditCenterInput: ColoradoInput(
 // Weld County School District No. RE-7 Ballot Issue 4A Mill Levy Override,opportunistic_benefits,in_progress,1,182397,2729,"""Yes/For""",731,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1819,1819
 //Weld County School District No. RE-7 Ballot Issue 4B Bonds,opportunistic_benefits,in_progress,1,182397,2729,"""Yes/For""",720,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1847,1847
 
-    override fun candidateNameCleanup(name: String): String {
+    fun candidateNameCleanup(name: String): String {
         var working = name
         if (working.contains("''")) working = working.replace("''", "'")
         if (working.contains("\"")) working = working.replace("\"", "'")
@@ -151,8 +152,9 @@ class Colorado2024AuditCenterInput: ColoradoInput(
             }
         }
     }
+
     companion object {
-        private val auditcenter = "/home/stormy/dev/github/rla/nealmcb/auditcenter/2024/general"
+        private val general2024 = "$auditcenter/2024/general"
     }
 
 }

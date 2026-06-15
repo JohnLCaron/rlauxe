@@ -85,8 +85,8 @@ open class CreateCorlaElection (
     }
 
     // StartAuditFirstRound will create the sorted MVRs
-    override fun createUnsortedMvrsExternal() = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
-    override fun createUnsortedMvrsInternal() = null
+    override fun unsortedMvrsExternal() = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
+    override fun unsortedMvrsInternal() = null
 }
 
 // CvrsToCardsAddStyles is random, so in order to match the mvrs and cvrs, we must generate the mvrs first,

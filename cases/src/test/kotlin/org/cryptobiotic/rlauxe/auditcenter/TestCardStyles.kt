@@ -3,17 +3,17 @@ package org.cryptobiotic.rlauxe.auditcenter
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
 import org.cryptobiotic.rlauxe.corla.CountyStylesFromMvrs
-import org.cryptobiotic.rlauxe.dominion.DominionCvrConverter
+import org.cryptobiotic.rlauxe.dominion.DominionConverter
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportReader
 import org.cryptobiotic.rlauxe.dominion.makeContestInfo
-import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import kotlin.test.Test
 
 // compare cardStyles from coloradoInput.countyStyles (taken from mvr files)
 // vs what we see in DominionCvrExport (taken from cvrs)
 class TestCardStyles {
     val show = false
-    val colorado2020 = Colorado2020AuditCenterInput()
+    val colorado2020 = Colorado2020General()
     val colorado2022 = Colorado2022Primary()
 
     @Test
@@ -23,7 +23,7 @@ class TestCardStyles {
 
     fun compareCvrSchemaVscoloradoInput(filename: String, coloradoInput: ColoradoInput) {
         // println(CastVoteRecord.header)
-        val export: DominionCvrExport = readDominionCvrExportCsv(filename, "")
+        val export: DominionCvrExport = DominionCvrExportReader(filename).read()
         val exportContestInfos = export.makeContestInfo().associateBy { it.id }
 
         // these contest id's are internal to the export.
@@ -32,28 +32,11 @@ class TestCardStyles {
         export.exportCardStyles.forEach { type ->
             println("  $type")
         }
-        // one pool for Boulder, with multiple ballot style, and card counts
-        // make the boulder simulated cvr pools as simple as this:
-        // export.ballotTypes
-        //  BallotType(name=DS-04D, contests=[0, 1, 2, 3, 4, 5, 6, 10, 13, 14, 15, 16, 17, 18, 19], count=17147)
-        //  BallotType(name=DS-01D, contests=[0, 1, 2, 3, 4, 5, 6, 8, 13, 14, 15, 16, 17, 18, 19], count=14329)
-        //  BallotType(name=DS-07D, contests=[0, 1, 2, 3, 4, 5, 6, 9, 13, 14, 15, 16, 17, 18, 19], count=12667)
-        //  BallotType(name=DS-08R, contests=[20, 21, 22, 23, 24, 25, 26, 29], count=6864)
-        //  BallotType(name=DS-05R, contests=[20, 21, 22, 23, 24, 25, 26, 30], count=5725)
-        //  BallotType(name=DS-10D, contests=[0, 1, 2, 3, 4, 5, 6, 12, 13, 14, 15, 16, 17, 18, 19], count=5416)
-        //  BallotType(name=DS-13D, contests=[0, 1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 16, 17, 18, 19], count=4582)
-        //  BallotType(name=DS-16D, contests=[0, 1, 2, 3, 4, 5, 6, 11, 13, 14, 15, 16, 17, 18, 19], count=4092)
-        //  BallotType(name=DS-17R, contests=[20, 21, 22, 23, 24, 25, 26, 31], count=2888)
-        //  BallotType(name=DS-02R, contests=[20, 21, 22, 23, 24, 25, 26, 28], count=2330)
-        //  BallotType(name=DS-14R, contests=[20, 21, 22, 23, 24, 25, 26, 27, 32], count=1817)
-        //  BallotType(name=DS-11R, contests=[20, 21, 22, 23, 24, 25, 26, 32], count=923)
-        //  BallotType(name=DS-19D, contests=[0, 1, 2, 3, 4, 5, 6, 7, 10, 13, 14, 15, 16, 17, 18, 19], count=363)
-        //  BallotType(name=DS-20R, contests=[20, 21, 22, 23, 24, 25, 26, 27, 30], count=111)
         println()
 
         val contestBuilder = CountyContestBuilder(coloradoInput)
         val contests = contestBuilder.contests
-        val dominionConverter = DominionCvrConverter("test", export, contests, coloradoInput, )
+        val dominionConverter = DominionConverter("test", export, contests, coloradoInput, )
 
         println("dominionConverter.ExportCardStyles")
         dominionConverter.cardStyles.values.forEach {

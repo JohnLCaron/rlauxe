@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.auditcenter.Colorado2024AuditCenterInput
+import org.cryptobiotic.rlauxe.auditcenter.Colorado2024General
 import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
@@ -12,7 +12,7 @@ import kotlin.math.abs
 import kotlin.test.Test
 
 class TestReadColoradoCsvFiles {
-    val input: ColoradoInput = Colorado2024AuditCenterInput()
+    val input: ColoradoInput = Colorado2024General()
 
     // data class CanonicalContest(
     //    val contestName: String,
@@ -148,7 +148,7 @@ class TestReadColoradoCsvFiles {
     //)
     @Test
     fun showMergeContestInfo() {
-        val (mergedContestInfo, mergedCountyInfo, statewideContests) = mergeContestInfo(Colorado2024AuditCenterInput())
+        val (mergedContestInfo, mergedCountyInfo, statewideContests) = mergeContestInfo(Colorado2024General())
 
         println("\nMerged Contest Info")
         println("\n${trunc("contest", -50)}    Npop,      Nc, voteMargin, countyMvrs, stateMvrs, Ncounties, auditReason")
@@ -192,7 +192,7 @@ class TestReadColoradoCsvFiles {
     @Test
     fun readResultsReportContest() {
         val filename = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
-        val contests = readResultsReportContest(filename) { input.contestNameCleanup(it) }
+        val contests = readResultsReportContest(filename) { it }
         println("read ${contests.size} contests from $filename")
         println("\n${trunc("contest", -50)} margin, mvrCount, ballotCount,")
 
@@ -206,7 +206,7 @@ class TestReadColoradoCsvFiles {
     @Test
     fun readTargetedContests() {
         val filename = "src/test/data/corla/2024audit/targetedContests.csv"
-        val targets = readTargetedContestsCsv(filename) { input.contestNameCleanup(it) }
+        val targets = readTargetedContestsCsv(filename) { it }
         println()
         println("${TargetedContestsCsv.header}, calcNeeded")
         targets.forEach {
@@ -222,7 +222,7 @@ class TestReadColoradoCsvFiles {
 
     @Test
     fun compareTargetedContestsAndTabulateCounty() {
-        val targets: List<TargetedContestsCsv> = readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv") { input.contestNameCleanup(it) }
+        val targets: List<TargetedContestsCsv> = readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv") { it }
 
         val contestTabsByCounty: Map<String, ContestTabByCounty> = readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv")
 
@@ -259,7 +259,7 @@ class TestReadColoradoCsvFiles {
     fun compareTabulateCountyAndRoundContest() {
         // use targetedContests only for the county and contest name
         val targets: List<TargetedContestsCsv> = readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv",
-            { input.contestNameCleanup(it) } )
+            { it} )
 
         val roundContests = input.roundContests
 

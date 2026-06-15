@@ -272,8 +272,8 @@ class CreateElectionForAttack(
 ): ElectionBuilder {
 
     override fun electionInfo() = ElectionInfo("CardManifestAttack", AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true,)
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(mvrs, populations)
-    override fun createUnsortedMvrsExternal() = null
+    override fun unsortedMvrsInternal() = mvrsToAuditableCardsListM(mvrs, populations)
+    override fun unsortedMvrsExternal() = null
     override fun contestsUA() = contestsUA
     override fun cardStyles() = populations
     override fun cards() = Closer( cards.iterator() )

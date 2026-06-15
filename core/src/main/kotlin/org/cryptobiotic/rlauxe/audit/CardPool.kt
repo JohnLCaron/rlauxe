@@ -85,7 +85,7 @@ interface CountyPoolsIF {
     val countyName: String
     val countyPoolId: Int
     val contestTabs: List<ContestTabulation>
-    val totalCards: Int
+    val cardCount: Int
     val styles: List<StyleIF>
 }
 
@@ -94,11 +94,11 @@ data class CountyPools (
     override val countyName: String,
     override val countyPoolId: Int,
     override val contestTabs: List<ContestTabulation>,
-    override val totalCards: Int,
+    override val cardCount: Int,
     override val styles: List<StyleIF>,
 ): CountyPoolsIF {
     override fun toString() = buildString {
-        appendLine("CountyPools(countyName='$countyName', countyPoolId=$countyPoolId, totalCards=$totalCards")
+        appendLine("CountyPools(countyName='$countyName', countyPoolId=$countyPoolId, totalCards=$cardCount")
         styles.forEach{ appendLine("cardStyle:  $it")}
         contestTabs.forEach{ appendLine("  $it")}
     }

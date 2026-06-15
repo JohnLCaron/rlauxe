@@ -1,8 +1,5 @@
-package org.cryptobiotic.rlauxe.dominion
+package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.boulder.CastVoteRecord
-import org.cryptobiotic.rlauxe.boulder.BoulderCvrExportCsv
-import org.cryptobiotic.rlauxe.boulder.readBoulderCvrExportCsv
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -11,10 +8,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-class TestDominionCvrReader {
+class TestBoulderCvrExportCsv {
     @Test
     fun parseThreeCandidatesTenVotesSucceeds() {
-        val filename = "src/test/data/corla/ThreeCandidatesTenVotes.csv"
+        val filename = "src/test/data/corla/1misc/ThreeCandidatesTenVotes.csv"
         val result: BoulderCvrExportCsv = readBoulderCvrExportCsv(filename, "Saguache")
         println(result.show())
 
@@ -389,12 +386,4 @@ class TestDominionCvrReader {
         assertEquals(65, export.schema.contests.size)
         assertEquals(25430, export.cvrs.size)
     }
-}
-
-fun makeCvr(id: Int, votes: Map<Int, IntArray>): Cvr {
-    val cvrb = CvrBuilder2(id.toString(),  false)
-    votes.forEach {
-        cvrb.replaceContestVotes(it.key, it.value)
-    }
-    return cvrb.build()
 }

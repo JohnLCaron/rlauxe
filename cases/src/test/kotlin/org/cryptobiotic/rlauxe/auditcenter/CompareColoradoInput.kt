@@ -9,8 +9,8 @@ import kotlin.test.Test
 
 // compare two sources of ColoradoInput supposedly identical
 class CompareContestInput {
-    val input1: ColoradoInput = Colorado2024AuditCenterInput()
-    val input2: ColoradoInput = Colorado2024AuditCenterInput()
+    val input1: ColoradoInput = Colorado2024General()
+    val input2: ColoradoInput = Colorado2024General()
 
     @Test
     fun compareGeneralCanonicalList() {

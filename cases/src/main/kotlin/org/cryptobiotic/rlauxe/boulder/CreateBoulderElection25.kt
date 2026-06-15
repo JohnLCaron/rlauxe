@@ -258,8 +258,8 @@ class CreateBoulderElection25(
             }
     }
     override fun cardPools() = cardPools
-    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, cardPools())
-    override fun createUnsortedMvrsExternal() = null
+    override fun unsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, cardPools())
+    override fun unsortedMvrsExternal() = null
 
     override fun cards() = createCards()
     override fun ncards() = ncards

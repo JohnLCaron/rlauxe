@@ -32,8 +32,9 @@ interface ElectionBuilder {
     fun cardPools(): List<CardPoolIF>?
     fun countyCardPools(): List<CountyPoolsIF>? = null
 
-    fun createUnsortedMvrsInternal(): List<AuditableCardM>? // for in-memory case, poolId used also as batch name?
-    fun createUnsortedMvrsExternal(): CloseableIterator<AuditableCardM>? // for out-of-memory case
+    // if (config.election.mvrSource == MvrSource.testPrivateMvrs), supply one or the other:
+    fun unsortedMvrsInternal(): List<AuditableCardM>? // for in-memory case, poolId used also as batch name?
+    fun unsortedMvrsExternal(): CloseableIterator<AuditableCardM>? // for out-of-memory case
 }
 
 private val logger = KotlinLogging.logger("CreateElectionRecord")

@@ -1,6 +1,7 @@
 @file:OptIn(ExperimentalSerializationApi::class)
 package org.cryptobiotic.rlauxe.persist.protobuf
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromByteArray
@@ -22,6 +23,8 @@ import java.nio.file.Files
 import java.nio.file.StandardOpenOption
 import kotlin.String
 import kotlin.io.path.Path
+
+private val logger = KotlinLogging.logger("ProtoCard")
 
 @Serializable
 class ProtoCard (
@@ -90,8 +93,10 @@ fun ProtoCard.importM(styleMap: Map<String, StyleIF> ): AuditableCardM {
             style = CardStyle.phantomBatch
         else if (this.styleName == CardStyle.fromCvr)
             style = CardStyle.fromCvrBatch
-        else
-            throw RuntimeException()
+        else {
+            logger.warn { "cant find ProtoCard.styleName = '${this.styleName}'"}
+            style = CardStyle.fromCvrBatch // TODO
+        }
     }
 
     return AuditableCardM(

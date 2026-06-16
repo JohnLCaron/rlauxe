@@ -1,8 +1,7 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -27,7 +26,7 @@ private val logger = KotlinLogging.logger("CardCsv")
 
 val CardHeader = "id, location, index, prn, phantom, poolId, cardStyle, cvr contests, candidates0, candidates1, ...\n"
 
-fun writeCardCsv(card: AuditableCardIF) = buildString {
+fun writeCardCsv(card: AuditableCard) = buildString {
     append("${card.id()}, ")
     if (card.id() == card.location()) append(", ") else append("${card.location()}, ")
     append("${card.index()}, ${card.prn().toString(radix=16)}, ${if(card.phantom()) "yes," else ","} ")
@@ -44,7 +43,7 @@ fun writeCardCsv(card: AuditableCardIF) = buildString {
     appendLine()
 }
 
-fun writeCardCsvFile(cards: List<AuditableCardIF>, outputFilename: String) {
+fun writeCardCsvFile(cards: List<AuditableCard>, outputFilename: String) {
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     writer.write(CardHeader)
     cards.forEach {
@@ -53,7 +52,7 @@ fun writeCardCsvFile(cards: List<AuditableCardIF>, outputFilename: String) {
     writer.close()
 }
 
-fun writeCardCsvFile(cards: CloseableIterator<AuditableCardIF>, outputFilename: String): Int {
+fun writeCardCsvFile(cards: CloseableIterator<AuditableCard>, outputFilename: String): Int {
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     writer.write(CardHeader)
     var count = 0
@@ -74,7 +73,7 @@ class CardCsvWriter(outputFilename: String) {
         writer.write(CardHeader)
     }
 
-    fun write(cards: List<AuditableCardIF>) {
+    fun write(cards: List<AuditableCard>) {
         cards.forEach {
             writer.write(writeCardCsv(it))
         }
@@ -88,7 +87,7 @@ class CardCsvWriter(outputFilename: String) {
 
 ////////////////////////////////////////////////////////////
 
-fun readCardCsvM(line: String): AuditableCardM {
+fun readCardCsvM(line: String): AuditableCard {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
@@ -126,14 +125,14 @@ fun readCardCsvM(line: String): AuditableCardM {
             candidates.addAll(cands)
             start += cands.size
         }
-        return AuditableCardM(id, location, index, sampleNum, phantom, styleName, poolId,
+        return AuditableCard(id, location, index, sampleNum, phantom, styleName, poolId,
             contestIds.toIntArray(), contestStarts.toIntArray(), candidates.toIntArray())
     }
-    return AuditableCardM(id, location, index, sampleNum, phantom, styleName, poolId,
+    return AuditableCard(id, location, index, sampleNum, phantom, styleName, poolId,
         intArrayOf(), intArrayOf(), intArrayOf())
 }
 
-class IteratorCardsCsvStreamM(input: InputStream, bufferSize: Int, val styles: List<StyleIF>?): CloseableIterator<AuditableCardM> {
+class IteratorCardsCsvStreamM(input: InputStream, bufferSize: Int, val styles: List<StyleIF>?): CloseableIterator<AuditableCard> {
     val styleMap = if (styles == null) null else styles.associateBy { it.name() }
     val reader = BufferedReader(InputStreamReader(input),bufferSize)
     var nextLine: String? = null
@@ -151,9 +150,9 @@ class IteratorCardsCsvStreamM(input: InputStream, bufferSize: Int, val styles: L
         return nextLine != null
     }
 
-    override fun next(): AuditableCardM {
+    override fun next(): AuditableCard {
         if (!hasNext()) throw NoSuchElementException()
-        val cardm: AuditableCardM =  readCardCsvM(nextLine!!)
+        val cardm: AuditableCard =  readCardCsvM(nextLine!!)
         val style = styleMap?.get(cardm.styleName)
         if (style != null)
             cardm.setStyle(style)
@@ -166,18 +165,18 @@ class IteratorCardsCsvStreamM(input: InputStream, bufferSize: Int, val styles: L
     }
 }
 
-class CardCsvReaderM(filename: String, val styles: List<StyleIF>?): CloseableIterable<AuditableCardM> {
+class CardCsvReaderM(filename: String, val styles: List<StyleIF>?): CloseableIterable<AuditableCard> {
     var useFilename = if (Files.exists(Path(filename))) filename
     else if (Files.exists(Path("$filename.zip"))) "$filename.zip" // TODO unzip and leave it unzipped
     else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
 
-    override fun iterator(): CloseableIterator<AuditableCardM> {
+    override fun iterator(): CloseableIterator<AuditableCard> {
         return readCardsCsvIteratorM(useFilename, styles)
     }
 }
 
 // replace readCardsCsvIterator
-fun readCardsCsvIteratorM(csvFile: String, styles: List<StyleIF>?): CloseableIterator<AuditableCardM> {
+fun readCardsCsvIteratorM(csvFile: String, styles: List<StyleIF>?): CloseableIterator<AuditableCard> {
     val useFilename: String = if (Files.exists(Path(csvFile))) csvFile
     else if (Files.exists(Path("$csvFile.zip"))) "$csvFile.zip" // TODO unzip
     else {
@@ -196,9 +195,9 @@ fun readCardsCsvIteratorM(csvFile: String, styles: List<StyleIF>?): CloseableIte
 }
 
 
-fun readCardsAndMergeToList(filename: String, styles: List<StyleIF>?): List<AuditableCardM> {
+fun readCardsAndMergeToList(filename: String, styles: List<StyleIF>?): List<AuditableCard> {
     val mergedMvrIter = readCardsCsvIteratorM(filename, styles)
-    val mvrCards = mutableListOf<AuditableCardM>()
+    val mvrCards = mutableListOf<AuditableCard>()
     while (mergedMvrIter.hasNext()) { mvrCards.add(mergedMvrIter.next())}
     return mvrCards
 }

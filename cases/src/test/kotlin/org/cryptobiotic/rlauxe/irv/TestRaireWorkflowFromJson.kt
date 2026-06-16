@@ -58,7 +58,7 @@ class TestRaireWorkflowFromJson {
 
 }
 
-fun runComparisonWorkflowR(workflow: WorkflowTesterClca, sortedMvrs: CloseableIterator<AuditableCardIF>, nassertions: Int) {
+fun runComparisonWorkflowR(workflow: WorkflowTesterClca, sortedMvrs: CloseableIterator<AuditableCard>, nassertions: Int) {
     val stopwatch = Stopwatch()
 
     var done = false

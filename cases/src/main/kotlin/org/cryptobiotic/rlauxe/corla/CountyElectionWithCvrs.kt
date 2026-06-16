@@ -49,7 +49,7 @@ open class CountyElectionWithCvrs (
             val dominionConverter = DominionConverter(county, export, contests, coloradoInput)
 
             // read into memory
-            val exportCvrs: List<AuditableCardM> = export.cvrs.map { dominionConverter.convertToCard(it) }
+            val exportCvrs: List<AuditableCard> = export.cvrs.map { dominionConverter.convertToCard(it) }
             val (tabs, cardCount) = tabulateCardsAndCount(Closer (exportCvrs.iterator() ), infos)
 
             // write them out while we have them
@@ -94,7 +94,7 @@ open class CountyElectionWithCvrs (
 fun writeUnsortedMvrs(
     county: String,
     publisher: Publisher,
-    countyMvrs: CloseableIterator<AuditableCardM>
+    countyMvrs: CloseableIterator<AuditableCard>
 ): Int {
     val dir = publisher.unsortedMvrsDirectory()
     validateOutputDir(Path(dir))
@@ -110,7 +110,7 @@ fun writeUnsortedMvrs(
 class CardIteratorfromCountyMvrs(
     publisher: Publisher,
     val styles: List<StyleIF>
-) : CloseableIterator<AuditableCardM> {
+) : CloseableIterator<AuditableCard> {
 
     val dir = publisher.unsortedMvrsDirectory()
     val path = Path(dir)
@@ -119,7 +119,7 @@ class CardIteratorfromCountyMvrs(
     val counties = countyPaths.iterator()
     var innerIter = readCardsCsvIteratorM(counties.next().toString(), styles = styles)  // TODO do we need styles ??
 
-    override fun next(): AuditableCardM {
+    override fun next(): AuditableCard {
         return innerIter.next()
     }
 

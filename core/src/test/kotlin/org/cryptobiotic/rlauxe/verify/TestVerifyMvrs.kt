@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.verify
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.makeCvr
 import org.cryptobiotic.rlauxe.util.ErrorMessages
@@ -14,11 +14,11 @@ class TestVerifyMvrs {
     @Test
     fun testMatch() {
         val N = 2
-        val cards = mutableListOf<AuditableCardM>()
+        val cards = mutableListOf<AuditableCard>()
         repeat(N) {
             val id = Random.nextInt()
             val cvr = makeCvr(id, 11, 15)
-            cards.add(AuditableCardM.fromCvr(cvr, it, prn=it.toLong()))
+            cards.add(AuditableCard.fromCvr(cvr, it, prn=it.toLong()))
         }
 
         val errs = ErrorMessages("testMatch")
@@ -31,11 +31,11 @@ class TestVerifyMvrs {
     @Test
     fun testDontMatch() {
         val N = 2
-        val cards = mutableListOf<AuditableCardM>()
+        val cards = mutableListOf<AuditableCard>()
         repeat(N) {
             val id = Random.nextInt()
             val cvr = makeCvr(id, 11, 15)
-            cards.add(AuditableCardM.fromCvr(cvr, it, prn=it.toLong()))
+            cards.add(AuditableCard.fromCvr(cvr, it, prn=it.toLong()))
         }
 
         val rcards = cards.reversed()
@@ -47,11 +47,11 @@ class TestVerifyMvrs {
     @Test
     fun testHasStyle() {
         val N = 5
-        val cards = mutableListOf<AuditableCardM>()
+        val cards = mutableListOf<AuditableCard>()
         repeat(N) {
             val id = Random.nextInt()
             val cvr = makeCvr(id, 11, 15)
-            cards.add(AuditableCardM.fromCvr(cvr, it, prn=it.toLong()))
+            cards.add(AuditableCard.fromCvr(cvr, it, prn=it.toLong()))
         }
 
         val rcards = listOf(

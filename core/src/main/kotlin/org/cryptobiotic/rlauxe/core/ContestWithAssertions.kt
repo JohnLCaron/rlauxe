@@ -1,14 +1,13 @@
 package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.noerror
-import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 
 // note mutability
@@ -228,7 +227,7 @@ open class ContestWithAssertions(
         private val logger = KotlinLogging.logger("ContestUnderAudit")
 
         // make contestUA from contests, generate Npop by reading cards
-        fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCardIF>, isClca: Boolean, hasStyle: Boolean): List<ContestWithAssertions> {
+        fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCard>, isClca: Boolean, hasStyle: Boolean): List<ContestWithAssertions> {
             val infos = contests.map { it.info() }.associateBy { it.id }
             val contestTabs = tabulateAuditableCards(cards, infos)
             val npopMap = contestTabs.mapValues { it.value.ncardsTabulated }

@@ -70,7 +70,7 @@ open class CountyElectionSansCvrs (
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
 
-    override fun cards(): CloseableIterator<AuditableCardIF> {
+    override fun cards(): CloseableIterator<AuditableCard> {
         // should we remove the votes?
         return CardIteratorfromCountyFiles(countyPools, publisher, styles = styles)
     }
@@ -82,13 +82,13 @@ open class CountyElectionSansCvrs (
         countyPools: List<CountyPools>,
         publisher: Publisher,
         val styles: List<StyleIF>
-    ) : CloseableIterator<AuditableCardM> {
+    ) : CloseableIterator<AuditableCard> {
 
         val dir = publisher.unsortedMvrsDirectory()
         val counties = countyPools.map { it.countyName }.iterator()
         var innerIter = readCardsCsvIteratorM("$dir/${counties.next()}.csv", styles = null)
 
-        override fun next(): AuditableCardM {
+        override fun next(): AuditableCard {
             return innerIter.next()
         }
 
@@ -132,7 +132,7 @@ open class CountyElectionSansCvrs (
     // to use the county Tabs, which are the only real tabs;  AdjustableStylePool are guesses.
     // but we want to use the AdjustableStylePool ncards to generate cards for each style
     // and use the undervotes as variable; but the vote totals should match.
-    class CvrIteratorfromPools(val countyPool: CountyPools, val startCardno: Int) : Iterator<AuditableCardIF> {
+    class CvrIteratorfromPools(val countyPool: CountyPools, val startCardno: Int) : Iterator<AuditableCard> {
         val vunderBatches: VunderBatches
         var cardPoolIter = countyPool.styles.iterator()
         var innerIter = CardsFromPool(cardPoolIter.next())
@@ -146,7 +146,7 @@ open class CountyElectionSansCvrs (
             vunderBatches = VunderBatches(countyPool.styles, onePool)
         }
 
-        override fun next(): AuditableCardIF {
+        override fun next(): AuditableCard {
             return innerIter.next()
         }
 
@@ -170,13 +170,13 @@ open class CountyElectionSansCvrs (
             return false
         }
 
-        inner class CardsFromPool(val cardPool: StyleIF) : Iterator<AuditableCardIF> {
+        inner class CardsFromPool(val cardPool: StyleIF) : Iterator<AuditableCard> {
             var countCards = 0
             val poolName = cardPool.name()
 
-            override fun next(): AuditableCardIF {
+            override fun next(): AuditableCard {
                 countCards++
-                val card = AuditableCardM.empty(id = "${poolName}.index-${cardno++}", phantom = false, poolName)
+                val card = AuditableCard.empty(id = "${poolName}.index-${cardno++}", phantom = false, poolName)
                 return vunderBatches.simulatePooledCard(card)
             }
 

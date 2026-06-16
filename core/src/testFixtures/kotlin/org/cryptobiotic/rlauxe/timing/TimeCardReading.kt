@@ -1,8 +1,7 @@
 package org.cryptobiotic.rlauxe.timing
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -141,7 +140,7 @@ class TimeCardReading {
         var ncards = 0
 
         // includes time to merge the styles
-        val cardIter: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles)
+        val cardIter: CloseableIterator<AuditableCard> = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles)
         while (cardIter.hasNext()) { //  && ncards < 1000000) {
             val card = cardIter.next()
             ncards++
@@ -226,7 +225,7 @@ class TimeCardReading {
             val trial = Stopwatch()
             var ncards = 0
 
-            val protoIter: CloseableIterator<AuditableCardM> = ProtoCardIteratorM(protoFilename, bufferSize, styles)
+            val protoIter: CloseableIterator<AuditableCard> = ProtoCardIteratorM(protoFilename, bufferSize, styles)
             while (protoIter.hasNext()) { //  && ncards < 1000_000) {
                 val card = protoIter.next()
                 accum += card.index() // prevent optimization
@@ -401,7 +400,7 @@ class TimeCardReading {
         val countyAudit = AuditRecord.read(topdir) as CountyAudit
         // val contestNameMap = countyAudit.contests.associate { it.contest.info().name to it }
         val mvrManager = PersistedMvrManager(countyAudit)
-        val cards: CloseableIterable<AuditableCardIF> = mvrManager.sortedManifest().cards
+        val cards: CloseableIterable<AuditableCard> = mvrManager.sortedManifest().cards
         val contestsUA = mvrManager.contestsUA
 
         val stopwatch = Stopwatch()

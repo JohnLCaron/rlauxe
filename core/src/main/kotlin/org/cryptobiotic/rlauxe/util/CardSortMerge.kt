@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
@@ -17,7 +17,7 @@ class SortMerge<T>(
     val seed: Long,
     val maxChunk: Int = maxChunkDefault) {
 
-    fun run(cardIter: CloseableIterator<T>, toCard: (from: T, index: Int, prn: Long) -> AuditableCardM) {
+    fun run(cardIter: CloseableIterator<T>, toCard: (from: T, index: Int, prn: Long) -> AuditableCard) {
         // out of memory sort by sampleNum()
         sortCards(cardIter, scratchDirectory, seed, toCard)
         mergeCards(scratchDirectory, outputFile)
@@ -28,7 +28,7 @@ class SortMerge<T>(
         cardIterator: CloseableIterator<T>,
         scratchDirectory: String,
         seed: Long,
-        toCard: (from: T, index: Int, prn: Long) -> AuditableCardM
+        toCard: (from: T, index: Int, prn: Long) -> AuditableCard
     ) {
         clearDirectory(Path.of(scratchDirectory))
         validateOutputDir(Path.of(scratchDirectory), ErrorMessages("sortCards"))
@@ -65,10 +65,10 @@ class SortMerge<T>(
 }
 
 private class ChunkSorter<T>(val workingDirectory: String, val prng: Prng, val max: Int,
-                             val toCard: (from: T, index: Int, prn: Long) -> AuditableCardM) {
+                             val toCard: (from: T, index: Int, prn: Long) -> AuditableCard) {
     var index = 0
     var count = 0
-    val cards = mutableListOf<AuditableCardM>()
+    val cards = mutableListOf<AuditableCard>()
     var countChunks = 0
 
     fun add(from: T) {
@@ -95,7 +95,7 @@ private class ChunkSorter<T>(val workingDirectory: String, val prng: Prng, val m
 
 private class CardMerger(chunkFilenames: List<String>, val writer: CardCsvWriter, val maxChunk: Int) {
     val nextUps = chunkFilenames.map { NextUp(readCardsCsvIteratorM(it, styles=null)) }
-    val cards = mutableListOf<AuditableCardM>()
+    val cards = mutableListOf<AuditableCard>()
     var total = 0
 
     fun merge() {
@@ -118,8 +118,8 @@ private class CardMerger(chunkFilenames: List<String>, val writer: CardCsvWriter
         cards.clear()
     }
 
-    class NextUp(val nextIter: CloseableIterator<AuditableCardM>) {
-        var currentCard: AuditableCardM? = null
+    class NextUp(val nextIter: CloseableIterator<AuditableCard>) {
+        var currentCard: AuditableCard? = null
         var sampleNumber = Long.MAX_VALUE
 
         init {

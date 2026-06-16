@@ -1,12 +1,11 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.AuditableCardMBuilder
+import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import kotlin.collections.get
 
@@ -24,7 +23,7 @@ class VunderPools(pools: List<CardPool>) {
     }
 
     // for the given pooled card with no votes, simulate one with votes, staying within the pool vote totals.
-    fun simulatePooledCard(card: AuditableCardIF): AuditableCardM {
+    fun simulatePooledCard(card: AuditableCard): AuditableCard {
         val vunderPool = vunderPools[card.poolId()]
         return vunderPool!!.simulatePooledCard(card)
     }
@@ -39,9 +38,9 @@ class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId
 
     // pass in a card from the manifest, and generate an Mvr from it with votes constrained by the contest tabs in Vunder
     // used in Estimation
-    fun simulatePooledCard(card: AuditableCardIF): AuditableCardM {
+    fun simulatePooledCard(card: AuditableCard): AuditableCard {
         require (poolName == "all" || card.poolId() == poolId) // TODO
-        val cardb = AuditableCardMBuilder.fromCard(card)
+        val cardb = AuditableCardBuilder.fromCard(card)
 
         card.possibleContests().forEach { contestId ->
             val vunderPicker = vunderPickers[contestId]
@@ -110,11 +109,11 @@ class VunderBatches(styles: List<StyleIF>, val onePool: VunderPool) {
     val styleMap = styles.associateBy { it.name() }
 
     // for the given pooled card with no votes, simulate one with votes, using card.styleName
-    fun simulatePooledCard(card: AuditableCardIF): AuditableCardIF {
+    fun simulatePooledCard(card: AuditableCard): AuditableCard {
         if (card.phantom()) return card
 
         val style = styleMap[card.styleName()]
-        val cardb = AuditableCardMBuilder.fromCard(card)
+        val cardb = AuditableCardBuilder.fromCard(card)
 
         if (style == null) {
             println("style ${card.styleName()} not found")

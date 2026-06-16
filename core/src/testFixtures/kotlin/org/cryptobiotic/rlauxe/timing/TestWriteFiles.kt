@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.timing
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
@@ -17,7 +17,7 @@ class TestWriteFiles {
     fun writeProtoFile () {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val publisher = Publisher("$topdir/audit")
-        val cardIter: CloseableIterator<AuditableCardIF> = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles=null)
+        val cardIter: CloseableIterator<AuditableCard> = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles=null)
 
         val stopwatch = Stopwatch()
         val ncards = writeProtoCards(cardIter, tempProtoFile)

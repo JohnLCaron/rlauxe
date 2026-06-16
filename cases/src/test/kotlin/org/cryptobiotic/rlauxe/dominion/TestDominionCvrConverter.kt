@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.dominion
 
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
@@ -83,7 +83,7 @@ class TestDominionConverter {
 
         val contestBuilder = CountyContestBuilder(coloradoInput)
         val dominionConverter = DominionConverter(county, export, contestBuilder.contests, coloradoInput)
-        val cards: List<AuditableCardM> = export.cvrs.map { dominionConverter.convertToCard(it) }
+        val cards: List<AuditableCard> = export.cvrs.map { dominionConverter.convertToCard(it) }
         println("ncards = ${cards.size}")
         val filename = "$testdataDir/tests/scratch/testWriteDominionCvrs.csv"
         writeCardCsvFile(cards, filename)

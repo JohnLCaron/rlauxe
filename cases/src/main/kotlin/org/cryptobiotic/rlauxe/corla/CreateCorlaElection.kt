@@ -42,7 +42,7 @@ open class CreateCorlaElection (
         } else {
             // read them back in as an Iterator, so we dont have to read all into memory
             val infos = countyElection.contests.map { it.info() }.associateBy { it.id }
-            val auditableCardIter: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles=countyPools)
+            val auditableCardIter: CloseableIterator<AuditableCard> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles=countyPools)
             // are we handling the batches correctly using mvrs?
             val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
             require(ncards == count)
@@ -65,8 +65,8 @@ open class CreateCorlaElection (
     override fun ncards() = ncards
 
     // TODO verify election creation, verify audit creation
-    override fun cards(): CloseableIterator<AuditableCardM> {
-        val unsortedMvrs: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
+    override fun cards(): CloseableIterator<AuditableCard> {
+        val unsortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
 
         return TransformingIterator(unsortedMvrs) { cardm ->
             when {

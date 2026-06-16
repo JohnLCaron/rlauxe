@@ -155,6 +155,13 @@ class DominionCvrExportReader(val filename: String, showHeaders: Boolean = false
             val line = records.next()
             if (line.isEmpty()) break
             if (!redaction(line)) {
+                try {
+                    val test = removeLeadingEquals(line.get(3)).toInt()
+                } catch (e : Throwable) {
+                    println("barf on cvrCount $cvrCount $line")
+                    break
+                }
+
                 val cvr = CastVoteRecord(
                     cvrNumber = removeLeadingEquals(line.get(0)).toInt(),
                     tabulatorNum = removeLeadingEquals(line.get(1)).toInt(),

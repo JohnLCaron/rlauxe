@@ -14,7 +14,7 @@ private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
 class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, PersistedMvrManager(auditRecord) {
 
     // extract the cards with sampleNumbers from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCardIF> {
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard> {
         val cards = findSamples(sampleNumbers, auditableCards)
 
         var lastRN = 0L
@@ -55,7 +55,7 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
             // then the cards we want are the previous cards and the new fuzzed cards
             // cant assume they are sorted by prn
 
-            val mvrs2 = mutableListOf<AuditableCardIF>()
+            val mvrs2 = mutableListOf<AuditableCard>()
             mvrs2.addAll(wantPrevious + newFuzzedCards)
             mvrs2.sortBy{ it.prn() }
 
@@ -90,7 +90,7 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
     }
 
     // get the wanted sampleNumbers from samplePrnsFile, and call setMvrsBySampleNumber(sampledMvrs) with them.
-    fun setMvrsForRoundIdx(roundIdx: Int): List<AuditableCardIF> {
+    fun setMvrsForRoundIdx(roundIdx: Int): List<AuditableCard> {
         val sampleNumbers = readSamplePrns(publisher.samplePrnsFile(roundIdx))
 
         return if (sampleNumbers.isEmpty()) {
@@ -108,9 +108,9 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
 // ClcaFuzzSamplerTracker uses this for only one contest; so the other fuzzings are ignored
 // PersistedMvrManagerTest uses this to fuzz all contests
 fun makeFuzzedCardsForClca(infoList: List<ContestInfo>,
-                           cards: List<AuditableCardIF>,
+                           cards: List<AuditableCard>,
                            fuzzPct: Double,
-) : List<AuditableCardIF> {
+) : List<AuditableCard> {
     if (fuzzPct == 0.0) return cards
     val infos = infoList.associate{ it.id to it }
     val isIRV = infoList.associate { it.id to it.isIrv}

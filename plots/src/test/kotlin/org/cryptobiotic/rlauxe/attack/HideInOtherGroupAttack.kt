@@ -2,8 +2,7 @@ package org.cryptobiotic.rlauxe.attack
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.Contest
@@ -143,7 +142,7 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
             CardStyle("group1",  1,intArrayOf(1,2), hasStyle),
             CardStyle("group2", 2, intArrayOf(2), hasStyle),
         )
-        val modifiedCards = mutableListOf<AuditableCardIF>()
+        val modifiedCards = mutableListOf<AuditableCard>()
         val cardAttacker = CardsWithStylesAttack(AuditType.CLCA, cards=Closer(cardsu.iterator()), styles=cardStyles, wantFlips=diff+1)
         while (cardAttacker.hasNext()) {
             modifiedCards.add(cardAttacker.next())
@@ -200,14 +199,14 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
 class CardsWithStylesAttack(
     val type: AuditType,
     val cvrsAreComplete: Boolean = true,
-    val cards: CloseableIterator<AuditableCardIF>,
-    phantomCards : List<AuditableCardM>? = null,
+    val cards: CloseableIterator<AuditableCard>,
+    phantomCards : List<AuditableCard>? = null,
     styles: List<CardStyle>,
     val wantFlips: Int
-): CloseableIterator<AuditableCardIF> {
+): CloseableIterator<AuditableCard> {
 
     val poolMap = styles.associateBy{ it.name() }
-    val allCards: Iterator<AuditableCardIF>
+    val allCards: Iterator<AuditableCard>
     var cardIndex = 1
     var flipCount = 0
 
@@ -223,7 +222,7 @@ class CardsWithStylesAttack(
 
     override fun hasNext() = allCards.hasNext()
 
-    override fun next(): AuditableCardIF {
+    override fun next(): AuditableCard {
         val org = allCards.next()
         val hasCvr = type.isClca()
 
@@ -237,7 +236,7 @@ class CardsWithStylesAttack(
         val contests = style.possibleContests()
         val votes = if (hasCvr) org.votes() else null
 
-        return AuditableCardM.fromVotes(org.id(), org.location(), cardIndex++, 0, phantom=org.phantom(),
+        return AuditableCard.fromVotes(org.id(), org.location(), cardIndex++, 0, phantom=org.phantom(),
             poolId=org.poolId(),
             votes=votes,
             styleName=org.styleName(),

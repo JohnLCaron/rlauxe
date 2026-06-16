@@ -6,7 +6,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import com.github.michaelbull.result.unwrapError
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CardStyle.Companion.useVotes
 import org.cryptobiotic.rlauxe.audit.StyleIF
@@ -31,7 +31,7 @@ class VerifyElectionCommitment(val location: String) {
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
     val batchSet: Set<StyleIF>
-    val cardManifest: CloseableIterable<AuditableCardIF>
+    val cardManifest: CloseableIterable<AuditableCard>
 
     init {
         val result = readElectionCommitment(location)
@@ -78,7 +78,7 @@ class VerifyElectionCommitment(val location: String) {
 }
 
 data class ElectionCommitment(val electionInfo: ElectionInfo, val contests: List<ContestWithAssertions>, val batches: List<StyleIF>?,
-                              val pools: List<CardPoolIF>?, val cardManifest: CloseableIterable<AuditableCardIF> )
+                              val pools: List<CardPoolIF>?, val cardManifest: CloseableIterable<AuditableCard> )
 
 fun readElectionCommitment(location: String): Result<ElectionCommitment, ErrorMessages> {
     val errs = ErrorMessages("readElectionRecord from '${location}'")
@@ -100,7 +100,7 @@ fun readElectionCommitment(location: String): Result<ElectionCommitment, ErrorMe
 fun verifyCardManifest(
     auditType: AuditType,
     contestsUA: List<ContestWithAssertions>,
-    cards: CloseableIterable<AuditableCardIF>,
+    cards: CloseableIterable<AuditableCard>,
     infos: Map<Int, ContestInfo>,
     batchSet: Set<StyleIF>,
     results: VerifyResults,

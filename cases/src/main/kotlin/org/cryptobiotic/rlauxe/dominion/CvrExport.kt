@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.dominion
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.audit.unpooled
 
@@ -21,13 +21,13 @@ data class CvrExport(
     }
 
     // only used in test
-    fun toAuditableCard(index: Int, prn: Long, phantom: Boolean = false, pools: Map<String, Int>? = null, showPoolVotes: Boolean = true): AuditableCardM {
+    fun toAuditableCard(index: Int, prn: Long, phantom: Boolean = false, pools: Map<String, Int>? = null, showPoolVotes: Boolean = true): AuditableCard {
         val contests = votes.map { it.key }.toIntArray()
         val poolkey = poolKey()
         val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]  // TODO not general
         // TODO if you want to delete the votes, add an adapter
         val useVotes = if (poolId == null || showPoolVotes) votes else null
-        return AuditableCardM.fromVotes(id, null, index, prn, phantom, styleName=poolKey(), poolId, useVotes)
+        return AuditableCard.fromVotes(id, null, index, prn, phantom, styleName=poolKey(), poolId, useVotes)
     }
 
     fun toCvr(pools: Map<String, Int>? = null , convertId: String) : Cvr {

@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.estimate.consistentSampling
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.workflow.MvrManagerForTesting
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import kotlin.test.Test
@@ -39,7 +39,7 @@ class TestConsistentSamplerFromShangrla {
 
         val prng = Prng(12345678901L)
         var cards = cvrs.mapIndexed { idx, it ->
-            AuditableCardM.fromCvr( it, idx, prng.next()) // here we assign sample number deterministically
+            AuditableCard.fromCvr( it, idx, prng.next()) // here we assign sample number deterministically
         }
         cards = cards.sortedBy { it.prn }
 
@@ -97,7 +97,7 @@ class TestConsistentSamplerFromShangrla {
         val phantomCVRs = makePhantomCvrs(contests)
 
         val prng = Prng(123456789012L)
-        val cards = (cvrs + phantomCVRs).mapIndexed { idx, it -> AuditableCardM.fromCvr( it, idx, prng.next()) }
+        val cards = (cvrs + phantomCVRs).mapIndexed { idx, it -> AuditableCard.fromCvr( it, idx, prng.next()) }
         assertEquals(10, cards.size)
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())

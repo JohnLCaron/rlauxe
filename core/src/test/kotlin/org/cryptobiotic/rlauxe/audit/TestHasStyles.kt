@@ -311,11 +311,11 @@ class TestHasStyles {
         // now fix the batches
         val all = CardStyle("all", 1, intArrayOf(1,2,3), false)
 
-        val newBatchedIter: CloseableIterator<AuditableCardM>  = TransformingIterator<AuditableCardM, AuditableCardM>(
-            Closer( testCards.iterator())) { card:AuditableCardM ->
+        val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
+            Closer( testCards.iterator())) { card:AuditableCard ->
             card.setStyle(all)
         }
-        val newBatched = mutableListOf<AuditableCardM>()
+        val newBatched = mutableListOf<AuditableCard>()
         while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }
 
         val tabs = tabulateAuditableCards(Closer(testCards.iterator()), infos).toSortedMap()
@@ -330,7 +330,7 @@ class TestHasStyles {
     }
 
     fun createAndRunTestAuditCards(auditType: AuditType, name:String, topdir: String, contests: List<Contest>,
-                                   testCards: List<AuditableCardM>, batches:List<StyleIF>): Boolean {
+                                   testCards: List<AuditableCard>, batches:List<StyleIF>): Boolean {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )

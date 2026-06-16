@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.StyleIF
@@ -20,7 +20,7 @@ import kotlin.random.Random
 private const val debugAdjust = false
 
 // (mvrs, cards, pools, styles)
-data class MvrCardAndPops(val mvrs: List<Cvr>, val cards: List<AuditableCardM>, val pools: List<CardPoolIF>, val batches: List<StyleIF>)
+data class MvrCardAndPops(val mvrs: List<Cvr>, val cards: List<AuditableCard>, val pools: List<CardPoolIF>, val batches: List<StyleIF>)
 
 /**
  * Creates a set of contests and populations, with randomly chosen candidates and margins.
@@ -133,8 +133,8 @@ data class MultiContestTestData(
         )
 
         // cardWithBatchName to AuditableCard
-        val cards = mutableListOf<AuditableCardM>()
-        val converter: CloseableIterator<AuditableCardM> = MergeStylesIntoCardsM(
+        val cards = mutableListOf<AuditableCard>()
+        val converter: CloseableIterator<AuditableCard> = MergeStylesIntoCardsM(
             batchNameIter,
             styles = cardStyles,
         )
@@ -188,11 +188,11 @@ data class MultiContestTestData(
         return cvrb.build(poolId)
     }
 
-    fun makeCardsFromContests(startCvrId : Int = 0): List<AuditableCardM> {
+    fun makeCardsFromContests(startCvrId : Int = 0): List<AuditableCard> {
         contestTestBuilders.forEach { it.resetTracker() } // startFresh
 
         var nextCardId = startCvrId
-        val result = mutableListOf<AuditableCardM>()
+        val result = mutableListOf<AuditableCard>()
         cardStyles.forEach { cardStyle ->
             val fcontests = contestTestBuilders.filter { cardStyle.hasContest(it.info.id) }
             repeat(cardStyle.ncards) {
@@ -206,8 +206,8 @@ data class MultiContestTestData(
         return result
     }
 
-    private fun makeCard(nextCardId: Int, fcontests: List<ContestTestDataBuilder>, poolId: Int?, cardStyle: String?): AuditableCardM {
-        val cardBuilder = AuditableCardMBuilder("card${nextCardId}", null, nextCardId, poolId, cardStyle)
+    private fun makeCard(nextCardId: Int, fcontests: List<ContestTestDataBuilder>, poolId: Int?, cardStyle: String?): AuditableCard {
+        val cardBuilder = AuditableCardBuilder("card${nextCardId}", null, nextCardId, poolId, cardStyle)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build()
     }
@@ -282,7 +282,7 @@ data class ContestTestDataBuilder(
     }
 
     // choose Candidate, add contest, including undervote
-    fun addContestToCard(cvrb: AuditableCardMBuilder) {
+    fun addContestToCard(cvrb: AuditableCardBuilder) {
         val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
         if (candidateIdx == ncands) {
             cvrb.replaceContestVote(info.id, null) // undervote

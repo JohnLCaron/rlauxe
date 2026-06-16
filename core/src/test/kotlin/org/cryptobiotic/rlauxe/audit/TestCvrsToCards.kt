@@ -117,7 +117,7 @@ class TestCvrsToCards {
         testOneTarget("oa noStyle pooled", cvrp, target[1], auditType, hasCardStyles, cardPool.name(), expectBatch = cardPool)
     }
 
-    fun testOneTarget(what: String, cvr: Cvr, card: AuditableCardM, auditType: AuditType, hasCardStyles: Boolean, expectStyle:String?, expectBatch:StyleIF?=null) {
+    fun testOneTarget(what: String, cvr: Cvr, card: AuditableCard, auditType: AuditType, hasCardStyles: Boolean, expectStyle:String?, expectBatch:StyleIF?=null) {
         println("$what [$auditType hasCardStyles:$hasCardStyles]:")
         println("  ${cvr.show()}")
         println("  ${card.show()}")
@@ -165,7 +165,7 @@ fun Cvr.show() = buildString {
     append("} poolId=$poolId")
 }
 
-fun AuditableCardM.show() = buildString {
+fun AuditableCard.show() = buildString {
     append("$location phantom=$phantom")
     if (votes() != null) {
         append(" votes={")
@@ -185,7 +185,7 @@ fun mvrsToAuditableCardsTestM(
     mvrs: List<Cvr>,
     styles: List<StyleIF>?,
     seed: Long? = null,
-): List<AuditableCardM> {
+): List<AuditableCard> {
 
     val styleMap = styles?.associateBy{ it.id() } ?: emptyMap()
     val prng = if (seed != null) Prng(seed) else null
@@ -203,7 +203,7 @@ fun mvrsToAuditableCardsTestM(
             else -> CardStyle.fromCvrBatch
         }
 
-        AuditableCardM.fromVotes(
+        AuditableCard.fromVotes(
             org.id,
             null,
             cardIndex++,

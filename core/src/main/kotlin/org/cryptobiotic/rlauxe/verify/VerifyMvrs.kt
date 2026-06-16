@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.verify
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 
 // see if the mvr, card pairs match
-fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCardIF, AuditableCardIF>>, errs: ErrorMessages) {
+fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCard, AuditableCard>>, errs: ErrorMessages) {
     var countErrs = 0
     mvrCardPairs.forEachIndexed { index, (mvr, card) ->
         val nested = errs.nested("sample $index")
@@ -36,7 +36,7 @@ fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCardIF, AuditableCardIF>
     }
 }
 
-fun AuditableCardIF.show() = buildString {
+fun AuditableCard.show() = buildString {
     append("AuditableCardIF(id='${id()}', index=${index()}, sampleNum=${prn()}, phantom=${phantom()}")
     if (poolId() != null) append(", poolId=${poolId()}")
     append(", styleName='${styleName()}'")

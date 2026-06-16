@@ -229,8 +229,8 @@ open class Contest(
     }
 
     override fun show() = buildString {
-        appendLine("'$name' ($id) $choiceFunction voteForN=${info.voteForN} votes=${votes()} undervotes=$undervotes")
-        append("   winners=${winners()} Nc=${Nc()} Nphantoms=${Nphantoms()} Nu=${Nundervotes()} sumVotes=${votes.values.sum()}")
+        append("'$name' ($id) $choiceFunction voteForN=${info.voteForN} votes=${votes()} undervotes=$undervotes,")
+        append(" winners=${winners()} Nc=${Nc()} Nphantoms=${Nphantoms()} Nu=${Nundervotes()} sumVotes=${votes.values.sum()}")
     }
 
     override fun showCandidates() = buildString {

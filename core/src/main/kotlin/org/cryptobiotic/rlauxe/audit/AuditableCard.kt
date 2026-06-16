@@ -7,7 +7,8 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator
 
-interface AuditableCardIF: CvrIF, SamplingCardIF {
+/*
+interface AuditableCard: CvrIF, SamplingCardIF {
     fun location(): String // enough info to find the card for a manual audit.
     fun index(): Int  // index into the original, canonical list of cards
 
@@ -21,7 +22,7 @@ interface AuditableCardIF: CvrIF, SamplingCardIF {
 
     // fun show(): String
     fun toCvr(): Cvr
-}
+} */
 
 interface SamplingCardIF {
     fun hasContest(contestId: Int): Boolean
@@ -29,28 +30,29 @@ interface SamplingCardIF {
 }
 
 // mutable style, so we dont need multiple classes
-data class AuditableCardM (
+data class AuditableCard (
     val id: String, // enough info to find the card for a manual audit.
     val location: String?, // enough info to find the card for a manual audit.
-    val index: Int,  // index into the original, canonical list of cards
+    val index: Int,  // index into the original, canonical list of cards, aka manifest index
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
     val styleName: String,
     val poolId: Int?, // must be set if its from a CardPool
-    val contestIds: IntArray,   // these form the votes map. set style if different
+    val contestIds: IntArray,   // these 3 form the votes map. set style if different
     val contestStarts: IntArray,
     val candidates: IntArray,
-): AuditableCardIF {
+): CvrIF, SamplingCardIF {
+
     // you can change the style but not null it; could also prevent changing altogether after its set
     private var style: StyleIF? = null
-    fun setStyle(style: StyleIF): AuditableCardM {
+    fun setStyle(style: StyleIF): AuditableCard {
         if (styleName != style.name())
-            logger.warn{"AuditableCardM.setStyle $styleName != ${style.name()}"}
+            logger.warn{"AuditableCard.setStyle $styleName != ${style.name()}"}
         require(styleName == style.name()) //  || style.name() == "unknown")
         this.style = style
         return this
     }
-    override fun style(): StyleIF? = style // could work harder so its not null
+    fun style(): StyleIF? = style // could work harder so its not null
 
     private val votes: Map<Int, IntArray>? by lazy {
         if (contestIds.isEmpty()) null else {
@@ -75,42 +77,42 @@ data class AuditableCardM (
         }
     }
 
+    // CvrIF
     override fun id() = id
-    override fun location() = location ?: id()
-    override fun index() = index
-    override fun prn() = prn
     override fun phantom() = phantom
     override fun poolId(): Int? = poolId
-    override fun styleName() = styleName
-
-    override fun votes(): Map<Int, IntArray>? = votes
-    override fun votes(contestId: Int): IntArray? = votes?.get(contestId) // use instead of votes
+    override fun votes(contestId: Int): IntArray? = votes?.get(contestId) // use instead of votes()
 
     override fun hasContest(contestId: Int): Boolean {
         return if (!useCvr && style != null) style!!.hasContest(contestId)
         else contestIds.contains(contestId)
     }
+    override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
+        val contestVotes = votes(contestId)
+        return if (contestVotes == null) 0
+        else if (contestVotes.contains(candidateId)) 1 else 0
+    }
 
-    override fun possibleContests() : IntArray {
+    // SamplingCardIF
+    override fun prn() = prn
+
+    fun location() = location ?: id()
+    fun index() = index
+    fun styleName() = styleName
+    fun possibleContests() : IntArray {
         return when {
             (!useCvr && style != null) -> style!!.possibleContests()
             else -> votes!!.keys.toList().sorted().toIntArray() // assumes cvrsContainUndervotes, set style if not.
         }
     }
 
-    override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
-        val contestVotes = votes(contestId)
-        return if (contestVotes == null) 0
-               else if (contestVotes.contains(candidateId)) 1 else 0
-    }
-
-    override fun hasExactContests() = style?.hasExactContests() ?: false
-
-    override fun toCvr() = Cvr(id, votes!!, phantom, poolId())
+    fun votes(): Map<Int, IntArray>? = votes  // TODO is this needed?
+    fun hasExactContests() = style?.hasExactContests() ?: false  // TODO is this needed?
+    fun toCvr() = Cvr(id, votes!!, phantom, poolId())
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is AuditableCardM) return false
+        if (other !is AuditableCard) return false
 
         if (index != other.index) return false
         if (prn != other.prn) return false
@@ -142,10 +144,28 @@ data class AuditableCardM (
         return result
     }
 
-    companion object {
-        private val logger = KotlinLogging.logger("AuditableCardM")
+    override fun toString() = buildString {
+        append("AuditableCard(id='$id',")
+        if (location != null) append(" location='$location',")
+        append(" index=$index, prn=$prn, styleName='$styleName',")
+        if (phantom) append(" phantom=$phantom,")
+        if (poolId != null) append(" poolId=$poolId,")
+        if (votes == null) append(" votes=null") else {
+            append(" votes=")
+            votes!!.forEach { (key, value) ->
+                if (value.size == 1)
+                    append(" $key:${value[0]},") // remove the bracket
+                else
+                    append(" $key:${value.contentToString()},") //show bracket for 0 or > 1
+            }
+        }
+        append(")")
+    }
 
-        fun fromCvr(cvr: Cvr, index: Int, prn: Long): AuditableCardM {
+    companion object {
+        private val logger = KotlinLogging.logger("AuditableCard")
+
+        fun fromCvr(cvr: Cvr, index: Int, prn: Long): AuditableCard {
             return fromVotes(cvr.id, null, index, prn, cvr.phantom, styleName = CardStyle.fromCvr,
                 poolId=cvr.poolId, votes=cvr.votes).setStyle(CardStyle.fromCvrBatch)
         }
@@ -158,21 +178,21 @@ data class AuditableCardM (
                       styleName: String,
                       poolId: Int?, // must be set if its from a CardPool
                       votes: Map<Int, IntArray>?
-        ): AuditableCardM {
+        ): AuditableCard {
             val (contestIds, contestStarts, candidates) = if (votes != null)
                 makeFromVotes(votes)
             else
                 Triple(IntArray(0), IntArray(0),IntArray(0))
 
-            return AuditableCardM(id, location, index, prn, phantom, styleName, poolId, contestIds, contestStarts, candidates)
+            return AuditableCard(id, location, index, prn, phantom, styleName, poolId, contestIds, contestStarts, candidates)
         }
 
-        fun empty(id: String, phantom: Boolean, styleName: String): AuditableCardM {
+        fun empty(id: String, phantom: Boolean, styleName: String): AuditableCard {
             return fromVotes(id, null, 0, 0, phantom, styleName, null, null)
         }
 
-        fun removeVotes(org: AuditableCardM): AuditableCardM {
-            return AuditableCardM(org.id, org.location, org.index, org.prn, org.phantom, org.styleName, org.poolId,
+        fun removeVotes(org: AuditableCard): AuditableCard {
+            return AuditableCard(org.id, org.location, org.index, org.prn, org.phantom, org.styleName, org.poolId,
                 IntArray(0), IntArray(0),IntArray(0))
         }
     }

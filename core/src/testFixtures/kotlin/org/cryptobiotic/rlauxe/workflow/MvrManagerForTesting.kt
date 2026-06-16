@@ -3,8 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardStyle
@@ -33,15 +32,15 @@ class MvrManagerForTesting(
     val pools: List<CardPool>? = null,
 ) : MvrManager, MvrManagerTestIF {
 
-    val sortedCards: List<AuditableCardIF>
-    val sortedMvrs: List<AuditableCardIF> // the mvrs in the same order as the sorted cards
-    private var mvrsForRound: List<AuditableCardIF> = emptyList()
+    val sortedCards: List<AuditableCard>
+    val sortedMvrs: List<AuditableCard> // the mvrs in the same order as the sorted cards
+    private var mvrsForRound: List<AuditableCard> = emptyList()
 
     init {
         // the order of the sortedCards cannot be changed once set.
         val prng = Prng(seed)
-        sortedCards = cvrs.mapIndexed { idx, it -> AuditableCardM.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
-        sortedMvrs = sortedCards.map { AuditableCardM.fromCvr(mvrs[it.index], it.index, it.prn) }
+        sortedCards = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
+        sortedMvrs = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 
     override fun sortedManifest(): SortedManifest {
@@ -51,7 +50,7 @@ class MvrManagerForTesting(
     override fun pools() = pools
     override fun styles() = pools
 
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCardIF>> {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>> {
         if (mvrsForRound.isEmpty()) {
             return sortedMvrs.zip(sortedCards) // all of em, for SingleRoundAudit
         }
@@ -61,7 +60,7 @@ class MvrManagerForTesting(
 
         // prove that sampledCvrs correspond to mvrs
         require(sampledCvrs.size == mvrsForRound.size)
-        val cvruaPairs: List<Pair<AuditableCardIF, AuditableCardIF>> = mvrsForRound.zip(sampledCvrs)
+        val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsForRound.zip(sampledCvrs)
         cvruaPairs.forEach { (mvr, cvr) ->
             require(mvr.location() == cvr.location())
             require(mvr.index() == cvr.index())
@@ -75,7 +74,7 @@ class MvrManagerForTesting(
     }
 
     // MvrManagerTestIF
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCardIF> {
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard> {
         val sampledMvrs = findSamples(sampleNumbers, Closer(sortedMvrs.iterator()))
         require(sampledMvrs.size == sampleNumbers.size)
 

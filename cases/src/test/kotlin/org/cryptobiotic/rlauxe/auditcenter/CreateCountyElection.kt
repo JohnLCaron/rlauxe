@@ -38,8 +38,8 @@ class CreateCountyElection(
 
     val contests: List<ContestIF>
     val contestsUA : List<ContestWithAssertions>
-    val simulatedCvrs: List<AuditableCardM>  // redacted cvrs
-    val allCards: List<AuditableCardM>  // redacted cvrs
+    val simulatedCvrs: List<AuditableCard>  // redacted cvrs
+    val allCards: List<AuditableCard>  // redacted cvrs
     val cardStyles: List<StyleIF>
 
     init {
@@ -148,16 +148,6 @@ class CreateCountyElection(
 
     override fun cards() = Closer( allCards.iterator() )
     override fun ncards() = ncards
-
-    /* fun createCards(): CloseableIterator<AuditableCardM> {
-        // same cvrs for CLCA and OneAudit
-        return CvrsToCardStylesIterator(
-            auditType,
-            Closer(allCvrs.iterator()), // use the mvrs as the cvrs
-            null,
-            styles = cardStyles // if (auditType.isClca()) null else cardPoolBuilders // integrate OA pools
-        )
-    } */
 }
 
 ////////////////////////////////////////////////////////////////////

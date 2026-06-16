@@ -190,7 +190,7 @@ class TestClcaElection(
     override fun contestsUA() = contestsUA
     override fun ncards() = allCvrs.size
 
-    override fun cards() : CloseableIterator<AuditableCardIF> {
+    override fun cards() : CloseableIterator<AuditableCard> {
         return CvrsToCardStylesIterator(
             AuditType.CLCA,
             Closer(allCvrs.iterator()),
@@ -256,7 +256,7 @@ class TestPollingElection(
     val contests: List<Contest>
     val testMvrs: List<Cvr>
     val batches: List<StyleIF>
-    val cards: List<AuditableCardM>
+    val cards: List<AuditableCard>
     val contestsUA: List<ContestWithAssertions>
 
     init {
@@ -352,7 +352,7 @@ class TestOneAuditElection(
 ): ElectionBuilder {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val cardPools: List<CardPool>
-    val cards: List<AuditableCardIF>
+    val cards: List<AuditableCard>
     val fuzzedMvrs: List<Cvr>
 
     init {

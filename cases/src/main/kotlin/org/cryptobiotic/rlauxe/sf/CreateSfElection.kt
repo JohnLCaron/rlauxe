@@ -69,7 +69,7 @@ class CreateSfElection(
         // phantomCount = countPhantoms(allCvrTabs, contestNcs)
 
         // we need to know the diluted Nb before we can create the assertions: another pass through the cvrExports
-        val cards: CloseableIterator<AuditableCardM> = createCards(auditType)
+        val cards: CloseableIterator<AuditableCard> = createCards(auditType)
         val auditableCardIter = MergeStylesIntoCardsM(cards, cardStyleMap.values.toList())
 
         val (manifestTabs, count) = tabulateCardsAndCount( auditableCardIter, infos)
@@ -158,16 +158,16 @@ class CreateSfElection(
     override fun cards() = createCards(auditType)
     override fun ncards() = ncards
 
-    fun createCards(auditType: AuditType): CloseableIterator<AuditableCardM> {
+    fun createCards(auditType: AuditType): CloseableIterator<AuditableCard> {
         // pass 2 through cvrExport
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsvFile)
-        val cardIter: CloseableIterator<AuditableCardM>
+        val cardIter: CloseableIterator<AuditableCard>
             = CvrExportConverterM(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
 
         // still need to remove cvrs for pooled data
-        val transformer = TransformingIterator<AuditableCardM, AuditableCardM>(cardIter) { org ->
+        val transformer = TransformingIterator<AuditableCard, AuditableCard>(cardIter) { org ->
             val hasCvr = auditType.isClca() || (auditType.isOA() && org.poolId == null)
-            if (hasCvr) org else AuditableCardM.removeVotes(org)
+            if (hasCvr) org else AuditableCard.removeVotes(org)
         }
         return transformer
     }
@@ -175,13 +175,13 @@ class CreateSfElection(
     // TODO add optional fuzz or some other error method?
     // convert the cvrExports to the private mvrs; must be in same order as createCards
     override fun unsortedMvrsExternal() = null
-    override fun unsortedMvrsInternal(): List<AuditableCardM> {
+    override fun unsortedMvrsInternal(): List<AuditableCard> {
         // pass 3 through cvrExport
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsvFile)
-        val cardIter: CloseableIterator<AuditableCardM>
+        val cardIter: CloseableIterator<AuditableCard>
                 = CvrExportConverterM(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
 
-        val unsortedMvrs = mutableListOf<AuditableCardM>()
+        val unsortedMvrs = mutableListOf<AuditableCard>()
         cardIter.use { iter ->
             while( iter.hasNext()) { unsortedMvrs.add (iter.next()) }
         }

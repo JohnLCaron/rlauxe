@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -64,7 +64,7 @@ fun makePhantomCards(
     contests: List<ContestIF>,
     startIdx: Int,
     prefix: String = "phantom-",
-): List<AuditableCardM> {
+): List<AuditableCard> {
     var idx = startIdx
 
     val phantombs = mutableListOf<PhantomBuilder>()
@@ -89,10 +89,10 @@ class PhantomBuilder(val id: String, val idx: Int) {
         return Cvr(id, votes, phantom = true)
     }
 
-    fun buildCardM(): AuditableCardM {
+    fun buildCardM(): AuditableCard {
         val votes = contests.associateWith { IntArray(0) }
        //  val (contestIds, contestStarts, candidates) = makeFromVotes(votes)
-        return AuditableCardM.fromVotes(id = id, location = null, index = idx, prn = 0L, phantom = true, styleName=CardStyle.phantoms, poolId = null,
+        return AuditableCard.fromVotes(id = id, location = null, index = idx, prn = 0L, phantom = true, styleName=CardStyle.phantoms, poolId = null,
             votes).setStyle(CardStyle.phantomBatch)
     }
 

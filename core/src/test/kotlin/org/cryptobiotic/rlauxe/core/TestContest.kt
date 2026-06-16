@@ -130,9 +130,9 @@ class TestContest {
         assertEquals(contest, contest2)
         assertEquals(contest.hashCode(), contest2.hashCode())
 
-        assertEquals("testContestInfo (0) Nc=211 Nphantoms=1 votes={1=108, 0=100, 2=0} undervotes=2, voteForN=1", contest.toString())
-        assertEquals( """'testContestInfo' (0) PLURALITY voteForN=1 votes={1=108, 0=100, 2=0} undervotes=2, voteForN=1
-   winners=[1] Nc=211 Nphantoms=1 Nu=2 sumVotes=208""",
+        assertEquals("testContestInfo (0) Nc=211 Nphantoms=1 votes={1=108, 0=100, 2=0} undervotes=2, voteForN=1",
+            contest.toString())
+        assertEquals( """'testContestInfo' (0) PLURALITY voteForN=1 votes={1=108, 0=100, 2=0} undervotes=2, winners=[1] Nc=211 Nphantoms=1 Nu=2 sumVotes=208""",
             contest.show())
     }
 
@@ -276,6 +276,7 @@ class TestContest {
                1 'cand1': votes=108  (winner)
                2 'cand2': votes=0 
                 Total=208
+                
         """.replaceIndent("   ")
         assertEquals(expectedShowCandidates, contestUAc.contest.showCandidates())
 

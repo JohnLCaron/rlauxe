@@ -7,8 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -41,7 +40,7 @@ class ProtoCard (
     val styleName: String,
 )
 
-fun AuditableCardIF.publishProto() : ProtoCard {
+fun AuditableCard.publishProto() : ProtoCard {
     val votes = this.votes()
     if (votes != null) {
         val contestIds = votes.keys
@@ -85,7 +84,7 @@ fun AuditableCardIF.publishProto() : ProtoCard {
     }
 }
 
-fun ProtoCard.importM(styleMap: Map<String, StyleIF> ): AuditableCardM {
+fun ProtoCard.importM(styleMap: Map<String, StyleIF> ): AuditableCard {
 
     var style = styleMap[this.styleName]
     if (style == null) {
@@ -99,7 +98,7 @@ fun ProtoCard.importM(styleMap: Map<String, StyleIF> ): AuditableCardM {
         }
     }
 
-    return AuditableCardM(
+    return AuditableCard(
         this.id,
         if (this.location == this.id) null else this.location,
         this.index,
@@ -115,7 +114,7 @@ fun ProtoCard.importM(styleMap: Map<String, StyleIF> ): AuditableCardM {
 
 /////////////////////////////////////////////////////////
 
-fun writeProtoCards(cards: CloseableIterator<AuditableCardIF>, protoFilename: String): Int {
+fun writeProtoCards(cards: CloseableIterator<AuditableCard>, protoFilename: String): Int {
     val outputStream: OutputStream = FileOutputStream(protoFilename)
 
     var count = 0
@@ -154,12 +153,12 @@ private fun writeVlenForProto(messageSize: Int, output: OutputStream) {
 }
 
 // see TimeCardReading
-class ProtoCardIterable(val protoFilename: String, val bufferSize: Int = 100_000, val styles: List<StyleIF>?) : CloseableIterable<AuditableCardM> {
-    override fun iterator(): CloseableIterator<AuditableCardM> =
+class ProtoCardIterable(val protoFilename: String, val bufferSize: Int = 100_000, val styles: List<StyleIF>?) : CloseableIterable<AuditableCard> {
+    override fun iterator(): CloseableIterator<AuditableCard> =
         ProtoCardIteratorM(protoFilename, bufferSize, styles)
 }
 
-class ProtoCardIteratorM(filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCardM> {
+class ProtoCardIteratorM(filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCard> {
     val styleMap: Map<String, StyleIF> = styles?.associateBy{ it.name() } ?: emptyMap()
 
     val errs = ErrorMessages("readProtoCardsFile '${filename}'")
@@ -180,7 +179,7 @@ class ProtoCardIteratorM(filename: String, bufferSize: Int = 100_000, val styles
         return (nextMessageSize > 0)
     }
 
-    override fun next(): AuditableCardM {
+    override fun next(): AuditableCard {
         val bytes = ByteArray(nextMessageSize)
         val bytesRead = inputStream.read(bytes)
         val protoCard = ProtoBuf.decodeFromByteArray<ProtoCard>(bytes)

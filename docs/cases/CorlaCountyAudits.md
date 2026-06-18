@@ -42,7 +42,7 @@ that the contest is in, calculate the county sample rate as
 
 Then we find the minimum countySampleRate over all counties. Conceptually, for each county we randomly choose and discard 
 extra samples, until all counties have the same sample rate. Now sum the number of remaining samples over all counties, and 
-sum the total cards over all counties. This is the _audit statum_ for that contest. (Note that the countySample rates are 
+sum the total cards over all counties. This is the _audit stratum_ for that contest. (Note that the countySample rates are 
 independent of the contest, but the set of counties used depends on each contest). The contest diluted margin is
 
     dilutedMargin = (margin in votes over all counties with the contest) / 

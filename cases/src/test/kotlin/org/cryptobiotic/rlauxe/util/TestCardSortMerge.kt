@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
@@ -101,7 +101,7 @@ class TestCardSortMerge {
         assertEquals(0, countPools) // the zip file has no pooled data
     }
 
-    fun toAuditableCard(from: CvrExport, index: Int, prn: Long, pools: Map<String, Int>? = null, showPoolVotes: Boolean = true): AuditableCardM {
+    fun toAuditableCard(from: CvrExport, index: Int, prn: Long, pools: Map<String, Int>? = null, showPoolVotes: Boolean = true): AuditableCard {
         return from.toAuditableCard(index=index, prn=prn, false, pools = pools, showPoolVotes)
     }
 

@@ -123,7 +123,7 @@ data class ContestSummary(
 fun verifyManifest(
     config: Config,
     contestsUA: List<ContestWithAssertions>,
-    cards: CloseableIterable<AuditableCardIF>,
+    cards: CloseableIterable<AuditableCard>,
     infos: Map<Int, ContestInfo>,
     results: VerifyResults,
 ): ContestSummary {
@@ -138,7 +138,7 @@ fun verifyManifest(
     val indexList = mutableListOf<Pair<Int, Long>>()
 
     var count = 0
-    var lastCard: AuditableCardIF? = null
+    var lastCard: AuditableCard? = null
     cards.iterator().use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
@@ -342,7 +342,7 @@ fun verifyClcaAgainstCards(
 
 fun verifyClcaAssortAvg(
     contestsUA: List<ContestWithAssertions>,
-    cards: CloseableIterator<AuditableCardIF>,
+    cards: CloseableIterator<AuditableCard>,
     result: VerifyResults,
     show: Boolean = false
 ): VerifyResults {
@@ -394,7 +394,7 @@ fun verifyClcaAssortAvg(
 // calculate diluted margin from assort values and poolAverages
 fun verifyOAassortAvg(
     contestsUA: List<ContestWithAssertions>,
-    cards: CloseableIterator<AuditableCardIF>,
+    cards: CloseableIterator<AuditableCard>,
     result: VerifyResults,
     show: Boolean = false
 ): VerifyResults {

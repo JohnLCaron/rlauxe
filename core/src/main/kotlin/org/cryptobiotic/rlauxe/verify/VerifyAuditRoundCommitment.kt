@@ -125,7 +125,7 @@ class VerifyAuditRoundCommitment(val auditRecordLocation: String) {
     }
 
     // TODO check mvrs
-    fun verifySamplingForContest(contest: ContestWithAssertions, cards: List<AuditableCardM>, nextCards: List<AuditableCardM>,
+    fun verifySamplingForContest(contest: ContestWithAssertions, cards: List<AuditableCard>, nextCards: List<AuditableCard>,
                                  round:Int, estCards: Int, result: VerifyResults): Boolean {
         val mycards = cards.filter { it.hasContest(contest.id) }.iterator()
         val nextcards = nextCards.filter { it.hasContest(contest.id) }.iterator()

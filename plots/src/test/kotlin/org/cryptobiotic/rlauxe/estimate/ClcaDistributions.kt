@@ -121,10 +121,10 @@ class ClcaDistributions {
             // heres the ConsistentSample permutation
             //             val sortedIndices = cvrsUA.indices.sortedBy { cvrsUA[it].sampleNumber() }
             val sortedIndices = ballotCards.sortedCards.indices.sortedBy { ballotCards.sortedCards[it].prn() } // TODO?
-            val sortedCards = sortedIndices.map { AuditableCardM.fromCvr(testCvrs[it], it, 0) }
+            val sortedCards = sortedIndices.map { AuditableCard.fromCvr(testCvrs[it], it, 0) }
             val sortedMvrs = sortedIndices.map { testMvrs[it] }
 
-            val sortedPairs: List<Pair<Cvr, AuditableCardM>> = sortedMvrs.zip(sortedCards)
+            val sortedPairs: List<Pair<Cvr, AuditableCard>> = sortedMvrs.zip(sortedCards)
 
             // "oracle" audit
             val contestUA = workflow.contestsUA().first()

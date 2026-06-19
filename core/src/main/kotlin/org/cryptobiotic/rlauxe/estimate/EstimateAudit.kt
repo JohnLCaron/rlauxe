@@ -179,7 +179,7 @@ class AuditTrialTask(
 
     override fun run(): List<AssertionTrialIF> {
         val stopwatch = Stopwatch()
-        val simMvrs = mutableListOf<AuditableCardIF>()
+        val simMvrs = mutableListOf<AuditableCard>()
 
         // TODO use VunderPoolsFuzzer when cvrsContainUndervotes = false
         // used for OA and Polling; different simulated pool data each run; TODO could use VunderPoolsFuzzer
@@ -311,7 +311,7 @@ class ContestClcaTrial(val run: Int,
     override fun startingTestStatistic() = startingTestStatistic
 
     // why not just use BettingMart ??
-    override fun addCard(mvr: AuditableCardIF?, card: AuditableCardIF, cardSortedIndex: Int) {
+    override fun addCard(mvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int) {
         countUsed++
 
         val assortValue = if (mvr != null) {
@@ -422,7 +422,7 @@ class ContestPollingTrial(val run: Int,
     override fun nmvrs() = countUsed
     override fun startingTestStatistic() = startingTestStatistic
 
-    override fun addCard(mvr: AuditableCardIF?, card: AuditableCardIF, cardSortedIndex: Int) {
+    override fun addCard(mvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int) {
         countUsed++
 
         val assortValue = if (card.phantom()) phantomAssortValue else {
@@ -480,7 +480,7 @@ interface AssertionTrialIF {
 
     fun skip(): Boolean
     fun wantsMore(): Boolean
-    fun addCard(mvr: AuditableCardIF?, card: AuditableCardIF, cardSortedIndex: Int)
+    fun addCard(mvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int)
 }
 
 fun findClosestTrial(data: List<AssertionTrialIF>, nmvrs: Int): AssertionTrialIF {

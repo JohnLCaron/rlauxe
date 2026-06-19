@@ -1,11 +1,9 @@
 package org.cryptobiotic.rlauxe.persist.protobuf
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.CardCsvReaderM
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
 import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -32,7 +30,7 @@ class TestProtoCard {
         val stopwatch = Stopwatch()
         var ncards = 0L
 
-        val protoIter: CloseableIterator<AuditableCardM> = ProtoCardIteratorM(publisher.sortedCardsProtoFile(), styles = styles)
+        val protoIter: CloseableIterator<AuditableCard> = ProtoCardIteratorM(publisher.sortedCardsProtoFile(), styles = styles)
         while (protoIter.hasNext() && csvIter.hasNext() && ncards < 100_000) {
             val cardFromCsv = csvIter.next()
             val cardFromProto = protoIter.next()
@@ -50,7 +48,7 @@ class TestProtoCard {
 
 }
 
-fun checkEqual(c1: AuditableCardM, c2: AuditableCardIF): Boolean {
+fun checkEqual(c1: AuditableCard, c2: AuditableCard): Boolean {
     assertEquals(c1.id(), c2.id())
     assertEquals(c1.location(), c2.location())
     assertEquals(c1.index(), c2.index())

@@ -23,7 +23,7 @@ interface ElectionBuilder {
     fun contestsUA(): List<ContestWithAssertions>
 
     // if you immediately write to disk, you only need one pass through the cards iterator
-    fun cards() : CloseableIterator<AuditableCardIF> // not sorted, dont need styles added yet
+    fun cards() : CloseableIterator<AuditableCard> // not sorted, dont need styles added yet
     fun ncards(): Int
 
     // In EstimateAudit, we want to use pools to estimate with, if they exist. So the merging needs to merge pools, not the batches.
@@ -33,8 +33,8 @@ interface ElectionBuilder {
     fun countyCardPools(): List<CountyPoolsIF>? = null
 
     // if (config.election.mvrSource == MvrSource.testPrivateMvrs), supply one or the other:
-    fun unsortedMvrsInternal(): List<AuditableCardM>? // for in-memory case, poolId used also as batch name?
-    fun unsortedMvrsExternal(): CloseableIterator<AuditableCardM>? // for out-of-memory case
+    fun unsortedMvrsInternal(): List<AuditableCard>? // for in-memory case, poolId used also as batch name?
+    fun unsortedMvrsExternal(): CloseableIterator<AuditableCard>? // for out-of-memory case
 }
 
 private val logger = KotlinLogging.logger("CreateElectionRecord")

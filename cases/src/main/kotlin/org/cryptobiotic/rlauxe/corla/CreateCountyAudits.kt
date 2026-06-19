@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
@@ -64,7 +64,7 @@ class CreateCountyAudits(
 
         // read them back in as an Iterator, so we dont have to read all into memory
         // val infos = contests.map { it.info() }.associateBy { it.id }
-        // val auditableCardIter: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = countyCardPools)
+        // val auditableCardIter: CloseableIterator<AuditableCard> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = countyCardPools)
 
         /* are we handling the batches correctly using mvrs?
         val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
@@ -87,9 +87,9 @@ class CreateCountyAudits(
 
     override fun contestsUA() = contestsUA
 
-    override fun cards(): CloseableIterator<AuditableCardM> {
+    override fun cards(): CloseableIterator<AuditableCard> {
         val publisher = Publisher(auditdir)
-        val unsortedMvrs: CloseableIterator<AuditableCardM> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
+        val unsortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
         return TransformingIterator(unsortedMvrs) { mvr ->
             when {
                 mvr.phantom -> mvr

@@ -1,12 +1,11 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
 
-// builds one AuditableCardM
-class AuditableCardMBuilder(
+// builds one AuditableCard
+class AuditableCardBuilder(
     val id: String,
     val location: String?,
     val index: Int,
@@ -26,7 +25,7 @@ class AuditableCardMBuilder(
     constructor(id: String, location: String?, index: Int, poolId: Int?, cardStyle: String?):
             this(id, location, index, 0L, false, cardStyle, poolId, null)
 
-    fun replaceContestVotes(contestId: Int, contestVotes: IntArray): AuditableCardMBuilder  {
+    fun replaceContestVotes(contestId: Int, contestVotes: IntArray): AuditableCardBuilder  {
         votes[contestId] = contestVotes
         return this
     }
@@ -35,13 +34,13 @@ class AuditableCardMBuilder(
         votes[id] = if (candidateId == null) intArrayOf() else intArrayOf(candidateId)
     }
 
-    fun build() : AuditableCardM {
+    fun build() : AuditableCard {
         val useBatchName: String = when {
             styleName != null -> styleName
             !votes.isEmpty() -> CardStyle.fromCvr
             else -> "unknown"
         }
-        val cardm = AuditableCardM.fromVotes(
+        val cardm = AuditableCard.fromVotes(
             id, location, index, prn, phantom,
             votes = votes,
             poolId = poolId,
@@ -52,7 +51,7 @@ class AuditableCardMBuilder(
     }
 
     companion object {
-        fun fromCard(card: AuditableCardIF) = AuditableCardMBuilder(
+        fun fromCard(card: AuditableCard) = AuditableCardBuilder(
             card.id(),
             if (card.id() == card.location()) null else card.location(),
             card.index(),

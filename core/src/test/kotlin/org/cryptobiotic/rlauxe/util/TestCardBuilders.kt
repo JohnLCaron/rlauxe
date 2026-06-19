@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -12,18 +12,18 @@ class TestCardBuilders {
 
     @Test
     fun testOneBuilder() {
-        val card = AuditableCardM.fromVotes ("cvr$42", null, 42, 4422L, false, // intArrayOf(1,2,3),
+        val card = AuditableCard.fromVotes ("cvr$42", null, 42, 4422L, false, // intArrayOf(1,2,3),
             poolId=null, votes=mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), styleName=CardStyle.fromCvr)
-        val cb = AuditableCardMBuilder.fromCard(card)
+        val cb = AuditableCardBuilder.fromCard(card)
         val back = cb.build()
         assertEquals(card, back)
     }
 
     @Test
     fun testReplaceContestVotes() {
-        val card = AuditableCardM.fromVotes ("cvr$42", null, 42, 4422L, false, // intArrayOf(1,2,3),
+        val card = AuditableCard.fromVotes ("cvr$42", null, 42, 4422L, false, // intArrayOf(1,2,3),
             poolId=null, votes=mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), styleName=CardStyle.fromCvr)
-        val cb = AuditableCardMBuilder.fromCard(card)
+        val cb = AuditableCardBuilder.fromCard(card)
         card.votes()!!.forEach { (contestId, votes) -> cb.replaceContestVotes(contestId, votes) }
         val back = cb.build()
         assertEquals(card, back)
@@ -35,14 +35,14 @@ class TestCardBuilders {
         val (mvrs, cards, pools, styles) = test.makeMvrCardAndPops()
         val cardMap = cards.associateBy { it.id }
 
-        val cardbs = mutableListOf<AuditableCardMBuilder>()
+        val cardbs = mutableListOf<AuditableCardBuilder>()
         cards.forEach {
-            val cb = AuditableCardMBuilder.fromCard(it)
+            val cb = AuditableCardBuilder.fromCard(it)
             cardbs.add( cb)
         }
 
         // convert back to Cvr
-        val roundtrip: List<AuditableCardM> = cardbs.map { it.build() }
+        val roundtrip: List<AuditableCard> = cardbs.map { it.build() }
         // same order
         roundtrip.forEach{
             val orgCard = cardMap[it.id]!!

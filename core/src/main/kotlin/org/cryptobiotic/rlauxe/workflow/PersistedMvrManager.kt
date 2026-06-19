@@ -26,7 +26,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
 
     val styles by lazy { auditRecord.readCardStyles() ?: auditRecord.readCardPools() } // styles are preferred
     val sortedManifest by lazy { auditRecord.readSortedManifest(styles) }
-    val auditableCards: CloseableIterator<AuditableCardIF> by lazy {  sortedManifest.cards.iterator() }
+    val auditableCards: CloseableIterator<AuditableCard> by lazy {  sortedManifest.cards.iterator() }
 
     //// problem is that you lose the cache when you close and open the AuditRecord between samplings
     val cachedCards : List<SamplingCardIF>? by lazy {
@@ -53,7 +53,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     override fun pools() = auditRecord.readCardPools() // could test if batches are cardPools
     override fun countyPools() = if (styles == null) null else auditRecord.readCountyCardPools(styles!!)
 
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCardIF>>  {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         val mvrsForRound = readMvrsForRound(round)
         val sampleNumbers = mvrsForRound.map { it.prn }
 
@@ -101,12 +101,12 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     // it must be in the same order as the sorted cards
     // it is placed into publisher.sampleMvrsFile(round), and this method just reads from that file.
     // return complete list of mvrs used for this round
-    private fun readMvrsForRound(round: Int): List<AuditableCardM> {
+    private fun readMvrsForRound(round: Int): List<AuditableCard> {
         return readCardsAndMergeList(publisher.sampleMvrsFile(round))
     }
 
     // TODO findSamples wantst he mvrs in sorted order
-    fun enterMvrsForRound(round: Int, mvrs: CloseableIterable<AuditableCardM>, errs: ErrorMessages): Boolean {
+    fun enterMvrsForRound(round: Int, mvrs: CloseableIterable<AuditableCard>, errs: ErrorMessages): Boolean {
         val sampledPrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))
         if (sampledPrnsResult.isErr) {
             logger.error{ "$sampledPrnsResult" } // needed?
@@ -132,11 +132,11 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         return true
     }
 
-    fun readCardsAndMerge(filename: String): CloseableIterator<AuditableCardM> {
+    fun readCardsAndMerge(filename: String): CloseableIterator<AuditableCard> {
         return readCardsCsvIteratorM(filename, styles)
     }
 
-    fun readCardsAndMergeList(filename: String): List<AuditableCardM> {
+    fun readCardsAndMergeList(filename: String): List<AuditableCard> {
         return readCardsAndMergeToList(filename, styles)
     }
 

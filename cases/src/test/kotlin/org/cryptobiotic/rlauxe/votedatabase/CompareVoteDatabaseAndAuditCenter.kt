@@ -12,16 +12,20 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.text.split
 
-// votedatabase missing San Juan;  cant read Garfield (yet); has Monroe and Roosevelt from some other state
-//   Baca has Huerfano, remove
-//   Las Animas has 106 cards out of ~8000
-// Garfield has an earler format
-// Broomfield, Huerfano, Montrose, Saquache appear to have a differrent earlier format same version 5.11.3.1
-//    first 5 cols have the field as ="field" otherwise look ok FIXED
+/*
+votedatabase missing San Juan;  cant read Garfield (yet); has Monroe and Roosevelt from some other state
+  Baca has Huerfano, remove
+  Las Animas has 106 cards out of ~8000
+Garfield has an older format, not yet read
 
-// auditcenter tabulate_county.csv missing Gunnison, San Juan
+auditcenter tabulate_county.csv missing Gunnison, San Juan
 
-// overall we are missing Baca, Garfield, Gunnison, San Juan counties
+overall we are missing Baca, Garfield, Gunnison, San Juan counties
+
+redactions: Boulder, Doloros, Pitkin, possibly Jefferson
+
+
+*/
 
 val votedatabase = "/home/stormy/datadrive/votedatabase"
 val colorado2020 = "$votedatabase/cvr/Colorado"

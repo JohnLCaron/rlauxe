@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.dominion
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
-import org.cryptobiotic.rlauxe.util.AuditableCardMBuilder
+import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import kotlin.collections.set
 
 // each export is specific to a County
@@ -92,7 +92,7 @@ class DominionConverter(val county: String, export: DominionCvrExport, contests:
     }
 
     // or to CvrExport ??
-    fun convertToCard(dcvr: CastVoteRecord): AuditableCardM {
+    fun convertToCard(dcvr: CastVoteRecord): AuditableCard {
         // must convert to canincal contestIDs to use cardStyles
         val contestSchemaIdSet = dcvr.contestVotes.map { it.contestId }.toSet()
         val canonicalIdSet = convertExportContestIdSetToCanonical(contestSchemaIdSet)
@@ -100,7 +100,7 @@ class DominionConverter(val county: String, export: DominionCvrExport, contests:
         if (cardStyle == null)
             print("")
         val useCardStyleName = cardStyle?.name ?: CardStyle.fromCvr
-        val cvrb = AuditableCardMBuilder(dcvr.imprintedId, null,  0, 0L, false, useCardStyleName, null, null)
+        val cvrb = AuditableCardBuilder(dcvr.imprintedId, null,  0, 0L, false, useCardStyleName, null, null)
         // have to map both contestId and candVotes
         dcvr.contestVotes.forEach{ contestVote ->
             val lookup = exportToCanonLookup[contestVote.contestId]

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.dominion
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
@@ -102,14 +102,14 @@ fun CvrExport.toCsv() = buildString {
 }
 
 class CvrExportToCardAdapterM(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: List<CardPoolIF>?, val convertPoolIds: Boolean)
-    : CloseableIterator<AuditableCardM> {
+    : CloseableIterator<AuditableCard> {
 
     val poolMap = pools?.associateBy { it.name() } ?: emptyMap()
     val poolCounts = mutableMapOf<String, Int>() // to assign index within the poool
     var countIndex = 0
 
     override fun hasNext() = cvrExportIterator.hasNext()
-    override fun next(): AuditableCardM {
+    override fun next(): AuditableCard {
         val cvrExport = cvrExportIterator.next()
         val pool = if (pools == null || cvrExport.group != 1) null else poolMap[ cvrExport.poolKey() ]
 
@@ -120,7 +120,7 @@ class CvrExportToCardAdapterM(val cvrExportIterator: CloseableIterator<CvrExport
             poolCounts[poolName] = poolCount + 1
             "pool ${pool.name()} position${poolCount+1}"
         }
-        val result = AuditableCardM.fromVotes(
+        val result = AuditableCard.fromVotes(
             cvrExport.id,
             location,
             countIndex,
@@ -142,13 +142,13 @@ class CvrExportConverterM(
     val pools: List<CardPoolIF>?,
     val styles: Map<Set<Int>, StyleIF>?,
     val convertPoolIds: Boolean
-) : CloseableIterator<AuditableCardM> {
+) : CloseableIterator<AuditableCard> {
     val poolMap = pools?.associateBy { it.name() } ?: emptyMap()
     val poolCounts = mutableMapOf<String, Int>() // to assign index within the poool
     var countIndex = 0
 
     override fun hasNext() = cvrExportIterator.hasNext()
-    override fun next(): AuditableCardM {
+    override fun next(): AuditableCard {
         val cvrExport = cvrExportIterator.next()
         val pool = if (pools == null || cvrExport.group != 1) null else poolMap[ cvrExport.poolKey() ]
         val style = if (styles == null) null else styles[ cvrExport.votes.keys ]
@@ -161,7 +161,7 @@ class CvrExportConverterM(
             "pool ${pool.name()} position${poolCount+1}"
         }
 
-        val result = AuditableCardM.fromVotes(
+        val result = AuditableCard.fromVotes(
             cvrExport.id,
             location,
             countIndex,

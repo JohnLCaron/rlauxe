@@ -33,12 +33,6 @@ class ShowGAOneAuditBetting {
         maxLoss: Double,
         poolPct: Double,
     ) {
-        // data class ContestMvrCardAndPops(
-        //    val contestUA: ContestWithAssertions,
-        //    val mvrs: List<Cvr>,
-        //    val cards: List<AuditableCardM>,
-        //    val pools: List<OneAuditPool>,
-        //)
         val (oaContest, mvrs, cards, cardPools) =
             makeOneAuditTest(margin, N, cvrFraction = 1 - poolPct, undervoteFraction = 0.0, phantomFraction = 0.0)
 

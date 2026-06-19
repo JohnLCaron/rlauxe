@@ -76,7 +76,7 @@ class TestCvrExportRedaction {
 
     @Test
     fun testElPaso() { // redaction
-        var filename = "$colorado2020/El Paso/cvr.csv"
+        var filename = "/home/stormy/datadrive/votedatabase/cvr/Colorado/Jefferson/JeffCO_2020_CVR_Redacted.csv"
         println(filename)
         val export: DominionCvrExport = DominionCvrExportReader(filename).read()
         export.exportCardStyles.forEach { type ->
@@ -87,6 +87,11 @@ class TestCvrExportRedaction {
         }
     }
 
+    // Boulder, Doloros, Pitkin, possibly Jefferson
+    // /home/stormy/datadrive/votedatabase/cvr/Colorado/Jefferson/JeffCO_2020_CVR_Redacted.csv has columns shifted by 1
+    // /home/stormy/datadrive/votedatabase/cvr/Colorado/Phillips/cvr.csv
+    ///home/stormy/datadrive/votedatabase/cvr/Colorado/Phillips/Phillips 2020  cvr phillips county.csv
+    //  RedactedGroup('r', ncards=1, contests=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29] totalVotes=62726)
     @Test
     fun allColorado2020Counties() {
         val path = Path(colorado2020)

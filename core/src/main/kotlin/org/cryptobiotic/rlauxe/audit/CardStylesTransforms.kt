@@ -9,7 +9,7 @@ import kotlin.sequences.plus
 fun mvrsToAuditableCardsListM(
     mvrs: List<Cvr>,
     styles: List<StyleIF>?,
-): List<AuditableCardM> {
+): List<AuditableCard> {
 
     val styleMap = styles?.associateBy{ it.id() } ?: emptyMap()
 
@@ -25,7 +25,7 @@ fun mvrsToAuditableCardsListM(
         }
 
         val (contestIds, contestStarts, candidates) = makeFromVotes(org.votes)
-        AuditableCardM(
+        AuditableCard(
             org.id,
             null,
             cardIndex++,
@@ -43,7 +43,7 @@ class MvrsToCardStylesIterator(
     val mvrs: CloseableIterator<Cvr>,
     styles: List<StyleIF>, //  either CardPool or CardStyle
     phantomCvrs : List<Cvr>? = null,
-): CloseableIterator<AuditableCardM> {
+): CloseableIterator<AuditableCard> {
 
     val allMvrs: Iterator<Cvr>
 
@@ -62,7 +62,7 @@ class MvrsToCardStylesIterator(
 
     override fun hasNext() = allMvrs.hasNext()
 
-    override fun next(): AuditableCardM {
+    override fun next(): AuditableCard {
         val org = allMvrs.next()
         val style = styleMap[org.poolId]  // hijack poolId
 
@@ -73,7 +73,7 @@ class MvrsToCardStylesIterator(
         }
 
         val (contestIds, contestStarts, candidates) = makeFromVotes(org.votes)
-        val cardm = AuditableCardM(
+        val cardm = AuditableCard(
             id = org.id,
             location = null,
             index = cardIndex++,
@@ -99,7 +99,7 @@ class CvrsToCardStylesIterator(
     val cvrs: CloseableIterator<Cvr>,
     phantomCvrs : List<Cvr>?,
     styles: List<StyleIF>?,  //  either CardPool or CardStyle
-): CloseableIterator<AuditableCardM> {
+): CloseableIterator<AuditableCard> {
 
     val styleMap = styles?.associateBy{ it.contestIdSet() } ?: emptyMap()
     val allCvrs: Iterator<Cvr>
@@ -118,7 +118,7 @@ class CvrsToCardStylesIterator(
 
     override fun hasNext() = allCvrs.hasNext()
 
-    override fun next(): AuditableCardM {
+    override fun next(): AuditableCard {
         val org = allCvrs.next()
         val style = styleMap[org.votes.keys]
         val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
@@ -130,7 +130,7 @@ class CvrsToCardStylesIterator(
             else -> CardStyle.fromCvr
         }
         val (contestIds, contestStarts, candidates) = makeFromVotes(votes)
-        val cardm = AuditableCardM(
+        val cardm = AuditableCard(
             id = org.id,
             location = null,
             index = cardIndex++,
@@ -151,15 +151,15 @@ class CvrsToCardStylesIterator(
 
 // merge styles into cards iterator
 class MergeStylesIntoCardsM(
-    val cardsIter: CloseableIterator<AuditableCardM>,
+    val cardsIter: CloseableIterator<AuditableCard>,
     styles: List<StyleIF>,
-): CloseableIterator<AuditableCardM> {
+): CloseableIterator<AuditableCard> {
     val styleMap = styles.associateBy{ it.name() }
 
     override fun hasNext() = cardsIter.hasNext()
 
     // styleName must be in styleMap
-    override fun next(): AuditableCardM {
+    override fun next(): AuditableCard {
         val org = cardsIter.next()
         val style = styleMap[org.styleName]
         val cardStyle = when {

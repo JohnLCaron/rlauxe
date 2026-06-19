@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.estimateOld
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -27,7 +27,7 @@ class TestMakeFuzzedCvrs {
         val assort = contestUA.clcaAssertions.first().cassorter
 
         val testMvrs = makeFuzzedCvrsForPolling(listOf(contest.info), testCvrs, mvrsFuzzPct)
-        val testCards = testCvrs.mapIndexed { idx, cvr -> AuditableCardM.fromCvr(cvr, idx, 0) }
+        val testCards = testCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0) }
         val sampler = ClcaSampler( // fuzz single contest OK
             contestUA.id,
             testCards.size,

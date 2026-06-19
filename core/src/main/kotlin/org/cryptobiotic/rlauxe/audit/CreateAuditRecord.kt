@@ -80,9 +80,9 @@ fun sortManifestInternal(publisher: Publisher, seed: Long) {
     logger.info{"sortManifestInternal ${countCards} cards to ${publisher.sortedCardsFile()} seed= $seed"}
 }
 
-fun createSortedCardsInternal(unsortedCards: CloseableIterator<AuditableCardM>, seed: Long) : List<AuditableCardM> {
+fun createSortedCardsInternal(unsortedCards: CloseableIterator<AuditableCard>, seed: Long) : List<AuditableCard> {
     val prng = Prng(seed)
-    val cards = mutableListOf<AuditableCardM>()
+    val cards = mutableListOf<AuditableCard>()
     unsortedCards.use { cardIter ->
         while (cardIter.hasNext()) {
             val unsorted = cardIter.next()
@@ -115,16 +115,16 @@ fun makeFastCards(publisher: Publisher, styles: List<StyleIF>): Int {
     return ncards
 }
 
-fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCardM>, seed: Long) {
-    val sorter = SortMerge<AuditableCardM>("$topdir/sortChunks", outputFile = outputFile, seed = seed)
+fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCard>, seed: Long) {
+    val sorter = SortMerge<AuditableCard>("$topdir/sortChunks", outputFile = outputFile, seed = seed)
     sorter.run(
         cardIter = unsortedCards,
-        toCard = { from: AuditableCardM, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
+        toCard = { from: AuditableCard, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
     )
 }
 
 // internal sort of unsortedMvrs (must be in canonical order) to sorted by prn
-fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<AuditableCardM>, styles: List<StyleIF>?, seed: Long) {
+fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<AuditableCard>, styles: List<StyleIF>?, seed: Long) {
     validateOutputDirOfFile(publisher.sortedMvrsFile())
 
     // val mvrCardIter = MvrsToCardsWithBatchNameIterator( mvrIter, batches ?: emptyList(), phantomCvrs = null, seed = seed)
@@ -132,7 +132,7 @@ fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<AuditableC
     // add the prn
     val prng = Prng(seed)
     val mvrIter = unsortedMvrs.iterator()
-    val mvrCards = mutableListOf<AuditableCardM>()
+    val mvrCards = mutableListOf<AuditableCard>()
     while (mvrIter.hasNext()) {
         mvrCards.add( mvrIter.next().copy(prn=prng.next()) )
     }

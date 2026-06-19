@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.dominion
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardM
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.util.createZipFile
 import kotlin.io.path.createTempFile
 
@@ -65,7 +65,7 @@ class TestCvrExportCsv {
         )
         val card = cvr.toAuditableCard(42, 43L, true, mapOf("test1-2" to 99))
 
-        val target = AuditableCardM.fromVotes (
+        val target = AuditableCard.fromVotes (
             "test1-2-3", null,
             42,
             43L,
@@ -89,7 +89,7 @@ class TestCvrExportCsv {
         )
         val card = cvr.toAuditableCard(42, 43L, true, mapOf("test1-2" to 99), showPoolVotes=true)
 
-        val target = AuditableCardM.fromVotes (
+        val target = AuditableCard.fromVotes (
             "test1-2-3", null,
             42,
             43L,

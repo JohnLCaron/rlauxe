@@ -7,7 +7,7 @@ import com.github.michaelbull.result.unwrap
 import com.github.michaelbull.result.unwrapError
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CardStyle.Companion.useVotes
 import org.cryptobiotic.rlauxe.audit.StyleIF
@@ -60,7 +60,7 @@ class VerifyAuditCommitment(val location: String, contestId: Int? = null, show: 
 data class AuditCommitment(val electionInfo: ElectionInfo, val auditCreationConfig: AuditCreationConfig,
                            val contests: List<ContestWithAssertions>, val styles: List<StyleIF>?,
                            val pools: List<CardPoolIF>?,
-                           val sortedManifest: CloseableIterable<AuditableCardIF> )
+                           val sortedManifest: CloseableIterable<AuditableCard> )
 
 fun readAuditCommitment(topdir: String): Result<AuditCommitment, ErrorMessages> {
     val errs = ErrorMessages("readElectionRecord from '${topdir}'")
@@ -84,7 +84,7 @@ fun readAuditCommitment(topdir: String): Result<AuditCommitment, ErrorMessages> 
 fun verifySortedCardManifest(
     auditType: AuditType,
     contestsUA: List<ContestWithAssertions>,
-    cards: CloseableIterable<AuditableCardIF>,
+    cards: CloseableIterable<AuditableCard>,
     infos: Map<Int, ContestInfo>,
     batchSet: Set<StyleIF>,
     seed: Long,
@@ -102,7 +102,7 @@ fun verifySortedCardManifest(
     val indexList = mutableListOf<Pair<Int, Long>>()
 
     var count = 0
-    var lastCard: AuditableCardIF? = null
+    var lastCard: AuditableCard? = null
 
     cards.iterator().use { cardIter ->
         while (cardIter.hasNext()) {

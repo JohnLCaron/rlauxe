@@ -64,8 +64,8 @@ class CreatePrecinctAndStyle(
         cardStyleMap = styles
         //  cardStyles = styles.values.toList()
 
-        // the full and complete AuditableCardM, merged with the pools
-        val auditableCardIter: CloseableIterator<AuditableCardM> = createCards(auditType)
+        // the full and complete AuditableCard, merged with the pools
+        val auditableCardIter: CloseableIterator<AuditableCard> = createCards(auditType)
 
         val (manifestTabs, count) = tabulateCardsAndCount( auditableCardIter, infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated }
@@ -140,7 +140,7 @@ class CreatePrecinctAndStyle(
     override fun cards() = createCards(auditType)
     override fun ncards() = ncards
 
-    fun createCards(auditType: AuditType): CloseableIterator<AuditableCardM> {
+    fun createCards(auditType: AuditType): CloseableIterator<AuditableCard> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val poolCounts = mutableMapOf<String, Int>() // to assign index within the poool
         val convertPoolIds = auditType.isOA()
@@ -150,7 +150,7 @@ class CreatePrecinctAndStyle(
         // converts CvrExport to CardWithBatchName, adds poolId, styleName, location
         // val cardIter = CvrExportToCardAdapter(cvrExportIter, cardPools(), auditType.isOA())
 
-        val transformer = TransformingIterator<CvrExport, AuditableCardM>(cvrExportIter) { cvrExport ->
+        val transformer = TransformingIterator<CvrExport, AuditableCard>(cvrExportIter) { cvrExport ->
             // TODO cardStyleMap must include all ccvrs
             val cardStyle = cardStyleMap[cvrExport.votes.keys]!!
             val pool = if (cvrExport.group != 1) null else {
@@ -174,7 +174,7 @@ class CreatePrecinctAndStyle(
             else
                 Triple(IntArray(0), IntArray(0), IntArray(0), )
 
-            AuditableCardM(
+            AuditableCard(
                 cvrExport.id,
                 location,
                 countIndex++,
@@ -192,11 +192,11 @@ class CreatePrecinctAndStyle(
     // TODO add optional fuzz or some other error method?
     // the cvrExports are the private mvrs; must be in same order as createCards
     override fun unsortedMvrsExternal() = null
-    override fun unsortedMvrsInternal(): List<AuditableCardM> {
+    override fun unsortedMvrsInternal(): List<AuditableCard> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cardIter = CvrExportToCardAdapterM(cvrExportIter, cardPools(), auditType.isOA())
 
-        val unsortedMvrs = mutableListOf<AuditableCardM>()
+        val unsortedMvrs = mutableListOf<AuditableCard>()
         cardIter.use { iter ->
             while( iter.hasNext()) { unsortedMvrs.add (iter.next()) }
         }

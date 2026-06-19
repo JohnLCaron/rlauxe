@@ -388,7 +388,7 @@ fun estimateOneAuditAssertionRound(
         throw RuntimeException("failed on cardSamples.usedByContests[${contestUA.contest.id}]")
     }
 
-    val oaFuzzedPairs: List<Pair<AuditableCardIF, AuditableCardIF>> = vunderFuzz.mvrCvrPairs
+    val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
     val previousErrorTracker = assertionRound.previousErrorTracker()
     val sampler =
         // start from where we left off

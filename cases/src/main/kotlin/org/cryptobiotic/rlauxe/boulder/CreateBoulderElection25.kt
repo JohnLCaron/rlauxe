@@ -264,7 +264,7 @@ class CreateBoulderElection25(
     override fun cards() = createCards()
     override fun ncards() = ncards
 
-    fun createCards(): CloseableIterator<AuditableCardM> {
+    fun createCards(): CloseableIterator<AuditableCard> {
         // same cvrs for CLCA and OneAudit
         return CvrsToCardStylesIterator(
             auditType,

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.irv
 
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
@@ -15,7 +15,6 @@ import org.cryptobiotic.rlauxe.util.SubsetIterator
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.workflow.readSortedManifest
-import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.test.Test
 import kotlin.use
 
@@ -26,8 +25,8 @@ class TestSf2024OneAuditIrv() {
     val cardPools: List<CardPool>
 
     val cardManifest: SortedManifest
-    val mvrsIterable: CloseableIterable<AuditableCardIF>
-    val mvrs = mutableListOf<AuditableCardIF>()
+    val mvrsIterable: CloseableIterable<AuditableCard>
+    val mvrs = mutableListOf<AuditableCard>()
 
     init {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"

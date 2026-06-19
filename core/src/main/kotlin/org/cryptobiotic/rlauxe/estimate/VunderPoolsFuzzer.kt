@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditableCardIF
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.util.AuditableCardMBuilder
+import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import kotlin.collections.toList
 import kotlin.random.Random
 
@@ -16,10 +16,10 @@ class VunderPoolsFuzzer(
     pools: List<CardPool>,
     val infos: Map<Int, ContestInfo>,
     val fuzzPct: Double,
-    cards: List<AuditableCardIF>
+    cards: List<AuditableCard>
 ) {
     val isIRV = infos.mapValues { it.value.isIrv }
-    var mvrCvrPairs: List<Pair<AuditableCardIF, AuditableCardIF>>  // the (mvr, cvr) pairs suitable for CLCA audit
+    var mvrCvrPairs: List<Pair<AuditableCard, AuditableCard>>  // the (mvr, cvr) pairs suitable for CLCA audit
     val vunderPools =  VunderPools(pools)
 
     init {
@@ -49,15 +49,15 @@ class VunderPoolsFuzzer(
 fun makeFuzzedCardFromCard(
     infos: Map<Int, ContestInfo>,
     isIRV: Map<Int, Boolean>, // contestId -> isIRV
-    card: AuditableCardIF, // must have votes, ie have a Cvr
+    card: AuditableCard, // must have votes, ie have a Cvr
     fuzzPct: Double,
-) : AuditableCardIF {
+) : AuditableCard {
     if (fuzzPct == 0.0 || card.phantom()) return card
     val r = Random.nextDouble(1.0)
     if (r > fuzzPct) return card
 
     require(card.votes() != null)
-    val cardb = AuditableCardMBuilder.fromCard(card)
+    val cardb = AuditableCardBuilder.fromCard(card)
     // TODO ?? cardb.possibleContests().forEach { contestId ->
     cardb.votes.forEach { (contestId, cands) ->
         val info = infos[contestId]

@@ -50,7 +50,7 @@ data class Candidate(
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-fun readBelgiumElectionJson(filename: String): Result<BelgiumElectionJson, ErrorMessages> {
+fun readBelgiumJsonFromFile(filename: String): Result<BelgiumElectionJson, ErrorMessages> {
     val errs = ErrorMessages("readBelgiumElectionJson '${filename}'")
     val filepath = Path.of(filename)
     if (!Files.exists(filepath)) {

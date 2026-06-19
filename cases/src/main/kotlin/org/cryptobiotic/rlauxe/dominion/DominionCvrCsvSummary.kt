@@ -5,7 +5,7 @@ import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.boulder.parseContestNameAndVoteFor
 import org.cryptobiotic.rlauxe.boulder.parseIrvContestName
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.corla.munge
+import org.cryptobiotic.rlauxe.auditcenter.munge
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -18,7 +18,7 @@ import kotlin.math.max
 
 private val logger = KotlinLogging.logger("DominionCvrExport")
 
-// // DominionCvrExportCsvSummary ??
+// one for each county
 data class DominionCvrCsvSummary(
     // val county: String,  TODO
     val electionName: String,

@@ -237,7 +237,7 @@ class DominionCvrExportCsvReader(val filename: String, showHeaders: Boolean = fa
             ballotStyles.add(cvr)
             return true
 
-        } else if (line.get(0).isEmpty()) { // Boulder, Dolores; has votes presumably of the sum of the redactions
+        } else if (line.get(0).isEmpty()) { // Boulder, Dolores; has votes, presumably the sum of the redactions
             val ballotStyle = line.get(ballotTypeIdx)
             val redactedGroup = DominionRedactedGroup(ballotStyle).addVotes(schema, line)
             ballotStyles.add(redactedGroup, nvotesMap)

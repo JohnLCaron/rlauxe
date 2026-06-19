@@ -3,6 +3,13 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
+import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
+import org.cryptobiotic.rlauxe.auditcenter.CorlaContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
+import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
+import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import org.cryptobiotic.rlauxe.auditcenter.MvrStyle
+import org.cryptobiotic.rlauxe.auditcenter.makeContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -35,13 +42,13 @@ class MakeCountyPoolsOld(
 
         val distributeNc: Map<String, Map<String, Int>> = distributeNc() // county -> contest -> Nc for that contest in that county
 
-        val contestTabByCounty: Map<String, CountyContestTabs> = coloradoInput.countyContestTabs.associateBy { it.countyName }
+        val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabAllContests.associateBy { it.countyName }
 
-        val mvrStylesMap: Map<String, CountyStylesFromMvrs> = coloradoInput.mvrStyles.associateBy { it.countyName }
+        val mvrStylesMap: Map<String, CountyStylesFromMvrs> = coloradoInput.stylesFromMvrs.associateBy { it.countyName }
 
         // the mvr styles are not complete. This seriously sucks.
         // pick out the contests that dont have styles that contain it
-        val missingContestsByCounty = mutableMapOf<String, MutableList<CountyContestTab>>() // countyName -> contestTab
+        val missingContestsByCounty = mutableMapOf<String, MutableList<CountyContestVotes>>() // countyName -> contestTab
         contestTabByCounty.map { (countyName, countyContest) ->
             val mvrStyles: CountyStylesFromMvrs = mvrStylesMap[countyName]!!
             countyContest.contests.forEach { (contestName, contestTab) ->
@@ -132,12 +139,11 @@ class MakeCountyPoolsOld(
             val countyContestNc: Map<String, Int> = distributeNc[countyPool.countyName]!!  // contestName -> contest.Nc
 
             // CountyContestTabs from tabulateCounty.csv
-            val tabs = countyPool.cct.contests.map { (name, countyContestTab) ->
+            val tabs = countyPool.cct.contests.map { (name, countyContestVotes) ->
                 val info = infosByName[name]!!
-                if (info.id == 180)
-                    print("here")
                 val ncards = countyContestNc[name] ?: 0
-                countyContestTab.makeContestTabulation(info, ncards)
+                val canonicalContest = coloradoInput.canonicalContests()[name]!!
+                countyContestVotes.makeContestTabulation(canonicalContest, info, ncards)
             }
 
             // TODO im not sure is missingStyle got assigned ncard ??
@@ -153,7 +159,7 @@ class MakeCountyPoolsOld(
     // for each contest, distribte Nc to the counties it is in, proportional to votesInCounty / totalVotes
     fun distributeNc(): Map<String, Map<String, Int>> { // county -> contest -> Nc
         val countyNc = mutableMapOf<String, MutableMap<String, Int>>() // county -> contest -> Nc
-        coloradoInput.contestTabsByCounty.values.forEach { contestTabByCounty ->
+        coloradoInput.contestTabsAllCounties.values.forEach { contestTabByCounty ->
             val contestName = contestTabByCounty.contestName
             val builder = builders[contestName]
             if (builder == null)
@@ -178,7 +184,7 @@ class MakeCountyPoolsOld(
                 contestSum[contestName] = contestAccum + contestVotes
             }
         }
-        coloradoInput.contestTabsByCounty.values.forEach { contestTab ->
+        coloradoInput.contestTabsAllCounties.values.forEach { contestTab ->
             val contestName = contestTab.contestName
             val sum = contestSum[contestName]!!
             val builder = builders[contestName]!!
@@ -189,14 +195,14 @@ class MakeCountyPoolsOld(
         return countyNc
     }
 
-    fun makeMissingPools(missingContestsByCounty: Map<String, List<CountyContestTab>>): Map<String, CountyPoolFromStyle> {
+    fun makeMissingPools(missingContestsByCounty: Map<String, List<CountyContestVotes>>): Map<String, CountyPoolFromStyle> {
         return missingContestsByCounty.map { (countyName, missingContests) -> makeMissingPool(countyName, missingContests) }
             .associateBy { it.countyName }
     }
 
     // the simplest thing to do is to munge all missing contests into a single style.
     // TODO something better ?
-    fun makeMissingPool(countyName: String, missingContests: List<CountyContestTab>): CountyPoolFromStyle {
+    fun makeMissingPool(countyName: String, missingContests: List<CountyContestVotes>): CountyPoolFromStyle {
 
         val votesForStyle = mutableMapOf<Int, ContestTabulation>() // all contests, this style
         missingContests.forEach { contestTab ->
@@ -221,7 +227,7 @@ class MakeCountyPoolsOld(
 // obsolete, but used by PoolsforAllCounties
 data class CountyPoolsBuilderOld(
     val countyName: String,
-    val cct: CountyContestTabs, // the votes subtotal for each contest in the county
+    val cct: CountyTabAllContests, // the votes subtotal for each contest in the county
     val mvrStyles: CountyStylesFromMvrs, // Set<contestId> and reletive count within county
     val missingPool: CountyPoolFromStyle?, // all the contests that werent in an mvrStyle
     val contestNc: Map<String, Int>, // contest name -> contest Nc for the county

@@ -2,9 +2,9 @@ package org.cryptobiotic.rlauxe.dominion
 
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
+import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.votedatabase.colorado2020

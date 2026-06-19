@@ -1,10 +1,5 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.auditcenter
-import org.cryptobiotic.rlauxe.corla.CanonicalContest
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
-import org.cryptobiotic.rlauxe.corla.readGeneralCanonicalList
-
 class Colorado2020General: ColoradoInput(
     generalCanonicalFile = "$general2020/canonicalTitleCase.csv",
     contestRoundFile = "$general2020/round_1/contest.csv",

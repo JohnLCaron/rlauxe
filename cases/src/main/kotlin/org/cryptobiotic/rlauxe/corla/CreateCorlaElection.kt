@@ -2,6 +2,10 @@ package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
+import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.writeCountyContestData
+import org.cryptobiotic.rlauxe.auditcenter.writeCountyData
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -189,7 +193,7 @@ fun createCorlaElection(
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, coloradoInput.countyContestTabs)
+    writeCountyContestData(topdir, contestMap, coloradoInput.countyTabAllContests)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

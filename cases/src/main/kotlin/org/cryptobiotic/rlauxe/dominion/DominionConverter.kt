@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.dominion
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.ContestIF
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
+import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import kotlin.collections.set
 

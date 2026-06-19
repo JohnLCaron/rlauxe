@@ -4,24 +4,12 @@ import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
-import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
-import org.cryptobiotic.rlauxe.audit.createAuditRecord
-import org.cryptobiotic.rlauxe.audit.createElectionRecord
 import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
-import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
-import org.cryptobiotic.rlauxe.corla.CountyElectionWithCvrs
-import org.cryptobiotic.rlauxe.corla.countyElectionWithCvrs
-import org.cryptobiotic.rlauxe.corla.writeCountyContestData
-import org.cryptobiotic.rlauxe.corla.writeCountyData
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
-import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.votedatabase.colorado2020
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
@@ -51,7 +39,7 @@ class MakeElectionsWithCvrs {
 
     @Test
     fun makeColorado2020() {
-        val topdir = "$cases/corla/withCvrs/Colorado2020"
+        val topdir = "$cases/corla/withCvrs/Colorado2020test"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -80,7 +68,7 @@ class MakeElectionsWithCvrs {
         // writeCountyData(topdir, coloradoInput.strataMap.values.toList())
 
         val contestMap = auditRecord.contests.associate { it.contest.info().name to it }
-        writeCountyContestData(topdir, contestMap, coloradoInput.countyContestTabs)
+        writeCountyContestData(topdir, contestMap, coloradoInput.countyTabAllContests)
     }
 
     @Test

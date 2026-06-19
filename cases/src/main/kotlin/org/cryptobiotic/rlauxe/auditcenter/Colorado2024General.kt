@@ -1,12 +1,8 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.auditcenter
-import org.cryptobiotic.rlauxe.corla.CanonicalContest
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.corla.ElectionDetailXml
 import org.cryptobiotic.rlauxe.corla.ResultsReportContest
 import org.cryptobiotic.rlauxe.corla.readColoradoElectionDetail
-import org.cryptobiotic.rlauxe.corla.readGeneralCanonicalList
 import org.cryptobiotic.rlauxe.corla.readResultsReportContest
 
 class Colorado2024General: ColoradoInput(

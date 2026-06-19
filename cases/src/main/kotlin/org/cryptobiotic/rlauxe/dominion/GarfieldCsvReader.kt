@@ -100,9 +100,9 @@ class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
             lineno++
 
             schema = makeSchema(contestLine, headerChoiceLine, headerChoiceLine)
-            println(schema.showColumns())
-            println()
-            println(schema.showContests())
+            // println(schema.showColumns())
+            // println()
+            // println(schema.showContests())
 
             // 3) match on header name
             // colno,          header name, firstRow

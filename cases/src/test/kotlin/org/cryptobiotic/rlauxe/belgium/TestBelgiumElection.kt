@@ -16,10 +16,10 @@ class TestBelgiumElection {
 
     @Test
     fun testReadBelgiumElection() {
-        val filename = belgianElectionMap["Namur"]!!
-        val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
+        val resourcePath = belgiumJsonInputResource["Namur"]!!
+        val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(resourcePath)
         val belgiumElection = if (result .isOk) result.unwrap()
-        else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")
+            else throw RuntimeException("Cannot read belgiumElection from ${resourcePath} err = $result")
         println(belgiumElection)
     }
 
@@ -31,8 +31,8 @@ class TestBelgiumElection {
     fun testBelgiumContest(electionName: String) {
         println("======================================================")
         println("ElectionName $electionName")
-        val filename = belgianElectionMap[electionName]!!
-        val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
+        val filename = belgiumJsonInputResource[electionName]!!
+        val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(filename)
         val belgiumElection = if (result .isOk) result.unwrap()
         else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")
         println(belgiumElection)
@@ -42,7 +42,7 @@ class TestBelgiumElection {
         val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
         val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes
 
-        val builder = DhondtBuilder(electionName, 1, dhondtParties, nwinners, totalVotes, 0,.05)
+        val builder = DhondtBuilder(electionName, 1, dhondtParties, nwinners, totalVotes, belgiumElection.NrOfBlankVotes,.05)
         println("Calculated Winners")
         builder.winnerScores.sortedBy { it.winningSeat }.forEach {
             println("  ${it}")

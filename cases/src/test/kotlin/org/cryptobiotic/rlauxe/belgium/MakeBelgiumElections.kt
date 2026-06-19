@@ -12,30 +12,8 @@ import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.math.ln
 import kotlin.test.Test
 
-val belgiumData = "src/test/data/belgium2024"
-val belgianElectionMap = mapOf(
-    "Anvers" to "$belgiumData/2024_chambre-des-représentants_Circonscription d'Anvers.json",
-    "Bruxelles" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Bruxelles-Capitale.json",
-    "FlandreWest" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Flandre occidentale.json",
-    "FlandreEast" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Flandre orientale.json",
-    "Hainaut" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Hainaut.json",
-    "Liège" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Liège.json",
-    "Limbourg" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Limbourg.json",
-    "Luxembourg" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Luxembourg.json",
-    "Namur" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Namur.json",
-    "BrabantFlamant" to "$belgiumData/2024_chambre-des-représentants_Circonscription du Brabant flamand.json",
-    "BrabantWallon" to "$belgiumData/2024_chambre-des-représentants_Circonscription du Brabant wallon.json",
-)
 val toptopdir = "$testdataDir/cases/belgium/belgium2024"
 
-/*
-TODO
-   1. read in parties.txt and pass into createAndRunBelgiumElection to get consistent party ids. DONE
-   2. change merge across contests to use Ids, not names DONE
-   3. read in sampleLimits to set into contestRound.haveSamples DONE
-   4. read in coalitions for showMergedSeatRanges() OBSOLETE
-   5. allow adding assertions to contestRounds and save them.
- */
 class MakeBelgiumElections {
 
     @Test
@@ -66,7 +44,7 @@ class MakeBelgiumElections {
     @Test
     fun showAllBelgiumElection() {
         val allResults = mutableMapOf<String, Triple<Int, Int, AssorterIF>>()
-        belgianElectionMap.keys.forEach {
+        belgiumJsonInputResource.keys.forEach {
             allResults[it] = showBelgiumElection(it)
         }
 

@@ -76,22 +76,6 @@ fun createBelgiumElection(
     return result
 }
 
-fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdir: String, contestId: Int,
-                                runRounds:Boolean = true,
-                                stopRound:Int=0,
-                                showVerify:Boolean = false,
-): Pair<Int, Int> {
-    val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
-    val belgiumElectionJson = if (result.isOk) result.unwrap()
-        else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")
-
-    val partyIds: Map<String, Int> = readPartyTxtFile("$toptopdir/parties.txt")
-
-    return createAndRunAllRounds(electionName, belgiumElectionJson, toptopdir, partyIds,
-        contestId = contestId,
-        runRounds, stopRound, showVerify)
-}
-
 // create election, run all rounds
 // return ntotalVotes from Json and finalRound.nmvrs
 fun createAndRunAllRounds(electionName: String, belgiumElectionJson: BelgiumElectionJson, toptopdir: String, partyIds: Map<String, Int>,

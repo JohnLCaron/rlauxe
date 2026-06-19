@@ -98,6 +98,7 @@ data class CountyPools (
     val cardCount: Int,
     val styles: List<StyleIF>,
 ) {
+    val contestMap: Map<Int, ContestTabulation> by lazy { contestTabs.associateBy { it.contestId } }
     override fun toString() = buildString {
         appendLine("CountyPools(countyName='$countyName', countyPoolId=$countyPoolId, totalCards=$cardCount")
         styles.forEach{ appendLine("cardStyle:  $it")}

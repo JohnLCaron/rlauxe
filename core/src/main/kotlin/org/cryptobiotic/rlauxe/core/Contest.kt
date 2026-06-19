@@ -150,7 +150,7 @@ open class Contest(
                 voteBuilder[it] = 0
             }
         }
-        votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap() // sort by number of votes recieved
+        votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap() // reverse sort by number of votes recieved, do not change
         votes.forEach { (candId, candVotes) ->
             require(candVotes <= Ncast) { // LOOK
                 "contest $id candidate= $candId votes = $candVotes must be <= (Nc - Nphantoms) = ${Nc - Nphantoms()}"

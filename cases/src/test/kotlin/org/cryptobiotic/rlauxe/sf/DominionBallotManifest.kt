@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.dominion
+package org.cryptobiotic.rlauxe.sf
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser

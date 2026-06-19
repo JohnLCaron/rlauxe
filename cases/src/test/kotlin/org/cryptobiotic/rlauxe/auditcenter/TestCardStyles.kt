@@ -1,8 +1,5 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
-import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
-import org.cryptobiotic.rlauxe.corla.CountyStylesFromMvrs
 import org.cryptobiotic.rlauxe.dominion.DominionConverter
 import org.cryptobiotic.rlauxe.dominion.DominionCvrCsvSummary
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsvReader
@@ -46,7 +43,7 @@ class TestCardStyles {
 
         val contestMap = contests.associateBy{ it.name }
         val contestNameToId = contests.associate{ it.name to it.id }
-        val boulderCountyStyles : CountyStylesFromMvrs = coloradoInput.mvrStyles.find { it.countyName == "Boulder" }!!
+        val boulderCountyStyles : CountyStylesFromMvrs = coloradoInput.stylesFromMvrs.find { it.countyName == "Boulder" }!!
         // data class CountyStyles(val countyName: String) {
         //    val styles = mutableMapOf<Set<String>, Style>()
         //    var cardCount = 0

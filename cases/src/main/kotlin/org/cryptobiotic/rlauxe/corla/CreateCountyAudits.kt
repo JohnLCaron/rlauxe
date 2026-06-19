@@ -14,6 +14,12 @@ import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.audit.createElectionRecord
 import org.cryptobiotic.rlauxe.audit.startFirstRound
+import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
+import org.cryptobiotic.rlauxe.auditcenter.CorlaContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
+import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import org.cryptobiotic.rlauxe.auditcenter.convertToCountyTabs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -38,7 +44,7 @@ class CreateCountyAudits(
     val countyName: String,
     val auditdir: String,
     val stateElection: CountyContestBuilder,
-    val countyContestTab: CountyContestTabs,
+    val countyContestTab: CountyTabAllContests,
     val hasStyle: Boolean,
 ): ElectionBuilder {
     val publisher = Publisher(auditdir)
@@ -108,7 +114,7 @@ class CreateCountyAudits(
     }
 
     // for one county, one contest
-    class CountyContestBuilderOld(corlaContestBuilder: CorlaContestBuilder, contestTab: CountyContestTab) {
+    class CountyContestBuilderOld(corlaContestBuilder: CorlaContestBuilder, contestTab: CountyContestVotes) {
         val info = corlaContestBuilder.info
         val Nc: Int     // taken from contestRound.contestBallotCardCount
         var Npop: Int = 0
@@ -124,14 +130,14 @@ class CreateCountyAudits(
 
             val singleCounty = corlaContestBuilder.counties.size == 1
             // TODO single county appropriate for the individual counties ??
-            if (corlaContestBuilder.contest != null) { //  && singleCounty) {
-                var useNc = corlaContestBuilder.contest.nc
+            if (corlaContestBuilder.mcontest != null) { //  && singleCounty) {
+                var useNc = corlaContestBuilder.mcontest.nc
                 if (useNc < totalVotes) {
-                    println("*** Contest '${info.name}' has $totalVotes total votes, but CorlaContestRoundCsv.contestBallotCardCount is ${corlaContestBuilder.contest.nc} - using totalVotes")
+                    println("*** Contest '${info.name}' has $totalVotes total votes, but CorlaContestRoundCsv.contestBallotCardCount is ${corlaContestBuilder.mcontest.nc} - using totalVotes")
                     useNc = totalVotes
                 }
                 Nc = useNc
-                Npop = corlaContestBuilder.contest.npop
+                Npop = corlaContestBuilder.mcontest.npop
             } else { // we dont know the Nc or Npop by County....; could pass in the division of Nc (proportional to voteCount)? barf
                 Nc = totalVotes
                 Npop = totalVotes
@@ -171,7 +177,7 @@ fun createCountyAudits(
     writeCountyAuditData(topdir, coloradoInput)
 
     val countyElection = CountyContestBuilder(coloradoInput)
-    val contestTabByCounty: Map<String, CountyContestTabs> = convertToCountyContestTabs(coloradoInput.contestTabsByCounty.values.toList())
+    val contestTabByCounty: Map<String, CountyTabAllContests> = convertToCountyTabs(coloradoInput.contestTabsAllCounties.values.toList())
         .associateBy { it.countyName }
 
     /* createColoradoElection(
@@ -206,7 +212,7 @@ fun createCountyAudits(
 
 fun writeCountyAuditData(topdir: String, coloradoInput: ColoradoInput) {
     // misc data by county
-    val countyMvrs = coloradoInput.countyMvrs
+    val countyMvrs = coloradoInput.countiesFromMvrs
 
     val outputFilename = "$topdir/countyData.csv"
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()

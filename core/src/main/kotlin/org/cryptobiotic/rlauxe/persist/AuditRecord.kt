@@ -90,12 +90,17 @@ open class AuditRecord(
     fun readCardPools(): List<CardPool>? {
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
         return if (!Files.exists(Path(publisher.cardPoolsFile()))) null
-               else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
+        else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
     }
 
     fun readCountyCardPools(styles: List<StyleIF>): List<CountyPools>? {
         return if (!Files.exists(Path(publisher.countyCardPoolsFile()))) null
-                else readCountyPoolsCsvFile(publisher.countyCardPoolsFile(), styles)
+        else readCountyPoolsCsvFile(publisher.countyCardPoolsFile(), styles)
+    }
+
+    fun readCountyCvrPools(styles: List<StyleIF>): List<CountyPools>? {
+        return if (!Files.exists(Path(publisher.countyCvrPoolsFile()))) null
+        else readCountyPoolsCsvFile(publisher.countyCvrPoolsFile(), styles)
     }
 
     // return contestId -> nmvrs

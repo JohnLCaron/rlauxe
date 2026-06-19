@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.corla
+package org.cryptobiotic.rlauxe.auditcenter
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
@@ -87,9 +87,9 @@ fun readColoradoContestRoundCsv(filename: String): Map<String, CorlaContestRound
         while (records.hasNext()) {
             line = records.next()!!
             val bmi = CorlaContestRoundCsv(
-                contestName = line.get(0).trim(),         // contest_name,
+                contestName = line.get(0).trim(),           // contest_name,
                 auditReason = getAuditReason(line.get(1).trim()),
-                nwinners = line.get(3).toInt(),   // winners_allowed,
+                nwinners = line.get(3).toInt(),             // winners_allowed,
                 ballotCardCount = line.get(4)
                     .toInt(), // ballot_card_count,contest_ballot_card_count,winners,min_margin,
                 contestBallotCardCount = line.get(5).toInt(), // contest_ballot_card_count

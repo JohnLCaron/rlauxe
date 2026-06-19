@@ -52,6 +52,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
 
     override fun pools() = auditRecord.readCardPools() // could test if batches are cardPools
     override fun countyPools() = if (styles == null) null else auditRecord.readCountyCardPools(styles!!)
+    override fun countyCvrPools() = if (styles == null) null else auditRecord.readCountyCvrPools(styles!!)
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         val mvrsForRound = readMvrsForRound(round)

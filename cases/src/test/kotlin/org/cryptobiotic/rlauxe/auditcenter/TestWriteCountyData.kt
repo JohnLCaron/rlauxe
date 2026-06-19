@@ -1,7 +1,6 @@
-package org.cryptobiotic.rlauxe.corla
+package org.cryptobiotic.rlauxe.auditcenter
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.auditcenter.Colorado2024General
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.CountyContestData
@@ -12,14 +11,14 @@ import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 
 // obsolete
-class TestWriteData {
+class TestWriteCountyData {
 
     @Test
     fun testWriteCountyContestData() {
-        val topdir = "$testdataDir/cases/corla/consistent"
+        val topdir = "${testdataDir}/cases/corla/consistent"
         val countyAudit = AuditRecord.readWithResult("$topdir/audit").unwrap()
         val contestMap = countyAudit.contests.associate { it.contest.info().name to it }
-        writeCountyContestData(topdir, contestMap, Colorado2024General().countyContestTabs)
+        writeCountyContestData(topdir, contestMap, Colorado2024General().countyTabAllContests)
 
         val roundtrip: List<CountyContestData> = readCountyContestData("$topdir/${CountyAudit.countyContestDataFile}")
         roundtrip.forEach { println(it) }
@@ -27,7 +26,7 @@ class TestWriteData {
 
     @Test
     fun testWriteCountyData() {
-        val topdir = "$testdataDir/cases/corla/consistent"
+        val topdir = "${testdataDir}/cases/corla/consistent"
         writeCountyData(topdir, Colorado2024General().strataMap.values.toList())
 
         val roundtrip: List<CountyData> = readCountyData("$topdir/${CountyAudit.countyDataFile}")

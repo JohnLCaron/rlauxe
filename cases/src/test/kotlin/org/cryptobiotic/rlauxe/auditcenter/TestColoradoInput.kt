@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import kotlin.test.Test
 
 // check name consistency in ColoradoInput

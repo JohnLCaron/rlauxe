@@ -1,10 +1,5 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.auditcenter
-import org.cryptobiotic.rlauxe.corla.CanonicalContest
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
-import org.cryptobiotic.rlauxe.corla.readGeneralCanonicalList
-
 class Colorado2022Primary(): ColoradoInput(
     generalCanonicalFile = "$primary2022/2022PrimaryRLACounty-CandidateList.csv",
     contestRoundFile = "$primary2022/round_1/contest.csv",

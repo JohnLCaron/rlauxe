@@ -3,8 +3,8 @@ package org.cryptobiotic.rlauxe.dominion
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2022Primary
 import org.cryptobiotic.rlauxe.core.ContestIF
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
-import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
+import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

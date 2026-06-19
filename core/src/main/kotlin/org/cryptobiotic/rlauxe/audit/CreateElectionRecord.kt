@@ -31,6 +31,7 @@ interface ElectionBuilder {
     fun cardStyles(): List<StyleIF>?
     fun cardPools(): List<CardPoolIF>?
     fun countyCardPools(): List<CountyPools>? = null
+    fun countyCvrPools(): List<CountyPools>? = null
 
     // if (config.election.mvrSource == MvrSource.testPrivateMvrs), supply one or the other:
     fun unsortedMvrsInternal(): List<AuditableCard>? // for in-memory case, poolId used also as batch name?
@@ -61,13 +62,19 @@ fun createElectionRecord(election: ElectionBuilder, auditDir: String, control: C
     val cardPools = election.cardPools()
     if (!cardPools.isNullOrEmpty()) {
         writeCardPoolCsvFile(cardPools, publisher.cardPoolsFile())
-        logger.info { "createElectionRecord ${cardPools.size} cardPools to ${publisher.cardPoolsFile()}" }
+        logger.info { "createElectionRecord write ${cardPools.size} cardPools to ${publisher.cardPoolsFile()}" }
     }
 
     val countyCardPools = election.countyCardPools()
     if (!countyCardPools.isNullOrEmpty()) {
         writeCountyCardPoolCsvFile(countyCardPools, publisher.countyCardPoolsFile())
-        logger.info { "createElectionRecord ${countyCardPools.size} countyCardPoolsFile to ${publisher.countyCardPoolsFile()}" }
+        logger.info { "createElectionRecord write ${countyCardPools.size} countyCardPoolsFile to ${publisher.countyCardPoolsFile()}" }
+    }
+
+    val countyCvrPools = election.countyCvrPools()
+    if (!countyCvrPools.isNullOrEmpty()) {
+        writeCountyCardPoolCsvFile(countyCvrPools, publisher.countyCvrPoolsFile())
+        logger.info { "createElectionRecord write ${countyCvrPools.size} countyCardPoolsFile to ${publisher.countyCardPoolsFile()}" }
     }
 
     val cards = election.cards()

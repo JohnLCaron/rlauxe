@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.corla
+package org.cryptobiotic.rlauxe.auditcenter
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
@@ -21,14 +21,13 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
     private fun makeContestBuilders(): List<CorlaContestBuilder> {
         val mergedContestMap = coloradoInput.mergedContestMap
         val strataMap = coloradoInput.strataMap
-        val contestTabs = coloradoInput.contestTabsByCounty
 
         val contestBuilders = mutableListOf<CorlaContestBuilder>()
 
         // canonical drives the boat
         mergedContestMap.values.forEach{ mcontest ->
-            val contestTab = contestTabs[mcontest.contestName]
-            if (contestTab == null) {
+            val contestTabAllCounties = coloradoInput.contestTabsAllCounties[mcontest.contestName]
+            if (contestTabAllCounties == null) {
                 logger.warn{"*** Cant find contestTab for '${mcontest.contestName}': remove from audit" }
                 // throw RuntimeException()
             } else {
@@ -63,7 +62,7 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
                     info,
                     mcontest,
                     strata,
-                    contestTab,
+                    contestTabAllCounties,
                 )
                 contestBuilders.add(contest)
             }
@@ -101,30 +100,34 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-// TODO ContestTabByCounty is what you need to break out the votes by county....
-class CorlaContestBuilder(val info: ContestInfo, val contest: MergedContestInfo, strata: StrataInfo, val contestTab: ContestTabByCounty) {
+class CorlaContestBuilder(val info: ContestInfo, val mcontest: MergedContestInfo, strata: StrataInfo, val contestTabAllCounties: ContestTabAllCounties) {
     val contestId = info.id
     val Nc: Int     // taken from contestRound.contestBallotCardCount
     var Npop: Int? = null     // taken from contestRound.contestBallotCardCount
-    val candidateVotes: Map<Int, Int>
-    val totalVotesAllCounties = contestTab.totalVotesAllCounties
-    val counties = contest.counties
+    val candidateVoteCount = mutableMapOf<String, Int>()
+    val totalVotesAllCounties = contestTabAllCounties.totalVotesAllCounties
+    val counties = mcontest.counties
 
     var poolTotalCards: Int = 0
     var poolTotalVotes: Int = 0
 
     init {
-
-        candidateVotes = contestTab.choices.map { (name, choice) ->
-            Pair( info.candidateNames[name] ?: 0, choice.totalVotes)
-        }.toMap()
+        contestTabAllCounties.choices.forEach { (name, choice) ->
+            val canonicalCandidateName = mcontest.canonicalContest.matchCanonicalCandidate(name)
+            if (canonicalCandidateName == null || info.candidateNames[canonicalCandidateName] == null) {
+                logger.error { "contestTab candidate name $name not found" }
+            } else {
+                val accum = candidateVoteCount.getOrDefault(canonicalCandidateName, 0)
+                candidateVoteCount[canonicalCandidateName] =  accum + choice.totalVotes
+            }
+        }
 
         // candidateVotes = contestTab.choices.values.mapIndexed { idx, choice -> Pair(idx, choice.totalVotes) }.toMap()
-        val minCardsNeeded = roundUp(candidateVotes.map { it.value }.sum() / info.voteForN.toDouble())
+        val minCardsNeeded = roundUp(candidateVoteCount.map { it.value }.sum() / info.voteForN.toDouble())
 
-        var useNc = contest.nc
+        var useNc = mcontest.nc
         if (useNc < minCardsNeeded) {
-            println("*** Contest '${info.name}' has $minCardsNeeded total cards, but CorlaContestRoundCsv.contestBallotCardCount is ${contest.nc} - using totalVotes")
+            println("*** Contest '${info.name}' has $minCardsNeeded total cards, but CorlaContestRoundCsv.contestBallotCardCount is ${mcontest.nc} - using totalVotes")
             useNc = minCardsNeeded
         }
         Nc = useNc
@@ -139,17 +142,20 @@ class CorlaContestBuilder(val info: ContestInfo, val contest: MergedContestInfo,
     fun expectedPoolNCards() = Nc
 
     fun build(): Contest {
-        val candVotes = candidateVotes.filter { info.candidateIds.contains(it.key) } // get rid of writeins?
-        // val totalVotes = candVotes.map {it.value}.sum()
-        // val ncards = max(builder.poolTotalCards(), totalVotes)
-        // val useNc = max(ncards, builder.Nc)
+        val candVotesById = candidateVoteCount.filter { info.candidateNames[it.key] != null } // get rid of writeins?
+                                                .mapKeys { info.candidateNames[it.key]!! }
         info.metadata["PoolPct"] = (100.0 * poolTotalCards / Nc).toInt().toString()
-        // assume Ncast = Nc; maybe Ncase = builder.poolTotalCards() ??
-        return Contest(info, candVotes, Nc, Nc)
+        val result = Contest(info, candVotesById, Nc, Nc)
+        if (info.name == "Presidential Electors") {
+            println(result.show())
+            println(result.showCandidates())
+            println()
+        }
+        return result
     }
 
     override fun toString(): String {
-        return "CorlaContestBuilder(info=$info, contestId=$contestId, Nc=$Nc, candidateVotes=$candidateVotes, poolTotalCards=$poolTotalCards)"
+        return "CorlaContestBuilder(info=$info, contestId=$contestId, Nc=$Nc, candidateVoteCount=$candidateVoteCount, poolTotalCards=$poolTotalCards)"
     }
 }
 

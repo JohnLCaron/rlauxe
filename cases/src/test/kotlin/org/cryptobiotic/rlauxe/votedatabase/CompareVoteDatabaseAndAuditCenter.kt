@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.votedatabase
 
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
+import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
 import org.cryptobiotic.rlauxe.dominion.DominionCvrCsvSummary
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsvReader
 import org.cryptobiotic.rlauxe.dominion.GarfieldCsvReader
@@ -155,7 +155,7 @@ class CompareVoteDatabaseAndAuditCenter {
         }
 
         // test every canon contest has a match in export
-        val countyContestTabs = input.countyContestTabs.find { it.countyName == county }!!
+        val countyContestTabs = input.countyTabAllContests.find { it.countyName == county }!!
         countyContestTabs.contests.keys.forEach { canonContest ->
             if (match[canonContest] == null) {
                 val match2 = sinfoList.find { it.name == canonContest } // probably not nneeded
@@ -171,7 +171,7 @@ class CompareVoteDatabaseAndAuditCenter {
 }
 
 fun suggest(county: String, contest: String, input: ColoradoInput): String {
-    val countyContestTabs = input.countyContestTabs.find { it.countyName == county }
+    val countyContestTabs = input.countyTabAllContests.find { it.countyName == county }
     if (countyContestTabs == null) return "unknown"
 
     for (canonContest in countyContestTabs.contests.keys) {

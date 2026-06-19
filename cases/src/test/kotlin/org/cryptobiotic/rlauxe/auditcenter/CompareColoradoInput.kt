@@ -1,10 +1,5 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
-import org.cryptobiotic.rlauxe.corla.readColoradoContestRoundCsv
-import org.cryptobiotic.rlauxe.corla.readContestComparisonCsv
-import org.cryptobiotic.rlauxe.corla.readCountyTabulateCsv
-import org.cryptobiotic.rlauxe.corla.readGeneralCanonicalList
 import kotlin.test.Test
 
 // compare two sources of ColoradoInput supposedly identical

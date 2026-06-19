@@ -1,14 +1,5 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.corla.CanonicalContest
-import org.cryptobiotic.rlauxe.corla.ColoradoInput
-import org.cryptobiotic.rlauxe.corla.readColoradoContestRoundCsv
-import org.cryptobiotic.rlauxe.corla.readColoradoElectionDetail
-import org.cryptobiotic.rlauxe.corla.readContestComparisonCsv
-import org.cryptobiotic.rlauxe.corla.readCountyTabulateCsv
-import org.cryptobiotic.rlauxe.corla.readGeneralCanonicalList
-import org.cryptobiotic.rlauxe.corla.readResultsReportContest
-import org.cryptobiotic.rlauxe.corla.readTargetedContestsCsv
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -23,10 +14,10 @@ class TestColoradoInputNames {
     fun checkCanonicalHasCountyTabulate() {
         val extras = mutableListOf<CanonicalContest>()
 
-        val contests = readCountyTabulateCsv(input.tabulateCountyFile)
+        val contestTabs = readCountyTabulateCsv(input.tabulateCountyFile)
         println("\n--------------------------------------------------------------------------")
         println("generalCanonicalFile missing contests/choices from tabulateCountyFile ${input.tabulateCountyFile}:")
-        contests.values.forEach { contest ->
+        contestTabs.values.forEach { contest ->
             if (!canonical.contains(contest.contestName)) {
                 println("  missing contest '${contest.contestName}'")
                 val addIt = CanonicalContest(contest.contestName, contest.choices.keys.toList())
@@ -49,11 +40,18 @@ class TestColoradoInputNames {
     fun checkCountyTabulateHasCanonical() {
         println("\n--------------------------------------------------------------------------")
         val missing = mutableListOf<String>()
-        val contests = readCountyTabulateCsv(input.tabulateCountyFile)
-        canonical.values.forEach {
-            if (!contests.contains(it.contestName)) {
-                println("countyTabulate missing canonical '${it.contestName}'")
-                missing.add(it.contestName)
+        val contestTabs: Map<String, ContestTabAllCounties> = readCountyTabulateCsv(input.tabulateCountyFile)
+        canonical.values.forEach { cc ->
+            if (!contestTabs.contains(cc.contestName)) {
+                println("countyTabulate missing canonical '${cc.contestName}'")
+                missing.add(cc.contestName)
+            } else {
+                val contestTab = contestTabs[cc.contestName]!!
+                val tabChoices: Set<String> = contestTab.choices.keys.toList().toSet()
+                cc.choices.forEach {
+                    if (!tabChoices.contains(it))
+                        println("    missing choice  '${it}' in contestTab '${cc.contestName}'")
+                }
             }
         }
         println()
@@ -82,7 +80,7 @@ class TestColoradoInputNames {
     @Test
     fun checkCanonicalHasContestComparison() {
         println("\n--------------------------------------------------------------------------")
-        val contestMvrs = input.contestMvrs.map { it.contestName }
+        val contestMvrs = input.contestsFromMvrs.map { it.contestName }
 
         println("generalCanonicalFile missing mvrComparisonContest")
         contestMvrs.forEach {
@@ -94,7 +92,7 @@ class TestColoradoInputNames {
     @Test
     fun checkCorrectedCanonicalContests() {
         input.canonicalContests().forEach { cc ->
-            assertTrue(input.contestTabsByCounty.contains(cc.key), "contestTabsByCounty '${cc.key}' from canonical")
+            assertTrue(input.contestTabsAllCounties.contains(cc.key), "contestTabsByCounty '${cc.key}' from canonical")
             assertTrue(input.roundContests.contains(cc.key), "roundContests '${cc.key}' from canonical")
         }
     }
@@ -103,7 +101,7 @@ class TestColoradoInputNames {
     fun reportCorrectedCanonicalContests() {
         val inputCanonical = input.canonicalContests()
 
-        input.contestTabsByCounty.forEach {
+        input.contestTabsAllCounties.forEach {
             if (!inputCanonical.contains(it.key)) println("canonical missing '${it.key}' from contestTabsByCounty")
         }
 
@@ -111,12 +109,12 @@ class TestColoradoInputNames {
             if (!inputCanonical.contains(it.key)) println( "canonical missing '${it.key}' from roundContests")
         }
 
-        input.contestMvrs.forEach {
+        input.contestsFromMvrs.forEach {
             if (!inputCanonical.contains(it.contestName)) println("canonical missing '${it.contestName}' from contestMvrs")
         }
 
         inputCanonical.forEach { cc ->
-            assertTrue(input.contestTabsByCounty.contains(cc.key), "contestTabsByCounty '${cc.key}' from canonical")
+            assertTrue(input.contestTabsAllCounties.contains(cc.key), "contestTabsByCounty '${cc.key}' from canonical")
             assertTrue(input.roundContests.contains(cc.key), "roundContests '${cc.key}' from canonical")
         }
     }

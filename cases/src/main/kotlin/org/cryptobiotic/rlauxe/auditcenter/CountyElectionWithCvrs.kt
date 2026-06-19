@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.corla
+package org.cryptobiotic.rlauxe.auditcenter
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
@@ -17,6 +17,8 @@ import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import java.nio.file.Path
 import kotlin.Int
 import kotlin.String
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
@@ -26,7 +28,6 @@ private val logger = KotlinLogging.logger("CountyElectionWithCvrs")
 open class CountyElectionWithCvrs (
     val counties: Map<String, String>, // countyName -> exportFile
     val coloradoInput: ColoradoInput,
-    val contestBuilder: CountyContestBuilder, // from coloradoInput (auditcenter data)
     val auditdir: String,
     val hasStyle: Boolean,
     val name: String,
@@ -35,12 +36,14 @@ open class CountyElectionWithCvrs (
     val contestsUA: List<ContestWithAssertions>
     val cardStyles = mutableListOf<CardStyle>()
     val countyPools = mutableListOf<CountyPools>()
+    val cvrPools = mutableListOf<CountyPools>()
 
     //val styles = mutableListOf<CardStyle>()
     //val countyPools = mutableListOf<CountyPools>()
     val publisher = Publisher(auditdir)
 
     init {
+        val contestBuilder = CountyContestBuilder(coloradoInput)
         val contests = contestBuilder.contests
         val infos = contests.map { it.info() }.associateBy{ it.id }
         val infosByName = contests.map { it.info() }.associateBy{ it.name }
@@ -51,7 +54,7 @@ open class CountyElectionWithCvrs (
         // styles = countyPoolBuilders.map { it.pools }.flatten()  // use the pools as styles
         // countyPools = countyPoolBuilders.map { it.build() }
 
-        val countyTabMap = coloradoInput.countyContestTabs.associateBy { it.countyName }
+        val countyTabMap = coloradoInput.countyTabAllContests.associateBy { it.countyName }
 
         val totalPoolTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
          //countyPools.forEach { countyPool -> totalPoolTabs.sumContestTabulations(  countyPool.contestTabs.associateBy { it.contestId } ) }
@@ -74,19 +77,25 @@ open class CountyElectionWithCvrs (
             writeUnsortedMvrs(county, publisher,Closer (exportCvrs.iterator() ))
 
             // Get the card styles from the cvrs
-            val countyCardStyles: List<CardStyle> = dominionConverter.cardStyles.values.toList()
+            val cvrCardStyles: List<CardStyle> = dominionConverter.cardStyles.values.toList()
 
-            // make the county pool from auditcenter plus cvr cardStyles
-            // cvrTabs: Map<Int, ContestTabulation>
+            // take ncards from cvrs
             val ncards = cvrTabs.map { (contestId, contestTab) ->
                 Pair(infos[contestId]!!.name, contestTab.ncards()) // use cvr ncards is the best we can do
             }.toMap()
-            val countyTab: CountyContestTabs = countyTabMap[county]!!
-            val contestTabs = countyTab.makeContestTabs(infosByName, ncards)
-            countyPools.add(
-                CountyPools(county, countyPoolId++, contestTabs, cvrCount, countyCardStyles)
+
+            val countyTab: CountyTabAllContests = countyTabMap[county]!! // // for one contest, all counties
+            val contestTabs = countyTab.makeContestTabs(coloradoInput.canonicalContests(), infosByName, ncards, )
+
+            cvrPools.add(
+                CountyPools(county, countyPoolId, cvrTabs.values.toList(), cvrCount, cvrCardStyles)
             )
-            cardStyles.addAll(countyCardStyles)
+
+            countyPools.add(
+                // make the county pool from auditcenter tabs plus cvr cardStyles and ncards
+                CountyPools(county, countyPoolId++, contestTabs, cvrCount, cvrCardStyles)
+            )
+            cardStyles.addAll(cvrCardStyles)
             totalPoolTabs.sumContestTabulations(contestTabs.associateBy { it.contestId })
         }
 
@@ -97,6 +106,11 @@ open class CountyElectionWithCvrs (
         this.ncards = totalCvrCardCount // or totalPoolCardCount?
         // use Nc as Npop
         contestsUA = contestBuilder.contests.map {
+            val contestCvrTab = totalCvrTabs[it.id]
+            if (contestCvrTab != null) {
+                it.info().metadata["CvrNcards"] = contestCvrTab.ncards().toString()
+                it.info().metadata["CvrNvotes"] = contestCvrTab.nvotes().toString()
+            }
             ContestWithAssertions(it, true, hasStyle).addStandardAssertions()
         }
     }
@@ -113,6 +127,7 @@ open class CountyElectionWithCvrs (
 
     override fun cardPools() = null
     override fun countyCardPools(): List<CountyPools> = countyPools
+    override fun countyCvrPools(): List<CountyPools> = cvrPools
 
     override fun unsortedMvrsInternal() = null
     override fun unsortedMvrsExternal() = CardIteratorfromCountyMvrs(publisher, styles = cardStyles)
@@ -184,10 +199,8 @@ fun countyElectionWithCvrs(
     val auditdir = "$topdir/audit"
     clearDirectory(Path(topdir))
 
-    val contestBuilder = CountyContestBuilder(coloradoInput)
-
     val election =
-        CountyElectionWithCvrs(counties, coloradoInput, contestBuilder,
+        CountyElectionWithCvrs(counties, coloradoInput,
             auditdir, name=name, hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
 
     createElectionRecord(election, auditDir = auditdir, roundConfig.sampling, clear = false)
@@ -197,7 +210,7 @@ fun countyElectionWithCvrs(
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, coloradoInput.countyContestTabs)
+    writeCountyContestData(topdir, contestMap, coloradoInput.countyTabAllContests)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

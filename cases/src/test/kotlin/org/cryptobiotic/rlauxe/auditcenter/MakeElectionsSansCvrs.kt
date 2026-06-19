@@ -8,8 +8,6 @@ import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.corla.countyElectionWithCvrs
-import org.cryptobiotic.rlauxe.corla.createCountyElectionSansCvrs
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.testdataDir

@@ -4,8 +4,8 @@ import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
 import org.cryptobiotic.rlauxe.corla.CountyStylesFromMvrs
 import org.cryptobiotic.rlauxe.dominion.DominionConverter
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportReader
+import org.cryptobiotic.rlauxe.dominion.DominionCvrCsvSummary
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsvReader
 import org.cryptobiotic.rlauxe.dominion.makeContestInfo
 import kotlin.test.Test
 
@@ -23,7 +23,7 @@ class TestCardStyles {
 
     fun compareCvrSchemaVscoloradoInput(filename: String, coloradoInput: ColoradoInput) {
         // println(CastVoteRecord.header)
-        val export: DominionCvrExport = DominionCvrExportReader(filename).read()
+        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
         val exportContestInfos = export.makeContestInfo().associateBy { it.id }
 
         // these contest id's are internal to the export.

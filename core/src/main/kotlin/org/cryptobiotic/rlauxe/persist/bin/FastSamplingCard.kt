@@ -48,18 +48,13 @@ class FastSamplingCardIterator(inputFile: String, styles: List<StyleIF>, bufferS
 
 fun writeFastSamplingCards(cards: CloseableIterator<AuditableCard>, filenameOut: String, styles: List<StyleIF>, limit: Int? = null): Int {
     val outputStream: OutputStream = FileOutputStream(filenameOut)
-
-    val styleMap = styles.associate { it.name() to it.id() }
     var count = 0
 
     DataOutputStream(outputStream).use { dos ->
         while (cards.hasNext() && (limit == null || count < limit)) {
             val card = cards.next()
             dos.writeLong(card.prn())
-            val styleId = styleMap[card.styleName()] ?: 0 // TODO
-            //if (styleId == null)
-             //   throw RuntimeException()
-            dos.writeInt(styleId)
+            dos.writeInt(card.styleId)
             count++
         }
         // EOF

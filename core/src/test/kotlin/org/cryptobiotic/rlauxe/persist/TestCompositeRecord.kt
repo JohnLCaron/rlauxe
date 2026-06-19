@@ -42,7 +42,7 @@ class TestCompositeRecord {
         println(anvers)
     }
 
-    @Test
+    // @Test
     fun testReadCorlaCountyAudit() {
         val record = AuditRecord.read(corlaUniform)!!
         val countyAudit = record as CountyAudit

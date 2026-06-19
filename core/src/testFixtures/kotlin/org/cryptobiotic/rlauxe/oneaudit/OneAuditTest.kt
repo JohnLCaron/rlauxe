@@ -193,7 +193,7 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<A
     val cards = mutableListOf<AuditableCard>()
     cardsNoBatch.forEach { card ->
         // val batch = if (card.poolId == 42) pool else CardStyle.fromCvrBatch
-        cards.add( card.copy(styleName=pool.name()).setStyle(pool))
+        cards.add( card.copy(styleId=pool.id()).setStyle(pool))
     }
 
     // we need to populate the pool tab with the votes

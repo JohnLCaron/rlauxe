@@ -81,22 +81,23 @@ data class CardPool(
     }
 }
 
+/*
 interface CountyPoolsIF {
     val countyName: String
     val countyPoolId: Int
     val contestTabs: List<ContestTabulation>
     val cardCount: Int
     val styles: List<StyleIF>
-}
+} */
 
 // CountyPool: pool with multiple CardStyles
 data class CountyPools (
-    override val countyName: String,
-    override val countyPoolId: Int,
-    override val contestTabs: List<ContestTabulation>,
-    override val cardCount: Int,
-    override val styles: List<StyleIF>,
-): CountyPoolsIF {
+    val countyName: String,
+    val countyPoolId: Int,
+    val contestTabs: List<ContestTabulation>,
+    val cardCount: Int,
+    val styles: List<StyleIF>,
+) {
     override fun toString() = buildString {
         appendLine("CountyPools(countyName='$countyName', countyPoolId=$countyPoolId, totalCards=$cardCount")
         styles.forEach{ appendLine("cardStyle:  $it")}

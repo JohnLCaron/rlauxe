@@ -34,17 +34,21 @@ fun preAuditContestCheck(contestsUA: List<ContestWithAssertions>, control: Conte
         }
     }
 
-    // remove contests if fail minRecountMargin, minMargin
+    // remove contests if fail minRecountMargin, minMargin, minSize
     if (control != null) {
-        if (control.minRecountMargin > 0.0 || control.minMargin > 0.0) {
+        if (control.minRecountMargin > 0.0 || control.minMargin > 0.0 || control.minSize != null) {
             contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress }.forEach { contestUA ->
-                if ((contestUA.minRecountMargin() ?: 0.0) <= control.minRecountMargin) {
+                if ((contestUA.minRecountMargin() ?: 1000.0) <= control.minRecountMargin) {
                     logger.info { "*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${control.minRecountMargin}" }
                     contestUA.preAuditStatus = TestH0Status.MinMargin
                 }
-                if ((contestUA.minMargin() ?: 0.0) <= control.minMargin) {
+                if ((contestUA.minMargin() ?: 1000.0) <= control.minMargin) {
                     logger.info { "*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minMargin()} <= ${control.minMargin}" }
                     contestUA.preAuditStatus = TestH0Status.MinMargin
+                }
+                if (contestUA.Npop <= (control.minSize ?: 0) ) {
+                    logger.info { "*** MinSize contest ${contestUA.id} population ${contestUA.Npop} <= ${control.minSize}" }
+                    contestUA.preAuditStatus = TestH0Status.MinSize
                 }
             }
         }

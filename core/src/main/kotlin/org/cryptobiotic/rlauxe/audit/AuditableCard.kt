@@ -36,19 +36,19 @@ data class AuditableCard (
     val index: Int,  // index into the original, canonical list of cards, aka manifest index
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    val styleName: String,
-    val poolId: Int?, // must be set if its from a CardPool
+    val styleId: Int,
     val contestIds: IntArray,   // these 3 form the votes map. set style if different
     val contestStarts: IntArray,
     val candidates: IntArray,
+    val poolId: Int?, // must be set if its from a CardPool
 ): CvrIF, SamplingCardIF {
 
     // you can change the style but not null it; could also prevent changing altogether after its set
     private var style: StyleIF? = null
     fun setStyle(style: StyleIF): AuditableCard {
-        if (styleName != style.name())
-            logger.warn{"AuditableCard.setStyle $styleName != ${style.name()}"}
-        require(styleName == style.name()) //  || style.name() == "unknown")
+        if (styleId != style.id())
+            logger.warn{"AuditableCard.setStyle $styleId != ${style.id()}"}
+        require(styleId == style.id()) //  || style.name() == "unknown")
         this.style = style
         return this
     }
@@ -70,10 +70,10 @@ data class AuditableCard (
         }
     }
 
-    private val useCvr = CardStyle.useVotes(styleName)
+    private val useCvr = CardStyle.useVotes(styleId)
     init {
         if (useCvr && votes == null) {
-            throw RuntimeException("cardStyle '${styleName}' must have non-null votes")
+            throw RuntimeException("card with style fromCvr or phantom must have non-null votes")
         }
     }
 
@@ -98,7 +98,7 @@ data class AuditableCard (
 
     fun location() = location ?: id()
     fun index() = index
-    fun styleName() = styleName
+    // fun styleName() = styleName
     fun possibleContests() : IntArray {
         return when {
             (!useCvr && style != null) -> style!!.possibleContests()
@@ -110,44 +110,10 @@ data class AuditableCard (
     fun hasExactContests() = style?.hasExactContests() ?: false  // TODO is this needed?
     fun toCvr() = Cvr(id, votes!!, phantom, poolId())
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is AuditableCard) return false
-
-        if (index != other.index) return false
-        if (prn != other.prn) return false
-        if (phantom != other.phantom) return false
-        if (poolId != other.poolId) return false
-        if (id != other.id) return false
-        if (location != other.location) return false
-        if (styleName != other.styleName) return false
-        if (!contestIds.contentEquals(other.contestIds)) return false
-        if (!contestStarts.contentEquals(other.contestStarts)) return false
-        if (!candidates.contentEquals(other.candidates)) return false
-        if (style != other.style) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = index
-        result = 31 * result + prn.hashCode()
-        result = 31 * result + phantom.hashCode()
-        result = 31 * result + (poolId ?: 0)
-        result = 31 * result + id.hashCode()
-        result = 31 * result + (location?.hashCode() ?: 0)
-        result = 31 * result + styleName.hashCode()
-        result = 31 * result + contestIds.contentHashCode()
-        result = 31 * result + contestStarts.contentHashCode()
-        result = 31 * result + candidates.contentHashCode()
-        result = 31 * result + (style?.hashCode() ?: 0)
-        return result
-    }
-
     override fun toString() = buildString {
         append("AuditableCard(id='$id',")
         if (location != null) append(" location='$location',")
-        append(" index=$index, prn=$prn, styleName='$styleName',")
+        append(" index=$index, prn=$prn, styleId=$styleId,")
         if (phantom) append(" phantom=$phantom,")
         if (poolId != null) append(" poolId=$poolId,")
         if (votes == null) append(" votes=null") else {
@@ -162,12 +128,46 @@ data class AuditableCard (
         append(")")
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is AuditableCard) return false
+
+        if (index != other.index) return false
+        if (prn != other.prn) return false
+        if (phantom != other.phantom) return false
+        if (styleId != other.styleId) return false
+        if (poolId != other.poolId) return false
+        if (id != other.id) return false
+        if (location != other.location) return false
+        if (!contestIds.contentEquals(other.contestIds)) return false
+        if (!contestStarts.contentEquals(other.contestStarts)) return false
+        if (!candidates.contentEquals(other.candidates)) return false
+        if (style != other.style) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = index
+        result = 31 * result + prn.hashCode()
+        result = 31 * result + phantom.hashCode()
+        result = 31 * result + styleId
+        result = 31 * result + (poolId ?: 0)
+        result = 31 * result + id.hashCode()
+        result = 31 * result + (location?.hashCode() ?: 0)
+        result = 31 * result + contestIds.contentHashCode()
+        result = 31 * result + contestStarts.contentHashCode()
+        result = 31 * result + candidates.contentHashCode()
+        result = 31 * result + (style?.hashCode() ?: 0)
+        return result
+    }
+
     companion object {
         private val logger = KotlinLogging.logger("AuditableCard")
 
         fun fromCvr(cvr: Cvr, index: Int, prn: Long): AuditableCard {
-            return fromVotes(cvr.id, null, index, prn, cvr.phantom, styleName = CardStyle.fromCvr,
-                poolId=cvr.poolId, votes=cvr.votes).setStyle(CardStyle.fromCvrBatch)
+            return fromVotes(cvr.id, null, index, prn, cvr.phantom, styleId = CardStyle.fromCvrStyle.id(),
+                votes=cvr.votes, poolId=cvr.poolId, ).setStyle(CardStyle.fromCvrStyle)
         }
 
         fun fromVotes(id: String, // enough info to find the card for a manual audit.
@@ -175,25 +175,26 @@ data class AuditableCard (
                       index: Int,  // index into the original, canonical list of cards
                       prn: Long,   // psuedo random number
                       phantom: Boolean,
-                      styleName: String,
+                      styleId: Int,
+                      votes: Map<Int, IntArray>?,
                       poolId: Int?, // must be set if its from a CardPool
-                      votes: Map<Int, IntArray>?
         ): AuditableCard {
             val (contestIds, contestStarts, candidates) = if (votes != null)
                 makeFromVotes(votes)
             else
                 Triple(IntArray(0), IntArray(0),IntArray(0))
 
-            return AuditableCard(id, location, index, prn, phantom, styleName, poolId, contestIds, contestStarts, candidates)
+            return AuditableCard(id, location, index, prn, phantom, styleId, contestIds, contestStarts, candidates, poolId)
         }
 
-        fun empty(id: String, phantom: Boolean, styleName: String): AuditableCard {
-            return fromVotes(id, null, 0, 0, phantom, styleName, null, null)
+        fun empty(id: String, phantom: Boolean, styleId: Int): AuditableCard {
+            return fromVotes(id, null, 0, 0, phantom, styleId, null, null)
         }
 
         fun removeVotes(org: AuditableCard): AuditableCard {
-            return AuditableCard(org.id, org.location, org.index, org.prn, org.phantom, org.styleName, org.poolId,
-                IntArray(0), IntArray(0),IntArray(0))
+            return AuditableCard(org.id, org.location, org.index, org.prn, org.phantom, org.styleId,
+                IntArray(0), IntArray(0),IntArray(0),
+                org.poolId,)
         }
     }
 

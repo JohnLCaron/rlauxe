@@ -5,19 +5,11 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.boulder.isEmpty
-import org.cryptobiotic.rlauxe.boulder.parseContestNameAndVoteFor
-import org.cryptobiotic.rlauxe.boulder.parseIrvContestName
 import org.cryptobiotic.rlauxe.util.ZipReader
-import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.util.trunc
 import java.io.File
 import java.io.InputStreamReader
 import java.io.Reader
-import java.lang.StrictMath.sqrt
 import java.nio.charset.Charset
-import kotlin.collections.set
-import kotlin.math.max
 
 // this reads csv files from "Dominion CVR export files", a standard Dominion csv format.
 // Note these record the cvr undervotes, but not for the redacted votes; a col is left empty when the ballot doesnt have that contest.
@@ -43,20 +35,27 @@ import kotlin.math.max
 private val logger = KotlinLogging.logger("DominionCvrExportReader")
 
 private val d3f = "%3d"
-private val showHeader = false
+private val showSchema = false
 private val showLines = false
 
 private val showDontMatch = false
 private val showBallotStyles = false
 private val showRedactedGroups = false
 
-// TODO extract the "Vote For" from the header, use to calculate the number of cards in the redacted lines. (method 1)
 // "Boulder County 2025 Coordinated","5.17.17.1",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 //,,,,,,,"City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Lafayette City Council (Vote For=4)","City of Longmont Mayor (Vote For=1)","City of Longmont Mayor (Vote For=1)","City of Longmont Mayor (Vote For=1)","City of Longmont Mayor (Vote For=1)","City of Longmont City Council At Large (Vote For=2)","City of Longmont City Council At Large (Vote For=2)","City of Longmont City Council At Large (Vote For=2)","City of Longmont City Council At Large (Vote For=2)","City of Longmont City Council At Large (Vote For=2)","City of Longmont City Council At Large (Vote For=2)","City of Longmont City Council Ward 2 (Vote For=1)","City of Longmont City Council Ward 2 (Vote For=1)","City of Louisville City Council Ward 1 (4-year term) (Vote For=1)","City of Louisville City Council Ward 1 (4-year term) (Vote For=1)","City of Louisville City Council Ward 2 (4-year term) (Vote For=1)","City of Louisville City Council Ward 3 (4-year term) (Vote For=1)","Boulder Valley School District RE-2 Director District B (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District E (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District E (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District F (4 Years) (Vote For=1)","St. Vrain Valley School District RE-1J Board of Education Director in Director District B (Vote For=1)","St. Vrain Valley School District RE-1J Board of Education Director in Director District B (Vote For=1)","St. Vrain Valley School District RE-1J Board of Education Director in Director District D (Vote For=1)","St. Vrain Valley School District RE-1J Board of Education Director in Director District D (Vote For=1)","St. Vrain Valley School District RE-1J Board of Education Director in Director District E (Vote For=1)","St. Vrain Valley School District RE-1J Board of Education Director in Director District F (Vote For=1)","Thompson School District R2-J Board of Education Director District B (Vote For=1)","Thompson School District R2-J Board of Education Director District E (Vote For=1)","Thompson School District R2-J Board of Education Director District E (Vote For=1)","Thompson School District R2-J Board of Education Director District F (Vote For=1)","Thompson School District R2-J Board of Education Director District F (Vote For=1)","City of Longmont Municipal Court Judge - Frick (Vote For=1)","City of Longmont Municipal Court Judge - Frick (Vote For=1)","Proposition LL (Statutory) (Vote For=1)","Proposition LL (Statutory) (Vote For=1)","Proposition MM (Statutory) (Vote For=1)","Proposition MM (Statutory) (Vote For=1)","Boulder County Ballot Issue 1A (Vote For=1)","Boulder County Ballot Issue 1A (Vote For=1)","Boulder County Ballot Issue 1B (Vote For=1)","Boulder County Ballot Issue 1B (Vote For=1)","City of Boulder Ballot Issue 2A (Vote For=1)","City of Boulder Ballot Issue 2A (Vote For=1)","City of Boulder Ballot Issue 2B (Vote For=1)","City of Boulder Ballot Issue 2B (Vote For=1)","City of Lafayette Ballot Issue 2C (Vote For=1)","City of Lafayette Ballot Issue 2C (Vote For=1)","City of Louisville Ballot Question 300 (Vote For=1)","City of Louisville Ballot Question 300 (Vote For=1)","City of Louisville Ballot Question 301 (Vote For=1)","City of Louisville Ballot Question 301 (Vote For=1)","Thompson School District R2-J Ballot Issue 5A (Vote For=1)","Thompson School District R2-J Ballot Issue 5A (Vote For=1)","Hygiene Fire Protection District Ballot Issue 6A (Vote For=1)","Hygiene Fire Protection District Ballot Issue 6A (Vote For=1)","Sunshine Fire Protection District Ballot Issue 6B (Vote For=1)","Sunshine Fire Protection District Ballot Issue 6B (Vote For=1)","Coal Creek Canyon Fire Protection District Ballot Issue 7B (Vote For=1)","Coal Creek Canyon Fire Protection District Ballot Issue 7B (Vote For=1)"
 //,,,,,,,"Nicole Speer","Rob Kaplan","Montserrat Palacios","Rob Smoke","Maxwell Lord","Jennifer Robins","Aaron Stone","Lauren Folkerts","Mark Wallach","Matt Benjamin","Rachel Rose Isaacson","Adam Gianola","Luke Arrington","Josh Beryl","Eric Ryant","Saul Tapia Vega","Rob Glenn","Kyle Beaulieu","Annmarie Jensen","Crystal Gallegos","Michael Watson","Susie Hidalgo-Fahring","Sarah Levison","Diane Crist","Shakeel Dalal","Crystal Prieto","Alex Kalkhofer","John Lembke","Jake Marsing","Riegan Sage","Steven Altschuler","Matthew Popkin","Teresa Simpkins","Joshua H. Cooperman","Denise Montagu","Judi Kern","Dietrich Hoefner","Nicole Rajpal","Jeffrey Lowe Anderson","Deann Bucher","Ana Temu Otting","Peggy A. Kelly","Hadley Solomon","Meosha Babbs","John Ahrens","Jocelyn Gilligan","Sarah Hurianek","Mike Scholl","Alexandra Lessem","Mary Buchanan","Dmitri Atrash","Lori Goebel","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against"
 //"CvrNumber","TabulatorNum","BatchId","RecordId","ImprintedId","CountingGroup","BallotType",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 //"1","102","1","82","102-1-82","Regular","03",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,0,1,1,,,,,,,,,,,,,,1,0,1,0,1,0,1,0,,,,,,,,,,,,,,,,,,
 //"2","102","1","81","102-1-81","Regular","03",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,0,1,1,,,,,,,,,,,,,,1,0,1,0,1,0,1,0,,,,,,,,,,,,,,,,,,
+
+// sometimes the headers have the party affiliations
+// 2020 Fremont County General,5.11.3.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+//,,,,,,Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),United States Senator (Vote For=1),United States Senator (Vote For=1),United States Senator (Vote For=1),United States Senator (Vote For=1),United States Senator (Vote For=1),United States Senator (Vote For=1),United States Senator (Vote For=1),United States Senator (Vote For=1),United States Senator (Vote For=1),Representative to the 117th United States Congress-District 5 (Vote For=1),Representative to the 117th United States Congress-District 5 (Vote For=1),Representative to the 117th United States Congress-District 5 (Vote For=1),Representative to the 117th United States Congress-District 5 (Vote For=1),Representative to the 117th United States Congress-District 5 (Vote For=1),State Representative - District 47 (Vote For=1),State Representative - District 47 (Vote For=1),State Representative - District 60 (Vote For=1),State Representative - District 60 (Vote For=1),District Attorney--11th Judicial District (Vote For=1),District Attorney--11th Judicial District (Vote For=1),Fremont County Board of County Commissioners - District 1 (Vote For=1),Fremont County Board of County Commissioners - District 3 (Vote For=1),Town of Williamsburg - Mayor (Vote For=1),Town of Williamsburg - Mayor (Vote For=1),Town of Williamsburg - Trustee (Vote For=3),Town of Williamsburg - Trustee (Vote For=3),Town of Williamsburg - Trustee (Vote For=3),Town of Williamsburg - Trustee (Vote For=3),Town of Williamsburg - Trustee (Vote For=3),Town of Williamsburg - Trustee (Vote For=3),Justice of the Colorado Supreme Court - Hart (Vote For=1),Justice of the Colorado Supreme Court - Hart (Vote For=1),Justice of the Colorado Supreme Court - Samour (Vote For=1),Justice of the Colorado Supreme Court - Samour (Vote For=1),Colorado Court of Appeals Judge - Tow (Vote For=1),Colorado Court of Appeals Judge - Tow (Vote For=1),Colorado Court of Appeals Judge - Welling (Vote For=1),Colorado Court of Appeals Judge - Welling (Vote For=1),Amendment B (CONSTITUTIONAL) (Vote For=1),Amendment B (CONSTITUTIONAL) (Vote For=1),Amendment C (CONSTITUTIONAL) (Vote For=1),Amendment C (CONSTITUTIONAL) (Vote For=1),Amendment 76 (CONSTITUTIONAL) (Vote For=1),Amendment 76 (CONSTITUTIONAL) (Vote For=1),Amendment 77 (CONSTITUTIONAL) (Vote For=1),Amendment 77 (CONSTITUTIONAL) (Vote For=1),Proposition EE (STATUTORY) (Vote For=1),Proposition EE (STATUTORY) (Vote For=1),Proposition 113 (STATUTORY) (Vote For=1),Proposition 113 (STATUTORY) (Vote For=1),Proposition 114 (STATUTORY) (Vote For=1),Proposition 114 (STATUTORY) (Vote For=1),Proposition 115 (STATUTORY) (Vote For=1),Proposition 115 (STATUTORY) (Vote For=1),Proposition 116 (STATUTORY) (Vote For=1),Proposition 116 (STATUTORY) (Vote For=1),Proposition 117 (STATUTORY) (Vote For=1),Proposition 117 (STATUTORY) (Vote For=1),Proposition 118 (STATUTORY) (Vote For=1),Proposition 118 (STATUTORY) (Vote For=1),FREMONT COUNTY - ISSUE 1A - EXTENSION OF 1% SHERIFF'S TAX (Vote For=1),FREMONT COUNTY - ISSUE 1A - EXTENSION OF 1% SHERIFF'S TAX (Vote For=1),City of Ca�on City - Question 2A - Black Hills Energy Franchise (Vote For=1),City of Ca�on City - Question 2A - Black Hills Energy Franchise (Vote For=1),DEER MOUNTAIN FIRE PROTECTION DISTRICT - ISSUE 6A - MILL LEVY INCREASE (Vote For=1),DEER MOUNTAIN FIRE PROTECTION DISTRICT - ISSUE 6A - MILL LEVY INCREASE (Vote For=1)
+//,,,,,,Joseph R. Biden / Kamala D. Harris,Donald J. Trump / Michael R. Pence,Don Blankenship / William Mohr,Bill Hammons / Eric Bodenstab,Howie Hawkins / Angela Nicole Walker,Blake Huber / Frank Atwood,"Jo Jorgensen / Jeremy ""Spike"" Cohen",Brian Carroll / Amar Patel,Mark Charles / Adrian Wallace,Phil Collins / Billy Joe Parker,"Roque ""Rocky"" De La Fuente / Darcy G. Richardson",Dario Hunter / Dawn Neptune Adams,Princess Khadijah Maryam Jacob-Fambro / Khadijah Maryam Jacob Sr.,Alyson Kennedy / Malcolm Jarrett,Joseph Kishore / Norissa Santa Cruz,Kyle Kenley Kopitke / Nathan Re Vo Sorenson,Gloria La Riva / Sunil Freeman,Joe McHugh / Elizabeth Storm,Brock Pierce / Karla Ballard,"Jordan ""Cancer"" Scott / Jennifer Tepool",Kanye West / Michelle Tidball,Write-in,Kasey Wells / Rachel Wells,Todd Cella / Timothy Bryan Cella,Tom Hoefling / Andy Prior,John W. Hickenlooper,Cory Gardner,Daniel Doyle,"Stephan ""Seku"" Evans",Raymon Anthony Doane,Write-in,Danny Skelly,Bruce Lohmiller,Michael Sanchez,Doug Lamborn,Jillian Freeland,Ed Duffett,Rebecca Keltie,Marcus Allen Murphy,Stephanie Luck,Bri Buentello,Ron Hanks,Lori Boydston,Linda Stanley,Kaitlin Turner,Kevin J. Grantham,Dwayne McFall,Forrest Borre,Billy Jack Hawkins,William R Esch,Alberta Winslow,Philip Ott,Stephen (Steve) Harrison,Joseph Pendergrass,Jerry Farringer,YES,NO,YES,NO,YES,NO,YES,NO,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST,YES/FOR,NO/AGAINST
+//CvrNumber,TabulatorNum,BatchId,RecordId,ImprintedId,BallotType,,,,,,,,,,,,,,,,,,,,,,,,,,DEM,REP,APV,UNI,LBR,,,,,REP,DEM,LBR,UNI,UAF,REP,DEM,REP,DEM,REP,DEM,REP,REP,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+//1,2,1,15,2-1-15,BT - 5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,,,0,1,0,0,,,,,,,,,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,,,,
+//2,2,1,13,2-1-13,BT - 1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,,,1,0,1,0,1,1,,,,,,,,,1,0,1,0,1,0,1,0,0,1,1,0,1,0,1,0,0,1,0,1,1,0,1,0,1,0,1,0,0,1,1,0,,,,
 
 // TODO extract the number of ballots from the "Consolidated 10 Ballots", and compare with method 1 (method 2)
 // "Redacted and Consolidated 10 Ballots",,,,,,"11 & PO-CC",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,4,1,2,4,,,,,,,,,,,,,,6,2,3,6,3,5,3,5,,,,,,,,,,,,,,,,,4,5
@@ -69,7 +68,7 @@ private val showRedactedGroups = false
 
 // TODO add the ncards foreach Redacted group. that lets us calculate the missing votes in the pool.
 
-class DominionCvrExportReader(val filename: String, showHeaders: Boolean = false) {
+class DominionCvrExportCsvReader(val filename: String, showHeaders: Boolean = false) {
     val ballotStyles = BallotStyles()
     val records: Iterator<CSVRecord>
     var lineno = 0
@@ -92,6 +91,7 @@ class DominionCvrExportReader(val filename: String, showHeaders: Boolean = false
             val reader: Reader = InputStreamReader(inputStream, "UTF-8")
             CSVParser(reader, CSVFormat.DEFAULT)
             // dunno CSVParser.Builder.get()
+            // TODO if we could look ahead, we could give them the first row
 
         } else {
             CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
@@ -100,34 +100,29 @@ class DominionCvrExportReader(val filename: String, showHeaders: Boolean = false
         records = parser.iterator()
         lineno++
 
-        // 1) we expect the first line to be the election name
+        // we expect the first line to be the election name
         val electionLine = records.next()
         if (showHeaders) showLine("electionName", electionLine)
         lineno++
         electionName = electionLine.get(0).replace("[^ -~]".toRegex(), "")
         versionName = electionLine.get(1).trim()
 
-        // 2) the contest name for that column
-        val contestLine = records.next()
-        val header1 = contestLine.toList().joinToString(", ")
-        if (showHeaders) {
-            println("header1 (contest names) has ${contestLine.toList().size} columns")
-            println("header1 = $header1")
-        }
-
-        var my_first_contest_column = 0
-        while ("" == contestLine[my_first_contest_column]) {
-            my_first_contest_column++
-        }
-        lineno++
-
         try {
-            // 3) the choice/candidate name for that column
+            // the contest names
+            val contestLine = records.next()
+            val header1 = contestLine.toList().joinToString(", ")
+            if (showHeaders) {
+                println("header1 (contest names) has ${contestLine.toList().size} columns")
+                println("header1 = $header1")
+            }
+            lineno++
+
+            // the choice/candidate names
             val choiceLine = records.next()
             if (showLines) showLine("choice/candidate", choiceLine)
             lineno++
 
-            // 4) the header for the first 6 columns, then party affiliation
+            // the header for the first columns, then (sometimes) the party affiliation of the candidates
             val headerRecord = records.next()
             if (showLines) showLine("header", headerRecord)
             val header2 = headerRecord.toList().joinToString(", ")
@@ -136,9 +131,15 @@ class DominionCvrExportReader(val filename: String, showHeaders: Boolean = false
                 println(header2)
             }
 
+
             // make the column structure out of those 3 lines
             schema = makeSchema(contestLine, choiceLine, headerRecord)
-            // println(schema.show())
+            if (showSchema) {
+                println(schema.showColumns())
+                println()
+                println(schema.showContests())
+            }
+
             nvotesMap = schema.contests.associate { it.contestIdx to it.voteForN }
             // ballotTypeIdx = if (schema.nheaders == 6) 5 else 6
             ballotTypeIdx = schema.nheaders - 1 // TODO see if BallotType == header 6
@@ -148,7 +149,7 @@ class DominionCvrExportReader(val filename: String, showHeaders: Boolean = false
         }
     }
 
-    fun read(showFirst: Int? = null, showAfter: Int? = null): DominionCvrExport {
+    fun read(showFirst: Int? = null, showAfter: Int? = null): DominionCvrCsvSummary {
 
         var cvrCount = 0
         while (records.hasNext()) {
@@ -190,7 +191,7 @@ class DominionCvrExportReader(val filename: String, showHeaders: Boolean = false
         }
 
         val ballotTypes = ballotStyles.ballotTypes.values.sortedBy { it.count }.reversed()
-        return DominionCvrExport(
+        return DominionCvrCsvSummary(
             electionName, versionName, filename, schema, cvrs,
             ballotStyles.redactedGroups.toSortedMap().values.toList(),
             ballotTypes

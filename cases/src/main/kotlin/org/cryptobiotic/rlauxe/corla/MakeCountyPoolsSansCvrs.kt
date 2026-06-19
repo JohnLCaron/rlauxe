@@ -17,8 +17,9 @@ import kotlin.math.roundToInt
 
 private val logger = KotlinLogging.logger("MakeCountyPools")
 
-// one CountyPools for each County
-class MakeCountyPools(
+// used by CountyElectionSansCvrs
+// one CountyPools for each County; make cardPools from Mvrs, then try to adjust to match ??
+class MakeCountyPoolsSansCvrs(
     val corlaContestBuilders: List<CorlaContestBuilder>,
     val coloradoInput: ColoradoInput,
     val onlyCounty: String? = null
@@ -132,20 +133,19 @@ class MakeCountyPools(
         coloradoInput.contestTabsByCounty.values.forEach { contestTabByCounty ->
             val contestName = contestTabByCounty.contestName
             val builder = builders[contestName]
-            if (builder == null)
-                throw RuntimeException()
-            val contestTotalVotes = contestTabByCounty.totalVotesAllCounties
-
-            val counties = contestTabByCounty.counties()
-            counties.forEach { name ->
-                val countyContest = countyNc.getOrPut(name) { mutableMapOf() }
-                val countyVotes = contestTabByCounty.countyVotes(name)
-                val fac = countyVotes / contestTotalVotes.toDouble()
-                countyContest[contestName] = (builder.Nc * fac).roundToInt()
+            if (builder != null) {
+                val contestTotalVotes = contestTabByCounty.totalVotesAllCounties
+                val counties = contestTabByCounty.counties()
+                counties.forEach { name ->
+                    val countyContest = countyNc.getOrPut(name) { mutableMapOf() }
+                    val countyVotes = contestTabByCounty.countyVotes(name)
+                    val fac = countyVotes / contestTotalVotes.toDouble()
+                    countyContest[contestName] = (builder.Nc * fac).roundToInt()
+                }
             }
         }
 
-        //// consistency check
+        /*  consistency check
         // sum over counties to get the contest sum
         val contestSum = mutableMapOf<String, Int>()
         countyNc.forEach { (countyName, countyVotes) ->
@@ -161,7 +161,7 @@ class MakeCountyPools(
             val contestNc = builder.Nc
             //if (abs(contestNc-sum) > 5)
             //    logger.warn{"makeCardPoolsFromCountyStyles has (contestNc-sum) ${abs(contestNc-sum)} > 5" }
-        }
+        } */
         return countyNc
     }
 
@@ -175,18 +175,20 @@ class MakeCountyPools(
     fun makeMissingPool(countyName: String, missingContests: List<CountyContestTab>): AdjustableStylePool {
         val votesForStyle = mutableMapOf<Int, ContestTabulation>() // all contests, this style
         missingContests.forEach { contestTab ->
-            val builder = builders[contestTab.contestName]!!
-            val info = builder.info
-            val votes = mutableMapOf<Int, Int>() // this contest
-            contestTab.choices.forEach { (choiceName, choiceVote) ->
-                val candId = info.candidateNames[choiceName]!!
-                votes[candId] = choiceVote
+            val builder = builders[contestTab.contestName]
+            if (builder != null) {
+                val info = builder.info
+                val votes = mutableMapOf<Int, Int>() // this contest
+                contestTab.choices.forEach { (choiceName, choiceVote) ->
+                    val candId = info.candidateNames[choiceName]!!
+                    votes[candId] = choiceVote
+                }
+                // distributeNc[countyName] doesnt have this county ....
+                // if missing contests is contained in this county, use Builder.Nc
+                // otherwise sum the votes
+                val ncards = if (builder.counties.size == 1) builder.Nc else votes.values.sum()
+                votesForStyle[info.id] = ContestTabulation(info, votes, ncards)
             }
-            // distributeNc[countyName] doesnt have this county ....
-            // if missing contests is contained in this county, use Builder.Nc
-            // otherwise sum the votes
-            val ncards = if (builder.counties.size == 1) builder.Nc else votes.values.sum()
-            votesForStyle[info.id] = ContestTabulation(info, votes, ncards)
         }
 
         CountyPoolsBuilder.nextPoolId++
@@ -205,7 +207,6 @@ class MakeCountyPools(
 // we have county styles and subtotals, which get distributed to the various county styles in (rough) proportion to their cardCount.
 // as usual, we dont know the undervotes, so we will distribute that also in proportion
 
-// merge into CountyPools
 data class CountyPoolsBuilder(
     val countyName: String,
     val cct: CountyContestTabs, // the votes subtotal for each contest in the county

@@ -235,6 +235,7 @@ data class ContestSampleControl(
     //// checkContestsCorrectlyFormed: preAuditStatus
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
     val minMargin: Double = 0.0, // do not audit contests less than this margin TODO really it should be noerror for clca?
+    val minSize: Int? = null, // do not audit contests with population less than this
 
     //// consistentSampling: contestRound.status, depends on having estimation
     val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / Npop) greater than this
@@ -260,7 +261,7 @@ data class ContestSampleControl(
 
     companion object {
         val removeMaxContests = "removeMaxContests"
-        val NONE = ContestSampleControl(0.0, 0.0, 0.0, null, null, emptyMap())
+        val NONE = ContestSampleControl(0.0, 0.0, null, 0.0, null, null, emptyMap())
         private val logger = KotlinLogging.logger("ContestSampleControl")
     }
 }

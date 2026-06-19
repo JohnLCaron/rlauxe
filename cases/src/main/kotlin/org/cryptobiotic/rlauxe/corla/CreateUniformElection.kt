@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeElectionInfoJsonFile
 import org.cryptobiotic.rlauxe.util.*
@@ -50,16 +50,16 @@ open class CreateUniformElection (
     override fun ncards() = ncards
 
     override fun cards(): CloseableIterator<AuditableCard> {
-        val unsortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
+        val unsortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.unsortedMvrsFile(), styles = null)
 
         return TransformingIterator(unsortedMvrs) { cardm ->
             when {
                 cardm.phantom -> cardm
-                auditType.isClca() -> cardm.copy(poolId = null, styleName = CardStyle.fromCvr) // TODO fishy
+                auditType.isClca() -> cardm.copy(poolId = null, styleId = CardStyle.fromCvrStyle.id) // TODO fishy
                 // auditType.isClca() -> cardm.copy(poolId = null)
                 (auditType.isPolling() && pollingMode!!.withoutBatches()) -> cardm.copy(
                     contestIds = IntArray(0), // might be safer to provide a function to remove all three
-                    styleName = "OneBatch",
+                    styleId = 0, // TODO "OneBatch",
                     poolId = 0
                 )
 
@@ -70,7 +70,7 @@ open class CreateUniformElection (
     }
 
     // StartAuditFirstRound will create the sorted MVRs
-    override fun unsortedMvrsExternal() = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
+    override fun unsortedMvrsExternal() = readCardsCsvIterator(publisher.unsortedMvrsFile(), styles = null)
     override fun unsortedMvrsInternal() = null
 }
 

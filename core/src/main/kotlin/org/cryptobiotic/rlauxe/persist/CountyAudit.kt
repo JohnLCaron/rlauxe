@@ -6,7 +6,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import java.io.BufferedReader
@@ -27,6 +27,7 @@ class CountyAudit(
 ): AuditRecord(location, config, contests, rounds, nmvrs)  {
 
     override fun auditdir() = "$location/audit"
+    private val styles by lazy { readCardStyles() ?: readCardPools() } // styles are preferred
 
     // for viewer
     // TODO assumes that we can see what county an mvr is from its styleName
@@ -35,11 +36,12 @@ class CountyAudit(
         val lastRound = rounds.last() // TODO last round that has results
 
         val mvrCount = mutableMapOf<String, Int>()
-        // styleNames should already be added
-        val mvrCardIter = readCardsCsvIteratorM(publisher.sampleMvrsFile(lastRound.roundIdx), styles=null)
+        // styles must be added
+        val mvrs = publisher.sampleMvrsFile(lastRound.roundIdx)
+        val mvrCardIter = readCardsCsvIterator(mvrs, styles=styles)
         var count = 0
         mvrCardIter.forEach { mvr ->
-            val split = mvr.styleName.split("-",".") // county is the first token of the style name HAHAHAHAH
+            val split = mvr.style()!!.name().split("-",".") // county is the first token of the style name HAHAHAHAH
             val countyName = split[0]
             val accum = mvrCount.getOrPut(countyName) { 0 }
             mvrCount[countyName] = accum + 1
@@ -58,7 +60,7 @@ class CountyAudit(
         val countyMvrFile = "${publisher.unsortedMvrsDirectory()}/$countyName.csv"
         logger.debug { "readCountyMvrsAndTabulate on $countyMvrFile (exists=${exists(countyMvrFile)}"}
         if (!exists(countyMvrFile)) return emptyMap()
-        val mvrs = readCardsCsvIteratorM(countyMvrFile, styles = null)
+        val mvrs = readCardsCsvIterator(countyMvrFile, styles = styles)
         val infos = contests.associate{ it.id to it.contest.info() }
         val tabs =  tabulateAuditableCards(mvrs, infos)
         logger.debug { "got ${tabs.size} tabulations"}

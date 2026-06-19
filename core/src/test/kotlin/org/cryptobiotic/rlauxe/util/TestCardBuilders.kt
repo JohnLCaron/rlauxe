@@ -13,7 +13,7 @@ class TestCardBuilders {
     @Test
     fun testOneBuilder() {
         val card = AuditableCard.fromVotes ("cvr$42", null, 42, 4422L, false, // intArrayOf(1,2,3),
-            poolId=null, votes=mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), styleName=CardStyle.fromCvr)
+            poolId=null, votes=mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), styleId=CardStyle.fromCvrStyle.id)
         val cb = AuditableCardBuilder.fromCard(card)
         val back = cb.build()
         assertEquals(card, back)
@@ -22,7 +22,7 @@ class TestCardBuilders {
     @Test
     fun testReplaceContestVotes() {
         val card = AuditableCard.fromVotes ("cvr$42", null, 42, 4422L, false, // intArrayOf(1,2,3),
-            poolId=null, votes=mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), styleName=CardStyle.fromCvr)
+            poolId=null, votes=mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), styleId=CardStyle.fromCvrStyle.id)
         val cb = AuditableCardBuilder.fromCard(card)
         card.votes()!!.forEach { (contestId, votes) -> cb.replaceContestVotes(contestId, votes) }
         val back = cb.build()

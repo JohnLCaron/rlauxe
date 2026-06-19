@@ -39,7 +39,7 @@ fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCard, AuditableCard>>, e
 fun AuditableCard.show() = buildString {
     append("AuditableCardIF(id='${id()}', index=${index()}, sampleNum=${prn()}, phantom=${phantom()}")
     if (poolId() != null) append(", poolId=${poolId()}")
-    append(", styleName='${styleName()}'")
+    append(", styleId='${styleId}'")
     append(", has possibleContests=${possibleContests().contentToString()}")
     if (votes() != null) append(" has vote contests=${votes()!!.keys.toList().sorted()})")
 }

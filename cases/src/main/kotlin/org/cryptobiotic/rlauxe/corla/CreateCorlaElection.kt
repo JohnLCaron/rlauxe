@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
@@ -42,7 +42,7 @@ open class CreateCorlaElection (
         } else {
             // read them back in as an Iterator, so we dont have to read all into memory
             val infos = countyElection.contests.map { it.info() }.associateBy { it.id }
-            val auditableCardIter: CloseableIterator<AuditableCard> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles=countyPools)
+            val auditableCardIter: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.unsortedMvrsFile(), styles=countyPools)
             // are we handling the batches correctly using mvrs?
             val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
             require(ncards == count)
@@ -66,7 +66,7 @@ open class CreateCorlaElection (
 
     // TODO verify election creation, verify audit creation
     override fun cards(): CloseableIterator<AuditableCard> {
-        val unsortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
+        val unsortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.unsortedMvrsFile(), styles = null)
 
         return TransformingIterator(unsortedMvrs) { cardm ->
             when {
@@ -74,7 +74,7 @@ open class CreateCorlaElection (
                 auditType.isClca() -> cardm.copy(poolId = null)
                 (auditType.isPolling() && pollingMode!!.withoutBatches()) -> cardm.copy(
                     contestIds = IntArray(0), // might be safer to provide a function to remove all three
-                    styleName = "OneBatch",
+                    styleId = 0, // TODO "OneBatch",
                     poolId = 0
                 )
 
@@ -85,7 +85,7 @@ open class CreateCorlaElection (
     }
 
     // StartAuditFirstRound will create the sorted MVRs
-    override fun unsortedMvrsExternal() = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
+    override fun unsortedMvrsExternal() = readCardsCsvIterator(publisher.unsortedMvrsFile(), styles = null)
     override fun unsortedMvrsInternal() = null
 }
 

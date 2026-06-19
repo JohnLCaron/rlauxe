@@ -36,22 +36,28 @@ class Colorado2020General: ColoradoInput(
         //countyTabulate missing auditcenter 'San Juan County Commissioner - District 1'
         //countyTabulate missing auditcenter 'San Juan County Commissioner - District 2'
         //countyTabulate missing auditcenter 'San Juan County Court Judge - Edwards'
-        //
-        //result.remove("Gunnison County Commissioner - District 1")
-        //result.remove("Gunnison County Commissioner - District 2")
-        //result.remove("Gunnison County Court Judge - Burgemeister")
-        //result.remove("Town of Marble - Board of Trustees")
-        //result.remove("Town of Marble Ballot Issue 2A")
-        //result.remove("San Juan County Commissioner - District 1")
-        //result.remove("San Juan County Commissioner - District 2")
-        //result.remove("San Juan County Court Judge - Edwards")
 
-        // these are from checkCountyTabulateHasCanonical() and checkContestRoundHasCanonical()
-        /* result.remove("Gunnison County Commissioner - District 1")
+        //// Baca
+        result.remove("Baca County Commissioner - District 1")
+        result.remove("Baca County Commissioner - District 3")
+        result.remove("Springfield School District RE-4 Ballot Issue 4A")
+
+        //// Gunnison
+        // Gunnison had 34 mvrs sampled; commissioner District 1; vote margin 2309; diluted margin 20.376%;
+        // total cvrs 11332. risk limit 4%
+        result.remove("Gunnison County Commissioner - District 1")
         result.remove("Gunnison County Commissioner - District 2")
-        result.remove("Gunnison County Court Judge - Burgemeister") // ?? check, also signal when not present in file
+        result.remove("Gunnison County Court Judge - Burgemeister")
         result.remove("Town of Marble - Board of Trustees")
-        result.remove("Town of Marble Ballot Issue 2A") */
+        result.remove("Town of Marble Ballot Issue 2A")
+
+        //// Las Animas
+        result.remove("Las Animas County Commissioner - District 1")
+        result.remove("Las Animas County Commissioner - District 2")
+        result.remove("Las Animas County Referred Measure 1A")
+        result.remove("Town of Cokedale Referred Measure 2A")
+
+        //// San Juan
         result.remove("San Juan County Commissioner - District 1")
         result.remove("San Juan County Commissioner - District 2")
         result.remove("San Juan County Court Judge - Edwards")
@@ -59,58 +65,30 @@ class Colorado2020General: ColoradoInput(
         result.toSortedMap()
     }
 
-    // county specific ??
-    fun contestNameCleanup(name: String): String {
-        return when (name) {
-            "Representative to the 117th United States Congress-District 2" -> "Representative to the 117th United States Congress - District 2"
-            "Representative to the 117th United States Congress-District 4" -> "Representative to the 117th United States Congress - District 4"
-            "District Attorney-20th Judicial District" -> "District Attorney - 20th Judicial District"
-            "Boulder County Court" -> "Boulder County Court Judge - Martin"
-            "City of Louisville City Council Ward 3 (1-Year Term)" -> "City of Louisville City Council Ward 3"
-            "Town of Superior - Trustee" -> "Town of Superior Trustee"
-            "City Of Boulder Ballot Issue 2B" -> "City of Boulder Ballot Issue 2B"
-            "Amendment B (Constitutional)" -> "Amendment B (CONSTITUTIONAL)"
-            "Amendment C (Constitutional)" -> "Amendment C (CONSTITUTIONAL)"
-            "Amendment 76 (Constitutional)" -> "Amendment 76 (CONSTITUTIONAL)"
-            "Amendment 77 (Constitutional)" -> "Amendment 77 (CONSTITUTIONAL)"
-            "Proposition EE (Statutory)" -> "Proposition EE (STATUTORY)"
-            "Proposition 113 (Statutory)" -> "Proposition 113 (STATUTORY)"
-            "Proposition 114 (Statutory)" -> "Proposition 114 (STATUTORY)"
-            "Proposition 115 (Statutory)" -> "Proposition 115 (STATUTORY)"
-            "Proposition 116 (Statutory)" -> "Proposition 116 (STATUTORY)"
-            "Proposition 117 (Statutory)" -> "Proposition 117 (STATUTORY)"
-            "Proposition 118 (Statutory)" -> "Proposition 118 (STATUTORY)"
-            else -> name
-        }
-    }
-
     override fun contestNameCleanup(county: String, name: String): String {
-        when (name) {
-            "Colorado Supreme Court Justice - Hart" -> return "Justice of the Colorado Supreme Court - Hart"
-            "Colorado Supreme Court Justice - Samour" -> return "Justice of the Colorado Supreme Court - Samour"
-            "Supreme Court Hart" -> return "Justice of the Colorado Supreme Court - Hart"
-            "Supreme Court Samour" -> return "Justice of the Colorado Supreme Court - Samour"
-        }
 
-        return when (county) {
+        val transform = when (county) {
             "Adams" -> when (name) {
                 "Adams County Court - Flaum" -> "Adams County Court Judge - Flaum"
                 "Adams County Court - Kirby" -> "Adams County Court Judge - Kirby"
                 "ISSUE 1A" -> "Adams County Ballot Issue 1A"
                 "ISSUE 1B" -> "Adams County Ballot Issue 1B"
                 "Question 1C" -> "Adams County Ballot Issue 1C"
-                else -> name
+                else -> null
             }
+
             "Alamosa" -> when (name) {
                 "Alamosa County Revenue Protection - 1A" -> "Alamosa County Ballot Question 1A"
                 "Alamosa County Ambulance District Revenue Protection - 6A" -> "Alamosa County Ambulance District Ballot Question 6A"
-                else -> name
+                else -> null
             }
+
             "Archuleta" -> when (name) {
                 "Ballot Issue 7A" -> "Los Pinos Fire Protection District Ballot Issue 7A"
                 "Ballot Issue 6A" -> "Aspen Springs Metropolitan District Ballot Issue 6A"
-                else -> name
+                else -> null
             }
+
             "Arapahoe" -> when (name) {
                 "Arapahoe County Court - Contiguglia" -> "Arapahoe County Court Judge - Contiguglia"
                 "Arapahoe County Court - Ollada" -> "Arapahoe County Court Judge - Ollada"
@@ -126,44 +104,51 @@ class Colorado2020General: ColoradoInput(
                 "Ballot Issue 5B" -> "Strasburg School District 31J Ballot Issue 5B"
                 "Ballot Issue 6A" -> "Sundance Hills Metro District Ballot Issue 6A"
                 "Ballot Issue 6B" -> "Sundance Hills Metro District Ballot Issue 6B"
-                else -> name
+                else -> null
             }
+
             "Bent" -> when (name) {
                 "County Court Judge" -> "Bent County Court Judge - Vigil"
-                else -> name
+                else -> null
             }
+
             "Boulder" -> when (name) {
                 "Boulder County Court" -> "Boulder County Court Judge - Martin" // could remove Judge
                 "City of Louisville City Council Ward 3 (1-Year Term)" -> "City of Louisville City Council Ward 3" // could remove after (
-                else -> name
+                else -> null
             }
 
             "Chaffee" -> when (name) {
                 "Sales Tax On Retail Marijuana" -> "Town of Buena Vista Ballot Issue 2A" // could be switched
                 "Allow Retail Marijuana Stores" -> "Town of Buena Vista Ballot Question 2B"
-                else -> name
+                else -> null
             }
+
             "Clear Creek" -> when (name) {
                 "County Court Judge" -> "Clear Creek County Court Judge - Jones"
-                else -> name
+                else -> null
             }
+
             "Conejos" -> when (name) {
                 "Conejos County Commissoiner District 1" -> "Conejos County Commissioner - District 1"
                 "Conejos County Court Judge" -> "Conejos County Court Judge - Cortez"
-                else -> name
+                else -> null
             }
+
             "Crowley" -> when (name) {
                 "Crowley County Court" -> "Crowley County Court Judge - Medina"
-                else -> name
+                else -> null
             }
+
             "Delta" -> when (name) {
                 "Delta County Ballot Issue 1A - Public Safety Improvements Sales Tax (Back the Badge)" -> "Delta County Ballot Issue 1A"
                 "Town of Cedaredge Ballot Issue 2A - Establishment of retail and medical marijuana stores" -> "Town of Cedaredge Ballot Issue 2A"
                 "Town of Cedaredge Ballot Issue 2B - Retail marijuana sales tax" -> "Town of Cedaredge Ballot Issue 2B"
                 "Town of Paonia Ballot Issue 2C - Establishment of marijuana stores" -> "Town of Paonia Ballot Issue 2C"
                 "Town of Paonia Ballot Issue 2D - Levy of occupational tax on marijuana sales" -> "Town of Paonia Ballot Issue 2D"
-                else -> name
+                else -> null
             }
+
             "Denver" -> when (name) {
                 "Court of Appeals Tow" -> "Colorado Court of Appeals Judge - Tow"
                 "Court of Appeals Welling" -> "Colorado Court of Appeals Judge - Welling"
@@ -203,8 +188,9 @@ class Colorado2020General: ColoradoInput(
                 "Ballot Measure 2J" -> "City and County of Denver Ballot Measure 2J"
                 "Ballot Measure 4A" -> "Denver Public Schools (School District No. 1) Ballot Measure 4A"
                 "Ballot Measure 4B" -> "Denver Public Schools (School District No. 1) Ballot Measure 4B"
-                else -> name
+                else -> null
             }
+
             "Douglas" -> when (name) {
                 "Representative to the United States Congress - District 4" -> "Representative to the 117th United States Congress - District 4"
                 "Representative to the United States Congress - District 6" -> "Representative to the 117th United States Congress - District 6"
@@ -215,8 +201,9 @@ class Colorado2020General: ColoradoInput(
                 "Castle Rock Councilmember District 6" -> "Town of Castle Rock Councilmember - District 6"
                 "City of Littleton Initiated Ballot Question 300" -> "City of Littleton Ballot Question 300"
                 "City of Littleton Referred Ballot Question 3A" -> "City of Littleton Ballot Question 3A"
-                else -> name
+                else -> null
             }
+
             "Eagle" -> when (name) {
                 "Candidates for Town Council" -> "Town of Avon Town Council"
                 "Eagle County Court" -> "Eagle County Court Judge - Olguin-Fresquez"
@@ -229,21 +216,54 @@ class Colorado2020General: ColoradoInput(
                 "Town of Gypsum Ballot Issue No. 2D" -> "Town of Gypsum Ballot Issue 2D"
                 "Ballot Issue 2G - Sustaining Existing Levels of Town Revenue from Future State Imposed Reductions in Residential Assessed Val..." -> "Town of Vail Ballot Issue 2G"
                 "Eagle County School District Ballot Issue 5B:" -> "Eagle County School District Re50J Ballot Issue 5B"
-                else -> name
+                else -> null
             }
+
             "El Paso" -> when (name) {
                 "El Paso County Court - Findorff" -> "El Paso County Court Judge - Findorff"
                 "El Paso County Court - Gerhart" -> "El Paso County Court Judge - Gerhart"
-                else -> name
+                else -> null
             }
+
             "Fremont" -> when (name) {
                 "Fremont County Board of County Commissioners - District 1" -> "Fremont County Commissioners - District 1"
                 "Fremont County Board of County Commissioners - District 3" -> "Fremont County Commissioners - District 3"
                 "FREMONT COUNTY - ISSUE 1A - EXTENSION OF 1% SHERIFF'S TAX" -> "Fremont County Ballot Issue 1A"
                 "City of Ca�on City - Question 2A - Black Hills Energy Franchise" -> "City of Canon City Ballot Question 2A"
                 "DEER MOUNTAIN FIRE PROTECTION DISTRICT - ISSUE 6A - MILL LEVY INCREASE" -> "Deer Mountain Fire Protection District Ballot Issue 6A"
-                else -> name
+                else -> null
             }
+
+            "Garfield" -> when (name) {
+                "Representative to the 117th US Congress Dist 3" -> "Representative to the 117th United States Congress - District 3"
+                "Board of Education District 3" -> "State Board of Education Member - Congressional District 3"
+                "State Senate District 8" -> "State Senator - District 8"
+                "County Commissioner District 2" -> "Garfield County Commissioner - District 2"
+                "County Commissioner District 3" -> "Garfield County Commissioner - District 3"
+                "Colorado Supreme Court- Hart" -> "Justice of the Colorado Supreme Court - Hart"
+                "Colorado Supreme Court-Samour" -> "Justice of the Colorado Supreme Court - Samour"
+                "Court of Appeals-Tow" -> "Colorado Court of Appeals Judge - Tow"
+                "Court of Appeals-Welling" -> "Colorado Court of Appeals Judge - Welling"
+                "9th Judicial Judge-Lynch" -> "District Court Judge - 9th Judicial District - Lynch"
+                "Amendment B - Local District Funding" -> "Amendment B (CONSTITUTIONAL)"
+                "Amendment C - Gaming" -> "Amendment C (CONSTITUTIONAL)"
+                "Amendment 76 - Citizen to Vote" -> "Amendment 76 (CONSTITUTIONAL)"
+                "Amendment 77  -Towns and Gaming" -> "Amendment 77 (CONSTITUTIONAL)"
+                "Proposition EE - Taxes on Vaping" -> "Proposition EE (STATUTORY)"
+                "Proposition 113- Popular Vote" -> "Proposition 113 (STATUTORY)"
+                "Proposition 114 - Gray Wolf" -> "Proposition 114 (STATUTORY)"
+                "Proposition 115 - Late term abortion" -> "Proposition 115 (STATUTORY)"
+                "Proposition 116-State Income Tax Rate Reduction" -> "Proposition 116 (STATUTORY)"
+                "Proposition 117 - New Enterprise" -> "Proposition 117 (STATUTORY)"
+                "Proposition 118 - Paid FMLA" -> "Proposition 118 (STATUTORY)"
+                "Issue 2A Glenwood Springs" -> "City of Glenwood Springs Ballot Issue 2A"
+                "Issue 5B Eagle School District RE50J" -> "Eagle County School District Re50J Ballot Issue 5B"
+                "Issue 6A Glenwood Springs Rural Fire" -> "Glenwood Springs Rural Fire Protection District Ballot Issue 6A"
+                "Issue 7A Colorado River Water Consveration Dist" -> "Colorado River Water Conservation District Ballot Issue 7A"
+                "Issue 7B Carbondale & Rural Fire Protection" -> "Carbondale and Rural Fire Protection District Ballot Issue 7B"
+                else -> null
+            }
+
             "Gilpin" -> when (name) {
                 "Gilpin County Issue 1A" -> "Gilpin County Ballot Issue 1A"
                 "Gilpin County Issue 1B" -> "Gilpin County Ballot Issue 1B"
@@ -251,21 +271,25 @@ class Colorado2020General: ColoradoInput(
                 "City of Central Question 2B" -> "City of Central Ballot Question 2B"
                 "Gilpin County RE-1 School District Issue 4A" -> "Gilpin County RE-1 School District Ballot Issue 4A,"
                 "Gilpin County Library District Issue 6A" -> "Gilpin County Library District Ballot Issue 6A"
-                else -> name
+                else -> null
             }
+
             "Gunnison" -> when (name) {
                 "Gunnison County Commissioner - District 1" -> "Gunnison County Commissioner - District 1"
                 "Gunnison County Commissioner - District 2" -> "Gunnison County Commissioner - District 2"
                 "Town of Marble - Board of Trustees" -> "Town of Marble - Board of Trustees"
                 "County Court Judge - Gunnison County - Burgemeister" -> "Gunnison County Court Judge - Burgemeister"
-                else -> name
+                else -> null
             }
+
             "Jackson" -> when (name) {
                 "Jackson County Commissioner Dist 2" -> "Jackson County Commissioner - District 2"
                 "Jackson County Commissioner Dist 3" -> "Jackson County Commissioner - District 3"
                 "District Court Judge - 8th Judicial District - Villaseñor" -> "District Court Judge - 8th Judicial District - Villasenor"
-                else -> name
+                "Justice of the Colorado Supreme Court - Samour" -> "Jackson - Justice of the Colorado Supreme Court - Samour" // diverted target
+                else -> null
             }
+
             "Jefferson" -> when (name) {
                 "Jefferson County Court - Burback" -> "Jefferson County Court Judge - Burback"
                 "Jefferson County Court - Carpenter" -> "Jefferson County Court Judge - Carpenter"
@@ -285,33 +309,34 @@ class Colorado2020General: ColoradoInput(
                 "City of Littleton Referred Ballot Question 3A" -> "City of Littleton Ballot Question 3A"
                 "City of Littleton Initiated Ballot Question 300" -> "City of Littleton Ballot Question 300"
                 "Lookout Mounatin Water District Ballot Issue 6B" -> "Lookout Mountain Water District Ballot Issue 6B"
-                else -> name
+                else -> null
             }
+
             "Kiowa" -> when (name) {
                 "2A TOWN OF EADS TABOR QUESTION" -> "Town of Eads Ballot Question 2A,"
-                else -> name
+                "Proposition 117 (STATUTORY)" -> "Kiowa - Proposition 117 (STATUTORY)"
+                else -> null
             }
+
             "Lake" -> when (name) {
                 "County Court Judge - Lake - Shamis" -> "Lake County Court Judge - Shamis"
-                else -> name
+                else -> null
             }
+
             "La Plata" -> when (name) {
                 "Durango School District 9-R" -> "Durango School District 9-R Ballot Issue 4A"
-                else -> name
+                else -> null
             }
+
             "Larimer" -> when (name) {
                 "County Commissioner - District 2" -> "Larimer County Commissioner - District 2"
                 "County Commissioner - District 3" -> "Larimer County Commissioner - District 3"
                 "County Court Judge - Larimer - Berenato" -> "Larimer County Court Judge - Berenato"
                 "County Court Judge - Larimer - Ecton" -> "Larimer County Court Judge - Ecton"
                 "County Court Judge - Larimer - Lehman" -> "Larimer County Court Judge - Lehman"
-                else -> name
+                else -> null
             }
-            "Logan" -> when (name) {
-                "County Court Judge - Logan - Brammer" -> "Logan County Court Judge - Brammer"
-                "Frenchman Groundwater Management District Referred Ballot Issue 7A" -> "Frenchman Groundwater Management District Ballot Issue 7A"
-                else -> name
-            }
+
             "Lincoln" -> when (name) {
                 "Amendment B" -> "Amendment B (CONSTITUTIONAL)"
                 "Amendment C" -> "Amendment C (CONSTITUTIONAL)"
@@ -324,11 +349,22 @@ class Colorado2020General: ColoradoInput(
                 "Proposition 116" -> "Proposition 116 (STATUTORY)"
                 "Proposition 117" -> "Proposition 117 (STATUTORY)"
                 "Proposition 118" -> "Proposition 118 (STATUTORY)"
-                else -> name
+                "Colorado Supreme Court Justice - Hart" -> "Lincoln - Justice of the Colorado Supreme Court - Hart" // diverted target
+                else -> null
             }
+
+            "Logan" -> when (name) {
+                "County Court Judge - Logan - Brammer" -> "Logan County Court Judge - Brammer"
+                "Frenchman Groundwater Management District Referred Ballot Issue 7A" -> "Frenchman Groundwater Management District Ballot Issue 7A"
+                else -> null
+            }
+
             "Mesa" -> {
-                if (name.startsWith("BALLOT ISSUE 6A")) return "Redlands 360 Metropolitan District No. 1 Ballot Issue ${name.substring(13)}"
-                if (name.startsWith("BALLOT ISSUE 6B")) return "Redlands 360 Metropolitan District No. 9 Ballot Issue ${name.substring(13)}"
+                if (name.startsWith("BALLOT ISSUE 6A"))
+                    return "Redlands 360 Metropolitan District No. 1 Ballot Issue ${name.substring(13)}"
+                if (name.startsWith("BALLOT ISSUE 6B"))
+                    return "Redlands 360 Metropolitan District No. 9 Ballot Issue ${name.substring(13)}"
+
                 when (name) {
                     "Mesa County Court - Grattan" -> "Mesa County Court Judge - Grattan"
                     "Mesa County Court - Henderson" -> "Mesa County Court Judge - Henderson"
@@ -366,36 +402,43 @@ class Colorado2020General: ColoradoInput(
                     "BALLOT ISSUE 6BO" -> "unknown"
                     "BALLOT ISSUE 6BP" -> "unknown"
                     "BALLOT ISSUE 6BQ" -> "unknown"
-                    else -> name
+                    else -> null
                 }
             }
+
             "Mineral" -> when (name) {
                 "Mineral County Court" -> "Mineral County Court Judge - Acheson"
-                else -> name
+                else -> null
             }
+
             "Moffat" -> when (name) {
                 "Ciyt of Craig Ballot Question 2D" -> "City of Craig Ballot Question 2D"
-                else -> name
+                else -> null
             }
+
             "Montrose" -> when (name) {
                 "County Commissioner - District 1" -> "Montrose County Commissioner - District 1"
                 "County Commissioner - District 3" -> "Montrose County Commissioner - District 3"
                 "County Surveyor" -> "Montrose County Surveyor"
-                else -> name
+                else -> null
             }
+
             "Morgan" -> when (name) {
                 "Brush RE-2J School District BALLOT ISSUE" -> "Brush RE-2J School District Ballot Issue 3D"
-                else -> name
+                else -> null
             }
+
             "Otero" -> when (name) {
                 "Ballot Question 2A" -> "City of La Junta Ballot Question 2A"
                 "General Obligation Bonds" -> "Rocky Ford School District R-2 Ballot Question 4A" // probably
-                else -> name
+                else -> null
             }
+
             "Ouray" -> when (name) {
                 "Ouray County Court Judge" -> "Ouray County Court Judge - Martin"
-                else -> name
+                else -> null
             }
+
             "Park" -> when (name) {
                 "Amendment B" -> "Amendment B (CONSTITUTIONAL)"
                 "Amendment C" -> "Amendment C (CONSTITUTIONAL)"
@@ -408,26 +451,35 @@ class Colorado2020General: ColoradoInput(
                 "Proposition 116" -> "Proposition 116 (STATUTORY)"
                 "Proposition 117" -> "Proposition 117 (STATUTORY)"
                 "Proposition 118" -> "Proposition 118 (STATUTORY)"
-                else -> name
+                else -> null
             }
+
             "Phillips" -> when (name) {
                 "Mayor, Town of Holyoke" -> "City of Holyoke Mayor,"
                 "City Council Member, Town of Holyoke" -> "City of Holyoke Council Member"
                 "Phillips County Court - Killin" -> "Phillips County Court Judge - Killin"
                 "Frenchman Groundwater Management District Referred Ballot Issue 7A" -> "Frenchman Groundwater Management District Ballot Issue 7A"
-                else -> name
+                else -> null
             }
+
             "Pitkin" -> when (name) {
                 "Mayor" -> "Town of Snowmass Village Mayor"
                 "Town Council" -> "Town of Snowmass Village Town Council"
                 "City of Aspen - Extension of Existing 0.3% Sales Tax for Educational Purposes Ballot Issue 2B:" -> "City of Aspen Ballot Issue 2B"
-                else -> name
+                else -> null
             }
+
+            "Prowers" -> when (name) {
+                "Amendment C (CONSTITUTIONAL)" -> "Prowers - Amendment C (CONSTITUTIONAL)" // diverted target
+                else -> null
+            }
+
             "Pueblo" -> when (name) {
                 "Extension of the One-Half Cent Sales Tax for Economic Development Question 2A" -> "City of Pueblo Ballot Issue 2A"
                 "Pueblo County School District 70 Issue 4A" -> "Pueblo County School District 70 Ballot Issue 4A"
-                else -> name
+                else -> null
             }
+
             "Rio Blanco" -> when (name) {
                 "Term limits for Assessor Ballot Issue 1A" -> "Rio Blanco County Ballot Issue 1A"
                 "Term limits for Clerk and Recorder Ballot Issue 1B" -> "Rio Blanco County Ballot Issue 1B"
@@ -436,13 +488,15 @@ class Colorado2020General: ColoradoInput(
                 "Term limits for Sheriff Ballot Issue 1E" -> "Rio Blanco County Ballot Issue 1E"
                 "Term limits for Treasurer Ballot Issue 1F" -> "Rio Blanco County Ballot Issue 1F"
                 "South Routt School District Ballot Issue 5A" -> "RE3 South Routt School District Ballot Issue 5A"
-                else -> name
+                else -> null
             }
+
             "Routt" -> when (name) {
                 "Eagle County School District Ballot Issue 5B" -> "Eagle County School District Re50J Ballot Issue 5B"
                 "South Routt School District Ballot Issue 5A" -> "RE3 South Routt School District Ballot Issue 5A"
-                else -> name
+                else -> null
             }
+
             "San Miguel" -> when (name) {
                 "Amendment B" -> "Amendment B (CONSTITUTIONAL)"
                 "Amendment C" -> "Amendment C (CONSTITUTIONAL)"
@@ -455,8 +509,9 @@ class Colorado2020General: ColoradoInput(
                 "Proposition 116" -> "Proposition 116 (STATUTORY)"
                 "Proposition 117" -> "Proposition 117 (STATUTORY)"
                 "Proposition 118" -> "Proposition 118 (STATUTORY)"
-                else -> name
+                else -> null
             }
+
             "Sedgwick" -> when (name) {
                 "Sedgwick County Court" -> "Sedgwick County Court Judge - Dolezal"
                 "Amendment B" -> "Amendment B (CONSTITUTIONAL)"
@@ -470,32 +525,52 @@ class Colorado2020General: ColoradoInput(
                 "Proposition 116" -> "Proposition 116 (STATUTORY)"
                 "Proposition 117" -> "Proposition 117 (STATUTORY)"
                 "Proposition 118" -> "Proposition 118 (STATUTORY)"
-                else -> name
+                else -> null
             }
+
             "Summit" -> when (name) {
                 "Summit County Court - Casias" -> "Summit County Court Judge - Casias"
-                else -> name
+                else -> null
             }
+
             "Teller" -> when (name) {
                 "City Councilmember" -> "City of Woodland Park Councilmember"
                 "Northeast Teller County Fire Protection District 7A" -> "Northeast Teller County Fire Protection District Ballot Issue 7A"
-                else -> name
+                "Amendment C (Constitutional) " -> "Teller - Amendment C (CONSTITUTIONAL)" // diverted target
+                "Amendment 77 (Constitutional)" -> "Teller - Amendment 77 (CONSTITUTIONAL)"
+                else -> null
             }
+
             "Washington" -> when (name) {
                 "Brush RE-2J School District BALLOT ISSUE" -> "Brush RE-2J School District Ballot Issue 3D"
-                else -> name
+                "Proposition EE (Statutory)" -> "Washington - Proposition EE (STATUTORY)" // diverted target
+                else -> null
             }
+
             "Weld" -> when (name) {
-                else -> name
+                else -> null
             }
+
             "Yuma" -> when (name) {
                 "County Court Judge - Yuma" -> "Yuma County Court Judge - Jones"
                 "BALLOT ISSUE 5A:  GENERAL OBLIGATION BONDS" -> "Holyoke School District RE-1J Ballot Issue 5A"
-                else -> name
+                else -> null
             }
+
+            else -> null
+        }
+        if (transform != null) return transform
+
+        // let counties have first pass as transform, then the general case
+        return when (name) {
+            "Colorado Supreme Court Justice - Hart" -> "Justice of the Colorado Supreme Court - Hart"
+            "Colorado Supreme Court Justice - Samour" -> "Justice of the Colorado Supreme Court - Samour"
+            "Supreme Court Hart" -> "Justice of the Colorado Supreme Court - Hart"
+            "Supreme Court Samour" -> "Justice of the Colorado Supreme Court - Samour"
             else -> name
         }
     }
+
     override fun candidateNameCleanup(county: String, name: String): String {
         when (name) {
             "Colorado Supreme Court Justice - Hart" -> return "Justice of the Colorado Supreme Court - Hart"
@@ -524,19 +599,10 @@ class Colorado2020General: ColoradoInput(
             }
             "Douglas" -> when (name) {
                 "Princess Khadijah Maryam Jacob-Fambro / Khadijah Maryam Jaco" -> "Princess Khadijah Maryam Jacob-Fambro / Khadijah Maryam Jacob Sr."
-                // "Jonathan" -> "Jonathan (JB) Bollefer"
                 else -> name
             }
-            "Elbert" -> when (name) {
-                // "Theresa" -> "Theresa (Terry) Howard"
-                else -> name
-            }
-            "Fremont" -> when (name) {
-                // "Stephen" -> "Stephen (Steve) Harrison"
-                else -> name
-            }
-            "Grand" -> when (name) {
-                // "Mary" -> "Mary (Cathy) Tindle"
+            "Garfield" -> when (name) {
+                "Princess Khadijah Maryam Jacob-Fambro/Khadijah Maryam Jacob" -> "Princess Khadijah Maryam Jacob-Fambro / Khadijah Maryam Jacob Sr."
                 else -> name
             }
             "Jefferson" -> when (name) {
@@ -558,23 +624,6 @@ class Colorado2020General: ColoradoInput(
                 else -> name
             }
             else -> name
-        }
-    }
-
-    fun candidateNameCleanup(candName: String): String {
-        return when (candName) {
-            "Jordan 'Cancer' Scott / Jennifer Tepool" -> "Jordan \"Cancer\" Scott / Jennifer Tepool"
-            "Roque 'Rocky' De La Fuente / Darcy G. Richardson" -> "Roque \"Rocky\" De La Fuente / Darcy G. Richardson"
-            "Jo Jorgensen / Jeremy 'Spike' Cohen" -> "Jo Jorgensen / Jeremy \"Spike\" Cohen"
-            "Stephan 'Seku' Evans" -> "Stephan \"Seku\" Evans"
-            "Andrew J. O'Connor" -> "Andrew J. OConnor"
-            "James T Crowder" -> "James T. Crowder"
-            "James E. 'Jed' Gilman" -> "James E. \"Jed\" Gilman"
-            "YES" -> "Yes"
-            "NO" -> "No"
-            "YES/FOR" -> "Yes/For"
-            "NO/AGAINST" -> "No/Against"
-            else -> candName
         }
     }
 

@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.resampleAndSaveResults
 import org.cryptobiotic.rlauxe.audit.runRound
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.cli.RunRlaRoundCli
 import org.cryptobiotic.rlauxe.cli.StartAuditFirstRoundCli
 import org.cryptobiotic.rlauxe.persist.AuditRecord
@@ -13,10 +14,10 @@ import kotlin.test.Test
 // DO NOT put into Unit Tests
 class TestRunRoundCli {
 
-
     @Test
     fun testRunRoundCli() {
-        val auditdir = "${testdataDir}/cases/sf2024/clca/audit"
+        val topdir = "$cases/corla/withCvrs/Colorado2020"
+        val auditdir = "${topdir}/audit"
 
         RunRlaRoundCli.main(
             arrayOf(

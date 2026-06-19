@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
@@ -126,7 +126,7 @@ class TestBoulder2024Cvrs {
     fun testMvrs() {
         val auditdir = "$testdataDir/cases/boulder24/oa/audit"
         val publisher = Publisher(auditdir)
-        val sortedMvrs = readCardsCsvIteratorM(publisher.sortedMvrsFile(), null)
+        val sortedMvrs = readCardsCsvIterator(publisher.sortedMvrsFile(), null)
 
         val tab = ContestTabulation(17, 1, false, listOf(0,1))
 

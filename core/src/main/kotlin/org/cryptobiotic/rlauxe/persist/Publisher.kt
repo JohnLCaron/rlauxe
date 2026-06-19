@@ -95,7 +95,7 @@ class Publisher(val auditDir: String) {
 
     fun sampleMvrsFile(round: Int): String {
         val dir = "$auditDir/round$round"
-        validateOutputDir(Path.of(dir), ErrorMessages("sampleMvrsFile"))
+        validateOutputDir(Path.of(dir), ErrorMessages("sampleMvrsFile")) // TODO bad idea ?
         return "$dir/sampleMvrs$round.csv"
     }
 

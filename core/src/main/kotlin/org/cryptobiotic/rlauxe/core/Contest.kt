@@ -238,7 +238,7 @@ open class Contest(
             val win = if (winners().contains(id)) " (winner)" else ""
             appendLine("   $id '$name': votes=${votes[id]} $win")
         }
-        appendLine("    Total=${votes.values.sum()}")
+        append("    Total=${votes.values.sum()}")
     }
 
     override fun toString() = buildString {

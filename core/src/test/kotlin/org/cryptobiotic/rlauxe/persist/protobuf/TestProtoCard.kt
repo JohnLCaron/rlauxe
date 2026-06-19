@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.persist.protobuf
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.CardCsvReaderM
+import org.cryptobiotic.rlauxe.persist.csv.CardCsvReader
 import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -20,17 +20,17 @@ class TestProtoCard {
 
     @Test
     fun testProtoAndCsvAgree () {
-        val topdir = "${testdataDir}/cases/corla/consistent"
+        val topdir = "$testdataDir/cases/auditcenter/County2024OnlyTeller"
         val publisher = Publisher("$topdir/audit")
         val bufferSize = 100_000
 
         val styles = readCardStylesJsonFile(publisher.cardStylesFile()).unwrap()
-        val csvIter = CardCsvReaderM(publisher.sortedCardsFile(), styles).iterator()
+        val csvIter = CardCsvReader(publisher.sortedCardsFile(), styles).iterator()
 
         val stopwatch = Stopwatch()
         var ncards = 0L
 
-        val protoIter: CloseableIterator<AuditableCard> = ProtoCardIteratorM(publisher.sortedCardsProtoFile(), styles = styles)
+        val protoIter: CloseableIterator<AuditableCard> = ProtoCardIterator(publisher.sortedCardsProtoFile(), styles = styles)
         while (protoIter.hasNext() && csvIter.hasNext() && ncards < 100_000) {
             val cardFromCsv = csvIter.next()
             val cardFromProto = protoIter.next()
@@ -54,7 +54,7 @@ fun checkEqual(c1: AuditableCard, c2: AuditableCard): Boolean {
     assertEquals(c1.index(), c2.index())
     assertEquals(c1.prn(), c2.prn())
     assertEquals(c1.poolId(), c2.poolId())
-    assertEquals(c1.styleName(), c2.styleName())
+    assertEquals(c1.styleId, c2.styleId)
 
     assertEquals(c1.votes() == null, c2.votes() == null)
     if (c1.votes() != null) {

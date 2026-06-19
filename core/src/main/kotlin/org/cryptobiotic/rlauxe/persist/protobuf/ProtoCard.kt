@@ -32,12 +32,12 @@ class ProtoCard (
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    val poolId: Int? = null, // must be set if its from a CardPool
+    val styleId: Int,
     // The default integer type is a varint encoding (intXX) that is optimized for small non-negative numbers.
     val contestIds: IntArray? = null,
     val contestStarts: IntArray? = null,
     val candidates: IntArray? = null,
-    val styleName: String,
+    val poolId: Int? = null, // must be set if its from a CardPool
 )
 
 fun AuditableCard.publishProto() : ProtoCard {
@@ -62,11 +62,11 @@ fun AuditableCard.publishProto() : ProtoCard {
             this.index(),
             this.prn(),
             this.phantom(),
-            this.poolId(),
+            this.styleId,
             contestIdas,
             contestStarts.toIntArray(),
             candidates.toIntArray(),
-            this.styleName(),
+            this.poolId,
         )
     } else {
         return ProtoCard(
@@ -75,26 +75,26 @@ fun AuditableCard.publishProto() : ProtoCard {
             this.index(),
             this.prn(),
             this.phantom(),
-            this.poolId(),
+            this.styleId,
             null,
             null,
             null,
-            this.styleName(),
+            this.poolId,
         )
     }
 }
 
-fun ProtoCard.importM(styleMap: Map<String, StyleIF> ): AuditableCard {
+fun ProtoCard.import(styleMap: Map<Int, StyleIF> ): AuditableCard {
 
-    var style = styleMap[this.styleName]
+    var style = styleMap[this.styleId]
     if (style == null) {
         if (this.phantom)
-            style = CardStyle.phantomBatch
-        else if (this.styleName == CardStyle.fromCvr)
-            style = CardStyle.fromCvrBatch
+            style = CardStyle.phantomStyle
+        else if (this.styleId == CardStyle.fromCvrStyle.id())
+            style = CardStyle.fromCvrStyle
         else {
-            logger.warn { "cant find ProtoCard.styleName = '${this.styleName}'"}
-            style = CardStyle.fromCvrBatch // TODO
+            logger.warn { "cant find ProtoCard.styleId = '${this.styleId}'"}
+            style = CardStyle.fromCvrStyle // TODO something better ??
         }
     }
 
@@ -104,11 +104,11 @@ fun ProtoCard.importM(styleMap: Map<String, StyleIF> ): AuditableCard {
         this.index,
         this.prn,
         this.phantom,
-        this.styleName,
-        this.poolId,
+        this.styleId,
         this.contestIds ?: intArrayOf(),
         this.contestStarts ?: intArrayOf(),
         this.candidates ?: intArrayOf(),
+        this.poolId,
     ).setStyle(style)
 }
 
@@ -155,11 +155,11 @@ private fun writeVlenForProto(messageSize: Int, output: OutputStream) {
 // see TimeCardReading
 class ProtoCardIterable(val protoFilename: String, val bufferSize: Int = 100_000, val styles: List<StyleIF>?) : CloseableIterable<AuditableCard> {
     override fun iterator(): CloseableIterator<AuditableCard> =
-        ProtoCardIteratorM(protoFilename, bufferSize, styles)
+        ProtoCardIterator(protoFilename, bufferSize, styles)
 }
 
-class ProtoCardIteratorM(filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCard> {
-    val styleMap: Map<String, StyleIF> = styles?.associateBy{ it.name() } ?: emptyMap()
+class ProtoCardIterator(filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCard> {
+    val styleMap: Map<Int, StyleIF> = styles?.associateBy{ it.id() } ?: emptyMap()
 
     val errs = ErrorMessages("readProtoCardsFile '${filename}'")
     val inputStream: InputStream
@@ -183,7 +183,7 @@ class ProtoCardIteratorM(filename: String, bufferSize: Int = 100_000, val styles
         val bytes = ByteArray(nextMessageSize)
         val bytesRead = inputStream.read(bytes)
         val protoCard = ProtoBuf.decodeFromByteArray<ProtoCard>(bytes)
-        return protoCard.importM(styleMap)
+        return protoCard.import(styleMap)
     }
 
     override fun close() {

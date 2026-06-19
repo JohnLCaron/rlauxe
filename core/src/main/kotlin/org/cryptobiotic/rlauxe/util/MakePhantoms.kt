@@ -92,8 +92,8 @@ class PhantomBuilder(val id: String, val idx: Int) {
     fun buildCardM(): AuditableCard {
         val votes = contests.associateWith { IntArray(0) }
        //  val (contestIds, contestStarts, candidates) = makeFromVotes(votes)
-        return AuditableCard.fromVotes(id = id, location = null, index = idx, prn = 0L, phantom = true, styleName=CardStyle.phantoms, poolId = null,
-            votes).setStyle(CardStyle.phantomBatch)
+        return AuditableCard.fromVotes(id = id, location = null, index = idx, prn = 0L, phantom = true, styleId=CardStyle.phantomStyle.id, poolId = null,
+            votes=votes).setStyle(CardStyle.phantomStyle)
     }
 
 }

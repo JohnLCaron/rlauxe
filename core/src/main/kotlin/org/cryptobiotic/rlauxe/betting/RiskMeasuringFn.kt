@@ -33,6 +33,7 @@ enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boole
     // preAuditStatus contest status set by checkContestsCorrectlyFormed and VerifyContests
     ContestMisformed(3,true, false), // Contest incorrectly formed
     MinMargin(4,true, false), // margin too small for RLA to efficiently work
+    MinSize(14,true, false), // population is too small for RLA to efficiently work
     TooManyPhantoms(5,true, false), // too many phantoms, makes margin < 0
 
     // set by sampleWithContestCutoff

@@ -9,7 +9,7 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.csv.CardCsvReaderM
+import org.cryptobiotic.rlauxe.persist.csv.CardCsvReader
 import org.cryptobiotic.rlauxe.persist.existsOrZip
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
@@ -61,7 +61,7 @@ fun enterMvrs(inputDir: String, mvrFile: String): Result<Boolean, ErrorMessages>
 
     val mvrManager = PersistedMvrManager(auditRecord)
 
-    val mvrs = CardCsvReaderM(mvrFile, mvrManager.styles())
+    val mvrs = CardCsvReader(mvrFile, mvrManager.styles())
 
     if (!mvrManager.enterMvrsForRound(lastRoundIdx, mvrs, errs)) {
         return Err(errs)

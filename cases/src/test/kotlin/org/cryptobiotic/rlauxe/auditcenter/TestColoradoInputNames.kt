@@ -20,19 +20,6 @@ class TestColoradoInputNames {
     val canonicalContestNames = canonical.map{ it.key }
 
     @Test
-    fun showCanonicalContests() {
-        canonical.values.forEach { println( it.contestName )}
-        println("there are ${canonical.size} auditcenter contests")
-    }
-
-    @Test
-    fun showCanonicalCounties() {
-        val counties = canonical.values.map { it.counties }.flatten().toSet().toList().sorted()
-        counties.forEach { println( it )}
-        println("there are ${counties.size} auditcenter counties")
-    }
-
-    @Test
     fun checkCanonicalHasCountyTabulate() {
         val extras = mutableListOf<CanonicalContest>()
 
@@ -103,102 +90,34 @@ class TestColoradoInputNames {
         }
     }
 
-    // now correct the auditcenter files and run this
+    // now correct ColoradoInput and run this
     @Test
     fun checkCorrectedCanonicalContests() {
-        val auditcenter = input.canonicalContests()
+        input.canonicalContests().forEach { cc ->
+            assertTrue(input.contestTabsByCounty.contains(cc.key), "contestTabsByCounty '${cc.key}' from canonical")
+            assertTrue(input.roundContests.contains(cc.key), "roundContests '${cc.key}' from canonical")
+        }
+    }
 
-        val contestTabs = input.contestTabsByCounty
-        contestTabs.forEach {
-            assertTrue(auditcenter.contains(it.key))
+    @Test
+    fun reportCorrectedCanonicalContests() {
+        val inputCanonical = input.canonicalContests()
+
+        input.contestTabsByCounty.forEach {
+            if (!inputCanonical.contains(it.key)) println("canonical missing '${it.key}' from contestTabsByCounty")
         }
 
-        val roundContests = input.roundContests
-        roundContests.forEach {
-            assertTrue(auditcenter.contains(it.key), "canonical missing roundContest '${it.key}'")
+        input.roundContests.forEach {
+            if (!inputCanonical.contains(it.key)) println( "canonical missing '${it.key}' from roundContests")
         }
 
         input.contestMvrs.forEach {
-            assertTrue(auditcenter.contains(it.contestName))
+            if (!inputCanonical.contains(it.contestName)) println("canonical missing '${it.contestName}' from contestMvrs")
         }
 
-        auditcenter.forEach {
-            assertTrue(contestTabs.contains(it.key))
-            assertTrue(roundContests.contains(it.key))
-        }
-
-    }
-
-    // @Test comparision contests are a subset
-    fun checkContestComparisonHasCanonical() {
-        println("\n--------------------------------------------------------------------------")
-        val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile)
-        val mvrMap = contestMvrs.associateBy{ it.contestName }
-        var count = 0
-        canonical.values.forEach {
-            if (!mvrMap.contains(it.contestName)) {
-                println("contestComparison missing canonical '${it.contestName}'")
-                count++
-            }
-        }
-        println("missing $count")
-    }
-
-
-    //// not needed
-
-    // @Test
-    fun checkResultsReportContest() {
-        val filename = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
-        val contests = readResultsReportContest(filename) { it }
-        println("ResultsReportSummary $filename missing")
-        contests.forEach {
-            if (!canonical.contains(it.contestName)) println("  '${it.contestName}'")
-        }
-        //   'Bannock Ballot Issue 6A'
-        //  'Spring Canyon Ballot Issue 6B'
-    }
-
-    //@Test
-    fun checkTargetedContestsCsv() {
-        val filename = "src/test/data/corla/2024audit/targetedContests.csv"
-        val targets = readTargetedContestsCsv(filename) { it }
-
-        println("ContestComparisonCsv $filename missing")
-        targets.forEach {
-            if (!canonical.contains(it.contestName)) println("  '${it.contestName}'")
-        }
-        //  'Bent County Commissioner - District 1'
-        //  'City and County of Broomfield Ballot Question 2G'
-        //  'Cheyenne County Court Judge - Eiring'
-        //  'Conejos County Commissioner - District 3'
-        //  'Costilla County Commissioner - District 3'
-        //  'Custer County Commissioner - District 2'
-        //  'Delta County Court Judge - Zeerip'
-        //  'City and County of Denver Ballot Issue 2Q'
-        //  'Fremont County Commissioner - District 3'
-        //  'Garfield County Commissioner - District 2'
-        //  'Hinsdale County Commissioner - District 1'
-        //  'North Park School District R-1 Ballot Issue 4A'
-        //  'La Plata County Commissioner - District 3'
-        //  'Las Animas County Commissioner - District 2'
-        //  'Montezuma County Ballot Issue 1A'
-        //  'Park County Commissioner - District 1'
-        //  'Pitkin County Ballot Issue 1A'
-        //  'Rio Grande County Court Judge - Stenger'
-        //  'Saguache County Commissioner - District 1'
-        //  'San Miguel County Ballot Measure 1A'
-        //  'Yuma County Court Judge - Jones'
-    }
-
-    //@Test
-    fun checkColoradoElectionDetail() {
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val detail = readColoradoElectionDetail(detailXmlFile)
-
-        println("ColoradoElectionDetail missing")
-        detail.contests.forEach {
-            if (!canonical.contains(it.text)) println("  '${it.text}'")
+        inputCanonical.forEach { cc ->
+            assertTrue(input.contestTabsByCounty.contains(cc.key), "contestTabsByCounty '${cc.key}' from canonical")
+            assertTrue(input.roundContests.contains(cc.key), "roundContests '${cc.key}' from canonical")
         }
     }
 }

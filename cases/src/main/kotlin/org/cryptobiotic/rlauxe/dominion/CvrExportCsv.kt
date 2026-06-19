@@ -16,6 +16,9 @@ const val CvrExportCsvHeader = "id, group, style, precinct, contests, candidates
 
 // private val logger = KotlinLogging.logger("CvrExportCvs")
 
+// serialization of CvrExport (from Json) to/from our ah-hoc csv format
+// TODO probably merge with our ad-hoc card csv format
+
 fun readCvrExportCsv(line: String): CvrExport {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
@@ -126,9 +129,9 @@ class CvrExportToCardAdapterM(val cvrExportIterator: CloseableIterator<CvrExport
             countIndex,
             0,
             phantom = false,
-            styleName = pool?.name() ?: CardStyle.fromCvr,
+            styleId = pool?.id() ?: CardStyle.fromCvrStyle.id,
+            votes = cvrExport.votes,
             poolId = pool?.poolId,
-            votes = cvrExport.votes
         )
 
         countIndex++
@@ -167,9 +170,9 @@ class CvrExportConverterM(
             countIndex,
             0,
             phantom = false,
+            styleId = pool?.id() ?: CardStyle.fromCvrStyle.id,
             votes =  cvrExport.votes,
             poolId = pool?.poolId,
-            styleName = style?.name() ?: CardStyle.fromCvr,
         )
 
         countIndex++

@@ -55,11 +55,11 @@ class TestVerifyMvrs {
         }
 
         val rcards = listOf(
-            cards[0].copy(styleName="hasStyle").setStyle(style=CardStyle("hasStyle", 1, cards[0].possibleContests(), true)),
-            cards[1].copy(styleName="hasStyle").setStyle(style=CardStyle("hasStyle", 1, removeOne(cards[1].possibleContests()), true)),
-            cards[2].copy(styleName="noStyle").setStyle(style=CardStyle("noStyle", 1, removeOne(cards[2].possibleContests()), false)),
-            cards[3].copy(styleName="hasStyle").setStyle(style=CardStyle("hasStyle", 1, addOne(cards[3].possibleContests()), true)),
-            cards[4].copy(styleName="noStyle").setStyle(style=CardStyle("noStyle", 1, addOne(cards[4].possibleContests()), false)),
+            cards[0].copy(styleId=1).setStyle(style=CardStyle("hasStyle", 1, cards[0].possibleContests(), true)),
+            cards[1].copy(styleId=1).setStyle(style=CardStyle("hasStyle", 1, removeOne(cards[1].possibleContests()), true)),
+            cards[2].copy(styleId=2).setStyle(style=CardStyle("noStyle", 2, removeOne(cards[2].possibleContests()), false)),
+            cards[3].copy(styleId=1).setStyle(style=CardStyle("hasStyle", 1, addOne(cards[3].possibleContests()), true)),
+            cards[4].copy(styleId=2).setStyle(style=CardStyle("noStyle", 2, addOne(cards[4].possibleContests()), false)),
         )
         val errs = ErrorMessages("testHasStyle")
         verifyMvrCardPairs(cards.zip(rcards), errs)

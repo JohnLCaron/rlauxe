@@ -18,7 +18,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.TransformingIterator
@@ -89,11 +89,11 @@ class CreateCountyAudits(
 
     override fun cards(): CloseableIterator<AuditableCard> {
         val publisher = Publisher(auditdir)
-        val unsortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIteratorM(publisher.unsortedMvrsFile(), styles = null)
+        val unsortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.unsortedMvrsFile(), styles = null)
         return TransformingIterator(unsortedMvrs) { mvr ->
             when {
                 mvr.phantom -> mvr
-                else -> mvr.copy(poolId = null, styleName = CardStyle.fromCvr)
+                else -> mvr.copy(poolId = null, styleId = CardStyle.fromCvrStyle.id)
             }
         }
     }

@@ -22,6 +22,7 @@ import kotlin.collections.toList
 
 private val logger = KotlinLogging.logger("CreateSfprecinctOA")
 
+// obsolete ??
 // use precincts as the pools
 class CreatePrecinctAndStyle(
     castVoteRecordZip: String,
@@ -180,9 +181,9 @@ class CreatePrecinctAndStyle(
                 countIndex++,
                 0,
                 phantom = false,
-                styleName = pool?.name() ?: CardStyle.fromCvr,
+                styleId = pool?.id() ?: CardStyle.fromCvrStyle.id,
+                contestIds, contestStarts, candidates,
                 poolId = poolId,
-                contestIds, contestStarts, candidates
             ).setStyle(cardStyle)
         }
 

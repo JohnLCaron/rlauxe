@@ -35,7 +35,7 @@ class TestReadBelgiumElection {
         val parties = readPartyTxtFile(partyFilename)
         val roys = readRoyaumeTxtFile(royaumeFilename).sortedBy { it.name }
 
-        println("RoyaumeTxtFile")
+        println("RoyaumeTxtFile") // can be used to test our reported results
         roys.forEachIndexed { idx, roy ->
             val partyId = parties[roy.name]
             println("${partyId}, ${sfn(roy.name, 20)}")

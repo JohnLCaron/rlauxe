@@ -15,8 +15,6 @@ import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.audit.createElectionRecord
 import org.cryptobiotic.rlauxe.audit.startFirstRound
-import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
-import org.cryptobiotic.rlauxe.belgium.createAndRunBelgiumElection
 import org.cryptobiotic.rlauxe.belgium.toptopdir
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2024General
@@ -25,9 +23,6 @@ import org.cryptobiotic.rlauxe.corla.createUniformElection
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.sf.CreatePrecinctAndStyle
 import org.cryptobiotic.rlauxe.sf.createSfElection
-import org.cryptobiotic.rlauxe.util.dfn
-import org.cryptobiotic.rlauxe.util.sfn
-import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -244,19 +239,9 @@ class TestGenerateAllUseCases {
         )
     }
 
-    // maybe just always make them Limited
     @Test
     fun createAllBelgiumElections() {
-        val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
-        belgianElectionMap.keys.forEachIndexed { idx, name ->
-            val filename = belgianElectionMap[name]!!
-            allmvrs[name] = createAndRunBelgiumElection(name, filename, toptopdir, contestId = idx+1) { null }
-        }
-        allmvrs.forEach {
-            val pct = (100.0 * it.value.second) / it.value.first.toDouble()
-            println("${sfn(it.key, 15)}: Nc= ${trunc(it.value.first.toString(), 10)} " +
-                    " nmvrs= ${trunc(it.value.second.toString(), 6)} pct= ${dfn(pct, 2)} %")
-        }
+        org.cryptobiotic.rlauxe.belgium.createAllBelgiumElections(toptopdir)
     }
 
 }

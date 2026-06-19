@@ -133,9 +133,27 @@ There's lots of online help for using IntelliJ.
 * **plots**: code to generate plots for documentation
 
 
-## Test Cases
+## Generate Test Cases from the uber jar
 
-The repo contains all the test case data, except for San Francisco. Download
+build the uberjars:
+
+$ ./gradlew assemble uberjar
+
+### belgium 
+
+The repo contains the needed input for belgium2024. To create the data:
+
+`
+java -classpath cases/build/libs/cases-0.9.5.3-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+    -case belgium -topdir "/home/you/wherever/cases/belgium2024"
+`
+
+* check _cases/build/libs/_ for the latest version of cases-uber.jar
+* substitute your own output directory
+
+### sf
+
+The repo does not contain the test data input for San Francisco. Download
 
   [SF2024 data](https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip)
 
@@ -143,6 +161,8 @@ into _$testdataDir/cases/sf2024/_ (where you chose _$testdataDir_ in the "Set th
 
 Then run _createSf2024CvrExport()_ test in _cases/src/test/kotlin/org/cryptobiotic/rlauxe/sf/CreateSf2024CvrExport.kt_
 to generate _testdataDir/cases/sf2024/crvExport.csv_. This only needs to be done one time.
+
+## review this
 
 All the test cases can now be generated from:
 

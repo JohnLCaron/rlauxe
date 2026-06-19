@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
@@ -38,7 +38,7 @@ class TestCardSortMerge {
             toCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )
 
-        val cardIter = readCardsCsvIteratorM(outputFile, null)
+        val cardIter = readCardsCsvIterator(outputFile, null)
         var count = 0
         var countPools = 0
         cardIter.forEach {
@@ -64,7 +64,7 @@ class TestCardSortMerge {
             toCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )
 
-        val cardIter = readCardsCsvIteratorM(outputFile, null)
+        val cardIter = readCardsCsvIterator(outputFile, null)
         var count = 0
         var countPools = 0
         cardIter.forEach {
@@ -90,7 +90,7 @@ class TestCardSortMerge {
             toCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )
 
-        val cardIter = readCardsCsvIteratorM(outputFile, null)
+        val cardIter = readCardsCsvIterator(outputFile, null)
         var count = 0
         var countPools = 0
         cardIter.forEach {

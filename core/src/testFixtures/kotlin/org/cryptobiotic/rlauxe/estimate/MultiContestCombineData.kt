@@ -17,7 +17,7 @@ data class MultiContestCombineData(
     val poolId: Int? = null,
 ) {
     val contestVoteTrackers: List<ContestVoteTracker>
-    val style = if (poolId == null) CardStyle.fromCvrBatch
+    val style = if (poolId == null) CardStyle.fromCvrStyle
         else CardStyle("batch$poolId", poolId, contests.map { it.id }.toIntArray(), false)
 
     init {
@@ -47,7 +47,7 @@ data class MultiContestCombineData(
     private fun makeCard(nextCardId: Int, fcontests: List<ContestVoteTracker>, cardStyle:String?): AuditableCard {
         //         constructor(location: String, index: Int, poolId: Int?, cardStyle: String?):
         val cardBuilder = AuditableCardBuilder("card${nextCardId}", null, nextCardId, 0, false,
-            styleName=style.name(), poolId, null, style=style)
+            styleId=style.id(), poolId=poolId, votesIn = null, style=style)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build()
     }
@@ -164,7 +164,7 @@ data class MultiContestCombinePools(
         vunderPool.simulatePooledCvr(cvrb2)
         val cvr = cvrb2.build()
         return AuditableCard.fromVotes("card${nextCardId}", null, nextCardId, 0L, false,
-            pool.name(), poolId=pool.poolId, cvr.votes).setStyle(pool)
+            styleId=pool.id(), poolId=pool.poolId, votes=cvr.votes).setStyle(pool)
 
     }
 }
@@ -269,6 +269,6 @@ data class MultiContestFromBallotStyles(
         vunderPool.simulatePooledCvr(cvrb2)
         val cvr = cvrb2.build()
         return AuditableCard.fromVotes(cardName, null, cardId, 0L, false,
-            cardStyle.name(), poolId=null, cvr.votes).setStyle(cardStyle)
+            styleId=cardStyle.id(), poolId=null, votes=cvr.votes).setStyle(cardStyle)
     }
 }

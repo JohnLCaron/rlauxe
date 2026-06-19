@@ -106,17 +106,17 @@ fun makeCvrsForVunderPool(pool: CardPool, vunderpool: VunderPool): List<Cvr> {
 // for multiple styles, multiple contests and one "pool" of subtotaled votes
 // used for estimation for OneAudit
 class VunderBatches(styles: List<StyleIF>, val onePool: VunderPool) {
-    val styleMap = styles.associateBy { it.name() }
+    val styleMap = styles.associateBy { it.id() }
 
     // for the given pooled card with no votes, simulate one with votes, using card.styleName
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
         if (card.phantom()) return card
 
-        val style = styleMap[card.styleName()]
+        val style = styleMap[card.styleId]
         val cardb = AuditableCardBuilder.fromCard(card)
 
         if (style == null) {
-            println("style ${card.styleName()} not found")
+            println("style ${card.styleId} not found")
             return cardb.build()
         }
 

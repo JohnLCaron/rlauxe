@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.estimate.VunderBatches
 import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.*
@@ -38,7 +38,7 @@ open class CountyElectionSansCvrs (
     val styles: List<StyleIF>
 
     init {
-        val makePools = MakeCountyPools(countyElection.corlaContestBuilders, coloradoInput, onlyCounty)
+        val makePools = MakeCountyPoolsSansCvrs(countyElection.corlaContestBuilders, coloradoInput, onlyCounty)
         val countyPoolBuilders: List<CountyPoolsBuilder> = makePools.countyPools
         styles = countyPoolBuilders.map { it.pools }.flatten()  // use the pools as styles
         countyPools = countyPoolBuilders.map { it.build() }
@@ -66,7 +66,7 @@ open class CountyElectionSansCvrs (
 
     override fun cardStyles(): List<StyleIF>? = styles
     override fun cardPools(): List<CardPoolIF>? = null
-    override fun countyCardPools(): List<CountyPoolsIF>? = countyPools
+    override fun countyCardPools(): List<CountyPools>? = countyPools
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
 
@@ -86,7 +86,7 @@ open class CountyElectionSansCvrs (
 
         val dir = publisher.unsortedMvrsDirectory()
         val counties = countyPools.map { it.countyName }.iterator()
-        var innerIter = readCardsCsvIteratorM("$dir/${counties.next()}.csv", styles = null)
+        var innerIter = readCardsCsvIterator("$dir/${counties.next()}.csv", styles = null)
 
         override fun next(): AuditableCard {
             return innerIter.next()
@@ -95,7 +95,7 @@ open class CountyElectionSansCvrs (
         override fun hasNext(): Boolean {
             if (innerIter.hasNext()) return true
             if (counties.hasNext()) {
-                innerIter = readCardsCsvIteratorM("$dir/${counties.next()}.csv", styles = null)
+                innerIter = readCardsCsvIterator("$dir/${counties.next()}.csv", styles = null)
                 return hasNext()
             }
             return false
@@ -176,7 +176,7 @@ open class CountyElectionSansCvrs (
 
             override fun next(): AuditableCard {
                 countCards++
-                val card = AuditableCard.empty(id = "${poolName}.index-${cardno++}", phantom = false, poolName)
+                val card = AuditableCard.empty(id = "${poolName}.index-${cardno++}", phantom = false, styleId=cardPool.id())
                 return vunderBatches.simulatePooledCard(card)
             }
 

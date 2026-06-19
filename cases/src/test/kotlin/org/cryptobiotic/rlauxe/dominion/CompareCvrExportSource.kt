@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.dominion
 
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.votedatabase.colorado2020
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -14,28 +15,28 @@ class CompareCvrExportSources {
     @Test
     fun compareBoulder20cvrs() {
         compareDominionCvrExport(
-            DominionCvrExportReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv").read(),
-            DominionCvrExportReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/Boulder CO.csv").read()
+            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv").read(),
+            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/Boulder CO.csv").read()
         )
     }
 
     @Test
     fun compareAdams20cvrs() {
         compareDominionCvrExport(
-            DominionCvrExportReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/cvr.csv").read(),
-            DominionCvrExportReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/Adams_2020G_CVR_REDACTED.csv").read()
+            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/cvr.csv").read(),
+            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/Adams_2020G_CVR_REDACTED.csv").read()
         )
     }
 
     @Test // breakdown
     fun compareArapahoe20cvrs() {
         compareDominionCvrExport(
-            DominionCvrExportReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/cvr.csv").read(),
-            DominionCvrExportReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/CVR_EDITED.csv").read()
+            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/cvr.csv").read(),
+            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/CVR_EDITED.csv").read()
         )
     }
 
-    fun compareDominionCvrExport(exp1: DominionCvrExport, exp2: DominionCvrExport) {
+    fun compareDominionCvrExport(exp1: DominionCvrCsvSummary, exp2: DominionCvrCsvSummary) {
         println("electionName = '${exp1.electionName}', '${exp2.electionName}'")
         assertEquals(exp1.electionName, exp2.electionName)
 
@@ -58,6 +59,7 @@ class CompareCvrExportSources {
             }
             skip = !same
         }
+
         // exp1 has extra column at 6: "PrecinctPortionID"
         // ** ColumnInfo(colno=6, contest=, choice=, header=PrecinctPortionID) == ColumnInfo(colno=6, contest=, choice=, header=BallotType)
 
@@ -153,29 +155,4 @@ class CompareCvrExportSources {
         if (col1.contestVotes != col2.contestVotes) return false
         return true
     }
-}
-
-fun DominionCvrExportCsv(filename:String, show: Boolean): DominionCvrExport {
-    val stopwatch = Stopwatch()
-    // redaction lines are present
-    val export: DominionCvrExport = DominionCvrExportReader(filename).read()
-    if (show) println(export.summary())
-    println("took = $stopwatch")
-
-    // assertEquals("2020 Boulder County General Election", export.electionName)
-    assertEquals("5.11.3.1", export.versionName)
-    assertEquals(49, export.schema.contests.size)
-    assertEquals(205796, export.cvrs.size)
-    assertEquals(0, export.redacted.size)
-
-    if (show) {
-        println()
-        println(export.schema.show())
-    }
-    if (show) {
-        println("ncolumns = ${export.schema.columns.size}")
-        println(SchemaColumnInfo.header)
-        export.schema.columns.forEach { println(it) }
-    }
-    return export
 }

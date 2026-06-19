@@ -13,25 +13,14 @@ import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("CardCsv")
 
-// interface CardIF {
-//    fun location(): String // enough info to find the card for a manual audit.
-//    fun index(): Int  // index into the original, canonical list of cards
-//    fun prn(): Long   // psuedo random number
-//    fun isPhantom(): Boolean
-//
-//    fun votes(): Map<Int, IntArray>?   // CVRs and phantoms
-//    fun poolId(): Int?                 // must be set if its from a CardPool  TODO verify batch name, poolId
-//    fun styleName(): String            // "fromCvr" if no batch and its from a CVR (then votes is non null)
-//}
-
-val CardHeader = "id, location, index, prn, phantom, poolId, cardStyle, cvr contests, candidates0, candidates1, ...\n"
+val CardHeader = "id, location, index, prn, phantom, styleId, poolId, cvr contests, candidates0, candidates1, ...\n"
 
 fun writeCardCsv(card: AuditableCard) = buildString {
     append("${card.id()}, ")
     if (card.id() == card.location()) append(", ") else append("${card.location()}, ")
     append("${card.index()}, ${card.prn().toString(radix=16)}, ${if(card.phantom()) "yes," else ","} ")
+    append("${card.styleId}, ")
     if (card.poolId() == null) append(", ") else append("${card.poolId()}, ")
-    append("${card.styleName()}, ")
 
     if (card.votes() != null) {
         val votes = card.votes()!!
@@ -87,7 +76,7 @@ class CardCsvWriter(outputFilename: String) {
 
 ////////////////////////////////////////////////////////////
 
-fun readCardCsvM(line: String): AuditableCard {
+fun readCardCsv(line: String): AuditableCard {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
@@ -98,9 +87,9 @@ fun readCardCsvM(line: String): AuditableCard {
     val index = ttokens[idx++].toInt()
     val sampleNum = ttokens[idx++].toLong(radix=16)
     val phantom = ttokens[idx++] == "yes"
+    val styleId = ttokens[idx++].trim().toInt()
     val poolIdToken = ttokens[idx++]
     val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()
-    val styleName = ttokens[idx++].trim()
 
     // if clca, list of actual contests and their votes
     if (idx < ttokens.size-1) {
@@ -125,15 +114,15 @@ fun readCardCsvM(line: String): AuditableCard {
             candidates.addAll(cands)
             start += cands.size
         }
-        return AuditableCard(id, location, index, sampleNum, phantom, styleName, poolId,
-            contestIds.toIntArray(), contestStarts.toIntArray(), candidates.toIntArray())
+        return AuditableCard(id, location, index, sampleNum, phantom, styleId,
+            contestIds.toIntArray(), contestStarts.toIntArray(), candidates.toIntArray(), poolId,)
     }
-    return AuditableCard(id, location, index, sampleNum, phantom, styleName, poolId,
-        intArrayOf(), intArrayOf(), intArrayOf())
+    return AuditableCard(id, location, index, sampleNum, phantom, styleId,
+        intArrayOf(), intArrayOf(), intArrayOf(), poolId,)
 }
 
-class IteratorCardsCsvStreamM(input: InputStream, bufferSize: Int, val styles: List<StyleIF>?): CloseableIterator<AuditableCard> {
-    val styleMap = if (styles == null) null else styles.associateBy { it.name() }
+class IteratorCardsCsvStream(input: InputStream, bufferSize: Int, val styles: List<StyleIF>?): CloseableIterator<AuditableCard> {
+    val styleMap = if (styles == null) null else styles.associateBy { it.id() }
     val reader = BufferedReader(InputStreamReader(input),bufferSize)
     var nextLine: String? = null
     var countLines  = 0
@@ -152,8 +141,8 @@ class IteratorCardsCsvStreamM(input: InputStream, bufferSize: Int, val styles: L
 
     override fun next(): AuditableCard {
         if (!hasNext()) throw NoSuchElementException()
-        val cardm: AuditableCard =  readCardCsvM(nextLine!!)
-        val style = styleMap?.get(cardm.styleName)
+        val cardm: AuditableCard =  readCardCsv(nextLine!!)
+        val style = styleMap?.get(cardm.styleId)
         if (style != null)
             cardm.setStyle(style)
         nextLine = null
@@ -165,18 +154,18 @@ class IteratorCardsCsvStreamM(input: InputStream, bufferSize: Int, val styles: L
     }
 }
 
-class CardCsvReaderM(filename: String, val styles: List<StyleIF>?): CloseableIterable<AuditableCard> {
+class CardCsvReader(filename: String, val styles: List<StyleIF>?): CloseableIterable<AuditableCard> {
     var useFilename = if (Files.exists(Path(filename))) filename
     else if (Files.exists(Path("$filename.zip"))) "$filename.zip" // TODO unzip and leave it unzipped
     else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
 
     override fun iterator(): CloseableIterator<AuditableCard> {
-        return readCardsCsvIteratorM(useFilename, styles)
+        return readCardsCsvIterator(useFilename, styles)
     }
 }
 
 // replace readCardsCsvIterator
-fun readCardsCsvIteratorM(csvFile: String, styles: List<StyleIF>?): CloseableIterator<AuditableCard> {
+fun readCardsCsvIterator(csvFile: String, styles: List<StyleIF>?): CloseableIterator<AuditableCard> {
     val useFilename: String = if (Files.exists(Path(csvFile))) csvFile
     else if (Files.exists(Path("$csvFile.zip"))) "$csvFile.zip" // TODO unzip
     else {
@@ -188,15 +177,15 @@ fun readCardsCsvIteratorM(csvFile: String, styles: List<StyleIF>?): CloseableIte
     return if (useFilename.endsWith(".zip")) {
         val reader = ZipReader(useFilename)
         val input = reader.inputStream()
-        IteratorCardsCsvStreamM(input, 8192, styles)
+        IteratorCardsCsvStream(input, 8192, styles)
     } else {
-        IteratorCardsCsvStreamM(File(useFilename).inputStream(), 8192, styles)
+        IteratorCardsCsvStream(File(useFilename).inputStream(), 8192, styles)
     }
 }
 
 
 fun readCardsAndMergeToList(filename: String, styles: List<StyleIF>?): List<AuditableCard> {
-    val mergedMvrIter = readCardsCsvIteratorM(filename, styles)
+    val mergedMvrIter = readCardsCsvIterator(filename, styles)
     val mvrCards = mutableListOf<AuditableCard>()
     while (mergedMvrIter.hasNext()) { mvrCards.add(mergedMvrIter.next())}
     return mvrCards

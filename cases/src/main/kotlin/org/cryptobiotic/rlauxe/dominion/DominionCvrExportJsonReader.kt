@@ -10,6 +10,8 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.unpooled
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.sf.ContestManifest
 import org.cryptobiotic.rlauxe.util.ErrorMessages
@@ -20,10 +22,11 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
 // this reads CvrExport_xxxxx.json files exported by Dominion.
-// we are getting these files from san francisco.
+// we are getting these files from san francisco (SF2024).
 // We derive CvrExports from them, and serialze to csv files.
 
-class DominionCvrSummary(
+// // DominionCvrExportJsonSummary ??
+class DominionCvrExportJsonSummary(
     var ncvrs: Int,  // number of CVRs created
     var ncards: Int,  // number of Card objects; all the Cards in a Session become one CVR
     val contestSums: MutableMap<Int, ContestSummary>,
@@ -31,7 +34,7 @@ class DominionCvrSummary(
 ) {
     constructor(): this(0, 0, mutableMapOf<Int, ContestSummary>(), emptyList())
 
-    fun add(other: DominionCvrSummary) {
+    fun add(other: DominionCvrExportJsonSummary) {
         ncvrs += other.ncvrs
         ncards += other.ncards
         other.contestSums.forEach { id, osumm ->
@@ -47,6 +50,64 @@ class DominionCvrSummary(
         }
     }
 }
+
+
+// intermediate CVR representation for DominionCvrExport from Json
+data class CvrExport(
+    val id: String,
+    val group: Int,
+    val ballotStyleId: Int, // TODO can this be used as a ballotStyle ??
+    val precinctPortionId: Int,
+    val votes: Map<Int, IntArray>
+) {
+
+    // Calculate the pool name from the cvr id. Could pass in a function (CvrExport) -> pool name
+    fun poolKey(): String {
+        if (group == 2) return unpooled
+        val lastIdx = id.lastIndexOf('-')
+        return id.substring(0, lastIdx)
+    }
+
+    // only used in test
+    fun toAuditableCard(index: Int, prn: Long, phantom: Boolean = false, pools: Map<String, Int>? = null, showPoolVotes: Boolean = true): AuditableCard {
+        //val contests = votes.map { it.key }.toIntArray()
+        //val poolkey = poolKey()
+        val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]  // TODO not general
+        // TODO if you want to delete the votes, add an adapter
+        val useVotes = if (poolId == null || showPoolVotes) votes else null
+        return AuditableCard.fromVotes(id, null, index, prn, phantom, styleId=ballotStyleId, poolId=poolId, votes=useVotes)
+    }
+
+    fun toCvr(pools: Map<String, Int>? = null , convertId: String) : Cvr {
+        val poolId = if (pools == null || group != 1) null else pools[ poolKey() ] // TODO not general
+        return Cvr(convertId, votes, phantom=false, poolId)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CvrExport
+
+        if (group != other.group) return false
+        if (id != other.id) return false
+        if (votes.size != other.votes.size) return false
+        for ((contestId, candidates) in votes) {
+            if (!candidates.contentEquals(other.votes[contestId])) return false
+        }
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = group
+        result = 31 * result + id.hashCode()
+        votes.forEach { (contestId, candidates) -> result = 31 * result + contestId.hashCode() + candidates.contentHashCode() }
+        return result
+    }
+
+}
+
 
 // The id is from Contest.Id
 data class ContestSummary(val id: Int) {
@@ -69,6 +130,9 @@ data class ContestSummary(val id: Int) {
         append("ContestSummary $id ncards=$ncards undervotes=$undervotes overvotes=$overvotes isOvervote=$isOvervote isBlank = $isBlank")
     }
 }
+
+//////////////////////////////////////////////////////////////////////////////
+// JSON serialization
 
 @Serializable
 data class DominionCvrExportJson(
@@ -194,7 +258,7 @@ data class Mark(
 }
 
 // remove candidate duplicates on IRV contests.
-fun DominionCvrExportJson.import(contestManifest: ContestManifest) : DominionCvrSummary {
+fun DominionCvrExportJson.import(contestManifest: ContestManifest) : DominionCvrExportJsonSummary {
     val irvContests = contestManifest.irvContests
     var ncards = 0
     val cvrs = mutableListOf<CvrExport>()
@@ -258,7 +322,7 @@ fun DominionCvrExportJson.import(contestManifest: ContestManifest) : DominionCvr
                 cards.BallotTypeId, cards.PrecinctPortionId, votes))
         }
     }
-    return DominionCvrSummary(cvrs.size, ncards, contestSums, cvrs)
+    return DominionCvrExportJsonSummary(cvrs.size, ncards, contestSums, cvrs)
 }
 
 fun removeDuplicates(svotes : List<Int> ) : List<Int> {
@@ -277,7 +341,7 @@ fun convertCvrExportJsonToCvrExports(inputStream: InputStream, contestManifest: 
 }
 
 // read CvrExport JSON inputStream and append CvrExport csv to outputStream
-fun convertCvrExportJsonToCsv(inputStream: InputStream, outputStream: OutputStream, contestManifest: ContestManifest): DominionCvrSummary {
+fun convertCvrExportJsonToCsv(inputStream: InputStream, outputStream: OutputStream, contestManifest: ContestManifest): DominionCvrExportJsonSummary {
     val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
     val dominionCvrs = if (result .isOk) result.unwrap()
     else throw RuntimeException("Cannot read DominionCvrJson err = $result")

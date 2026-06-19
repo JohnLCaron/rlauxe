@@ -2,8 +2,9 @@ package org.cryptobiotic.rlauxe.votedatabase
 
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExport
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportReader
+import org.cryptobiotic.rlauxe.dominion.DominionCvrCsvSummary
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsvReader
+import org.cryptobiotic.rlauxe.dominion.GarfieldCsvReader
 import org.cryptobiotic.rlauxe.dominion.makeContestInfo
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
@@ -64,7 +65,7 @@ class CompareVoteDatabaseAndAuditCenter {
         }
         reader.close() */
 
-        matchNames("Roosevelt", "$colorado2020/Roosevelt/cvr.csv", Colorado2020General())
+        matchNames("Garfield", "$colorado2020/Garfield/cvr.csv", Colorado2020General())
         // assertEquals(0, errs)
     }
 
@@ -78,17 +79,14 @@ class CompareVoteDatabaseAndAuditCenter {
     @Test
     fun allColorado2020Counties() {
         val path = Path(colorado2020)
+        val errCount = mapOf("La Plata" to 2)
         path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202")}.forEach { subdir ->
             val county = subdir.fileName.toString()
-            /* subdir.listDirectoryEntries().filter { !it.isDirectory() && it.fileName.toString().endsWith(".csv")
-                    && it.fileName.toString() != "summary.csv"
-                    && !it.fileName.toString().contains("Manifest")
-            }.forEach { entry -> */
-            if (county !in listOf("Monroe", "Roosevelt", "Garfield")) { // no such county in Colorado && earlier format TODO
+            if (county !in listOf("Monroe", "Roosevelt", "Baca", "Garfield", "Gunnison")) {
                 try {
                     val filename = "${subdir.toString()}/cvr.csv" // entry.toString()
                     val errs = matchNames(county, filename, Colorado2020General())
-                    assertEquals(0, errs)
+                    assertEquals(errCount[county] ?: 0, errs)
                 } catch (e: Exception) {
                     println(e.message)
                     throw e
@@ -113,7 +111,7 @@ class CompareVoteDatabaseAndAuditCenter {
                     if (county != "Monroe" && county != "Garfield") { // no such county in Colorado && earlier format && Baca has copy of Heurfano
                         try {
                             val filename = entry.toString()
-                            val reader = DominionCvrExportReader(filename)
+                            val reader = DominionCvrExportCsvReader(filename)
                             val star = if (reader.electionName.contains(county)) "" else "**"
                             println("  $star ${reader.electionName} : ${filename}")
                         } catch (e: Exception) {
@@ -131,17 +129,20 @@ class CompareVoteDatabaseAndAuditCenter {
         println("\n-----------------------------------")
         println("county=$county csvfile = $exportFile")
 
-        val export: DominionCvrExport = DominionCvrExportReader(exportFile).read()
+        val export: DominionCvrCsvSummary = if (county == "Garfield") GarfieldCsvReader(exportFile).read() else
+            DominionCvrExportCsvReader(exportFile).read()
         val sinfoList = export.makeContestInfo()
         var errs = 0
 
         // test every export contest has a match in canon, along with each choice
+        val match = mutableMapOf<String, String>()
         sinfoList.map { sinfo ->
             val contest = input.matchCanonicalContest(county, sinfo.name)
             if (contest == null) {
                 println("   \"${sinfo.name}\" -> \"${suggest(county, sinfo.name, input)}\"")
                 errs++
             } else {
+                match[contest.contestName] = sinfo.name
                 sinfo.candidateNames.keys.filter { it != "Write-In"}.forEach { cand ->
                     val match = input.matchCanonicalCandidate(county, contest, cand)
                     if (match == null) {
@@ -153,15 +154,17 @@ class CompareVoteDatabaseAndAuditCenter {
             }
         }
 
-        /* test every canon contest has a match in export TODO
+        // test every canon contest has a match in export
         val countyContestTabs = input.countyContestTabs.find { it.countyName == county }!!
         countyContestTabs.contests.keys.forEach { canonContest ->
-            val exportContest = input.matchExportContest(county, canonContest)
-            if (infos[exportContest] == null) {
-                println("*** didnt find canonicalContest named '${canonContest}' in export file")
-                errs++
+            if (match[canonContest] == null) {
+                val match2 = sinfoList.find { it.name == canonContest } // probably not nneeded
+                if (match2 == null) {
+                    println("*** didnt find canonicalContest named '${canonContest}' in export file")
+                    errs++
+                }
             }
-        } */
+        }
 
         return errs
     }

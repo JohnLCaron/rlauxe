@@ -4,8 +4,9 @@ import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 
+// obsolete I think
 class MakeBelgiumAuditSampleLimit {
-    val topdirLimited = "$testdataDir/cases/belgium/2024limited"
+    val topdirLimited = "$testdataDir/cases/belgium/belgium2024limited"
 
     fun sampleLimitFun(contestId: Int): Int? {
         return when (contestId) {

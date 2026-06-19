@@ -87,7 +87,7 @@ class CardManifestAttack {
                     index,
                     0L,
                     false,
-                    if (hasStyle) "cvr" else "incomplete",
+                    styleId=CardStyle.fromCvrStyle.id,
                     poolId = null,
                     votes = mapOf(2 to intArrayOf(1)),
                 )
@@ -106,7 +106,7 @@ class CardManifestAttack {
                     index,
                     0L,
                     false,
-                    if (hasStyle) "pool1" else "incomplete",
+                    styleId=CardStyle.fromCvrStyle.id,
                     poolId = 1,
                     votes=null,
                 )
@@ -127,7 +127,7 @@ class CardManifestAttack {
                 index,
                 0L,
                 false,
-                if (hasStyle) "cvr" else "incomplete",
+                styleId=CardStyle.fromCvrStyle.id,
                 poolId=null,
                 votes = mapOf(2 to intArrayOf(1)),  // move the 50-100 votes to here
                 )
@@ -139,14 +139,14 @@ class CardManifestAttack {
         // these are Bobs pooled votes that match the mvrs
         repeat(25) {
             // mvr has Bob's votes
-            mcards.add(AuditableCard.fromVotes("Pool1-$poolCount", null, index, 0L, false, "pool1", poolId = 1, null))
+            mcards.add(AuditableCard.fromVotes("Pool1-$poolCount", null, index, 0L, false, styleId=1, poolId=1, votes=null))
             poolCount++
             index++
         }
         // these are contestB pooled votes that match the mvrs
         repeat(25) {
             // mvr doesnt contain contest 1
-            mcards.add(AuditableCard.fromVotes("Pool1-$poolCount", null, index, 0L, false, "pool1", poolId = 1, null))
+            mcards.add(AuditableCard.fromVotes("Pool1-$poolCount", null, index, 0L, false, styleId=1, poolId=1, votes=null))
             poolCount++
             index++
         }

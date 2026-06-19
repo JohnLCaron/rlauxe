@@ -132,6 +132,7 @@ fun startTestElectionClca(
         ncontests,
         addRaire,
         addRaireCandidates)
+
     createElectionRecord(election, auditDir = auditdir)
 
     val config = Config.from( election.electionInfo(), nsimTrials = 100, simFuzzPct = simFuzz, fuzzMvrs=fuzzMvrs)

@@ -3,11 +3,11 @@ package org.cryptobiotic.rlauxe.audit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.bin.writeFastSamplingCards
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditCreationConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundConfigJsonFile
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIteratorM
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -73,7 +73,7 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: Strin
 
 // assumes that the CardManifest has already been written
 fun sortManifestInternal(publisher: Publisher, seed: Long) {
-    val unsortedCards = readCardsCsvIteratorM(publisher.cardManifestFile(), styles=null)
+    val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile(), styles=null)
     val sortedCards = createSortedCardsInternal(unsortedCards, seed)
     val countCards = writeCardCsvFile(Closer(sortedCards.iterator()), publisher.sortedCardsFile())
     // createZipFile(publisher.sortedCardsFile(), delete = true)
@@ -95,7 +95,7 @@ fun createSortedCardsInternal(unsortedCards: CloseableIterator<AuditableCard>, s
 
 // assumes that the CardManifest has already been written
 fun sortManifestExternal(topdir: String, publisher: Publisher, seed: Long) {
-    val unsortedCards = readCardsCsvIteratorM(publisher.cardManifestFile(), styles=null)
+    val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile(), styles=null)
     writeSortedCardsExternal(topdir, publisher.sortedCardsFile(), unsortedCards, seed)
 }
 
@@ -103,12 +103,12 @@ fun makeFastCards(publisher: Publisher, styles: List<StyleIF>): Int {
     val stopwatch = Stopwatch()
 
     // copy sortedCards csv to sortedCards proto file for better performance
-    val sortedCards = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles)
+    val sortedCards = readCardsCsvIterator(publisher.sortedCardsFile(), styles)
     writeProtoCards(sortedCards, publisher.sortedCardsProtoFile())
 
     // extract some info from sorted proto cards for a super compact "samplingCards" binary file
     val bufferSize = 100_000
-    val protoIter = ProtoCardIteratorM(publisher.sortedCardsProtoFile(), bufferSize, styles)  // dont actually need styles i think
+    val protoIter = ProtoCardIterator(publisher.sortedCardsProtoFile(), bufferSize, styles)  // dont actually need styles i think
     val ncards = writeFastSamplingCards(protoIter, publisher.fastSamplingFile(), styles)
 
     logger.info{"makeFastCards ${ncards} took ${stopwatch}"}

@@ -130,7 +130,7 @@ fun verifySortedCardManifest(
             indexList.add(Pair(card.index(), card.prn()))
 
             // check that batch exists
-            if (!useVotes(card.styleName()) && !batchSet.contains(card.style())) {
+            if (!useVotes(card.styleId) && !batchSet.contains(card.style())) {
                 results.addError("card $count ${card.id()} batch ${card.style()} not in batches")
             }
 

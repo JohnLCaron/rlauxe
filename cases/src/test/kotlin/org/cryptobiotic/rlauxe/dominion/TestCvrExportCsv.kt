@@ -72,7 +72,7 @@ class TestCvrExportCsv {
             true,
             votes = mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
             poolId = 99,
-            styleName="test1-2"
+            styleId = 12,
         )
 
         assertEquals(target, card)
@@ -96,7 +96,7 @@ class TestCvrExportCsv {
             true,
             votes=votes,
             poolId=99,
-            styleName="test1-2"
+            styleId = 12,
         )
 
         assertEquals(target, card)

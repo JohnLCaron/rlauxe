@@ -91,10 +91,11 @@ data class CardStyle(
         // val unknown = CardStyle("unknown", -1, intArrayOf(), true) // kludge
 
         //  assumes cvrsContainUndervotes, use regular batch if not.
-        val fromCvrBatch = CardStyle(fromCvr, -1, intArrayOf(), true)
-        val phantomBatch = CardStyle(phantoms, -1, intArrayOf(), true)
+        val fromCvrStyle = CardStyle(fromCvr, -1, intArrayOf(), true)
+        val phantomStyle = CardStyle(phantoms, -2, intArrayOf(), true)
 
-        fun useVotes(styleName: String): Boolean = styleName == fromCvr || styleName == phantoms
+        // card must contain votes if fromCvrStyle or phantomStyle
+        fun useVotes(styleId: Int): Boolean = styleId == -1 ||  styleId == -2
 
         fun from(id: Int, contests: Set<Int>) = CardStyle(
             "cardStyle$id", id, contests.toList().sorted().toIntArray(), true)

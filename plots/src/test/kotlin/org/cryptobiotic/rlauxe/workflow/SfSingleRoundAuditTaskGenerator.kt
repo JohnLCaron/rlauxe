@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
@@ -103,7 +103,7 @@ class SfSingleRoundAuditTask(
 
 class AuditableCardCsvReaderSkip(val filename: String, val skip: Int, val styles: List<StyleIF>?): CloseableIterable<AuditableCard> {
     override fun iterator(): CloseableIterator<AuditableCard> {
-        val cardsNoBatchSkipped = readCardsCsvIteratorM(filename, styles)
+        val cardsNoBatchSkipped = readCardsCsvIterator(filename, styles)
         repeat(skip) { if (cardsNoBatchSkipped.hasNext()) (cardsNoBatchSkipped.next()) }
         return Closer(cardsNoBatchSkipped)
     }

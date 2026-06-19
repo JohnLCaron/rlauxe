@@ -7,8 +7,9 @@ import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import kotlin.collections.set
 
-// each export is specific to a County
-class DominionConverter(val county: String, export: DominionCvrExport, contests: List<ContestIF>, coloradoInput: ColoradoInput) {
+// convert DominionCvrExportCsv
+// each export is specific to a County.
+class DominionConverter(val county: String, export: DominionCvrCsvSummary, contests: List<ContestIF>, coloradoInput: ColoradoInput) {
                            //val styleNameMap: Map<Set<Int>, String>) {
     private val exportToCanonLookup = mutableMapOf<Int, ExportToCanonLookup>() // export contestId -> SchemaToCanonLookup
      val cardStyles: Map<Set<Int>, CardStyle> // canonicalContestIdSet -> cardStyle
@@ -97,10 +98,8 @@ class DominionConverter(val county: String, export: DominionCvrExport, contests:
         val contestSchemaIdSet = dcvr.contestVotes.map { it.contestId }.toSet()
         val canonicalIdSet = convertExportContestIdSetToCanonical(contestSchemaIdSet)
         val cardStyle = cardStyles[canonicalIdSet]
-        if (cardStyle == null)
-            print("")
-        val useCardStyleName = cardStyle?.name ?: CardStyle.fromCvr
-        val cvrb = AuditableCardBuilder(dcvr.imprintedId, null,  0, 0L, false, useCardStyleName, null, null)
+        val useCardStyleId = cardStyle?.id() ?: CardStyle.fromCvrStyle.id
+        val cvrb = AuditableCardBuilder(dcvr.imprintedId, null,  0, 0L, false, styleId=useCardStyleId, poolId=null, votesIn=null)
         // have to map both contestId and candVotes
         dcvr.contestVotes.forEach{ contestVote ->
             val lookup = exportToCanonLookup[contestVote.contestId]
@@ -132,7 +131,7 @@ data class ExportContestInfo(
     val candidateIdToName: Map<Int, String> = candidateNames.entries.associate {(k,v) -> v to k }
 }
 
-fun DominionCvrExport.makeContestInfo(): List<ExportContestInfo> {
+fun DominionCvrCsvSummary.makeContestInfo(): List<ExportContestInfo> {
     val columns = this.schema.columns
 
     return this.schema.contests.map { exportContest ->

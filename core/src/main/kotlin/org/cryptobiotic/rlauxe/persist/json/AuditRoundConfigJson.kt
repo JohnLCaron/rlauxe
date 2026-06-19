@@ -102,34 +102,36 @@ data class ContestSampleControl(
 data class ContestSampleControlJson(
     val minRecountMargin: Double,
     val minMargin: Double,
+    val minSize: Int? = null,
 
     val maxSamplePct: Double,
     val contestSampleCutoff: Int?,
     val auditSampleCutoff: Int?,
     val other: Map<String, String>,
-    val sampling: Sampling = Sampling.consistent
+    val sampling: Sampling = Sampling.consistent,
 )
 
 fun ContestSampleControl.publishJson() = ContestSampleControlJson(
-    this.minRecountMargin,
-    this.minMargin,
-    this.maxSamplePct,
-    this.contestSampleCutoff,
-    this.auditSampleCutoff,
-    this.other,
-    this.sampling,
+    minRecountMargin=this.minRecountMargin,
+    minMargin=this.minMargin,
+    minSize=this.minSize,
+    maxSamplePct=this.maxSamplePct,
+    contestSampleCutoff=this.contestSampleCutoff,
+    auditSampleCutoff=this.auditSampleCutoff,
+    other=this.other,
+    sampling=this.sampling,
 )
 
 fun ContestSampleControlJson.import() =  ContestSampleControl(
-    this.minRecountMargin,
-    this.minMargin,
-    this.maxSamplePct,
-    this.contestSampleCutoff,
-    this.auditSampleCutoff,
-    this.other,
-    this.sampling,
+    minRecountMargin=this.minRecountMargin,
+    minMargin=this.minMargin,
+    minSize=this.minSize,
+    maxSamplePct=this.maxSamplePct,
+    contestSampleCutoff=this.contestSampleCutoff,
+    auditSampleCutoff=this.auditSampleCutoff,
+    other=this.other,
+    sampling=this.sampling,
 )
-
 
 @Serializable
 data class PollingConfigJson(

@@ -300,27 +300,26 @@ fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAs
     var count = 0
     countyTabs.forEach { countyTab ->
         countyTab.contests.values.forEach { contestTab ->
-            val contestUA = contestMap[contestTab.contestName]!!
-            val contest = contestUA.contest
-            val info = contest.info()
-            val candidateVotes = contestTab.choices.map { (choice, vote) ->
-                Pair(info.candidateNames[choice] ?: 0, vote)
-            }.toMap()
+            val contestUA = contestMap[contestTab.contestName]
+            if (contestUA != null) {
+                val contest = contestUA.contest
+                val info = contest.info()
+                val candidateVotes = contestTab.choices.map { (choice, vote) ->
+                    Pair(info.candidateNames[choice] ?: 0, vote)
+                }.toMap()
 
-            if (info.id == 533)
-                print("")
+                // calculate the vote difference for the minimum assorter
+                val minAssertion = contestUA.minAssertion()
+                val voteDiff = if (minAssertion == null) 0
+                    else minAssertion.assorter.calcMarginFromRegVotes(candidateVotes, 1).toInt()
 
-            // calculate the vote difference for the minimum assorter
-            val minAssertion = contestUA.minAssertion()
-            val voteDiff = if (minAssertion != null) minAssertion.assorter.calcMarginFromRegVotes(candidateVotes, 1).toInt()
-                           else 0
-
-            writer.write("${countyTab.countyName}, ${contestTab.contestName}, ${info.id}, $voteDiff, ")
-            candidateVotes.forEach { (id, vote) ->
-                writer.write("$id:$vote, ")
+                writer.write("${countyTab.countyName}, ${contestTab.contestName}, ${info.id}, $voteDiff, ")
+                candidateVotes.forEach { (id, vote) ->
+                    writer.write("$id:$vote, ")
+                }
+                writer.write("\n")
+                count++
             }
-            writer.write("\n")
-            count++
         }
     }
     writer.close()

@@ -16,16 +16,16 @@ class TestAuditableCardsCsv {
             42,
             43L,
             true,
-            "pool11",
-            11,
+            styleId=11,
             votes=mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
+            poolId=null
         )
 
         val csv = writeCardCsv(target)
         print(CardHeader)
         println(csv)
 
-        val roundtrip = readCardCsvM(csv)
+        val roundtrip = readCardCsv(csv)
         assertEquals(target, roundtrip)
     }
 
@@ -37,28 +37,28 @@ class TestAuditableCardsCsv {
             42,
             43L,
             false,
-            styleName = "all",
-            null,
-            null,
+            styleId = 2222,
+            votes=null,
+            poolId=null,
         )
 
         val csv = writeCardCsv(target)
         print(CardHeader)
         println(csv)
 
-        val roundtrip = readCardCsvM(csv)
+        val roundtrip = readCardCsv(csv)
         assertEquals(target, roundtrip)
     }
 
     @Test
     fun testRoundtripIO() {
         val target = listOf(
-            AuditableCard.fromVotes ("deets", "dots", 42, 43L, false, "pool111", 111, null),
-            AuditableCard.fromVotes ("deeks","docs",  42, 43L, false, styleName="all", null, null),
+            AuditableCard.fromVotes ("deets", "dots", 42, 43L, false, styleId=678, votes=null, null),
+            AuditableCard.fromVotes ("deeks","docs",  42, 43L, false, styleId=678, votes=null, null),
             AuditableCard.fromVotes ("id", "info to find card", 42, 43L, true,
-                votes=mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), poolId=11, styleName="pool11"),
+                votes=mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), poolId=11, styleId=678),
             AuditableCard.fromVotes ("id1", "info2 to find card", 42, 43L, true,
-                votes=mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), poolId=null, styleName="cvr"),
+                votes=mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), poolId=null, styleId=678),
         )
 
         val scratchFile = kotlin.io.path.createTempFile().toFile()
@@ -67,7 +67,7 @@ class TestAuditableCardsCsv {
         val roundtrip = readCardsAndMergeToList(scratchFile.toString(), null)
         assertEquals(target, roundtrip)
 
-        readCardsCsvIteratorM(scratchFile.toString(), null).use { cardIter ->
+        readCardsCsvIterator(scratchFile.toString(), null).use { cardIter ->
             var count = 0
             while (cardIter.hasNext()) {
                 val roundtrip = cardIter.next()
@@ -77,7 +77,7 @@ class TestAuditableCardsCsv {
         }
 
         val zipFile = createZipFile(scratchFile.toString(), delete = true)
-        readCardsCsvIteratorM(zipFile.toString(), null).use { cardIter ->
+        readCardsCsvIterator(zipFile.toString(), null).use { cardIter ->
             var count = 0
             while (cardIter.hasNext()) {
                 val roundtrip = cardIter.next()

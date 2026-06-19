@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.CountyPools
-import org.cryptobiotic.rlauxe.audit.CountyPoolsIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import java.io.*
@@ -21,7 +20,7 @@ private val logger = KotlinLogging.logger("CountyCardPoolCsv")
 
 val CountyCardPoolHeader = "countyPoolId, countyName, totalCards, cardStyles, contestId, voteForN, cands, ncards, novote, undervotes, overvotes, nphantoms, isIrv, votes:count ... \n"
 
-fun writeCountyCardPoolCsv(pool: CountyPoolsIF) = buildString {
+fun writeCountyCardPoolCsv(pool: CountyPools) = buildString {
     val styleIds = pool.styles.map{ it.id() }.joinToString(" ")
     append("${pool.countyPoolId}, ${pool.countyName}, ${pool.cardCount}, $styleIds, ")
     pool.contestTabs.forEachIndexed { index, contestTab ->
@@ -30,7 +29,7 @@ fun writeCountyCardPoolCsv(pool: CountyPoolsIF) = buildString {
     }
 }
 
-fun writeCountyCardPoolCsvFile(pools: List<CountyPoolsIF>, outputFilename: String) {
+fun writeCountyCardPoolCsvFile(pools: List<CountyPools>, outputFilename: String) {
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     writer.write(CountyCardPoolHeader)
     pools.forEach {

@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
@@ -16,6 +17,8 @@ import kotlin.math.ln
 import kotlin.test.Test
 
 class TestCorlaEstimate {
+    val topdir = "$cases/corla/sansCvrs/Colorado2020sans"
+
     @Test
     fun showEstimateGentle() {
         showEstimateSimple(0.05)
@@ -42,7 +45,7 @@ class TestCorlaEstimate {
 
     @Test
     fun testCountPhantoms() {
-        val auditdir = "$testdataDir/cases/corla/consistent/audit"
+        val auditdir = "$topdir/audit"
         val auditRecord = AuditRecord.read(auditdir)!!
         val mvrManager = PersistedMvrManager(auditRecord as AuditRecord)
         countPhantoms(mvrManager.sortedManifest(), 116)

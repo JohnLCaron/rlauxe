@@ -6,11 +6,11 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.bin.FastSamplingCardIterator
-import org.cryptobiotic.rlauxe.persist.csv.CardCsvReaderM
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.CardCsvReader
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterable
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIteratorM
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterableInline
@@ -71,7 +71,7 @@ class TimeCardReading {
         val publisher = Publisher("$topdir/audit")
 
         val bufferSize = 8096 // 100_000
-        val cardIter = CardCsvReaderM(publisher.sortedCardsFile(), null).iterator()
+        val cardIter = CardCsvReader(publisher.sortedCardsFile(), null).iterator()
         while (cardIter.hasNext()) { //  && ncards < 1000000) {
             val card = cardIter.next()
             ncards++
@@ -106,7 +106,7 @@ class TimeCardReading {
             val trial = Stopwatch()
             var ncards = 0
 
-            val csvIter = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles)
+            val csvIter = readCardsCsvIterator(publisher.sortedCardsFile(), styles)
             while (csvIter.hasNext()) { //  && ncards < 1000_000) {
                 val card = csvIter.next()
                 accum += card.index() // prevent optimization
@@ -140,7 +140,7 @@ class TimeCardReading {
         var ncards = 0
 
         // includes time to merge the styles
-        val cardIter: CloseableIterator<AuditableCard> = readCardsCsvIteratorM(publisher.sortedCardsFile(), styles)
+        val cardIter: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.sortedCardsFile(), styles)
         while (cardIter.hasNext()) { //  && ncards < 1000000) {
             val card = cardIter.next()
             ncards++
@@ -169,7 +169,7 @@ class TimeCardReading {
 
         val bufferSize = 100_000
         val protoFilename = publisher.sortedCardsProtoFile()
-        val protoIterable = CloseableIterableInline { ProtoCardIteratorM(protoFilename, bufferSize, styles) }
+        val protoIterable = CloseableIterableInline { ProtoCardIterator(protoFilename, bufferSize, styles) }
 
         val stopwatch = Stopwatch()
         var accum = 0
@@ -225,7 +225,7 @@ class TimeCardReading {
             val trial = Stopwatch()
             var ncards = 0
 
-            val protoIter: CloseableIterator<AuditableCard> = ProtoCardIteratorM(protoFilename, bufferSize, styles)
+            val protoIter: CloseableIterator<AuditableCard> = ProtoCardIterator(protoFilename, bufferSize, styles)
             while (protoIter.hasNext()) { //  && ncards < 1000_000) {
                 val card = protoIter.next()
                 accum += card.index() // prevent optimization
@@ -259,7 +259,7 @@ class TimeCardReading {
 
         var accum = 0
 
-        val protoIterable = CloseableIterable { ProtoCardIteratorM(protoFilename, bufferSize, styles) }
+        val protoIterable = CloseableIterable { ProtoCardIterator(protoFilename, bufferSize, styles) }
         val welford = Welford()
 
         val ntrials = 20

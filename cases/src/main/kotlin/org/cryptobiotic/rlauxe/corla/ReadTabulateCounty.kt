@@ -145,6 +145,16 @@ data class CountyContestTabs(val countyName: String) {
         val contest = contests.getOrPut(contestName ) { CountyContestTab(contestName) }
         contest.addChoice(choiceName, choiceVote)
     }
+
+    fun makeContestTabs(infos:Map<String, ContestInfo>, ncards: Map<String, Int>): List<ContestTabulation> {
+        return contests.values.map {
+            val info = infos[it.contestName]
+            val ncards = ncards[it.contestName] ?: 0
+            if (info == null)
+                print("")
+            it.makeContestTabulation(info!!, ncards)
+        }
+    }
 }
 
 // we only know votes, not ncards or undervotes.

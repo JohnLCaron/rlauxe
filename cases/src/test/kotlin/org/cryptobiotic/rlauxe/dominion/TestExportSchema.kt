@@ -3,8 +3,6 @@ package org.cryptobiotic.rlauxe.dominion
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2022Primary
 import org.cryptobiotic.rlauxe.core.ContestIF
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.corla.CanonicalContest
 import org.cryptobiotic.rlauxe.corla.ColoradoInput
 import org.cryptobiotic.rlauxe.corla.CountyContestBuilder
 import kotlin.test.Test
@@ -41,7 +39,7 @@ class TestExportSchema {
 }
 
 fun testCvrSchema(county: String, filename: String, coloradoInput: ColoradoInput): Int {
-    val export: DominionCvrExport = DominionCvrExportReader(filename).read()
+    val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
     var errs = 0
 
     println("========================================================================================")
@@ -53,7 +51,7 @@ fun testCvrSchema(county: String, filename: String, coloradoInput: ColoradoInput
     return errs
 }
 
-fun compareExportSchemaVsAuditCenter(county: String, export: DominionCvrExport, coloradoInput: ColoradoInput): Int {
+fun compareExportSchemaVsAuditCenter(county: String, export: DominionCvrCsvSummary, coloradoInput: ColoradoInput): Int {
     val sinfos = export.makeContestInfo()
 
     var countErrs = 0
@@ -77,7 +75,7 @@ fun compareExportSchemaVsAuditCenter(county: String, export: DominionCvrExport, 
     return countErrs
 }
 
-fun compareCvrSchemaVsContestBuilder(county: String, export: DominionCvrExport, coloradoInput: ColoradoInput): Int {
+fun compareCvrSchemaVsContestBuilder(county: String, export: DominionCvrCsvSummary, coloradoInput: ColoradoInput): Int {
     val exportContestInfos = export.makeContestInfo()
 
     // CountyContestBuilder only uses coloradoInput

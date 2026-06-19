@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsAndMergeToList
 import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -85,7 +85,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         require(resultSamples.isOk)
         val sampleNumbers = resultSamples.unwrap()
 
-        val mergedMvrIter = readCardsCsvIteratorM(publisher.sortedMvrsFile(), styles)
+        val mergedMvrIter = readCardsCsvIterator(publisher.sortedMvrsFile(), styles)
         val sampledMvrs = findSamples(sampleNumbers, mergedMvrIter)
         require(sampledMvrs.size == sampleNumbers.size)
 
@@ -133,7 +133,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     }
 
     fun readCardsAndMerge(filename: String): CloseableIterator<AuditableCard> {
-        return readCardsCsvIteratorM(filename, styles)
+        return readCardsCsvIterator(filename, styles)
     }
 
     fun readCardsAndMergeList(filename: String): List<AuditableCard> {

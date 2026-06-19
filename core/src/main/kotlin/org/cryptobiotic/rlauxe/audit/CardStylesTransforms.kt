@@ -18,10 +18,10 @@ fun mvrsToAuditableCardsListM(
     return mvrs.map { org ->
         val style = styleMap[org.poolId]  // hijack poolId
 
-        val useStyleName = when {
-            (style != null) -> style.name()
-            org.phantom() -> CardStyle.phantoms
-            else -> CardStyle.fromCvr
+        val styleId = when {
+            (style != null) -> style.id()
+            org.phantom() -> CardStyle.phantomStyle.id()
+            else -> CardStyle.fromCvrStyle.id()
         }
 
         val (contestIds, contestStarts, candidates) = makeFromVotes(org.votes)
@@ -31,9 +31,9 @@ fun mvrsToAuditableCardsListM(
             cardIndex++,
             0,
             phantom = org.phantom,
-            styleName = useStyleName,
-            poolId = org.poolId,
+            styleId = styleId,
             contestIds, contestStarts, candidates,
+            poolId = org.poolId,
         )
     }
 }
@@ -66,10 +66,10 @@ class MvrsToCardStylesIterator(
         val org = allMvrs.next()
         val style = styleMap[org.poolId]  // hijack poolId
 
-        val styleName = when {
-            org.phantom() -> CardStyle.phantoms
-            (style != null) -> style.name()
-            else -> CardStyle.fromCvr
+        val styleId = when {
+            (style != null) -> style.id()
+            org.phantom() -> CardStyle.phantomStyle.id()
+            else -> CardStyle.fromCvrStyle.id()
         }
 
         val (contestIds, contestStarts, candidates) = makeFromVotes(org.votes)
@@ -79,11 +79,11 @@ class MvrsToCardStylesIterator(
             index = cardIndex++,
             prn = 0,
             phantom=org.phantom,
-            styleName = styleName,
-            poolId = org.poolId,
+            styleId = styleId,
             contestIds = contestIds,
             contestStarts = contestStarts,
             candidates = candidates,
+            poolId = org.poolId,
         )
         if (style != null) cardm.setStyle(style)
         return cardm
@@ -124,10 +124,10 @@ class CvrsToCardStylesIterator(
         val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
         val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
 
-        val styleName = when {
-            (style != null) -> style.name()
-            org.phantom() -> CardStyle.phantoms
-            else -> CardStyle.fromCvr
+        val styleId = when {
+            (style != null) -> style.id()
+            org.phantom() -> CardStyle.phantomStyle.id()
+            else -> CardStyle.fromCvrStyle.id()
         }
         val (contestIds, contestStarts, candidates) = makeFromVotes(votes)
         val cardm = AuditableCard(
@@ -136,11 +136,11 @@ class CvrsToCardStylesIterator(
             index = cardIndex++,
             prn = 0,
             phantom=org.phantom,
-            styleName = styleName,
-            poolId = if (type.isClca()) null else org.poolId,
+            styleId = styleId,
             contestIds = contestIds,
             contestStarts = contestStarts,
             candidates = candidates,
+            poolId = if (type.isClca()) null else org.poolId,
         )
         if (style != null) cardm.setStyle(style)
         return cardm
@@ -154,18 +154,18 @@ class MergeStylesIntoCardsM(
     val cardsIter: CloseableIterator<AuditableCard>,
     styles: List<StyleIF>,
 ): CloseableIterator<AuditableCard> {
-    val styleMap = styles.associateBy{ it.name() }
+    val styleMap = styles.associateBy{ it.id() }
 
     override fun hasNext() = cardsIter.hasNext()
 
     // styleName must be in styleMap
     override fun next(): AuditableCard {
         val org = cardsIter.next()
-        val style = styleMap[org.styleName]
+        val style = styleMap[org.styleId]
         val cardStyle = when {
             style != null -> style
-            org.styleName == CardStyle.phantoms -> CardStyle.phantomBatch
-            org.styleName == CardStyle.fromCvr -> CardStyle.fromCvrBatch
+            org.styleId == CardStyle.phantomStyle.id() -> CardStyle.phantomStyle
+            org.styleId == CardStyle.fromCvrStyle.id() -> CardStyle.fromCvrStyle
             else -> throw RuntimeException()
         }
         return org.setStyle(cardStyle)

@@ -1,12 +1,10 @@
 package org.cryptobiotic.rlauxe.dominion
 
-import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.votedatabase.colorado2020
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class TestCvrExportRedaction {
     val show = false
@@ -14,7 +12,7 @@ class TestCvrExportRedaction {
     @Test
     fun testBoulder20() {
         val filename = "/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/Boulder CO.csv"
-        val export: DominionCvrExport = DominionCvrExportReader(filename).read()
+        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
         export.exportCardStyles.forEach { type ->
             println("  $type")
         }
@@ -27,7 +25,7 @@ class TestCvrExportRedaction {
     @Test
     fun testBoulder22Primary() {
         val filename = "/home/stormy/datadrive/votedatabase/cvr/2022Primaries/Colorado/Boulder CO '22 Primary.csv"
-        val export: DominionCvrExport = DominionCvrExportReader(filename).read()
+        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
         export.exportCardStyles.forEach { type ->
             println("  $type")
         }
@@ -40,7 +38,7 @@ class TestCvrExportRedaction {
     @Test
     fun testBoulder24() {
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
-        val export: DominionCvrExport = DominionCvrExportReader(filename).read()
+        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
         export.exportCardStyles.forEach { type ->
             println("  $type")
         }
@@ -52,7 +50,7 @@ class TestCvrExportRedaction {
     @Test
     fun testBoulder25() {
         val filename = "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv"
-        val export: DominionCvrExport = DominionCvrExportReader(filename).read()
+        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
         export.exportCardStyles.forEach { type ->
             println("  $type")
         }
@@ -65,7 +63,7 @@ class TestCvrExportRedaction {
     fun testEagle() { // redaction
         var filename = "$colorado2020/Eagle/cvr.csv"
         println(filename)
-        val export: DominionCvrExport = DominionCvrExportReader(filename).read()
+        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
         export.exportCardStyles.forEach { type ->
             println("  $type")
         }
@@ -78,7 +76,7 @@ class TestCvrExportRedaction {
     fun testElPaso() { // redaction
         var filename = "/home/stormy/datadrive/votedatabase/cvr/Colorado/Jefferson/JeffCO_2020_CVR_Redacted.csv"
         println(filename)
-        val export: DominionCvrExport = DominionCvrExportReader(filename).read()
+        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
         export.exportCardStyles.forEach { type ->
             println("  $type")
         }
@@ -107,7 +105,7 @@ class TestCvrExportRedaction {
                         try {
                             val filename = entry.toString()
                             println(filename)
-                            val export: DominionCvrExport = DominionCvrExportReader(filename).read()
+                            val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
                             export.redacted.forEach { group -> println("  $group") }
 
                         } catch (e: Exception) {

@@ -197,7 +197,7 @@ data class MultiContestTestData(
             val fcontests = contestTestBuilders.filter { cardStyle.hasContest(it.info.id) }
             repeat(cardStyle.ncards) {
                 // val poolId = if ((poolPctForTestData != null) && cardStyle.id  < 2) 1 else null
-                result.add( makeCard(nextCardId++, fcontests, poolId = cardStyle.id, cardStyle=cardStyle.name))
+                result.add( makeCard(nextCardId++, fcontests, poolId = cardStyle.id, styleId=cardStyle.id))
             }
         }
 
@@ -206,8 +206,8 @@ data class MultiContestTestData(
         return result
     }
 
-    private fun makeCard(nextCardId: Int, fcontests: List<ContestTestDataBuilder>, poolId: Int?, cardStyle: String?): AuditableCard {
-        val cardBuilder = AuditableCardBuilder("card${nextCardId}", null, nextCardId, poolId, cardStyle)
+    private fun makeCard(nextCardId: Int, fcontests: List<ContestTestDataBuilder>, poolId: Int?, styleId: Int): AuditableCard {
+        val cardBuilder = AuditableCardBuilder("card${nextCardId}", null, nextCardId, poolId=poolId, styleId=styleId)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build()
     }

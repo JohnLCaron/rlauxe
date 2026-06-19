@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.sf
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.dominion.CvrExportCsvHeader
-import org.cryptobiotic.rlauxe.dominion.DominionCvrSummary
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportJsonSummary
 import org.cryptobiotic.rlauxe.dominion.convertCvrExportJsonToCsv
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -93,7 +93,7 @@ class CreateSf2024CvrExport {
     // read the CvrExport_* files out of the castVoteRecord JSON zip file, convert to "CvrExport" CSV file.
     // use the contestManifestFile to add the undervotes, and to identify the IRV contests
     // write to "$topDir/$cvrExportCsvFile"
-    fun createCvrExportCsvFile(topDir: String, castVoteRecordZip: String, contestManifestFilename: String): DominionCvrSummary {
+    fun createCvrExportCsvFile(topDir: String, castVoteRecordZip: String, contestManifestFilename: String): DominionCvrExportJsonSummary {
         val stopwatch = Stopwatch()
         val outputFilename = "$topDir/$cvrExportCsvFile"
         val cvrExportCsvStream = FileOutputStream(outputFilename)
@@ -103,7 +103,7 @@ class CreateSf2024CvrExport {
         println("IRV contests = ${contestManifest.irvContests}")
 
         var countFiles = 0
-        val summaryTotal = DominionCvrSummary()
+        val summaryTotal = DominionCvrExportJsonSummary()
         val zipReader = ZipReaderTour(
             castVoteRecordZip, silent = true, sortPaths = true,
             filter = { path -> path.toString().contains("CvrExport_") },

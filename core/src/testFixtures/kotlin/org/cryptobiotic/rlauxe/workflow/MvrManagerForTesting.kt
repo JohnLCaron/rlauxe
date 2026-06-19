@@ -10,9 +10,9 @@ import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIteratorM
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIteratorM
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
@@ -138,11 +138,11 @@ fun readSortedManifest(publisher: Publisher, infos: Map<Int, ContestInfo>, ncard
 
     // first look for sortedCardsProtoFile, use if present, else use sortedCardsFile
     if (Files.exists(Path(publisher.sortedCardsProtoFile()))) {
-        val sortedCardsIter = CloseableIterable { ProtoCardIteratorM(publisher.sortedCardsProtoFile(), styles = styles) }
+        val sortedCardsIter = CloseableIterable { ProtoCardIterator(publisher.sortedCardsProtoFile(), styles = styles) }
         return SortedManifest(sortedCardsIter, ncards)
     }
 
-    val mergedCards = CloseableIterable { readCardsCsvIteratorM(publisher.sortedCardsFile(), styles) }
+    val mergedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile(), styles) }
     return SortedManifest(mergedCards, ncards)
 }
 

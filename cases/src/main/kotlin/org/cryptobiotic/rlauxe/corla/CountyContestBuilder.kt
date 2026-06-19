@@ -15,7 +15,7 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
     val contests: List<Contest>
 
     init {
-        contests = corlaContestBuilders.map { it.makeContest() }
+        contests = corlaContestBuilders.map { it.build() }
     }
 
     private fun makeContestBuilders(): List<CorlaContestBuilder> {
@@ -138,7 +138,7 @@ class CorlaContestBuilder(val info: ContestInfo, val contest: MergedContestInfo,
 
     fun expectedPoolNCards() = Nc
 
-    fun makeContest(): Contest {
+    fun build(): Contest {
         val candVotes = candidateVotes.filter { info.candidateIds.contains(it.key) } // get rid of writeins?
         // val totalVotes = candVotes.map {it.value}.sum()
         // val ncards = max(builder.poolTotalCards(), totalVotes)

@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
@@ -59,6 +60,22 @@ fun readBelgiumElectionJson(filename: String): Result<BelgiumElectionJson, Error
 
     return try {
         Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
+            val json = jsonReader.decodeFromStream<BelgiumElectionJson>(inp)
+            if (errs.hasErrors()) Err(errs) else Ok(json)
+        }
+    } catch (t: Throwable) {
+        errs.add("Exception= ${t.message} ${t.stackTraceToString()}")
+    }
+}
+
+fun readBelgiumJsonFromResourcePath(resourcePath: String): Result<BelgiumElectionJson, ErrorMessages> {
+    val errs = ErrorMessages("readBelgiumJsonFromResourcePath")
+    val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true }
+
+    return try {
+        val inputStream = object {}.javaClass.getResourceAsStream(resourcePath) ?:
+                        return errs.add("$resourcePath does not exist")
+        inputStream.use { inp ->
             val json = jsonReader.decodeFromStream<BelgiumElectionJson>(inp)
             if (errs.hasErrors()) Err(errs) else Ok(json)
         }

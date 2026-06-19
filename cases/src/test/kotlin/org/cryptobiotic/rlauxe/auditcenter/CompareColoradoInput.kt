@@ -91,3 +91,16 @@ fun compareLists(list1: List<String>, list2: List<String>, name1: String = "cano
         }
     }
 }
+
+fun compareMaps(map1: Map<Int, String>, map2: Map<Int,String>, name1: String = "canonical1", name2: String = "canonical2") {
+    map1.forEach { (id1, val1) ->
+        val val2 = map2[id1]
+        if (val2 == null) println(" $name2 doesnt have '${id1}' from $name1")
+        else if (val1 != val2) println(" for $id1 values differ: '$val1' !=  $val2")
+    }
+    map2.forEach { (id2, val2) ->
+        val val1 = map1[id2]
+        if (val1 == null) println(" $name1 doesnt have '${id2}' from $name2")
+        else if (val1 != val2) println(" for $id2 values differ: '$val1' !=  $val2")
+    }
+}

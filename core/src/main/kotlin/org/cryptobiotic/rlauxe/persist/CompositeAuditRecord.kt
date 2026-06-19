@@ -37,6 +37,7 @@ data class CompositeAuditRecord(
     override val componentRecords: List<AuditRecord>,
 ): CompositeRecordIF  {
 
+    // used by viewer
     fun readPartyNames(): Map<Int, String> {
         return readCanonicalPartyTxtFile("$location/$canonicalPartiesFilename")
     }
@@ -45,6 +46,7 @@ data class CompositeAuditRecord(
         return readLimitsTxtFile("$location/$limitsFilename")
     }
 
+    // used ??
     fun readCoalitions(): List<CoalitionList> {
         return readCoalitionTxtFile("$location/$coalitionFilename")
     }

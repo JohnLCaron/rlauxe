@@ -76,35 +76,41 @@ fun createBelgiumElection(
     return result
 }
 
-// create election, run all rounds
-// return ntotalVotes from Json and finalRound.nmvrs
 fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdir: String, contestId: Int,
-                          runRounds:Boolean = true,
-                          stopRound:Int=0,
-                          showVerify:Boolean = false,
-                          sampleLimitFun: (Int) -> Int?,
+                                runRounds:Boolean = true,
+                                stopRound:Int=0,
+                                showVerify:Boolean = false,
 ): Pair<Int, Int> {
-    println("======================================================")
-    println("electionName $electionName")
     val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
-    val belgiumElection = if (result.isOk) result.unwrap()
+    val belgiumElectionJson = if (result.isOk) result.unwrap()
         else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")
 
     val partyIds: Map<String, Int> = readPartyTxtFile("$toptopdir/parties.txt")
-    val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, partyIds[it.PartyLabel]!!, it.NrOfVotes) }
-    val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
-    val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes // TODO undervotes = belgiumElection.NrOfBlankVotes
 
-    //     name: String,
-    //    id: Int,
-    //    parties: List<DhondtCandidate>,
-    //    nseats: Int,
-    //    undervotes: Int,
-    //    minFraction: Double,
-    val dcontest = makeDhondtContest(electionName, contestId, dhondtParties, nwinners, totalVotes, belgiumElection.NrOfBlankVotes,.05)
+    return createAndRunAllRounds(electionName, belgiumElectionJson, toptopdir, partyIds,
+        contestId = contestId,
+        runRounds, stopRound, showVerify)
+}
+
+// create election, run all rounds
+// return ntotalVotes from Json and finalRound.nmvrs
+fun createAndRunAllRounds(electionName: String, belgiumElectionJson: BelgiumElectionJson, toptopdir: String, partyIds: Map<String, Int>,
+                          contestId: Int,
+                          runRounds:Boolean = true,
+                          stopRound:Int=0,
+                          showVerify:Boolean = false,
+): Pair<Int, Int> {
+    println("\n======================================================")
+    println("electionName $electionName")
+
+    val dhondtParties = belgiumElectionJson.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, partyIds[it.PartyLabel]!!, it.NrOfVotes) }
+    val nwinners = belgiumElectionJson.ElectionLists.sumOf { it.NrOfSeats }
+    val totalVotes = belgiumElectionJson.NrOfValidVotes + belgiumElectionJson.NrOfBlankVotes // TODO undervotes = belgiumElection.NrOfBlankVotes
+
+    val dcontest = makeDhondtContest(electionName, contestId, dhondtParties, nwinners, totalVotes, belgiumElectionJson.NrOfBlankVotes,.05)
 
     val topdir = "$toptopdir/$electionName"
-    val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, riskMeasuringSampleLimit=sampleLimitFun(contestId))
+    val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05)
     val round = AuditRoundConfig(
         SimulationControl(nsimTrials = 1),  // why only 1 ??
         ContestSampleControl.NONE,
@@ -119,10 +125,9 @@ fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdi
         print(results)
         if (results.hasErrors) throw RuntimeException("createBelgiumElection failed to verify")
     }
-
+    println()
     if (runRounds == false) return Pair(0, 0)
 
-    println("============================================================")
     var done = false
     var finalRound: AuditRoundIF? = null
     while (!done) {
@@ -136,5 +141,54 @@ fun createAndRunBelgiumElection(electionName: String, filename: String, toptopdi
         Pair(totalVotes, finalRound.nmvrs)
     } else Pair(0, 0)
 }
+
+fun createAllBelgiumElections(toptopdir: String) {
+    val partyIds = readPartyTxtResource("$belgiumData/parties.txt")
+    copyResourceFile("$belgiumData/canonicalParties.txt", "$toptopdir/canonicalParties.txt")
+
+    val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
+    belgiumJsonInputResource.keys.forEachIndexed { idx, name ->
+        val resourcePath = belgiumJsonInputResource[name]!!
+        val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(resourcePath)
+        val belgiumElectionJson = if (result.isOk) result.unwrap() else throw RuntimeException("$result")
+
+        allmvrs[name] = createAndRunAllRounds(name, belgiumElectionJson, toptopdir, partyIds,
+                contestId = idx+1, runRounds=false)
+    }
+    println("============================================================")
+    allmvrs.forEach {
+        val pct = (100.0 * it.value.second) / it.value.first.toDouble()
+        println("${sfn(it.key, 15)}: Nc= ${trunc(it.value.first.toString(), 10)} " +
+                " nmvrs= ${trunc(it.value.second.toString(), 6)} pct= ${dfn(pct, 2)} %")
+    }
+    // showAllBelgiumElection()
+}
+
+fun createAndRunOneBelgiumElection(electionName: String, toptopdir: String, contestId: Int): Pair<Int, Int> {
+    val resourcePath = belgiumJsonInputResource[electionName]!!
+    val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(resourcePath)
+    val belgiumElectionJson = if (result.isOk) result.unwrap() else throw RuntimeException("$result")
+
+    val partyIds = readPartyTxtResource("$belgiumData/parties.txt")
+    copyResourceFile("$belgiumData/canonicalParties.txt", "$toptopdir/canonicalParties.txt")
+
+    return createAndRunAllRounds(electionName, belgiumElectionJson, toptopdir, partyIds,
+        contestId = contestId, runRounds=false)
+}
+
+val belgiumData = "/resources/data/cases/belgium/belgium2024"
+val belgiumJsonInputResource = mapOf(
+    "Anvers" to "$belgiumData/2024_chambre-des-représentants_Circonscription d'Anvers.json",
+    "Bruxelles" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Bruxelles-Capitale.json",
+    "FlandreWest" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Flandre occidentale.json",
+    "FlandreEast" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Flandre orientale.json",
+    "Hainaut" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Hainaut.json",
+    "Liège" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Liège.json",
+    "Limbourg" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Limbourg.json",
+    "Luxembourg" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Luxembourg.json",
+    "Namur" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Namur.json",
+    "BrabantFlamant" to "$belgiumData/2024_chambre-des-représentants_Circonscription du Brabant flamand.json",
+    "BrabantWallon" to "$belgiumData/2024_chambre-des-représentants_Circonscription du Brabant wallon.json",
+)
 
 

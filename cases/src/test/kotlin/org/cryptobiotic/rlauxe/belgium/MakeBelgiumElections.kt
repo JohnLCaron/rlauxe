@@ -37,11 +37,11 @@ TODO
    5. allow adding assertions to contestRounds and save them.
  */
 class MakeBelgiumElections {
+
     @Test
     fun createBelgiumElection() {
         val name = "Bruxelles"
-        val filename = belgianElectionMap[name]!!
-        createAndRunBelgiumElection(name, filename, toptopdir, contestId=5, showVerify=true) { null }
+        createAndRunOneBelgiumElection(name, toptopdir, contestId=5)
     }
 
     @Test
@@ -50,19 +50,8 @@ class MakeBelgiumElections {
     }
 
     @Test
-    fun createAllBelgiumElections() {
-        val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
-        belgianElectionMap.keys.forEachIndexed { idx, name ->
-            val filename = belgianElectionMap[name]!!
-            allmvrs[name] = createAndRunBelgiumElection(name, filename, toptopdir, contestId = idx+1,
-                            runRounds=false) { null }
-        }
-        allmvrs.forEach {
-            val pct = (100.0 * it.value.second) / it.value.first.toDouble()
-            println("${sfn(it.key, 15)}: Nc= ${trunc(it.value.first.toString(), 10)} " +
-                    " nmvrs= ${trunc(it.value.second.toString(), 6)} pct= ${dfn(pct, 2)} %")
-        }
-        showAllBelgiumElection()
+    fun createAllBelgiumElectionsFromResources() {
+        createAllBelgiumElections(toptopdir)
     }
 
     @Test
@@ -106,53 +95,6 @@ class MakeBelgiumElections {
         }
     }
 }
-
-/*
-fun createBelgiumElection(electionName: String, contestId: Int, stopRound:Int=0, showVerify:Boolean = false): Pair<Int, Int> {
-    println("======================================================")
-    println("electionName $electionName")
-    val filename = belgianElectionMap[electionName]!!
-    val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
-    val belgiumElection = if (result .isOk) result.unwrap()
-    else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")
-
-    val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, idx+1, it.NrOfVotes) }
-    val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
-    val dcontest = makeProtoContest(electionName, contestId, dhondtParties, nwinners, 0,.05)
-
-    val totalVotes = belgiumElection.NrOfValidVotes // + belgiumElection.NrOfBlankVotes
-    val contestd = dcontest.createContest(Nc = totalVotes, Ncast = totalVotes)
-
-    val topdir = "$toptopdir/$electionName"
-
-    val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05)
-    val round = AuditRoundConfig(
-        SimulationControl(nsimTrials = 1),
-        ContestSampleControl.NONE,
-        ClcaConfig(fuzzMvrs=0.0), null)
-
-    createBelgiumElection(topdir=topdir, contestd, creation, round)
-
-    val auditdir = "$topdir/audit"
-    val results = RunVerifyContests.runVerifyContests(auditdir, null, show = showVerify)
-    println()
-    print(results)
-    if (results.hasErrors) fail()
-
-    println("============================================================")
-    var done = false
-    var finalRound: AuditRoundIF? = null
-    while (!done) {
-        val lastRound = runRound(inputDir = auditdir)
-        if (lastRound != null) finalRound = lastRound
-        done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
-    }
-
-    return if (finalRound != null) {
-        println("$electionName: ${finalRound.show()}")
-        Pair(totalVotes, finalRound.nmvrs)
-    } else Pair(0, 0)
-} */
 
 private fun runBelgiumElection(electionName: String, stopRound:Int=0): Int {
     val topdir = "$toptopdir/$electionName"

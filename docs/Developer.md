@@ -1,5 +1,5 @@
 # Developer Notes
-_05/20/2026_
+_06/20/2026_
 
 <!-- TOC -->
 * [Developer Notes](#developer-notes)
@@ -12,7 +12,9 @@ _05/20/2026_
     * [Run the core tests using gradle](#run-the-core-tests-using-gradle)
   * [Using IntelliJ](#using-intellij)
   * [Modules](#modules)
-  * [Test Cases](#test-cases)
+  * [Generate Test Cases from the uber jar](#generate-test-cases-from-the-uber-jar)
+    * [for the belgium test case](#for-the-belgium-test-case)
+    * [Do not use this part yet: under development](#do-not-use-this-part-yet-under-development)
   * [rlauxe viewer](#rlauxe-viewer)
 * [Notes and stats](#notes-and-stats)
   * [Code Coverage (Lines of Codes)](#code-coverage-lines-of-codes)
@@ -32,7 +34,6 @@ _05/20/2026_
 2. **Java 21+**. Install as needed, and make it your default JVM when working with rlauxe.
 3. The correct version of Gradle and Kotlin will be installed when you invoke a gradle command.
 4. You need internet access to download the dependencies.
-
 
 ## Download the git repository
 
@@ -139,7 +140,7 @@ build the uberjars:
 
 $ ./gradlew assemble uberjar
 
-### belgium 
+### for the belgium test case
 
 The repo contains the needed input for belgium2024. To create the data:
 
@@ -151,7 +152,7 @@ java -classpath cases/build/libs/cases-0.9.5.3-uber.jar org.cryptobiotic.rlauxe.
 * check _cases/build/libs/_ for the latest version of cases-uber.jar
 * substitute your own output directory
 
-### sf
+### Do not use this part yet: under development
 
 The repo does not contain the test data input for San Francisco. Download
 
@@ -161,8 +162,6 @@ into _$testdataDir/cases/sf2024/_ (where you chose _$testdataDir_ in the "Set th
 
 Then run _createSf2024CvrExport()_ test in _cases/src/test/kotlin/org/cryptobiotic/rlauxe/sf/CreateSf2024CvrExport.kt_
 to generate _testdataDir/cases/sf2024/crvExport.csv_. This only needs to be done one time.
-
-## review this
 
 All the test cases can now be generated from:
 

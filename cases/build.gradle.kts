@@ -22,12 +22,12 @@ dependencies {
     implementation(libs.commons.poi)
     implementation(libs.commons.poi.ooxml)
     implementation(libs.bundles.xmlutil)
+    implementation(libs.logback.classic)
 
     testImplementation(libs.bundles.jvmtest)
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(testFixtures(project(":core")))
-    testImplementation(libs.logback.classic)
 }
 
 tasks.test {

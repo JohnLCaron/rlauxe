@@ -145,13 +145,7 @@ class CorlaContestBuilder(val info: ContestInfo, val mcontest: MergedContestInfo
         val candVotesById = candidateVoteCount.filter { info.candidateNames[it.key] != null } // get rid of writeins?
                                                 .mapKeys { info.candidateNames[it.key]!! }
         info.metadata["PoolPct"] = (100.0 * poolTotalCards / Nc).toInt().toString()
-        val result = Contest(info, candVotesById, Nc, Nc)
-        if (info.name == "Presidential Electors") {
-            println(result.show())
-            println(result.showCandidates())
-            println()
-        }
-        return result
+        return Contest(info, candVotesById, Nc, Nc)
     }
 
     override fun toString(): String {

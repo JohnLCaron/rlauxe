@@ -26,7 +26,7 @@ import kotlin.io.path.listDirectoryEntries
 private val logger = KotlinLogging.logger("CountyElectionWithCvrs")
 
 open class CountyElectionWithCvrs (
-    val counties: Map<String, String>, // countyName -> exportFile
+    val counties: Map<String, String>, // countyName -> exportCvrFile
     val coloradoInput: ColoradoInput,
     val auditdir: String,
     val hasStyle: Boolean,
@@ -38,8 +38,6 @@ open class CountyElectionWithCvrs (
     val countyPools = mutableListOf<CountyPools>()
     val cvrPools = mutableListOf<CountyPools>()
 
-    //val styles = mutableListOf<CardStyle>()
-    //val countyPools = mutableListOf<CountyPools>()
     val publisher = Publisher(auditdir)
 
     init {
@@ -48,17 +46,8 @@ open class CountyElectionWithCvrs (
         val infos = contests.map { it.info() }.associateBy{ it.id }
         val infosByName = contests.map { it.info() }.associateBy{ it.name }
 
-        // from auditcenter, duplicate SansCvrs
-        // val makePools = MakeCountyPoolsSansCvrs(contestBuilder.corlaContestBuilders, coloradoInput)
-        // val countyPoolBuilders: List<CountyPoolsBuilder> = makePools.countyPools
-        // styles = countyPoolBuilders.map { it.pools }.flatten()  // use the pools as styles
-        // countyPools = countyPoolBuilders.map { it.build() }
-
         val countyTabMap = coloradoInput.countyTabAllContests.associateBy { it.countyName }
-
         val totalPoolTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
-         //countyPools.forEach { countyPool -> totalPoolTabs.sumContestTabulations(  countyPool.contestTabs.associateBy { it.contestId } ) }
-        //val totalPoolCardCount = countyPools.sumOf { it.cardCount }
 
         var totalCvrCardCount = 0
         val totalCvrTabs = mutableMapOf<Int, ContestTabulation>() // total over counties

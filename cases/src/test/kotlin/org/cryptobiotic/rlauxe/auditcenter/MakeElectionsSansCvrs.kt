@@ -64,12 +64,15 @@ class MakeElectionsSansCvrs {
 
     @Test
     fun makeColorado2020General() {
-        val topdir = "$cases/corla/sansCvrs/Colorado2020sans/"
+        val topdir = "$cases/corla/sansCvrs/Colorado2020sans"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
-            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 200000,
+            ContestSampleControl(minRecountMargin = .005,
+                minSize = 10,
+                contestSampleCutoff = 10000,
+                auditSampleCutoff = 200000,
                 sampling = Sampling.consistent),
             ClcaConfig(), null)
 

@@ -39,7 +39,7 @@ class MakeElectionsWithCvrs {
 
     @Test
     fun makeColorado2020() {
-        val topdir = "$cases/corla/withCvrs/Colorado2020test"
+        val topdir = "$cases/corla/withCvrs/Colorado2020"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(

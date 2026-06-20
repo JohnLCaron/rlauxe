@@ -9,8 +9,10 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
+import java.nio.file.Path
 
 private val logger = KotlinLogging.logger("BelgiumClca")
 
@@ -78,7 +80,9 @@ fun createBelgiumElection(
 
 // create election, run all rounds
 // return ntotalVotes from Json and finalRound.nmvrs
-fun createAndRunAllRounds(electionName: String, belgiumElectionJson: BelgiumElectionJson, toptopdir: String, partyIds: Map<String, Int>,
+fun createAndRunAllRounds(electionName: String,
+                          belgiumElectionJson: BelgiumElectionJson,
+                          toptopdir: String,
                           contestId: Int,
                           runRounds:Boolean = true,
                           stopRound:Int=0,
@@ -86,6 +90,10 @@ fun createAndRunAllRounds(electionName: String, belgiumElectionJson: BelgiumElec
 ): Pair<Int, Int> {
     println("\n======================================================")
     println("electionName $electionName")
+
+    val partyIds = readPartyTxtResource("$belgiumData/parties.txt")
+    validateOutputDir(Path.of(toptopdir))
+    copyResourceFile("$belgiumData/canonicalParties.txt", "$toptopdir/canonicalParties.txt")
 
     val dhondtParties = belgiumElectionJson.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, partyIds[it.PartyLabel]!!, it.NrOfVotes) }
     val nwinners = belgiumElectionJson.ElectionLists.sumOf { it.NrOfSeats }
@@ -127,16 +135,13 @@ fun createAndRunAllRounds(electionName: String, belgiumElectionJson: BelgiumElec
 }
 
 fun createAllBelgiumElections(toptopdir: String) {
-    val partyIds = readPartyTxtResource("$belgiumData/parties.txt")
-    copyResourceFile("$belgiumData/canonicalParties.txt", "$toptopdir/canonicalParties.txt")
-
     val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
     belgiumJsonInputResource.keys.forEachIndexed { idx, name ->
         val resourcePath = belgiumJsonInputResource[name]!!
         val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(resourcePath)
         val belgiumElectionJson = if (result.isOk) result.unwrap() else throw RuntimeException("$result")
 
-        allmvrs[name] = createAndRunAllRounds(name, belgiumElectionJson, toptopdir, partyIds,
+        allmvrs[name] = createAndRunAllRounds(name, belgiumElectionJson, toptopdir,
                 contestId = idx+1, runRounds=false)
     }
     println("============================================================")
@@ -153,10 +158,7 @@ fun createAndRunOneBelgiumElection(electionName: String, toptopdir: String, cont
     val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(resourcePath)
     val belgiumElectionJson = if (result.isOk) result.unwrap() else throw RuntimeException("$result")
 
-    val partyIds = readPartyTxtResource("$belgiumData/parties.txt")
-    copyResourceFile("$belgiumData/canonicalParties.txt", "$toptopdir/canonicalParties.txt")
-
-    return createAndRunAllRounds(electionName, belgiumElectionJson, toptopdir, partyIds,
+    return createAndRunAllRounds(electionName, belgiumElectionJson, toptopdir,
         contestId = contestId, runRounds=false)
 }
 

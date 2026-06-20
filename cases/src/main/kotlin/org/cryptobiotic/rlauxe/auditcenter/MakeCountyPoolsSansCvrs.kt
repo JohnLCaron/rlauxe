@@ -58,7 +58,8 @@ class MakeCountyPoolsSansCvrs(
         // missingPools for each county
         val missingPools: Map<String, AdjustableStylePool> = makeMissingPools(missingContestsByCounty)
 
-        countyPools = contestTabByCounty.map { (countyName, countyContest) ->
+        countyPools = contestTabByCounty.filter { it.key !in listOf("Baca", "Garfield", "Gunnison", "Las Animas") }
+            .map { (countyName, countyContest) ->
             CountyPoolsBuilder(
                 countyName, countyContest, mvrStylesMap[countyName]!!,
                 missingPools[countyName], distributeNc[countyName]!!, infosByName, coloradoInput)
@@ -166,13 +167,17 @@ class MakeCountyPoolsSansCvrs(
     }
 
     fun makeMissingPools(missingContestsByCounty: Map<String, List<CountyContestVotes>>): Map<String, AdjustableStylePool> {
-        return missingContestsByCounty.map { (countyName, missingContests) -> makeMissingPool(countyName, missingContests) }
-            .associateBy { it.countyName }
+        val stylePools = mutableListOf<AdjustableStylePool>()
+        missingContestsByCounty.forEach { (countyName, missingContests) ->
+            val missingPool = makeMissingPool(countyName, missingContests)
+            if (missingPool != null ) stylePools.add(missingPool)
+        }
+        return stylePools.associateBy { it.countyName }
     }
 
     // the simplest thing to do is to munge all missing contests into a single style.
     // TODO look at contest.Nc, put disparate Nc into different stylePool
-    fun makeMissingPool(countyName: String, missingContests: List<CountyContestVotes>): AdjustableStylePool {
+    fun makeMissingPool(countyName: String, missingContests: List<CountyContestVotes>): AdjustableStylePool? {
         val votesForStyle = mutableMapOf<Int, ContestTabulation>() // all contests, this style
         missingContests.forEach { contestTab ->
             val builder = builders[contestTab.contestName]
@@ -190,6 +195,8 @@ class MakeCountyPoolsSansCvrs(
                 votesForStyle[info.id] = ContestTabulation(info, votes, ncards)
             }
         }
+
+        if (votesForStyle.isEmpty()) return null
 
         CountyPoolsBuilder.nextPoolId++
         return AdjustableStylePool(
@@ -261,7 +268,9 @@ data class CountyPoolsBuilder(
                 val contestPct = contestPcts.getOrDefault(contestName, 0.0)
                 contestPcts[contestName] = contestPct + stylePct
 
-                val info = infos[contestName]!!
+                val info = infos[contestName]
+                if (info == null)
+                    throw Exception("cant find $contestName")
                 val votes = mutableMapOf<Int, Int>() // this contest
                 val contestTab = cct.contests[contestName]!!
                 contestTab.choices.forEach { (choiceName, choiceVote) ->
@@ -273,9 +282,6 @@ data class CountyPoolsBuilder(
                 // needs to be adjusted across the styles in proportion to how many cards used it
                 val Nc = adjContestNc[contestName]!!  // total Nc for this contest over all styles
                 val ncards = (stylePct * Nc).roundToInt() // scale by stylePct
-
-                if (info.id == 650)
-                    print("")
 
                 votesForStyle[info.id] = ContestTabulation(info, votes, ncards)
             }
@@ -351,17 +357,16 @@ data class AdjustableStylePool(
     init {
         // contestId -> minCardsNeeded
         voteTotals.forEach { (contestId, contestTab) ->
-            if (contestId == 650)
-                print("")
             val ncards = contestTab.ncards() // nvotes was scaled by stylePct
             val info = infos[contestId]!!
             // based on the contest's votes, you need at least this many cards for this contest
-
             minCardsNeeded[contestId] = roundUp(ncards.toDouble() / info.voteForN)
         }
+        if (minCardsNeeded.size == 0)
+            print("")
         // you need at least this many cards for this pool
         val fromMaxMin = minCardsNeeded.values.max()
-        val fromTabs = voteTotals.values.maxOf { it.nvotes() }
+        // val fromTabs = voteTotals.values.maxOf { it.nvotes() }
         maxMinCardsNeeded = fromMaxMin
     }
 

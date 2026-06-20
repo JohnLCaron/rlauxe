@@ -148,5 +148,5 @@ reorder contests?
 remove Baca and Las Animas DONE
 remove small contests DONE
 add Gunnison
-compare votedatabase and auditcenter total votes
+compare votedatabase and auditcenter total votes DONE
 compare uniform and style sampling

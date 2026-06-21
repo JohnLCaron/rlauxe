@@ -138,9 +138,10 @@ There's lots of online help for using IntelliJ.
 
 build the uberjars:
 
+$ cd <devhome>/rlauxe
 $ ./gradlew assemble uberjar
 
-### for the belgium test case
+### for the belgium 2024 test case
 
 The repo contains the needed input for belgium2024. To create the data:
 
@@ -149,8 +150,8 @@ java -classpath cases/build/libs/cases-0.9.5.3-uber.jar org.cryptobiotic.rlauxe.
     -case belgium -topdir "/home/you/wherever/cases/belgium2024"
 `
 
-* check _cases/build/libs/_ for the latest version of cases-uber.jar
-* substitute your own output directory
+* check _cases/build/libs/_ for the latest version of cases-uber.jar and use that
+* substitute your own output "topdir" directory
 
 ### Do not use this part yet: under development
 

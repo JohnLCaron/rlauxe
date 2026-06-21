@@ -1,5 +1,41 @@
 # Belgium election use case
-02/19/2026
+06/20/2026
+
+## Viewing the Belgium 2024 election interactively
+
+1. clone the latest repos of both rlauxe (https://github.com/JohnLCaron/rlauxe-viewer) and rlauxe-viewer (https://github.com/JohnLCaron/rlauxe-viewer)
+
+2. to generate the data, follow these instructions from https://github.com/JohnLCaron/rlauxe/blob/main/docs/Developer.md#generate-test-cases-from-the-uber-jar
+
+build the uberjars:
+
+````
+$ cd <devhome>/rlauxe
+$ ./gradlew clean assemble uberjar
+````
+
+for the belgium test case, the repo contains the needed input for belgium2024 election. To create the data:
+
+````
+$ java -classpath cases/build/libs/cases-0.9.5.3-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+  -case belgium -topdir "/home/you/wherever/cases/belgium2024"
+````
+
+* check cases/build/libs/ for the latest version of cases-<version>-uber.jar and use that version
+* substitute your own output "topdir" directory
+
+3. to run the viewer, follow these instructions from https://github.com/JohnLCaron/rlauxe-viewer#starting-rlauxe-viewer
+
+````
+$ cd <devhome>/rlauxe-viewer
+$ ./gradlew clean assemble uberJar
+$ java -jar viewer/build/libs/viewer-uber.jar -belgiumAudit
+````
+
+Also see https://github.com/JohnLCaron/rlauxe-viewer#special-features-for-belgium-audits
+
+This will work whenever theres a new version of the data format or the viewer. Always update both repos at the same time.
+
 
 ## 2024 Data
 

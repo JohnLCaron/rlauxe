@@ -8,11 +8,9 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.auditcenter.munge
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.util.trunc
 import java.lang.StrictMath.sqrt
 import kotlin.collections.set
-import kotlin.math.max
 
 // these are the data structures used for DominionCvrExportReader
 
@@ -26,7 +24,7 @@ data class DominionCvrCsvSummary(
     val filename: String,
     val schema: Schema,
     val cvrs: List<CastVoteRecord>, // includes both regular and IRV votes, but not redacted groups
-    val redacted: List<DominionRedactedGroup>,
+    val redactedGroups: List<DominionRedactedGroup>,
     val exportCardStyles: List<ExportCardStyle>,
 ) {
     fun show() = buildString {
@@ -35,7 +33,7 @@ data class DominionCvrCsvSummary(
         appendLine(" versionName = $versionName")
         appendLine("$schema")
         cvrs.forEach { appendLine(it.show()) }
-        redacted.forEach { appendLine(it.toString()) }
+        redactedGroups.forEach { appendLine(it.toString()) }
     }
 
     fun summary() = buildString {
@@ -92,6 +90,8 @@ data class CastVoteRecord(
         return this
     }
 
+    // assume a vote is 0 or 1
+    // return list of candidates voted for; the candidates are numbered jithin this contest
     fun makeRegularVotes(schema: Schema, line: CSVRecord, lineno: Int, exportContest: SchemaContestInfo): List<Int> {
         val votes = mutableListOf<Int>()
         for (i in 0 until exportContest.ncols) { // so i in [0..ncands)
@@ -162,113 +162,17 @@ data class CastVoteRecord(
 
 }
 
-// note that these contestIds are internal to this file (!)
-// contestIdx = contestId. Need to cross reference with contest name in the header to get that right
-// use colIdx to eliminate write-ins.
+// note that these contestIds are internal to this file, so must to cross reference with contest name in the header to get that right
+// candVotes list the candidates voted for
 data class ContestVotes(val contestId: Int, val candVotes: List<Int>)
 
-// TODO merge groups of the same ballotType ??
-class DominionRedactedGroup(var ballotType: String) {
-    // dont have ContestInfos yet
-    val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
-    private var csvRecord : CSVRecord? = null // debugging
-    var ncards: Int = 1  //used by the accumulating group
-
-    fun contests() = contestVotes.keys.toSet()
-
-    fun addVotes(schema: Schema, line: CSVRecord): DominionRedactedGroup {
-        var colidx = schema.nheaders // skip over the first 6 or 7 columns
-        while (colidx < line.size()) {
-            val valueAtIdx = line.get(colidx)
-            if (valueAtIdx.isNotEmpty()) {
-                val useContestIdx = schema.columns[colidx].contestIdx  // same as contestID?
-                val useContest = schema.contests[useContestIdx]
-                if (useContest.isIRV) {
-                    // I think these are just regular Cvrs but the IRV contest was made seperate for privacy reasons
-                    // "RCV Redacted & Randomly Sorted",,,,,"DS-01",0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-                    println("*** IRV RedactedVotes shouldnt get here!")
-                } else {
-                    val candidateVotes = contestVotes.getOrPut(useContestIdx, { mutableMapOf() })
-                    for (candIdx in 0 until useContest.ncols) {
-                        val nvotes = line.get(useContest.startCol + candIdx).toInt()
-                        val prev = candidateVotes[candIdx] ?: 0
-                        candidateVotes[candIdx] = prev + nvotes
-                    }
-                    if (useContest.contestIdx == 31 && candidateVotes.values.sum() == 1)
-                        print("")
-                }
-                colidx += useContest.ncols
-            } else {
-                colidx++
-            }
-        }
-        csvRecord = line
-        return this
-    }
-
-    fun merge(other: DominionRedactedGroup, voteForNmap: Map<Int, Int>): DominionRedactedGroup {
-        other.contestVotes.forEach { (contestId, otherCands) ->
-            val mycands = contestVotes.getOrPut(contestId, { mutableMapOf() })
-
-            otherCands.forEach { (cand, otherVote) ->
-                val myvotes = mycands[cand] ?: 0
-                mycands[cand] = myvotes + otherVote
-            }
-        }
-        this.ncards += other.ncards // other.minCards(voteForNmap)
-
-        return this
-    }
-
-    // method #1
-    // based on votes and voteForN, calculates the minimum number of cards that in this redacted line
-    fun minCards(voteForNmap: Map<Int, Int>): Int {
-        var minCards = 0
-        contestVotes.forEach { (contestId, cands) ->
-            val voteForN = voteForNmap[contestId]!!
-            val minCardsForContest = roundUp(cands.values.sum() / voteForN.toDouble())
-            minCards = max(minCards, minCardsForContest)
-        }
-        return minCards
-    }
-
-    override fun toString() = buildString {
-        val contests = contestVotes.map { it.key }.sorted()
-        val totalVotes = contestVotes.values.map{ it.values }.flatten().sum()
-        append("RedactedGroup('$ballotType', ncards=$ncards, contests=$contests totalVotes=$totalVotes)")
-        // appendLine(csvRecord.toString())
-    }
-
-    companion object {
-
-        fun makeAccumulator(starting: DominionRedactedGroup, accumName:String, voteForNmap: Map<Int, Int>): DominionRedactedGroup {
-            val accum = DominionRedactedGroup(accumName)
-            accum.merge(starting, voteForNmap)
-
-            // override with method #2
-            if (starting.csvRecord != null) {
-                accum.ncards = parseNCards(starting.csvRecord!!.values()[0])
-            }
-            return accum
-        }
-
-        // method #2: specific to Boulder25; "Redacted and Consolidated 10 Ballots"
-        fun parseNCards(line:String): Int {
-            if (!line.contains("Redacted and Consolidated")) return 1
-
-            val tokens = line.split(" ")
-            require(tokens.size > 3) { "unexpected redacted line $line" }
-            val ncards = tokens[3].toInt()
-            return ncards
-        }
-    }
-}
+/////////////////////////////////////////////////////////////////////////
 
 private val showDontMatch = false
 private val showBallotStyles = false
 private val showRedactedGroups = false
 
-data class ExportCardStyle(val name: String, val contests: Set<Int>, var count: Int = 0)
+data class ExportCardStyle(val name: String, val contests: Set<Int>, var countCards: Int = 0)
 
 class BallotStyles {
     val ballotTypes = mutableMapOf<Set<Int>, ExportCardStyle>()
@@ -277,19 +181,19 @@ class BallotStyles {
     fun add(cvr:CastVoteRecord) {
         val cvrContests = cvr.contestVotes.map { it.contestId }.toSet()
         val ballotType = ballotTypes.getOrPut(cvrContests) { ExportCardStyle(cvr.ballotType, cvrContests) }
-        ballotType.count++
+        ballotType.countCards++
     }
 
     // TODO we might want to remove contests with vote count == 0 ??
-    fun add(redacted:DominionRedactedGroup, voteForNmap: Map<Int, Int>) {
+    fun add(redacted:DominionRedactedGroup) {
         // this is Boulder specific: val rname = if (redacted.contestVotes.contains(31)) "r${redacted.ballotType}+31"
-        val rname = "r${redacted.ballotType}"
+        val rname = "${redacted.ballotType}"
         val group = redactedGroups[rname]
         if (group == null) {
-            redactedGroups[rname] = DominionRedactedGroup.makeAccumulator(redacted, rname, voteForNmap)
+            redactedGroups[rname] = DominionRedactedGroup.makeAccumulator(redacted, rname)
         } else {
             if (group.contests() == redacted.contests())
-                group.merge(redacted, voteForNmap)
+                group.merge(redacted)
             else if (showDontMatch)
                 println("redacted $redacted doesnt match $group; c31 = ${redacted.contestVotes[31]}")
         }
@@ -298,7 +202,7 @@ class BallotStyles {
 
 /////////////////////////////////////////////////////////////////////////
 
-class Schema(val columns: List<SchemaColumnInfo>, val nheaders: Int, val contests: List<SchemaContestInfo>) {
+class Schema(val columns: List<SchemaColumnInfo>, val nheaders: Int, val contests: List<SchemaContestInfo>, val voteForNs: Map<Int, Int>) {
     val writeIns : Set<Int> = columns.filter{ it.choice == "Write-in" }.map { it.colno }.toSet()
 
     fun choices(contestId: Int): List<String> {
@@ -410,7 +314,8 @@ fun makeSchema(contests: CSVRecord, choices: CSVRecord, headers: CSVRecord, firs
     }
     ccontests.add( SchemaContestInfo(currContestIdx, currContestName, startIdx, columns.size-startIdx) )
 
-    return Schema(columns, nheaders, ccontests)
+    val voteForNs = ccontests.associate { it.contestIdx to it.voteForN }
+    return Schema(columns, nheaders, ccontests, voteForNs)
 }
 
 fun cleanContestName(col: String) : String {

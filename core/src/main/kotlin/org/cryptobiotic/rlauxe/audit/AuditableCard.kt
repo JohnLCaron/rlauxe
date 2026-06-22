@@ -98,7 +98,6 @@ data class AuditableCard (
 
     fun location() = location ?: id()
     fun index() = index
-    // fun styleName() = styleName
     fun possibleContests() : IntArray {
         return when {
             (!useCvr && style != null) -> style!!.possibleContests()
@@ -107,6 +106,7 @@ data class AuditableCard (
     }
 
     fun votes(): Map<Int, IntArray>? = votes  // TODO is this needed?
+    // TODO fun sumVotes(): Int = if (votes == null) 0 else votes!!.values.map { it.sum() }.sum()
     fun hasExactContests() = style?.hasExactContests() ?: false  // TODO is this needed?
     fun toCvr() = Cvr(id, votes!!, phantom, poolId())
 

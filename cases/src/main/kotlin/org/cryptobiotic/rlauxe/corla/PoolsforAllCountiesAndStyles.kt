@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.auditcenter.MvrStyle
-import org.cryptobiotic.rlauxe.auditcenter.convertToCountyTabs
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -29,8 +28,7 @@ class PoolsforAllCountiesAndStyles(
 
         val countyNc: Map<String, Map<String, Int>> = distributeNc() // county -> contest -> Nc for that contest in that county
 
-        val contestTabByCounty: Map<String, CountyTabAllContests> =
-            convertToCountyTabs(coloradoInput.contestTabsAllCounties.values.toList()).associateBy { it.countyName }
+        val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabAllContests
         val stylesByCounty: Map<String, CountyStylesFromMvrs> = coloradoInput.stylesFromMvrs.associateBy { it.countyName }
 
         // merge the styles into the CountyContestTabs, pick out the contestTabs that dont have styles
@@ -63,22 +61,6 @@ class PoolsforAllCountiesAndStyles(
             it.setTotalCardsFromPools(pools)
             it.info.metadata["CORLApoolTotalCards"] = it.poolTotalCards.toString()
             it.info.metadata["CORLApoolTotalVotes"] = it.poolTotalVotes.toString()
-        }
-
-        // how close are we to desired Nvotes?
-        val nvotesDiffByContestBefore = mutableMapOf<CorlaContestBuilder, Int>()
-        var totalVoteDiff = 0
-        corlaContestBuilders.forEach {
-            nvotesDiffByContestBefore[it] = it.totalVotesAllCounties - it.poolTotalVotes
-            totalVoteDiff += abs(it.totalVotesAllCounties - it.poolTotalVotes)
-        }
-        println("total vote diff = $totalVoteDiff")
-
-        if (debugNvotes) {
-            corlaContestBuilders.forEach {
-                val before = nvotesDiffByContestBefore[it]
-                println("  contest ${it.info.id} nvotes (expect - pools) = $before")
-            }
         }
 
         /* adjustments disabled
@@ -124,17 +106,17 @@ class PoolsforAllCountiesAndStyles(
     // for each contest, distribte Nc to the counties it is in, proportional to votesInCounty / totalVotes
     fun distributeNc(): Map<String, Map<String, Int>> { // county -> contest -> Nc
         val countyNc = mutableMapOf<String, MutableMap<String, Int>>() // county -> contest -> Nc
-        coloradoInput.contestTabsAllCounties.values.forEach { contestTabByCounty ->
+        coloradoInput.contestTabAllCounties.values.forEach { contestTabByCounty ->
             val contestName = contestTabByCounty.contestName
             val builder = builders[contestName]
             if (builder == null)
                 throw RuntimeException()
-            val contestTotalVotes = contestTabByCounty.totalVotesAllCounties
+            val contestTotalVotes = contestTabByCounty.choices.values.sum()
 
-            val counties = contestTabByCounty.counties()
+            val counties = contestTabByCounty.counties
             counties.forEach { name ->
                 val countyContest = countyNc.getOrPut(name) { mutableMapOf() }
-                val countyVotes = contestTabByCounty.countyVotes(name)
+                val countyVotes = contestTabByCounty.choices[name]!! // TODO
                 val fac = countyVotes / contestTotalVotes.toDouble()
                 countyContest[contestName] = (builder.Nc * fac).roundToInt()
             }
@@ -149,7 +131,7 @@ class PoolsforAllCountiesAndStyles(
                 contestSum[contestName] = contestAccum + contestVotes
             }
         }
-        coloradoInput.contestTabsAllCounties.values.forEach { contestTab ->
+        coloradoInput.contestTabAllCounties.values.forEach { contestTab ->
             val contestName = contestTab.contestName
             val sum = contestSum[contestName]!!
             val builder = builders[contestName]!!

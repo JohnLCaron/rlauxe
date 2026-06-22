@@ -32,8 +32,8 @@ class TestCountyCardPoolCsv {
             println(tpool)
             println(rpool)
 
-            rpool.contestTabs.forEach { rtab ->
-                val ttab = tpool.contestTabs[rtab.contestId]
+            rpool.contestTabs.forEach { (contestId, rtab) ->
+                val ttab = tpool.contestTabs[contestId]
                 assertEquals(ttab, rtab)
             }
 
@@ -66,7 +66,7 @@ class TestCountyCardPoolCsv {
 
         poolId++
         return CountyPools(
-            "testRegVotes", poolId, tabs.values.toList(), 42,
+            "testRegVotes", poolId, tabs, 42,
             listOf(style)
         )
     }

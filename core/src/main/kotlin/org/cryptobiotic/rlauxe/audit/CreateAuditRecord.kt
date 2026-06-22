@@ -28,7 +28,7 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: Strin
     logger.info{"writeAuditCreationConfig to ${publisher.auditCreationConfigFile()}\n  ${config.creation}"}
 
     writeAuditRoundConfigJsonFile(config.round, publisher.auditRoundProtoFile())
-    logger.info{"writeAuditRoundProto to ${publisher.auditRoundProtoFile()}\n  ${config.round}"}
+    logger.info{"writeAuditRound to ${publisher.auditRoundProtoFile()}\n  ${config.round}"}
 
     if (sortManifest) { // sortManifest false for uniform sampling
         if (externalSortDir == null) { // TODO make explicit
@@ -49,6 +49,7 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: Strin
             } else {
                 val unsortedCards = election.unsortedMvrsExternal()
                 if (unsortedCards != null && externalSortDir != null) {
+                    // TODO we are doing two external sorts, one for cvrs and one for mvrs. seems wasteful
                     writeSortedCardsExternal(
                         externalSortDir,
                         publisher.sortedMvrsFile(),
@@ -109,7 +110,7 @@ fun makeFastCards(publisher: Publisher, styles: List<StyleIF>): Int {
     // extract some info from sorted proto cards for a super compact "samplingCards" binary file
     val bufferSize = 100_000
     val protoIter = ProtoCardIterator(publisher.sortedCardsProtoFile(), bufferSize, styles)  // dont actually need styles i think
-    val ncards = writeFastSamplingCards(protoIter, publisher.fastSamplingFile(), styles)
+    val ncards = writeFastSamplingCards(protoIter, publisher.fastSamplingFile())
 
     logger.info{"makeFastCards ${ncards} took ${stopwatch}"}
     return ncards

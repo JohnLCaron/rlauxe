@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.dominion
 
-import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.votedatabase.colorado2020
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -44,7 +42,7 @@ class CompareCvrExportSources {
         // assertEquals(exp1.versionName, exp2.versionName)
         assertEquals(exp1.schema.contests.size, exp2.schema.contests.size)
         assertEquals(exp1.cvrs.size, exp2.cvrs.size)
-        assertEquals(exp1.redacted.size, exp2.redacted.size)
+        assertEquals(exp1.redactedGroups.size, exp2.redactedGroups.size)
 
         println("\nCompare columns")
         var skip = false
@@ -134,7 +132,7 @@ class CompareCvrExportSources {
     // data class BallotType(val name: String, val contests: Set<Int>, var count: Int = 0)
     fun compare(col1: ExportCardStyle, col2: ExportCardStyle): Boolean {
         if (col1.contests != col2.contests) return false
-        if (col1.count != col2.count) return false
+        if (col1.countCards != col2.countCards) return false
         return true
     }
 

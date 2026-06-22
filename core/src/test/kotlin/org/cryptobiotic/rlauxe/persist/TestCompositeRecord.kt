@@ -45,7 +45,7 @@ class TestCompositeRecord {
     // @Test
     fun testReadCorlaCountyAudit() {
         val record = AuditRecord.read(corlaUniform)!!
-        val countyAudit = record as CountyAudit
+        val countyAudit = record as CountyAuditRecord
         println("contests = ${countyAudit.contests.size}")
         println("countyData = ${countyAudit.countyData.size}")
 

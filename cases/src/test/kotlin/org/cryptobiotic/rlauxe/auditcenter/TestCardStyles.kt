@@ -32,8 +32,8 @@ class TestCardStyles {
         println()
 
         val contestBuilder = CountyContestBuilder(coloradoInput)
-        val contests = contestBuilder.contests
-        val dominionConverter = DominionConverter("test", export, contests, coloradoInput, )
+        val infosByName = contestBuilder.infos.mapKeys { it.value.name }
+        val dominionConverter = DominionConverter("test", export, infosByName, coloradoInput, )
 
         println("dominionConverter.ExportCardStyles")
         dominionConverter.cardStyles.values.forEach {
@@ -41,6 +41,7 @@ class TestCardStyles {
         }
         println()
 
+        val contests = contestBuilder.contests(emptyMap())
         val contestMap = contests.associateBy{ it.name }
         val contestNameToId = contests.associate{ it.name to it.id }
         val boulderCountyStyles : CountyStylesFromMvrs = coloradoInput.stylesFromMvrs.find { it.countyName == "Boulder" }!!

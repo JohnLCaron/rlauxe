@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.persist.bin
 
 import org.cryptobiotic.rlauxe.audit.makeFastCards
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.CountyAudit
+import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -19,7 +19,7 @@ class TestFastSamplingCards {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val publisher = Publisher("$topdir/audit")
 
-        val countyAudit = AuditRecord.read(topdir) as CountyAudit
+        val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)
         val styles = mvrManager.styles()!! // TODO maybe not optional ?
         val cardManifest = countyAudit.readSortedManifest(styles)
@@ -27,7 +27,7 @@ class TestFastSamplingCards {
         val cardIter = cardManifest.cards.iterator()
 
         val stopwatch = Stopwatch()
-        val ncards = writeFastSamplingCards(cardIter, testFastSamplFile, styles)
+        val ncards = writeFastSamplingCards(cardIter, testFastSamplFile)
         cardIter.close()
 
         println("writeSamplingCards ncards = $ncards, took $stopwatch")
@@ -38,7 +38,7 @@ class TestFastSamplingCards {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val publisher = Publisher("$topdir/audit")
 
-        val countyAudit = AuditRecord.read(topdir) as CountyAudit
+        val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)
         val styles = mvrManager.styles()!! // TODO maybe not optional ?
 

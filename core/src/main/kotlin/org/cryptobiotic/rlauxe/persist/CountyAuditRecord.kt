@@ -16,7 +16,7 @@ import kotlin.text.split
 
 // CountyAudit assume existence of countyDataFile and countyContestDataFile. does not use nested county directories (yet)
 // Used by Corla
-class CountyAudit(
+class CountyAuditRecord(
         location: String,
         config: Config,
         contests: List<ContestWithAssertions>,
@@ -85,7 +85,7 @@ class CountyAudit(
         }
 
         // used by viewer
-        fun readFrom(location: String): CountyAudit? {
+        fun readFrom(location: String): CountyAuditRecord? {
             val auditResult = AuditRecord.readWithResult("$location/audit")
             val auditRecord = if (auditResult.isOk) auditResult.unwrap() else {
                 logger.warn { auditResult.unwrapError() }
@@ -95,7 +95,7 @@ class CountyAudit(
             val countyData = readCountyData("$location/$countyDataFile")
             val countyContestData = readCountyContestData("$location/$countyContestDataFile")
 
-            return CountyAudit(auditRecord.location, auditRecord.config, auditRecord.contests, auditRecord.rounds,
+            return CountyAuditRecord(auditRecord.location, auditRecord.config, auditRecord.contests, auditRecord.rounds,
                 auditRecord.nmvrs, countyData, countyContestData)
         }
     }

@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -71,6 +70,19 @@ class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId
         }
     }
 
+    fun simulatePooledCard(cvb2: AuditableCardBuilder) {
+        vunderPickers.forEach { (contestId, vunderPicker) ->
+            if (vunderPicker.isEmpty()) {
+                if (hasExactContests) cvb2.replaceContestVotes(contestId, intArrayOf()) // cant be missing so add an undervote
+            } else {
+                val cands = vunderPicker.pickRandomCandidatesAndDecrement()
+                if (cands != null) {
+                    cvb2.replaceContestVotes(contestId, cands) // ok if no contests on it ??
+                }
+            }
+        }
+    }
+
     fun done() = vunderPickers.values.all { it.isEmpty() }
 
     fun reset() {
@@ -83,6 +95,34 @@ class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId
             return VunderPool(vunders, "all", poolId, true)
         }
     }
+}
+
+// class AuditableCardBuilder(
+//    val id: String,
+//    val location: String?,
+//    val index: Int,
+//    val prn: Long,
+//    val phantom: Boolean,
+//    val styleId: Int,
+//    val poolId: Int? = null,
+//    votesIn: Map<Int, IntArray>?,
+//    val style: StyleIF? = null,
+//)
+
+fun makeCardsForVunderPool(pool: CardPool, styleId: Int, vunderpool: VunderPool): List<AuditableCard> {
+    vunderpool.reset()
+    val rcvrs = mutableListOf<AuditableCard>()
+    var count = 1
+    while (!vunderpool.done()) {
+        val cvrId = "${pool.name()}-redacted${count}"
+        val cvb2 = AuditableCardBuilder(cvrId, null, 0, 0, phantom = false, styleId=styleId, poolId=null, votesIn=null)
+        vunderpool.simulatePooledCard(cvb2)
+        rcvrs.add(cvb2.build())
+        count++
+    }
+
+    rcvrs.shuffle()
+    return rcvrs
 }
 
 // for viewer: ContestPoolsTable.showSimulatedCards.
@@ -102,41 +142,3 @@ fun makeCvrsForVunderPool(pool: CardPool, vunderpool: VunderPool): List<Cvr> {
     return rcvrs
 }
 
-// TODO use this for CountyPools?
-// for multiple styles, multiple contests and one "pool" of subtotaled votes
-// used for estimation for OneAudit
-class VunderBatches(styles: List<StyleIF>, val onePool: VunderPool) {
-    val styleMap = styles.associateBy { it.id() }
-
-    // for the given pooled card with no votes, simulate one with votes, using card.styleName
-    fun simulatePooledCard(card: AuditableCard): AuditableCard {
-        if (card.phantom()) return card
-
-        val style = styleMap[card.styleId]
-        val cardb = AuditableCardBuilder.fromCard(card)
-
-        if (style == null) {
-            println("style ${card.styleId} not found")
-            return cardb.build()
-        }
-
-        style.possibleContests().forEach { contestId ->
-            val vunderPicker = onePool.vunderPickers[contestId]
-            // only contests still needed to audit are in OnePool
-            if (vunderPicker != null) {
-                if (vunderPicker.isEmpty()) {
-                    if (style.hasExactContests()) cardb.replaceContestVotes(
-                        contestId,
-                        intArrayOf()
-                    ) // missing not allowed
-                } else {
-                    val cands = vunderPicker.pickRandomCandidatesAndDecrement()
-                    if (cands != null) {
-                        cardb.replaceContestVotes(contestId, cands) // ok if no contests on it ??
-                    }
-                }
-            }
-        }
-        return cardb.build()
-    }
-}

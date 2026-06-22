@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.dominion.DominionConverter
 import org.cryptobiotic.rlauxe.dominion.DominionCvrCsvSummary
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsvReader
 import org.cryptobiotic.rlauxe.dominion.GarfieldCsvReader
+import org.cryptobiotic.rlauxe.estimate.simulateCards
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -34,7 +35,7 @@ open class CountyElectionWithCvrs (
 ): ElectionBuilder {
     val ncards: Int
     val contestsUA: List<ContestWithAssertions>
-    val cardStyles = mutableListOf<CardStyle>()
+    val cvrCardStyles = mutableListOf<StyleIF>()
     val countyPools = mutableListOf<CountyPools>()
     val cvrPools = mutableListOf<CountyPools>()
 
@@ -42,11 +43,10 @@ open class CountyElectionWithCvrs (
 
     init {
         val contestBuilder = CountyContestBuilder(coloradoInput)
-        val contests = contestBuilder.contests
-        val infos = contests.map { it.info() }.associateBy{ it.id }
-        val infosByName = contests.map { it.info() }.associateBy{ it.name }
+        val infos = contestBuilder.infos
+        val infosByName = infos.mapKeys{ it.value.name }
 
-        val countyTabMap = coloradoInput.countyTabAllContests.associateBy { it.countyName }
+        val countyTabMap = coloradoInput.countyTabAllContests
         val totalPoolTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
 
         var totalCvrCardCount = 0
@@ -56,37 +56,57 @@ open class CountyElectionWithCvrs (
             //// the cvrs
             val export: DominionCvrCsvSummary = if (county == "Garfield") GarfieldCsvReader(exportFile).read() else
                 DominionCvrExportCsvReader(exportFile).read()
-            val dominionConverter = DominionConverter(county, export, contests, coloradoInput)
+            val dominionConverter = DominionConverter(county, export, infosByName, coloradoInput)
+
             val exportCvrs: List<AuditableCard> = export.cvrs.map { dominionConverter.convertToCard(it) }
-            val (cvrTabs, cvrCount) = tabulateCardsAndCount(Closer (exportCvrs.iterator() ), infos)
+
+            val redactedCvrs = mutableListOf<AuditableCard>()
+            if (county == "Boulder") {
+                dominionConverter.redactedPools.forEach { pool ->
+                    redactedCvrs.addAll(simulateCards(pool))
+                }
+            }
+            val allCvrs: List<AuditableCard> = exportCvrs + redactedCvrs
+
+            val (cvrTabs, cvrCount) = tabulateCardsAndCount(Closer (allCvrs.iterator() ), infos)
             totalCvrTabs.sumContestTabulations(cvrTabs)
             totalCvrCardCount += cvrCount
 
-            // write them out while we have them
-            writeUnsortedMvrs(county, publisher,Closer (exportCvrs.iterator() ))
+            // write them out while we have them in memory
+            writeUnsortedMvrs(county, publisher,Closer (allCvrs.iterator() ))
 
             // Get the card styles from the cvrs
-            val cvrCardStyles: List<CardStyle> = dominionConverter.cardStyles.values.toList()
+            val countyCardStyles: List<StyleIF> = dominionConverter.cardStyles.values.toList() + dominionConverter.redactedPools.map { it as StyleIF }
 
             // take ncards from cvrs
             val ncards = cvrTabs.map { (contestId, contestTab) ->
                 Pair(infos[contestId]!!.name, contestTab.ncards()) // use cvr ncards is the best we can do
             }.toMap()
 
+            // auditcenter tabulations
             val countyTab: CountyTabAllContests = countyTabMap[county]!! // // for one contest, all counties
             val contestTabs = countyTab.makeContestTabs(coloradoInput.canonicalContests(), infosByName, ncards, )
+                                       .associateBy { it.contestId }
 
+            // Note using same countyPoolId for both cvrPools and countyPools
             cvrPools.add(
-                CountyPools(county, countyPoolId, cvrTabs.values.toList(), cvrCount, cvrCardStyles)
+                CountyPools(county, countyPoolId, cvrTabs, cvrCount, countyCardStyles)
             )
-
             countyPools.add(
                 // make the county pool from auditcenter tabs plus cvr cardStyles and ncards
-                CountyPools(county, countyPoolId++, contestTabs, cvrCount, cvrCardStyles)
+                CountyPools(county, countyPoolId++, contestTabs, cvrCount, countyCardStyles)
             )
-            cardStyles.addAll(cvrCardStyles)
-            totalPoolTabs.sumContestTabulations(contestTabs.associateBy { it.contestId })
+
+            cvrCardStyles.addAll(countyCardStyles)
+            totalPoolTabs.sumContestTabulations(contestTabs)
         }
+
+        // probably a bad idea, in that it would create phantoms for what is (probably) the redacted ballots
+        // eg Boulder went from 66393 to 251 missing votes (2646 to 25 missing cards) when redacted ballots were added
+        val ncast: Map<Int, Int>  = totalPoolTabs.mapValues { it.value.ncards() }
+        // val contests = contestBuilder.contests(ncast)
+        // just leave it as Ncast = Nc, then the diff goes into the undervote
+        val contests = contestBuilder.contests(emptyMap<Int, Int>())
 
         // where do we get these? difference between the cvr card counts and the contest.Nc = round.contestBallotCardCount
         // can put them is a seperate pool as long as you include them in the unsorted iterator
@@ -94,11 +114,12 @@ open class CountyElectionWithCvrs (
 
         this.ncards = totalCvrCardCount // or totalPoolCardCount?
         // use Nc as Npop
-        contestsUA = contestBuilder.contests.map {
+        contestsUA = contests.map {
             val contestCvrTab = totalCvrTabs[it.id]
             if (contestCvrTab != null) {
                 it.info().metadata["CvrNcards"] = contestCvrTab.ncards().toString()
                 it.info().metadata["CvrNvotes"] = contestCvrTab.nvotes().toString()
+                it.info().metadata["CvrNundervotes"] = contestCvrTab.undervotes().toString()
             }
             ContestWithAssertions(it, true, hasStyle).addStandardAssertions()
         }
@@ -112,17 +133,17 @@ open class CountyElectionWithCvrs (
         )
 
     override fun contestsUA() = contestsUA
-    override fun cardStyles(): List<StyleIF> = cardStyles
+    override fun cardStyles(): List<StyleIF> = cvrCardStyles
 
     override fun cardPools() = null
     override fun countyCardPools(): List<CountyPools> = countyPools
     override fun countyCvrPools(): List<CountyPools> = cvrPools
 
     override fun unsortedMvrsInternal() = null
-    override fun unsortedMvrsExternal() = CardIteratorfromCountyMvrs(publisher, styles = cardStyles)
+    override fun unsortedMvrsExternal() = CardIteratorfromCountyMvrs(publisher, styles = cvrCardStyles)
 
     // TODO do we need to munge the mvrs for the card manifest? Add the card styles ??
-    override fun cards() = CardIteratorfromCountyMvrs(publisher, styles = cardStyles)
+    override fun cards() = CardIteratorfromCountyMvrs(publisher, styles = cvrCardStyles)
     override fun ncards() = ncards
 }
 

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.votedatabase
 
+import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
 import org.cryptobiotic.rlauxe.dominion.DominionCvrCsvSummary
@@ -13,20 +14,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.text.split
 
-/*
-votedatabase missing San Juan;  cant read Garfield (yet); has Monroe and Roosevelt from some other state
-  Baca has Huerfano, remove
-  Las Animas has 106 cards out of ~8000
-Garfield has an older format, not yet read
-
-auditcenter tabulate_county.csv missing Gunnison, San Juan
-
-overall we are missing Baca, Garfield, Gunnison, San Juan counties
-
-redactions: Boulder, Doloros, Pitkin, possibly Jefferson
-
-
-*/
+// see Corla2020notes
 
 val votedatabase = "/home/stormy/datadrive/votedatabase"
 val colorado2020 = "$votedatabase/cvr/Colorado"
@@ -79,10 +67,10 @@ class CompareVoteDatabaseAndAuditCenter {
     @Test
     fun allColorado2020Counties() {
         val path = Path(colorado2020)
-        val errCount = mapOf("La Plata" to 2)
+        val errCount = emptyMap<String, Int>() // mapOf("La Plata" to 2)
         path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202")}.forEach { subdir ->
             val county = subdir.fileName.toString()
-            if (county !in listOf("Monroe", "Roosevelt", "Baca", "Garfield", "Gunnison")) {
+            if (county !in listOf("Monroe", "Roosevelt", "Baca", "Gunnison", "Las Animas") && county > "A") {
                 try {
                     val filename = "${subdir.toString()}/cvr.csv" // entry.toString()
                     val errs = matchNames(county, filename, Colorado2020General())
@@ -137,12 +125,21 @@ class CompareVoteDatabaseAndAuditCenter {
         // test every export contest has a match in canon, along with each choice
         val match = mutableMapOf<String, String>()
         sinfoList.map { sinfo ->
-            val contest = input.matchCanonicalContest(county, sinfo.name)
+            val contest: CanonicalContest? = input.matchCanonicalContest(county, sinfo.name)
             if (contest == null) {
                 println("   \"${sinfo.name}\" -> \"${suggest(county, sinfo.name, input)}\"")
                 errs++
             } else {
                 match[contest.contestName] = sinfo.name
+                // show the differences
+                if (contest.contestName.startsWith("Pres") || contest.contestName.startsWith("United")) {
+                    val candidateSet = contest.choices.toSet()
+                    sinfo.candidateNames.keys.filter { it != "Write-In" }.forEach { cand ->
+                        if (!candidateSet.contains(cand))
+                            println("   no matches for original candidate '$cand' for contest '${contest.contestName}' county '$county'")
+                    }
+                }
+
                 sinfo.candidateNames.keys.filter { it != "Write-In"}.forEach { cand ->
                     val match = input.matchCanonicalCandidate(county, contest, cand)
                     if (match == null) {
@@ -155,7 +152,7 @@ class CompareVoteDatabaseAndAuditCenter {
         }
 
         // test every canon contest has a match in export
-        val countyContestTabs = input.countyTabAllContests.find { it.countyName == county }!!
+        val countyContestTabs = input.countyTabAllContests[county]!!
         countyContestTabs.contests.keys.forEach { canonContest ->
             if (match[canonContest] == null) {
                 val match2 = sinfoList.find { it.name == canonContest } // probably not nneeded
@@ -171,7 +168,7 @@ class CompareVoteDatabaseAndAuditCenter {
 }
 
 fun suggest(county: String, contest: String, input: ColoradoInput): String {
-    val countyContestTabs = input.countyTabAllContests.find { it.countyName == county }
+    val countyContestTabs = input.countyTabAllContests[county]
     if (countyContestTabs == null) return "unknown"
 
     for (canonContest in countyContestTabs.contests.keys) {

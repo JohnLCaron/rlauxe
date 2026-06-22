@@ -94,16 +94,14 @@ interface CountyPoolsIF {
 data class CountyPools (
     val countyName: String,
     val countyPoolId: Int,
-    val contestTabs: List<ContestTabulation>,
+    val contestTabs: Map<Int, ContestTabulation>,
     val cardCount: Int,
     val styles: List<StyleIF>,
 ) {
-    val contestMap: Map<Int, ContestTabulation> by lazy { contestTabs.associateBy { it.contestId } }
     override fun toString() = buildString {
         appendLine("CountyPools(countyName='$countyName', countyPoolId=$countyPoolId, totalCards=$cardCount")
         styles.forEach{ appendLine("cardStyle:  $it")}
         contestTabs.forEach{ appendLine("  $it")}
     }
 }
-
 

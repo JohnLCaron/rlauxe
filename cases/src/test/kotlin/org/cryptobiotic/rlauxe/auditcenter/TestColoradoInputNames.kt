@@ -14,14 +14,15 @@ class TestColoradoInputNames {
     fun checkCanonicalHasCountyTabulate() {
         val extras = mutableListOf<CanonicalContest>()
 
-        val contestTabs = readCountyTabulateCsv(input.tabulateCountyFile)
+        // TODO read raw input ??
+        val contestTabs: Map<String, ContestTabAllCounties> = input.contestTabAllCounties
         println("\n--------------------------------------------------------------------------")
         println("generalCanonicalFile missing contests/choices from tabulateCountyFile ${input.tabulateCountyFile}:")
         contestTabs.values.forEach { contest ->
             if (!canonical.contains(contest.contestName)) {
                 println("  missing contest '${contest.contestName}'")
                 val addIt = CanonicalContest(contest.contestName, contest.choices.keys.toList())
-                addIt.counties.addAll(contest.counties())
+                addIt.counties.addAll(contest.counties)
                 extras.add(addIt)
             } else {
                 val canonicalChoices: Set<String> = canonical[contest.contestName]!!.choices.toSet()
@@ -40,13 +41,15 @@ class TestColoradoInputNames {
     fun checkCountyTabulateHasCanonical() {
         println("\n--------------------------------------------------------------------------")
         val missing = mutableListOf<String>()
-        val contestTabs: Map<String, ContestTabAllCounties> = readCountyTabulateCsv(input.tabulateCountyFile)
+
+        // TODO read raw input ??
+        val contestTabs: Map<String, ContestTabAllCounties> = input.contestTabAllCounties
         canonical.values.forEach { cc ->
             if (!contestTabs.contains(cc.contestName)) {
                 println("countyTabulate missing canonical '${cc.contestName}'")
                 missing.add(cc.contestName)
             } else {
-                val contestTab = contestTabs[cc.contestName]!!
+                val contestTab : ContestTabAllCounties = contestTabs[cc.contestName]!!
                 val tabChoices: Set<String> = contestTab.choices.keys.toList().toSet()
                 cc.choices.forEach {
                     if (!tabChoices.contains(it))
@@ -61,8 +64,8 @@ class TestColoradoInputNames {
     @Test
     fun checkCountyTabulateAndCanonicalContests() {
         println("\n--------------------------------------------------------------------------")
-        val countyTabs = readCountyTabulateCsv(input.tabulateCountyFile)
-        val countiesFromTab = countyTabs.values.map { it.counties() }.flatten().toSet().toList()
+        val countyTabs: Map<String, CountyTabAllContests> = readCountyTabulateCsv(input.tabulateCountyFile)
+        val countiesFromTab = countyTabs.keys.toSet().toList()
 
         println("compare canonical contest counties and CountyTabulateCsv")
         compareLists(input.counties(), countiesFromTab, "canonical", "countyTabulateCsv")
@@ -92,7 +95,7 @@ class TestColoradoInputNames {
     @Test
     fun checkCorrectedCanonicalContests() {
         input.canonicalContests().forEach { cc ->
-            assertTrue(input.contestTabsAllCounties.contains(cc.key), "contestTabsByCounty '${cc.key}' from canonical")
+            assertTrue(input.contestTabAllCounties.contains(cc.key), "contestTabsByCounty '${cc.key}' from canonical")
             assertTrue(input.roundContests.contains(cc.key), "roundContests '${cc.key}' from canonical")
         }
     }
@@ -101,7 +104,7 @@ class TestColoradoInputNames {
     fun reportCorrectedCanonicalContests() {
         val inputCanonical = input.canonicalContests()
 
-        input.contestTabsAllCounties.forEach {
+        input.contestTabAllCounties.forEach {
             if (!inputCanonical.contains(it.key)) println("canonical missing '${it.key}' from contestTabsByCounty")
         }
 
@@ -114,7 +117,7 @@ class TestColoradoInputNames {
         }
 
         inputCanonical.forEach { cc ->
-            assertTrue(input.contestTabsAllCounties.contains(cc.key), "contestTabsByCounty '${cc.key}' from canonical")
+            assertTrue(input.contestTabAllCounties.contains(cc.key), "contestTabsByCounty '${cc.key}' from canonical")
             assertTrue(input.roundContests.contains(cc.key), "roundContests '${cc.key}' from canonical")
         }
     }

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.timing
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.CountyAudit
+import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.bin.FastSamplingCardIterator
 import org.cryptobiotic.rlauxe.persist.csv.CardCsvReader
@@ -333,7 +333,7 @@ class TimeCardReading {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val publisher = Publisher("$topdir/audit")
 
-        val countyAudit = AuditRecord.read(topdir) as CountyAudit
+        val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)
         val styles = mvrManager.styles()!!
 
@@ -397,7 +397,7 @@ class TimeCardReading {
         // val styles: List<CountyStyles> = Colorado2024Input.countyStyles
 
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val countyAudit = AuditRecord.read(topdir) as CountyAudit
+        val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         // val contestNameMap = countyAudit.contests.associate { it.contest.info().name to it }
         val mvrManager = PersistedMvrManager(countyAudit)
         val cards: CloseableIterable<AuditableCard> = mvrManager.sortedManifest().cards

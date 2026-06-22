@@ -80,7 +80,7 @@ fun compareCvrSchemaVsContestBuilder(county: String, export: DominionCvrCsvSumma
 
     // CountyContestBuilder only uses coloradoInput
     val contestBuilder = CountyContestBuilder(coloradoInput)
-    val contests = contestBuilder.contests
+    val contests = contestBuilder.contests(emptyMap())
 
     var countErrs = 0
     val contestMap: Map<String, ContestIF> = contests.associateBy { it.name }

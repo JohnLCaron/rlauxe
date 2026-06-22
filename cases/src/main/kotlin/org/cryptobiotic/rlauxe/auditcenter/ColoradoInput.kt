@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.auditcenter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.persist.CountyAudit
+import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
 import java.io.FileOutputStream
@@ -63,27 +63,30 @@ abstract class ColoradoInput(
         readColoradoContestRoundCsv(contestRoundFile)
     } // 725
 
-    //////////////////////////////////////////////////////////
-    // corla/src/test/data/2024audit/tabulateCounty.csv
-    // county_name,contest_name,choice,votes
-    // Adams,Presidential Electors,Kamala D. Harris / Tim Walz,124050
-    // Adams,Presidential Electors,Donald J. Trump / JD Vance,103011
-    // Adams,Presidential Electors,Robert F. Kennedy Jr. / Nicole Shanahan,2909
-    //
-    // data class ContestTabByCounty(
-    //    val contestName: String
-    //    val choices = mutableMapOf<String, CountyTabulateChoice>()
-    //
-    val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
+    // data class CountyTabAllContests(val countyName: String) {
+    //    val contests = Map<String, CountyContestVotes>() // contestName (canonical I think) -> CountyContestVotes
+    //    var ncards = 0
+    // data class CountyContestVotes(val contestName: String) {
+    //    val choices = Map<String, Int>() // choice name (not canonical) -> votes in this county and contest
+    //    var ncards = 0
+    val countyTabAllContests: Map<String, CountyTabAllContests> by lazy {
         readCountyTabulateCsv(tabulateCountyFile)
     }
-    // data class CountyContestTabs(
-    //    val countyName: String
-    //    val contests = mutableMapOf<String, CountyContestTab>()
-    // data class CountyContestTab(
-    //    val contestName: String) {
-    //    val choices = mutableMapOf<String, Int>() // choice name -> nvotes in this county
-    val countyTabAllContests: List<CountyTabAllContests> by lazy { convertToCountyTabs(contestTabsAllCounties.values.toList()) }
+
+    // data class ContestTabAllCounties(val contestName: String) {
+    //    val choices = Map<String, Int>() // // canonical choice name -> votes
+    //    val counties = Set<String>()
+    //    var totalCardsInContest: Int
+    open val contestTabAllCounties: Map<String, ContestTabAllCounties> by lazy {
+        val tabs = mutableMapOf<String, ContestTabAllCounties>()
+        countyTabAllContests.values.forEach { countyTabAllContests ->
+            countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
+                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties (contestName) }
+                tab.add(countyTabAllContests.countyName, countyContestVotes)
+            }
+        }
+        tabs.toMap()
+    }
 
     //////////
     // from the list of mvr, cvr comparisions, we derive the following:
@@ -206,7 +209,7 @@ data class MergedContestInfo(
 data class StrataInfo(
     val strataName: String,
     val nmvrs: Int, // countyMvr.countMvr
-    val ncards: Int,  // round.ballotCardCount
+    val ballotCardCount: Int,  // round.ballotCardCount
 )
 
 data class MergedInfo(
@@ -279,7 +282,7 @@ fun mergeContestInfo(input: ColoradoInput): MergedInfo {
     val stateMvrCount = mergedContestInfo.filter { it.auditReason == AuditReason.state_wide_contest}.maxOf {
         it.statewideMvrs
     }
-    strataInfo.add(StrataInfo("Statewide", nmvrs = stateMvrCount, ncards= statewideBallots, ))
+    strataInfo.add(StrataInfo("Statewide", nmvrs = stateMvrCount, ballotCardCount= statewideBallots, ))
 
     return MergedInfo(mergedContestInfo, strataInfo, statewideContests)
 }
@@ -312,11 +315,11 @@ fun CountyContestVotes.makeContestTabulation(canonicalContest: CanonicalContest,
 
 fun writeCountyData(topdir: String, strataInfo: List<StrataInfo>) {
     // misc data by county
-    val outputFilename = "$topdir/${CountyAudit.countyDataFile}"
+    val outputFilename = "$topdir/${CountyAuditRecord.countyDataFile}"
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
-    writer.write("county,   nmvrs, npop\n")
+    writer.write("county,   nmvrs, ballotCardCount\n")
     strataInfo.sortedBy { it.strataName }.forEach {
-        writer.write("${it.strataName}, ${nfn(it.nmvrs, 5)}, ${nfn(it.ncards, 5)}\n")
+        writer.write("${it.strataName}, ${nfn(it.nmvrs, 5)}, ${nfn(it.ballotCardCount, 5)}\n")
     }
     writer.close()
     println("wrote ${strataInfo.size} countyData to $outputFilename")
@@ -327,14 +330,14 @@ fun writeCountyData(topdir: String, strataInfo: List<StrataInfo>) {
 // data class ContestTab(val contestName: String) {
 //    val choices = mutableMapOf<String, Int>()
 
-fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAssertions>, countyTabs: List<CountyTabAllContests>) {
+fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAssertions>, countyTabs: Map<String, CountyTabAllContests>) {
     // misc data by county
-    val outputFilename = "$topdir/${CountyAudit.countyContestDataFile}"
+    val outputFilename = "$topdir/${CountyAuditRecord.countyContestDataFile}"
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     writer.write("county, contest, id, voteDiff, votes,\n")
 
     var count = 0
-    countyTabs.forEach { countyTab ->
+    countyTabs.values.forEach { countyTab ->
         countyTab.contests.values.forEach { contestTab ->
             val contestUA = contestMap[contestTab.contestName]
             if (contestUA != null) {

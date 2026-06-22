@@ -129,11 +129,11 @@ class TestDominionCvrReaderOnTestExamples {
         assertEquals("2024 Boulder County GE Recounts", export.electionName)
         assertEquals("5.17.17.1", export.versionName)
         assertEquals(65, export.schema.contests.size)
-        assertEquals(8, export.redacted.size)
+        assertEquals(8, export.redactedGroups.size)
         // export.redacted.forEach { println(it.contestVotes.toString()) }
 
         // Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
-        val cvr0 = export.redacted[0]
+        val cvr0 = export.redactedGroups[0]
         assertEquals("r10", cvr0.ballotType)
         var idx = 0
         assertEquals(

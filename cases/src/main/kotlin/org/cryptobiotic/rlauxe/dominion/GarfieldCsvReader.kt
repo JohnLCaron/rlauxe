@@ -156,7 +156,7 @@ class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
         cvrCount++
         lineno++
 
-        val ballotTypes = ballotStyles.ballotTypes.values.sortedBy { it.count }.reversed()
+        val ballotTypes = ballotStyles.ballotTypes.values.sortedBy { it.countCards }.reversed()
         return DominionCvrCsvSummary(
             "Garfield", "unknown", filename, schema, cvrs,
             ballotStyles.redactedGroups.toSortedMap().values.toList(),

@@ -23,7 +23,7 @@ val CountyCardPoolHeader = "countyPoolId, countyName, totalCards, cardStyles, co
 fun writeCountyCardPoolCsv(pool: CountyPools) = buildString {
     val styleIds = pool.styles.map{ it.id() }.joinToString(" ")
     append("${pool.countyPoolId}, ${pool.countyName}, ${pool.cardCount}, $styleIds, ")
-    pool.contestTabs.forEachIndexed { index, contestTab ->
+    pool.contestTabs.values.forEachIndexed { index, contestTab ->
         if (index > 0) { append("${pool.countyPoolId},,,, ") }
         append(writeContestTabulationCsv(contestTab))
     }
@@ -119,7 +119,7 @@ class CountyPoolBuilder(
         val cardStyleIds =
             if (cardStyless.isEmpty()) emptyList() else cardStyless.split(" ").map { it.trim().toInt() }
         val cardStyles = cardStyleIds.map { styleMap[it]!! }
-        return CountyPools(poolName, poolId, contestTabs.values.toList(), totalCards, cardStyles, )
+        return CountyPools(poolName, poolId, contestTabs, totalCards, cardStyles, )
     }
 }
 

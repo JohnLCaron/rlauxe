@@ -16,8 +16,8 @@ class TestDominionConverter {
 
     @Test
     fun testDominionConverter() {
-        val filename = "$colorado2020/Boulder/cvr.csv"
-        testDominionConverter("Boulder", filename, coloradoInput = Colorado2020General())
+        val filename = "$colorado2020/Denver/cvr.csv"
+        testDominionConverter("Denver", filename, coloradoInput = Colorado2020General())
     }
 
     @Test
@@ -35,9 +35,8 @@ class TestDominionConverter {
     // this tests running and checking DominionCvrConverter
     fun testDominionConverter(county: String, filename: String, coloradoInput: ColoradoInput) {
         val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
-
         val contestBuilder = CountyContestBuilder(coloradoInput)
-        val dominionConverter = DominionConverter(county, export, contestBuilder.contests, coloradoInput)
+        val dominionConverter = DominionConverter(county, export, contestBuilder.infosByName, coloradoInput)
     }
 
     // this tests coverting all of the cvrs and checking them against the ExportCvr
@@ -46,10 +45,10 @@ class TestDominionConverter {
         val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
 
         val contestBuilder = CountyContestBuilder(coloradoInput)
-        val contests = contestBuilder.contests
+        val contests = contestBuilder.contests(emptyMap())
         val contestMap = contests.associateBy{ it.name }
 
-        val dominionConverter = DominionConverter(county, export, contests, coloradoInput)
+        val dominionConverter = DominionConverter(county, export, contestBuilder.infosByName, coloradoInput)
         var count = 0
         var countOutOfOrder = 0
         export.cvrs.map { cvr: CastVoteRecord ->
@@ -82,7 +81,7 @@ class TestDominionConverter {
         val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
 
         val contestBuilder = CountyContestBuilder(coloradoInput)
-        val dominionConverter = DominionConverter(county, export, contestBuilder.contests, coloradoInput)
+        val dominionConverter = DominionConverter(county, export, contestBuilder.infosByName, coloradoInput)
         val cards: List<AuditableCard> = export.cvrs.map { dominionConverter.convertToCard(it) }
         println("ncards = ${cards.size}")
         val filename = "$testdataDir/tests/scratch/testWriteDominionCvrs.csv"

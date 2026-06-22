@@ -19,6 +19,7 @@ fun countPhantoms(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<I
     return result
 }
 
+//// TODO replace with CardTabulation
 fun tabulateCardsAndCount(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>): Pair<Map<Int, ContestTabulation>, Int> {
     val tabs = mutableMapOf<Int, ContestTabulation>()
     var count = 0
@@ -26,11 +27,11 @@ fun tabulateCardsAndCount(cards: CloseableIterator<AuditableCard>, infos: Map<In
         while (cardIter.hasNext()) {
             val card = cardIter.next()
             count++
-            infos.forEach { (contestId, info) ->
-                if (card.hasContest(contestId)) { // TODO note that here, we believe possibleContests ...
+            infos.forEach { (contestId, info) ->    // TODO why not loop over card.contestIds ??
+                if (card.hasContest(contestId)) {   // TODO note that here, we believe possibleContests ...
                     val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
                     if (card.phantom()) tab.nphantoms++
-                    val votes = card.votes()
+                    val votes = card.votes()        // TODO use card.votes(contestId)
                     if (votes != null && votes[contestId] != null) { // happens when cardStyle == all
                         val contestVote = votes[contestId]!!
                         tab.addVotes(contestVote, card.phantom())
@@ -77,6 +78,7 @@ fun tabulateNpops(cvrs: List<Cvr>, infos: List<ContestInfo>): Map<Int, Int> {
     return npops
 }
 
+//// TODO replace with CardTabulation
 fun tabulateNpopsFromCards(cards: CloseableIterator<AuditableCard>, infos: List<ContestInfo>): Pair<Map<Int, Int>, Int> {
     val npops = mutableMapOf<Int, Int>()
     var count = 0

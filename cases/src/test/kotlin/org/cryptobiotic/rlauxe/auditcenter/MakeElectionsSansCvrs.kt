@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.CountyAudit
+import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
 
 import kotlin.test.Test
@@ -64,7 +64,7 @@ class MakeElectionsSansCvrs {
 
     @Test
     fun makeColorado2020General() {
-        val topdir = "$cases/corla/sansCvrs/Colorado2020sans"
+        val topdir = "$cases/corla/sansCvrs/Colorado2020test"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -84,7 +84,7 @@ class MakeElectionsSansCvrs {
     fun readCountyAuditRecord() {
         val topdir = "$cases/corla/sansCvrs/Colorado2020sans/"
         val auditRecord = AuditRecord.read("$topdir")
-        val countyRecord =  auditRecord as CountyAudit
+        val countyRecord =  auditRecord as CountyAuditRecord
 
         println("countyRecord.countyData")
         countyRecord.countyData.forEach { println( "  $it") }

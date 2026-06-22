@@ -19,7 +19,6 @@ import org.cryptobiotic.rlauxe.auditcenter.CorlaContestBuilder
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
-import org.cryptobiotic.rlauxe.auditcenter.convertToCountyTabs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -177,8 +176,7 @@ fun createCountyAudits(
     writeCountyAuditData(topdir, coloradoInput)
 
     val countyElection = CountyContestBuilder(coloradoInput)
-    val contestTabByCounty: Map<String, CountyTabAllContests> = convertToCountyTabs(coloradoInput.contestTabsAllCounties.values.toList())
-        .associateBy { it.countyName }
+    val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabAllContests
 
     /* createColoradoElection(
         externalSortDir = topdir,

@@ -34,9 +34,9 @@ class MakeCountyPoolsSansCvrs(
         val distributeNc: Map<String, Map<String, Int>> = distributeNc() // county -> contest -> Nc for that contest in that county
 
         val contestTabByCounty: Map<String, CountyTabAllContests> = if (onlyCounty == null)
-            coloradoInput.countyTabAllContests.associateBy { it.countyName }
+            coloradoInput.countyTabAllContests
         else
-            mapOf(onlyCounty to coloradoInput.countyTabAllContests.find { it.countyName == onlyCounty }!! )
+            mapOf(onlyCounty to coloradoInput.countyTabAllContests[onlyCounty]!! )
 
         val mvrStylesMap: Map<String, CountyStylesFromMvrs> = coloradoInput.stylesFromMvrs.associateBy { it.countyName }
 
@@ -131,15 +131,16 @@ class MakeCountyPoolsSansCvrs(
     // for each contest, distribte Nc to the counties it is in, proportional to votesInCounty / totalVotes
     fun distributeNc(): Map<String, Map<String, Int>> { // county -> contest -> Nc
         val countyNc = mutableMapOf<String, MutableMap<String, Int>>() // county -> contest -> Nc
-        coloradoInput.contestTabsAllCounties.values.forEach { contestTabByCounty ->
+        coloradoInput.contestTabAllCounties.values.forEach { contestTabByCounty ->
             val contestName = contestTabByCounty.contestName
+            val contestChoices = contestTabByCounty.canonicalChoices(coloradoInput.canonicalContests()[contestName]!!)
             val builder = builders[contestName]
             if (builder != null) {
-                val contestTotalVotes = contestTabByCounty.totalVotesAllCounties
-                val counties = contestTabByCounty.counties()
+                val contestTotalVotes = contestChoices.values.sum()
+                val counties = contestTabByCounty.counties
                 counties.forEach { name ->
                     val countyContest = countyNc.getOrPut(name) { mutableMapOf() }
-                    val countyVotes = contestTabByCounty.countyVotes(name)
+                    val countyVotes = contestChoices[name]!!
                     val fac = countyVotes / contestTotalVotes.toDouble()
                     countyContest[contestName] = (builder.Nc * fac).roundToInt()
                 }
@@ -318,7 +319,7 @@ data class CountyPoolsBuilder(
             val ncards = contestNc[name] ?: 0
             val canonicalContest = coloradoInput.canonicalContests()[name]!!
             countyContestVotes.makeContestTabulation(canonicalContest, info, ncards)
-        }
+        }.associateBy { it.contestId }
 
         // we dont know the actual number of cards, we only know the candidate counts
         // if you change ncards, you change undervotes...

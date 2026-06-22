@@ -46,7 +46,7 @@ class FastSamplingCardIterator(inputFile: String, styles: List<StyleIF>, bufferS
     }
 }
 
-fun writeFastSamplingCards(cards: CloseableIterator<AuditableCard>, filenameOut: String, styles: List<StyleIF>, limit: Int? = null): Int {
+fun writeFastSamplingCards(cards: CloseableIterator<AuditableCard>, filenameOut: String, limit: Int? = null): Int {
     val outputStream: OutputStream = FileOutputStream(filenameOut)
     var count = 0
 

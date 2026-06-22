@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.auditcenter.Colorado2024General
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
 import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
-import org.cryptobiotic.rlauxe.auditcenter.convertToCountyTabs
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
 import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.util.dfn
@@ -67,21 +66,17 @@ class TestReadColoradoCsvFiles {
         val targets: List<TargetedContestsCsv> =
             readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv") { it }
 
-        val contestTabsByCounty: Map<String, ContestTabAllCounties> =
+        val countyTabAllContests: Map<String, CountyTabAllContests> =
             readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv")
 
-        val ccts: Map<String, CountyTabAllContests> = convertToCountyTabs(contestTabsByCounty.values.toList()).associateBy {
-            clean(
-                it.countyName
-            )
-        }
+        val contestTabAllCounties: Map<String, ContestTabAllCounties> = input.contestTabAllCounties
 
         println()
         println(trunc("from tabulateCounty", 113))
         println("${trunc(TargetedContestsCsv.header, 93)}  winner, loser, voteMargin, diff%")
         targets.filter { it.countyName != "Colorado" }.forEach { it ->
             val contestName = clean(it.contestName)
-            val cct = ccts[it.countyName]!!
+            val cct = countyTabAllContests[it.countyName]!!
             val cctContests = cct.contests.mapKeys { clean(it.key) }
 
             val contestTab = cctContests[contestName]
@@ -113,8 +108,8 @@ class TestReadColoradoCsvFiles {
 
         val roundContests = input.roundContests
 
-        val contestTabsByCounty = input.contestTabsAllCounties
-        val ccts: Map<String, CountyTabAllContests> = convertToCountyTabs(contestTabsByCounty.values.toList()).associateBy { it.countyName }
+        val contestTabsByCounty = input.contestTabAllCounties
+        val countyTabAllContests: Map<String, CountyTabAllContests> = input.countyTabAllContests
 
         println()
         println("${trunc("---from tabulateCounty---", 100)}     --------from contestRound-----")
@@ -125,7 +120,7 @@ class TestReadColoradoCsvFiles {
 
             val roundContest = roundContests[contestName]
 
-            val cct = ccts[target.countyName]!!
+            val cct = countyTabAllContests[target.countyName]!!
             val cctContests = cct.contests.mapKeys { clean(it.key) }
 
             val contestTab = cctContests[contestName]

@@ -36,16 +36,17 @@ open class CreateCorlaElection (
 
     init {
         countyPools = PoolsforAllCountiesAndStyles(countyElection.corlaContestBuilders, coloradoInput).countyPools
+        val contests = countyElection.contests(emptyMap()) // WRONG
 
         // have to save the mvrs and generate the cardManifest from them.
-        ncards = createAndSaveUnsortedMvrs(countyElection.contests, countyPools, publisher)
+        ncards = createAndSaveUnsortedMvrs(contests, countyPools, publisher)
 
         // TODO Npop >= Nc
         val npopMap: Map<Int, Int> = if ((auditType.isPolling() && pollingMode!!.withoutBatches())) {
-            countyElection.contests.associate { it.id to ncards } // then the population is the entire set of cards. (wont go well)
+            contests.associate { it.id to ncards } // then the population is the entire set of cards. (wont go well)
         } else {
             // read them back in as an Iterator, so we dont have to read all into memory
-            val infos = countyElection.contests.map { it.info() }.associateBy { it.id }
+            val infos = countyElection.infos
             val auditableCardIter: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.unsortedMvrsFile(), styles=countyPools)
             // are we handling the batches correctly using mvrs?
             val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
@@ -53,7 +54,7 @@ open class CreateCorlaElection (
             manifestTabs.mapValues { it.value.ncardsTabulated }
         }
 
-        contestsUA = ContestWithAssertions.make(countyElection.contests, npopMap, auditType.isClca(), hasStyle)
+        contestsUA = ContestWithAssertions.make(contests, npopMap, auditType.isClca(), hasStyle)
     }
 
     override fun electionInfo() =

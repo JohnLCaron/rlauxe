@@ -1,0 +1,27 @@
+package org.cryptobiotic.rlauxe.auditcenter
+
+import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+class TestReadTabulateCounty {
+    val input: ColoradoInput = Colorado2020General()
+
+    @Test
+    fun readTabulateCounties() {
+        val countyTabs: Map<String, CountyTabAllContests> = readCountyTabulateCsv(input.tabulateCountyFile)
+        val countyTabs2: Map<String, CountyTabAllContests> = input.countyTabAllContests
+        countyTabs.forEach {
+            val tab2 = countyTabs2[it.key]
+            assertEquals(it.value, tab2)
+        }
+    }
+
+    @Test
+    fun contestTabAllCounties() {
+        val contestTabAllCounties: Map<String, ContestTabAllCounties> = input.contestTabAllCounties
+        contestTabAllCounties.forEach {
+            assertTrue(it.key !in listOf("Baca", "Gunnison", "Las Animas"))
+        }
+    }
+}

@@ -1,13 +1,11 @@
 package org.cryptobiotic.rlauxe.timing
 
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
-import org.cryptobiotic.rlauxe.audit.makeFastCards
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.CountyAudit
+import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.bin.FastSamplingCard
 import org.cryptobiotic.rlauxe.persist.bin.FastSamplingCardIterator
-import org.cryptobiotic.rlauxe.persist.bin.writeFastSamplingCards
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
@@ -24,7 +22,7 @@ class TimeFastSamplingCards {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val publisher = Publisher("$topdir/audit")
 
-        val countyAudit = AuditRecord.read(topdir) as CountyAudit
+        val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)
         val styles = mvrManager.styles()!!
         val cardIter = FastSamplingCardIterator(publisher.fastSamplingFile(), styles, 100_000)
@@ -39,7 +37,7 @@ class TimeFastSamplingCards {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val publisher = Publisher("$topdir/audit")
 
-        val countyAudit = AuditRecord.read(topdir) as CountyAudit
+        val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)
 
         val stopwatch = Stopwatch()
@@ -62,7 +60,7 @@ class TimeFastSamplingCards {
     @Test
     fun timeSamplingFromMvrManager() {
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val countyAudit = AuditRecord.read(topdir) as CountyAudit
+        val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)
 
         runConsistentSampling(Closer(mvrManager.samplingCards().iterator()))
@@ -74,7 +72,7 @@ class TimeFastSamplingCards {
 
     fun runConsistentSampling(cardIter: CloseableIterator<SamplingCardIF>) {
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val countyAudit = AuditRecord.read(topdir) as CountyAudit
+        val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)
         val contestsUA = mvrManager.contestsUA
 

@@ -38,9 +38,9 @@ open class CreateUniformElection (
         ncards = 0 // createAndSaveUnsortedMvrs(stateElection.contests, stateElection.cardPools, publisher)
 
         val builders: List<CorlaContestBuilder> = stateElection.corlaContestBuilders
-        val npopMap: Map<Int, Int> = builders.associate { it.info.id to it.Npop!! }.toMap()
+        val npopMap: Map<Int, Int> = builders.associate { it.info.id to it.strata.ballotCardCount }.toMap()
 
-        contestsUA = ContestWithAssertions.make(stateElection.contests, npopMap, auditType.isClca(), hasStyle=false)
+        contestsUA = ContestWithAssertions.make(stateElection.contests(npopMap), npopMap, auditType.isClca(), hasStyle=false)
     }
 
     override fun electionInfo() =

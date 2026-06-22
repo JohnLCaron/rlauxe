@@ -81,7 +81,7 @@ data class CardStyle(
 
     override fun toString(): String {
         val sortedContests = possibleContests.toList().sorted()
-        return "CardStyle(name=$name, ncards= $ncards, contests=${sortedContests}"
+        return "CardStyle(name=$name, id=$id, ncards= $ncards, contests=${sortedContests}"
     }
 
     companion object {

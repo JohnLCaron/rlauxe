@@ -23,6 +23,7 @@ class ContestTabulation(
     constructor(info: ContestInfo, votes: Map<Int, Int>, ncards: Int): this(info) {
         votes.forEach{ this.addVote(it.key, it.value) }
         this.ncardsTabulated = ncards
+        this.undervotes = ncards - nvotes()
     }
 
     val voteForN = if (isIrv) 1 else voteForNin
@@ -223,11 +224,11 @@ fun tabulateCloseableCvrs(cvrs: CloseableIterator<Cvr>, infos: Map<Int, ContestI
     return votes
 }
 
+//// TODO repalce with CardTabulation
 fun tabulateCards(cards: Iterator<AuditableCard>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     return tabulateAuditableCards(Closer(cards), infos)
 }
 
-// tabulates both regular and IRV over everything in the cards
 fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val tabs = mutableMapOf<Int, ContestTabulation>()
     cards.use { cardIter ->
@@ -248,5 +249,30 @@ fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<I
         }
     }
     return tabs
+}
+
+// tabulates both regular and IRV over everything in the cards, with visitor
+// assumes that contest is found in infos
+class CardTabulation(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>, visitor: (AuditableCard) -> Any) {
+    val tabs = mutableMapOf<Int, ContestTabulation>()
+    init {
+        cards.use { cardIter ->
+            while (cardIter.hasNext()) {
+                val card = cardIter.next()
+                card.contestIds.forEach { contestId ->
+                    val info = infos[contestId]!!
+                    val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
+                    if (card.phantom()) tab.nphantoms++
+                    if (card.votes(contestId) != null) {
+                        val contestVote = card.votes(contestId)!!
+                        tab.addVotes(contestVote, card.phantom())
+                    } else {
+                        tab.ncardsTabulated++
+                    }
+                    visitor(card)
+                }
+            }
+        }
+    }
 }
 

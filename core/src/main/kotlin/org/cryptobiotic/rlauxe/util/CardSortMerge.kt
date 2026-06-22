@@ -18,9 +18,12 @@ class SortMerge<T>(
     val maxChunk: Int = maxChunkDefault) {
 
     fun run(cardIter: CloseableIterator<T>, toCard: (from: T, index: Int, prn: Long) -> AuditableCard) {
+        val stopwatch = Stopwatch()
         // out of memory sort by sampleNum()
         sortCards(cardIter, scratchDirectory, seed, toCard)
-        mergeCards(scratchDirectory, outputFile)
+        val ncards = mergeCards(scratchDirectory, outputFile)
+        logger.info{"External sorting wrote ${ncards} cards to $outputFile took $stopwatch"}
+
     }
 
     // out of memory sorting
@@ -48,7 +51,7 @@ class SortMerge<T>(
     fun mergeCards(
         workingDirectory: String,
         outputFile: String,
-    ) {
+    ): Int {
         //// the merging of the sorted chunks, and writing the completely sorted file
         val writer = CardCsvWriter(outputFile)
 
@@ -60,7 +63,7 @@ class SortMerge<T>(
         }
         val merger = CardMerger(paths, writer, maxChunk)
         merger.merge()
-        logger.info{"SortMerge wrote ${writer.countCards} to $outputFile"}
+        return writer.countCards
     }
 }
 

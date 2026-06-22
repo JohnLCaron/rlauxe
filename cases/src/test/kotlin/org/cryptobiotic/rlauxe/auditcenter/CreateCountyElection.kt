@@ -28,14 +28,15 @@ class CreateCountyElection(
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean = true,
 ): ElectionBuilder {
+    val contests = makeContests()
     val infoList = makeContestInfo().sortedBy{ it.id }
-    val infoMap = infoList.associateBy { it.id }
+    val infos = infoList.associateBy { it.id }
+    val infoByName = infoList.associateBy { it.name }
 
     val contestTabs: Map<Int, ContestTabulation> = countCvrVotes()
     val contestBuilders: Map<Int, ContestBuilder> = makeContestBuilders().associate { it.info.id to it }
     val ncards: Int
 
-    val contests: List<ContestIF>
     val contestsUA : List<ContestWithAssertions>
     val simulatedCvrs: List<AuditableCard>  // redacted cvrs
     val allCards: List<AuditableCard>  // redacted cvrs
@@ -43,14 +44,12 @@ class CreateCountyElection(
 
     init {
         // we need to know the diluted Nb before we can create the UAs
-        contests = makeContests()
         simulatedCvrs = emptyList() // makeRedactedCvrs()
 
-        val dominionConverter = DominionConverter(county, dominionExport, contests, coloradoInput)
+        val dominionConverter = DominionConverter(county, dominionExport, infoByName, coloradoInput)
         val exportCards = dominionExport.cvrs.map { dominionConverter.convertToCard(it) }
         cardStyles = dominionConverter.cardStyles.values.toList()
 
-        val infos = contests.map { it.info() }
         val phantoms = makePhantomCards(contests, 0)
         allCards = exportCards + simulatedCvrs + phantoms // TODO leave out phantoms ??
 
@@ -58,7 +57,7 @@ class CreateCountyElection(
         this.ncards = allCards.size
 
         val cardIter = Closer (allCards.iterator() )
-        val (npopMap, count) = tabulateNpopsFromCards(cardIter, infos) // TODO check this, seems wrong
+        val (npopMap, count) = tabulateNpopsFromCards(cardIter, infos.values.toList()) // TODO check this, seems wrong
         contestsUA = ContestWithAssertions.make(contests, npopMap, true, hasStyle)
     }
 
@@ -120,7 +119,7 @@ class CreateCountyElection(
         // TODO do these include undervotes ??
         dominionExport.cvrs.forEach { cvr ->
             cvr.contestVotes.forEach { contestVote: ContestVotes ->
-                val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation(infoMap[contestVote.contestId]!!) }
+                val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation(infos[contestVote.contestId]!!) }
                 tab.addVotes(contestVote.candVotes.toIntArray(), phantom=false)
             }
         }

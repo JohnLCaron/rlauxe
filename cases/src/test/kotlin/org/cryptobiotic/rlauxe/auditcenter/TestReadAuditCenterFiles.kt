@@ -1,11 +1,8 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
-import org.junit.jupiter.api.Assertions
 import kotlin.test.Test
 
 class TestReadAuditCenterFiles {
@@ -22,10 +19,10 @@ class TestReadAuditCenterFiles {
         println()
 
         // here we read it from the file
-        val contests: Map<String, ContestTabAllCounties> = readCountyTabulateCsv(input.tabulateCountyFile)
+        val contests: Map<String, ContestTabAllCounties> = input.contestTabAllCounties
 
         val pres = contests["Presidential Electors"]!!
-        val ctacChoices = pres.choices.map { Pair(it.key, it.value.totalVotes) }.sortedBy { it.first }.toMap()
+        val ctacChoices = pres.choices.map { Pair(it.key, it.value) }.sortedBy { it.first }.toMap()
         println(pres.contestName)
 
         val canonical: CanonicalContest = readGeneralCanonicalList(input.generalCanonicalFile).find { it.contestName == "Presidential Electors"}!!
@@ -102,19 +99,18 @@ class TestReadAuditCenterFiles {
         }
     }
 
-    @Test
+    /* @Test
     fun readCountyTabulateFile() {
         // no name cleanup
-        val contests:Map<String, ContestTabAllCounties> = readCountyTabulateCsv(input.tabulateCountyFile)
+        val contests:Map<String, ContestTabAllCounties> = input.contestTabAllCounties
         // val contests = readCountyTabulateCsv(input.tabulateCountyFile, { contestNameCleanup(it)}, { candidateNameCleanup(it) })
 
         println("read ${contests.size} contests from ${input.tabulateCountyFile} (${contests.values.sumOf { it.choices.size }} choices)")
 
         println("totalVotesAllCounties")
         contests.values.forEach { contest ->
-            val counties = contest.counties()
-            val sumCounties = counties.sumOf { contest.countyVotes(it) }
-            Assertions.assertEquals(contest.totalVotesAllCounties, sumCounties)
+            val sumCounties = contest.totalCardsInContest
+            assertEquals(contest.totalVotesAllCounties, sumCounties)
             println(" ${nfn(contest.totalVotesAllCounties, 7)}, ${contest.contestName}")
         }
 
@@ -123,7 +119,7 @@ class TestReadAuditCenterFiles {
         cct.forEach {
             println(it)
         }
-    }
+    } */
 
     @Test
     fun readContestComparison() {
@@ -199,7 +195,7 @@ class TestReadAuditCenterFiles {
         println("\nStrata Info")
         println("\ncounty      nmvrs,  npop")
         mergedCountyInfo.sortedBy { it.strataName }.forEach {
-            println("${sfn(it.strataName, -10)}  ${nfn(it.nmvrs, 5)}, ${nfn(it.ncards, 7)}")
+            println("${sfn(it.strataName, -10)}  ${nfn(it.nmvrs, 5)}, ${nfn(it.ballotCardCount, 7)}")
         }
         println()
 

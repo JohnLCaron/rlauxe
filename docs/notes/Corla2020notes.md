@@ -1,5 +1,5 @@
 # Corla2020 Notes
-6/20/26
+6/22/26
 
 I can read in most of the cvr data from https://votedatabase.com for the Colorado 202 General elections. 
 Much of the work is matching the contest and candidate names from the cvr export file to what's in auditcenter.

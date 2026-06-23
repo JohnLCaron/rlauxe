@@ -572,7 +572,7 @@ object Quantiles {
          * indexes, and the values the corresponding quantile values. When iterating, entries in the
          * map are ordered by quantile index in the same order they were passed to the `indexes` method.
          */
-        fun compute(dataset: List<Double>): MutableMap<Int?, Double?>? {
+        fun compute(dataset: List<Double>): MutableMap<Int, Double>? {
             return computeInPlace(*dataset.toDoubleArray())
         }
 
@@ -585,7 +585,7 @@ object Quantiles {
          * indexes, and the values the corresponding quantile values. When iterating, entries in the
          * map are ordered by quantile index in the same order they were passed to the `indexes` method.
          */
-        fun compute(vararg dataset: Double): MutableMap<Int?, Double?> {
+        fun compute(vararg dataset: Double): MutableMap<Int, Double> {
             return computeInPlace(*dataset.clone())
         }
 
@@ -599,7 +599,7 @@ object Quantiles {
          * indexes, and the values the corresponding quantile values. When iterating, entries in the
          * map are ordered by quantile index in the same order they were passed to the `indexes` method.
          */
-        fun compute(vararg dataset: Long): MutableMap<Int?, Double?> {
+        fun compute(vararg dataset: Long): MutableMap<Int, Double> {
             return computeInPlace(*longsToDoubles(dataset))
         }
 
@@ -612,7 +612,7 @@ object Quantiles {
          * indexes, and the values the corresponding quantile values. When iterating, entries in the
          * map are ordered by quantile index in the same order they were passed to the `indexes` method.
          */
-        fun compute(vararg dataset: Int): MutableMap<Int?, Double?> {
+        fun compute(vararg dataset: Int): MutableMap<Int, Double> {
             return computeInPlace(*intsToDoubles(dataset))
         }
 
@@ -626,14 +626,14 @@ object Quantiles {
          * map are ordered by quantile index in the same order that the indexes were passed to the
          * `indexes` method.
          */
-        fun computeInPlace(vararg dataset: Double): MutableMap<Int?, Double?> {
+        fun computeInPlace(vararg dataset: Double): MutableMap<Int, Double> {
             require(dataset.size > 0) {"Cannot calculate quantiles of an empty dataset"}
             if (containsNaN(*dataset)) {
-                val nanMap: MutableMap<Int?, Double?> = LinkedHashMap<Int?, Double?>()
+                val nanMap: MutableMap<Int, Double> = LinkedHashMap<Int, Double>()
                 for (index in indexes) {
                     nanMap.put(index, Double.Companion.NaN)
                 }
-                return Collections.unmodifiableMap<Int?, Double?>(nanMap)
+                return nanMap
             }
 
             // Calculate the quotients and remainders in the integer division x = k * (N - 1) / q, i.e.
@@ -668,7 +668,7 @@ object Quantiles {
             selectAllInPlace(
                 requiredSelections, 0, requiredSelectionsCount - 1, dataset, 0, dataset.size - 1
             )
-            val ret: MutableMap<Int?, Double?> = LinkedHashMap<Int?, Double?>()
+            val ret: MutableMap<Int, Double> = LinkedHashMap<Int, Double>()
             for (i in indexes.indices) {
                 val quotient = quotients[i]
                 val remainder = remainders[i]
@@ -678,7 +678,30 @@ object Quantiles {
                     ret[indexes[i]] = interpolate(dataset[quotient], dataset[quotient + 1], remainder.toDouble(), scale.toDouble())
                 }
             }
-            return Collections.unmodifiableMap<Int?, Double?>(ret)
+            return ret
         }
     }
+}
+
+fun showDeciles(distribution: List<Double>, n: Int) = buildString {
+    val raw = calcDeciles(distribution)
+    raw.forEach { append("${nfn(it.key,2)}% <= ${dfn(it.value, n)}, ") }
+}
+
+fun showDecilesShort(distribution: List<Double>, n: Int) = buildString {
+    val raw = calcDeciles(distribution)
+    val rawShort = buildString { raw.forEach { append("${dfn(it.value, 2)}, ") } }
+    append("[$rawShort]")
+}
+
+fun calcDeciles(distribution: List<Double>): Map<Int, Double> {
+    val decilePcts = IntArray(10) { 10 * (it+1) }
+    return Quantiles.percentiles().indexes(*decilePcts).compute(*distribution.toDoubleArray()).toMap()
+    // return raw.mapValues { roundUp(100 * it.value) }
+}
+
+fun calcDecilesFromInt(distribution: List<Int>): Map<Int, Int> {
+    val decilePcts = IntArray(10) { 10 * (it+1) }
+    val raw = Quantiles.percentiles().indexes(*decilePcts).compute(*distribution.toIntArray()).toMap()
+    return raw.mapValues { roundUp(100 * it.value) }
 }

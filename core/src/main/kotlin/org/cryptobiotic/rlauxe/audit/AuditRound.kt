@@ -6,9 +6,8 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.makeAprioriErrorRates
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.util.Quantiles
+import org.cryptobiotic.rlauxe.util.calcDecilesFromInt
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.roundUp
 
 interface AuditRoundIF {
     val roundIdx: Int
@@ -267,11 +266,10 @@ data class EstimationRoundResult(
         }
     }
 
-    // used by viewer
+    // used by viewer ??
     fun deciles(): List<Int> {
-        val decilePcts = IntArray(10) { 10 * (it+1) }
-        val wtf: MutableMap<Int?, Double?> = Quantiles.percentiles().indexes(*decilePcts).compute(*estimatedDistribution.toIntArray())
-        return wtf.values.map { roundUp(it!!) }
+        val deciles = calcDecilesFromInt(estimatedDistribution)
+        return deciles.values.toList()
     }
 }
 

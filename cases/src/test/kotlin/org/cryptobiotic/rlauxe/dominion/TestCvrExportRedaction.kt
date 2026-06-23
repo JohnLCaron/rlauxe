@@ -31,8 +31,14 @@ class TestCvrExportRedaction {
         testRedactedBallots("/home/stormy/datadrive/votedatabase/cvr/Colorado/Dolores/cvr.csv")
     }
 
-    fun testRedactedBallots(filename: String) {
-        val export = DominionCvrExportCsvReader(filename).read()
+    @Test
+    fun testGarfield20() {
+        testRedactedBallots("/home/stormy/datadrive/votedatabase/cvr/Colorado/Garfield/cvr.csv")
+    }
+
+    fun testRedactedBallots(exportFile: String) {
+        val export: DominionCvrCsvSummary = if (exportFile.contains("Garfield")) GarfieldCsvReader(exportFile).read() else
+            DominionCvrExportCsvReader(exportFile).read()
 
         val styles: Map<String, ExportCardStyle> = export.exportCardStyles.associateBy { it.name }
         var totalLines = 0

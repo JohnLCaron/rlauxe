@@ -34,6 +34,7 @@ Much of the work is matching the contest and candidate names from the cvr export
 The cvr data very closely match the contest vote counts in auditcenter.
 All but 15 contests have cvrs within 1% of the auditcenter, and most are below .1%. 
 It seems likely most differences are due to redacted ballots.
+See [Vote Differences](Corla202cvrDiff.md) for details.
 
 ## Summary of data (with 4 missing counties)
 
@@ -45,6 +46,8 @@ It seems likely most differences are due to redacted ballots.
 * auditable contests = 526 (after removing NoLoser, MinMargin, and MinSize contests)
 
 ## Uniform vs Style Based Sampling
+
+These differ in which contests are chosen for the audit and how many are selected, which affects how the risk is measured for all contests.
 
 ### only targeted contests
  

@@ -4,6 +4,9 @@ import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.estimateOld.probability
 import org.cryptobiotic.rlauxe.estimateOld.quantile
+import org.cryptobiotic.rlauxe.util.calcDeciles
+import org.cryptobiotic.rlauxe.util.calcDecilesFromInt
+import org.cryptobiotic.rlauxe.util.showDeciles
 import kotlin.math.min
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -44,6 +47,21 @@ class TestQuantiles {
             val wtf: Double = percentiles().index(pct).compute(*data.toIntArray())
             println("percent=$pct = $wtf")
         }
+    }
+
+    @Test
+    fun testDecilesFromInt() {
+        val data = listOf(137, 194, 198, 229, 241, 252, 266, 386, 668, 896, 919, 1135, 2131, 2631, 3364, 3651, 3651, 4127, 7473, 9629)
+        val deciles = calcDecilesFromInt(data)
+        println("deciles = $deciles")
+    }
+
+    @Test
+    fun testDeciles() {
+        val data = listOf(.0137, .0194, .0198, .0229, .0241, .0252, .0266, .0386, .0668, .0896, .0919, .1135, .2131, .2631, .3364, .3651, .3651, .4127, .7473, .9629)
+        val deciles = calcDeciles(data)
+        println("deciles = $deciles")
+        println("showDeciles = ${showDeciles(data,2)}")
     }
 
     @Test

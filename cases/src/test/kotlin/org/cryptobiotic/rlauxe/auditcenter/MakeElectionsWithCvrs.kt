@@ -51,7 +51,7 @@ class MakeElectionsWithCvrs {
         // writeCountyData(topdir, coloradoInput.strataMap.values.toList())
 
         val contestMap = auditRecord.contests.associate { it.contest.info().name to it }
-        writeCountyContestData(topdir, contestMap, coloradoInput.countyTabAllContests)
+        writeCountyContestData(topdir, contestMap, coloradoInput)
     }
 
     @Test

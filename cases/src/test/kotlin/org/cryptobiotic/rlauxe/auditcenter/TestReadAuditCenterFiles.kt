@@ -19,7 +19,7 @@ class TestReadAuditCenterFiles {
         println()
 
         // here we read it from the file
-        val contests: Map<String, ContestTabAllCounties> = input.contestTabAllCounties
+        val contests: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties
 
         val pres = contests["Presidential Electors"]!!
         val ctacChoices = pres.choices.map { Pair(it.key, it.value) }.sortedBy { it.first }.toMap()
@@ -35,7 +35,7 @@ class TestReadAuditCenterFiles {
         println()
 
         ctacChoices.forEach {
-            val match = canonical.matchCanonicalCandidate(it.key)
+            val match = canonical.matchCandidateName(it.key)
             val match2 = candidateNames[it.key]?.toString() ?: "HEYA STUPID"
             println("${trunc(it.key, 40)}: ${it.value} -> $match2 : $match")
         }

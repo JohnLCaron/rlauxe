@@ -28,7 +28,7 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
 
         // canonical drives the boat
         mergedContestMap.values.forEach{ mcontest ->
-            val contestTabAllCounties = coloradoInput.contestTabAllCounties[mcontest.contestName]
+            val contestTabAllCounties = coloradoInput.contestTabsAllCounties[mcontest.contestName]
             if (contestTabAllCounties == null) {
                 logger.warn{"*** Cant find contestTab for '${mcontest.contestName}': remove from audit" }
                 // throw RuntimeException()
@@ -114,7 +114,6 @@ class CorlaContestBuilder(val info: ContestInfo, val mcontest: MergedContestInfo
     var poolTotalVotes: Int = 0
 
     init {
-
         candidateVoteCount = contestTabAllCounties.canonicalChoices(mcontest.canonicalContest)
 
         // candidateVotes = contestTab.choices.values.mapIndexed { idx, choice -> Pair(idx, choice.totalVotes) }.toMap()

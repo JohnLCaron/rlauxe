@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 private val debugNvotes = false
@@ -28,7 +27,7 @@ class PoolsforAllCountiesAndStyles(
 
         val countyNc: Map<String, Map<String, Int>> = distributeNc() // county -> contest -> Nc for that contest in that county
 
-        val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabAllContests
+        val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabsAllContests
         val stylesByCounty: Map<String, CountyStylesFromMvrs> = coloradoInput.stylesFromMvrs.associateBy { it.countyName }
 
         // merge the styles into the CountyContestTabs, pick out the contestTabs that dont have styles
@@ -106,17 +105,14 @@ class PoolsforAllCountiesAndStyles(
     // for each contest, distribte Nc to the counties it is in, proportional to votesInCounty / totalVotes
     fun distributeNc(): Map<String, Map<String, Int>> { // county -> contest -> Nc
         val countyNc = mutableMapOf<String, MutableMap<String, Int>>() // county -> contest -> Nc
-        coloradoInput.contestTabAllCounties.values.forEach { contestTabByCounty ->
-            val contestName = contestTabByCounty.contestName
+        coloradoInput.contestTabsAllCounties.values.forEach { contestTabAllCounties ->
+            val contestName = contestTabAllCounties.contestName
             val builder = builders[contestName]
             if (builder == null)
                 throw RuntimeException()
-            val contestTotalVotes = contestTabByCounty.choices.values.sum()
-
-            val counties = contestTabByCounty.counties
-            counties.forEach { name ->
-                val countyContest = countyNc.getOrPut(name) { mutableMapOf() }
-                val countyVotes = contestTabByCounty.choices[name]!! // TODO
+            val contestTotalVotes = contestTabAllCounties.choices.values.sum()
+            contestTabAllCounties.countyVotes.forEach { (countyName, countyVotes) ->
+                val countyContest = countyNc.getOrPut(countyName) { mutableMapOf() }
                 val fac = countyVotes / contestTotalVotes.toDouble()
                 countyContest[contestName] = (builder.Nc * fac).roundToInt()
             }
@@ -131,7 +127,7 @@ class PoolsforAllCountiesAndStyles(
                 contestSum[contestName] = contestAccum + contestVotes
             }
         }
-        coloradoInput.contestTabAllCounties.values.forEach { contestTab ->
+        coloradoInput.contestTabsAllCounties.values.forEach { contestTab ->
             val contestName = contestTab.contestName
             val sum = contestSum[contestName]!!
             val builder = builders[contestName]!!

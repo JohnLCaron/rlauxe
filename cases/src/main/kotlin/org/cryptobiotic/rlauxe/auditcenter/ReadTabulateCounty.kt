@@ -43,9 +43,9 @@ data class CountyContestVotes(val contestName: String) {
         choices[choiceName] = accum + choiceVote
     }
 
-    fun canonicalChoices(canonicalContest: CanonicalContest): Map<String, Int>  {
-        return choices.mapKeys {
-            canonicalContest.matchCanonicalCandidate(it.key )!!
+    fun canonicalChoices(canonicalContest: CanonicalContest): Map<String, Int> {
+        return choices.filter { !isWriteIn(it.key) }.mapKeys {
+            canonicalContest.matchCandidateName(it.key )!!
         }
     }
 
@@ -102,7 +102,8 @@ fun readCountyTabulateCsv(filename: String): Map<String, CountyTabAllContests> {
 
 data class ContestTabAllCounties(val contestName: String) {
     val choices = mutableMapOf<String, Int>() // original choice name -> votes
-    val counties = mutableSetOf<String>()
+    val counties = mutableSetOf<String>()     // countyNames
+    val countyVotes = mutableMapOf<String, Int>()     // countyName -> total votes for this contest in this county
 
     fun add(countyName: String, votes: CountyContestVotes) {
         votes.choices.forEach { (choiceName, votes) ->
@@ -110,19 +111,26 @@ data class ContestTabAllCounties(val contestName: String) {
             choices[choiceName] = accum + votes
         }
         counties.add(countyName)
+        countyVotes[countyName] = votes.choices.values.sum()
     }
 
     // did you know that '' looks like " in a lot of fancy fonts ?
     // so the county tab file may have the same contests in different variants.....
     fun canonicalChoices(canonicalContest: CanonicalContest): Map<String, Int>  { // canonical choice name -> votes
         val result = mutableMapOf<String, Int>()
-        choices.forEach { (choiceName, votes) ->
-            val canonCand = canonicalContest.matchCanonicalCandidate(choiceName)!!
+        choices.filter{ !isWriteIn(it.key) }.forEach { (choiceName, votes) ->
+            val canonCand = canonicalContest.matchCandidateName(choiceName)
+            if (canonCand == null) {
+                println("'${choiceName}' not found in canonical contest '${canonicalContest.contestName}'")
+                throw RuntimeException()
+            }
             val accum = result.getOrDefault(canonCand, 0)
             result[canonCand] = accum + votes
         }
         return result
     }
+
+    fun sumVotes() = choices.values.sumOf { it }
 
     override fun toString() = buildString {
         appendLine("'$contestName'")

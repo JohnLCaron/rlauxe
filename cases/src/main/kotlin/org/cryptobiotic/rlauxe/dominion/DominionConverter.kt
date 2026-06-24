@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
+import org.cryptobiotic.rlauxe.auditcenter.isWriteIn
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -39,7 +40,7 @@ class DominionConverter(val county: String, export: DominionCvrCsvSummary, val i
 
                 val candPairs = mutableListOf<Pair<Int, Int>>()
 
-                schemaInfo.candidateNames.filter { it.key != "Write-In"}.forEach { (exportCandidate, schemaCandId) ->
+                schemaInfo.candidateNames.filter { !isWriteIn(it.key) }.forEach { (exportCandidate, schemaCandId) ->
                     // use a lookup instead of a map TODO worth the complexity ??
                     val canonCandidateName = coloradoInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
                     // println("$exportCandidate -> $canonCandidateName")
@@ -154,7 +155,7 @@ class DominionConverter(val county: String, export: DominionCvrCsvSummary, val i
 // for a canonicalContest, lookup export candidate -> canonical candidate
 data class ExportToCanonLookup(val canonContestId: Int, val candLookup: IntArray ) {
 
-    // not 1-1 so cant use mapKeys. For eaxmple Write-In candidate was removed
+    // not 1-1 so cant use mapKeys. For example Write-In candidate was removed
     fun <T> convertCands(inp: Map<Int,T>): Map<Int,T> {
         val result = mutableMapOf<Int, T>()
         inp.forEach {
@@ -197,7 +198,7 @@ fun DominionCvrCsvSummary.makeContestInfo(): List<ExportContestInfo> {
             val candidateMap1 = mutableMapOf<String, Int>()
             var candIdx = 0
             for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
-                if (columns[col].choice != "Write-in") { // remove write-ins
+                if (!isWriteIn(columns[col].choice)) { // remove write-ins
                     candidateMap1[columns[col].choice] = candIdx
                 }
                 candIdx++

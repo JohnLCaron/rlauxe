@@ -31,7 +31,6 @@ import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundUp
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
-import kotlin.collections.associateBy
 import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("CreateCountyAudits")
@@ -176,7 +175,7 @@ fun createCountyAudits(
     writeCountyAuditData(topdir, coloradoInput)
 
     val countyElection = CountyContestBuilder(coloradoInput)
-    val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabAllContests
+    val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabsAllContests
 
     /* createColoradoElection(
         externalSortDir = topdir,

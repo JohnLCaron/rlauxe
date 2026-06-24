@@ -46,7 +46,7 @@ open class CountyElectionWithCvrs (
         val infos = contestBuilder.infos
         val infosByName = infos.mapKeys{ it.value.name }
 
-        val countyTabMap = coloradoInput.countyTabAllContests
+        val countyTabMap = coloradoInput.countyTabsAllContests
         val totalPoolTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
 
         var totalCvrCardCount = 0
@@ -220,7 +220,7 @@ fun countyElectionWithCvrs(
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, coloradoInput.countyTabAllContests)
+    writeCountyContestData(topdir, contestMap, coloradoInput)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

@@ -11,6 +11,9 @@ class Colorado2024General: ColoradoInput(
     tabulateCountyFile = "$general2024/tabulateCounty.csv",
     mvrComparisonFile = "$general2024/round3/contestComparison.csv"
 ) {
+
+    override val skipCounties = listOf<String>()
+
     // canonical contests and choices
     override fun canonicalContests(): Map<String, CanonicalContest> = canonicalContests
     private val canonicalContests by lazy {
@@ -20,10 +23,7 @@ class Colorado2024General: ColoradoInput(
         //add these missing contests:
         val extras = listOf(
             CanonicalContest("Bannock Ballot Issue 6A", choices = listOf("Yes", "No")).addCounties(listOf("Douglas")),
-            CanonicalContest(
-                "Spring Canyon Ballot Issue 6B",
-                choices = listOf("Yes", "No")
-            ).addCounties(listOf("Douglas")),
+            CanonicalContest("Spring Canyon Ballot Issue 6B", choices = listOf("Yes", "No")).addCounties(listOf("Douglas")),
         )
         extras.forEach { result[it.contestName] = it }
 

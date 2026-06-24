@@ -14,6 +14,8 @@ import java.io.File
 import kotlin.collections.forEach
 import kotlin.text.split
 
+private val logger = KotlinLogging.logger("CountyAuditRecord")
+
 // CountyAudit assume existence of countyDataFile and countyContestDataFile. does not use nested county directories (yet)
 // Used by Corla
 class CountyAuditRecord(
@@ -126,30 +128,34 @@ fun readCountyData(filename: String): List<CountyData> {
 data class CountyContestData(val countyName: String, val contestName: String, val id: Int, val voteDiff: Int, val votes: Map<Int, Int>)
 
 fun readCountyContestData(filename: String): List<CountyContestData> {
-    val reader: BufferedReader = File(filename).bufferedReader()
-    reader.readLine() // skip header line
+    try {
+        val reader: BufferedReader = File(filename).bufferedReader()
+        reader.readLine() // skip header line
 
-    val countyData = mutableListOf<CountyContestData>()
-    while (true) {
-        var line = reader.readLine()
-        if (line == null) break
+        val countyData = mutableListOf<CountyContestData>()
+        while (true) {
+            var line = reader.readLine()
+            if (line == null) break
 
-        val tokens = line.split(",")
-        var idx = 0
-        val countyName = tokens[idx++].trim()
-        val contestName = tokens[idx++].trim()
-        val id = tokens[idx++].trim().toInt()
-        val voteDiff = tokens[idx++].trim().toInt()
-        val votes = mutableMapOf<Int, Int>()
-        while (idx < line.length && tokens[idx].trim().isNotEmpty()) {
-            val inner = tokens[idx++].split(":")
-            val id = inner[0].trim().toInt()
-            val vote = inner[1].trim().toInt()
-            votes[id] = vote
+            val tokens = line.split(",")
+            var idx = 0
+            val countyName = tokens[idx++].trim()
+            val contestName = tokens[idx++].trim()
+            val id = tokens[idx++].trim().toInt()
+            val voteDiff = tokens[idx++].trim().toInt()
+            val votes = mutableMapOf<Int, Int>()
+            while (idx < line.length && tokens[idx].trim().isNotEmpty()) {
+                val inner = tokens[idx++].split(":")
+                val id = inner[0].trim().toInt()
+                val vote = inner[1].trim().toInt()
+                votes[id] = vote
+            }
+            countyData.add(CountyContestData(countyName, contestName, id, voteDiff, votes))
         }
-        countyData.add( CountyContestData(countyName, contestName, id, voteDiff, votes))
+        reader.close()
+        return countyData
+    } catch (e: Exception) {
+        logger.error { e.message }
+        return emptyList()
     }
-    reader.close()
-
-    return countyData
 }

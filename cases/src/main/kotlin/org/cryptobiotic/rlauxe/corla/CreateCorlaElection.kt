@@ -194,7 +194,7 @@ fun createCorlaElection(
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, coloradoInput.countyTabAllContests)
+    writeCountyContestData(topdir, contestMap, coloradoInput)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

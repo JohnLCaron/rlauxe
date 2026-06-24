@@ -6,6 +6,8 @@ class Colorado2022Primary(): ColoradoInput(
     tabulateCountyFile = "$primary2022/tabulate_county.csv",
     mvrComparisonFile = "$primary2022/round_2/contest_comparison.csv"
 ) {
+    override val skipCounties = listOf<String>()
+
     // canonical contests and choices
     override fun canonicalContests() = canonicalContests
     private val canonicalContests: Map<String, CanonicalContest> by lazy {
@@ -18,7 +20,16 @@ class Colorado2022Primary(): ColoradoInput(
         )
         extras.forEach { result[it.contestName] = it }
 
+        // add these missing candidates:
+        addCandidates(result, "Gilpin County Commissioner - District 2 - REP", listOf("Rick Wenzel"))
+
         result.toSortedMap()
+    }
+
+    fun addCandidates(result: MutableMap<String, CanonicalContest>, contestName: String, addCandidates: List<String>) {
+        val current = result[contestName]!!
+        val achoices = current.choices + addCandidates
+        result[contestName] = current.copy(choices = achoices).addCounties(current.counties.toList())
     }
 
     // county round

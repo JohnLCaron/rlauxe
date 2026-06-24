@@ -35,6 +35,12 @@ abstract class ColoradoInput(
     val tabulateCountyFile: String,
     val mvrComparisonFile: String
 ) {
+    abstract val skipCounties: List<String>
+    /* open fun skipCandidate(candidateName: String) : Boolean {
+        val cleanup = munge(candidateName)
+        return cleanup.contains("writein")
+    } */
+
     //      CountyName,ContestName,ContestChoices
     //      El Paso,City of Colorado Springs Ballot Question 300,"Yes/For,No/Against"
     //
@@ -69,7 +75,7 @@ abstract class ColoradoInput(
     // data class CountyContestVotes(val contestName: String) {
     //    val choices = Map<String, Int>() // choice name (not canonical) -> votes in this county and contest
     //    var ncards = 0
-    val countyTabAllContests: Map<String, CountyTabAllContests> by lazy {
+    val countyTabsAllContests: Map<String, CountyTabAllContests> by lazy {
         readCountyTabulateCsv(tabulateCountyFile)
     }
 
@@ -77,9 +83,9 @@ abstract class ColoradoInput(
     //    val choices = Map<String, Int>() // // canonical choice name -> votes
     //    val counties = Set<String>()
     //    var totalCardsInContest: Int
-    open val contestTabAllCounties: Map<String, ContestTabAllCounties> by lazy {
+    open val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
         val tabs = mutableMapOf<String, ContestTabAllCounties>()
-        countyTabAllContests.values.forEach { countyTabAllContests ->
+        countyTabsAllContests.values.forEach { countyTabAllContests ->
             countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
                 val tab = tabs.getOrPut(contestName) { ContestTabAllCounties (contestName) }
                 tab.add(countyTabAllContests.countyName, countyContestVotes)
@@ -114,7 +120,9 @@ abstract class ColoradoInput(
 
     ///////////////////
     // merge info from all the above, derive the following
-    val mergedInfo: MergedInfo by lazy { mergeContestInfo(this) } // mergedContestInfo, strataInfo, statewideContests
+    val mergedInfo: MergedInfo by lazy {
+        mergeContestInfo(this)
+    } // mergedContestInfo, strataInfo, statewideContests
 
     // data class MergedContestInfo(
     //    // canonical
@@ -134,7 +142,9 @@ abstract class ColoradoInput(
     //    val countyMvrs: Int,
     //    val statewideMvrs: Int,
     //)
-    val mergedContestMap: Map<String, MergedContestInfo> by lazy { mergedInfo.mergedContestInfo.associateBy { it.contestName } }
+    val mergedContestMap: Map<String, MergedContestInfo> by lazy {
+        mergedInfo.mergedContestInfo.associateBy { it.contestName }
+    }
 
     // data class StrataInfo(
     //    val strataName: String,
@@ -148,7 +158,7 @@ abstract class ColoradoInput(
     open fun contestNameCleanup(county: String, name: String) = name
     open fun candidateNameCleanup(county: String, name: String) = name
 
-    //// needed to match the export contest/canidata names, all ColoradoInput classes should be consistent already
+    //// needed to match the export contest/candidata names, all ColoradoInput classes should be consistent already
 
     fun matchCanonicalContest(county: String, exportContestName: String): CanonicalContest? {
         val transform = contestNameCleanup(county, exportContestName)
@@ -186,6 +196,11 @@ fun yesno(candName:String):String {
     }
 }
 
+fun isWriteIn(candidateName: String) : Boolean {
+    val cleanup = munge(candidateName)
+    return cleanup.contains("writein")
+}
+
 data class MergedContestInfo(
     // canonical
     val canonicalContest: CanonicalContest,
@@ -219,7 +234,7 @@ data class MergedInfo(
 )
 
 // just use munge to match names, no county name cleanup
-fun CanonicalContest.matchCanonicalCandidate(candidateName: String): String? {
+fun CanonicalContest.matchCandidateName(candidateName: String): String? {
     var match = this.choices.find { munge(it) == munge(candidateName) }
     if (match == null) match = this.choices.find { it == yesno(candidateName) }
     return match
@@ -258,12 +273,12 @@ fun mergeContestInfo(input: ColoradoInput): MergedInfo {
     // pick out the contests that are the targeted ones; should have a single contest
     val strataInfo = mutableListOf<StrataInfo>()
     val statewideContests = mutableListOf<CorlaContestRoundCsv>()
-    canonical.values.forEach {
-        val round: CorlaContestRoundCsv? = roundContests[it.contestName]
+    canonical.values.forEach { canonicalContest ->
+        val round: CorlaContestRoundCsv? = roundContests[canonicalContest.contestName]
         if (round != null && round.auditReason == AuditReason.county_wide_contest) {
-            if (it.counties.size != 1)
-                println("*** ${it.contestName} has multiple counties: ${it.counties}")
-            val county: String = it.counties.first()
+            if (canonicalContest.counties.size != 1)
+                println("*** ${canonicalContest.contestName} has ncounties != 1: ${canonicalContest.counties}")
+            val county: String = canonicalContest.counties.first()
             val countyMvr: CountyMvrCount = countyMap[county]!!
 
             val countyInfo = StrataInfo(
@@ -301,11 +316,10 @@ fun CountyTabAllContests.makeContestTabs(canonicalContests: Map<String, Canonica
 
 // ContestTabByCounty (for one contest, all counties) vs CountyContestTab (for one county, one contest) (jeesh)
 fun CountyContestVotes.makeContestTabulation(canonicalContest: CanonicalContest, info: ContestInfo, ncards: Int): ContestTabulation {
-    val candidateVotes = this.choices.map { (choice, vote) ->
-        val canonicalCandidateName = canonicalContest.matchCanonicalCandidate(choice)
-        if (info.candidateNames[canonicalCandidateName] == null)
-            logger.error{"contestTab candidate name $canonicalCandidateName not found in info"}
-        Pair( info.candidateNames[canonicalCandidateName]!!, vote)
+    val candidateVotes = this.canonicalChoices(canonicalContest).map { (canonChoice, vote) ->
+        if (info.candidateNames[canonChoice] == null)
+            logger.error{"contestTab candidate name $canonChoice not found in info"}
+        Pair( info.candidateNames[canonChoice]!!, vote)
     }.toMap()
 
     return ContestTabulation(info, candidateVotes, ncards)
@@ -330,7 +344,8 @@ fun writeCountyData(topdir: String, strataInfo: List<StrataInfo>) {
 // data class ContestTab(val contestName: String) {
 //    val choices = mutableMapOf<String, Int>()
 
-fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAssertions>, countyTabs: Map<String, CountyTabAllContests>) {
+fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAssertions>, coloradoInput: ColoradoInput) {
+    val countyTabs = coloradoInput.countyTabsAllContests
     // misc data by county
     val outputFilename = "$topdir/${CountyAuditRecord.countyContestDataFile}"
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
@@ -338,22 +353,22 @@ fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAs
 
     var count = 0
     countyTabs.values.forEach { countyTab ->
-        countyTab.contests.values.forEach { contestTab ->
-            val contestUA = contestMap[contestTab.contestName]
-            if (contestUA != null) {
+        countyTab.contests.values.forEach { ccv: CountyContestVotes ->
+            val contestUA = contestMap[ccv.contestName]
+            val canonicalContest = coloradoInput.canonicalContests()[ccv.contestName]
+            if (contestUA != null && canonicalContest != null) {
                 val contest = contestUA.contest
                 val info = contest.info()
-                val candidateVotes = contestTab.choices.map { (choice, vote) ->
-                    Pair(info.candidateNames[choice] ?: 0, vote)
-                }.toMap()
+                val candidateVotes: Map<String, Int> = ccv.canonicalChoices(canonicalContest)
+                val votesByCandId = candidateVotes.mapKeys { info.candidateNames[it.key]!! }
 
                 // calculate the vote difference for the minimum assorter
                 val minAssertion = contestUA.minAssertion()
                 val voteDiff = if (minAssertion == null) 0
-                    else minAssertion.assorter.calcMarginFromRegVotes(candidateVotes, 1).toInt()
+                    else minAssertion.assorter.calcMarginFromRegVotes(votesByCandId, 1).toInt()
 
-                writer.write("${countyTab.countyName}, ${contestTab.contestName}, ${info.id}, $voteDiff, ")
-                candidateVotes.forEach { (id, vote) ->
+                writer.write("${countyTab.countyName}, ${ccv.contestName}, ${info.id}, $voteDiff, ")
+                votesByCandId.forEach { (id, vote) ->
                     writer.write("$id:$vote, ")
                 }
                 writer.write("\n")

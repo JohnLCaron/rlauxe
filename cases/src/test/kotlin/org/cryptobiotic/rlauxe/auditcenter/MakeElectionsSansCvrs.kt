@@ -17,16 +17,16 @@ import kotlin.test.Test
 class MakeElectionsSansCvrs {
     val show = false
 
-    @Test
+    val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
+    val round = AuditRoundConfig(
+        SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
+        ContestSampleControl(minRecountMargin = .005, minSize = 10, contestSampleCutoff = 10000,
+            auditSampleCutoff = 200000, sampling = Sampling.consistent),
+        ClcaConfig(), null)
+
+    // @Test
     fun makeCounty2024OnlyTeller() {
         val topdir = "$testdataDir/cases/auditcenter/County2024OnlyTeller"
-
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
-        val round = AuditRoundConfig(
-            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
-            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 200000,
-                sampling = Sampling.consistent),
-            ClcaConfig(), null)
 
         createCountyElectionSansCvrs(topdir, "$topdir/audit", Colorado2024General(),
             creation, round, name = "County2024OnlyTeller", startFirstRound = true, onlyCounty="Teller")
@@ -34,14 +34,7 @@ class MakeElectionsSansCvrs {
 
     @Test
     fun makeCounty2024General() {
-        val topdir = "$testdataDir/cases/auditcenter/County2024General"
-
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
-        val round = AuditRoundConfig(
-            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
-            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 200000,
-                sampling = Sampling.consistent),
-            ClcaConfig(), null)
+        val topdir = "$cases/corla/sansCvrs/Colorado2024"
 
         createCountyElectionSansCvrs(topdir, "$topdir/audit", Colorado2024General(),
             creation, round, name = "County2024General", startFirstRound = true)
@@ -49,14 +42,7 @@ class MakeElectionsSansCvrs {
 
     @Test
     fun makeColorado2022Primary() {
-        val topdir = "$testdataDir/cases/auditcenter/Colorado2022Primary"
-
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
-        val round = AuditRoundConfig(
-            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
-            ContestSampleControl(minRecountMargin = .005, minSize = 10, contestSampleCutoff = 10000,
-                auditSampleCutoff = 200000, sampling = Sampling.consistent),
-            ClcaConfig(), null)
+        val topdir = "$cases/corla/sansCvrs/Colorado2022Primary"
 
         createCountyElectionSansCvrs(topdir, "$topdir/audit", Colorado2022Primary(),
             creation, round, name = "Colorado2022Primary", startFirstRound = true)
@@ -64,17 +50,7 @@ class MakeElectionsSansCvrs {
 
     @Test
     fun makeColorado2020General() {
-        val topdir = "$cases/corla/sansCvrs/Colorado2020test"
-
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
-        val round = AuditRoundConfig(
-            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
-            ContestSampleControl(minRecountMargin = .005,
-                minSize = 10,
-                contestSampleCutoff = 10000,
-                auditSampleCutoff = 200000,
-                sampling = Sampling.consistent),
-            ClcaConfig(), null)
+        val topdir = "$cases/corla/sansCvrs/Colorado2020"
 
         createCountyElectionSansCvrs(topdir, "$topdir/audit", Colorado2020General(),
             creation, round, name = "Colorado2020sans", startFirstRound = true)
@@ -101,5 +77,15 @@ class MakeElectionsSansCvrs {
         mvrCounts.forEach { println( it ) }
         println("mvrCounts total nmvrs = ${mvrCounts.values.sumOf { it.nmvrs }}")
         println()
+    }
+
+    @Test
+    fun writeCountyContestData() {
+        val topdir = "$cases/corla/sansCvrs/Colorado2022Primary"
+        val auditRecord = AuditRecord.read(topdir)!!
+
+        val coloradoInput = Colorado2022Primary()
+        val contestMap = auditRecord.contests.associate { it.contest.info().name to it }
+        writeCountyContestData(topdir, contestMap, coloradoInput)
     }
 }

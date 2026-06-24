@@ -77,12 +77,12 @@ class CompareContestInput {
 fun compareLists(list1: List<String>, list2: List<String>, name1: String = "canonical1", name2: String = "canonical2") {
     list1.forEach {
         if (!list2.contains(it)) {
-            println(" $name2 doesnt have '${it}' from $name1")
+            println("  $name2 doesnt have '${it}' from $name1")
         }
     }
     list2.forEach {
         if (!list1.contains(it)) {
-            println(" $name1 doesnt have '${it}' from $name2")
+            println("  $name1 doesnt have '${it}' from $name2")
         }
     }
 }

@@ -6,10 +6,11 @@ class Colorado2020General: ColoradoInput(
     tabulateCountyFile = "$general2020/tabulate_county.csv",
     mvrComparisonFile = "$general2020/round_3/contestComparison.csv"
 ) {
+    override val skipCounties = listOf("Baca", "Gunnison", "Las Animas")
 
-    override val contestTabAllCounties: Map<String, ContestTabAllCounties> by lazy {
+    override val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
         val tabs = mutableMapOf<String, ContestTabAllCounties>()
-        countyTabAllContests.values.filter { it.countyName !in listOf("Baca", "Gunnison", "Las Animas") }.forEach { countyTabAllContests ->
+        countyTabsAllContests.values.filter { it.countyName !in listOf("Baca", "Gunnison", "Las Animas") }.forEach { countyTabAllContests ->
             countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
                 val tab = tabs.getOrPut(contestName) { ContestTabAllCounties (contestName) }
                 tab.add(countyTabAllContests.countyName, countyContestVotes)

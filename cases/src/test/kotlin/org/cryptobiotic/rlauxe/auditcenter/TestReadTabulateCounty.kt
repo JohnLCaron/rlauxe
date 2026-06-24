@@ -10,7 +10,7 @@ class TestReadTabulateCounty {
     @Test
     fun readTabulateCounties() {
         val countyTabs: Map<String, CountyTabAllContests> = readCountyTabulateCsv(input.tabulateCountyFile)
-        val countyTabs2: Map<String, CountyTabAllContests> = input.countyTabAllContests
+        val countyTabs2: Map<String, CountyTabAllContests> = input.countyTabsAllContests
         countyTabs.forEach {
             val tab2 = countyTabs2[it.key]
             assertEquals(it.value, tab2)
@@ -19,9 +19,9 @@ class TestReadTabulateCounty {
 
     @Test
     fun contestTabAllCounties() {
-        val contestTabAllCounties: Map<String, ContestTabAllCounties> = input.contestTabAllCounties
+        val contestTabAllCounties: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties
         contestTabAllCounties.forEach {
-            assertTrue(it.key !in listOf("Baca", "Gunnison", "Las Animas"))
+            assertTrue(it.key !in input.skipCounties)
         }
     }
 }

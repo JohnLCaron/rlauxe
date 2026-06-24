@@ -18,7 +18,7 @@ class TestWriteCountyData {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val countyAudit = AuditRecord.readWithResult("$topdir/audit").unwrap()
         val contestMap = countyAudit.contests.associate { it.contest.info().name to it }
-        writeCountyContestData(topdir, contestMap, Colorado2024General().countyTabAllContests)
+        writeCountyContestData(topdir, contestMap, Colorado2024General())
 
         val roundtrip: List<CountyContestData> = readCountyContestData("$topdir/${CountyAuditRecord.countyContestDataFile}")
         roundtrip.forEach { println(it) }

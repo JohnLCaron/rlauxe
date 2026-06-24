@@ -42,7 +42,7 @@ open class CountyElectionSansCvrs (
         // val countyTabs = coloradoInput.countyTabAllContests.associateBy { it.countyName }
 
         // make the pools from the auditcenter
-        val makePools = MakeCountyPoolsSansCvrs(contestBuilder.corlaContestBuilders, coloradoInput, onlyCounty)
+        val makePools = CountyPoolsSansCvrs(contestBuilder.corlaContestBuilders, coloradoInput, onlyCounty)
         val countyPoolBuilders: List<CountyPoolsBuilder> = makePools.countyPools
         countyPools = countyPoolBuilders.map { it.build() }
         countyPools.forEach {
@@ -65,7 +65,8 @@ open class CountyElectionSansCvrs (
             print("$ncards != $cvrCardCount")
         val totalCvrTabs = countyIterator.totalCvrTabs
         val ncast: Map<Int, Int>  = totalCvrTabs.mapValues { it.value.ncards() }
-        val contests = contestBuilder.contests(ncast)
+        // just leave it as Ncast = Nc, then the diff goes into the undervote
+        val contests = contestBuilder.contests(emptyMap<Int, Int>())
 
         // where do we get these? difference between the cvr card counts and the contest.Nc = round.contestBallotCardCount
         // can put them is a seperate pool as long as you include them in the unsorted iterator
@@ -284,7 +285,7 @@ fun createCountyElectionSansCvrs(
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, coloradoInput.countyTabAllContests)
+    writeCountyContestData(topdir, contestMap, coloradoInput)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

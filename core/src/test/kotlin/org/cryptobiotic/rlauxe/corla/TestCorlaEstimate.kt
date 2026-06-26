@@ -17,7 +17,7 @@ import kotlin.math.ln
 import kotlin.test.Test
 
 class TestCorlaEstimate {
-    val topdir = "$cases/corla/sansCvrs/Colorado2020sans"
+    val topdir = "$cases/corla/sansCvrs/Colorado2020"
 
     @Test
     fun showEstimateGentle() {

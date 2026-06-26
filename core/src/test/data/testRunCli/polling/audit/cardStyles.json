@@ -4,40 +4,50 @@
             "name": "style0",
             "id": 0,
             "possibleContests": [
+                0,
                 1,
+                2,
                 3,
                 4
             ],
-            "hasExactContests": false
+            "hasExactContests": false,
+            "ncards": 1540
         },
         {
             "name": "style1",
             "id": 1,
             "possibleContests": [
-                0,
-                3
+                1,
+                2,
+                4
             ],
-            "hasExactContests": false
+            "hasExactContests": false,
+            "ncards": 4024
         },
         {
             "name": "style2",
             "id": 2,
             "possibleContests": [
                 0,
-                2
+                1,
+                2,
+                4
             ],
-            "hasExactContests": false
+            "hasExactContests": false,
+            "ncards": 5116
         },
         {
             "name": "style3",
             "id": 3,
             "possibleContests": [
+                0,
                 1,
                 2,
                 3,
                 4
             ],
-            "hasExactContests": false
+            "hasExactContests": false,
+            "ncards": 9320
         }
     ]
 }

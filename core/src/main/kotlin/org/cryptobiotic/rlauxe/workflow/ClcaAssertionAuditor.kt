@@ -70,6 +70,9 @@ class RunClcaContestTask(
     val parameters: Map<String, Any>,
     val onlyTask: OnlyTask? = null,
 ): ConcurrentTask<Boolean> {
+    init {
+        print("")
+    }
 
     override fun name() = "RunClcaContestTask for ${contestRound.contestUA.name} round $roundIdx nassertions ${contestRound.assertionRounds.size}"
 

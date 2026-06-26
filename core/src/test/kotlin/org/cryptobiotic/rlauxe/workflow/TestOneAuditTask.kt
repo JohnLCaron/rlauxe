@@ -78,9 +78,7 @@ class TestOneAuditTask {
         val Nc = 50000
         val margin = .04
         val mvrFuzzPct = 0.0
-        val config = Config.from(
-            AuditType.ONEAUDIT, simFuzzPct = mvrFuzzPct,
-        )
+        val config = Config.from(AuditType.ONEAUDIT, simFuzzPct = mvrFuzzPct)
         val taskGen = OneAuditSingleRoundWithDilutedMargin(
             Nc,
             margin,

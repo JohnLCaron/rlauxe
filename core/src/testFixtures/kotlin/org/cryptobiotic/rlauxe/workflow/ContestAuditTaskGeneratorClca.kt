@@ -128,7 +128,11 @@ class ClcaSingleRoundWorkflowTask(
     override fun name() = name
 
     override fun run(): WorkflowResult {
-        val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
+        val contestRounds = workflow.contestsUA().map {
+            val round = ContestRound(it, 1)
+            round.maxSampleAllowed = testMvrs.size
+            round
+        }
         val maxEstMvrs = runClcaSingleRoundAudit(workflow, contestRounds, auditor, parameters)
 
         val contestRound = contestRounds.first() // theres only one

@@ -1,5 +1,5 @@
 # Corla2020 Notes
-6/24/26
+6/25/26
 
 We obtained the cvr data from https://votedatabase.com for the Colorado 2020 General elections, and used it to run
 a real audit. This is for testing purposes only: the data is not official, some of the data is missing, in particular
@@ -102,6 +102,25 @@ Experiment with relaxing the risk limits:
 | under      4% |   450   |    364   |
 | under      5% |   491   |    366   |
 | under     10% |   519   |    381   |
+
+## important contests
+
+* targeted
+* multicounty contests
+* contestName.startsWith("Representative to the")
+* contestName.startsWith("State")
+
+rlauxe nmvrs = 7697
+corla nmvrs = 8245
+contests under maxRisk (style) = 376 / 526 = 71%
+contests under maxRisk (uniform) = 364 / 526 = 69%
+
+|               |  style  |  uniform |
+|---------------|---------|----------|
+| under maxRisk |   376   |    364   |
+| under      4% |   376   |    364   |
+| under      5% |   377   |    366   |
+| under     10% |   387   |    381   |
 
 ## all contests
 

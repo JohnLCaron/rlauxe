@@ -24,8 +24,8 @@ import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import java.nio.file.Files
 import kotlin.io.path.Path
 
-class VerifyElectionCommitment(val location: String) {
-    val publisher = Publisher(location)
+class VerifyElectionCommitment(val topdir: String) {
+    val publisher = Publisher(topdir)
     val election: ElectionCommitment
     val auditType: AuditType
     val contests: List<ContestWithAssertions>
@@ -34,7 +34,7 @@ class VerifyElectionCommitment(val location: String) {
     val cardManifest: CloseableIterable<AuditableCard>
 
     init {
-        val result = readElectionCommitment(location)
+        val result = readElectionCommitment(topdir)
         election = if (result.isOk) result.unwrap() else {
             println(result.unwrapError())
             throw RuntimeException(result.unwrapError().toString())
@@ -50,7 +50,7 @@ class VerifyElectionCommitment(val location: String) {
 
     fun verify(): VerifyResults {
         val results = VerifyResults()
-        results.addMessage("---VerifyElection on $location")
+        results.addMessage("---VerifyElection on $topdir")
         if (contests.size == 1) results.addMessage("  ${contests.first()} ")
 
         val contestSummary = verifyCardManifest(auditType, contests, cardManifest, infos, batchSet, results)
@@ -80,10 +80,10 @@ class VerifyElectionCommitment(val location: String) {
 data class ElectionCommitment(val electionInfo: ElectionInfo, val contests: List<ContestWithAssertions>, val batches: List<StyleIF>?,
                               val pools: List<CardPoolIF>?, val cardManifest: CloseableIterable<AuditableCard> )
 
-fun readElectionCommitment(location: String): Result<ElectionCommitment, ErrorMessages> {
-    val errs = ErrorMessages("readElectionRecord from '${location}'")
+fun readElectionCommitment(topdir: String): Result<ElectionCommitment, ErrorMessages> {
+    val errs = ErrorMessages("readElectionRecord from '${topdir}'")
 
-    val auditRecord = AuditRecord.read(location) as AuditRecord
+    val auditRecord = AuditRecord.read(topdir) as AuditRecord
     val mvrManager = PersistedMvrManager(auditRecord)
 
     val electionInfo = auditRecord.electionInfo

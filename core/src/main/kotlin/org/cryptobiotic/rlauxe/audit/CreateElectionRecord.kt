@@ -40,15 +40,21 @@ interface ElectionBuilder {
 
 private val logger = KotlinLogging.logger("CreateElectionRecord")
 
-fun createElectionRecord(election: ElectionBuilder, auditDir: String, control: ContestSampleControl? = null, clear: Boolean = true, validate: Boolean = false) {
-    if (clear) clearDirectory(Path(auditDir))
+fun createElectionRecord(election: ElectionBuilder, topdir: String, control: ContestSampleControl? = null, clear: Boolean = true, validate: Boolean = false) {
+    if (clear) clearDirectory(Path(topdir))
 
-    val errs = validateOutputDir(Path.of(auditDir))
+    val errs = validateOutputDir(Path.of(topdir))
     if (errs.hasErrors()) {
         logger.error { errs.toString() }
         throw RuntimeException(errs.toString())
     }
-    val publisher = Publisher(auditDir)
+    val errs2 = validateOutputDir(Path.of("$topdir/audit"))
+    if (errs2.hasErrors()) {
+        logger.error { errs2.toString() }
+        throw RuntimeException(errs2.toString())
+    }
+
+    val publisher = Publisher(topdir)
     val electionInfo = election.electionInfo()
     writeElectionInfoJsonFile(electionInfo, publisher.electionInfoFile())
     logger.info{"createElectionRecord writeElectionInfoJsonFile to ${publisher.electionInfoFile()}\n  $electionInfo"}
@@ -88,7 +94,7 @@ fun createElectionRecord(election: ElectionBuilder, auditDir: String, control: C
     val contestsUA = election.contestsUA()
 
     val results = VerifyResults()
-    results.addMessage("---VerifyElection on $auditDir")
+    results.addMessage("---VerifyElection on $topdir")
     preAuditContestCheck(contestsUA, control, results)
 
     // write contests
@@ -97,7 +103,7 @@ fun createElectionRecord(election: ElectionBuilder, auditDir: String, control: C
 
     // taking forever - make optional
     if (validate) {
-        val verifyECResults = VerifyElectionCommitment(auditDir).verify()
+        val verifyECResults = VerifyElectionCommitment(topdir).verify()
         if (verifyECResults.hasErrors) {
             logger.error { "createElectionRecord VerifyElectionCommitment failed: ${verifyECResults}" }
         }

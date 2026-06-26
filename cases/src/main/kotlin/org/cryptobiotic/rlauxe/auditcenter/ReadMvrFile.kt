@@ -137,14 +137,14 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
                 // 6 consensus,record_type,audit_board_comment,timestamp,cvr_id,
                 // 11 audit_reason (optional)
                 val compareLine = ComparisonLine(
-                    line.get(0).trim(),
-                    line.get(1).trim(),
-                    line.get(2).trim(),
-                    line.get(3).trim(),
-                    line.get(4).trim(),
-                    line.get(5).trim(),
-                    line.get(10).toInt(),
-                    if (line.size() > 11) (line.get(11).trim() == "STATE_WIDE_CONTEST") else false,
+                    line.get(0).trim(), // county_name
+                    line.get(1).trim(), // contest_name
+                    line.get(2).trim(), // imprinted_id
+                    line.get(3).trim(), // ballot_type
+                    line.get(4).trim(), // choice_per_voting_computer
+                    line.get(5).trim(), // audit_board_selection
+                    line.get(10).toInt(), // cvr_id
+                    if (line.size() > 11) (line.get(11).trim() == "STATE_WIDE_CONTEST") else false, // audit_reason
                     )
                 val card = cards.getOrPut(compareLine.cvrId) { Card(compareLine.cvrId) }
                 card.add(compareLine)

@@ -8,8 +8,8 @@ import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 
 class TestRelaxedAssertionsOld {
-    val auditdir = "$testdataDir/cases/belgium/belgium2024/"
-    val auditRecord = AuditRecord.read(auditdir)!!
+    val topdir = "$testdataDir/cases/belgium/belgium2024/"
+    val auditRecord = AuditRecord.read(topdir)!!
     val contests = auditRecord.contests
     val lastRound = auditRecord.rounds.last()
     val config = auditRecord.config

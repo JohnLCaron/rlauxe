@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.strata.Strata
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.sfn
@@ -30,7 +31,7 @@ interface CompositeRecordIF: AuditRecordIF {
 
 // used by Belgium. TODO can we make it a subclass of AuditRecord ?? Can we call it BelgiumAudit ?
 data class CompositeAuditRecord(
-    override val location: String,
+    override val topdir: String,
     override val config: Config,
     override val contests: List<ContestWithAssertions>,
     override val rounds: List<AuditRoundIF>,
@@ -39,19 +40,17 @@ data class CompositeAuditRecord(
 
     // used by viewer
     fun readPartyNames(): Map<Int, String> {
-        return readCanonicalPartyTxtFile("$location/$canonicalPartiesFilename")
+        return readCanonicalPartyTxtFile("$topdir/$canonicalPartiesFilename")
     }
 
     fun readSampleLimits(): List<SampleLimit> {
-        return readLimitsTxtFile("$location/$limitsFilename")
+        return readLimitsTxtFile("$topdir/$limitsFilename")
     }
 
     // used ??
     fun readCoalitions(): List<CoalitionList> {
-        return readCoalitionTxtFile("$location/$coalitionFilename")
+        return readCoalitionTxtFile("$topdir/$coalitionFilename")
     }
-
-    override fun auditdir() = "$location/audit"
 
     override fun readSortedManifest(styles: List<StyleIF>?): SortedManifest {
         return componentRecords.first().readSortedManifest(styles)
@@ -86,9 +85,9 @@ data class CompositeAuditRecord(
     }
 
     override fun toString() = buildString {
-        append("CompositeRecord location='$location'\n$config")
+        append("CompositeRecord location='$topdir'\n$config")
         appendLine("components")
-        componentRecords.forEach{ appendLine("  ${it.location}")}
+        componentRecords.forEach{ appendLine("  ${it.topdir}")}
         appendLine("contests")
         contests.forEach{ appendLine("  $it")}
         appendLine("rounds")
@@ -109,8 +108,8 @@ data class CompositeAuditRecord(
                 path.listDirectoryEntries().sorted().forEach { entry ->
                     val filename = entry.fileName.toString()
                     if (entry.isDirectory()  && filename != "private" && !filename.startsWith("round")) {
-                        val auditDir = "${entry.toAbsolutePath()}/audit"
-                        val publisher = Publisher(auditDir)
+                        val topdir = entry.toAbsolutePath().toString()
+                        val publisher = Publisher(topdir)
                         if (exists(publisher.electionInfoFile()) &&
                             // exists(publisher.cardManifestFile()) &&
                             exists(publisher.contestsFile())) return true
@@ -133,9 +132,9 @@ data class CompositeAuditRecord(
                 path.listDirectoryEntries().sorted().forEach { entry ->
                     val filename = entry.fileName.toString()
                     if (entry.isDirectory()  && filename != "private" && !filename.startsWith("round")) {
-                        val auditDir = "${entry.toAbsolutePath()}/audit"
-                        if (Path(auditDir).exists()) {
-                            val result: Result<AuditRecordIF, ErrorMessages> = AuditRecord.readWithResult(auditDir)
+                        val topdir = entry.toAbsolutePath().toString()
+                        if (Path(topdir).exists()) {
+                            val result: Result<AuditRecordIF, ErrorMessages> = AuditRecord.readWithResult(topdir)
                             if (result.isErr) {
                                 logger.warn {"  Error: ${result.component2()}" }
                             } else {
@@ -226,6 +225,7 @@ data class ProxyAuditRound(
     override var mvrsUnused: Int = 0,
 ) : AuditRoundIF {
     override var auditorMaxNewMvrs: Int? = null
+    override val countyStrata: List<Strata>? = null// for uniform audits
 
     init {
         auditWasDone = auditRounds.all { it.auditWasDone }

@@ -40,25 +40,6 @@ class TestConfigBuilders {
         testConfigBuilderRoundtrip(electionInfo, target)
     }
 
-    //        createSfElection(
-    //            auditdir=auditdir,
-    //            AuditType.CLCA,
-    //            zipFilename,
-    //            "ContestManifest.json",
-    //            "CandidateManifest.json",
-    //            cvrExportCsv = cvrExportCsv,
-    //            contestSampleCutoff = 1000,
-    //            auditSampleCutoff = 2000,
-    //        )
-    //        (auditType == AuditType.CLCA) -> AuditConfig(
-    //            AuditType.CLCA, riskLimit = .05, nsimEst=20,
-    //            minRecountMargin=minRecountMargin,
-    //            minMargin=minMargin,
-    //            removeMaxContests = removeMaxContests,
-    //            contestSampleCutoff = contestSampleCutoff, auditSampleCutoff = auditSampleCutoff,
-    //            simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs,
-    //            clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
-    //        )
     @Test
     fun testSfBuilderClca() {
         val electionInfo = ElectionInfo(
@@ -143,13 +124,10 @@ fun testConfigBuilderRoundtrip(electionInfo: ElectionInfo, target: Config) {
 
 fun createBoulderConfigBuilder(
     electionInfo: ElectionInfo, // trouble
-    //auditdir: String,
-    //auditType : AuditType,
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .005,
     minMargin: Double = 0.0,
     maxSamplePct: Double = 0.0,
-    //auditConfigIn: AuditConfig? = null,
     mvrFuzz: Double? = null,
     contestSampleCutoff: Int?,
     auditSampleCutoff: Int?,
@@ -175,10 +153,7 @@ fun createBoulderConfigBuilder(
 }
 
 fun createSfConfigBuilder(
-    //auditdir: String,
     electionInfo: ElectionInfo, // trouble
-    //auditConfigIn: AuditConfig? = null,
-    // poolsHaveOneCardStyle: Boolean = false,
     estPercentile: List<Int>,
     mvrFuzz: Double? = null,
     minRecountMargin: Double = 0.005,

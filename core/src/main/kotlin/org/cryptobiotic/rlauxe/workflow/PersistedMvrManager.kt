@@ -22,7 +22,7 @@ import org.cryptobiotic.rlauxe.verify.verifyMvrCardPairs
 open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boolean = true): MvrManager {
     val config = auditRecord.config
     val contestsUA = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress } // note: only InProgress
-    val publisher = Publisher(auditRecord.location)
+    val publisher = Publisher(auditRecord.topdir)
 
     val styles by lazy { auditRecord.readCardStyles() ?: auditRecord.readCardPools() } // styles are preferred
     val sortedManifest by lazy { auditRecord.readSortedManifest(styles) }
@@ -45,7 +45,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         return if (cachedCards != null) CloseableIterable { cachedCards!!.iterator() } else sortedManifest().cards
     }
 
-    override fun auditdir() = auditRecord.location
+    override fun topdir() = auditRecord.topdir
 
     override fun sortedManifest() = sortedManifest
     override fun styles() = styles

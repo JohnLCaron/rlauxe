@@ -9,8 +9,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestCandidateSeats {
-    val auditdir = "$testdataDir/cases/belgium/belgium2024/"
-    val auditRecord = AuditRecord.read(auditdir)!! as CompositeAuditRecord
+    val topdir = "$testdataDir/cases/belgium/belgium2024/"
+    val auditRecord = AuditRecord.read(topdir)!! as CompositeAuditRecord
     val contests = auditRecord.contests
     val partyNames = auditRecord.readPartyNames()
     val lastRound = auditRecord.rounds.last()

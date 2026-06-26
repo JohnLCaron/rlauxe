@@ -12,9 +12,9 @@ private val logger = KotlinLogging.logger("ColoradoPolling")
 class CreateColoradoPolling (
     coloradoInput: ColoradoInput,
     countyElection: CountyContestBuilder,
-    auditdir: String,
+    topdir: String,
     pollingMode: PollingMode,
-): CreateCorlaElection(coloradoInput, countyElection, AuditType.POLLING, auditdir, pollingMode=pollingMode, hasStyle = true) {
+): CreateCorlaElection(coloradoInput, countyElection, AuditType.POLLING, topdir, pollingMode=pollingMode, hasStyle = true) {
 
     val contestsPolling: List<ContestWithAssertions>
 

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-class Colorado2020General: ColoradoInput(
+class Colorado2020corrected: ColoradoInput(
     generalCanonicalFile = "$general2020/canonicalTitleCase.csv",
     contestRoundFile = "$general2020/round_1/contest.csv",
     tabulateCountyFile = "$general2020/tabulate_county.csv",
@@ -30,20 +30,6 @@ class Colorado2020General: ColoradoInput(
             CanonicalContest("Adams County Ballot Issue 1A", listOf("Yes/For", "No/Against",)).addCounties(listOf("Adams"))
         )
         extras.forEach { result[it.contestName] = it }
-
-        // compare canonical contest counties and CountyTabulateCsv
-        //  countyTabulateCsv doesnt have 'Gunnison' from canonical
-        //  countyTabulateCsv doesnt have 'San Juan' from canonical
-
-        // remove these contests: TODO some? are in cvrs; see TestContestNames
-        //countyTabulate missing auditcenter 'Gunnison County Commissioner - District 1'
-        //countyTabulate missing auditcenter 'Gunnison County Commissioner - District 2'
-        //countyTabulate missing auditcenter 'Gunnison County Court Judge - Burgemeister'
-        //countyTabulate missing auditcenter 'Town of Marble - Board of Trustees'
-        //countyTabulate missing auditcenter 'Town of Marble Ballot Issue 2A'
-        //countyTabulate missing auditcenter 'San Juan County Commissioner - District 1'
-        //countyTabulate missing auditcenter 'San Juan County Commissioner - District 2'
-        //countyTabulate missing auditcenter 'San Juan County Court Judge - Edwards'
 
         //// Baca
         result.remove("Baca County Commissioner - District 1")
@@ -294,7 +280,7 @@ class Colorado2020General: ColoradoInput(
                 "Jackson County Commissioner Dist 2" -> "Jackson County Commissioner - District 2"
                 "Jackson County Commissioner Dist 3" -> "Jackson County Commissioner - District 3"
                 "District Court Judge - 8th Judicial District - Villaseñor" -> "District Court Judge - 8th Judicial District - Villasenor"
-                "Justice of the Colorado Supreme Court - Samour" -> "Jackson - Justice of the Colorado Supreme Court - Samour" // diverted target
+                // "Justice of the Colorado Supreme Court - Samour" -> "Jackson - Justice of the Colorado Supreme Court - Samour" // diverted target
                 else -> null
             }
 
@@ -357,7 +343,8 @@ class Colorado2020General: ColoradoInput(
                 "Proposition 116" -> "Proposition 116 (STATUTORY)"
                 "Proposition 117" -> "Proposition 117 (STATUTORY)"
                 "Proposition 118" -> "Proposition 118 (STATUTORY)"
-                "Colorado Supreme Court Justice - Hart" -> "Lincoln - Justice of the Colorado Supreme Court - Hart" // diverted target
+                // "Colorado Supreme Court Justice - Hart" -> "Lincoln - Justice of the Colorado Supreme Court - Hart" // diverted target
+                "Lincoln - Colorado Supreme Court Justice - Hart" -> "Justice of the Colorado Supreme Court - Hart"
                 else -> null
             }
 
@@ -478,7 +465,8 @@ class Colorado2020General: ColoradoInput(
             }
 
             "Prowers" -> when (name) {
-                "Amendment C (CONSTITUTIONAL)" -> "Prowers - Amendment C (CONSTITUTIONAL)" // diverted target
+                "Prowers - Amendment C (CONSTITUTIONAL)" -> "Amendment C (CONSTITUTIONAL)"
+                // "Amendment C (CONSTITUTIONAL)" -> "Prowers - Amendment C (CONSTITUTIONAL)" // diverted target
                 else -> null
             }
 
@@ -544,14 +532,16 @@ class Colorado2020General: ColoradoInput(
             "Teller" -> when (name) {
                 "City Councilmember" -> "City of Woodland Park Councilmember"
                 "Northeast Teller County Fire Protection District 7A" -> "Northeast Teller County Fire Protection District Ballot Issue 7A"
-                "Amendment C (Constitutional) " -> "Teller - Amendment C (CONSTITUTIONAL)" // diverted target
-                "Amendment 77 (Constitutional)" -> "Teller - Amendment 77 (CONSTITUTIONAL)"
+                "Teller - Amendment C (Constitutional) " -> "Amendment C (CONSTITUTIONAL)"
+                // "Amendment C (Constitutional) " -> "Teller - Amendment C (CONSTITUTIONAL)" // diverted target
+                // "Amendment 77 (Constitutional)" -> "Teller - Amendment 77 (CONSTITUTIONAL)" // diverted target
                 else -> null
             }
 
             "Washington" -> when (name) {
                 "Brush RE-2J School District BALLOT ISSUE" -> "Brush RE-2J School District Ballot Issue 3D"
-                "Proposition EE (Statutory)" -> "Washington - Proposition EE (STATUTORY)" // diverted target
+                "Washington - Proposition EE (Statutory)" -> "Proposition EE (STATUTORY)"
+                // "Proposition EE (Statutory)" -> "Washington - Proposition EE (STATUTORY)" // diverted target
                 else -> null
             }
 

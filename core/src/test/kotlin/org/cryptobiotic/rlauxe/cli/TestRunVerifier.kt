@@ -11,13 +11,13 @@ class TestRunVerifyContests {
 
     @Test
     fun testRunVerifyClca() {
-        val auditdir = if (useLocal) "../core/src/test/data/testRunCli/clca/audit"
-            else "$testdataDir/persist/testRunCli/clca/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
+        val topdir = if (useLocal) "../core/src/test/data/testRunCli/clca"
+            else "$testdataDir/persist/testRunCli/clca"
+        val results = RunVerifyContests.runVerifyContests(topdir, 1, show = show)
         println()
         print(results)
 
-        val results2 = runVerifyAuditRecord(auditdir)
+        val results2 = runVerifyAuditRecord(topdir)
         println()
         print(results2)
         if (results.hasErrors) fail()
@@ -26,13 +26,13 @@ class TestRunVerifyContests {
 
     @Test
     fun testRunVerifyOA() {
-        val auditdir = if (useLocal) "../core/src/test/data/testRunCli/oneaudit/audit"
-            else "$testdataDir/persist/testRunCli/oneaudit/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = if (useLocal) "../core/src/test/data/testRunCli/oneaudit"
+            else "$testdataDir/persist/testRunCli/oneaudit"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
 
-        val results2 = runVerifyAuditRecord(auditdir)
+        val results2 = runVerifyAuditRecord(topdir)
         println()
         print(results2)
         if (results.hasErrors) fail()
@@ -41,13 +41,13 @@ class TestRunVerifyContests {
 
     @Test
     fun testRunVerifyPolling() {
-        val auditdir = if (useLocal) "../core/src/test/data/testRunCli/polling/audit"
-            else "$testdataDir/persist/testRunCli/polling/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = if (useLocal) "../core/src/test/data/testRunCli/polling"
+            else "$testdataDir/persist/testRunCli/polling"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
 
-        val results2 = runVerifyAuditRecord(auditdir)
+        val results2 = runVerifyAuditRecord(topdir)
         println()
         print(results2)
         if (results.hasErrors) fail()
@@ -56,13 +56,13 @@ class TestRunVerifyContests {
 
     @Test
     fun testRunVerifyRaire() {
-        val auditdir = if (useLocal) "../core/src/test/data/testRunCli/raire/audit"
-            else "$testdataDir/persist/testRunCli/raire/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = if (useLocal) "../core/src/test/data/testRunCli/raire"
+            else "$testdataDir/persist/testRunCli/raire"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
 
-        val results2 = runVerifyAuditRecord(auditdir)
+        val results2 = runVerifyAuditRecord(topdir)
         println()
         print(results2)
         if (results.hasErrors) fail()

@@ -76,12 +76,11 @@ class MakeBelgiumElections {
 
 private fun runBelgiumElection(electionName: String, stopRound:Int=0): Int {
     val topdir = "$toptopdir/$electionName"
-    val auditdir = "$topdir/audit"
 
     var done = false
     var finalRound: AuditRoundIF? = null
     while (!done) {
-        val lastRound = runRound(inputDir = auditdir)
+        val lastRound = runRound(inputDir = topdir)
         if (lastRound != null) finalRound = lastRound
         done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
     }
@@ -98,10 +97,9 @@ private fun showBelgiumElection(electionName: String): Triple<Int, Int, Assorter
     println("======================================================")
     println("showBelgiumElection $electionName")
     val topdir = "$toptopdir/$electionName"
-    val auditdir = "$topdir/audit"
 
-    val auditRecord = AuditRecord.read(auditdir)
-        ?: throw RuntimeException("directory '$auditdir' does not contain an audit record")
+    val auditRecord = AuditRecord.read(topdir)
+        ?: throw RuntimeException("directory '$topdir' does not contain an audit record")
 
     val contestUA = auditRecord.contests.first()
     println(contestUA.show())

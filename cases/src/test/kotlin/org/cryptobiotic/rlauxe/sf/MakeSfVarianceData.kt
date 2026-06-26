@@ -50,7 +50,7 @@ class MakeSfVarianceData {
         val topdir: String,
         val nsimTrials: Int,
     ) : ConcurrentTask<Boolean> {
-        val auditdir = "$topdir/audit$runIndex"
+        val topdirn = "$topdir$runIndex"
 
         override fun name() = "createSFElection $runIndex"
 
@@ -62,7 +62,7 @@ class MakeSfVarianceData {
                 ClcaConfig(), null)
 
             createSfElection(
-                auditdir=auditdir,
+                topdir=topdirn,
                 castVoteRecordZip,
                 "ContestManifest.json",
                 "CandidateManifest.json",
@@ -72,7 +72,7 @@ class MakeSfVarianceData {
             )
             GeneralAdaptiveBetting.showCounts("after create")
 
-            return runAllRoundsAndVerify(auditdir)
+            return runAllRoundsAndVerify(topdirn)
         }
     }
 
@@ -95,7 +95,7 @@ class MakeSfVarianceData {
         val topdir: String,
         val auditType: AuditType,
     ) : ConcurrentTask<Boolean> {
-        val auditdir = "$topdir/audit$runIndex"
+        val topdirn = "$topdir$runIndex"
         val contestManifestFilename = "ContestManifest.json"
         val candidateManifestFile = "CandidateManifest.json"
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05,)
@@ -119,13 +119,13 @@ class MakeSfVarianceData {
                 mvrSource = mvrSource
             )
 
-            createElectionRecord(election, auditDir = auditdir)
+            createElectionRecord(election, topdir = topdirn)
 
             val config = Config(election.electionInfo(), creation, round)
-            createAuditRecord(config, election, auditDir = auditdir)
+            createAuditRecord(config, election, topdir = topdirn)
 
-            startFirstRound(auditdir)
-            return runAllRoundsAndVerify(auditdir)
+            startFirstRound(topdirn)
+            return runAllRoundsAndVerify(topdirn)
         }
     }
 
@@ -136,8 +136,8 @@ class MakeSfVarianceData {
 
         val tasks = mutableListOf<ConcurrentTask<List<AuditResult2>>>()
         repeat(8) { removeN ->
-            val auditdir = "$testdataDir/cases/sf2024/clcan/audit$removeN"
-            tasks.add(RunRemoveSFtask( removeN+2,20, auditdir, AuditType.CLCA, nsimTrials=20))
+            val topdirn = "$testdataDir/cases/sf2024/clcan$removeN"
+            tasks.add(RunRemoveSFtask( removeN+2,20, topdirn, AuditType.CLCA, nsimTrials=20))
         }
 
         val results: List<AuditResult2> =
@@ -153,8 +153,8 @@ class MakeSfVarianceData {
 
         val tasks = mutableListOf<ConcurrentTask<List<AuditResult2>>>()
         repeat(8) { removeN ->
-            val auditDir = "$testdataDir/cases/sf2024/oan/audit$removeN"
-            tasks.add(RunRemoveSFtask(removeN+2, 20, auditDir, AuditType.ONEAUDIT, nsimTrials=20))
+            val topdirn = "$testdataDir/cases/sf2024/oan$removeN"
+            tasks.add(RunRemoveSFtask(removeN+2, 20, topdirn, AuditType.ONEAUDIT, nsimTrials=20))
         }
 
         val estResults: List<AuditResult2> =
@@ -179,7 +179,7 @@ class MakeSfVarianceData {
     inner class RunRemoveSFtask(
         val removeN: Int,
         val nruns: Int,
-        val auditDir: String,
+        val topdir: String,
         val auditType: AuditType,
         val nsimTrials: Int,
     ) : ConcurrentTask<List<AuditResult2>> {
@@ -202,7 +202,7 @@ class MakeSfVarianceData {
                 )
 
                 createSfElection(
-                    auditdir = auditDir,
+                    topdir = topdir,
                     castVoteRecordZip,
                     "ContestManifest.json",
                     "CandidateManifest.json",
@@ -212,10 +212,10 @@ class MakeSfVarianceData {
                 )
 
                 println("${name()} removeN=$removeN run=$run")
-                runAllRoundsAndVerify(auditDir, verify = false)
+                runAllRoundsAndVerify(topdir, verify = false)
 
                 val contestState = mutableMapOf<Int, TestH0Status>()
-                val auditRecord = AuditRecord.read(auditDir)!!
+                val auditRecord = AuditRecord.read(topdir)!!
                 auditRecord.rounds.forEach { auditRound ->
                     auditRound.contestRounds.forEach { contestRound ->
                         contestState[contestRound.id] = contestRound.status
@@ -234,8 +234,8 @@ class MakeSfVarianceData {
     fun createSfRemoveNsp() {
         val tasks = mutableListOf<ConcurrentTask<List<AuditResult2>>>()
         repeat(8) { removeN ->
-            val auditDir = "$testdataDir/cases/sf2024/oaspn/audit$removeN"
-            tasks.add( RunRemoveSFtaskSP(removeN+2, 20, auditDir, nsimTrials=20))
+            val topdirn = "$testdataDir/cases/sf2024/oaspn$removeN"
+            tasks.add( RunRemoveSFtaskSP(removeN+2, 20, topdirn, nsimTrials=20))
         }
 
         val estResults: List<AuditResult2> =
@@ -261,14 +261,14 @@ class MakeSfVarianceData {
     inner class RunRemoveSFtaskSP(
         val removeN: Int,
         val nruns: Int,
-        val auditDir: String,
+        val topdir: String,
         val nsimTrials: Int,
     ) : ConcurrentTask<List<AuditResult2>> {
 
         val contestManifestFilename = "ContestManifest.json"
         val candidateManifestFile = "CandidateManifest.json"
 
-        override fun name() = "RunRemoveSFtaskSP $auditDir"
+        override fun name() = "RunRemoveSFtaskSP $topdir"
 
         override fun run(): List<AuditResult2> {
 
@@ -289,22 +289,22 @@ class MakeSfVarianceData {
                     poolsHaveOneCardStyle=true,
                     mvrSource = mvrSource
                 )
-                createElectionRecord(election, auditDir = auditDir)
+                createElectionRecord(election, topdir = topdir)
 
                 val config = Config(election.electionInfo(), creation, round)
-                createAuditRecord(config, election, auditDir = auditDir)
+                createAuditRecord(config, election, topdir = topdir)
 
-                val startResult = startFirstRound(auditDir)
+                val startResult = startFirstRound(topdir)
                 if (startResult.isErr) {
                     println( startResult.toString() )
                     return emptyList()
                 }
 
                 println("${name()} removeN=$removeN run=$run")
-                runAllRoundsAndVerify(auditDir, verify=false)
+                runAllRoundsAndVerify(topdir, verify=false)
 
                 val contestState = mutableMapOf<Int, TestH0Status>()
-                val auditRecord = AuditRecord.read(auditDir)!!
+                val auditRecord = AuditRecord.read(topdir)!!
                 auditRecord.rounds.forEach { auditRound ->
                     auditRound.contestRounds.forEach { contestRound ->
                         contestState[contestRound.id] = contestRound.status

@@ -20,9 +20,9 @@ import kotlin.use
 
 private val logger = KotlinLogging.logger("StartAudit")
 
-fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: String, externalSortDir: String? = null,
+fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String, externalSortDir: String? = null,
                       validate: Boolean = false, sortManifest: Boolean = true) {
-    val publisher = Publisher(auditDir)
+    val publisher = Publisher(topdir)
 
     writeAuditCreationConfigJsonFile(config.creation, publisher.auditCreationConfigFile())
     logger.info{"writeAuditCreationConfig to ${publisher.auditCreationConfigFile()}\n  ${config.creation}"}
@@ -65,7 +65,7 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: Strin
     }
 
     if (validate) {
-        val verifyACResults = VerifyAuditCommitment(auditDir).verify()
+        val verifyACResults = VerifyAuditCommitment(topdir).verify()
         if (verifyACResults.hasErrors) {
             logger.error { "createAuditRecord VerifyAuditCommitment failed: ${verifyACResults}" }
         }

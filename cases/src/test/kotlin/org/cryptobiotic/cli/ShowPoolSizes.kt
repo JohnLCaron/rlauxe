@@ -10,17 +10,16 @@ import kotlin.test.Test
 
 class ShowPoolSizes {
 
-
     @Test
     fun showCardPools() {
-        showCardPoolSizes("sf2024/oa", "$testdataDir/cases/sf2024/oa/audit")
-        showCardPoolSizes("sf2024/oans", "$testdataDir/cases/sf2024/oans/audit")
-        showCardPoolSizes("boulder24/oa", "$testdataDir/cases/boulder24/oa/audit")
-        showCardPoolSizes("corla/oa", "$testdataDir/cases/corla/oneaudit/audit")
+        showCardPoolSizes("sf2024/oa", "$testdataDir/cases/sf2024/oa")
+        showCardPoolSizes("sf2024/oans", "$testdataDir/cases/sf2024/oans")
+        showCardPoolSizes("boulder24/oa", "$testdataDir/cases/boulder24/oa")
+        showCardPoolSizes("corla/oa", "$testdataDir/cases/corla/oneaudit")
     }
 
-    fun showCardPoolSizes(what: String, where: String) {
-        val publisher = Publisher(where)
+    fun showCardPoolSizes(what: String, topdir: String) {
+        val publisher = Publisher(topdir)
 
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
         val allContests = if (contestsResults .isOk) contestsResults.unwrap().sortedBy { it.id } else return

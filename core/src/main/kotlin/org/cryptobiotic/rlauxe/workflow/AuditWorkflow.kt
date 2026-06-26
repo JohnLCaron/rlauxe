@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.EstimateAudit
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.estimate.removeContestsAndSample
+import org.cryptobiotic.rlauxe.strata.Strata
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 // abstract superclass of workflows
@@ -27,7 +28,8 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
             val contestRounds = contestsUA() // these have been filtered to InProgress only
                 .filter{ onlyTask == null || it.id == onlyTask.contestId }
                 .map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contestRounds = contestRounds, samplePrns = emptyList())
+            val countyStrata = if (config.isUniform) emptyList<Strata>() else null
+            AuditRound(roundIdx, contestRounds = contestRounds, countyStrata=countyStrata, samplePrns = emptyList())
         } else {
             // next time, create from previous round
             previousRound.createNextRound()
@@ -42,7 +44,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 
         // estimate how many samples are needed for each contest, to satisfy the risk function,
         val estimate = EstimateAudit(
-            auditdir = mvrManager.auditdir(),
+            topdir = mvrManager.topdir(),
             config,
             auditRound.roundIdx,
             auditRound.contestRounds,

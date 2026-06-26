@@ -124,8 +124,8 @@ class TestBoulder2024Cvrs {
 
     @Test
     fun testMvrs() {
-        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
-        val publisher = Publisher(auditdir)
+        val topdir = "$testdataDir/cases/boulder24/oa"
+        val publisher = Publisher(topdir)
         val sortedMvrs = readCardsCsvIterator(publisher.sortedMvrsFile(), null)
 
         val tab = ContestTabulation(17, 1, false, listOf(0,1))

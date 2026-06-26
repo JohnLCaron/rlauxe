@@ -16,7 +16,7 @@ class TestWriteCountyData {
     @Test
     fun testWriteCountyContestData() {
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val countyAudit = AuditRecord.readWithResult("$topdir/audit").unwrap()
+        val countyAudit = AuditRecord.readWithResult(topdir).unwrap()
         val contestMap = countyAudit.contests.associate { it.contest.info().name to it }
         writeCountyContestData(topdir, contestMap, Colorado2024General())
 

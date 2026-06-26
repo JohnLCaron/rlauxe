@@ -242,14 +242,14 @@ class CardManifestAttack {
         //// create a peristent audit
         val election = CreateElectionForAttack(listOf(contestUA), mcards, mvrs, cardPools, null)
 
-        val auditdir = "$topdir/audit"
+        val topdir = "$topdir"
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 20000)
 
-        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
-        startFirstRound(auditdir)
+        createAuditRecord(config, election, topdir = topdir, externalSortDir=topdir)
+        startFirstRound(topdir)
 
         println("============================================================")
-        val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, true)
+        val resultsvc = RunVerifyContests.runVerifyContests(topdir, null, true)
         println()
         print(resultsvc)
         if (resultsvc.hasErrors) println("*** Verify fails") else println("*** Verify success")
@@ -257,7 +257,7 @@ class CardManifestAttack {
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir)
+            val lastRound = runRound(inputDir = topdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
     }

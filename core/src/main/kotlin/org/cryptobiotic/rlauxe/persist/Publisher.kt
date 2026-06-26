@@ -42,67 +42,66 @@ $topdir/
             unsortedMvrs.csv     // AuditableCardCsv (optional)
  */
 
-class Publisher(val auditDir: String) {
-    // fun auditConfigFile() = "$auditDir/auditConfig.json"
-    fun auditCreationConfigFile() = "$auditDir/auditCreationConfig.json"
-    fun auditRoundProtoFile() = "$auditDir/auditRoundConfig.json"
-    // fun auditSeedFile() = "$auditDir/auditSeed.json"
-    fun cardManifestFile() = "$auditDir/cardManifest.csv" // cardManifest
-    fun cardPoolsFile() = "$auditDir/cardPools.csv"
-    fun countyCardPoolsFile() = "$auditDir/countyCardPools.csv"
-    fun countyCvrPoolsFile() = "$auditDir/countyCvrPools.csv"
-    fun cardStylesFile() = "$auditDir/cardStyles.json"
-    fun contestsFile() = "$auditDir/contests.json"
-    fun electionInfoFile() = "$auditDir/electionInfo.json"
-    fun fastSamplingFile() = "$auditDir/fastSampling.bin" //make sampling fast
-    fun sortedCardsFile() = "$auditDir/sortedCards.csv" // sorted cardManifest
-    fun sortedCardsProtoFile() = "$auditDir/sortedCards.proto" // cardManifest
+class Publisher(val topdir: String) {
+    val auditdir = "$topdir/audit"
+    fun auditCreationConfigFile() = "$auditdir/auditCreationConfig.json"
+    fun auditRoundProtoFile() = "$auditdir/auditRoundConfig.json"
+    fun cardManifestFile() = "$auditdir/cardManifest.csv" // cardManifest
+    fun cardPoolsFile() = "$auditdir/cardPools.csv"
+    fun countyCardPoolsFile() = "$auditdir/countyCardPools.csv"
+    fun countyCvrPoolsFile() = "$auditdir/countyCvrPools.csv"
+    fun cardStylesFile() = "$auditdir/cardStyles.json"
+    fun contestsFile() = "$auditdir/contests.json"
+    fun electionInfoFile() = "$auditdir/electionInfo.json"
+    fun fastSamplingFile() = "$auditdir/fastSampling.bin" //make sampling fast
+    fun sortedCardsFile() = "$auditdir/sortedCards.csv" // sorted cardManifest
+    fun sortedCardsProtoFile() = "$auditdir/sortedCards.proto" // cardManifest
 
     // private
-    fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"   // TODO make proto ??
-    fun privateOneshotFile() = "$auditDir/private/oneshot.txt"
-    fun unsortedMvrsFile() = "$auditDir/private/unsortedMvrs.csv"
-    fun unsortedMvrsDirectory() = "$auditDir/private"
+    fun sortedMvrsFile() = "$auditdir/private/sortedMvrs.csv"   // TODO make proto ??
+    fun privateOneshotFile() = "$auditdir/private/oneshot.txt"
+    fun unsortedMvrsFile() = "$auditdir/private/unsortedMvrs.csv"
+    fun unsortedMvrsDirectory() = "$auditdir/private"
 
     fun auditRoundConfigFile(round: Int): String {
-        val dir = "$auditDir/round$round"
+        val dir = "$auditdir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("auditStateFile"))
         return "$dir/auditRoundConfig$round.json"
     }
 
     fun auditEstFile(round: Int): String {
-        val dir = "$auditDir/round$round"
+        val dir = "$auditdir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("auditStateFile"))
         return "$dir/auditEst$round.json"
     }
 
     fun auditFile(round: Int): String {
-        val dir = "$auditDir/round$round"
+        val dir = "$auditdir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("auditStateFile"))
         return "$dir/auditState$round.json"
     }
 
     fun samplePrnsFile(round: Int): String {
-        val dir = "$auditDir/round$round"
+        val dir = "$auditdir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("samplePrnsFile"))
         return "$dir/samplePrns$round.json"
     }
 
     fun sampleCardsFile(round: Int): String {
-        val dir = "$auditDir/round$round"
+        val dir = "$auditdir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("sampleCards"))
         return "$dir/sampleCards$round.csv"
     }
 
     fun sampleMvrsFile(round: Int): String {
-        val dir = "$auditDir/round$round"
+        val dir = "$auditdir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("sampleMvrsFile")) // TODO bad idea ?
         return "$dir/sampleMvrs$round.csv"
     }
 
     // debugging see "keepSimMvrs" flag
     fun estMvrsFile(round: Int, trial: Int): String {
-        val dir = "$auditDir/round$round"
+        val dir = "$auditdir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("sampleMvrsFile"))
         return "$dir/estMvrs$trial.csv"
     }
@@ -110,7 +109,7 @@ class Publisher(val auditDir: String) {
     // what round are we on?
     fun currentRound(): Int {
         var roundIdx = 1
-        while (Files.exists(Path.of("$auditDir/round$roundIdx"))) {
+        while (Files.exists(Path.of("$auditdir/round$roundIdx"))) {
             roundIdx++
         }
         return roundIdx - 1

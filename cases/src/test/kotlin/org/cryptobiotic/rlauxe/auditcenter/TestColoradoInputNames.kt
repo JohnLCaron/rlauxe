@@ -5,7 +5,7 @@ import kotlin.test.assertTrue
 
 // check name consistency in ColoradoInput
 class TestColoradoInputNames {
-    val input: ColoradoInput = Colorado2024General()
+    val input: ColoradoInput = Colorado2020corrected()
 
     val canonical = readGeneralCanonicalList(input.generalCanonicalFile).associateBy { it.contestName }
     val canonicalContestNames = canonical.map{ it.key }
@@ -91,15 +91,15 @@ class TestColoradoInputNames {
     }
 
     @Test
-    fun checkCountyTabulateHasCanonical() {
-        println("\n------------------------- checkCountyTabulateHasCanonical")
+    fun checkContestTabulateHasCanonical() {
+        println("\n------------------------- checkContestTabulateHasCanonical")
         val missing = mutableListOf<String>()
 
-        // TODO read raw input ??
+        // raw inout
         val contestTabs: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties
         canonical.values.forEach { cc ->
             if (!contestTabs.contains(cc.contestName)) {
-                println("countyTabulate missing canonical '${cc.contestName}'")
+                println("contestTabulate missing canonical contest '${cc.contestName}'")
                 missing.add(cc.contestName)
             } else {
                 val contestTab : ContestTabAllCounties = contestTabs[cc.contestName]!!
@@ -119,7 +119,6 @@ class TestColoradoInputNames {
         println("\n-------------------------- checkCountyTabulateAndCanonicalContests")
         val countyTabs: Map<String, CountyTabAllContests> = readCountyTabulateCsv(input.tabulateCountyFile)
         val countiesFromTab = countyTabs.keys.toSet().toList()
-
         compareLists(input.counties(), countiesFromTab, "canonical", "countyTabulateCsv")
     }
 

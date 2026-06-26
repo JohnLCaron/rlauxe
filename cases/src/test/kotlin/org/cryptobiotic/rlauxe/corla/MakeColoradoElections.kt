@@ -69,7 +69,7 @@ class MakeColoradoElections {
                 sampling = Sampling.uniform),
             ClcaConfig(), null)
 
-        createUniformElection(topdir, "$topdir/audit", Colorado2024General(),
+        createUniformElection(topdir,  Colorado2024General(),
             creation, round, name = "Corla24Uniform")
     }
 
@@ -84,7 +84,7 @@ class MakeColoradoElections {
                 sampling = Sampling.consistent),
             ClcaConfig(), null)
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(),
+        createCorlaElection(topdir,  Colorado2024General(),
             null, creation, round, name = "Corla24Consistent", startFirstRound = true)
     }
 
@@ -98,7 +98,7 @@ class MakeColoradoElections {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(),
+        createCorlaElection(topdir,  Colorado2024General(),
             pollingMode=PollingMode.withPools, creation, round)
     }
 
@@ -112,7 +112,7 @@ class MakeColoradoElections {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(),
+        createCorlaElection(topdir,  Colorado2024General(),
             pollingMode=PollingMode.withBatches, creation, round)
     }
 
@@ -126,7 +126,7 @@ class MakeColoradoElections {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(),
+        createCorlaElection(topdir,  Colorado2024General(),
             pollingMode=PollingMode.withoutBatches, creation, round)
     }
 
@@ -143,12 +143,12 @@ class MakeColoradoElections {
 
     // @Test
     fun testRunVerifyPolling() {
-        val auditdir = "$testdataDir/cases/corla/polling/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
+        val topdir = "$testdataDir/cases/corla/polling"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = true)
         println()
         print(results)
 
-        val results2 = runVerifyAuditRecord(auditdir)
+        val results2 = runVerifyAuditRecord(topdir)
         println()
         print(results2)
         if (results.hasErrors) fail()
@@ -186,7 +186,7 @@ class MakeColoradoElections {
         val countySamples = countyPrecincts.associate { it.county to mutableMapOf<String, PrecinctSamples>() }
 
         // fake: reading the mvrs instead of the cvrs
-        val publisher = Publisher("$topDir/audit")
+        val publisher = Publisher(topDir)
         val sampledMvrs = readCardsAndMergeToList(publisher.sampleMvrsFile(1), null)
         println("number of samples = ${sampledMvrs.size}")
 

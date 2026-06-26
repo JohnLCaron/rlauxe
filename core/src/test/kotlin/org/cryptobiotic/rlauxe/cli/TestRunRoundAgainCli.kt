@@ -9,11 +9,11 @@ class TestRunRoundAgainCli {
 
     @Test
     fun testRunRoundAgainOneAudit() {
-        val auditdir = "$testdataDir/persist/testRunCli/oneaudit/audit"
+        val topdir = "$testdataDir/persist/testRunCli/oneaudit"
 
         RunRoundAgainCli.main(
             arrayOf(
-                "-auditDir", auditdir,
+                "-topdir", topdir,
                 "-contest", "1",
                 "-round", "1",
                 "-assertion", "first",
@@ -23,11 +23,11 @@ class TestRunRoundAgainCli {
 
     @Test
     fun testRunRoundAgainClca() {
-        val auditdir = "$testdataDir/cases/belgium/belgium2024/Bruxelles/audit"
+        val topdir = "$testdataDir/cases/belgium/belgium2024/Bruxelles"
 
         RunRoundAgainCli.main(
             arrayOf(
-                "-auditDir", auditdir,
+                "-topdir", topdir,
                 "-contest", "2",
                 "-round", "1",
                 "-assertion", "first",
@@ -37,11 +37,11 @@ class TestRunRoundAgainCli {
 
     @Test
     fun testRunRoundAgainPolling() {
-        val auditDir = "$testdataDir/persist/testRunCli/polling/audit"
+        val topdir = "$testdataDir/persist/testRunCli/polling"
 
         RunRoundAgainCli.main(
             arrayOf(
-                "-auditDir", auditDir,
+                "-topdir", topdir,
                 "-contest", "1",
                 "-round", "1",
                 "-assertion", "first",
@@ -51,11 +51,11 @@ class TestRunRoundAgainCli {
 
     @Test
     fun testRunRoundAgainRaire() {
-        val auditDir = "$testdataDir/persist/testRunCli/raire/audit"
+        val topdir = "$testdataDir/persist/testRunCli/raire"
 
         RunRoundAgainCli.main(
             arrayOf(
-                "-auditDir", auditDir,
+                "-topdir", topdir,
                 "-contest", "1",
                 "-round", "1",
                 "-assertion", "first",
@@ -65,11 +65,11 @@ class TestRunRoundAgainCli {
 
     @Test
     fun testRunRoundAgainComposite() {
-        val auditDir = "$testdataDir/cases/belgium/2024"
+        val topdir = "$testdataDir/cases/belgium/2024"
 
         RunRoundAgainCli.main(
             arrayOf(
-                "-auditDir", auditDir,
+                "-topdir", topdir,
                 "-contestName", "Namur",
                 "-round", "1",
                 "-assertion", "first",

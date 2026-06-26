@@ -23,7 +23,7 @@ import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 
-class VerifyAuditCommitment(val location: String, contestId: Int? = null, show: Boolean = false) {
+class VerifyAuditCommitment(val topdir: String, contestId: Int? = null, show: Boolean = false) {
     val audit: AuditCommitment
     val auditType: AuditType
     val contests: List<ContestWithAssertions>
@@ -31,7 +31,7 @@ class VerifyAuditCommitment(val location: String, contestId: Int? = null, show: 
     val batchSet: Set<StyleIF>
 
     init {
-        val result = readAuditCommitment(location)
+        val result = readAuditCommitment(topdir)
         audit = if (result.isOk) result.unwrap() else {
             println(result.unwrapError())
             throw RuntimeException(result.unwrapError().toString())
@@ -46,7 +46,7 @@ class VerifyAuditCommitment(val location: String, contestId: Int? = null, show: 
 
     fun verify(): VerifyResults {
         val results = VerifyResults()
-        results.addMessage("---VerifyElection on $location")
+        results.addMessage("---VerifyElection on $topdir")
         if (contests.size == 1) results.addMessage("  ${contests.first()} ")
 
         verifySortedCardManifest(auditType, contests, audit.sortedManifest, infos, batchSet,
@@ -67,7 +67,7 @@ fun readAuditCommitment(topdir: String): Result<AuditCommitment, ErrorMessages> 
 
     val auditRecord = AuditRecord.read(topdir) as AuditRecord
     val mvrManager = PersistedMvrManager(auditRecord)
-    val publisher = Publisher("$topdir/audit")
+    val publisher = Publisher(topdir)
 
 
     val electionInfo = auditRecord.electionInfo

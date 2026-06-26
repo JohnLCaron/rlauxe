@@ -123,8 +123,6 @@ fun startTestElectionClca(
     addRaire: Boolean,
     addRaireCandidates: Int,
 ) {
-    val auditdir = "$topdir/audit"
-
     val election = TestClcaElection(
         minMargin,
         pctPhantoms,
@@ -133,13 +131,13 @@ fun startTestElectionClca(
         addRaire,
         addRaireCandidates)
 
-    createElectionRecord(election, auditDir = auditdir)
+    createElectionRecord(election, topdir = topdir)
 
     val config = Config.from( election.electionInfo(), nsimTrials = 100, simFuzzPct = simFuzz, fuzzMvrs=fuzzMvrs)
 
-    createAuditRecord(config, election, auditDir = auditdir)
+    createAuditRecord(config, election, topdir = topdir)
 
-    val result = startFirstRound(auditdir)
+    val result = startFirstRound(topdir)
     if (result.isErr) error{ result.toString() }
 }
 
@@ -226,28 +224,28 @@ fun startTestElectionPolling(
     ncontests: Int = 11,
     pollingMode: PollingMode,
 ) {
-    val auditdir = "$topdir/audit"
+    val topdir = "$topdir"
 
     val election = TestPollingElection(
-        auditdir,
+        topdir,
         minMargin,
         pctPhantoms,
         ncards,
         ncontests,
         pollingMode
     )
-    createElectionRecord(election, auditDir = auditdir, )
+    createElectionRecord(election, topdir = topdir, )
 
     val config = Config.from(election.electionInfo(), nsimTrials = 20, simFuzzPct = simFuzz)
 
-    createAuditRecord(config, election, auditDir = auditdir)
+    createAuditRecord(config, election, topdir = topdir)
 
-    val result = startFirstRound(auditdir)
+    val result = startFirstRound(topdir)
     if (result.isErr) logger.error{ result.toString() }
 }
 
 class TestPollingElection(
-    val auditdir: String,
+    val topdir: String,
     minMargin: Double,
     pctPhantoms: Double?,
     ncards: Int,
@@ -320,10 +318,10 @@ fun startTestElectionOneAudit(
     cvrFraction: Double,
     extraPct: Double,
 ) {
-    val auditDir = "$topdir/audit"
+    val topdir = "$topdir"
 
     val election = TestOneAuditElection(
-        auditDir,
+        topdir,
         minMargin,
         cvrFraction = cvrFraction,
         ncards,
@@ -331,19 +329,19 @@ fun startTestElectionOneAudit(
         extraPct=extraPct,
         fuzzMvrs=fuzzMvrs,
     )
-    createElectionRecord(election, auditDir = auditDir, clear = true)
+    createElectionRecord(election, topdir = topdir, clear = true)
 
     val config = Config.from(election.electionInfo(), nsimTrials = 20, simFuzzPct = simFuzz,
         fuzzMvrs=fuzzMvrs)
 
-    createAuditRecord(config, election, auditDir = auditDir)
+    createAuditRecord(config, election, topdir = topdir)
 
-    val result = startFirstRound(auditDir)
+    val result = startFirstRound(topdir)
     if (result.isErr) error{ result.toString() }
 }
 
 class TestOneAuditElection(
-    val auditDir: String,
+    val topdir: String,
     minMargin: Double,
     cvrFraction: Double,
     ncards: Int,

@@ -20,7 +20,7 @@ class MakeBoulderElection {
 
     @Test
     fun createBoulder25oa() { // simulate CVRs
-        val auditdir = "$testdataDir/cases/boulder2025/oa/audit"
+        val topdir = "$testdataDir/cases/boulder2025/oa"
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03, )
         val round = AuditRoundConfig(
@@ -38,7 +38,7 @@ class MakeBoulderElection {
             "2025",
             "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv",
             "src/test/data/Boulder2025/2025C-Boulder-County-Official-Statement-of-Votes.csv",
-            auditdir = auditdir,
+            topdir = topdir,
             creation,
             round,
             distributeOvervotes = listOf(),
@@ -51,7 +51,7 @@ class MakeBoulderElection {
 
     @Test
     fun createBoulder24oa() {
-        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
+        val topdir = "$testdataDir/cases/boulder24/oa"
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03, )
         val round = AuditRoundConfig(
@@ -69,7 +69,7 @@ class MakeBoulderElection {
             "2024",
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditdir = auditdir,
+            topdir = topdir,
             creation,
             round,
             distributeOvervotes = listOf(0, 63)
@@ -78,8 +78,8 @@ class MakeBoulderElection {
 
     @Test
     fun testRunVerifyBoulder24oa() {
-        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
+        val topdir = "$testdataDir/cases/boulder24/oa"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = false)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -87,7 +87,7 @@ class MakeBoulderElection {
 
     @Test
     fun createBoulder24clca() { // simulate CVRs
-        val auditdir = "$testdataDir/cases/boulder24/clca/audit"
+        val topdir = "$testdataDir/cases/boulder24/clca"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03, )
         val round = AuditRoundConfig(
@@ -100,7 +100,7 @@ class MakeBoulderElection {
             "2024",
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditdir = auditdir,
+            topdir = topdir,
             creation,
             round,
             distributeOvervotes = listOf(0, 63)
@@ -109,8 +109,8 @@ class MakeBoulderElection {
 
     @Test
     fun testRunVerifyBoulder24clca() {
-        val auditdir = "$testdataDir/cases/boulder24/clca/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
+        val topdir = "$testdataDir/cases/boulder24/clca"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = false)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -126,7 +126,7 @@ class MakeBoulderElection {
 
         println(combined.show())
 
-        val auditdir = "$testdataDir/cases/boulder23/oa/audit"
+        val topdir = "$testdataDir/cases/boulder23/oa"
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03, )
         val round = AuditRoundConfig(
@@ -143,7 +143,7 @@ class MakeBoulderElection {
         // fun createBoulderElectionWithSovo(
         //    cvrExportFile: String,
         //    sovo: BoulderStatementOfVotes,
-        //    auditdir: String,
+        //    topdir: String,
         //    creation: AuditCreationConfig,
         //    round: AuditRoundConfig,
         //    mvrSource: MvrSource = MvrSource.testPrivateMvrs,
@@ -152,7 +152,7 @@ class MakeBoulderElection {
             "2023",
             cvrExportFile = "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
             sovo = combined,
-            auditdir = auditdir,
+            topdir = topdir,
             creation,
             round,
             distributeOvervotes = listOf(2),
@@ -173,7 +173,7 @@ class MakeBoulderElection {
      createBoulderElection(
          "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv",
          "src/test/data/Boulder2024/2024G-Boulder-County-Amended-Statement-of-Votes.csv",
-         auditDir = "$testdataDir/cases/boulder24recount",
+         topdir = "$testdataDir/cases/boulder24recount",
          minRecountMargin = 0.0,
      )
  }
@@ -236,9 +236,9 @@ class MakeBoulderElection {
 
     class RunOneAuditVarianceTask(
         val runIndex: Int,
-        val topdir: String,
+        topdir: String,
     ) : ConcurrentTask<Boolean> {
-        val auditdir = "$topdir/audit$runIndex"
+        val topdirIdx = "$topdir$runIndex"
 
         override fun name() = "createBoulderElection $runIndex"
 
@@ -260,12 +260,12 @@ class MakeBoulderElection {
                 "2024",
                 "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
                 "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-                auditdir = auditdir,
+                topdir = topdirIdx,
                 creation,
                 round,
                 distributeOvervotes = listOf(0, 63)
             )
-            return runAllRoundsAndVerify(auditdir, verify = false)
+            return runAllRoundsAndVerify(topdirIdx, verify = false)
         }
     }
 }

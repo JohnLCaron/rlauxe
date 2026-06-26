@@ -61,17 +61,16 @@ fun createBelgiumElection(
     roundConfig: AuditRoundConfig,
     clear: Boolean = true): Result<AuditRoundIF, ErrorMessages>
 {
-    val auditdir = "$topdir/audit"
     val stopwatch = Stopwatch()
     val election = BelgiumClca(contestd, MvrSource.testPrivateMvrs)
 
-    createElectionRecord(election, auditDir = auditdir, clear = clear)
+    createElectionRecord(election, topdir = topdir, clear = clear)
     println("createBelgiumElection took $stopwatch")
 
     val config = Config(election.electionInfo(), creationConfig, roundConfig)
-    createAuditRecord(config, election, auditDir = auditdir) // , externalSortDir=topdir)
+    createAuditRecord(config, election, topdir = topdir) // , externalSortDir=topdir)
 
-    val result = startFirstRound(auditdir)
+    val result = startFirstRound(topdir)
     if (result.isErr) logger.error{ result.toString() }
     logger.info {"startFirstBoulderRound took $stopwatch" }
 
@@ -110,9 +109,8 @@ fun createAndRunAllRounds(electionName: String,
 
     createBelgiumElection(topdir=topdir, dcontest, creation, round)
 
-    val auditdir = "$topdir/audit"
     if (showVerify) {
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = showVerify)
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = showVerify)
         println()
         print(results)
         if (results.hasErrors) throw RuntimeException("createBelgiumElection failed to verify")
@@ -123,7 +121,7 @@ fun createAndRunAllRounds(electionName: String,
     var done = false
     var finalRound: AuditRoundIF? = null
     while (!done) {
-        val lastRound = runRound(inputDir = auditdir)
+        val lastRound = runRound(inputDir = topdir)
         if (lastRound != null) finalRound = lastRound
         done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
     }

@@ -21,7 +21,7 @@ open class CompositeMvrManager(
     val mvrWrite: Boolean = true
 ): MvrManager {
 
-    val publisher = Publisher(auditRecord.componentRecords.first().location)
+    val publisher = Publisher(auditRecord.componentRecords.first().topdir)
 
     override fun styles(): List<StyleIF>? {
         return readBatchesComposite(publisher)

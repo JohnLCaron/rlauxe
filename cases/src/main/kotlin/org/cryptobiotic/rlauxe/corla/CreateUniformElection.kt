@@ -25,11 +25,11 @@ open class CreateUniformElection (
     val coloradoInput: ColoradoInput,
     val stateElection: CountyContestBuilder,
     val auditType: AuditType,
-    val auditdir: String,
+    val topdir: String,
     val pollingMode: PollingMode?,
     val name: String? = null,
 ): ElectionBuilder {
-    val publisher = Publisher(auditdir)
+    val publisher = Publisher(topdir)
     val ncards: Int
     val contestsUA: List<ContestWithAssertions>
 
@@ -83,7 +83,6 @@ open class CreateUniformElection (
 // Create audit using mvrs from Corla, dont write cards (!)
 fun createUniformElection(
     topdir: String,
-    auditdir: String,
     coloradoInput: ColoradoInput,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
@@ -96,18 +95,17 @@ fun createUniformElection(
     val countyElection = CountyContestBuilder(coloradoInput)
 
     val election =
-        CreateUniformElection(coloradoInput, countyElection, creation.auditType, auditdir, pollingMode=null, name=name)
+        CreateUniformElection(coloradoInput, countyElection, creation.auditType, topdir, pollingMode=null, name=name)
 
     // skip the simulated cvrs
-    // createElectionRecord(election, auditDir = auditdir, clear = false)
     val contestsUA = election.contestsUA()
 
     val results = VerifyResults()
-    results.addMessage("---VerifyElection on $auditdir")
+    results.addMessage("---VerifyElection on $topdir")
     preAuditContestCheck(contestsUA, roundConfig.sampling, results)
 
     // write contests
-    val publisher = Publisher(auditdir)
+    val publisher = Publisher(topdir)
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     logger.info{"createElectionRecord write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
 
@@ -117,14 +115,14 @@ fun createUniformElection(
     logger.info{"createElectionRecord writeElectionInfoJsonFile to ${publisher.electionInfoFile()}\n  $electionInfo"}
 
     val config = Config(election.electionInfo(), creation, roundConfig)
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir = null, sortManifest = false)
+    createAuditRecord(config, election, topdir = topdir, externalSortDir = null, sortManifest = false)
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
     writeCountyContestData(topdir, contestMap, coloradoInput)
 
     if (startFirstRound) {
-        val result = startFirstRound(auditdir)
+        val result = startFirstRound(topdir)
         if (result.isErr) logger.error { result.toString() }
         logger.info { "createCorla took $stopwatch" }
     }

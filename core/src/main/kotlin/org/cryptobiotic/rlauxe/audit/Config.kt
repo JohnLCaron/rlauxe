@@ -14,6 +14,7 @@ data class Config(
     val isClca = auditType == AuditType.CLCA
     val isOA = auditType == AuditType.ONEAUDIT
     val isPolling = auditType == AuditType.POLLING
+    val isUniform = round.sampling.sampling == Sampling.uniform
 
     init {
         require(creation.auditType == election.auditType) {"creation.auditType must equal electionInfo.auditType"}
@@ -40,7 +41,6 @@ data class Config(
     fun replaceSeed(seed: Long): Config {
         return Config(this.election, this.creation.copy(seed = seed), this.round, this.version)
     }
-
 
     override fun toString() = buildString {
         appendLine("Config(")
@@ -235,7 +235,7 @@ data class ContestSampleControl(
     //// checkContestsCorrectlyFormed: preAuditStatus
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
     val minMargin: Double = 0.0, // do not audit contests less than this margin TODO really it should be noerror for clca?
-    val minSize: Int? = null, // do not audit contests with population less than this
+    val minSize: Int? = null, // do not audit contests with Nc less than this
 
     //// consistentSampling: contestRound.status, depends on having estimation
     val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / Npop) greater than this

@@ -50,7 +50,12 @@ abstract class ColoradoInput(
     //    val counties =  mutableSetOf<String>()
 
     abstract fun canonicalContests(): Map<String, CanonicalContest>
-    fun counties() = canonicalContests().values.map { it.counties }.flatten().toSet().toList().sorted()
+    fun counties(): List<String>  = canonicalContests().values.map { it.counties }
+        .flatten()
+        .filter { it: String -> it !in skipCounties }
+        .toSet()
+        .toList()
+        .sorted()
 
     // data class CorlaContestRoundCsv(
     //    val contestName: String,
@@ -208,13 +213,26 @@ data class MergedContestInfo(
     val choices: List<String>,
     val counties: Set<String>,
 
-    // contestRound
+    // data class CorlaContestRoundCsv(
+    //    val contestName: String,
+    //    val auditReason: AuditReason,
+    //    val nwinners: Int,
+    //    val ballotCardCount: Int,         // population size = eg county size when uniform audit
+    //    val contestBallotCardCount: Int,  // Nc = number of cards with this contest on it
+    //    val winners: String,
+    //    val minMargin: Int,
+    //    val riskLimit: Double,  // TODO use this
+    //    val gamma: Double,      // and this ?? = 1.03905000
+    //    val optimisticSamplesToAudit: Int, // check if these ever differ
+    //    val estimatedSamplesToAudit: Int,
+    //)
     val auditReason: AuditReason,
-    val npop:Int,       // ballotCardCount
-    val nc:Int,         // contestBallotCardCount
-    val voteForN: Int,  // nwinners
-    val nsamples: Int,  // optimisticSamplesToAudit
-    val marginInVotes: Int, // minMargin
+    val npop:Int,       // ballot_card_count
+    val nc:Int,         // contest_ballot_card_count
+    val voteForN: Int,  // winners_allowed
+    val nsamples: Int,  // optimistic_samples_to_audit
+    val marginInVotes: Int, // min_margin
+    val riskLimit: Double, // risk_limit
 
     // mvr file
     val countyMvrs: Int,
@@ -224,7 +242,7 @@ data class MergedContestInfo(
 data class StrataInfo(
     val strataName: String,
     val nmvrs: Int, // countyMvr.countMvr
-    val ballotCardCount: Int,  // round.ballotCardCount
+    val ballotCardCount: Int,  // round.ballot_card_count
 )
 
 data class MergedInfo(
@@ -264,13 +282,15 @@ fun mergeContestInfo(input: ColoradoInput): MergedInfo {
             round?.nwinners ?: 1,
             round?.optimisticSamplesToAudit ?: 0,
             round?.minMargin ?: 0,
+            round?.riskLimit ?: 0.0,
 
-            compare ?. countMvr ?: 0,
-            compare ?. countStatewide ?: 0,
+            compare ?. countMvr ?: 0,    // ContestMvrCount.countMvr
+            compare ?. countStatewide ?: 0,   // ContestMvrCount.countStatewide
         )
     }
 
     // pick out the contests that are the targeted ones; should have a single contest
+    // TODO what if theres more than one targeted county contest ?? More than one county ??
     val strataInfo = mutableListOf<StrataInfo>()
     val statewideContests = mutableListOf<CorlaContestRoundCsv>()
     canonical.values.forEach { canonicalContest ->
@@ -278,7 +298,7 @@ fun mergeContestInfo(input: ColoradoInput): MergedInfo {
         if (round != null && round.auditReason == AuditReason.county_wide_contest) {
             if (canonicalContest.counties.size != 1)
                 println("*** ${canonicalContest.contestName} has ncounties != 1: ${canonicalContest.counties}")
-            val county: String = canonicalContest.counties.first()
+            val county: String = canonicalContest.counties.first() // use the first county
             val countyMvr: CountyMvrCount = countyMap[county]!!
 
             val countyInfo = StrataInfo(

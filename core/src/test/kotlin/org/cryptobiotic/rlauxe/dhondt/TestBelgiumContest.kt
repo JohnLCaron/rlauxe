@@ -23,8 +23,8 @@ class TestBelgiumContest {
     val sortedManifest: SortedManifest
 
     init {
-        val auditdir = "$testdataDir/cases/belgium/belgium2024/Bruxelles/audit"
-        val auditRecord = AuditRecord.read(auditdir) as AuditRecord
+        val topdir = "$testdataDir/cases/belgium/belgium2024/Bruxelles"
+        val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
         sortedManifest = mvrManager.sortedManifest()
         config = auditRecord.config

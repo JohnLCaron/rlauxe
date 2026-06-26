@@ -17,11 +17,10 @@ class TestRunRoundCli {
     @Test
     fun testRunRoundCli() {
         val topdir = "$cases/corla/withCvrs/Colorado2020"
-        val auditdir = "${topdir}/audit"
 
         RunRlaRoundCli.main(
             arrayOf(
-                "-in", auditdir,
+                "-in", topdir,
                 // "--auditorMaxNewMvrs", "105",
                 // "--onlyTask", "17-1/0",
             )
@@ -30,11 +29,11 @@ class TestRunRoundCli {
 
     @Test
     fun testRunAllRoundsCli() {
-        val auditdir = "${testdataDir}/cases/corla/polling/audit"
+        val topdir = "${testdataDir}/cases/corla/polling"
 
         /* RunRlaRoundCli.main(
             arrayOf(
-                "-in", auditdir,
+                "-in", topdir,
                 // "--onlyTask", "28-NEN 107/102",
             )
         ) */
@@ -44,7 +43,7 @@ class TestRunRoundCli {
         var done = false
         var finalRound: AuditRoundIF? = null
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir)
+            val lastRound = runRound(inputDir = topdir)
             if (lastRound != null) finalRound = lastRound
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
         }
@@ -54,11 +53,11 @@ class TestRunRoundCli {
 
     @Test
     fun testStartAuditFirstRound() {
-        val auditdir = "/home/stormy/datadrive/rla/cases/corla/Colorado2020all"
+        val topdir = "/home/stormy/datadrive/rla/cases/corla/Colorado2020all"
 
         StartAuditFirstRoundCli.main(
             arrayOf(
-                "-in", auditdir,
+                "-in", topdir,
                 // "--onlyTask", "14-37/35",
             )
         )
@@ -66,14 +65,14 @@ class TestRunRoundCli {
 
     @Test
     fun testResampleAndSaveResults() {
-        val auditdir = "${cases}/corla/withCvrs/Colorado2020"
-        resampleAndSaveResults(auditdir)
+        val topdir = "${cases}/corla/withCvrs/Colorado2020"
+        resampleAndSaveResults(topdir)
     }
 
     @Test
     fun testRemoveAndResample() {
-        val auditdir = "${testdataDir}/cases/boulder24/oa/audit"
-        val auditRecord = AuditRecord.read(auditdir)!!
+        val topdir = "${testdataDir}/cases/boulder24/oa"
+        val auditRecord = AuditRecord.read(topdir)!!
         val lastRound = auditRecord.rounds.last()
         val removeContests = listOf(16,17)
         removeContests.forEach {

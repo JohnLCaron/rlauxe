@@ -9,10 +9,10 @@ class TestPersistentConsistentSampling {
 
     @Test   //  TODO what the hell are we testing ??
     fun testPersistentConsistentSampling() {
-        val auditDir = "../core/src/test/data/testRunCli/polling/audit"
-        val auditRecord = AuditRecord.read(auditDir)
+        val topdir = "../core/src/test/data/testRunCli/polling"
+        val auditRecord = AuditRecord.read(topdir)
         if (auditRecord == null) {
-            println("auditRecord not found at $auditDir")
+            println("auditRecord not found at $topdir")
             return
         }
         require(auditRecord is AuditRecord)

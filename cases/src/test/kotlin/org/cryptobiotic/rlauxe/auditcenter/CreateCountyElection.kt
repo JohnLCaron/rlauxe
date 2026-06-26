@@ -155,7 +155,7 @@ fun createCountyElection(
     county: String,
     coloradoInput: ColoradoInput,
     cvrExportFile: String,
-    auditdir: String,
+    topdir: String,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
@@ -168,14 +168,14 @@ fun createCountyElection(
     val election = CreateCountyElection(county, coloradoInput, creation.auditType, export, mvrSource = mvrSource,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
 
-    createElectionRecord(election, auditDir = auditdir)
+    createElectionRecord(election, topdir = topdir)
     println("createCountyElection for $county took $stopwatch")
 
     val config = Config(election.electionInfo(), creation, roundConfig)
-    createAuditRecord(config, election, auditDir = auditdir)
+    createAuditRecord(config, election, topdir = topdir)
 
     if (startFirstRound) {
-        val result = startFirstRound(auditdir)
+        val result = startFirstRound(topdir)
         if (result.isErr) logger.error { result.toString() }
     }
     logger.info{"startFirstBoulderRound took $stopwatch"}

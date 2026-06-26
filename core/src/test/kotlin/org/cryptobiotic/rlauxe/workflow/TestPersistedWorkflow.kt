@@ -17,7 +17,6 @@ class TestPersistedWorkflow {
     fun testPersistedSingleClca() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
         val topdir = "$testdataDir/persist/persistWorkflow/singleClca"
-        val auditdir = "$topdir/audit"
 
         val N = 50000
         val testData = MultiContestTestData(1, 1, N, marginRange=0.03..0.03, ncands=2)
@@ -30,12 +29,12 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs("testPersistedSingleClca", contestsUA, testMvrs, AuditType.CLCA, mvrSource=MvrSource.testPrivateMvrs)
-        createElectionRecord(election, auditDir = auditdir)
+        createElectionRecord(election, topdir = topdir)
 
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01)
 
-        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir, validate = true)
-        startFirstRound(auditdir)
+        createAuditRecord(config, election, topdir = topdir, externalSortDir=topdir, validate = true)
+        startFirstRound(topdir)
 
         runPersistedAudit(topdir)
     }
@@ -44,7 +43,6 @@ class TestPersistedWorkflow {
     fun testPersistedAuditClca() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
         val topdir = "$testdataDir/persist/persistWorkflow/clca"
-        val auditdir = "$topdir/audit"
 
         val N = 50000
         val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
@@ -57,11 +55,11 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs("testPersistedAuditClca", contestsUA, testMvrs, AuditType.CLCA, mvrSource=MvrSource.testPrivateMvrs)
-        createElectionRecord(election, auditDir = auditdir)
+        createElectionRecord(election, topdir = topdir)
 
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01)
-        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir, validate = true)
-        startFirstRound(auditdir)
+        createAuditRecord(config, election, topdir = topdir, externalSortDir=topdir, validate = true)
+        startFirstRound(topdir)
 
         runPersistedAudit(topdir)
     }
@@ -78,7 +76,6 @@ class TestPersistedWorkflow {
     fun testPersistedOneAudit() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
         val topdir = "$testdataDir/persist/persistWorkflow/oneaudit"
-        val auditdir = "$topdir/audit"
 
         val N = 5000
         // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
@@ -94,12 +91,12 @@ class TestPersistedWorkflow {
 
         val election = CreateElectionFromCvrs("testPersistedOneAudit", contestsUA, mvrs, AuditType.ONEAUDIT,
             cardPools = cardPools, mvrSource=MvrSource.testPrivateMvrs)
-        createElectionRecord(election, auditDir = auditdir)
+        createElectionRecord(election, topdir = topdir)
 
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 20000, simFuzzPct = .01)
 
-        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir, validate = true)
-        startFirstRound(auditdir)
+        createAuditRecord(config, election, topdir = topdir, externalSortDir=topdir, validate = true)
+        startFirstRound(topdir)
 
         runPersistedAudit(topdir, maxRounds=10)
     }
@@ -116,7 +113,6 @@ class TestPersistedWorkflow {
         val cvrPercent = .50
 
         val topdir = "$testdataDir/persist/persistWorkflow/oneauditProblem2"
-        val auditdir = "$topdir/audit"
 
         val electionInfo = ElectionInfo.forTest(AuditType.ONEAUDIT, MvrSource.testPrivateMvrs)
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05,)
@@ -139,19 +135,17 @@ class TestPersistedWorkflow {
 
         val election = CreateElectionFromCvrs("testPersistedOneAudit", contestsUA, mvrs, AuditType.ONEAUDIT,
             cardPools = pools, mvrSource=MvrSource.testPrivateMvrs)
-        createElectionRecord(election, auditDir = auditdir)
+        createElectionRecord(election, topdir = topdir)
 
-        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir, validate=true)
-        startFirstRound(auditdir)
+        createAuditRecord(config, election, topdir = topdir, externalSortDir=topdir, validate=true)
+        startFirstRound(topdir)
 
         runPersistedAudit(topdir, maxRounds=10)
     }
 }
 
 fun runPersistedAudit(topdir: String, maxRounds:Int = 6) {
-    val auditdir = "$topdir/audit"
-
-    val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
+    val verifyResults = RunVerifyContests.runVerifyContests(topdir, null, show = true)
     println()
     print(verifyResults)
     if (verifyResults.hasErrors) println("*** VERIFY FAILED") // fail() TODO
@@ -161,11 +155,11 @@ fun runPersistedAudit(topdir: String, maxRounds:Int = 6) {
     var lastRound: AuditRoundIF? = null
 
     while (!done) {
-        lastRound = runRound(inputDir = auditdir)
+        lastRound = runRound(inputDir = topdir)
         if (lastRound == null) fail()
 
         /* TODO!! ??
-        val enterResult = enterMvrs(auditdir, publisher.sortedCardsFile())
+        val enterResult = enterMvrs(topdir, publisher.sortedCardsFile())
         if (enterResult is Err) {
             println("enterMvrs failed ${enterResult.error}")
             fail()

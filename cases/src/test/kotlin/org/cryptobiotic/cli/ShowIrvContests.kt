@@ -22,7 +22,7 @@ class ShowIrvContests {
         val stopwatch = Stopwatch()
 
         val topDir = "$testdataDir/cases/sf2024"
-        val publisher = Publisher("$topDir/clca/audit")
+        val publisher = Publisher("$topDir/clca")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
         val contestsUA = if (contestsResults .isOk) contestsResults.unwrap()
         else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")

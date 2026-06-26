@@ -20,7 +20,7 @@ class TimeFastSamplingCards {
     @Test
     fun timeConsistentSampling() {
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
 
         val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)
@@ -35,7 +35,7 @@ class TimeFastSamplingCards {
     @Test
     fun timeConsistentSamplingCached() {
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
 
         val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)

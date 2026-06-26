@@ -43,7 +43,7 @@ class TimeCardReading {
         val stopwatch = Stopwatch()
         var totalRead = 0L
 
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
         val file = File(publisher.sortedCardsFile())
         val inputStream = file.inputStream()
         val fileLength = file.length()
@@ -68,7 +68,7 @@ class TimeCardReading {
         val stopwatch = Stopwatch()
         var ncards = 0
 
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
 
         val bufferSize = 8096 // 100_000
         val cardIter = CardCsvReader(publisher.sortedCardsFile(), null).iterator()
@@ -94,7 +94,7 @@ class TimeCardReading {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
         val styles = mvrManager.styles()
 
         var accum = 0
@@ -133,7 +133,7 @@ class TimeCardReading {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
         val styles = mvrManager.styles()
 
         val stopwatch = Stopwatch()
@@ -164,7 +164,7 @@ class TimeCardReading {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
         val styles = mvrManager.styles()
 
         val bufferSize = 100_000
@@ -210,7 +210,7 @@ class TimeCardReading {
     @Test
     fun timeReadProto () {
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
         val protoFilename = publisher.sortedCardsProtoFile()
         val styles = readCardStylesJsonFile(publisher.cardStylesFile()).unwrap()
 
@@ -250,7 +250,7 @@ class TimeCardReading {
     @Test
     fun timeReadProtoIterable () {
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
         val protoFilename = publisher.sortedCardsProtoFile()
         val styles = readCardStylesJsonFile(publisher.cardStylesFile()).unwrap()
 
@@ -296,7 +296,7 @@ class TimeCardReading {
     @Test
     fun timeReadProtoNonGeneric () {
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
         val protoFilename = publisher.sortedCardsProtoFile()
         val styles = readCardStylesJsonFile(publisher.cardStylesFile()).unwrap()
 
@@ -331,7 +331,7 @@ class TimeCardReading {
     @Test
     fun timeFastSampling() {
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
 
         val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)

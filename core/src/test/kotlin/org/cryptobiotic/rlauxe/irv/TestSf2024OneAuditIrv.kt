@@ -29,8 +29,8 @@ class TestSf2024OneAuditIrv() {
     val mvrs = mutableListOf<AuditableCard>()
 
     init {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
-        val auditRecord = AuditRecord.read(auditdir) as AuditRecord
+        val topdir = "$testdataDir/cases/sf2024/oa"
+        val auditRecord = AuditRecord.read(topdir) as AuditRecord
         // cardManifest = auditRecord.readCardManifest()
         config = auditRecord.config
         contests = auditRecord.contests
@@ -39,7 +39,7 @@ class TestSf2024OneAuditIrv() {
         cardPools = auditRecord.readCardPools()!!
 
         // use the cvrs from the clca as the mvrs
-        val cvrdir = "$testdataDir/cases/sf2024/clca/audit"
+        val cvrdir = "$testdataDir/cases/sf2024/clca"
         val cvrPublisher = Publisher(cvrdir)
         cardManifest = readSortedManifest(cvrPublisher, infos, auditRecord.electionInfo.totalCardCount)
         mvrsIterable = cardManifest.cards

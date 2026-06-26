@@ -21,7 +21,7 @@ interface MvrManager {
 
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  // Pair(mvr, cvr)
     fun writeMvrsForRound(round: Int): Int
-    fun auditdir() = "none"
+    fun topdir() = "none"
 
     fun samplingCards(): CloseableIterable<SamplingCardIF> = sortedManifest().cards
 }

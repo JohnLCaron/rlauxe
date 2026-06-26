@@ -6,6 +6,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.verify.VerifyResults
@@ -17,17 +18,17 @@ import java.nio.file.Path
 
 private val logger = KotlinLogging.logger("StartAudit")
 
-fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvrs: Int? = null): Result<AuditRoundIF, ErrorMessages> {
+fun startFirstRound(topdir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvrs: Int? = null): Result<AuditRoundIF, ErrorMessages> {
     val errs = ErrorMessages("startFirstRound")
 
     try {
-        if (notExists(Path.of(auditDir))) {
-            return errs.add( "audit Directory $auditDir does not exist" )
+        if (notExists(Path.of(topdir))) {
+            return errs.add( "audit Directory $topdir does not exist" )
         }
 
         // delete any roundX subdirectories
-        val auditDirFile = File(auditDir)
-        auditDirFile.walkTopDown()
+        val topdirFile = File(topdir)
+        topdirFile.walkTopDown()
             .filter { it.isDirectory }
             .filter { it.name.startsWith("round") }
             .forEach {
@@ -36,9 +37,9 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null, auditorMaxNewM
                 println()
             }
 
-        val auditRecord = AuditRecord.read(auditDir)
+        val auditRecord = AuditRecord.read(topdir)
         if (auditRecord == null) {
-            return errs.add("directory '$auditDir' does not contain an audit record")
+            return errs.add("directory '$topdir' does not contain an audit record")
         }
         require(auditRecord is AuditRecord)
 
@@ -51,6 +52,11 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null, auditorMaxNewM
         // this may change the auditStatus to misformed.
         val results = VerifyResults()
         preAuditContestCheck(auditRecord.contests,  config.sampling, results)
+        // in case it changed TODO is this ok ??
+        val publisher = auditRecord.publisher
+        writeContestsJsonFile(auditRecord.contests, publisher.contestsFile())
+        logger.info{"startFirstRound write ${auditRecord.contests.size} contests to ${publisher.contestsFile()}"}
+
         if (results.hasErrors) {
             logger.warn{ results.toString() }
         } else {
@@ -64,7 +70,7 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null, auditorMaxNewM
 
         // get matching mvrs if needed
         if (auditRecord.config.mvrSource == MvrSource.testPrivateMvrs) {
-            val publisher = Publisher(auditDir)
+            val publisher = Publisher(topdir)
             val ncards = workflow.writeMvrsForRound(roundIdx)
             logger.info{"writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(roundIdx)}"}
         }

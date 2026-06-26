@@ -28,7 +28,7 @@ class CaseStudiesVarianceScatter {
         caseStudiesVariancePlots(
             name,
             dirName,
-            "$testdataDir/cases/boulder24/clca/audit",
+            "$testdataDir/cases/boulder24/clca",
             "$testdataDir/cases/boulder24oa2/",
             null,
             false
@@ -44,7 +44,7 @@ class CaseStudiesVarianceScatter {
         caseStudiesVariancePlots(
             name,
             dirName,
-            "$testdataDir/cases/sf2024/clca/audit",
+            "$testdataDir/cases/sf2024/clca",
             "$testdataDir/cases/sf2024oa",
             "$testdataDir/cases/sf2024oasp",
             true
@@ -68,8 +68,8 @@ class CaseStudiesVarianceScatter {
         val totalOA = mutableListOf<Int>()
         val oneshotOA = mutableListOf<Int>()
         repeat(nruns) { run ->
-            val auditdir = "$oaAuditDir/audit${run+1}"
-            val pair = readAuditRecord(auditdir, "OneAudit")
+            val topdir = "$oaAuditDir${run+1}"
+            val pair = readAuditRecord(topdir, "OneAudit")
             println("OneAudit ${run+1} has ${clcaAssertionMap.size} assertions")
             if (pair != null) {
                 val (totalMvrs, allAssertions) = pair
@@ -82,14 +82,14 @@ class CaseStudiesVarianceScatter {
                 catPoints.addAll(cats)
                 readResults.add(allAssertions)
             }
-            // oneshotOA.add(OneShotAudit(auditdir).run(skip, writeFile=Publisher(auditdir).privateOneshotFile())) // TODO embed OneShotAudit into generation for speed of plotting
+            // oneshotOA.add(OneShotAudit(topdir).run(skip, writeFile=Publisher(topdir).privateOneshotFile())) // TODO embed OneShotAudit into generation for speed of plotting
         }
 
         val totalSP = mutableListOf<Int>()
         val oneshotSP = mutableListOf<Int>()
         repeat(nruns) { run ->
-            val auditdir = "$spAuditDir/audit${run+1}"
-            val pair = readAuditRecord(auditdir, "PrecinctStyleOA")
+            val topdir = "$spAuditDir${run+1}"
+            val pair = readAuditRecord(topdir, "PrecinctStyleOA")
             println("PrecinctStyleOA ${run+1} has ${clcaAssertionMap.size} assertions")
             if (pair != null) {
                 val (totalMvrs, allAssertions) = pair
@@ -102,7 +102,7 @@ class CaseStudiesVarianceScatter {
                 catPoints.addAll(cats)
                 readResults.add(allAssertions)
             }
-            // oneshotSP.add(OneShotAudit(auditdir).run(skip, writeFile=Publisher(auditdir).privateOneshotFile()))
+            // oneshotSP.add(OneShotAudit(topdir).run(skip, writeFile=Publisher(topdir).privateOneshotFile()))
         }
 
         println("$name in $dirName :")
@@ -214,8 +214,8 @@ fun List<Int>.stddev(): Double {
 
 data class CatPoint(val cat: String, val samplesUsed: Int, val margin: Double)
 
-fun readAuditRecord(auditDir: String, cat: String, marginOverride:Map<Int, Double>? = null): Pair<Int, Map<String, CatPoint>>? {
-    val auditRecordResult = AuditRecord.readWithResult(auditDir)
+fun readAuditRecord(topdir: String, cat: String, marginOverride:Map<Int, Double>? = null): Pair<Int, Map<String, CatPoint>>? {
+    val auditRecordResult = AuditRecord.readWithResult(topdir)
     if (auditRecordResult.isErr) {
         println(auditRecordResult)
         return null
@@ -238,6 +238,6 @@ fun readAuditRecord(auditDir: String, cat: String, marginOverride:Map<Int, Doubl
             }
         }
     }
-    println("read $auditDir totalMvrs=$totalMvrs")
+    println("read $topdir totalMvrs=$totalMvrs")
     return Pair(totalMvrs, allAssertions)
 }

@@ -10,8 +10,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifyBoulder24oa() {
-        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = "$testdataDir/cases/boulder24/oa"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -19,8 +19,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifyBoulder24oaContest() {
-        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 17, show = true)
+        val topdir = "$testdataDir/cases/boulder24/oa"
+        val results = RunVerifyContests.runVerifyContests(topdir, 17, show = true)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -28,8 +28,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifyBoulderClca() {
-        val auditdir = "$testdataDir/cases/boulder24/clca/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = "$testdataDir/cases/boulder24/clca"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -37,8 +37,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifyBoulderClcaContest() {
-        val auditdir = "$testdataDir/cases/boulder24/clca/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 20, show = show)
+        val topdir = "$testdataDir/cases/boulder24/clca"
+        val results = RunVerifyContests.runVerifyContests(topdir, 20, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -46,8 +46,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifyCorlaConsistent() {
-        val auditdir = "$testdataDir/cases/corla/consistent/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = "$testdataDir/cases/corla/consistent"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -55,8 +55,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifyCorlaUniform() {
-        val auditdir = "$testdataDir/cases/corla/uniform/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
+        val topdir = "$testdataDir/cases/corla/uniform"
+        val results = RunVerifyContests.runVerifyContests(topdir, 1, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -64,8 +64,8 @@ class TestVerifyUseCases {
 
     //@Test
     fun testRunVerifyCorlaPolling() {
-        val auditdir = "$testdataDir/cases/corla/polling/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = "$testdataDir/cases/corla/polling"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -73,8 +73,8 @@ class TestVerifyUseCases {
 
     //@Test
     fun testRunVerifyCorlaPollingContest() {
-        val auditdir = "$testdataDir/cases/corla/polling/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
+        val topdir = "$testdataDir/cases/corla/polling"
+        val results = RunVerifyContests.runVerifyContests(topdir, 1, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -82,8 +82,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifySf2024clca() {
-        val auditdir = "$testdataDir/cases/sf2024/clca/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = "$testdataDir/cases/sf2024/clca"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -91,8 +91,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifySf2024clcaContest() {
-        val auditdir = "$testdataDir/cases/sf2024/clca/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 52, show = show)
+        val topdir = "$testdataDir/cases/sf2024/clca"
+        val results = RunVerifyContests.runVerifyContests(topdir, 52, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -100,8 +100,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifySf2024oa() {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = "$testdataDir/cases/sf2024/oa"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -109,8 +109,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifySf2024oaContest() {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 16, show = true)
+        val topdir = "$testdataDir/cases/sf2024/oa"
+        val results = RunVerifyContests.runVerifyContests(topdir, 16, show = true)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -118,8 +118,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifySf2024oaps() {
-        val auditdir = "$testdataDir/cases/sf2024/oaps/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = "$testdataDir/cases/sf2024/oaps"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -127,8 +127,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifySf2024oapsContest() {
-        val auditdir = "$testdataDir/cases/sf2024/oaps/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 16, show = true)
+        val topdir = "$testdataDir/cases/sf2024/oaps"
+        val results = RunVerifyContests.runVerifyContests(topdir, 16, show = true)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -136,8 +136,8 @@ class TestVerifyUseCases {
 
     // @Test
     fun testRunVerifySf2024oans() {
-        val auditdir = "$testdataDir/cases/sf2024/oans/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = "$testdataDir/cases/sf2024/oans"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -145,8 +145,8 @@ class TestVerifyUseCases {
 
     // @Test
     fun testRunVerifySf2024oansContest() {
-        val auditdir = "$testdataDir/cases/sf2024/oans/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = true)
+        val topdir = "$testdataDir/cases/sf2024/oans"
+        val results = RunVerifyContests.runVerifyContests(topdir, 1, show = true)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -154,8 +154,8 @@ class TestVerifyUseCases {
 
     // @Test
     fun testRunVerifySf2024polling() {
-        val auditdir = "$testdataDir/cases/sf2024/polling/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = "$testdataDir/cases/sf2024/polling"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -163,8 +163,8 @@ class TestVerifyUseCases {
 
     // @Test
     fun testRunVerifySf2024pollingContest() {
-        val auditdir = "$testdataDir/cases/sf2024/polling/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = true)
+        val topdir = "$testdataDir/cases/sf2024/polling"
+        val results = RunVerifyContests.runVerifyContests(topdir, 1, show = true)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -172,8 +172,8 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifyDHondt() {
-        val auditdir = "$testdataDir/cases/belgium/2024/Hainaut/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        val topdir = "$testdataDir/cases/belgium/2024/Hainaut"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
         if (results.hasErrors) fail()

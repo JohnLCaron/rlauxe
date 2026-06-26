@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.betting
 
+import org.cryptobiotic.rlauxe.util.noerror
+
 val stdBet = 2.0 / 1.03905
 
 // SmithRamdas eq 33
@@ -65,6 +67,13 @@ fun estSampleSizeStandardBet(Npop: Int, noerror: Double, alpha: Double): Int {
     return estSampleSize(Npop, 2.0 / 1.03905, noerror, alpha)
 }
 
+// for viewer
+fun estSampleSizeStandardBet(voteDiff: Int, Npop: Int, upper: Double, alpha: Double ): Int {
+    val margin = voteDiff / Npop.toDouble()
+    val noerror = noerror(margin, upper)
+    return estSampleSize(Npop, 2.0 / 1.03905, noerror, alpha)
+}
+
 fun estSampleSize(Npop: Int, bet:Double, noerror: Double, alpha: Double): Int {
     val tracker = TrackerImpl()
     val Tneeded = 1.0 / alpha
@@ -82,6 +91,13 @@ fun estSampleSize(Npop: Int, bet:Double, noerror: Double, alpha: Double): Int {
 }
 
 fun estRiskStandardBet(Npop: Int, noerror: Double, nsamples: Int): Double {
+    return estRisk(Npop, 2.0 / 1.03905, noerror, nsamples)
+}
+
+// for viewer
+fun estRiskStandardBet(voteDiff: Int, Npop: Int, upper: Double, nsamples: Int, ): Double {
+    val margin = voteDiff / Npop.toDouble()
+    val noerror = noerror(margin, upper)
     return estRisk(Npop, 2.0 / 1.03905, noerror, nsamples)
 }
 

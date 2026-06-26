@@ -25,13 +25,13 @@ import java.nio.file.Path
 private val logger = KotlinLogging.logger("RunAuditRoundAgain")
 
 // for debugging, transparency. rlauxe-viewer
-fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound): String {
+fun runRoundAgain(topdir: String, contestRound: ContestRound, assertionRound: AssertionRound): String {
     val contestId = contestRound.contestUA.id
     val contestName = contestRound.contestUA.name
     try {
-        if (notExists(Path.of(auditDir))) {
-            logger.warn { "Audit Directory $auditDir does not exist" }
-            return "Audit Directory $auditDir does not exist"
+        if (notExists(Path.of(topdir))) {
+            logger.warn { "Audit Directory $topdir does not exist" }
+            return "Audit Directory $topdir does not exist"
         }
         val roundIdx = assertionRound.roundIdx
         val assertion = assertionRound.assertion
@@ -40,11 +40,11 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         val taus = Taus(assertion.assorter.upperBound())
         val oaAssorter: OneAuditClcaAssorter? = if (cassertion?.cassorter is OneAuditClcaAssorter) cassertion.cassorter else null
 
-        val auditRecord = AuditRecord.read(auditDir)
+        val auditRecord = AuditRecord.read(topdir)
         if (auditRecord == null) {
-            return "directory '$auditDir' does not contain an audit record"
+            return "directory '$topdir' does not contain an audit record"
         }
-        logger.info { "runRoundAgain in $auditDir for round $roundIdx, contest '$contestName', and assertion $assertion" }
+        logger.info { "runRoundAgain in $topdir for round $roundIdx, contest '$contestName', and assertion $assertion" }
 
         val useAuditRecord = if (auditRecord is CompositeAuditRecord) {
             auditRecord.findComponentWithName(contestRound.contestUA.name)

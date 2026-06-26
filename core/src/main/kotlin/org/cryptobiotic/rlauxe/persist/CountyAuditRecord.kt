@@ -5,6 +5,7 @@ import com.github.michaelbull.result.unwrapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.Config
+import org.cryptobiotic.rlauxe.audit.poolName
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -19,16 +20,15 @@ private val logger = KotlinLogging.logger("CountyAuditRecord")
 // CountyAudit assume existence of countyDataFile and countyContestDataFile. does not use nested county directories (yet)
 // Used by Corla
 class CountyAuditRecord(
-        location: String,
-        config: Config,
-        contests: List<ContestWithAssertions>,
-        rounds: List<AuditRound>,
-        nmvrs: Int, // number of mvrs already sampled
-        val countyData: List<CountyData>,
-        val countyContestData: List<CountyContestData>, // used by viewer
-): AuditRecord(location, config, contests, rounds, nmvrs)  {
+    topdir: String,
+    config: Config,
+    contests: List<ContestWithAssertions>,
+    rounds: List<AuditRound>,
+    nmvrs: Int, // number of mvrs already sampled
+    val countyData: List<CountyData>,
+    val countyContestData: List<CountyContestData>, // used by viewer
+): AuditRecord(topdir, config, contests, rounds, nmvrs)  {
 
-    override fun auditdir() = "$location/audit"
     private val styles by lazy { readCardStyles() ?: readCardPools() } // styles are preferred
 
     // for viewer
@@ -43,8 +43,7 @@ class CountyAuditRecord(
         val mvrCardIter = readCardsCsvIterator(mvrs, styles=styles)
         var count = 0
         mvrCardIter.forEach { mvr ->
-            val split = mvr.style()!!.name().split("-",".") // county is the first token of the style name HAHAHAHAH
-            val countyName = split[0]
+            val countyName = mvr.style()!!.poolName()
             val accum = mvrCount.getOrPut(countyName) { 0 }
             mvrCount[countyName] = accum + 1
             count++
@@ -75,11 +74,11 @@ class CountyAuditRecord(
         val countyContestDataFile = "countyContestData.csv"
 
         // check CountyComposite exists
-        fun checkExists(location: String?): Boolean {
-            if (location == null) return false
-            if (!exists("$location/$countyDataFile")) return false
-            if (!exists("$location/$countyContestDataFile")) return false
-            val publisher = Publisher("$location/audit")
+        fun checkExists(topdir: String?): Boolean {
+            if (topdir == null) return false
+            if (!exists("$topdir/$countyDataFile")) return false
+            if (!exists("$topdir/$countyContestDataFile")) return false
+            val publisher = Publisher(topdir)
             return (exists(publisher.electionInfoFile()) &&
                     exists(publisher.auditCreationConfigFile()) &&
                     exists(publisher.auditRoundProtoFile()) &&
@@ -87,17 +86,17 @@ class CountyAuditRecord(
         }
 
         // used by viewer
-        fun readFrom(location: String): CountyAuditRecord? {
-            val auditResult = AuditRecord.readWithResult("$location/audit")
+        fun readFrom(topdir: String): CountyAuditRecord? {
+            val auditResult = AuditRecord.readWithResult(topdir)
             val auditRecord = if (auditResult.isOk) auditResult.unwrap() else {
                 logger.warn { auditResult.unwrapError() }
                 return null
             }
 
-            val countyData = readCountyData("$location/$countyDataFile")
-            val countyContestData = readCountyContestData("$location/$countyContestDataFile")
+            val countyData = readCountyData("$topdir/$countyDataFile")
+            val countyContestData = readCountyContestData("$topdir/$countyContestDataFile")
 
-            return CountyAuditRecord(auditRecord.location, auditRecord.config, auditRecord.contests, auditRecord.rounds,
+            return CountyAuditRecord(auditRecord.topdir, auditRecord.config, auditRecord.contests, auditRecord.rounds,
                 auditRecord.nmvrs, countyData, countyContestData)
         }
     }
@@ -111,7 +110,7 @@ fun readCountyData(filename: String): List<CountyData> {
 
     val countyData = mutableListOf<CountyData>()
     while (true) {
-        var line = reader.readLine()
+        val line = reader.readLine()
         if (line == null) break
 
         val tokens = line.split(",")
@@ -134,7 +133,7 @@ fun readCountyContestData(filename: String): List<CountyContestData> {
 
         val countyData = mutableListOf<CountyContestData>()
         while (true) {
-            var line = reader.readLine()
+            val line = reader.readLine()
             if (line == null) break
 
             val tokens = line.split(",")

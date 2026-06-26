@@ -6,12 +6,14 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.makeAprioriErrorRates
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.strata.Strata
 import org.cryptobiotic.rlauxe.util.calcDecilesFromInt
 import org.cryptobiotic.rlauxe.util.df
 
 interface AuditRoundIF {
     val roundIdx: Int
     val contestRounds: List<ContestRound>
+    val countyStrata: List<Strata>? // for uniform audits
 
     var auditWasDone: Boolean
     var auditIsComplete: Boolean
@@ -28,17 +30,18 @@ interface AuditRoundIF {
 
  // Note: mutable
 data class AuditRound(
-    override val roundIdx: Int,
-    override val contestRounds: List<ContestRound>,
+     override val roundIdx: Int,
+     override val contestRounds: List<ContestRound>,
+     override var countyStrata: List<Strata>? = null, // for uniform audits
 
-    override var auditWasDone: Boolean = false,
-    override var auditIsComplete: Boolean = false,
-    override var samplePrns: List<Long>, // card prns to sample for this round (complete, not just new).
+     override var auditWasDone: Boolean = false,
+     override var auditIsComplete: Boolean = false,
+     override var samplePrns: List<Long>, // card prns to sample for this round (complete, not just new).
                                          // duplicates samplePrnsFile, so no need to serialze
-    override var nmvrs: Int = 0,    // mvrs in the round
-    override var newmvrs: Int = 0,  // new mvrs in the round
-    override var mvrsUnused: Int = 0,
-    override var mvrsUsed: Int = 0,
+     override var nmvrs: Int = 0,    // mvrs in the round
+     override var newmvrs: Int = 0,  // new mvrs in the round
+     override var mvrsUnused: Int = 0,
+     override var mvrsUsed: Int = 0,
 ) : AuditRoundIF {
     override var auditorMaxNewMvrs: Int? = null
 
@@ -53,7 +56,7 @@ data class AuditRound(
             val prevContestRound = this.contestRounds.find { it.id == contestRound.id }
             contestRound.createNextRound(prevContestRound)
         }
-        return AuditRound(roundIdx + 1, nextContests, samplePrns = emptyList())
+        return AuditRound(roundIdx + 1, nextContests, countyStrata=this.countyStrata, samplePrns = emptyList())
     }
 }
 
@@ -71,7 +74,6 @@ fun List<AuditRoundIF>.previousSamplePrns(currentRoundIdx: Int): Set<Long> {
 // TODO so what happens if we add new AssertionRound at round > 1 (Dhondt) ?
 data class ContestRound(val contestUA: ContestWithAssertions, val assertionRounds: List<AssertionRound>, val roundIdx: Int) {
     val id = contestUA.id
-
     val name = contestUA.name
     val Npop = contestUA.Npop
 
@@ -132,17 +134,24 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         return assertionRounds.maxOfOrNull { it.auditResult?.pmin ?: 1.0 } ?: 1.0
     }
 
+    override fun toString(): String {
+        return "ContestRound(roundIdx=$roundIdx, id=$id, estMvrs=$estMvrs, estNewMvrs=$estNewMvrs, status=$status)"
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ContestRound
+        if (other !is ContestRound) return false
 
         if (roundIdx != other.roundIdx) return false
-        if (estNewMvrs != other.estNewMvrs) return false
+        if (maxSampleAllowed != other.maxSampleAllowed) return false
         if (estMvrs != other.estMvrs) return false
+        if (estNewMvrs != other.estNewMvrs) return false
         if (done != other.done) return false
         if (included != other.included) return false
+        if (haveSampleSize != other.haveSampleSize) return false
+        if (haveNewSampleSize != other.haveNewSampleSize) return false
+        if (auditorWantNewMvrs != other.auditorWantNewMvrs) return false
+        if (auditorWantRisk != other.auditorWantRisk) return false
         if (contestUA != other.contestUA) return false
         if (assertionRounds != other.assertionRounds) return false
         if (status != other.status) return false
@@ -152,18 +161,19 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
 
     override fun hashCode(): Int {
         var result = roundIdx
-        result = 31 * result + estNewMvrs
+        result = 31 * result + (maxSampleAllowed ?: 0)
         result = 31 * result + estMvrs
+        result = 31 * result + estNewMvrs
         result = 31 * result + done.hashCode()
         result = 31 * result + included.hashCode()
+        result = 31 * result + haveSampleSize
+        result = 31 * result + haveNewSampleSize
+        result = 31 * result + (auditorWantNewMvrs ?: 0)
+        result = 31 * result + (auditorWantRisk?.hashCode() ?: 0)
         result = 31 * result + contestUA.hashCode()
         result = 31 * result + assertionRounds.hashCode()
         result = 31 * result + status.hashCode()
         return result
-    }
-
-    override fun toString(): String {
-        return "ContestRound(roundIdx=$roundIdx, id=$id, estMvrs=$estMvrs, estNewMvrs=$estNewMvrs, status=$status)"
     }
 }
 

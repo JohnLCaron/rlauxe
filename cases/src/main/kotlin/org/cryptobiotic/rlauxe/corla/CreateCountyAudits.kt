@@ -40,12 +40,12 @@ private val debugUndervotes = true
 // obsolete
 class CreateCountyAudits(
     val countyName: String,
-    val auditdir: String,
+    val topdir: String,
     val stateElection: CountyContestBuilder,
     val countyContestTab: CountyTabAllContests,
     val hasStyle: Boolean,
 ): ElectionBuilder {
-    val publisher = Publisher(auditdir)
+    val publisher = Publisher(topdir)
     val ncards: Int
     val contestsUA: List<ContestWithAssertions>
     val countyCardPools: List<CardPoolIF>
@@ -63,7 +63,7 @@ class CreateCountyAudits(
         val contests = builders.map { it.makeContest() }
 
         // have to save the mvrs and generate the cardManifest from them
-        clearDirectory(Path(auditdir))
+        clearDirectory(Path(topdir))
         ncards = createAndSaveUnsortedMvrs(contests, countyCardPools, publisher)
 
         // read them back in as an Iterator, so we dont have to read all into memory
@@ -92,7 +92,7 @@ class CreateCountyAudits(
     override fun contestsUA() = contestsUA
 
     override fun cards(): CloseableIterator<AuditableCard> {
-        val publisher = Publisher(auditdir)
+        val publisher = Publisher(topdir)
         val unsortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.unsortedMvrsFile(), styles = null)
         return TransformingIterator(unsortedMvrs) { mvr ->
             when {
@@ -108,7 +108,7 @@ class CreateCountyAudits(
     override fun unsortedMvrsInternal() = null
     override fun unsortedMvrsExternal() = null
     override fun toString(): String {
-        return "CorlaElectionBuilder(countyName='$countyName', auditdir='$auditdir')"
+        return "CorlaElectionBuilder(countyName='$countyName', topdir='$topdir')"
     }
 
     // for one county, one contest
@@ -176,30 +176,20 @@ fun createCountyAudits(
 
     val countyElection = CountyContestBuilder(coloradoInput)
     val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabsAllContests
-
-    /* createColoradoElection(
-        externalSortDir = topdir,
-        auditdir = "$topdir/audit", // or put it in audit ??
-        pollingMode = null,
-        creationConfig,
-        roundConfig,
-        startFirstRound = startFirstRound,
-        name = "Corla24County",
-    ) */
     val whichCounties = if (wantCounties.isNotEmpty()) wantCounties else contestTabByCounty.keys.toList()
 
     whichCounties.map { countyName ->
-        val election = CreateCountyAudits(countyName, "$topdir/$countyName/audit", countyElection,
+        val election = CreateCountyAudits(countyName, "$topdir/$countyName", countyElection,
             contestTabByCounty[countyName]!!,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
 
-        createElectionRecord(election, auditDir = election.auditdir, clear = false)
+        createElectionRecord(election, topdir = election.topdir, clear = false)
         val config = Config(election.electionInfo(), creationConfig, roundConfig)
 
-        createAuditRecord(config, election, auditDir = election.auditdir, externalSortDir = "$topdir/${election.countyName}")
+        createAuditRecord(config, election, topdir = election.topdir, externalSortDir = "$topdir/${election.countyName}")
 
         if (startFirstRound) {
-            val result = startFirstRound(election.auditdir)
+            val result = startFirstRound(election.topdir)
             if (result.isErr) logger.error { result.toString() }
         }
     }

@@ -30,7 +30,7 @@ object RunCalcAssortAvg {
     @JvmStatic
     fun main(args: Array<String>) {
         val parser = ArgParser("RunCalcAssortAvg")
-        val auditDir by parser.option(
+        val topdir by parser.option(
             ArgType.String,
             shortName = "in",
             description = "Directory containing input election record"
@@ -49,15 +49,15 @@ object RunCalcAssortAvg {
         try {
             parser.parse(args)
 
-            val auditRecordResult = AuditRecord.readWithResult(auditDir)
+            val auditRecordResult = AuditRecord.readWithResult(topdir)
             val auditRecord = if (auditRecordResult.isOk) auditRecordResult.unwrap() else {
-                println("auditRecord not found at $auditDir")
+                println("auditRecord not found at $topdir")
                 println(auditRecordResult.unwrapError())
                 return
             }
             require(auditRecord is AuditRecord)
             val config = auditRecord.config
-            println("auditRecord in $auditDir isOA=${config.isOA}")
+            println("auditRecord in $topdir isOA=${config.isOA}")
 
             var onlyContest: ContestWithAssertions? = null
             var onlyAssertion: ClcaAssertion? = null
@@ -102,7 +102,7 @@ object RunCalcAssortAvg {
 
             val mvrManager = PersistedMvrManager(auditRecord)
             val cardManifest = mvrManager.sortedManifest()
-            val publisher = Publisher(auditDir)
+            val publisher = Publisher(topdir)
             println("cardManifest has ${cardManifest.ncards} cards")
 
             val usePrivate = (config.mvrSource == MvrSource.testPrivateMvrs)

@@ -28,7 +28,7 @@ class MakeElectionsSansCvrs {
     fun makeCounty2024OnlyTeller() {
         val topdir = "$testdataDir/cases/auditcenter/County2024OnlyTeller"
 
-        createCountyElectionSansCvrs(topdir, "$topdir/audit", Colorado2024General(),
+        createCountyElectionSansCvrs(topdir,  Colorado2024General(),
             creation, round, name = "County2024OnlyTeller", startFirstRound = true, onlyCounty="Teller")
     }
 
@@ -36,7 +36,7 @@ class MakeElectionsSansCvrs {
     fun makeCounty2024General() {
         val topdir = "$cases/corla/sansCvrs/Colorado2024"
 
-        createCountyElectionSansCvrs(topdir, "$topdir/audit", Colorado2024General(),
+        createCountyElectionSansCvrs(topdir,  Colorado2024General(),
             creation, round, name = "County2024General", startFirstRound = true)
     }
 
@@ -44,7 +44,7 @@ class MakeElectionsSansCvrs {
     fun makeColorado2022Primary() {
         val topdir = "$cases/corla/sansCvrs/Colorado2022Primary"
 
-        createCountyElectionSansCvrs(topdir, "$topdir/audit", Colorado2022Primary(),
+        createCountyElectionSansCvrs(topdir,  Colorado2022Primary(),
             creation, round, name = "Colorado2022Primary", startFirstRound = true)
     }
 
@@ -52,14 +52,14 @@ class MakeElectionsSansCvrs {
     fun makeColorado2020General() {
         val topdir = "$cases/corla/sansCvrs/Colorado2020"
 
-        createCountyElectionSansCvrs(topdir, "$topdir/audit", Colorado2020General(),
+        createCountyElectionSansCvrs(topdir, Colorado2020General(),
             creation, round, name = "Colorado2020sans", startFirstRound = true)
     }
 
     @Test
     fun readCountyAuditRecord() {
         val topdir = "$cases/corla/sansCvrs/Colorado2020sans/"
-        val auditRecord = AuditRecord.read("$topdir")
+        val auditRecord = AuditRecord.read(topdir)
         val countyRecord =  auditRecord as CountyAuditRecord
 
         println("countyRecord.countyData")

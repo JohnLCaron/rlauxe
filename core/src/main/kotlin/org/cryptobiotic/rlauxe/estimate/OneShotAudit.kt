@@ -13,15 +13,15 @@ import kotlin.math.max
 
 // AuditRecord must have privateMvrs; run actual audit to compare to estimation
 class OneShotAudit(
-    val auditdir: String,
+    val topdir: String,
 ) {
-    val record = AuditRecord.read(auditdir) as AuditRecord
+    val record = AuditRecord.read(topdir) as AuditRecord
     val config = record.config
 
     val mvrManager = PersistedMvrManager(record, false)
     val cardManifest = mvrManager.sortedManifest()
     val cardPools = mvrManager.pools()
-    val mvrs = mvrManager.readCardsAndMerge(Publisher(auditdir).sortedMvrsFile())
+    val mvrs = mvrManager.readCardsAndMerge(Publisher(topdir).sortedMvrsFile())
 
     fun run(skipContests: List<Int>? = null, writeFile: String? = null, show: Boolean = false): Int {
 
@@ -39,7 +39,7 @@ class OneShotAudit(
 
         val useSkipContests: List<Int> = skipContests ?: contestStatus.filter { !it.value }.map { it.key }
         val contestsUAs = record.contests.filter { it.id !in useSkipContests }
-        println("OneShotAudit exclude $useSkipContests on $auditdir")
+        println("OneShotAudit exclude $useSkipContests on $topdir")
 
         val assertionAudits = mutableListOf<AssertionTrialIF>()
         contestsUAs.forEach { contestUA ->

@@ -17,7 +17,7 @@ class TestFastSamplingCards {
     // @Test
     fun writeSamplingCards() {
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
 
         val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)
@@ -36,7 +36,7 @@ class TestFastSamplingCards {
     @Test
     fun readSamplingCards() {
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
 
         val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)
@@ -57,13 +57,13 @@ class TestFastSamplingCards {
 
     // @Test
     fun testMakeFastCards() {
-        val auditdir = "${testdataDir}/cases/sf2024/oa/audit"
-        val auditRecord = AuditRecord.read(auditdir) as AuditRecord
+        val topdir = "${testdataDir}/cases/sf2024/oa"
+        val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
         val styles = mvrManager.styles()!!
 
         val stopwatch = Stopwatch()
-        val publisher = Publisher(auditdir)
+        val publisher = Publisher(topdir)
         val ncards = makeFastCards(publisher, styles)
         println("ncards = $ncards that took $stopwatch= ${stopwatch.elapsed(TimeUnit.MILLISECONDS)/ncards.toDouble()} ms/card")
 

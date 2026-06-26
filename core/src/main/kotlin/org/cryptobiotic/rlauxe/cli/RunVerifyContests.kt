@@ -43,8 +43,8 @@ object RunVerifyContests {
         }
     }
 
-    fun runVerifyContests(auditDir: String, contestId: Int?, show: Boolean): VerifyResults {
-        val verifier = VerifyContests(auditDir, show)
+    fun runVerifyContests(topdir: String, contestId: Int?, show: Boolean): VerifyResults {
+        val verifier = VerifyContests(topdir, show)
         if (contestId != null) {
             val wantContest = verifier.allContests!!.find { it.id == contestId }
             if (wantContest == null) return VerifyResults("Cant find contest with id $contestId")

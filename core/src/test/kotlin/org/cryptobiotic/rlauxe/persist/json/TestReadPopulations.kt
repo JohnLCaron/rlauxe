@@ -15,9 +15,9 @@ class TestReadPopulations {
 
     @Test
     fun testReadPollingBatches() {
-        val auditdir = "$testdataDir/persist/testRunCli/polling/audit"
+        val topdir = "$testdataDir/persist/testRunCli/polling"
 
-        val publisher = Publisher(auditdir)
+        val publisher = Publisher(topdir)
         val pops = readStyles(publisher)!!
         println("read ${pops} batch (original)")
         val pool = pops.first()
@@ -39,10 +39,10 @@ class TestReadPopulations {
 
     @Test
     fun testReadOneAuditPools() {
-        val auditdir = "$testdataDir/persist/testRunCli/oneaudit/audit"
-        // val auditdir = "../core/src/test/data/testRunCli/oneaudit/audit"
+        val topdir = "$testdataDir/persist/testRunCli/oneaudit"
+        // val topdir = "../core/src/test/data/testRunCli/oneaudit"
 
-        val publisher = Publisher(auditdir)
+        val publisher = Publisher(topdir)
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
         val cardPools = readCardPools(publisher, infos)!!

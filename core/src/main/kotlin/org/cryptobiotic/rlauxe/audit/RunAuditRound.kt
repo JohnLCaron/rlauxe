@@ -33,16 +33,16 @@ fun runRound(inputDir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvrs: In
 }
 
 // run one round and get ready to run the next round; or get ready to run the first round.
-fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvrs: Int? = null): Result<AuditRoundIF, ErrorMessages> {
+fun runRoundResult(topdir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvrs: Int? = null): Result<AuditRoundIF, ErrorMessages> {
     val errs = ErrorMessages("runRoundResult")
 
     try {
-        if (notExists(Path.of(auditDir))) {
-            return errs.add( "audit Directory $auditDir does not exist" )
+        if (notExists(Path.of(topdir))) {
+            return errs.add( "directory $topdir does not exist" )
         }
-        val auditRecord = AuditRecord.read(auditDir)
+        val auditRecord = AuditRecord.read(topdir)
         if (auditRecord == null) {
-            return errs.add("directory '$auditDir' does not contain an audit record")
+            return errs.add("directory '$topdir' does not contain an audit record")
         }
         require(auditRecord is AuditRecord) // TODO
 
@@ -52,7 +52,7 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null, auditorMaxNewMv
         var auditWasRun = false
 
         if (workflow.auditRounds().isEmpty()) {
-            return startFirstRound(auditDir, onlyTask, auditorMaxNewMvrs)
+            return startFirstRound(topdir, onlyTask, auditorMaxNewMvrs)
 
         } else {
             // run the audit on the last round, if it wasnt done
@@ -86,7 +86,7 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null, auditorMaxNewMv
 
             // get matching mvrs if needed
             if (!nextRound.auditIsComplete && auditRecord.config.election.mvrSource == MvrSource.testPrivateMvrs) {
-                val publisher = Publisher(auditDir)
+                val publisher = auditRecord.publisher
                 val ncards = workflow.writeMvrsForRound(roundIdx)
                 logger.info{"writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(roundIdx)}"}
             }
@@ -106,29 +106,29 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null, auditorMaxNewMv
     }
 }
 
-fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7, verify:Boolean = true): Boolean {
+fun runAllRoundsAndVerify(topdir: String, maxRounds:Int=7, verify:Boolean = true): Boolean {
     println("============================================================")
     var done = false
     var lastRound: AuditRoundIF? = null
 
     while (!done) {
-        lastRound = runRound(inputDir = auditdir)
+        lastRound = runRound(inputDir = topdir)
         if (lastRound == null) return false
         done = lastRound.auditIsComplete || lastRound.roundIdx > maxRounds
         GeneralAdaptiveBetting.showCounts("round $lastRound")
     }
 
     if (lastRound != null) {
-        println("nrounds = ${lastRound.roundIdx} nmvrs = ${lastRound.nmvrs} auditdir=$auditdir")
+        println("nrounds = ${lastRound.roundIdx} nmvrs = ${lastRound.nmvrs} topdir=$topdir")
     } else {
-        println("failed in auditdir=$auditdir")
+        println("runAllRoundsAndVerify failed in $topdir")
         return false
     }
 
     println("============================================================")
 
     if (verify) {
-        val verifyRound = VerifyAuditRoundCommitment(auditdir).verify()
+        val verifyRound = VerifyAuditRoundCommitment(topdir).verify()
         if (verifyRound.hasErrors) {
             println()
             print(verifyRound)
@@ -140,8 +140,8 @@ fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7, verify:Boolean = tr
 }
 
 // for testing
-fun resampleAndSaveResults(auditdir: String): Boolean {
-    val auditRecord = AuditRecord.read(auditdir)!! as AuditRecord
+fun resampleAndSaveResults(topdir: String): Boolean {
+    val auditRecord = AuditRecord.read(topdir)!! as AuditRecord
     return resampleAndSaveResults(auditRecord, auditRecord.rounds.last())
 }
 
@@ -155,7 +155,7 @@ fun resampleAndSaveResults(auditRecord: AuditRecord, lastRound: AuditRound): Boo
         chooseSamples(auditRecord.config.sampling, lastRound, mvrManager.samplingCards(), previousSamples)
 
         // writeAuditState
-        val publisher = Publisher(auditRecord.location)
+        val publisher = auditRecord.publisher
         writeAuditRoundJsonFile(lastRound, publisher.auditEstFile(lastRound.roundIdx))
         logger.info {"resampleAndRun writeAuditEstimation to ${publisher.auditEstFile(lastRound.roundIdx)}"}
 
@@ -183,7 +183,7 @@ fun saveAuditRound(auditRecord: AuditRecordIF, lastRound: AuditRoundIF): Boolean
     try {
 
         // writeAuditState
-        val publisher = Publisher(auditRecord.location)
+        val publisher = Publisher(auditRecord.topdir)
         writeAuditRoundJsonFile(lastRound, publisher.auditEstFile(lastRound.roundIdx))
         logger.info {"saveAuditRound to ${publisher.auditEstFile(lastRound.roundIdx)}"}
 

@@ -27,6 +27,7 @@ interface AuditableCard: CvrIF, SamplingCardIF {
 interface SamplingCardIF {
     fun hasContest(contestId: Int): Boolean
     fun prn(): Long
+    fun poolName(): String
 }
 
 // mutable style, so we dont need multiple classes
@@ -95,6 +96,7 @@ data class AuditableCard (
 
     // SamplingCardIF
     override fun prn() = prn
+    override fun poolName() = style?.poolName() ?: "unknown"
 
     fun location() = location ?: id()
     fun index() = index

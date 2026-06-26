@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.persist.bin
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
+import org.cryptobiotic.rlauxe.audit.poolName
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import java.io.BufferedInputStream
 import java.io.DataInputStream
@@ -14,6 +15,7 @@ import java.io.OutputStream
 data class FastSamplingCard(val prn : Long, val style: StyleIF) : SamplingCardIF {
     override fun prn() = prn
     override fun hasContest(contestId: Int) = style.hasContest( contestId)
+    override fun poolName() = style.poolName()
 }
 
 class FastSamplingCardIterator(inputFile: String, styles: List<StyleIF>, bufferSize: Int): CloseableIterator<SamplingCardIF> {

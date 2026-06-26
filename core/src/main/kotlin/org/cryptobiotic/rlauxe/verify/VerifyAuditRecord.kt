@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.existsOrZip
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 
-class VerifyAuditRecord(val auditRecordLocation: String) {
+class VerifyAuditRecord(val topdir: String) {
     val auditRecord: AuditRecordIF
     val mvrManager: PersistedMvrManager
     val publisher: Publisher
@@ -20,7 +20,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
     val allInfos: Map<Int, ContestInfo>?
 
     init {
-        val auditRecordResult = AuditRecord.readWithResult(auditRecordLocation)
+        val auditRecordResult = AuditRecord.readWithResult(topdir)
         if (auditRecordResult .isOk) {
             auditRecord = auditRecordResult.unwrap()
         } else {
@@ -30,7 +30,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         }
         mvrManager = PersistedMvrManager(auditRecord as AuditRecord, false)
 
-        publisher = Publisher(auditRecordLocation)
+        publisher = Publisher(topdir)
         config = auditRecord.config
         contests = auditRecord.contests
 
@@ -46,7 +46,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
 
     fun verify(): VerifyResults {
         val result = VerifyResults()
-        result.addMessage("VerifyAuditRecord on $auditRecordLocation ")
+        result.addMessage("VerifyAuditRecord on $topdir ")
         auditRecord.rounds.forEach { verifyRound(it, result) }
 
         verifyMultipleRoundSampling(result)

@@ -29,7 +29,7 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 interface AuditRecordIF {
-    val location: String
+    val topdir: String
     val config: Config
     val contests: List<ContestWithAssertions>
     val rounds: List<AuditRoundIF>
@@ -41,20 +41,18 @@ interface AuditRecordIF {
     fun readOneShotMvrs(): Map<Int, Int>
     fun readCardStyles(): List<StyleIF>?
     fun name(): String
-    fun auditdir() : String
 }
 
 open class AuditRecord(
-    override val location: String,
+    override val topdir: String,
     override val config: Config,
     override val contests: List<ContestWithAssertions>,
     override val rounds: List<AuditRound>,
     val nmvrs: Int // number of mvrs already sampled
 ): AuditRecordIF {
-    val publisher = Publisher(location)
+    val publisher = Publisher(topdir)
     val electionInfo = config.election
 
-    override fun auditdir() = location // it.location.substring(stateRecord.location.length)
     override fun name() = electionInfo.electionName // it.location.substring(stateRecord.location.length)
 
     override fun readSamplingCards(styles: List<StyleIF>?): CloseableIterable<SamplingCardIF>? {
@@ -124,11 +122,11 @@ open class AuditRecord(
     }
 
     fun showName(): String {
-        return "audit $location election ${electionInfo.electionName}"
+        return "audit $topdir election ${electionInfo.electionName}"
     }
 
     override fun toString() = buildString {
-        append("AuditRecord ${name()} location='$location'\n$config")
+        append("AuditRecord ${name()} location='$topdir'\n$config")
         appendLine("contests")
         contests.forEach{ appendLine("  $it")}
         appendLine("rounds")
@@ -139,19 +137,19 @@ open class AuditRecord(
         private val logger = KotlinLogging.logger("AuditRecord")
 
         // checks all types of AuditRecordIF
-        fun checkExists(location: String?): Boolean {
-            if (location == null) return false
-            if (CountyAuditRecord.checkExists(location)) return true
-            if (CountyComposite.checkExists(location)) return true
-            if (CompositeAuditRecord.checkExists(location)) return true
-            if (checkAuditRecordExists(location)) return true
+        fun checkExists(topdir: String?): Boolean {
+            if (topdir == null) return false
+            if (CountyAuditRecord.checkExists(topdir)) return true
+            if (CountyComposite.checkExists(topdir)) return true
+            if (CompositeAuditRecord.checkExists(topdir)) return true
+            if (checkAuditRecordExists(topdir)) return true
             return false
         }
 
         // check for just an AuditRecord
-        fun checkAuditRecordExists(location: String?): Boolean {
-            if (location == null) return false
-            val publisher = Publisher(location)
+        fun checkAuditRecordExists(topdir: String?): Boolean {
+            if (topdir == null) return false
+            val publisher = Publisher(topdir)
             if (!exists(publisher.electionInfoFile())) return false
             if (!exists(publisher.sortedCardsProtoFile()) && !exists(publisher.cardManifestFile())) return false
             if (!exists(publisher.contestsFile())) return false
@@ -159,24 +157,24 @@ open class AuditRecord(
         }
 
         // reads all types of AuditRecordIF
-        fun read(location: String): AuditRecordIF? {
+        fun read(topdir: String): AuditRecordIF? {
 
-            if (CountyAuditRecord.checkExists(location)) {
-                val countyAudit = CountyAuditRecord.readFrom(location)
+            if (CountyAuditRecord.checkExists(topdir)) {
+                val countyAudit = CountyAuditRecord.readFrom(topdir)
                 if (countyAudit != null) return countyAudit
             }
 
-            if (CountyComposite.checkExists(location)) {
-                val countyComposite = CountyComposite.readFrom(location)
+            if (CountyComposite.checkExists(topdir)) {
+                val countyComposite = CountyComposite.readFrom(topdir)
                 if (countyComposite != null) return countyComposite
             }
 
-            if (CompositeAuditRecord.checkExists(location)) {
-                val compositeRecord = CompositeAuditRecord.readFrom(location)
+            if (CompositeAuditRecord.checkExists(topdir)) {
+                val compositeRecord = CompositeAuditRecord.readFrom(topdir)
                 if (compositeRecord != null) return compositeRecord
             }
 
-            val auditRecordResult = readWithResult(location)
+            val auditRecordResult = readWithResult(topdir)
             if (auditRecordResult.isOk) {
                 return auditRecordResult.unwrap()
             } else {
@@ -186,10 +184,10 @@ open class AuditRecord(
         }
 
         // reads an AuditRecord
-        fun readWithResult(location: String): Result<AuditRecord, ErrorMessages> {
-            val errs = ErrorMessages("readAuditRecord from '${location}'")
+        fun readWithResult(topdir: String): Result<AuditRecord, ErrorMessages> {
+            val errs = ErrorMessages("readAuditRecord from '${topdir}'")
 
-            val publisher = Publisher(location)
+            val publisher = Publisher(topdir)
             val electionInfoResult = readElectionInfoJsonFile(publisher.electionInfoFile())
             val electionInfo = if (electionInfoResult.isOk) electionInfoResult.unwrap() else {
                 errs.addNested(electionInfoResult.unwrapError())
@@ -277,7 +275,7 @@ open class AuditRecord(
 
             return if (errs.hasErrors()) Err(errs) else {
                 val config = Config(electionInfo!!, auditCreationConfig!!, roundConfig)
-                Ok(AuditRecord(location, config, contests!!, rounds, countMvrsUsed))
+                Ok(AuditRecord(topdir, config, contests!!, rounds, countMvrsUsed))
             }
         }
     }

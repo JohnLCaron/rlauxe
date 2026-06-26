@@ -322,7 +322,7 @@ fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestI
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 fun createSfElection(
-    auditdir: String,
+    topdir: String,
     castVoteRecordZip: String,
     contestManifestFilename: String,
     candidateManifestFile: String,
@@ -342,14 +342,14 @@ fun createSfElection(
         poolsHaveOneCardStyle=false,
         mvrSource = mvrSource
     )
-    createElectionRecord(election, auditDir = auditdir)
+    createElectionRecord(election, topdir = topdir)
     logger.info{"createSfElection took $stopwatch"}
     stopwatch.start()
 
     val config = Config(election.electionInfo(), creation, round)
-    createAuditRecord(config, election, auditDir = auditdir)
+    createAuditRecord(config, election, topdir = topdir)
 
-    val result = startFirstRound(auditdir)
+    val result = startFirstRound(topdir)
     if (result.isErr) logger.error{ result.toString() }
     logger.info{"startFirstSfRound took $stopwatch"}
 

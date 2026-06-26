@@ -16,7 +16,7 @@ class TestWriteFiles {
     @Test
     fun writeProtoFile () {
         val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher("$topdir")
         val cardIter: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.sortedCardsFile(), styles=null)
 
         val stopwatch = Stopwatch()

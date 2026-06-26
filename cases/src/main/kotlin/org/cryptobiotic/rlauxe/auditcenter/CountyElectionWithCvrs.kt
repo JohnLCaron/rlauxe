@@ -29,9 +29,10 @@ private val logger = KotlinLogging.logger("CountyElectionWithCvrs")
 open class CountyElectionWithCvrs (
     val counties: Map<String, String>, // countyName -> exportCvrFile
     val coloradoInput: ColoradoInput,
-    val auditdir: String,
+    val topdir: String,
     val hasStyle: Boolean,
     val name: String,
+    isUniform: Boolean,
 ): ElectionBuilder {
     val ncards: Int
     val contestsUA: List<ContestWithAssertions>
@@ -39,7 +40,7 @@ open class CountyElectionWithCvrs (
     val countyPools = mutableListOf<CountyPools>()
     val cvrPools = mutableListOf<CountyPools>()
 
-    val publisher = Publisher(auditdir)
+    val publisher = Publisher(topdir)
 
     init {
         val contestBuilder = CountyContestBuilder(coloradoInput)
@@ -107,21 +108,25 @@ open class CountyElectionWithCvrs (
         // val contests = contestBuilder.contests(ncast)
         // just leave it as Ncast = Nc, then the diff goes into the undervote
         val contests = contestBuilder.contests(emptyMap<Int, Int>())
-
-        // where do we get these? difference between the cvr card counts and the contest.Nc = round.contestBallotCardCount
-        // can put them is a seperate pool as long as you include them in the unsorted iterator
-        val phantoms = makePhantomCards(contests, 0) // TODO
-
-        this.ncards = totalCvrCardCount // or totalPoolCardCount?
-        // use Nc as Npop
-        contestsUA = contests.map {
+        contests.forEach {
             val contestCvrTab = totalCvrTabs[it.id]
             if (contestCvrTab != null) {
                 it.info().metadata["CvrNcards"] = contestCvrTab.ncards().toString()
                 it.info().metadata["CvrNvotes"] = contestCvrTab.nvotes().toString()
                 it.info().metadata["CvrNundervotes"] = contestCvrTab.undervotes().toString()
             }
-            ContestWithAssertions(it, true, hasStyle).addStandardAssertions()
+
+        }
+        // where do we get these? difference between the cvr card counts and the contest.Nc = round.contestBallotCardCount
+        // can put them is a seperate pool as long as you include them in the unsorted iterator
+        val phantoms = makePhantomCards(contests, 0) // TODO
+
+        this.ncards = totalCvrCardCount // or totalPoolCardCount?
+
+        contestsUA = contests.map {
+            // use strataSize or Nc as population size
+            val NpopIn = if (isUniform) it.info().metadata["CORLAstrataNcards"]!!.toInt() else null
+            ContestWithAssertions(it, true, hasStyle, NpopIn = NpopIn).addStandardAssertions()
         }
     }
 
@@ -204,26 +209,27 @@ fun countyElectionWithCvrs(
     roundConfig: AuditRoundConfig,
     startFirstRound: Boolean = true,
     name: String,
+    isUniform: Boolean,
 ) {
     val stopwatch = Stopwatch()
-    val auditdir = "$topdir/audit"
     clearDirectory(Path(topdir))
 
     val election =
         CountyElectionWithCvrs(counties, coloradoInput,
-            auditdir, name=name, hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
+            topdir, name=name, hasStyle = roundConfig.sampling.sampling == Sampling.consistent,
+            isUniform=isUniform )
 
-    createElectionRecord(election, auditDir = auditdir, roundConfig.sampling, clear = false)
+    createElectionRecord(election, topdir = topdir, roundConfig.sampling, clear = false)
     val config = Config(election.electionInfo(), creation, roundConfig)
 
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir)
+    createAuditRecord(config, election, topdir = topdir, externalSortDir = topdir)
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
     writeCountyContestData(topdir, contestMap, coloradoInput)
 
     if (startFirstRound) {
-        val result = startFirstRound(auditdir)
+        val result = startFirstRound(topdir)
         if (result.isErr) logger.error { result.toString() }
     }
     logger.info { "createColorado2020 took $stopwatch" }

@@ -14,16 +14,14 @@ import org.cryptobiotic.rlauxe.core.*
 // so may not be needed
 
 class CountyComposite(
-    location: String,
+    topdir: String,
     config: Config,
     contests: List<ContestWithAssertions>,
     rounds: List<AuditRound>,
     nmvrs: Int,
     override val componentRecords: List<AuditRecord>, // optional
     val countyData: List<CountyData>,
-): AuditRecord(location, config, contests, rounds, nmvrs), CompositeRecordIF  {
-
-    override fun auditdir() = "$location/audit"
+): AuditRecord(topdir, config, contests, rounds, nmvrs), CompositeRecordIF  {
 
     override fun findComponentWithName(name: String): AuditRecord? {
         return componentRecords.find {
@@ -32,9 +30,9 @@ class CountyComposite(
     }
 
     override fun toString() = buildString {
-        append("CountyComposite location='$location'\n$config")
+        append("CountyComposite location='${this@CountyComposite.topdir}'\n$config")
         appendLine("components")
-        componentRecords.forEach{ appendLine("  ${it.name()} at ${it.location}")}
+        componentRecords.forEach{ appendLine("  ${it.name()} at ${it.topdir}")}
         appendLine("contests")
         contests.forEach{ appendLine("  $it")}
         appendLine("rounds")
@@ -50,33 +48,33 @@ class CountyComposite(
         val countyDataFile = "countyData.csv"
 
         fun fromStateAndCounties(stateRecord: AuditRecord, countyRecords: List<AuditRecord>, countyData: List<CountyData>): CountyComposite {
-            return CountyComposite(stateRecord.location, stateRecord.config, stateRecord.contests, stateRecord.rounds,
+            return CountyComposite(stateRecord.topdir, stateRecord.config, stateRecord.contests, stateRecord.rounds,
                 stateRecord.nmvrs, countyRecords, countyData)
         }
 
         // check CountyComposite exists
-        fun checkExists(location: String?): Boolean {
-            if (location == null) return false
-            if (!exists("$location/$countyDataFile")) return false
-            val publisher = Publisher("$location/audit")
+        fun checkExists(topdir: String?): Boolean {
+            if (topdir == null) return false
+            if (!exists("$topdir/$countyDataFile")) return false
+            val publisher = Publisher(topdir)
             return (exists(publisher.electionInfoFile()) &&
                 // exists(publisher.cardManifestFile()) &&
                 exists(publisher.contestsFile()))
         }
 
         // used by viewer
-        fun readFrom(location: String): CountyComposite? {
-            val stateLevelResult = AuditRecord.readWithResult("$location/audit")
+        fun readFrom(topdir: String): CountyComposite? {
+            val stateLevelResult = AuditRecord.readWithResult(topdir)
             val stateLevel = if (stateLevelResult.isOk) stateLevelResult.unwrap() else {
                 logger.warn { stateLevelResult.unwrapError() }
                 return null
             }
 
-            val components = if (CompositeAuditRecord.checkExists(location)) {
-                CompositeAuditRecord.readFrom(location)!!.componentRecords
+            val components = if (CompositeAuditRecord.checkExists(topdir)) {
+                CompositeAuditRecord.readFrom(topdir)!!.componentRecords
             } else emptyList()
 
-            val countyData = readCountyData("$location/$countyDataFile")
+            val countyData = readCountyData("$topdir/$countyDataFile")
 
             return fromStateAndCounties(stateLevel, components, countyData)
         }

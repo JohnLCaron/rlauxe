@@ -338,7 +338,7 @@ fun createBoulderElection(
     version: String,
     cvrExportFile: String,
     sovoFile: String,
-    auditdir: String,
+    topdir: String,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     distributeOvervotes: List<Int>, // maybe no default
@@ -358,14 +358,14 @@ fun createBoulderElection(
         CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
 
-    createElectionRecord(election, auditDir = auditdir)
+    createElectionRecord(election, topdir = topdir)
     println("CreateBoulderElection took $stopwatch")
 
     val config = Config(election.electionInfo(), creation, roundConfig)
-    createAuditRecord(config, election, auditDir = auditdir)
+    createAuditRecord(config, election, topdir = topdir)
 
     if (startFirstRound) {
-        val result = startFirstRound(auditdir)
+        val result = startFirstRound(topdir)
         if (result.isErr) logger.error { result.toString() }
     }
     logger.info{"startFirstBoulderRound took $stopwatch"}
@@ -375,7 +375,7 @@ fun createBoulderElectionWithSovo(
     version: String,
     cvrExportFile: String,
     sovo: BoulderStatementOfVotes,
-    auditdir: String,
+    topdir: String,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     distributeOvervotes: List<Int>,
@@ -393,13 +393,13 @@ fun createBoulderElectionWithSovo(
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
 
 
-    createElectionRecord(election, auditDir = auditdir)
+    createElectionRecord(election, topdir = topdir)
     println("CreateBoulderElection took $stopwatch")
 
     val config = Config(election.electionInfo(), creation, roundConfig)
-    createAuditRecord(config, election, auditDir = auditdir)
+    createAuditRecord(config, election, topdir = topdir)
 
-    val result = startFirstRound(auditdir)
+    val result = startFirstRound(topdir)
     if (result.isErr) logger.error{ result.toString() }
     logger.info{"startFirstBoulderRound took $stopwatch"}
 

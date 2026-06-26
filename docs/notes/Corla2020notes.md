@@ -1,8 +1,9 @@
 # Corla2020 Notes
-6/23/26
+6/24/26
 
-I can read in most of the cvr data from https://votedatabase.com for the Colorado 2020 General elections. 
-Much of the work is matching the contest and candidate names from the cvr export file to what's in auditcenter.
+We obtained the cvr data from https://votedatabase.com for the Colorado 2020 General elections, and used it to run
+a real audit. This is for testing purposes only: the data is not official, some of the data is missing, in particular
+the redacted data is largely unaccounted for.
 
 ## votedatabase
 
@@ -47,70 +48,38 @@ See [Vote Differences](Corla2020cvrDiff.md) for details.
 
 ## Uniform vs Style Based Sampling
 
-These differ in which contests are chosen for the audit and how many are selected, which affects how the risk is measured for all contests.
+The Colorado 2020 General Election audit used a risk limit of 4%.
+
+Here are several scenarios that differ in which contests are chosen for the style-based audit. The uniform sample is what was actually done and does not vary.
 
 ### only targeted contests
- 
-````
-  style nmvrs = 4514
+
+style nmvrs = 4144
 uniform nmvrs = 8245
-contests under maxRisk (style) = 230 / 526 = 43%
-contests under maxRisk (uniform) = 460 / 526 = 87%
+contests under maxRisk (style) = 245 / 526 = 46%
+contests under maxRisk (uniform) = 364 / 526 = 69%
 
 |               |  style  |  uniform |
 |---------------|---------|----------|
-| under maxRisk |   230   |    460   |
-| under      3% |   230   |    460   |
-| under      5% |   239   |    478   |
-| under     10% |   261   |    485   |
-````
+| under maxRisk |   245   |    364   |
+| under      4% |   245   |    364   |
+| under      5% |   249   |    366   |
+| under     10% |   266   |    381   |
 
 ### targeted contests and other contests with estMvrs <= max
 
-````
-(max = 100)
-  style nmvrs = 8761
-uniform nmvrs = 8245
-contests under maxRisk (style) = 477 / 526 = 90%
-contests under maxRisk (uniform) = 460 / 526 = 87%
+max = 115
+rlauxe nmvrs = 8246
+corla nmvrs = 8245
+contests under maxRisk (style) = 481 / 526 = 91%
+contests under maxRisk (uniform) = 364 / 526 = 69%
 
 |               |  style  |  uniform |
 |---------------|---------|----------|
-| under maxRisk |   477   |    460   |
-| under      3% |   477   |    460   |
-| under      5% |   478   |    478   |
-| under     10% |   479   |    485   |
-````
-
-````
-(max = 90)
-  style nmvrs = 8302
-uniform nmvrs = 8245
-contests under maxRisk (style) = 468 / 526 = 88%
-contests under maxRisk (uniform) = 460 / 526 = 87%
-
-|               |  style  |  uniform |
-|---------------|---------|----------|
-| under maxRisk |   468   |    460   |
-| under      3% |   468   |    460   |
-| under      5% |   469   |    478   |
-| under     10% |   471   |    485   |
-````
-
-````
-(max=80)
-  style nmvrs = 8096
-uniform nmvrs = 8245
-contests under maxRisk (style) = 465 / 526 = 88%
-contests under maxRisk (uniform) = 460 / 526 = 87%
-
-|               |  style  |  uniform |
-|---------------|---------|----------|
-| under maxRisk |   465   |    460   |
-| under      3% |   465   |    460   |
-| under      5% |   466   |    478   |
-| under     10% |   468   |    485   |
-````
+| under maxRisk |   481   |    364   |
+| under      4% |   481   |    364   |
+| under      5% |   481   |    366   |
+| under     10% |   482   |    381   |
 
 ### targeted contests plus relaxed risks
 
@@ -122,19 +91,31 @@ Experiment with relaxing the risk limits:
 * if estMvrs in [50, 150), use 5% risk kimit
 * if estMvrs < 50, use 3% risk limit
 
-````
-  style nmvrs = 13074
-uniform nmvrs = 8245
-contests under maxRisk (style) = 518 / 526 = 98%
-contests under maxRisk (uniform) = 469 / 526 = 89%
+  style nmvrs = 13010
+  uniform nmvrs = 8245
+  contests under maxRisk (style) = 519 / 526 = 98%
+  contests under maxRisk (uniform) = 364 / 526 = 69%
 
 |               |  style  |  uniform |
 |---------------|---------|----------|
-| under maxRisk |   518   |    469   |
-| under      3% |   438   |    460   |
-| under      5% |   490   |    478   |
-| under     10% |   518   |    485   |
-````
+| under maxRisk |   519   |    364   |
+| under      4% |   450   |    364   |
+| under      5% |   491   |    366   |
+| under     10% |   519   |    381   |
+
+## all contests
+
+style nmvrs = 19978
+uniform nmvrs = 8245
+contests under maxRisk (style) = 526 / 526 = 100%
+contests under maxRisk (uniform) = 364 / 526 = 69%
+
+|               |  style  |  uniform |
+|---------------|---------|----------|
+| under maxRisk |   526   |    364   |
+| under      4% |   526   |    364   |
+| under      5% |   526   |    366   |
+| under     10% |   526   |    381   |
 
 ## TODO DONE
 
@@ -147,13 +128,14 @@ contests under maxRisk (uniform) = 469 / 526 = 89%
 * add Boulder redacted ballots back in (by simulation). DONE
 * compare votedatabase and auditcenter votes DONE
 * compare uniform and style sampling DONE
+* look for problems and bugs in uniform vs style comparison DONE
+* in separate election, generate synthetic cvrs for all counties in 2020 and compare to real ones DONE
+* improve algorithm for generating synthetic cvrs DONE
+* generate 2024 general election with synthetic cvrs DONE
 
 ## TODO
 
-* look for problems and bugs in uniform vs style comparison
-* in separate election, generate synthetic cvrs for all counties in 2020 and compare to real ones
-* improve algorithm for generating synthetic cvrs
-* generate 2024 general election with synthetic cvrs
+* show plot of incremental cost of adding the low margin contests: what do the lowest n contests cost ?
 
 ## Appendix A Votes differences between auditcenter and votedatabase
 

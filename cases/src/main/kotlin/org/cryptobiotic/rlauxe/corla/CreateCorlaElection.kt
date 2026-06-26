@@ -24,12 +24,12 @@ open class CreateCorlaElection (
     val coloradoInput: ColoradoInput,
     val countyElection: CountyContestBuilder,
     val auditType: AuditType,
-    val auditdir: String,
+    val topdir: String,
     val hasStyle: Boolean,
     val pollingMode: PollingMode?,
     val name: String? = null,
 ): ElectionBuilder {
-    val publisher = Publisher(auditdir)
+    val publisher = Publisher(topdir)
     val ncards: Int
     val contestsUA: List<ContestWithAssertions>
     val countyPools: List<CountyPoolFromStyle>
@@ -59,7 +59,7 @@ open class CreateCorlaElection (
 
     override fun electionInfo() =
         ElectionInfo(
-            name ?: "Corla24$auditType$pollingMode", auditType, ncards(),
+            name ?: "Corla24$topdir$pollingMode", auditType, ncards(),
             contestsUA.size, pollingMode = pollingMode,
             mvrSource = MvrSource.testPrivateMvrs
         )
@@ -167,7 +167,6 @@ class CardsFromPool(val cardPool: CardPoolIF) : Iterator<Cvr> {
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
 fun createCorlaElection(
     topdir: String,
-    auditdir: String,
     coloradoInput: ColoradoInput,
     pollingMode: PollingMode? = null,
     creation: AuditCreationConfig,
@@ -181,23 +180,23 @@ fun createCorlaElection(
 
     val election = if (creation.auditType.isClca())
             CreateCorlaElection(coloradoInput, countyElection,
-                creation.auditType, auditdir, pollingMode=null, name=name,
+                creation.auditType, topdir, pollingMode=null, name=name,
                 hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
         else
-            CreateColoradoPolling(coloradoInput, countyElection, auditdir, pollingMode!!) // TODO hasExact = false ??
+            CreateColoradoPolling(coloradoInput, countyElection, topdir, pollingMode!!) // TODO hasExact = false ??
 
     // TODO kludge in sampleControl for the moment
-    createElectionRecord(election, auditDir = auditdir, roundConfig.sampling, clear = false)
+    createElectionRecord(election, topdir = topdir, roundConfig.sampling, clear = false)
     val config = Config(election.electionInfo(), creation, roundConfig)
 
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir)
+    createAuditRecord(config, election, topdir = topdir, externalSortDir = topdir)
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
     writeCountyContestData(topdir, contestMap, coloradoInput)
 
     if (startFirstRound) {
-        val result = startFirstRound(auditdir)
+        val result = startFirstRound(topdir)
         if (result.isErr) logger.error { result.toString() }
         logger.info { "createCorlaElection took $stopwatch" }
     }

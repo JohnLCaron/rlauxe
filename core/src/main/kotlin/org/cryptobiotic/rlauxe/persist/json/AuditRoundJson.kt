@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.strata.Strata
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Welford
 
@@ -38,6 +39,7 @@ import java.nio.file.StandardOpenOption
 data class AuditRoundJson(
     val roundIdx: Int,
     val contestRounds: List<ContestRoundJson>,
+    val countyStrata: List<StrataJson>? = null,
     val auditWasDone: Boolean,
     val auditIsComplete: Boolean,
     val nmvrs: Int,
@@ -51,6 +53,7 @@ fun AuditRoundIF.publishJson() : AuditRoundJson {
     return AuditRoundJson(
         this.roundIdx,
         contestRounds.map { it.publishJson() },
+        this.countyStrata?.map { it.publishJson() },
         this.auditWasDone,
         this.auditIsComplete,
         this.nmvrs,
@@ -70,6 +73,7 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
     val auditRound = AuditRound(
         this.roundIdx,
         contestRounds,
+        this.countyStrata?.map { it.import() },
         this.auditWasDone,
         this.auditIsComplete,
         samplePrns,
@@ -81,6 +85,25 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
     auditRound.auditorMaxNewMvrs = this.auditorMaxNewMvrs
     return auditRound
 }
+
+@Serializable
+data class StrataJson(
+    val strataName: String,// county name or a multicounty contest
+    val nmvrs: Int,  // may be wantMvrs or haveMvrs
+    val population: Int,
+)
+
+fun Strata.publishJson() = StrataJson(
+    strataName,
+    nmvrs,
+    population
+)
+
+fun StrataJson.import() = Strata(
+    strataName,
+    nmvrs,
+    population
+)
 
 // data class ContestRound(val contestUA: ContestWithAssertions, val assertionRounds: List<AssertionRound>, val roundIdx: Int) {
 //    val id = contestUA.id

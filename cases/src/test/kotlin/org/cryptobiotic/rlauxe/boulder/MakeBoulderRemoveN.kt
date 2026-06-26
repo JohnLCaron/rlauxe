@@ -24,8 +24,8 @@ class MakeBoulderRemoveN {
         val results = mutableListOf<AuditResult>()
 
         repeat(11) { removeN ->
-            val auditdir = "$testdataDir/cases/boulder24/clcan/audit$removeN"
-            val task = RunRemoveBoulderTask(removeN, 1, auditdir, AuditType.CLCA)
+            val topdirn = "$testdataDir/cases/boulder24/clcan$removeN"
+            val task = RunRemoveBoulderTask(removeN, 1, topdirn, AuditType.CLCA)
             val estResults: List<AuditResult> = task.run()
             results.addAll(estResults)
         }
@@ -38,8 +38,8 @@ class MakeBoulderRemoveN {
 
         val tasks = mutableListOf<ConcurrentTask<List<AuditResult>>>()
         repeat(11) { removeN ->
-            val auditDir = "$testdataDir/cases/boulder24/oan/audit$removeN"
-            tasks.add(RunRemoveBoulderTask(removeN, 1, auditDir, AuditType.ONEAUDIT))
+            val topdirn = "$testdataDir/cases/boulder24/oan$removeN"
+            tasks.add(RunRemoveBoulderTask(removeN, 1, topdirn, AuditType.ONEAUDIT))
         }
 
         val estResults: List<AuditResult> =
@@ -65,7 +65,7 @@ class MakeBoulderRemoveN {
 class RunRemoveBoulderTask(
     val removeN: Int,
     val nruns: Int,
-    val auditDir: String,
+    val topdir: String,
     val auditType: AuditType,
 ) : ConcurrentTask<List<AuditResult>> {
 
@@ -79,13 +79,13 @@ class RunRemoveBoulderTask(
             "2024",
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditdir = auditDir,
+            topdir = topdir,
             creation,
             round,
             distributeOvervotes = listOf(0, 63)
         )
 
-        val publisher = Publisher(auditDir)
+        val publisher = Publisher(topdir)
         val results = mutableListOf<AuditResult>()
         repeat(nruns) { run ->
             // TODO
@@ -93,11 +93,11 @@ class RunRemoveBoulderTask(
             //val nconfig = config.copy(removeMaxContests = removeN, seed = secureRandom.nextLong())
             //writeAuditConfigJsonFile(nconfig, publisher.auditConfigFile())
             println("${name()} removeN=$removeN run=$run")
-            startFirstRound(auditDir)
-            runAllRoundsAndVerify(auditDir, verify = false)
+            startFirstRound(topdir)
+            runAllRoundsAndVerify(topdir, verify = false)
 
             val contestState = mutableMapOf<Int, TestH0Status>()
-            val auditRecord = AuditRecord.read(auditDir)!!
+            val auditRecord = AuditRecord.read(topdir)!!
             auditRecord.rounds.forEach { auditRound ->
                 auditRound.contestRounds.forEach { contestRound ->
                     contestState[contestRound.id] = contestRound.status

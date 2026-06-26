@@ -9,24 +9,24 @@ class TestEnterMvrsCli {
 
     @Test
     fun testEnterMvrsClca() {
-        val auditDir = "src/test/data/testRunCli/clca/audit"
+        val topdir = "src/test/data/testRunCli/clca"
         EnterMvrsCli.main(
             arrayOf(
-                "-in", auditDir,
-                "-mvrs", "$auditDir/sortedCards.csv"
+                "-in", topdir,
+                "-mvrs", "$topdir/sortedCards.csv"
             )
         )
     }
 
     @Test
     fun testEnterMvrsError1() {
-        val auditDir = "/my/bad/testPersistentWorkflowClca"
+        val topdir = "/my/bad/testPersistentWorkflowClca"
 
         assertFailsWith<RuntimeException> {
             EnterMvrsCli.main(
                 arrayOf(
-                    "-in", auditDir,
-                    "-mvrs", "$auditDir/sortedCards.csv"
+                    "-in", topdir,
+                    "-mvrs", "$topdir/sortedCards.csv"
                 )
             )
         }
@@ -34,12 +34,12 @@ class TestEnterMvrsCli {
 
     @Test
     fun testEnterMvrsError2() {
-        val auditDir = "$testdataDir/persist/testPersistentWorkflowClca"
+        val topdir = "$testdataDir/persist/testPersistentWorkflowClca"
         assertFailsWith<RuntimeException> {
             EnterMvrsCli.main(
                 arrayOf(
-                    "-in", auditDir,
-                    "-mvrs", "$auditDir/noexist.csv"
+                    "-in", topdir,
+                    "-mvrs", "$topdir/noexist.csv"
                 )
             )
         }

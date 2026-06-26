@@ -21,8 +21,8 @@ class TestSfElection {
 
     @Test
     fun testRunVerifySFoa() {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
+        val topdir = "$testdataDir/cases/sf2024/oa"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = false)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -30,9 +30,9 @@ class TestSfElection {
 
     @Test
     fun testSFoaPopulations() {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
+        val topdir = "$testdataDir/cases/sf2024/oa"
 
-        val auditRecord = AuditRecord.read(auditdir) as AuditRecord
+        val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord, false)
         val cardManifest = mvrManager.sortedManifest()
         val pools = mvrManager.pools()!!
@@ -72,7 +72,7 @@ class TestSfElection {
         }
         assertEquals(count49, contest49.Npop)
 
-        val publisher = Publisher(auditdir)
+        val publisher = Publisher(topdir)
         val sortedMvrs = mvrManager.readCardsAndMerge(publisher.sortedMvrsFile())
         countCards = 0
         count49 = 0
@@ -100,8 +100,8 @@ class TestSfElection {
 
     @Test
     fun testSFmaxBet() {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
-        val publisher = Publisher(auditdir)
+        val topdir = "$testdataDir/cases/sf2024/oa"
+        val publisher = Publisher(topdir)
 
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
         val scontests = contests.sortedBy { it.id  }

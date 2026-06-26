@@ -20,12 +20,12 @@ private val logger = KotlinLogging.logger("CountyElectionSansCvrs")
 // generate countyPools from auditcenter
 open class CountyElectionSansCvrs (
     val coloradoInput: ColoradoInput,
-    val auditdir: String,
+    val topdir: String,
     val hasStyle: Boolean,
     val name: String,
     val onlyCounty: String? = null,
 ): ElectionBuilder {
-    val publisher = Publisher(auditdir)
+    val publisher = Publisher(topdir)
     val ncards: Int
     val contestsUA: List<ContestWithAssertions>
     val countyPools: List<CountyPools>
@@ -262,7 +262,6 @@ open class CountyElectionSansCvrs (
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
 fun createCountyElectionSansCvrs(
     topdir: String,
-    auditdir: String,
     coloradoInput: ColoradoInput,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
@@ -274,21 +273,21 @@ fun createCountyElectionSansCvrs(
     clearDirectory(Path(topdir))
 
     val election =
-        CountyElectionSansCvrs(coloradoInput,  auditdir, name=name,
+        CountyElectionSansCvrs(coloradoInput,  topdir, name=name,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent,
             onlyCounty = onlyCounty)
 
-    createElectionRecord(election, auditDir = auditdir, roundConfig.sampling, clear = false) // cants clear because we have the mvrs written
+    createElectionRecord(election, topdir = topdir, roundConfig.sampling, clear = false) // cants clear because we have the mvrs written
     val config = Config(election.electionInfo(), creation, roundConfig)
 
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir, sortManifest = true)
+    createAuditRecord(config, election, topdir = topdir, externalSortDir = topdir, sortManifest = true)
 
     writeCountyData(topdir, coloradoInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
     writeCountyContestData(topdir, contestMap, coloradoInput)
 
     if (startFirstRound) {
-        val result = startFirstRound(auditdir)
+        val result = startFirstRound(topdir)
         if (result.isErr) logger.error { result.toString() }
         logger.info { "createCorlaElection took $stopwatch" }
     }

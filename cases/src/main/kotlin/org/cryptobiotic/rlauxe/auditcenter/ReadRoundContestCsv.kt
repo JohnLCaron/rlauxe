@@ -57,13 +57,13 @@ data class CorlaContestRoundCsv(
     val contestName: String,
     val auditReason: AuditReason,
     val nwinners: Int,
-    val ballotCardCount: Int,         // population size = county size when uniform audit
+    val ballotCardCount: Int,         // population size = eg county size when uniform audit
     val contestBallotCardCount: Int,  // Nc = number of cards with this contest on it
     val winners: String,
     val minMargin: Int,
-    val riskLimit: Double,
-    val gamma: Double,
-    val optimisticSamplesToAudit: Int,
+    val riskLimit: Double,  // TODO use this
+    val gamma: Double,      // and this ?? = 1.03905000
+    val optimisticSamplesToAudit: Int, // check if these ever differ
     val estimatedSamplesToAudit: Int,
 )
 

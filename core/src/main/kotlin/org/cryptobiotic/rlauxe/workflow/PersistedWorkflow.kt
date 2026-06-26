@@ -18,8 +18,7 @@ class PersistedWorkflow(
     val auditRecord: AuditRecordIF,
     val mvrWrite: Boolean = true, // skip writing when doing RunRoundAgain
 ): AuditWorkflow() {
-    val auditDir = auditRecord.location
-    val publisher = Publisher(auditDir)
+    val publisher = Publisher(auditRecord.topdir)
 
     private val config: Config
     private val auditContests: List<ContestWithAssertions>
@@ -51,32 +50,31 @@ class PersistedWorkflow(
         val nextRound = super.startNewRound(quiet, onlyTask, auditorMaxNewMvrs)
 
         if (nextRound.samplePrns.isEmpty()) {
-            logger.warn {"*** FAILED TO GET ANY SAMPLES (PersistentAudit)"}
-            nextRound.auditIsComplete = true
-        } else {
-            // heres where we limit the number of samples we are willing to audit
-            val riskMeasuringSampleLimit = config.creation.riskMeasuringSampleLimit
-            if (riskMeasuringSampleLimit != null && nextRound.samplePrns.size > riskMeasuringSampleLimit) {
-                nextRound.samplePrns = nextRound.samplePrns.subList(0, riskMeasuringSampleLimit)
-            }
+            logger.warn {"There are no samples chosen for round ${nextRound.roundIdx}"}
+        }
 
-            val auditRoundConfig = config.round
-            writeAuditRoundConfigJsonFile(auditRoundConfig, publisher.auditRoundConfigFile(nextRound.roundIdx))
-            logger.info {"startNewRound writeAuditRoundConfig to ${publisher.auditRoundConfigFile(nextRound.roundIdx)}"}
+        // heres where we limit the number of samples we are willing to audit
+        val riskMeasuringSampleLimit = config.creation.riskMeasuringSampleLimit
+        if (riskMeasuringSampleLimit != null && nextRound.samplePrns.size > riskMeasuringSampleLimit) {
+            nextRound.samplePrns = nextRound.samplePrns.subList(0, riskMeasuringSampleLimit)
+        }
 
-            writeAuditRoundJsonFile(nextRound, publisher.auditEstFile(nextRound.roundIdx))
-            logger.info {"startNewRound writeAuditEstimation to ${publisher.auditEstFile(nextRound.roundIdx)}"}
+        val auditRoundConfig = config.round
+        writeAuditRoundConfigJsonFile(auditRoundConfig, publisher.auditRoundConfigFile(nextRound.roundIdx))
+        logger.info {"startNewRound writeAuditRoundConfig to ${publisher.auditRoundConfigFile(nextRound.roundIdx)}"}
 
-            writeSamplePrnsJsonFile(nextRound.samplePrns, publisher.samplePrnsFile(nextRound.roundIdx))
-            logger.info {"startNewRound ${nextRound.samplePrns.size} samplePrns written to ${publisher.samplePrnsFile(nextRound.roundIdx)}"}
+        writeAuditRoundJsonFile(nextRound, publisher.auditEstFile(nextRound.roundIdx))
+        logger.info {"startNewRound writeAuditEstimation to ${publisher.auditEstFile(nextRound.roundIdx)}"}
 
-            // TODO what if we wrote mvrs as part of startNewRound instead of runAuditRound ??
-            //   in a real audit, need to set the real mvrs externally with EnterMvrsCli, which calls auditRecord.enterMvrs(mvrs)
-            //   in a test audit, the test mvrs are generated from the cardManifest, with optional fuzzing
-            if (mvrManager is PersistedMvrManagerTest) {
-                val sampledMvrs = mvrManager.setMvrsForRoundIdx(nextRound.roundIdx)
-                logger.info {"  added ${sampledMvrs.size} mvrs to mvrManager"}
-            }
+        writeSamplePrnsJsonFile(nextRound.samplePrns, publisher.samplePrnsFile(nextRound.roundIdx))
+        logger.info {"startNewRound ${nextRound.samplePrns.size} samplePrns written to ${publisher.samplePrnsFile(nextRound.roundIdx)}"}
+
+        // TODO what if we wrote mvrs as part of startNewRound instead of runAuditRound ??
+        //   in a real audit, need to set the real mvrs externally with EnterMvrsCli, which calls auditRecord.enterMvrs(mvrs)
+        //   in a test audit, the test mvrs are generated from the cardManifest, with optional fuzzing
+        if (mvrManager is PersistedMvrManagerTest) {
+            val sampledMvrs = mvrManager.setMvrsForRoundIdx(nextRound.roundIdx)
+            logger.info {"  added ${sampledMvrs.size} mvrs to mvrManager"}
         }
 
         return nextRound
@@ -110,7 +108,7 @@ class PersistedWorkflow(
     }
 
     override fun toString(): String {
-        return "PersistentWorkflow(auditDir='$auditDir', mode=$mvrSource, mvrManager=${mvrManager.javaClass.simpleName})"
+        return "PersistentWorkflow(topdir='${auditRecord.topdir}', mode=$mvrSource, mvrManager=${mvrManager.javaClass.simpleName})"
     }
 
     companion object {

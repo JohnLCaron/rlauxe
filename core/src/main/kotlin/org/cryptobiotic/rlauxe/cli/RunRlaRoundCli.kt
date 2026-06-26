@@ -82,9 +82,9 @@ object RunRoundAgainCli {
     @JvmStatic
     fun main(args: Array<String>) {
         val parser = ArgParser("RunAudit")
-        val auditDir by parser.option(
+        val topdir by parser.option(
             ArgType.String,
-            shortName = "auditDir",
+            shortName = "topdir",
             description = "Directory containing input election record"
         ).required()
         val roundIdx by parser.option(
@@ -111,14 +111,14 @@ object RunRoundAgainCli {
         try {
             parser.parse(args)
 
-            val auditRecord = AuditRecord.read(auditDir)
+            val auditRecord = AuditRecord.read(topdir)
             if (auditRecord == null) {
-                println("auditRecord not found at $auditDir")
+                println("auditRecord not found at $topdir")
                 return
             }
             val auditRound = if (roundIdx == -1) auditRecord.rounds.last() else auditRecord.rounds.find { it.roundIdx == roundIdx }
             if (auditRound == null) {
-                println("AuditRound roundIdx $roundIdx not found at $auditDir")
+                println("AuditRound roundIdx $roundIdx not found at $topdir")
                 return
             }
             val contestRound = if (contestName != null) auditRound.contestRounds.find { it.name == contestName }
@@ -140,8 +140,7 @@ object RunRoundAgainCli {
                 return
             }
 
-            // fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {
-            val result = runRoundAgain(auditDir, contestRound, assertionRound)
+            val result = runRoundAgain(topdir, contestRound, assertionRound)
             println(result)
         } catch (t: Throwable) {
             println(t.message)

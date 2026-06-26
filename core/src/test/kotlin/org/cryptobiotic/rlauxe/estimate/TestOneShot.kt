@@ -10,13 +10,13 @@ class TestOneShot {
 
     @Test
     fun testOneShot() {
-        val auditdir = "$testdataDir/cases/corla/consistent/audit"
-        val record = AuditRecord.read(auditdir)
+        val topdir = "$testdataDir/cases/corla/consistent"
+        val record = AuditRecord.read(topdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)
 
-        val writeOneshot = Publisher(auditdir).privateOneshotFile()
-        val oneshot = OneShotAudit(auditdir)
+        val writeOneshot = Publisher(topdir).privateOneshotFile()
+        val oneshot = OneShotAudit(topdir)
         oneshot.run(null, writeOneshot, show=true)
 
         val oneshotNmvrs = record.readOneShotMvrs()
@@ -25,8 +25,8 @@ class TestOneShot {
 
     // @Test dont use for unit tests TODO WHY NOT?
     fun testEstimatePollingAudit() {
-        val auditdir = "/home/stormy/rla/cases/corla/polling/audit"
-        val record = AuditRecord.read(auditdir)
+        val topdir = "/home/stormy/rla/cases/corla/polling"
+        val record = AuditRecord.read(topdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)
         val mvrManager = PersistedMvrManager(record)
@@ -34,7 +34,7 @@ class TestOneShot {
         val roundIdx = 4
         val auditRound = record.rounds[roundIdx-1]
         val estaudit = EstimateAudit(
-            auditdir,
+            topdir,
             record.config,
             roundIdx,
             auditRound.contestRounds,

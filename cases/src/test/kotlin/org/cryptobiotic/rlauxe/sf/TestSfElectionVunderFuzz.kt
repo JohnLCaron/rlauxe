@@ -19,8 +19,8 @@ import kotlin.test.assertEquals
 import kotlin.use
 
 class TestSfElectionVunderFuzz {
-    val auditdir = "$testdataDir/cases/sf2024/oa/audit"
-    val publisher = Publisher(auditdir)
+    val topdir = "$testdataDir/cases/sf2024/oa"
+    val publisher = Publisher(topdir)
 
     val mvrManager: PersistedMvrManager
     val sortedManifest: SortedManifest
@@ -31,7 +31,7 @@ class TestSfElectionVunderFuzz {
     val cardPools: List<CardPool>?
 
     init {
-        val auditRecord = AuditRecord.read(auditdir) as AuditRecord
+        val auditRecord = AuditRecord.read(topdir) as AuditRecord
         mvrManager = PersistedMvrManager(auditRecord)
         val mvrManager = PersistedMvrManager(auditRecord)
         sortedManifest = mvrManager.sortedManifest()

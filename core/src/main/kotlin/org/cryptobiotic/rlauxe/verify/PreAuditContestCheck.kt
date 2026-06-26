@@ -46,8 +46,8 @@ fun preAuditContestCheck(contestsUA: List<ContestWithAssertions>, control: Conte
                     logger.info { "*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minMargin()} <= ${control.minMargin}" }
                     contestUA.preAuditStatus = TestH0Status.MinMargin
                 }
-                if (contestUA.Npop <= (control.minSize ?: 0) ) {
-                    logger.info { "*** MinSize contest ${contestUA.id} population ${contestUA.Npop} <= ${control.minSize}" }
+                if (contestUA.Nc <= (control.minSize ?: 0) ) {
+                    logger.info { "*** MinSize contest ${contestUA.id} population ${contestUA.Nc} <= ${control.minSize}" }
                     contestUA.preAuditStatus = TestH0Status.MinSize
                 }
             }

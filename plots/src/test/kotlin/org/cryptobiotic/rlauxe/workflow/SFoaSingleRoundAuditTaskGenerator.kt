@@ -18,7 +18,7 @@ interface WorkflowResultListTaskGenerator {
 
 class SFoaSingleRoundAuditTaskGenerator(
     val run: Int,
-    val auditDir: String,
+    val topdir: String,
     val mvrsFuzzPct: Double = 0.0,
     val parameters : Map<String, Any>,
     val auditConfigIn: Config? = null,
@@ -30,7 +30,7 @@ class SFoaSingleRoundAuditTaskGenerator(
 
         return SfoaSingleRoundAuditTask(
             run,
-            auditDir,
+            topdir,
             parameters,
             quiet = false,
         )
@@ -39,7 +39,7 @@ class SFoaSingleRoundAuditTaskGenerator(
 
 class SfoaSingleRoundAuditTask(
     val run: Int,
-    val auditDir: String,
+    val topdir: String,
     val otherParameters: Map<String, Any>,
     val quiet: Boolean,
 ) : ConcurrentTask<List<WorkflowResult>> {
@@ -50,7 +50,7 @@ class SfoaSingleRoundAuditTask(
         println("SfoaSingleRoundAuditTask start ${name()}")
         val wresults = mutableListOf<WorkflowResult>()
 
-        val rlauxAudit = PersistedWorkflow.readFrom(auditDir)!!
+        val rlauxAudit = PersistedWorkflow.readFrom(topdir)!!
         val mvrManager = rlauxAudit.mvrManager()
         val batches = mvrManager.styles()
 
@@ -59,7 +59,7 @@ class SfoaSingleRoundAuditTask(
                 val assertionRound = AssertionRound(cassertion, 1, null)
                 val contestRound = ContestRound(contestUA, listOf(assertionRound), 1)
 
-                val skipper = AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run, batches)
+                val skipper = AuditableCardCsvReaderSkip("$topdir/sortedCards.csv", skipPerRun * run, batches)
                 val manifestWithSkipper = SortedManifest(skipper, 0)
 
                 val sampler =

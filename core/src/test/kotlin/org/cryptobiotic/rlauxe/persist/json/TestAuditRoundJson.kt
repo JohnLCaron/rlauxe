@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.irv.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.irv.simulateRaireTestContest
+import org.cryptobiotic.rlauxe.strata.Strata
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
@@ -23,8 +24,8 @@ class TestAuditRoundJson {
 
     @Test
     fun testSf24oa() {
-        val auditdir = "/home/stormy/rla/cases/sf2024/oa/audit"
-        val record = AuditRecord.read(auditdir) as AuditRecord
+        val topdir = "/home/stormy/rla/cases/sf2024/oa"
+        val record = AuditRecord.read(topdir) as AuditRecord
         val contestsUAs = record.contests
 
         val scratchFile = createTempFile().toFile()
@@ -73,6 +74,7 @@ class TestAuditRoundJson {
         val target = AuditRound(
             2,
             contestRounds,
+            countyStrata = listOf(Strata("Silt", 42, 348730), Strata("Dawn", 422, 348730)),
             true,
             false,
             samplePrns = listOf(1,2,3),
@@ -103,6 +105,7 @@ class TestAuditRoundJson {
         val target = AuditRound(
             1,
             contestRounds,
+            countyStrata = null,
             false,
             false,
             samplePrns = listOf(1,2,3, 21),
@@ -149,6 +152,7 @@ class TestAuditRoundJson {
         val target = AuditRound(
             1,
             lastRound.contestRounds,
+            null,
             false,
             false,
             samplePrns = lastRound.samplePrns,
@@ -226,6 +230,7 @@ class TestAuditRoundJson {
         val target = AuditRound(
             1,
             nextRound.contestRounds,
+            null,
             false,
             false,
             samplePrns = nextRound.samplePrns,
@@ -273,6 +278,7 @@ class TestAuditRoundJson {
         val target = AuditRound(
             1,
             nextRound.contestRounds,
+            null,
             false,
             false,
             samplePrns = nextRound.samplePrns,

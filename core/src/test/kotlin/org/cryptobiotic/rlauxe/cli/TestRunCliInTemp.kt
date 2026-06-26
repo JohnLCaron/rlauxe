@@ -15,7 +15,6 @@ class TestRunCliInTemp {
     fun testCliRoundClca() {
         val topPath = createTempDirectory()
         val topdir = topPath.toString()
-        val auditdir = "$topdir/audit"
 
         RunRlaStartFuzz.main(
             arrayOf(
@@ -28,25 +27,25 @@ class TestRunCliInTemp {
         )
 
         println("============================================================")
-        RunVerifyContests.main(arrayOf("-in", auditdir))
+        RunVerifyContests.main(arrayOf("-in", topdir))
 
         println("============================================================")
         RunRlaRoundCli.main(
             arrayOf(
-                "-in", auditdir,
+                "-in", topdir,
             )
         )
 
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir)
+            val lastRound = runRound(inputDir = topdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
 
         println("============================================================")
         val status = RunVerifyAuditRecord.main(
             arrayOf(
-                "-in", auditdir,
+                "-in", topdir,
             )
         )
         println(status)
@@ -57,7 +56,6 @@ class TestRunCliInTemp {
     fun testCliRoundPolling() {
         val topPath = createTempDirectory()
         val topdir = topPath.toString()
-        val auditdir = "$topdir/audit"
 
         RunRlaStartFuzz.main(
             arrayOf(
@@ -71,16 +69,16 @@ class TestRunCliInTemp {
 
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir)
+            val lastRound = runRound(inputDir = topdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 7
         }
 
         println("============================================================")
-        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=auditdir)
+        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
         println(results)
 
         println("============================================================")
-        val results2 = RunVerifyContests.runVerifyContests(auditdir, null, false)
+        val results2 = RunVerifyContests.runVerifyContests(topdir, null, false)
         println()
         print(results2)
 
@@ -93,7 +91,6 @@ class TestRunCliInTemp {
     fun testCliRoundRaire() {
         val topPath = createTempDirectory()
         val topdir = topPath.toString()
-        val auditdir = "$topdir/audit"
 
         RunRlaStartFuzz.main(
             arrayOf(
@@ -108,17 +105,17 @@ class TestRunCliInTemp {
         )
 
         println("============================================================")
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, false)
+        val results = RunVerifyContests.runVerifyContests(topdir, null, false)
 
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir)
+            val lastRound = runRound(inputDir = topdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
 
         println("============================================================")
-        val results2 = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=auditdir)
+        val results2 = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
 
         topPath.deleteRecursively()
         if (results.hasErrors) fail()
@@ -129,7 +126,6 @@ class TestRunCliInTemp {
     fun testCliOneAudit() {
         val topPath = createTempDirectory()
         val topdir = topPath.toString()
-        val auditdir = "$topdir/audit"
 
         RunRlaStartFuzz.main(
             arrayOf(
@@ -142,19 +138,19 @@ class TestRunCliInTemp {
         )
 
         println("============================================================")
-        val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
+        val resultsvc = RunVerifyContests.runVerifyContests(topdir, null, false)
         println()
         print(resultsvc)
 
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir)
+            val lastRound = runRound(inputDir = topdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
 
         println("============================================================")
-        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditdir)
+        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = topdir)
         println(results)
 
         if (results.hasErrors) fail()

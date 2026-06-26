@@ -32,7 +32,7 @@ class TestGenerateAllUseCases {
 
     @Test
     fun createBoulder24oa() {
-        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
+        val topdir = "$testdataDir/cases/boulder24/oa"
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, )
         val round = AuditRoundConfig(
@@ -44,7 +44,7 @@ class TestGenerateAllUseCases {
             "2024",
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditdir = auditdir,
+            topdir = topdir,
             creation,
             round,
             distributeOvervotes = listOf(0, 63)
@@ -53,7 +53,7 @@ class TestGenerateAllUseCases {
 
     @Test
     fun createBoulder24clca() { // simulate CVRs
-        val auditdir = "$testdataDir/cases/boulder24/clca/audit"
+        val topdir = "$testdataDir/cases/boulder24/clca"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, )
         val round = AuditRoundConfig(
@@ -65,7 +65,7 @@ class TestGenerateAllUseCases {
             "2024",
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditdir = auditdir,
+            topdir = topdir,
             creation,
             round,
             distributeOvervotes = listOf(0, 63)
@@ -84,7 +84,7 @@ class TestGenerateAllUseCases {
                 sampling = Sampling.uniform),
             ClcaConfig(), null)
 
-        createUniformElection(topdir, "$topdir/audit",
+        createUniformElection(topdir,
             Colorado2024General(), creation, round, name = "Corla24Uniform")
     }
 
@@ -99,7 +99,7 @@ class TestGenerateAllUseCases {
                 sampling = Sampling.consistent),
             ClcaConfig(), null)
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(),
+        createCorlaElection(topdir, Colorado2024General(),
             null, creation, round, name = "Corla24Consistent", startFirstRound = true)
     }
 
@@ -113,7 +113,7 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
             ClcaConfig(), null)
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(), null, creation, round)
+        createCorlaElection(topdir,  Colorado2024General(), null, creation, round)
     }
 
    //  @Test
@@ -126,7 +126,7 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(),
+        createCorlaElection(topdir,  Colorado2024General(),
             pollingMode=PollingMode.withPools, creation, round)
     }
 
@@ -140,7 +140,7 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(),
+        createCorlaElection(topdir,  Colorado2024General(),
             pollingMode=PollingMode.withBatches, creation, round)
     }
 
@@ -154,7 +154,7 @@ class TestGenerateAllUseCases {
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
-        createCorlaElection(topdir, "$topdir/audit", Colorado2024General(),
+        createCorlaElection(topdir,  Colorado2024General(),
             pollingMode=PollingMode.withoutBatches, creation, round,
             startFirstRound = false,
         )
@@ -162,7 +162,7 @@ class TestGenerateAllUseCases {
 
     // @Test
     fun makeSFPrecinctAndStyleOA() {
-        val auditdir = "$testdataDir/cases/sf2024/oaps/audit"
+        val topdir = "$testdataDir/cases/sf2024/oaps"
         val contestManifestFilename = "ContestManifest.json"
         val candidateManifestFile = "CandidateManifest.json"
 
@@ -185,12 +185,12 @@ class TestGenerateAllUseCases {
             mvrSource = mvrSource
         )
 
-        createElectionRecord(election, auditDir = auditdir)
+        createElectionRecord(election, topdir = topdir)
 
         val config = Config(election.electionInfo(), creation, round)
-        createAuditRecord(config, election, auditDir = auditdir)
+        createAuditRecord(config, election, topdir = topdir)
 
-        val result = startFirstRound(auditdir)
+        val result = startFirstRound(topdir)
         if (result.isErr) {
             println( result.toString() )
             fail()
@@ -199,7 +199,7 @@ class TestGenerateAllUseCases {
 
     @Test
     fun makeSFElectionOA() {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
+        val topdir = "$testdataDir/cases/sf2024/oa"
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, )
         val round = AuditRoundConfig(
@@ -208,7 +208,7 @@ class TestGenerateAllUseCases {
             ClcaConfig(), null)
 
         createSfElection(
-            auditdir=auditdir,
+            topdir=topdir,
             sfZipFile,
             "ContestManifest.json",
             "CandidateManifest.json",
@@ -220,7 +220,7 @@ class TestGenerateAllUseCases {
 
     @Test
     fun makeSFElectionClca() {
-        val auditdir = "$testdataDir/cases/sf2024/clca/audit"
+        val topdir = "$testdataDir/cases/sf2024/clca"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, )
         val round = AuditRoundConfig(
@@ -229,7 +229,7 @@ class TestGenerateAllUseCases {
             ClcaConfig(), null)
 
         createSfElection(
-            auditdir=auditdir,
+            topdir=topdir,
             sfZipFile,
             "ContestManifest.json",
             "CandidateManifest.json",

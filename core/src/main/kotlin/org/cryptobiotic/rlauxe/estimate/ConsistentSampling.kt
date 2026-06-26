@@ -3,8 +3,12 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.strata.Strata
+import org.cryptobiotic.rlauxe.strata.setHaveSampleSize
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.CloseableIterable
+import kotlin.text.drop
 
 private val verifyMaxIndex = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
@@ -113,10 +117,10 @@ fun chooseSamples(
     samplingCards: CloseableIterable<SamplingCardIF>,
     previousSamples: Set<Long> = emptySet(), // all previous prns ever sampled
 ): List<Long> {
-    if (sampling.sampling == Sampling.consistent || (auditRound.roundIdx == 1 && !auditRound.auditWasDone))
-        return consistentSampling(auditRound, samplingCards, previousSamples)
+    return if (sampling.sampling == Sampling.uniform)
+        uniformSampling(auditRound, samplingCards, previousSamples)
     else
-        return uniformSampling(auditRound, samplingCards, previousSamples)
+        consistentSampling(auditRound, samplingCards, previousSamples)
 }
 
 // From Consistent Sampling with Replacement, Ronald Rivest, August 31, 2018
@@ -131,7 +135,7 @@ fun chooseSamples(
 fun consistentSampling(
     auditRound: AuditRoundIF,
     samplingCards: CloseableIterable<SamplingCardIF>,
-    previousSamples: Set<Long> = emptySet(), // all previous prns ever sampled
+    previousSamples: Set<Long> = emptySet(),
 ): List<Long>  // debugging
 {
     val stopwatch = Stopwatch()
@@ -212,27 +216,6 @@ fun consistentSampling(
 
         cardIndex++
     }
-    /*
-    logger.info{"consistent sampling read $cardIndex cards"}
-    val contest19 = contestsIncluded.find { it.id == 19 }!!
-    logger.info { "contest ${contest19.id}:  (have) ${contest19.haveSampleSize} ${(wantSampleSize[contest19.id] ?: 0)} (want) maxSampleAllowed=${contest19.maxSampleAllowed}" }
-    val extract = mutableListOf<AuditableCard>()
-    sampledCards.forEachIndexed { idx, card ->
-        if (card.hasContest(19) && idx < contest19.maxSampleAllowed!!) {
-            extract.add(card)
-        }
-    }
-    println("extract 19 = ${extract.size}")
-    print("")
-    // TODO why would this happen ??
-    val wantMore = contestsIncluded.any { it.haveSampleSize < (wantSampleSize[it.id] ?: 0) }
-    if (wantMore) {
-        contestsIncluded.forEach {
-            if (it.haveSampleSize < (wantSampleSize[it.id] ?: 0))
-                logger.warn { "contest ${it.id}:  (have) ${it.haveSampleSize} < ${(wantSampleSize[it.id] ?: 0)} (want)" }
-        }
-    } */
-    // if (debugConsistent) logger.info{"**consistentSampling haveSampleSize = $haveSampleSize, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs"}
 
     // set the results into the auditRound direclty
     auditRound.nmvrs = sampledPrns.size
@@ -243,17 +226,103 @@ fun consistentSampling(
     return sampledPrns
 }
 
-// we dont have an example of a uniform audit. Corla just using values from colorado-rla.
 fun uniformSampling(
     auditRound: AuditRoundIF,
     samplingCards: CloseableIterable<SamplingCardIF>,
-    previousSamples: Set<Long> = emptySet(), // all previous prns ever sampled
+    previousSamples: Set<Long> = emptySet(), // TODO
+): List<Long>  // debugging
+{
+    val stopwatch = Stopwatch()
+    if (auditRound.countyStrata == null)  return emptyList()
+    val countyStrataWant: Map<String, Strata> = auditRound.countyStrata!!.associateBy { it.strataName }
+    if (countyStrataWant.isEmpty()) return emptyList()
+
+    // included means these are included in the sampling
+    // we still want to estimate risks for not-done contests
+    //val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
+    //val contestsIncluded = auditRound.contestRounds.filter { !it.done && it.included }
+    //if (contestsIncluded.isEmpty()) return emptyList()
+
+    var newMvrs = 0 // count when this card not in previous samples
+    auditRound.contestRounds.forEach {
+        it.haveSampleSize = 0
+        it.haveNewSampleSize = 0
+    }
+
+    val wantFromPools = countyStrataWant.mapValues { it.value.nmvrs }
+    val haveFromPools = mutableMapOf<String, Int>()
+    val sampledPrns = mutableListOf<Long>()
+    var cardIndex = 0  // track maximum index (not done yet)
+
+    var maxNewSamples = auditRound.auditorMaxNewMvrs // TODO test
+    if (maxNewSamples == null || maxNewSamples < 0) maxNewSamples = Int.MAX_VALUE
+    val useAll = auditRound.auditorMaxNewMvrs != null
+    val samplingCardIter = samplingCards.iterator()
+    while (
+        samplingCardIter.hasNext() &&
+        sampledPrns.size < maxNewSamples &&
+        wantFromPools.any { it.value > (haveFromPools[it.key] ?: 0) } // have < want
+    ) {
+        // get the next card in sorted order
+        val card = samplingCardIter.next()
+        val countyName = card.poolName()
+
+        // do we want it ?
+        val haveFromPool = haveFromPools.getOrDefault(countyName, 0)
+        val include = useAll || (haveFromPool < (wantFromPools[countyName] ?: 0))  // have < want
+
+        if (include) {
+            haveFromPools[countyName] = haveFromPool + 1
+            sampledPrns.add(card.prn())
+        }
+        cardIndex++
+
+        // debug
+        if (cardIndex % 5000 == 0) {
+            val need = mutableMapOf<String, Int>()
+            wantFromPools.forEach { (name, want) ->
+                val have = haveFromPools[countyName] ?: 0
+                val still = want - have
+                if (still > 0) need[name] = still
+            }
+            logger.info { " after $cardIndex cards, have ${sampledPrns.size} and still need = $need"}
+        }
+    }
+
+    // set the results into the contestRound
+    val countyStrata = mutableMapOf<String, Strata>()
+    countyStrataWant.forEach { (name, strata) ->
+        val have = haveFromPools[name] ?: 0
+        countyStrata[name] = Strata(name, have, strata.population)
+    }
+    setHaveSampleSize(auditRound.contestRounds.filter { !it.done }, countyStrata, useAll)
+
+    // set the results into the auditRound directly
+    auditRound.nmvrs = sampledPrns.size
+    auditRound.newmvrs = newMvrs
+    auditRound.samplePrns = sampledPrns
+
+    logger.info{" uniformSampling read $cardIndex and chose ${sampledPrns.size} cards; took $stopwatch"}
+    return sampledPrns
+}
+
+fun counties(contestUA: ContestWithAssertions): List<String> {
+    val CORLAcounties = contestUA.contest.info().metadata.get("CORLAcounties")
+    if (CORLAcounties == null) return emptyList()
+    val stripped = CORLAcounties.drop(1).dropLast(1)
+    return stripped.split(",".toRegex()).dropLastWhile { it.isEmpty() }
+}
+
+// we dont have an example of a uniform audit. Corla just using values from colorado-rla.
+fun uniformSamplingOld(
+    auditRound: AuditRoundIF,
+    samplingCards: CloseableIterable<SamplingCardIF>,
+    previousSamples: Set<Long> = emptySet(),
 ): List<Long> {
 
     // ignore included flag, eliminate done
     val contestsIncluded = auditRound.contestRounds.filter { !it.done }
     if (contestsIncluded.isEmpty()) return emptyList()
-
 
     var newMvrs = 0 // count when this card not in previous samples
     auditRound.contestRounds.forEach {
@@ -306,7 +375,8 @@ fun uniformSampling(
     auditRound.newmvrs = newMvrs
     auditRound.samplePrns = sampledPrns
 
-    logger.info{" consistentSampling chose ${sampledPrns.size} cards"}
+    logger.info{" uniformSamplingOld chose ${sampledPrns.size} cards"}
     return sampledPrns
 }
+
 

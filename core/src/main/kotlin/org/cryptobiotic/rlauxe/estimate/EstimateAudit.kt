@@ -46,7 +46,7 @@ private val showWork = false
 //   assertionRound.estimationResult = estimationResult
 
 class EstimateAudit(
-    val auditdir: String,
+    val topdir: String,
     val config: Config,
     val roundIdx: Int,
     val contests: List<ContestRound>,
@@ -71,7 +71,7 @@ class EstimateAudit(
         // each trial is running all the contests in the round (but only the minAssertion)
         val ntrials = if (auditType.isClca()) 1 else config.round.simulation.nsimTrials
         repeat(ntrials) { run ->
-            tasks.add(AuditTrialTask(auditdir, roundIdx, run+1, config, contestsToAudit, pools, styles, sortedManifest))
+            tasks.add(AuditTrialTask(topdir, roundIdx, run+1, config, contestsToAudit, pools, styles, sortedManifest))
         }
         val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunner<List<AssertionTrialIF>>().run(tasks, nthreads)
 
@@ -165,7 +165,7 @@ class EstimateAudit(
 
 // 1 trial, all contests
 class AuditTrialTask(
-    val auditdir: String,
+    val topdir: String,
     val roundIdx: Int,
     val run: Int,
     val config: Config,
@@ -238,7 +238,7 @@ class AuditTrialTask(
         if (keepSimMvrs) {
             // hmm on subsequent rounds, wont you get diffferent simulation on previous cards ?
             // yes but we skip cards already used using prevSamplesUsed ....
-            val publisher = Publisher(auditdir)
+            val publisher = Publisher(topdir)
             writeCardCsvFile(simMvrs , publisher.estMvrsFile(roundIdx, run))
         }
 

@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.estRiskStandardBet
 import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.strata.Strata
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -30,8 +31,11 @@ class TestUniformSampling {
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         // contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
 
-        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
+        val countyStrata = listOf(Strata("test", 42, 1287))
+        val auditRound = AuditRound(1, contestRounds, countyStrata = countyStrata, samplePrns = emptyList())
         auditRound.auditorMaxNewMvrs = 1111
+
+        // TODO need styles with poolNames, then wantFromPools says how many from each pool
 
         //// main side effects:
         ////    auditRound.nmvrs = sampledCards.size
@@ -107,7 +111,7 @@ class TestUniformSampling {
             //   useAssertionRound.estNewMvrs = newMvrs
             //   assertionRound.estimationResult = estimationResult
             val estimate = EstimateAudit(
-                mvrManager.auditdir(),
+                mvrManager.topdir(),
                 config,
                 auditRound.roundIdx,
                 auditRound.contestRounds,

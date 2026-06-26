@@ -7,11 +7,11 @@ class TestRunCalcAssortAvg {
 
     @Test
     fun testRunCalcAssortAvg() {
-        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
+        val topdir = "$testdataDir/cases/boulder24/oa"
 
         RunCalcAssortAvg.main(
             arrayOf(
-                "-in", auditdir,
+                "-in", topdir,
                "-contest", "50", // use name for composite ??
                "-assertion", "1/0"
             )

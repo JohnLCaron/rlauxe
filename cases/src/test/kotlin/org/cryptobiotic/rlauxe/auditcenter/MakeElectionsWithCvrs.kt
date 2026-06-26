@@ -1,15 +1,23 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import com.github.michaelbull.result.Result
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
+import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
+import org.cryptobiotic.rlauxe.audit.resampleAndSaveResults
+import org.cryptobiotic.rlauxe.audit.runRound
+import org.cryptobiotic.rlauxe.audit.runRoundResult
+import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
+import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.votedatabase.colorado2020
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
@@ -20,24 +28,48 @@ import kotlin.test.Test
 class MakeElectionsWithCvrs {
     val show = false
 
-    @Test
-    fun makeColorado2020() {
-        val topdir = "$cases/corla/withCvrs/Colorado2020"
+    val round = AuditRoundConfig(
+        SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
+        ContestSampleControl(
+            minRecountMargin = .005,
+            minMargin = .005,
+            minSize = 10,
+            contestSampleCutoff = 10000,
+            auditSampleCutoff = 200000,
+            sampling = Sampling.consistent),
+        ClcaConfig(), null)
 
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
+    @Test
+    fun makeColorado2020uniform() {
+        val topdir = "$cases/corla/withCvrs/Colorado2020uniform"
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.04, ) // TODO LOOK
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
-            ContestSampleControl(minRecountMargin = .005,
+            ContestSampleControl(
+                minRecountMargin = .005,
+                minMargin = .005,
                 minSize = 10,
                 contestSampleCutoff = 10000,
                 auditSampleCutoff = 200000,
-                sampling = Sampling.consistent),
+                sampling = Sampling.uniform),
             ClcaConfig(), null)
 
-        // TODO topdir vs auditdir !!
         countyElectionWithCvrs(
             allColorado2020Counties(), Colorado2020General(), topdir,
-            creation, round, name = "Colorado2020", startFirstRound = true
+            creation, round, name = "Colorado2020uniform", startFirstRound = true,
+            isUniform = true,
+        )
+    }
+
+    @Test
+    fun makeColorado2020() {
+        val topdir = "$cases/corla/withCvrs/Colorado2020"
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.04, ) // TODO LOOK
+
+        countyElectionWithCvrs(
+            allColorado2020Counties(), Colorado2020General(), topdir,
+            creation, round, name = "Colorado2020", startFirstRound = true,
+            isUniform = false,
         )
     }
 
@@ -55,9 +87,29 @@ class MakeElectionsWithCvrs {
     }
 
     @Test
+    fun startColorado2020() {
+        val topdir = "$cases/corla/withCvrs/Colorado2020uniform"
+        startFirstRound(topdir)
+    }
+
+    @Test
+    fun runColorado2020() {
+        val topdir = "$cases/corla/withCvrs/Colorado2020uniform"
+        runRound(topdir)
+    }
+    @Test
+    fun resampleColorado2020() {
+        val topdir = "$cases/corla/withCvrs/Colorado2020uniform"
+        resampleAndSaveResults(topdir)
+    }
+
+    @Test
     fun openColorado2020() {
-        val auditdir = "$cases/corla/withCvrs/Colorado2020"
-        val countyRecord = AuditRecord.read(auditdir) as CountyAuditRecord
+        val topdir = "$cases/corla/withCvrs/Colorado2020uniform"
+        val countyRecord = AuditRecord.read(topdir) as CountyAuditRecord
+
+        val what = runRoundResult(topdir)
+        println(what)
 
         println("countyRecord.countyData")
         // countyRecord.countyData.forEach { println( it) }
@@ -68,7 +120,7 @@ class MakeElectionsWithCvrs {
 
         val mvrCounts = countyRecord.countMvrsByCounty()
         println("countyRecord.countMvrsByCounty")
-        mvrCounts.forEach { println( it) }
+        mvrCounts.forEach { println(it) }
         println()
     }
 }

@@ -17,7 +17,7 @@ class MakeSfElection {
 
     @Test
     fun makeSFElectionOA() {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
+        val topdir = "$testdataDir/cases/sf2024/oa"
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05,)
         val round = AuditRoundConfig(
@@ -26,7 +26,7 @@ class MakeSfElection {
             ClcaConfig(), null)
 
         createSfElection(
-            auditdir=auditdir,
+            topdir=topdir,
             castVoteRecordZip,
             "ContestManifest.json",
             "CandidateManifest.json",
@@ -38,8 +38,8 @@ class MakeSfElection {
 
     @Test
     fun testRunVerifySFoa() {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
+        val topdir = "$testdataDir/cases/sf2024/oa"
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = false)
         println()
         print(results)
         if (results.hasErrors) fail()
@@ -47,7 +47,7 @@ class MakeSfElection {
 
     @Test
     fun makeSFElectionClca() {
-        val auditdir = "$testdataDir/cases/sf2024/clca/audit"
+        val topdir = "$testdataDir/cases/sf2024/clca"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, )
         val round = AuditRoundConfig(
@@ -56,7 +56,7 @@ class MakeSfElection {
             ClcaConfig(fuzzMvrs=.001), null)
 
         createSfElection(
-            auditdir=auditdir,
+            topdir=topdir,
             castVoteRecordZip,
             "ContestManifest.json",
             "CandidateManifest.json",
@@ -68,7 +68,7 @@ class MakeSfElection {
 
     @Test
     fun makePrecinctAndStyleOA() {
-        val auditdir = "$testdataDir/cases/sf2024/oaps/audit"
+        val topdir = "$testdataDir/cases/sf2024/oaps"
         val contestManifestFilename = "ContestManifest.json"
         val candidateManifestFile = "CandidateManifest.json"
 
@@ -91,12 +91,12 @@ class MakeSfElection {
             mvrSource = mvrSource
         )
 
-        createElectionRecord(election, auditDir = auditdir)
+        createElectionRecord(election, topdir = topdir)
 
         val config = Config(election.electionInfo(), creation, round)
-        createAuditRecord(config, election, auditDir = auditdir)
+        createAuditRecord(config, election, topdir = topdir)
 
-        val result = startFirstRound(auditdir)
+        val result = startFirstRound(topdir)
         if (result.isErr) logger.error{ result.toString() }
     }
 }

@@ -129,7 +129,7 @@ class TestConsistentSampling {
             //   useAssertionRound.estNewMvrs = newMvrs
             //   assertionRound.estimationResult = estimationResult
             val estimate = EstimateAudit(
-                mvrManager.auditdir(),
+                mvrManager.topdir(),
                 config,
                 auditRound.roundIdx,
                 auditRound.contestRounds,

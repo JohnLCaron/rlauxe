@@ -2,15 +2,16 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import kotlin.test.Test
 
 class TestOneShot {
 
+    // OneShot requires MvrSource.testPrivateMvrs
     @Test
     fun testOneShot() {
-        val topdir = "$testdataDir/cases/corla/consistent"
+        val topdir = "src/test/data/testRunCli/clca"
         val record = AuditRecord.read(topdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)

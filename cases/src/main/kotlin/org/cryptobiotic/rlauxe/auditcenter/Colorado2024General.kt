@@ -1,10 +1,5 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.corla.ElectionDetailXml
-import org.cryptobiotic.rlauxe.corla.ResultsReportContest
-import org.cryptobiotic.rlauxe.corla.readColoradoElectionDetail
-import org.cryptobiotic.rlauxe.corla.readResultsReportContest
-
 class Colorado2024General: ColoradoInput(
     generalCanonicalFile = "$general2024/2024GeneralCanonicalList.csv",
     contestRoundFile = "$general2024/round1/contest.csv",
@@ -33,16 +28,8 @@ class Colorado2024General: ColoradoInput(
         result.toSortedMap()
     }
 
-    //// not used
-    val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
+    ///////////////////////// not used
 
-    val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-    val detailXmlContests: ElectionDetailXml by lazy { readColoradoElectionDetail(detailXmlFile) }
-
-    val resultsReportSummaryFile = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
-    val resultsContests: List<ResultsReportContest> by lazy {
-        readResultsReportContest(resultsReportSummaryFile) { it }
-    }
 
     // TODO County specific?
     fun contestNameCleanup(name: String): String {

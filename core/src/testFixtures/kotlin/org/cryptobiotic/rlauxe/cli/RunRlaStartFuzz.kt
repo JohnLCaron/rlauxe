@@ -180,7 +180,8 @@ class TestClcaElection(
     }
 
     override fun electionInfo() = ElectionInfo(
-        "TestClcaElection", AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true,)
+        "TestClcaElection", AuditType.CLCA, ncards(), contestsUA.size,
+        mvrSource = MvrSource.testPrivateMvrs, cvrsContainUndervotes = true,)
     override fun unsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, cardStyles()) // for in-memory case
     override fun unsortedMvrsExternal() = null
 

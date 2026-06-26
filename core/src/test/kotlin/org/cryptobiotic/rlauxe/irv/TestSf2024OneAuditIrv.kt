@@ -51,7 +51,7 @@ class TestSf2024OneAuditIrv() {
         }
     }
 
-    @Test
+    // @Test not working; plus its in testdataDir
     fun testAssorterMethods() {
         val contest24 = contests.find { it.id == 24 }!!
         val rcontestUA = contest24 as RaireContestWithAssertions

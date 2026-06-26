@@ -29,7 +29,7 @@ class MvrManagerFromManifest(
         val pairs = cardManifest.zip(mvrs)
         val prng = Prng(seed)
         val cardsWithPrn = mutableListOf<Pair<AuditableCard, Cvr>>()
-        // pairs.forEach { cardsWithPrn.add(Pair(it.first.copy(prn=prng.next()), it.second)) } // TODO
+        pairs.forEach { cardsWithPrn.add(Pair(it.first.copy(prn=prng.next()), it.second)) }
         val sortedPairs = cardsWithPrn.sortedBy { it.first.prn() }
         sortedCards = sortedPairs.map { it.first }
         sortedMvrs = sortedPairs.map { it.second }

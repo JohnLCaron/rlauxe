@@ -19,15 +19,16 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.bundles.logging)
     implementation(libs.commons.csv)
-    implementation(libs.commons.poi)
-    implementation(libs.commons.poi.ooxml)
-    implementation(libs.bundles.xmlutil)
     implementation(libs.logback.classic)
 
+    testImplementation(testFixtures(project(":core")))
     testImplementation(libs.bundles.jvmtest)
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(testFixtures(project(":core")))
+    testImplementation(libs.commons.poi)
+    testImplementation(libs.commons.poi.ooxml)
+    testImplementation(libs.bundles.xmlutil)
+
 }
 
 tasks.test {

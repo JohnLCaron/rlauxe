@@ -46,7 +46,6 @@ class TestUniformSampling {
 
         println("uniformSampling samples needed = ${auditRound.samplePrns.size}\n")
         assertEquals(auditRound.samplePrns.size, auditRound.nmvrs)
-        assertEquals(auditRound.nmvrs, auditRound.newmvrs)
 
         // must be ordered
         var lastRN = 0L

@@ -62,7 +62,7 @@ data class Config(
                  contestSampleCutoff:Int? = if (auditType.isPolling()) 10000 else 2000,
                  apriori: TausRates = TausRates(emptyMap()),
                  mvrSource: MvrSource = if (auditType.isClca())
-                      MvrSource.testClcaSimulated else MvrSource.testPrivateMvrs,): Config {
+                      MvrSource.testClcaSimulated else MvrSource.testPrivateMvrs): Config {
 
             return from(
                 ElectionInfo.forTest(auditType, mvrSource),

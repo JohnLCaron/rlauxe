@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 06/26/2026_
+_last changed: 06/29/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the

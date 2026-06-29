@@ -218,14 +218,6 @@ class DHondtContest(
 
     data class Dround(val candId: Int, val score: Double, val round: Int, val winningSeat: Int?)
 
-    // this needs to be recalculated as the mvrLimit might change
-/*     private var candSeats: CandSeatRangeBuilder2? = null
-    private fun getCandSeats(contestRound: ContestRound): CandSeatRangeBuilder2 {
-        if (candSeats != null) return candSeats!!
-        candSeats = CandSeatRangeBuilder2(contestRound)
-        return candSeats!!
-    } */
-
     fun showRelaxedAssertions(contestRound: ContestRound): String {
         val cands = CandSeatRangeBuilder(contestRound)
         val relax = RelaxedAssertionReport(cands)

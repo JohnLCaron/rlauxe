@@ -8,6 +8,9 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.estMarginUpperFromSamples
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
+import org.cryptobiotic.rlauxe.util.roundUp
+
+/* You can transform to Plurality contest with voteForN=nwinners and the candidates are the $candName/$round */
 
 // winner,loser: candidate ids
 // lastSeatWon: last seat won by winner
@@ -65,17 +68,15 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     }
 
     override fun desc() = "${shortName()}: upperBound=${df(upperBound())}"
-    override fun shortName() = "DHondt w/l=${winnerNameRound()}/${loserNameRound()}"
-    fun reverseName() = "DHondt w/l=${loserNameRound()}/${winnerNameRound()}"
+    override fun shortName() = "DHondt w-l=${winnerNameRound()}-${loserNameRound()}"
+    fun reverseName() = "DHondt w-l=${loserNameRound()}-${winnerNameRound()}"
 
     // Youd like to be able to add new assorters as needed, but the factoring out into contests.json makes that harder
     // we could add new assertionRound, but dont have the new assorters in contests.json
-    // TODO I think you need both the candidate and the round to be unique.
-    //    val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int
-    override fun hashcodeDesc() = "${winnerNameRound()}/${loserNameRound()} ${info.name}" // must be unique for serialization
+    override fun hashcodeDesc() = "${winnerNameRound()}-${loserNameRound()} ${info.name}" // must be unique for serialization
 
-    fun winnerNameRound() =  "${info.candidateIdToName[winner()]}-$lastSeatWon"
-    fun loserNameRound() =  "${info.candidateIdToName[loser()]}-$firstSeatLost"
+    fun winnerNameRound() =  "${info.candidateIdToName[winner()]}/$lastSeatWon"
+    fun loserNameRound() =  "${info.candidateIdToName[loser()]}/$firstSeatLost"
 
     fun showAssertionDifficulty(votesForWinner: Int, votesForLoser: Int): String {
         val winnerScore = votesForWinner / lastSeatWon.toDouble()
@@ -89,14 +90,15 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         return winnerScore - loserScore
     }
 
-    fun getScoreRange(Npop: Int, nsamples: Int, alpha: Double) : Int {
+    fun scoreRange(Npop: Int, nsamples: Int, alpha: Double) : Int {
         val stdBet = 2.0 / 1.03905
         val marginUpper = estMarginUpperFromSamples(stdBet, nsamples, alpha)
-        val margin = marginUpper * upperBound()
+        val margin = marginUpper * upperBound()  // this would be the difference in scores except for the affine transform
         val hmean = margin2mean(margin)
 
-        val gmean = (hmean - .5) / c
-        return (Npop * gmean).toInt()
+        // hmean = c * voteDiff/Npop + 0.5     // see makeFrom, below
+        // (hmean - .5) * Npop / c = voteDiff
+        return roundUp((hmean - .5) * Npop / c)
     }
 
     override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
@@ -179,7 +181,6 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         }
 
         fun makeFrom(info: ContestInfo, winner: DhondtCandidate, loser: DhondtCandidate, Nc: Int, Npop: Int?=null): DHondtAssorter {
-
             // Let f_e,s = Te/d(s) for entity e and seat s
             // f_A,WA > f_B,LB, so e = A and s = Wa
 

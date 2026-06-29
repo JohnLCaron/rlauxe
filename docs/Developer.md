@@ -1,5 +1,5 @@
 # Developer Notes
-_06/20/2026_
+_06/26/2026_
 
 <!-- TOC -->
 * [Developer Notes](#developer-notes)
@@ -134,7 +134,7 @@ There's lots of online help for using IntelliJ.
 * **plots**: code to generate plots for documentation
 
 
-## Generate Test Cases from the uber jar
+## Generate Test Cases 
 
 build the uberjars:
 
@@ -146,46 +146,89 @@ $ ./gradlew assemble uberjar
 The repo contains the needed input for belgium2024. To create the data:
 
 `
-java -classpath cases/build/libs/cases-0.9.5.3-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/rlauxe-cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case belgium -topdir "/home/you/wherever/cases/belgium2024"
 `
 
-* check _cases/build/libs/_ for the latest version of cases-uber.jar and use that
+* check _cases/build/libs/_ for the latest version of rlauxe-cases-uber.jar and use that
 * substitute your own output "topdir" directory
 
-### Do not use this part yet: under development
+Use `java -jar viewer/build/libs/viewer-uber.jar -belgiumAudit` to view this case.
+See [here](https://github.com/JohnLCaron/rlauxe-viewer#special-features-for-belgium-audits).
+
+
+### for the boulder 2024 test case
+
+The repo contains the needed input for boulder024. To create the data:
+
+`
+java -classpath cases/build/libs/rlauxe-cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+    -case boulder2024 -topdir "/home/you/wherever/cases/boulder2024" -type oa
+`
+
+will create a OneAudit election. To create a CLCA election, use the flag "-type clca"
+
+
+### for the Colorado 2020 test case
+
+The repo does not contain the test data input for Colorado. Clone the following git repository:
+
+git clone https://github.com/nealmcb/auditcenter
+
+Then run:
+
+`
+java -classpath cases/build/libs/rlauxe-cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+    -case corla2020 -toptopdir "/home/you/wherever/cases/corla2020" \
+    -votecenter "/home/you/wherever/git/auditcenter/directory" -sampling "style"
+`
+
+will create an election using style based sampling (CSD). To use uniform sampling, use the flag "-sampling uniform"
+
+Use `java -jar viewer/build/libs/viewer-uber.jar -corlaAudit` to view this case.
+See [here](https://github.com/JohnLCaron/rlauxe-viewer#special-features-for-corlaaudits).
+
+
+### for the San Francisco 2024 test case
 
 The repo does not contain the test data input for San Francisco. Download
 
   [SF2024 data](https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip)
 
-into _$testdataDir/cases/sf2024/_ (where you chose _$testdataDir_ in the "Set the test data directory" step above)
+Create the _top directory_ for this case (eg _$testdataDir/cases/sf2024/_), and put the downloaded zip file in it.
 
-Then run _createSf2024CvrExport()_ test in _cases/src/test/kotlin/org/cryptobiotic/rlauxe/sf/CreateSf2024CvrExport.kt_
-to generate _testdataDir/cases/sf2024/crvExport.csv_. This only needs to be done one time.
+Then run:
 
-All the test cases can now be generated from:
+`
+java -classpath cases/build/libs/rlauxe-cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+    -case sf2024 -toptopdir "/home/you/wherever/cases/sf2024" --cvrExport
+`
+to build the cvrExport.csv file, which will be written to topdir. This only needs to be done one time.
 
-'cases/src/test/kotlin/org/cryptobiotic/create/TestGenerateAllUseCases.kt'
+To generate the sf2024 election data: 
 
-Run all rounds on all the generated test cases:
+`
+java -classpath cases/build/libs/rlauxe-cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+    -case sf2024 -toptopdir "/home/you/wherever/cases/sf2024"
+`
 
-'cases/src/test/kotlin/org/cryptobiotic/create/TestRunAllRoundsAllUseCases.kt'
-
-Run the verifier on all the generated test cases:
-
-'cases/src/test/kotlin/org/cryptobiotic/create/TestVerifyUseCases.kt'
+will create a OneAudit election. To create a CLCA election, add the flag "-type clca"
 
 
 ## rlauxe viewer
 
-Download the [rlauxe-viewer repo](https://github.com/JohnLCaron/rlauxe-viewer) and follow instructions there to view 
-Audit Records and run audits on them, for example on any of the test cases.
+Download the [rlauxe-viewer repo](https://github.com/JohnLCaron/rlauxe-viewer) and follow the 
+[instructions](https://github.com/JohnLCaron/rlauxe-viewer#building-rlauxe-viewer) to view Audit Records and run audits on them, for example on any of the test cases.
 
 **Caveat Emptor**: The serialization formats are undergoing rapid changes, with no backwards compatibility (yet). Expect that
-if you download a new version of the library, you may have to regenerate any audit records (including tests cases), 
+if you download a new version of the library, you may have to regenerate any audit records (including tests case data), 
 before viewing them.
 
+**Quaeso ignosce mihi peccatum meum**: We are now using semantic versioning (with a leading 0 to indicate a prerelease): eg "0.10.0.0" = 0.MAJOR.MINOR.PATCH.
+The data format is rapidly changing in incompatible ways; when it does, the major version will increment.
+You will have to regenerate any data you have. The case study data can now be regenerated from the command line,
+see [Getting Started](docs/Developer.md#getting-started).
+Mea culpa, mea culpa, mea maxima culpa.
 
 # Notes and stats
 

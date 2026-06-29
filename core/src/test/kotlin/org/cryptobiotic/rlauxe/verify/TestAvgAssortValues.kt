@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.verify
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.MergeStylesIntoCardsM
+import org.cryptobiotic.rlauxe.audit.MergeStylesIntoCards
 import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsTestM
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -157,7 +157,7 @@ class TestAvgAssortValues {
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
 
         val cardIterable: CloseableIterable<AuditableCard> =
-            CloseableIterable { MergeStylesIntoCardsM(
+            CloseableIterable { MergeStylesIntoCards(
                 Closer(testCards.iterator()),
                 styles = test.cardStyles,) }
 
@@ -204,7 +204,7 @@ class TestAvgAssortValues {
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
 
         val cardIterable: CloseableIterable<AuditableCard> =
-            CloseableIterable { MergeStylesIntoCardsM(
+            CloseableIterable { MergeStylesIntoCards(
                 Closer(testCards.iterator()),
                 styles = test.cardStyles,) }
 

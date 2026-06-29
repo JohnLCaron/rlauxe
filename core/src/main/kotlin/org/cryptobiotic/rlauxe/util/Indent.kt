@@ -1,15 +1,14 @@
 package org.cryptobiotic.rlauxe.util
 
-private const val nspaces : Int = 2
-class Indent(val level: Int) {
+class Indent(val level: Int, val nspaces: Int = 2) {
     private val indent = makeBlanks(level * nspaces)
 
     override fun toString(): String {
         return indent
     }
 
-    fun incr() = Indent(level+1)
-    fun decr() = Indent(level-1)
+    fun incr() = Indent(level+1, nspaces)
+    fun decr() = Indent(level-1, nspaces)
 
     private fun makeBlanks(len: Int) : String {
         val blanks = StringBuilder(len)

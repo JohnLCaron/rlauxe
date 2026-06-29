@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.cli
 
+import org.cryptobiotic.rlauxe.persist.auditdir
 import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -13,7 +14,7 @@ class TestEnterMvrsCli {
         EnterMvrsCli.main(
             arrayOf(
                 "-in", topdir,
-                "-mvrs", "$topdir/audit/private/sortedMvrs.csv"
+                "-mvrs", "$topdir/$auditdir/private/sortedMvrs.csv"
             )
         )
     }

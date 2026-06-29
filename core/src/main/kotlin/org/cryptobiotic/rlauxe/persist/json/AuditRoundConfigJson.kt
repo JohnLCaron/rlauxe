@@ -108,7 +108,7 @@ data class ContestSampleControlJson(
     val contestSampleCutoff: Int?,
     val auditSampleCutoff: Int?,
     val other: Map<String, String>,
-    val sampling: Sampling = Sampling.consistent,
+    val sampling: Sampling,
 )
 
 fun ContestSampleControl.publishJson() = ContestSampleControlJson(

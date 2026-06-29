@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.sf
 
 import java.io.FileInputStream
+import java.io.IOException
+import java.io.InputStream
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
@@ -86,6 +88,16 @@ class StaxReader {
     }
 
     fun read(xmlFile: String): List<StaxContest> {
+        return readFromStream(FileInputStream(xmlFile))
+    }
+
+    fun readFromResourcePath(resourcePath: String): List<StaxContest> {
+        val inputStream = object {}.javaClass.getResourceAsStream(resourcePath) ?:
+            throw IOException("$resourcePath does not exist")
+        return readFromStream(inputStream)
+    }
+
+    fun readFromStream(input: InputStream): List<StaxContest> {
         val contests = mutableListOf<StaxContest>()
 
         var currentContest = StaxContest("")
@@ -97,8 +109,8 @@ class StaxReader {
 
         // Use a factory to get an instance of XMLEventReader
         val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
-        FileInputStream(xmlFile).use { fileInputStream ->
-            val eventReader: XMLEventReader = inputFactory.createXMLEventReader(fileInputStream)
+        input.use { inputStream ->
+            val eventReader: XMLEventReader = inputFactory.createXMLEventReader(inputStream)
 
             while (eventReader.hasNext()) {
                 val event: XMLEvent = eventReader.nextEvent()

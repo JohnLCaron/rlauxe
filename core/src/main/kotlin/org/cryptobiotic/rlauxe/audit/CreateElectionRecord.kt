@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.auditdir
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
@@ -48,7 +49,7 @@ fun createElectionRecord(election: ElectionBuilder, topdir: String, control: Con
         logger.error { errs.toString() }
         throw RuntimeException(errs.toString())
     }
-    val errs2 = validateOutputDir(Path.of("$topdir/audit"))
+    val errs2 = validateOutputDir(Path.of("$topdir/$auditdir"))
     if (errs2.hasErrors()) {
         logger.error { errs2.toString() }
         throw RuntimeException(errs2.toString())
@@ -56,6 +57,8 @@ fun createElectionRecord(election: ElectionBuilder, topdir: String, control: Con
 
     val publisher = Publisher(topdir)
     val electionInfo = election.electionInfo()
+    val version = ElectionBuilder::class.java.getPackage().getImplementationVersion() ?: "unknown"
+    electionInfo.metadata["version"] = version
     writeElectionInfoJsonFile(electionInfo, publisher.electionInfoFile())
     logger.info{"createElectionRecord writeElectionInfoJsonFile to ${publisher.electionInfoFile()}\n  $electionInfo"}
 

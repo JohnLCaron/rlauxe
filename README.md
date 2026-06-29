@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 06/25/2026_
+_last changed: 06/26/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -15,8 +15,16 @@ https://github.com/michelleblom/audit-irv-cp/tree/raire-branch, and released und
 
 See [Getting Started](docs/Developer.md#getting-started) if you are a developer wanting to compile and use the library.
 
+# Versioning
+
+We are now using semantic versioning (with a leading 0 to indicate a prerelease): eg "0.10.0.0" = 0.MAJOR.MINOR.PATCH.
+The data format is rapidly changing in incompatible ways; when it does, the major version will increment.
+You will have to regenerate any data you have. The case study data can now be regenerated from the command line,
+see [Getting Started](docs/Developer.md#getting-started).
+
 **Table of Contents**
 <!-- TOC -->
+* [Versioning](#versioning)
 * [SHANGRLA framework](#shangrla-framework)
 * [Rlauxe Workflow Overview](#rlauxe-workflow-overview)
 * [Audit Types](#audit-types)

@@ -14,15 +14,15 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.dominion.CvrExportConverterM
+import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapter
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.irv.makeRaireOneAuditContest
 import org.cryptobiotic.rlauxe.irv.makeRaireContest
+import org.cryptobiotic.rlauxe.util.CardTabulation
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.TransformingIterator
-import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import kotlin.Boolean
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -69,10 +69,16 @@ class CreateSfElection(
         // phantomCount = countPhantoms(allCvrTabs, contestNcs)
 
         // we need to know the diluted Nb before we can create the assertions: another pass through the cvrExports
-        val cards: CloseableIterator<AuditableCard> = createCards(auditType)
-        val auditableCardIter = MergeStylesIntoCardsM(cards, cardStyleMap.values.toList())
+        //        val cards: CloseableIterator<AuditableCard> = createCards(auditType)
+        //        val auditableCardIter = MergeStylesIntoCardsM(cards, cardStyleMap.values.toList())
+        val cvrExportIter = cvrExportCsvIterator(cvrExportCsvFile)
+        val cardIter: CloseableIterator<AuditableCard>
+                = CvrExportToCardAdapter(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
+        val cardTabulation = CardTabulation(cardIter, infos) { }
+        val manifestTabs = cardTabulation.tabs
+        val count = cardTabulation.cvrCount
 
-        val (manifestTabs, count) = tabulateCardsAndCount( auditableCardIter, infos)
+        // val (manifestTabs, count) = tabulateCardsAndCount( auditableCardIter, infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated }
         // println("contestNbs= ${contestNbs}")
         this.ncards = count
@@ -117,7 +123,7 @@ class CreateSfElection(
                 }
                 pool.accumulateVotes(cvrExport.toCvr(null, cvrExport.id))
 
-                // styles
+                // all cards will have one of these styles
                 val csc = cardStyles.getOrPut(cvrExport.votes.keys) { CardStyle(cardStyles.size + 1, cvrExport.votes.keys) }
                 csc.ncards++
 
@@ -162,9 +168,10 @@ class CreateSfElection(
         // pass 2 through cvrExport
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsvFile)
         val cardIter: CloseableIterator<AuditableCard>
-            = CvrExportConverterM(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
+            = CvrExportToCardAdapter(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
 
-        // still need to remove cvrs for pooled data
+        // needed for final result, but cant be used in CvrExportToCardAdapter
+        // remove cvrs for cards in the oneaudit pools
         val transformer = TransformingIterator<AuditableCard, AuditableCard>(cardIter) { org ->
             val hasCvr = auditType.isClca() || (auditType.isOA() && org.poolId == null)
             if (hasCvr) org else AuditableCard.removeVotes(org)
@@ -179,7 +186,7 @@ class CreateSfElection(
         // pass 3 through cvrExport
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsvFile)
         val cardIter: CloseableIterator<AuditableCard>
-                = CvrExportConverterM(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
+                = CvrExportToCardAdapter(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
 
         val unsortedMvrs = mutableListOf<AuditableCard>()
         cardIter.use { iter ->
@@ -304,8 +311,10 @@ fun makeContestInfos(contestManifest: ContestManifest, candidateManifest: Candid
     }
 }
 
+// the contests come from the ContestManifest, the contest Nc from summary.xml, apparently not in the CvrExport file
+//   so we have placed it into the resorces directory
 fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestInfo>): Map<Int, Int> { // contestId -> Nc
-    val staxContests: List<StaxReader.StaxContest> = StaxReader().read("src/test/data/SF2024/summary.xml") // sketchy
+    val staxContests: List<StaxReader.StaxContest> = StaxReader().readFromResourcePath("/resources/data/cases/sf2024/summary.xml")
     val contestNcs= mutableMapOf<Int, Int>()
     contestInfos.forEach { info ->
         val contestM = contestManifest.contests.values.find { it.Description == info.name }

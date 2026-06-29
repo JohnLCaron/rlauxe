@@ -1,6 +1,14 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
+import org.junit.jupiter.api.Assertions
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.forEach
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -102,6 +110,43 @@ class TestContestTabulation {
         assertEquals(contestTabs2, contestTabs)
         assertEquals(contestTabs2.hashCode(), contestTabs.hashCode())
 
+    }
+
+    @Test
+    fun testTabulateCardsAndCount() {
+        val test = MultiContestTestData(20, 11, 20000)
+        val ( mvrs, cards, pools, styles) = test.makeMvrCardAndPops()
+        val infos = test.contests.map { it.info }.associateBy { it.id }
+
+        val cardTabulation = CardTabulation(Closer (cards.iterator() ), infos) { }
+        val tabs = cardTabulation.tabs
+        val count = cardTabulation.cvrCount
+        Assertions.assertEquals(cards.size, count)
+
+        val tab2 = tabulateAuditableCards(Closer(cards.iterator()), infos)
+        tabs.forEach { println(it) }
+
+        Assertions.assertEquals(tabs, tab2)
+    }
+
+    @Test
+    fun checkTabulationCvrsAndCards() {
+        val test = MultiContestTestData(20, 11, 20000)
+        val infos = test.contests.associate { it.id to it.info }
+
+        val ( mvrs, cards, pools, styles) = test.makeMvrCardAndPops()
+        val cvrTabs =  tabulateCvrs(mvrs.iterator(), infos)
+
+        val cardTabulation = CardTabulation( Closer(cards.iterator()), infos) { }
+        val cardTabs = cardTabulation.tabs
+        val count = cardTabulation.cvrCount
+
+        assertEquals(cards.size, count)
+        assertEquals(cvrTabs.size, cardTabs.size)
+        cvrTabs.forEach { (id, cvrTab) ->
+            val cardTab = cardTabs[id]
+            assertEquals(cvrTab, cardTab)
+        }
     }
 
 }

@@ -3,7 +3,7 @@ package org.cryptobiotic.cli
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapterM
+import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -33,7 +33,7 @@ class ShowIrvContests {
         }
 
         val cvrCsv = "$topDir/$cvrExportCsvFile"
-        val cardIter = CvrExportToCardAdapterM(cvrExportCsvIterator(cvrCsv), null, false)
+        val cardIter = CvrExportToCardAdapter(cvrExportCsvIterator(cvrCsv), null, null, false)
         var count = 0
         while (cardIter.hasNext()) {
             irvCounters.forEach { it.addCvr(cardIter.next())}

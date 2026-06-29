@@ -18,7 +18,7 @@ import kotlin.test.fail
 
 class MakeBoulderElection {
 
-    @Test
+    // @Test
     fun createBoulder25oa() { // simulate CVRs
         val topdir = "$testdataDir/cases/boulder2025/oa"
 
@@ -49,7 +49,7 @@ class MakeBoulderElection {
     // looks like the 2024-Boulder-County-General-Redacted-Cast-Vote-Record.xlsx got saved with incorrect character encoding (?).
     // hand corrected "Claudia De la Cruz / Karina García"
 
-    @Test
+    // @Test
     fun createBoulder24oa() {
         val topdir = "$testdataDir/cases/boulder24/oa"
 
@@ -85,7 +85,7 @@ class MakeBoulderElection {
         if (results.hasErrors) fail()
     }
 
-    @Test
+    // @Test
     fun createBoulder24clca() { // simulate CVRs
         val topdir = "$testdataDir/cases/boulder24/clca"
 
@@ -116,7 +116,7 @@ class MakeBoulderElection {
         if (results.hasErrors) fail()
     }
 
-    @Test
+    // @Test
     fun createBoulder23oa() {
         val sovo = readBoulderStatementOfVotes(
             "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes.csv", "Boulder2023")

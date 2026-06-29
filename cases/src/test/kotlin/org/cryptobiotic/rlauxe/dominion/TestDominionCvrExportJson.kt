@@ -145,7 +145,7 @@ class TestDominionCvrExportJson {
         cardManifestWriter2.write(CardHeader)
 
         val cvrExportIter = cvrExportCsvIterator(cvrExportFilename)
-        val cardIter = CvrExportToCardAdapterM(cvrExportIter, null, false )
+        val cardIter = CvrExportToCardAdapter(cvrExportIter, null, null, false )
         // val cardIter = CvrsToCardsWithBatchNameIterator(AuditType.CLCA, cvrIter, null, null)
 
         while (cardIter.hasNext()) {
@@ -163,7 +163,7 @@ class TestDominionCvrExportJson {
         val cvrExportIter2 = cvrExportCsvIterator(cvrExportFilename) // CvrExport
 
         val pool = CardPoolTest("31-125", 2, intArrayOf(0, 1, 2), false, 42)
-        val cardIter2 = CvrExportToCardAdapterM(cvrExportIter2, pools= listOf(pool), true) // Cvr
+        val cardIter2 = CvrExportToCardAdapter(cvrExportIter2, listOf(pool), null, true) // Cvr
         // val cardIter2 = CvrsToCardsWithBatchNameIterator(AuditType.ONEAUDIT, cvrIter2, null, listOf(cardStyle)) // AuditableCard
 
         while (cardIter2.hasNext()) {

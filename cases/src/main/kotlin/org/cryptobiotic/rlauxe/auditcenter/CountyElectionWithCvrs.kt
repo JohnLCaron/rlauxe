@@ -14,7 +14,6 @@ import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import java.nio.file.Path
 import kotlin.Int
 import kotlin.String
@@ -69,7 +68,10 @@ open class CountyElectionWithCvrs (
             }
             val allCvrs: List<AuditableCard> = exportCvrs + redactedCvrs
 
-            val (cvrTabs, cvrCount) = tabulateCardsAndCount(Closer (allCvrs.iterator() ), infos)
+            val cardTabulation = CardTabulation(Closer (allCvrs.iterator() ), infos) { }
+            val cvrTabs = cardTabulation.tabs
+            val cvrCount = cardTabulation.cvrCount
+            // val (cvrTabs, cvrCount) = tabulateCardsAndCount(Closer (allCvrs.iterator() ), infos)
             totalCvrTabs.sumContestTabulations(cvrTabs)
             totalCvrCardCount += cvrCount
 

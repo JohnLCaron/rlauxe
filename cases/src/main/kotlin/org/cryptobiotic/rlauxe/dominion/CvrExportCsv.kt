@@ -104,17 +104,23 @@ fun CvrExport.toCsv() = buildString {
     appendLine()
 }
 
-class CvrExportToCardAdapterM(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: List<CardPoolIF>?, val convertPoolIds: Boolean)
-    : CloseableIterator<AuditableCard> {
+// convert CvrExport to AuditableCard, setting poolId and styleId if given
+class CvrExportToCardAdapter(
+    val cvrExportIterator: CloseableIterator<CvrExport>,
+    val oapools: List<CardPoolIF>?, // name must be the cvrExport.poolKey()
+    val styleMap: Map<Set<Int>, StyleIF>?, // use IdSet to assign styles
+    val convertPoolIds: Boolean
+) : CloseableIterator<AuditableCard> {
 
-    val poolMap = pools?.associateBy { it.name() } ?: emptyMap()
+    val poolMap = oapools?.associateBy { it.name() } ?: emptyMap()
     val poolCounts = mutableMapOf<String, Int>() // to assign index within the poool
     var countIndex = 0
 
     override fun hasNext() = cvrExportIterator.hasNext()
     override fun next(): AuditableCard {
         val cvrExport = cvrExportIterator.next()
-        val pool = if (pools == null || cvrExport.group != 1) null else poolMap[ cvrExport.poolKey() ]
+        val pool = if (oapools == null || cvrExport.group != 1) null else poolMap[ cvrExport.poolKey() ]
+        val style = if (styleMap == null) null else styleMap[ cvrExport.contestIdSet() ]
 
         // TODO this is location. Perhaps we need to also store original id ?? So maybe output card ?
         val location = if (!convertPoolIds || pool == null) null else {
@@ -129,7 +135,7 @@ class CvrExportToCardAdapterM(val cvrExportIterator: CloseableIterator<CvrExport
             countIndex,
             0,
             phantom = false,
-            styleId = pool?.id() ?: CardStyle.fromCvrStyle.id,
+            styleId = style?.id() ?: CardStyle.fromCvrStyle.id,
             votes = cvrExport.votes,
             poolId = pool?.poolId,
         )
@@ -140,10 +146,12 @@ class CvrExportToCardAdapterM(val cvrExportIterator: CloseableIterator<CvrExport
     override fun close() = cvrExportIterator.close()
 }
 
-class CvrExportConverterM(
+/* TODO same as CvrExportToCardAdapter
+// convert CvrExport to AuditableCard, merging styles
+class CvrExportConverter(
     val cvrExportIterator: CloseableIterator<CvrExport>,
     val pools: List<CardPoolIF>?,
-    val styles: Map<Set<Int>, StyleIF>?,
+    // val styles: Map<Set<Int>, StyleIF>?,
     val convertPoolIds: Boolean
 ) : CloseableIterator<AuditableCard> {
     val poolMap = pools?.associateBy { it.name() } ?: emptyMap()
@@ -154,7 +162,7 @@ class CvrExportConverterM(
     override fun next(): AuditableCard {
         val cvrExport = cvrExportIterator.next()
         val pool = if (pools == null || cvrExport.group != 1) null else poolMap[ cvrExport.poolKey() ]
-        val style = if (styles == null) null else styles[ cvrExport.votes.keys ]
+        // val style = if (styles == null) null else styles[ cvrExport.votes.keys ]
 
         // TODO this is location. Perhaps we need to also store original id ?? So maybe output card ?
         val location = if (!convertPoolIds || pool == null) null else {
@@ -179,4 +187,4 @@ class CvrExportConverterM(
         return result
     }
     override fun close() = cvrExportIterator.close()
-}
+} */

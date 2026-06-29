@@ -8,12 +8,12 @@ import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapterM
+import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapter
+import org.cryptobiotic.rlauxe.util.CardTabulation
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.TransformingIterator
 import org.cryptobiotic.rlauxe.util.nfz
-import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import kotlin.Boolean
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -37,7 +37,7 @@ class CreatePrecinctAndStyle(
     val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
     val cardPoolBuilders: List<OneAuditPoolFromCvrs>
     val cardPools: List<CardPool>
-    val cardStyleMap: Map<Set<Int>, CardStyle>
+    val styleMap: Map<Set<Int>, CardStyle>
     //  val cardStyles: List<CardStyleIF>
     val contestsUA: List<ContestWithAssertions>
     val ncards: Int
@@ -62,13 +62,16 @@ class CreatePrecinctAndStyle(
 
         cardPoolMapByName = precinctPools
         cardPoolBuilders = cardPoolMapByName.values.toList()
-        cardStyleMap = styles
+        styleMap = styles
         //  cardStyles = styles.values.toList()
 
         // the full and complete AuditableCard, merged with the pools
         val auditableCardIter: CloseableIterator<AuditableCard> = createCards(auditType)
 
-        val (manifestTabs, count) = tabulateCardsAndCount( auditableCardIter, infos)
+        val cardTabulation = CardTabulation(auditableCardIter, infos) { }
+        val manifestTabs = cardTabulation.tabs
+        val count = cardTabulation.cvrCount
+        // val (manifestTabs, count) = tabulateCardsAndCount( auditableCardIter, infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated }
         // println("contestNbs= ${contestNbs}")
         this.ncards = count
@@ -136,7 +139,7 @@ class CreatePrecinctAndStyle(
     )
 
     override fun cardStyles() = null // cardStyles
-    override fun cardPools() = if (auditType.isOA()) cardPoolBuilders else null
+    override fun cardPools() = if (auditType.isOA()) cardPoolBuilders else null // always the oa pools ??
     override fun contestsUA() = contestsUA
     override fun cards() = createCards(auditType)
     override fun ncards() = ncards
@@ -153,7 +156,7 @@ class CreatePrecinctAndStyle(
 
         val transformer = TransformingIterator<CvrExport, AuditableCard>(cvrExportIter) { cvrExport ->
             // TODO cardStyleMap must include all ccvrs
-            val cardStyle = cardStyleMap[cvrExport.votes.keys]!!
+            val cardStyle = styleMap[cvrExport.votes.keys]!!
             val pool = if (cvrExport.group != 1) null else {
                 val poolName = poolName(cvrExport.precinctPortionId, cardStyle)
                 cardPoolMapByName[poolName]!!
@@ -195,7 +198,7 @@ class CreatePrecinctAndStyle(
     override fun unsortedMvrsExternal() = null
     override fun unsortedMvrsInternal(): List<AuditableCard> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
-        val cardIter = CvrExportToCardAdapterM(cvrExportIter, cardPools(), auditType.isOA())
+        val cardIter = CvrExportToCardAdapter(cvrExportIter, cardPools(), styleMap, auditType.isOA())
 
         val unsortedMvrs = mutableListOf<AuditableCard>()
         cardIter.use { iter ->

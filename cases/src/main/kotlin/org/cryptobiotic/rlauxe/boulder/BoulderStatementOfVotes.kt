@@ -7,6 +7,9 @@ import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.io.InputStream
 import java.nio.charset.Charset
 import kotlin.text.appendLine
 
@@ -24,14 +27,14 @@ import kotlin.text.appendLine
 //100,2181207100,Presidential Electors,Blake Huber / Andrea Denault,"1,569","1,325",1,24,0
 
 // replicate https://assets.bouldercounty.gov/wp-content/uploads/2024/11/2024G-Boulder-County-Official-Summary-of-Votes.pdf
-data class BoulderStatementOfVotes(val filename: String, val contests: List<BoulderContestVotes>) {
+data class BoulderStatementOfVotes(val inputSource: String, val contests: List<BoulderContestVotes>) {
     init {
         contests.forEachIndexed{ idx, it -> it.id = idx+1 }
     }
 
     fun show() = buildString{
         appendLine("Boulder Statement of Votes")
-        appendLine(filename)
+        appendLine(inputSource)
         appendLine("ncontests = ${contests.size}")
         appendLine()
         appendLine(BoulderContestVotes.header)
@@ -181,8 +184,18 @@ data class BoulderStatementLine(
     }
 }
 
+fun readBoulderSOVfromResourcePath(resourcePath: String, variation: String): BoulderStatementOfVotes {
+    val inputStream = object {}.javaClass.getResourceAsStream(resourcePath) ?:
+    throw IOException("$resourcePath does not exist")
+    return readBoulderSOVfromInputStream(inputStream, variation, resourcePath)
+}
+
 fun readBoulderStatementOfVotes(filename: String, variation: String): BoulderStatementOfVotes {
-    val parser = CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
+    return readBoulderSOVfromInputStream(FileInputStream(filename), variation, filename)
+}
+
+fun readBoulderSOVfromInputStream(input: InputStream, variation: String, inputSource: String): BoulderStatementOfVotes {
+    val parser = CSVParser.parse(input, Charset.forName("UTF-8"), CSVFormat.DEFAULT)
     // val parser = CSVParser.parse(File(filename), Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
 
     val records = parser.iterator()
@@ -227,7 +240,7 @@ fun readBoulderStatementOfVotes(filename: String, variation: String): BoulderSta
         val contest = contests.getOrPut(key) { BoulderContestVotes( key) }
         contest.addPrecinct(precinct)
     }
-    return BoulderStatementOfVotes(filename, contests.toSortedMap().values.toList())
+    return BoulderStatementOfVotes(inputSource, contests.toSortedMap().values.toList())
 }
 
 fun String.convertToInteger(): Int {

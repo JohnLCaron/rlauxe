@@ -7,6 +7,10 @@ plugins {
 
 group = "org.cryptobiotic.rlauxe"
 version = libs.versions.rlauxe.get()
+val subprojectName = name
+val subprojectVersion = version
+
+println("subprojectName = $subprojectName version = $subprojectVersion")
 
 dependencies {
     implementation(files("../libs/raire-java-1.0.2.jar"))
@@ -68,6 +72,8 @@ tasks.register<Jar>("uberJar") {
 
     manifest {
         attributes("Main-Class" to "org.cryptobiotic.rlauxe.cli.verifier.RunVerifier")
+        attributes("Implementation-Title" to subprojectName)
+        attributes("Implementation-Version" to subprojectVersion)
     }
 
     from(sourceSets.main.get().output)

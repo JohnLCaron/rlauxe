@@ -81,6 +81,7 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
     val thrashers: List<AltThrasher>
 
     val partyRanges: ContestSeats // contest/party seat ranges from all failed assertions
+    val partyMap = dcontest.parties.associateBy { it.id }
 
     init {
         // dhondt assertion failures
@@ -201,6 +202,24 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
         return ContestSeats(dc.id, partySeats.values.toList())
     }
 
+    // or just always make it ??
+    fun findAssorter(winnerScore: DhondtScore, loserScore: DhondtScore) : DHondtAssorter {
+
+        val winnerName = "${dcontest.info.candidateIdToName[winnerScore.candidate]}/${winnerScore.divisor}"
+        val loserName = "${dcontest.info.candidateIdToName[loserScore.candidate]}/${loserScore.divisor}"
+        val alreadyHave = assorters.find { it is DHondtAssorter &&
+                it.winnerNameRound() == winnerName &&
+                it.loserNameRound() == loserName} as DHondtAssorter?
+        if (alreadyHave != null) return alreadyHave
+
+        val winningCandidate: DhondtCandidate = partyMap[winnerScore.candidate]!!.copy()
+        val losingCandidate: DhondtCandidate = partyMap[loserScore.candidate]!!.copy()
+        winningCandidate.lastSeatWon = winnerScore.divisor
+        losingCandidate.firstSeatLost = loserScore.divisor
+
+        return DHondtAssorter.makeFrom(dcontest.info, winningCandidate, losingCandidate, dcontest.Nc)
+    }
+
     inner class AltThrasher(val name: String, fromContest: DHondtContest, val thrasher: ThresholdRiskFailure) {
         val altContest: AltContest
 
@@ -281,6 +300,7 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
     fun makeAltContestFromFlippedAssertion(fromContest: DHondtContest, failure: DhondtRiskFailure): AltContest {
         // in order to flip the winner/loser assertion, youd have to change the reported votes / margin
         // and all the changed assertions would depend on what the score gap is.
+        // println("*** make makeAltContestFromFlippedAssertion for ${failure.assorter}")
 
         // lets just manipuate the lastSeatWon/firstSeatLost
         val winner = failure.assorter.winner()
@@ -314,6 +334,9 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
         dalt.assorters.addAll(assorters)
 
         return AltContest(dalt, failure = failure)
+        //println(altContest.alt)
+        //println("*** end makeAltContestFromFlippedAssertion for ${failure.assorter}")
+        //return altContest
     }
 
     fun check(dh: DHondtContest) {

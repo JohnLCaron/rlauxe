@@ -1,14 +1,15 @@
 package org.cryptobiotic.rlauxe.dhondt
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.core.ClcaAssertion
+import org.cryptobiotic.rlauxe.util.Indent
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
+import kotlin.math.min
 
 class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
-    val dcontest = builder.dcontest
+    val dcontest: DHondtContest = builder.dcontest
     val sortedLoserGroups: List<DhondtLoserGroup>
 
     init {
@@ -25,9 +26,44 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
         sortedLoserGroups = dhondtLoserGroups.values.toList().sortedByDescending { it.highScore() }
     }
 
-    fun showRelaxedAssertion(cassertion: ClcaAssertion) = buildString {
-        // build an alternative contest with the named assertion absent
-        // just
+    private val show = false
+    private val showLosers = 6
+
+    data class Score(val winner: DhondtScore, val loser: DhondtScore, val startLoser: Int, val nlosers: Int) {
+        var assorter: DHondtAssorter? = null
+        var diff: Int = 0
+        var minDiff: Int = 0
+        var fails: Boolean = false
+
+        fun name(): String {
+            return if (assorter != null)
+                "${assorter!!.winnerNameRound()}-${assorter!!.loserNameRound()}"
+            else
+                "${winner.candidate}/${winner.divisor}-${loser.candidate}/${loser.divisor}"
+        }
+
+        override fun toString() = "${if (fails) "**" else ""}(winner=${winner.candidate}/${winner.divisor}, loser=${loser.candidate}/${loser.divisor}, " +
+                "startLoser=$startLoser)"
+    }
+
+    class KeepScore() {
+        val rows = mutableMapOf<Int, RowScores>()
+        fun addColumn(startRow: Int, cols: MutableList<Score>) {
+            repeat(cols.size) { idx ->
+                val row = rows.getOrPut(startRow + idx, { RowScores(startRow + idx) })
+                row.scores.add(cols[idx])
+            }
+        }
+
+        fun getRow(row: Int): List<Score> {
+            if (rows[row] == null)
+                print("")
+            return rows[row]?.scores ?: emptyList()
+        }
+
+        class RowScores(val row: Int) {
+            val scores = mutableListOf<Score>()
+        }
     }
 
     fun showRelaxedAssertions(): String = buildString {
@@ -35,34 +71,107 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
         appendLine("${dcontest}")
         appendLine("reported winners")
         append(" seat ${sfn("winner-round", candNameWidth)}     ${sfn("nvotes", 6)}, ")
-        append("${sfn(" score", 6)},  ${sfn("scoreDiff", 6)}, ")
+        append(" ${sfn(" score", 6)}, scoreDiff, scoreDiffMin")
         appendLine()
+
         // sorted scores
-        var prev: Int? = null
-        repeat(dcontest.nseats + 3) { idx ->
+        var prevScore: DhondtScore? = null
+        // the winners
+        repeat(dcontest.nseats) { idx ->
             val score = dcontest.sortedScores[idx]
             // sortedRawScores.filter{ it.divisor <= maxRound }.forEachIndexed { idx, score ->
             val candId = score.candidate
-            if (idx < dcontest.nseats) append(" (${nfn(idx + 1, 2)}) ") else append("      ")
+            append(" (${nfn(idx + 1, 2)}) ")
             val nameRound = "${builder.orgInfo.candidateIdToName[candId]!!}-${score.divisor}"
             val below = if (builder.belowMinPct.contains(candId)) "*" else " "
             append(" ${trunc(nameRound, candNameWidth)}$below, ")
             append(" ${nfn(builder.votes[candId]!!, 6)}, ${nfn(score.score.toInt(), 6)}, ")
 
-            if (prev != null) append("   ${nfn(prev - score.score.toInt(), 6)},")
-            prev = score.score.toInt()
+            if (prevScore != null) append("    ${nfn(prevScore.score.toInt() - score.score.toInt(), 6)},")
+            prevScore = score
             appendLine()
         }
+        val lastWinner = prevScore!!
+
+        // the losers
+        val losersLeft: Int = dcontest.sortedScores.size - dcontest.nseats
+        val maxLosers = min(showLosers, losersLeft)
+        var keepScore = KeepScore()
+
+        // build KeepScore
+        repeat(maxLosers) { idx ->
+            val scoreRank = dcontest.nseats + idx
+            val loser = dcontest.sortedScores[scoreRank]
+            val score = Score(lastWinner, loser, dcontest.nseats + idx + 1, dcontest.nseats + maxLosers)
+            buildKeepScore(score, keepScore, Indent(0, nspaces=4))
+        }
+
+        repeat(maxLosers) { idx ->
+            val scoreRank = dcontest.nseats + idx
+            val loser = dcontest.sortedScores[scoreRank]
+            // sortedRawScores.filter{ it.divisor <= maxRound }.forEachIndexed { idx, score ->
+            val candId = loser.candidate
+            append("      ")
+            val nameRound = "${builder.orgInfo.candidateIdToName[candId]}-${loser.divisor}"
+            val below = if (builder.belowMinPct.contains(candId)) "*" else " "
+            append(" ${trunc(nameRound, candNameWidth)}$below, ")
+            append(" ${nfn(builder.votes[candId]!!, 6)}, ${nfn(loser.score.toInt(), 6)}, ")
+
+            val scoreTree = Score(lastWinner, loser, dcontest.nseats+idx+1, dcontest.nseats+maxLosers)
+            val sb = StringBuffer()
+            showRowScore(scoreTree, keepScore, sb)
+            appendLine(sb)
+            if (show) println()
+        }
+
         appendLine()
 
         append( showDhondtRiskFailures() )
         appendLine()
+    }
 
-        // threshold assertion failures
-        //if (builder.altThrashContests.isNotEmpty()) {
-        //    append( showAltThrashContest(builder.altThrashContests.first()) )
-        //}
-        //appendLine()
+    fun showRowScore(score : Score, keepScore: KeepScore, sb: StringBuffer) {
+        showScore(score, sb)
+        keepScore.getRow(score.startLoser).forEach { sib ->
+            showScoreWithName(sib, sb)
+        }
+    }
+
+    fun showScore(score : Score, sb: StringBuffer) {
+        testScore(score)
+        sb.append("    ${nfn(score.diff, 6)}, ${nfn(score.minDiff,6)}${if (score.fails) "*" else " "}")
+    }
+
+    fun showScoreWithName(score : Score, sb: StringBuffer) {
+        testScore(score)
+        val s = " ${score.name()}: ${score.diff}, ${score.minDiff}${if (score.fails) "*" else " "}"
+        sb.append(" ${trunc(s, 40)};")
+    }
+
+    fun buildKeepScore(score : Score, keepScore: KeepScore, indent: Indent) {
+        testScore(score)
+        if (show) println("${indent}$score")
+
+        if (score.fails) {
+            val col = mutableListOf<Score>()
+            for (scoreRank in score.startLoser until score.nlosers) {
+                val nextLoser = dcontest.sortedScores[scoreRank]
+                val test = Score(score.loser, nextLoser, scoreRank+1, score.nlosers)
+                col.add(test)
+            }
+            keepScore.addColumn(score.startLoser+1, col)
+            col.forEach {
+                buildKeepScore(it, keepScore, indent.incr())
+            }
+        }
+    }
+
+    fun testScore(score: Score) {
+        score.diff = score.winner.score.toInt() - score.loser.score.toInt()
+        val assorter = builder.findAssorter(score.winner, score.loser)
+        score.minDiff = assorter.scoreRange(dcontest.Nc, builder.nsamples, alpha)
+        score.fails = (score.diff < score.minDiff)
+        score.assorter = assorter
     }
 
     // not crazy about these DhondtLoserGroup
@@ -79,7 +188,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
             if (winningSeat == null)
                 append("       ")
             else
-                append(" (${nfn(winningSeat!!, 2)})  ")
+                append(" (${nfn(winningSeat, 2)})  ")
 
             if (idx == 0) {
                 append(failure.loserScore.showLoser(
@@ -98,6 +207,11 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
             idx++
         }
     }
+
+    // a >? b
+    // a > c
+    // b >? c
+    //
 
     // not crazy about these DhondtLoserGroup
     fun showDhondtRiskFailures(sortedGroups: List<DhondtLoserGroup>) = buildString {
@@ -184,7 +298,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
 
         // sorted scores
         var prev: Int? = null
-        repeat(nseats+ 3) { idx ->
+        repeat(nseats + 3) { idx ->
             val score = sortedScores[idx]
             val candId = score.candidate
             if (idx < nseats) append(" (${nfn(idx + 1, 2)}) ") else append("      ")
@@ -194,6 +308,9 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
 
             if (prev != null) append(" ${nfn(prev - score.score.toInt(), 6)},")
             prev = score.score.toInt()
+
+            // find the assertion
+            // append("${sfn("scoreRange", 10)}")
             appendLine()
         }
         // appendLine("winners=${alt.winnerSeats}")

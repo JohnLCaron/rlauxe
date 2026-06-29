@@ -28,7 +28,7 @@ data class DhondtScore(val candidate: Int, val score: Double, val divisor: Int) 
 
     fun showLoser(name: String, votes: Int) = buildString {
         append(" ${name}")
-        append("-${nfn(divisor, 2)}, ")
+        append("/${nfn(divisor, 2)}, ")
         append(" ${nfn(votes, 6)}, ${nfn(score.toInt(), 6)}, ")
     }
 }

@@ -82,7 +82,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
             // sortedRawScores.filter{ it.divisor <= maxRound }.forEachIndexed { idx, score ->
             val candId = score.candidate
             append(" (${nfn(idx + 1, 2)}) ")
-            val nameRound = "${builder.orgInfo.candidateIdToName[candId]!!}-${score.divisor}"
+            val nameRound = "${builder.orgInfo.candidateIdToName[candId]!!}/${score.divisor}"
             val below = if (builder.belowMinPct.contains(candId)) "*" else " "
             append(" ${trunc(nameRound, candNameWidth)}$below, ")
             append(" ${nfn(builder.votes[candId]!!, 6)}, ${nfn(score.score.toInt(), 6)}, ")
@@ -112,7 +112,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
             // sortedRawScores.filter{ it.divisor <= maxRound }.forEachIndexed { idx, score ->
             val candId = loser.candidate
             append("      ")
-            val nameRound = "${builder.orgInfo.candidateIdToName[candId]}-${loser.divisor}"
+            val nameRound = "${builder.orgInfo.candidateIdToName[candId]}/${loser.divisor}"
             val below = if (builder.belowMinPct.contains(candId)) "*" else " "
             append(" ${trunc(nameRound, candNameWidth)}$below, ")
             append(" ${nfn(builder.votes[candId]!!, 6)}, ${nfn(loser.score.toInt(), 6)}, ")
@@ -177,7 +177,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
     // not crazy about these DhondtLoserGroup
     fun showDhondtRiskFailures() = buildString {
 
-        appendLine("Contested       loser-round   nvotes,  score, scoreDiff,  noerror, estSamples, actSamples, estRisk, assertion")
+        appendLine("Contested       loser/round   nvotes,  score, scoreDiff,  noerror, estSamples, actSamples, estRisk, assertion")
 
         var idx = 0
         builder.failureNodes.forEach {  node ->

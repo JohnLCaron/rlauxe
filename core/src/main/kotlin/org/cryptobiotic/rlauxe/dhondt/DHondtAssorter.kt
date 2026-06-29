@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.dhondt
 
+import org.cryptobiotic.rlauxe.betting.estMarginUpperFromSamples
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
-import org.cryptobiotic.rlauxe.util.estMarginUpperFromSamples
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.roundUp

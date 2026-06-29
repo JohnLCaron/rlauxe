@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.betting.TestH0Status
+import org.cryptobiotic.rlauxe.betting.estMarginUpperFromSamples
 import org.cryptobiotic.rlauxe.betting.estRiskStandardBet
 import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.junit.Assert.assertTrue

@@ -7,8 +7,6 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.util.createZipFile
 import kotlin.io.path.createTempFile
 
-const val cvrExportCsvFile = "cvrExport.csv"
-
 class TestCvrExportCsv {
 
     // Test CvrExport <--> Csv

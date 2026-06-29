@@ -96,8 +96,10 @@ fun estRiskFromMargin(bet:Double, marginUpper:Double, nsamples: Int): Double {
 
 //// TODO end of replace with estSampleSize, estRisk in betting/Utils
 
-// work backwards, if samples are needed to satisfy risk limit, what must the margin be?
-fun estMarginUpperFromSamples(bet:Double, samples:Int, alpha: Double): Double {
+// work backwards, if you have nsamples, whats the largin margin you can satisfy the risk limit?
+// assumes no errors and a constant payout
+// return margin/upper
+fun estMarginUpperFromSamples(bet:Double, nsamples:Int, alpha: Double): Double {
     // payoff^n = 1/alpha
     // ln(payoff) * n = -ln(alpha)
     // ln(1.0 + bet * nomargin / 2) = -ln(alpha) / n
@@ -117,7 +119,7 @@ fun estMarginUpperFromSamples(bet:Double, samples:Int, alpha: Double): Double {
     // (2 - marginUpper) = 2bet/(2term - 2 + bet)
     // marginUpper = 2 - 2bet/(2term - 2 + bet)
 
-    val term = exp(-ln(alpha) / samples)
+    val term = exp(-ln(alpha) / nsamples)
     val den = (2.0*term - 2.0 + bet)
     return 2.0 - 2.0 * bet / den
 }

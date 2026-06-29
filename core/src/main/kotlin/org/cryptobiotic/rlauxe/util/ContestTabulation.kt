@@ -201,6 +201,12 @@ fun tabulateOneAuditPools(cardPools: List<CardPoolIF>, infos: Map<Int, ContestIn
     return poolSums
 }
 
+// return contestId -> contest population size
+fun tabulateNpops(cvrs: List<Cvr>, infos: List<ContestInfo>): Map<Int, Int> {
+    val tabs = tabulateCloseableCvrs(Closer(cvrs.iterator()), infos.associateBy { it.id })
+    return tabs.mapValues { it.value.ncards() }
+}
+
 // return contestId -> ContestTabulation
 fun tabulateCvrs(cvrs: Iterator<Cvr>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     return tabulateCloseableCvrs(Closer(cvrs), infos)
@@ -224,52 +230,37 @@ fun tabulateCloseableCvrs(cvrs: CloseableIterator<Cvr>, infos: Map<Int, ContestI
     return votes
 }
 
-//// TODO repalce with CardTabulation
 fun tabulateCards(cards: Iterator<AuditableCard>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     return tabulateAuditableCards(Closer(cards), infos)
 }
 
 fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
-    val tabs = mutableMapOf<Int, ContestTabulation>()
-    cards.use { cardIter ->
-        while (cardIter.hasNext()) {
-            val card = cardIter.next()
-            infos.forEach { (contestId, info) ->
-                if (card.hasContest(contestId)) { // TODO note that here, we believe possibleContests ...
-                    val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
-                    if (card.phantom()) tab.nphantoms++
-                    if (card.votes(contestId) != null) { // happens when cardStyle == all
-                        val contestVote = card.votes(contestId)!!
-                        tab.addVotes(contestVote, card.phantom())
-                    } else {
-                        tab.ncardsTabulated++
-                    }
-                }
-            }
-        }
-    }
-    return tabs
+    return CardTabulation(cards, infos, { }).tabs
 }
 
 // tabulates both regular and IRV over everything in the cards, with visitor
-// assumes that contest is found in infos
+// this will make tabs for any contest on a card, if the contest is present in infos
 class CardTabulation(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>, visitor: (AuditableCard) -> Any) {
     val tabs = mutableMapOf<Int, ContestTabulation>()
+    var cvrCount = 0
     init {
         cards.use { cardIter ->
             while (cardIter.hasNext()) {
                 val card = cardIter.next()
+                cvrCount++
                 card.contestIds.forEach { contestId ->
-                    val info = infos[contestId]!!
-                    val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
-                    if (card.phantom()) tab.nphantoms++
-                    if (card.votes(contestId) != null) {
-                        val contestVote = card.votes(contestId)!!
-                        tab.addVotes(contestVote, card.phantom())
-                    } else {
-                        tab.ncardsTabulated++
+                    val info = infos[contestId]
+                    if (info != null) {
+                        val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
+                        if (card.votes(contestId) != null) {
+                            val contestVote = card.votes(contestId)!!
+                            tab.addVotes(contestVote, card.phantom())
+                        } else {
+                            if (card.phantom()) tab.nphantoms++
+                            tab.ncardsTabulated++
+                        }
+                        visitor(card)
                     }
-                    visitor(card)
                 }
             }
         }

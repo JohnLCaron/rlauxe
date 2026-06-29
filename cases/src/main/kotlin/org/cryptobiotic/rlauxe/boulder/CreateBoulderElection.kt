@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.utils.tabulateNpops
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -336,7 +335,7 @@ class CreateBoulderElection(
 // OA: Create a OneAudit where pools are from the redacted cvrs.
 fun createBoulderElection(
     version: String,
-    cvrExportFile: String,
+    cvrExportResourcePath: String,
     sovoFile: String,
     topdir: String,
     creation: AuditCreationConfig,
@@ -349,8 +348,8 @@ fun createBoulderElection(
     val stopwatch = Stopwatch()
 
     val variation = if (version == "2023") "Boulder2023" else "Boulder2024"
-    val sovo = readBoulderStatementOfVotes(sovoFile, variation)
-    val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrExportFile, "Boulder")
+    val sovo = readBoulderSOVfromResourcePath(sovoFile, variation)
+    val export: BoulderCvrExportCsv = readBoulderCvrExportsFromResourcePath(cvrExportResourcePath, "Boulder")
 
     val election = if (version == "2025")
         CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource, hasStyle = true)

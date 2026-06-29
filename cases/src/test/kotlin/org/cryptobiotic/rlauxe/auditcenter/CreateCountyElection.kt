@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.dominion.DominionConverter
 import org.cryptobiotic.rlauxe.dominion.DominionCvrCsvSummary
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsvReader
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.utils.tabulateNpopsFromCards
 import kotlin.collections.map
 import kotlin.collections.plus
 import kotlin.collections.set
@@ -57,7 +56,10 @@ class CreateCountyElection(
         this.ncards = allCards.size
 
         val cardIter = Closer (allCards.iterator() )
-        val (npopMap, count) = tabulateNpopsFromCards(cardIter, infos.values.toList()) // TODO check this, seems wrong
+        val cardTabulation = CardTabulation(cardIter, infos) { }
+        val npopMap = cardTabulation.tabs.mapValues { it.value.ncards() }
+
+        // val (npopMap, count2) = tabulateNpopsFromCards(cardIter, infos.values.toList()) // TODO check this, seems wrong
         contestsUA = ContestWithAssertions.make(contests, npopMap, true, hasStyle)
     }
 

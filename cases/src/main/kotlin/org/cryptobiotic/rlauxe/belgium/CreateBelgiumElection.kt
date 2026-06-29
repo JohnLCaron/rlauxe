@@ -79,13 +79,13 @@ fun createBelgiumElection(
 
 // create election, run all rounds
 // return ntotalVotes from Json and finalRound.nmvrs
-fun createAndRunAllRounds(electionName: String,
-                          belgiumElectionJson: BelgiumElectionJson,
-                          toptopdir: String,
-                          contestId: Int,
-                          runRounds:Boolean = true,
-                          stopRound:Int=0,
-                          showVerify:Boolean = false,
+fun createBelgiumAndRunAllRounds(electionName: String,
+                                 belgiumElectionJson: BelgiumElectionJson,
+                                 toptopdir: String,
+                                 contestId: Int,
+                                 runRounds:Boolean = true,
+                                 stopRound:Int=0,
+                                 showVerify:Boolean = false,
 ): Pair<Int, Int> {
     println("\n======================================================")
     println("electionName $electionName")
@@ -139,7 +139,7 @@ fun createAllBelgiumElections(toptopdir: String) {
         val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(resourcePath)
         val belgiumElectionJson = if (result.isOk) result.unwrap() else throw RuntimeException("$result")
 
-        allmvrs[name] = createAndRunAllRounds(name, belgiumElectionJson, toptopdir,
+        allmvrs[name] = createBelgiumAndRunAllRounds(name, belgiumElectionJson, toptopdir,
                 contestId = idx+1, runRounds=false)
     }
     println("============================================================")
@@ -156,7 +156,7 @@ fun createAndRunOneBelgiumElection(electionName: String, toptopdir: String, cont
     val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(resourcePath)
     val belgiumElectionJson = if (result.isOk) result.unwrap() else throw RuntimeException("$result")
 
-    return createAndRunAllRounds(electionName, belgiumElectionJson, toptopdir,
+    return createBelgiumAndRunAllRounds(electionName, belgiumElectionJson, toptopdir,
         contestId = contestId, runRounds=false)
 }
 

@@ -1,5 +1,5 @@
 # Corla2020 Notes
-6/25/26
+6/27/26
 
 We obtained the cvr data from https://votedatabase.com for the Colorado 2020 General elections, and used it to run
 a real audit. This is for testing purposes only: the data is not official, some of the data is missing, in particular
@@ -54,87 +54,112 @@ Here are several scenarios that differ in which contests are chosen for the styl
 
 ### only targeted contests
 
-style nmvrs = 4144
-uniform nmvrs = 8245
-contests under maxRisk (style) = 245 / 526 = 46%
-contests under maxRisk (uniform) = 364 / 526 = 69%
-
-|               |  style  |  uniform |
-|---------------|---------|----------|
-| under maxRisk |   245   |    364   |
-| under      4% |   245   |    364   |
-| under      5% |   249   |    366   |
-| under     10% |   266   |    381   |
-
-### targeted contests and other contests with estMvrs <= max
-
-max = 115
-rlauxe nmvrs = 8246
+rlauxe nmvrs = 4153
 corla nmvrs = 8245
-contests under maxRisk (style) = 481 / 526 = 91%
-contests under maxRisk (uniform) = 364 / 526 = 69%
+contests under maxRisk (rlauxe) = 230 / 526 = 43%
+contests under maxRisk (corla) = 364 / 526 = 69%
 
-|               |  style  |  uniform |
+|               | rlauxe  |   corla  |
 |---------------|---------|----------|
-| under maxRisk |   481   |    364   |
-| under      4% |   481   |    364   |
-| under      5% |   481   |    366   |
-| under     10% |   482   |    381   |
+| under maxRisk |   230   |    364   |
+| under      5% |   234   |    366   |
+| under     10% |   259   |    381   |
+| under     20% |   297   |    393   |
+| under     30% |   321   |    397   |
 
-### targeted contests plus relaxed risks
+### targeted contests and contests with estMvrs <= maxMvrs
 
-Experiment with relaxing the risk limits:
+maxMvrs = 120
+rlauxe nmvrs = 8223
+corla nmvrs = 8245
+contests under maxRisk (rlauxe) = 482 / 526 = 91%
+contests under maxRisk (corla) = 364 / 526 = 69%
 
-* if target contest, always audit
-* if estMvrs > 500, do not audit
-* if estMvrs in [150, 500), use 10% risk limit
-* if estMvrs in [50, 150), use 5% risk kimit
-* if estMvrs < 50, use 3% risk limit
-
-  style nmvrs = 13010
-  uniform nmvrs = 8245
-  contests under maxRisk (style) = 519 / 526 = 98%
-  contests under maxRisk (uniform) = 364 / 526 = 69%
-
-|               |  style  |  uniform |
+|               | rlauxe  |   corla  |
 |---------------|---------|----------|
-| under maxRisk |   519   |    364   |
-| under      4% |   450   |    364   |
-| under      5% |   491   |    366   |
-| under     10% |   519   |    381   |
+| under maxRisk |   482   |    364   |
+| under      5% |   482   |    366   |
+| under     10% |   483   |    381   |
+| under     20% |   487   |    393   |
+| under     30% |   490   |    397   |
 
-## important contests
+### targeted plus important contests
 
 * targeted
 * multicounty contests
 * contestName.startsWith("Representative to the")
 * contestName.startsWith("State")
 
-rlauxe nmvrs = 7697
+rlauxe nmvrs = 7680
 corla nmvrs = 8245
-contests under maxRisk (style) = 376 / 526 = 71%
-contests under maxRisk (uniform) = 364 / 526 = 69%
+contests under maxRisk (rlauxe) = 379 / 526 = 72%
+contests under maxRisk (corla) = 364 / 526 = 69%
 
-|               |  style  |  uniform |
+|               | rlauxe  |   corla  |
 |---------------|---------|----------|
-| under maxRisk |   376   |    364   |
-| under      4% |   376   |    364   |
-| under      5% |   377   |    366   |
-| under     10% |   387   |    381   |
+| under maxRisk |   379   |    364   |
+| under      5% |   384   |    366   |
+| under     10% |   391   |    381   |
+| under     20% |   402   |    393   |
+| under     30% |   413   |    397   |
 
-## all contests
+### all contests
 
-style nmvrs = 19978
-uniform nmvrs = 8245
-contests under maxRisk (style) = 526 / 526 = 100%
-contests under maxRisk (uniform) = 364 / 526 = 69%
+rlauxe nmvrs = 19404
+corla nmvrs = 8245
+contests under maxRisk (rlauxe) = 526 / 526 = 100%
+contests under maxRisk (corla) = 364 / 526 = 69%
 
-|               |  style  |  uniform |
+|               | rlauxe  |   corla  |
 |---------------|---------|----------|
 | under maxRisk |   526   |    364   |
-| under      4% |   526   |    364   |
 | under      5% |   526   |    366   |
 | under     10% |   526   |    381   |
+| under     20% |   526   |    393   |
+| under     30% |   526   |    397   |
+
+## Experiments with relaxed risk limits
+
+### all contests with relaxed risks
+
+* if estMvrs > 250, use 20% risk limit
+* if estMvrs > 150, use 10% risk limit
+* if estMvrs in [50, 150), use 5% risk kimit
+* if estMvrs < 50, use audit risk limit
+
+rlauxe nmvrs = 14056
+corla nmvrs = 8245
+contests under maxRisk (rlauxe) = 526 / 526 = 100%
+contests under maxRisk (corla) = 367 / 526 = 69%
+
+|               | rlauxe  |   corla  |
+|---------------|---------|----------|
+| under maxRisk |   526   |    367   |
+| under      5% |   488   |    366   |
+| under     10% |   511   |    381   |
+| under     20% |   526   |    393   |
+| under     30% |   526   |    397   |
+
+### all contests > 500 with relaxed risks
+
+* if estMvrs > 500, do not include
+* if estMvrs > 250, use 20% risk limit
+* if estMvrs > 150, use 10% risk limit
+* if estMvrs in [50, 150), use 5% risk kimit
+* if estMvrs < 50, use audit risk limit
+
+rlauxe nmvrs = 11273
+corla nmvrs = 8245
+contests under maxRisk (rlauxe) = 519 / 526 = 98%
+contests under maxRisk (corla) = 367 / 526 = 69%
+
+|               | rlauxe  |   corla  |
+|---------------|---------|----------|
+| under maxRisk |   519   |    367   |
+| under      5% |   485   |    366   |
+| under     10% |   501   |    381   |
+| under     20% |   519   |    393   |
+| under     30% |   520   |    397   |
 
 ## TODO DONE
 
@@ -157,6 +182,10 @@ contests under maxRisk (uniform) = 364 / 526 = 69%
 * show plot of incremental cost of adding the low margin contests: what do the lowest n contests cost ?
 
 ## Appendix A Votes differences between auditcenter and votedatabase
+
+[See](Corla2020cvrDiff.md)
+
+**Use the rlauxe viewer to see these interactively.**
 
 ## Appendix B track down bug in countyTabulation 
 

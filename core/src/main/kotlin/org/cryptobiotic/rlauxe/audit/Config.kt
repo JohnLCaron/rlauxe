@@ -44,12 +44,12 @@ data class Config(
 
     override fun toString() = buildString {
         appendLine("Config(")
-        appendLine("  electionInfo=$election, ")
-        appendLine("  creation=$creation, ")
-        appendLine("  simulation=$simulation, ")
-        appendLine("  sampling=$sampling)")
-        if (round.clcaConfig != null) appendLine("  clcaConfig=${round.clcaConfig} )")
-        if (round.pollingConfig != null) appendLine("  pollingConfig=${round.pollingConfig} )")
+        appendLine("  $election, ")
+        appendLine("  $creation, ")
+        appendLine("  $sampling)")
+        appendLine("  $simulation, ")
+        if (round.clcaConfig != null) appendLine("  ${round.clcaConfig} )")
+        if (round.pollingConfig != null) appendLine("  ${round.pollingConfig} )")
     }
 
     companion object {
@@ -154,9 +154,9 @@ data class ElectionInfo(
 
     val mvrSource: MvrSource =
         if (auditType.isClca()) MvrSource.testClcaSimulated else MvrSource.testPrivateMvrs,
+ ) {
+    val metadata = mutableMapOf<String, String>() // downside its not in equals
 
-    val other: Map<String, String> = emptyMap(),    // soft parameters to ease migration
-) {
     init {
         if (mvrSource == MvrSource.testClcaSimulated && auditType.isPolling()) {
             throw RuntimeException("MvrSource must be CLCA or OneAudit")
@@ -165,6 +165,16 @@ data class ElectionInfo(
             throw RuntimeException("Polling Audits must set pollingMode")
         }
     }
+
+    fun addMetadata(key: String, value:String): ElectionInfo {
+        metadata[key] = value
+        return this
+    }
+
+    override fun toString(): String {
+        return "ElectionInfo(electionName='$electionName', auditType=$auditType, totalCardCount=$totalCardCount, contestCount=$contestCount, cvrsContainUndervotes=$cvrsContainUndervotes, pollingMode=$pollingMode, mvrSource=$mvrSource, metadata=$metadata)"
+    }
+
     companion object {
         fun forTest(auditType: AuditType, mvrSource: MvrSource) =
             ElectionInfo("testing", auditType, 42, 1, mvrSource=mvrSource,

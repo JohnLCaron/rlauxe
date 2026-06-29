@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.CvrsToCardStylesIterator
-import org.cryptobiotic.rlauxe.audit.MergeStylesIntoCardsM
+import org.cryptobiotic.rlauxe.audit.MergeStylesIntoCards
 import kotlin.Int
 import kotlin.String
 import kotlin.math.abs
@@ -134,7 +134,7 @@ data class MultiContestTestData(
 
         // cardWithBatchName to AuditableCard
         val cards = mutableListOf<AuditableCard>()
-        val converter: CloseableIterator<AuditableCard> = MergeStylesIntoCardsM(
+        val converter: CloseableIterator<AuditableCard> = MergeStylesIntoCards(
             batchNameIter,
             styles = cardStyles,
         )

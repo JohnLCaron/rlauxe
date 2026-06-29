@@ -7,14 +7,16 @@ plugins {
 
 group = "org.cryptobiotic.rlauxe"
 version = libs.versions.rlauxe.get()
+val subprojectName = name
+val subprojectVersion = version
 
 repositories {
     maven("https://packages.jetbrains.team/maven/p/kds/kotlin-ds-maven")  // for lets-plot
 }
 
 dependencies {
-    api(project(":core"))
-    api(project(":cases"))
+    api(project(":rlauxe-core"))
+    api(project(":rlauxe-cases"))
 
     implementation(kotlin("stdlib"))
     implementation(libs.bull.result)
@@ -26,7 +28,7 @@ dependencies {
     testImplementation(libs.bundles.jvmtest)
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(testFixtures(project(":core")))
+    testImplementation(testFixtures(project(":rlauxe-core")))
     testImplementation(libs.logback.classic)
 }
 

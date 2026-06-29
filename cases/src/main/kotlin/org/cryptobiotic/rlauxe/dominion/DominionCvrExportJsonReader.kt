@@ -21,6 +21,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
+const val cvrExportCsvFile = "cvrExport.csv"
+
 // this reads CvrExport_xxxxx.json files exported by Dominion.
 // we are getting these files from san francisco (SF2024).
 // We derive CvrExports from them, and serialze to csv files.
@@ -67,6 +69,8 @@ data class CvrExport(
         val lastIdx = id.lastIndexOf('-')
         return id.substring(0, lastIdx)
     }
+
+    fun contestIdSet() = votes.keys.toSet()
 
     // only used in test
     fun toAuditableCard(index: Int, prn: Long, phantom: Boolean = false, pools: Map<String, Int>? = null, showPoolVotes: Boolean = true): AuditableCard {

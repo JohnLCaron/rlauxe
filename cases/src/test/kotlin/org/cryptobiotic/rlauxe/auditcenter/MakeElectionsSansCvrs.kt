@@ -51,6 +51,7 @@ class MakeElectionsSansCvrs {
     @Test
     fun makeColorado2020General() {
         val topdir = "$cases/corla/sansCvrs/Colorado2020"
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.04, )
 
         createCountyElectionSansCvrs(topdir, Colorado2020General(),
             creation, round, name = "Colorado2020sans", startFirstRound = true)

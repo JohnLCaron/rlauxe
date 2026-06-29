@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-class Colorado2020General: ColoradoInput(
-    generalCanonicalFile = "$general2020/canonicalTitleCase.csv",
-    contestRoundFile = "$general2020/round_1/contest.csv",
-    tabulateCountyFile = "$general2020/tabulate_county.csv",
-    mvrComparisonFile = "$general2020/round_3/contestComparison.csv"
+class Colorado2020General(ac:String?=auditcenter): ColoradoInput(
+    generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
+    contestRoundFile = "$ac/2020/general/round_1/contest.csv",
+    tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
+    mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
 ) {
     override val skipCounties = listOf("Baca", "Gunnison", "Las Animas", "San Juan")
 

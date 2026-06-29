@@ -5,10 +5,14 @@ import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.boulder.RedactedGroup.Companion.makeAccumulator
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.sf.StaxReader.StaxContest
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.ZipReader
 import org.cryptobiotic.rlauxe.util.roundUp
 import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
 import java.lang.StrictMath.sqrt
@@ -337,24 +341,30 @@ class BallotStyles {
 
 // TODO add the ncards foreach Redacted group. that lets us calculate the missing votes in the pool.
 
-
-fun readBoulderCvrExportCsv(filename: String, countyId: String): BoulderCvrExportCsv {
-    val ballotStyles = BallotStyles()
-
-    val parser = if (filename.endsWith(".zip")) {
+fun readBoulderCvrExportCsv(filename: String, countyName: String): BoulderCvrExportCsv {
+    val input: InputStream = if (filename.endsWith(".zip")) {
         val zipReader = ZipReader(filename)
         // by convention, the file inside is the filename with zip replaced by csv
         val lastPart = filename.substringAfterLast("/")
         val innerFilename = lastPart.replace(".zip", ".csv")
-        val inputStream = zipReader.inputStream(innerFilename)
-        val reader: Reader = InputStreamReader(inputStream, "UTF-8")
-        CSVParser(reader, CSVFormat.DEFAULT)
-        // dunno CSVParser.Builder.get()
+        zipReader.inputStream(innerFilename)
 
     } else {
-        CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
+        FileInputStream(filename)
     }
+    return readBoulderCvrExportsFromInputStream(input, filename, countyName)
+}
 
+fun readBoulderCvrExportsFromResourcePath(resourcePath: String, countyName: String): BoulderCvrExportCsv {
+    val inputStream = object {}.javaClass.getResourceAsStream(resourcePath) ?:
+        throw IOException("$resourcePath does not exist")
+    return readBoulderCvrExportsFromInputStream(inputStream, resourcePath, countyName)
+}
+
+fun readBoulderCvrExportsFromInputStream(input: InputStream, inputName: String, countyName: String): BoulderCvrExportCsv {
+    val ballotStyles = BallotStyles()
+
+    val parser = CSVParser.parse(input, Charset.forName("UTF-8"), CSVFormat.DEFAULT)
     val records: Iterator<CSVRecord> = parser.iterator()
     var lineNum = 1
 
@@ -455,7 +465,7 @@ fun readBoulderCvrExportCsv(filename: String, countyId: String): BoulderCvrExpor
         ballotStyles.redactedGroups.toSortedMap().forEach { println("  ${it.value}") }
     }
 
-    return BoulderCvrExportCsv(countyId, electionName, versionName, filename, schema, cvrs,
+    return BoulderCvrExportCsv(countyName, electionName, versionName, inputName, schema, cvrs,
         ballotStyles.redactedGroups.toSortedMap().values.toList(),
         ballotStyles.ballotTypes.toSortedMap().values.toList())
 }

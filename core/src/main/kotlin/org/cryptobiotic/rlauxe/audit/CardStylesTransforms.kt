@@ -150,7 +150,7 @@ class CvrsToCardStylesIterator(
 }
 
 // merge styles into cards iterator
-class MergeStylesIntoCardsM(
+class MergeStylesIntoCards(
     val cardsIter: CloseableIterator<AuditableCard>,
     styles: List<StyleIF>,
 ): CloseableIterator<AuditableCard> {

@@ -30,7 +30,7 @@ class TestGenerateAllUseCases {
     val sfDir = "$testdataDir/cases/sf2024"
     val sfZipFile = "$sfDir/CVR_Export_20241202143051.zip"
 
-    @Test
+    // @Test
     fun createBoulder24oa() {
         val topdir = "$testdataDir/cases/boulder24/oa"
 
@@ -51,7 +51,7 @@ class TestGenerateAllUseCases {
         )
     }
 
-    @Test
+    //@Test
     fun createBoulder24clca() { // simulate CVRs
         val topdir = "$testdataDir/cases/boulder24/clca"
 

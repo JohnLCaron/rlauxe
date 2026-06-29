@@ -1,12 +1,13 @@
 package org.cryptobiotic.rlauxe.persist
 
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import org.junit.Assert.assertTrue
 import kotlin.test.Test
 
 class TestCompositeRecord {
-    val belgiumData = "$testdataDir/cases/belgium/belgium2024"
+    val belgiumData = "$cases/belgium2024"
     val corlaUniform = "$testdataDir/cases/corla/uniform"
 
     @Test
@@ -40,6 +41,12 @@ class TestCompositeRecord {
 
         val anvers = (compositeRecord as CompositeAuditRecord).findComponentWithName("Anvers")
         println(anvers)
+    }
+
+    @Test
+    fun testReadComponent() {
+        val componentRecord = AuditRecord.read("$belgiumData/Anvers")!!
+        println(componentRecord)
     }
 
     // @Test

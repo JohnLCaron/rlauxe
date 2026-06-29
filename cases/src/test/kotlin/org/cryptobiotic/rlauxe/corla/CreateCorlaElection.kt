@@ -13,7 +13,6 @@ import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import kotlin.Int
 import kotlin.String
 
@@ -49,7 +48,10 @@ open class CreateCorlaElection (
             val infos = countyElection.infos
             val auditableCardIter: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.unsortedMvrsFile(), styles=countyPools)
             // are we handling the batches correctly using mvrs?
-            val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
+            val cardTabulation = CardTabulation(auditableCardIter, infos) { }
+            val manifestTabs = cardTabulation.tabs
+            val count = cardTabulation.cvrCount
+            // val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
             require(ncards == count)
             manifestTabs.mapValues { it.value.ncardsTabulated }
         }

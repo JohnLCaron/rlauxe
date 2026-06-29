@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.dominion.writeCvrExportCsvFile
+import org.cryptobiotic.rlauxe.persist.auditdir
 import org.cryptobiotic.rlauxe.persist.csv.readCardsAndMergeToList
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.junit.jupiter.api.Assertions
@@ -16,7 +17,7 @@ class TestCsvReading {
 
     @Test
     fun testAuditableCardCsvFile() {
-        val filenameIn = "$testdataDir/cases/sf2024/oa/audit/sortedCards.csv"
+        val filenameIn = "$testdataDir/cases/sf2024/oa/$auditdir/sortedCards.csv"
         val original = readCardsAndMergeToList(filenameIn, null)
         val filenameOut = "$tempDir/sfCards.csv"
 

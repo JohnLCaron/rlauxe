@@ -1,5 +1,5 @@
 # Developer Notes
-_06/26/2026_
+_06/29/2026_
 
 <!-- TOC -->
 * [Developer Notes](#developer-notes)
@@ -12,9 +12,11 @@ _06/26/2026_
     * [Run the core tests using gradle](#run-the-core-tests-using-gradle)
   * [Using IntelliJ](#using-intellij)
   * [Modules](#modules)
-  * [Generate Test Cases from the uber jar](#generate-test-cases-from-the-uber-jar)
-    * [for the belgium test case](#for-the-belgium-test-case)
-    * [Do not use this part yet: under development](#do-not-use-this-part-yet-under-development)
+  * [Generate Test Cases](#generate-test-cases-)
+    * [for the belgium 2024 test case](#for-the-belgium-2024-test-case)
+    * [for the boulder 2024 test case](#for-the-boulder-2024-test-case)
+    * [for the Colorado 2020 test case](#for-the-colorado-2020-test-case)
+    * [for the San Francisco 2024 test case](#for-the-san-francisco-2024-test-case)
   * [rlauxe viewer](#rlauxe-viewer)
 * [Notes and stats](#notes-and-stats)
   * [Code Coverage (Lines of Codes)](#code-coverage-lines-of-codes)
@@ -180,13 +182,17 @@ Then run:
 `
 java -classpath cases/build/libs/rlauxe-cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case corla2020 -toptopdir "/home/you/wherever/cases/corla2020" \
-    -votecenter "/home/you/wherever/git/auditcenter/directory" -sampling "style"
+    -auditcenter "/home/you/wherever/git/auditcenter/directory" -sampling style
 `
 
-will create an election using style based sampling (CSD). To use uniform sampling, use the flag "-sampling uniform"
+* check _cases/build/libs/_ for the latest version of rlauxe-cases-uber.jar
+* substitute your own "auditcenter" directory
+* substitute your own "toptopdir" directory where the data will be written.
+* currently we are only supporting the Colorado 2020 General election, but other elections will be added.
 
-Use `java -jar viewer/build/libs/viewer-uber.jar -corlaAudit` to view this case.
-See [here](https://github.com/JohnLCaron/rlauxe-viewer#special-features-for-corlaaudits).
+This creates an election using style based sampling (CSD). To use uniform sampling, use the flag "-sampling uniform"
+
+See [here](https://github.com/JohnLCaron/rlauxe-viewer/docs/CorlaViewer.md
 
 
 ### for the San Francisco 2024 test case

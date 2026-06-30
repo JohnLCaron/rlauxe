@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 06/29/2026_
+_last changed: 06/30/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -251,7 +251,7 @@ For OneAudit, results depend on the percent of CVRs vs pooled ballots, the pool 
 The following is a best case scenario with no errors in the CVRs, a single pool with the same margin as the CVRs, and a single card style, 
 with several values of the CVR percentage, as a function of margin, and maxRisk = .9:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html" rel="OneAuditNoErrorsLogLinear">![OneAuditNoErrorsLogLinear](docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors3LogLinear.html" rel="OneAuditNoErrorsLogLinear">![OneAuditNoErrorsLogLinear](docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors3LogLinear.png)</a>
 
 OneAudit has a large variance due to the random sequence of pool values. Here are the one sigma intervals for
 the "best case" 90% CVR OneAudit. For example, a 2% margin contest has a one-sigma interval of (466, 2520) (click on the image

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.cli
 
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 
@@ -7,7 +8,7 @@ class TestRunCalcAssortAvg {
 
     @Test
     fun testRunCalcAssortAvg() {
-        val topdir = "$testdataDir/cases/boulder24/oa"
+        val topdir = "$cases/boulder/boulder24/oa"
 
         RunCalcAssortAvg.main(
             arrayOf(

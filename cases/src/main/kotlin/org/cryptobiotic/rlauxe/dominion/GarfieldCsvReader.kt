@@ -72,9 +72,7 @@ class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
             val innerFilename = lastPart.replace(".zip", ".csv")
             val inputStream = zipReader.inputStream(innerFilename)
             val reader: Reader = InputStreamReader(inputStream, "UTF-8")
-            CSVParser(reader, CSVFormat.DEFAULT)
-            // dunno CSVParser.Builder.get()
-
+            CSVParser.parse(reader, CSVFormat.DEFAULT)
         } else {
             CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
         }

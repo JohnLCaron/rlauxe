@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.persist.bin
 
 import org.cryptobiotic.rlauxe.audit.makeFastCards
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -35,7 +36,7 @@ class TestFastSamplingCards {
 
     @Test
     fun readSamplingCards() {
-        val topdir = "${testdataDir}/cases/corla/consistent"
+        val topdir = "$cases/corla/corla2020/clca"
         val publisher = Publisher("$topdir")
 
         val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord

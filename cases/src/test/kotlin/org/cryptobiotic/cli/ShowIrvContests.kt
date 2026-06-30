@@ -2,7 +2,7 @@ package org.cryptobiotic.cli
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
@@ -21,7 +21,7 @@ class ShowIrvContests {
     fun showRaireContests() {
         val stopwatch = Stopwatch()
 
-        val topDir = "$testdataDir/cases/sf2024"
+        val topDir = "$cases/sf/sf2024"
         val publisher = Publisher("$topDir/clca")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
         val contestsUA = if (contestsResults .isOk) contestsResults.unwrap()

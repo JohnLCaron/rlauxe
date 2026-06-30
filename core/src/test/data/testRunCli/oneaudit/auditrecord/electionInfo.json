@@ -1,0 +1,11 @@
+{
+    "electionName": "TestOneAuditElection",
+    "auditType": "ONEAUDIT",
+    "ncards": 50500,
+    "ncontests": 1,
+    "cvrsContainUndervotes": true,
+    "mvrSource": "testPrivateMvrs",
+    "metadata": {
+        "version": "unknown"
+    }
+}

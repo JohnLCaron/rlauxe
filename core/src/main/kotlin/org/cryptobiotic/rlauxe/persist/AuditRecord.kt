@@ -164,10 +164,10 @@ open class AuditRecord(
                 if (countyAudit != null) return countyAudit
             }
 
-            if (CountyComposite.checkExists(topdir)) {
+            /* if (CountyComposite.checkExists(topdir)) {
                 val countyComposite = CountyComposite.readFrom(topdir)
                 if (countyComposite != null) return countyComposite
-            }
+            } */
 
             if (CompositeAuditRecord.checkExists(topdir)) {
                 val compositeRecord = CompositeAuditRecord.readFrom(topdir)

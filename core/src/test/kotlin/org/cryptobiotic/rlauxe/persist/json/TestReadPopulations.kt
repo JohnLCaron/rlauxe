@@ -12,10 +12,13 @@ import kotlin.test.assertEquals
 
 // TODO mo betta
 class TestReadPopulations {
+    val useLocal = true
+    val toptopdir = if (useLocal) "src/test/data/testRunCli"
+    else "$testdataDir/persist/testRunCli"
 
     @Test
     fun testReadPollingBatches() {
-        val topdir = "$testdataDir/persist/testRunCli/polling"
+        val topdir = "$toptopdir/polling"
 
         val publisher = Publisher(topdir)
         val pops = readStyles(publisher)!!
@@ -39,8 +42,7 @@ class TestReadPopulations {
 
     @Test
     fun testReadOneAuditPools() {
-        val topdir = "$testdataDir/persist/testRunCli/oneaudit"
-        // val topdir = "../core/src/test/data/testRunCli/oneaudit"
+        val topdir = "$toptopdir/oneaudit"
 
         val publisher = Publisher(topdir)
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())

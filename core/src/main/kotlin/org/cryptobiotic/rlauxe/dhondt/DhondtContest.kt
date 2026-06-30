@@ -248,11 +248,6 @@ class DHondtContest(
         return cands.countContestedSeats() // + cands.thrashers.size
     }
 
-    fun showContestedSeats(contestRound: ContestRound): Pair<Int, String> {
-        val relax = RelaxedAssertionsOld(this, contestRound)
-        return relax.contestedSeatReport()
-    }
-
     //// create a cvr for each vote
     fun createSimulatedCvrs(): List<Cvr> {
         val cvrs = mutableListOf<Cvr>()

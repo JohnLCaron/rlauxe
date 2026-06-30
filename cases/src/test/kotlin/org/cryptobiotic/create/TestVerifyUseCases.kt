@@ -1,5 +1,6 @@
 package org.cryptobiotic.create
 
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import kotlin.test.Test
@@ -172,7 +173,7 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifyDHondt() {
-        val topdir = "$testdataDir/cases/belgium/2024/Hainaut"
+        val topdir = "$cases/belgium/belgium2024/Hainaut"
         val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)

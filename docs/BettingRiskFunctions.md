@@ -1,5 +1,5 @@
 # Risk and betting functions
-_last changed 02/15/2026_
+_last changed 06/30/2026_
 
 <!-- TOC -->
 * [Risk and betting functions](#risk-and-betting-functions)
@@ -168,7 +168,7 @@ The next two plots compare the current OneAudit results to previous OneAudit whe
 
 **Current OneAudit using eq 2**
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html" rel="OneAuditNoErrors">![OneAuditNoErrors](plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors3LogLinear.html" rel="OneAuditNoErrors">![OneAuditNoErrors](plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors3LogLinear.png)</a>
 
 **Previous OneAudit**
 

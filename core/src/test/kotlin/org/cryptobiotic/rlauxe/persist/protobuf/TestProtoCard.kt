@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.persist.protobuf
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.CardCsvReader
 import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
@@ -20,7 +21,7 @@ class TestProtoCard {
 
     @Test
     fun testProtoAndCsvAgree () {
-        val topdir = "$testdataDir/cases/auditcenter/County2024OnlyTeller"
+        val topdir = "$cases/corla/corla2020/clca"
         val publisher = Publisher("$topdir")
         val bufferSize = 100_000
 

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.cli
 
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.test.Test
@@ -23,7 +24,7 @@ class TestRunRoundAgainCli {
 
     @Test
     fun testRunRoundAgainClca() {
-        val topdir = "$testdataDir/cases/belgium/belgium2024/Bruxelles"
+        val topdir = "$cases/belgium/belgium2024/Bruxelles"
 
         RunRoundAgainCli.main(
             arrayOf(
@@ -65,7 +66,7 @@ class TestRunRoundAgainCli {
 
     @Test
     fun testRunRoundAgainComposite() {
-        val topdir = "$testdataDir/cases/belgium/2024"
+        val topdir = "$cases/belgium/2024"
 
         RunRoundAgainCli.main(
             arrayOf(

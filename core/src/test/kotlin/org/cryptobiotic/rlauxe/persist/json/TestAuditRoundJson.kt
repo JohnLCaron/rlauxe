@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
@@ -24,7 +25,7 @@ class TestAuditRoundJson {
 
     @Test
     fun testSf24oa() {
-        val topdir = "/home/stormy/rla/cases/sf2024/oa"
+        val topdir = "$cases/sf/sf2024/oa"
         val record = AuditRecord.read(topdir) as AuditRecord
         val contestsUAs = record.contests
 

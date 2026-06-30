@@ -2,13 +2,15 @@ package org.cryptobiotic.rlauxe.dhondt
 
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.BelowThreshold
+import org.cryptobiotic.rlauxe.dhondt.CandSeatRanges.Companion.showMergedSeatRanges
+import org.cryptobiotic.rlauxe.dhondt.CandSeatRanges.Companion.showSeatRange
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class TestRelaxedAssertionReport {
-    val topdir = "$cases/belgium2024/"
+    val topdir = "$cases/belgium/belgium2024/"
     val auditRecord = AuditRecord.read(topdir)!! as CompositeAuditRecord
     val contests = auditRecord.contests
     val partyNames = auditRecord.readPartyNames()
@@ -100,5 +102,33 @@ class TestRelaxedAssertionReport {
         val dcontest = contestRound.contestUA.contest as DHondtContest
         assertTrue(dcontest.assorters.isEmpty())
         println( dcontest.showRelaxedAssertion(contestRound, cassertion) )
+    }
+
+    @Test
+    fun testCoalitionReport() {
+        print( showCoalitionReport(auditRecord as CompositeAuditRecord))
+    }
+
+    @Test
+    fun testMergeSeatRanges() {
+        print( showMergedSeatRanges(lastRound))
+    }
+
+    @Test
+    fun testAltContest() {
+        val contestRound = lastRound.contestRounds.find { it.id == 5 }!!
+        print( showSeatRange(contestRound))
+    }
+
+    @Test
+    fun testShowAllRelaxedAssertions() {
+        contests.forEach{ contestUA ->
+            val contestRound = lastRound.contestRounds.find { it.contestUA.id == contestUA.id }
+            if (contestRound != null) {
+                val result = (contestUA.contest as DHondtContest).showRelaxedAssertions(contestRound)
+                println(result)
+                println("=======================================================================================================")
+            }
+        }
     }
 }

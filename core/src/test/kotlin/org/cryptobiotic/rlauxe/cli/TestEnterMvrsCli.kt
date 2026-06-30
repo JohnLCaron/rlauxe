@@ -14,7 +14,7 @@ class TestEnterMvrsCli {
         EnterMvrsCli.main(
             arrayOf(
                 "-in", topdir,
-                "-mvrs", "$topdir/$auditdir/private/sortedMvrs.csv"
+                "-mvrs", "$topdir/private/sortedMvrs.csv"
             )
         )
     }

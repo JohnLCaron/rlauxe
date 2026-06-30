@@ -18,6 +18,7 @@ import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.belgium.toptopdir
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2024General
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.corla.createCorlaElection
 import org.cryptobiotic.rlauxe.corla.createUniformElection
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
@@ -27,12 +28,12 @@ import kotlin.test.Test
 import kotlin.test.fail
 
 class TestGenerateAllUseCases {
-    val sfDir = "$testdataDir/cases/sf2024"
+    val sfDir = "$cases/sf/sf2024"
     val sfZipFile = "$sfDir/CVR_Export_20241202143051.zip"
 
     // @Test
     fun createBoulder24oa() {
-        val topdir = "$testdataDir/cases/boulder24/oa"
+        val topdir = "$cases/boulder/boulder2024/oa"
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, )
         val round = AuditRoundConfig(
@@ -53,7 +54,7 @@ class TestGenerateAllUseCases {
 
     //@Test
     fun createBoulder24clca() { // simulate CVRs
-        val topdir = "$testdataDir/cases/boulder24/clca"
+        val topdir = "$cases/boulder/boulder2024/clca"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, )
         val round = AuditRoundConfig(
@@ -72,25 +73,9 @@ class TestGenerateAllUseCases {
         )
     }
 
-    // obsolete
-    // @Test
-    fun makeColoradoClcaUniform() {
-        val topdir = "$testdataDir/cases/corla/uniform"
-
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
-        val round = AuditRoundConfig(
-            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
-            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 200000,
-                sampling = Sampling.uniform),
-            ClcaConfig(), null)
-
-        createUniformElection(topdir,
-            Colorado2024General(), creation, round, name = "Corla24Uniform")
-    }
-
     // @Test
     fun makeColoradoClcaConsistent() {
-        val topdir = "$testdataDir/cases/corla/consistent"
+        val topdir = "$cases/corla/consistent"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -105,7 +90,7 @@ class TestGenerateAllUseCases {
 
     // @Test
     fun createColoradoClca() {
-        val topdir = "$testdataDir/cases/corla/clca"
+        val topdir = "$cases/corla/clca"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -118,7 +103,7 @@ class TestGenerateAllUseCases {
 
    //  @Test
     fun createColoradoPollingPools() {
-        val topdir = "$testdataDir/cases/corla/polling"
+        val topdir = "$cases/corla/polling"
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -132,7 +117,7 @@ class TestGenerateAllUseCases {
 
     // @Test
     fun createColoradoPollingBatches() {
-        val topdir = "$testdataDir/cases/corla/polling2"
+        val topdir = "$cases/corla/polling2"
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -146,7 +131,7 @@ class TestGenerateAllUseCases {
 
     // @Test // too long - fix
     fun createColoradoPollingWithoutBatches() {
-        val topdir = "$testdataDir/cases/corla/polling3"
+        val topdir = "$cases/corla/polling3"
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -162,7 +147,7 @@ class TestGenerateAllUseCases {
 
     // @Test
     fun makeSFPrecinctAndStyleOA() {
-        val topdir = "$testdataDir/cases/sf2024/oaps"
+        val topdir = "$cases/sf2024/oaps"
         val contestManifestFilename = "ContestManifest.json"
         val candidateManifestFile = "CandidateManifest.json"
 
@@ -197,9 +182,9 @@ class TestGenerateAllUseCases {
         }
     }
 
-    @Test
+    // @Test
     fun makeSFElectionOA() {
-        val topdir = "$testdataDir/cases/sf2024/oa"
+        val topdir = "$cases/sf2024/oa"
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, )
         val round = AuditRoundConfig(
@@ -218,9 +203,9 @@ class TestGenerateAllUseCases {
         )
     }
 
-    @Test
+    // @Test
     fun makeSFElectionClca() {
-        val topdir = "$testdataDir/cases/sf2024/clca"
+        val topdir = "$cases/sf2024/clca"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, )
         val round = AuditRoundConfig(
@@ -239,7 +224,7 @@ class TestGenerateAllUseCases {
         )
     }
 
-    @Test
+    // @Test
     fun createAllBelgiumElections() {
         org.cryptobiotic.rlauxe.belgium.createAllBelgiumElections(toptopdir)
     }

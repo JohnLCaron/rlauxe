@@ -2,28 +2,28 @@
 rlauxe = "0.10.0.0"  ## prerelease 0.MAJOR.MINOR.PATCH
 
 # main dependency versions
-kotlin = "2.3.20"
+kotlin = "2.3.21"
 kotlinx-cli = "0.3.6"
-kotlinx-coroutines = "1.10.2"
-oshai-version = "7.0.13"
+kotlinx-coroutines = "1.11.0"
+oshai-version = "8.0.4"
 slf4j-version="2.0.17"
 
 # library versions
-bull-result = "2.1.0"
+bull-result = "2.3.1"
 commons-csv = "1.14.1"
 commons-math = "3.6.1"
 commons-poi = "5.5.1"
 kandy-letsPlot = "0.8.3"
 kotlin-statistics = "0.8.3"
-protobuf = "4.34.1"
+google-protobuf = "4.34.1"  # not used
 serialization = "1.11.0"
-xmlutil-version = "0.91.3"
+xmlutil-version = "0.91.3" # not used
 
 # test only dependency versions
 junit-jupiter-params = "5.13.1"
-logback = "1.5.29"
-mockk = "1.14.9"
-kotest = "6.1.3"
+logback = "1.5.37"
+mockk = "1.14.9" # used ?
+kotest = "6.2.0"
 
 [libraries]
 
@@ -43,7 +43,7 @@ commons-csv = { module = "org.apache.commons:commons-csv", version.ref = "common
 commons-math = { module = "org.apache.commons:commons-math3", version.ref = "commons-math" }
 commons-poi = { module = "org.apache.poi:poi", version.ref = "commons-poi" }
 commons-poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "commons-poi" }
-google-protobuf = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protobuf" }
+google-protobuf = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "google-protobuf" }
 pdvrieze-xmlutil-core-xml = { module = "io.github.pdvrieze.xmlutil:core-jvmcommon", version.ref = "xmlutil-version" }
 pdvrieze-xmlutil-serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization-jvm", version.ref = "xmlutil-version" }
 
@@ -66,7 +66,7 @@ jvmtest = ["junit-jupiter-params", "kotlin-test-junit5", "logback-classic", "moc
 xmlutil = ["pdvrieze-xmlutil-core-xml", "pdvrieze-xmlutil-serialization-xml", ]
 
 [plugins]
-# kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-google-protobuf-kotlin = { id = "com.google.protobuf", version.ref = "protobuf" }
+# kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+# google-protobuf-kotlin = { id = "com.google.protobuf", version.ref = "google-protobuf" }
 

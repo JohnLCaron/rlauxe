@@ -28,7 +28,7 @@ class VerifyAuditRecord(val topdir: String) {
             logger.error{ auditRecordResult.toString() }
             throw RuntimeException( auditRecordResult.toString() )
         }
-        mvrManager = PersistedMvrManager(auditRecord as AuditRecord, false)
+        mvrManager = PersistedMvrManager(auditRecord, false)
 
         publisher = Publisher(topdir)
         config = auditRecord.config

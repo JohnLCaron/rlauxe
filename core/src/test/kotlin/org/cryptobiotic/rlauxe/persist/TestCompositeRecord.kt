@@ -7,8 +7,8 @@ import org.junit.Assert.assertTrue
 import kotlin.test.Test
 
 class TestCompositeRecord {
-    val belgiumData = "$cases/belgium2024"
-    val corlaUniform = "$testdataDir/cases/corla/uniform"
+    val belgiumData = "$cases/belgium/belgium2024"
+    val corlaUniform = "$cases/corla/corla2020/uniform"
 
     @Test
     fun testReadFrom() {

@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.dhondt
 
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.Config
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -23,7 +24,7 @@ class TestBelgiumContest {
     val sortedManifest: SortedManifest
 
     init {
-        val topdir = "$testdataDir/cases/belgium/belgium2024/Bruxelles"
+        val topdir = "$cases/belgium/belgium2024/Bruxelles"
         val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
         sortedManifest = mvrManager.sortedManifest()

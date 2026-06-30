@@ -2,7 +2,7 @@
 _last changed 06/29/2026_
 
 I found a bug in my relaxed assertion algorithm. I thought I was recursively checking for all relaxed (aka "disputed" or "failed")
-assertions, but actually didnt go to more than one levels of recursion.
+assertions, but actually didnt go to more than one level of recursion.
 
 For the Belgium 2024 standard example of limited mvrs, only these 2 assertions were found to be failures for FlandreEast:
 

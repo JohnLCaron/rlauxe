@@ -213,6 +213,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
     // b >? c
     //
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
     // not crazy about these DhondtLoserGroup
     fun showDhondtRiskFailures(sortedGroups: List<DhondtLoserGroup>) = buildString {
 
@@ -226,7 +227,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
                 if (winningSeat == null)
                     append("       ")
                 else
-                    append(" (${nfn(winningSeat!!, 2)})  ")
+                    append(" (${nfn(winningSeat, 2)})  ")
 
                 if (idx == 0) {
                     append(arm.loserScore.showLoser(
@@ -257,7 +258,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
         return buildString {
             appendLine(showAltFailureContest(altContest))
             done.add(altContest.failure!!.assorter.shortName())
-            done.add(altContest.failure!!.assorter.reverseName())
+            done.add(altContest.failure.assorter.reverseName())
 
             // all the failures from altContest
             altContest.dhondtFailures.forEach {

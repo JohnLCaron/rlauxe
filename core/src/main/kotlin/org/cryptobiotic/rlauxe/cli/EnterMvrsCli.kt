@@ -56,7 +56,7 @@ fun enterMvrs(inputDir: String, mvrFile: String): Result<Boolean, ErrorMessages>
     val result = AuditRecord.readWithResult(inputDir)
     if (result.isErr) return Err(result.component2()!!) // TODO inelegant
 
-    val auditRecord = result.unwrap() as AuditRecord
+    val auditRecord = result.unwrap()
     val lastRoundIdx = if (auditRecord.rounds.isEmpty()) 1 else auditRecord.rounds.last().roundIdx
 
     val mvrManager = PersistedMvrManager(auditRecord)

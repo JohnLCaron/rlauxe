@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.SortedManifest
@@ -29,7 +30,7 @@ class TestSf2024OneAuditIrv() {
     val mvrs = mutableListOf<AuditableCard>()
 
     init {
-        val topdir = "$testdataDir/cases/sf2024/oa"
+        val topdir = "$cases/sf/sf2024/oa"
         val auditRecord = AuditRecord.read(topdir) as AuditRecord
         // cardManifest = auditRecord.readCardManifest()
         config = auditRecord.config
@@ -39,7 +40,7 @@ class TestSf2024OneAuditIrv() {
         cardPools = auditRecord.readCardPools()!!
 
         // use the cvrs from the clca as the mvrs
-        val cvrdir = "$testdataDir/cases/sf2024/clca"
+        val cvrdir = "$cases/sf/sf2024/clca"
         val cvrPublisher = Publisher(cvrdir)
         cardManifest = readSortedManifest(cvrPublisher, infos, auditRecord.electionInfo.totalCardCount)
         mvrsIterable = cardManifest.cards

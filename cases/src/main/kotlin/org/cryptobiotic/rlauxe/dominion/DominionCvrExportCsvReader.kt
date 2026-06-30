@@ -99,8 +99,7 @@ class DominionCvrExportCsvReader(val filename: String, showHeaders: Boolean = fa
             val innerFilename = lastPart.replace(".zip", ".csv")
             val inputStream = zipReader.inputStream(innerFilename)
             val reader: Reader = InputStreamReader(inputStream, "UTF-8")
-            CSVParser(reader, CSVFormat.DEFAULT)
-            // dunno CSVParser.Builder.get()
+            CSVParser.parse(reader, CSVFormat.DEFAULT)
             // TODO if we could look ahead, we could give them the first row
 
         } else {

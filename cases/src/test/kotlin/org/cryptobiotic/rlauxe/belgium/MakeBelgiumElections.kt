@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.belgium
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.runRound
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.util.dfn
@@ -12,7 +13,7 @@ import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.math.ln
 import kotlin.test.Test
 
-val toptopdir = "$testdataDir/cases/belgium/belgium2024"
+val toptopdir = "$cases/belgium/belgium2024"
 
 class MakeBelgiumElections {
 

@@ -1,0 +1,53 @@
+{
+    "batches": [
+        {
+            "name": "style0",
+            "id": 0,
+            "possibleContests": [
+                1,
+                3,
+                4
+            ],
+            "hasExactContests": false,
+            "ncards": 955
+        },
+        {
+            "name": "style1",
+            "id": 1,
+            "possibleContests": [
+                0,
+                2,
+                3,
+                4
+            ],
+            "hasExactContests": false,
+            "ncards": 8
+        },
+        {
+            "name": "style2",
+            "id": 2,
+            "possibleContests": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "hasExactContests": false,
+            "ncards": 14017
+        },
+        {
+            "name": "style3",
+            "id": 3,
+            "possibleContests": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "hasExactContests": false,
+            "ncards": 5020
+        }
+    ]
+}

@@ -106,5 +106,5 @@ object CreateCaseData {
 
 /*
 java -classpath cases/build/libs/cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
-    -case belgium -topdir "/home/stormy/datadrive/rla/cases/belgium/belgium24"
+    -case belgium -topdir "/home/stormy/datadrive/rla/cases/belgium/belgium2024"
  */

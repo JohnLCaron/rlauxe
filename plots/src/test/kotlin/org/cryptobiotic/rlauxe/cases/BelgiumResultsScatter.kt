@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.cases
 
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
@@ -13,9 +14,8 @@ import org.jetbrains.kotlinx.kandy.util.color.Color
 import kotlin.io.path.Path
 import kotlin.test.Test
 
-// comnpare audit variance across SF, SFoa and SFaNS
 class BelgiumResultsScatter {
-    val belgiumDataDir = "$testdataDir/cases/belgium/2024"
+    val belgiumDataDir = "$cases/belgium/belgium2024"
     val belgiumData : CompositeAuditRecord
 
     val name = "BelgiumResultsScatter"

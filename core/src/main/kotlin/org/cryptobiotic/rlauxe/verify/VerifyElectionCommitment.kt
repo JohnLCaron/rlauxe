@@ -94,7 +94,7 @@ fun readElectionCommitment(topdir: String): Result<ElectionCommitment, ErrorMess
     val sortedManifest = mvrManager.sortedManifest()
 
     return if (errs.hasErrors()) Err(errs) else
-        Ok(ElectionCommitment(electionInfo!!, contests, styles, pools, sortedManifest.cards))
+        Ok(ElectionCommitment(electionInfo, contests, styles, pools, sortedManifest.cards))
 }
 
 fun verifyCardManifest(

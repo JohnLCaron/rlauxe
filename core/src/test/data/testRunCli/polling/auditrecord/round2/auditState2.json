@@ -1,0 +1,77 @@
+{
+    "roundIdx": 2,
+    "contestRounds": [
+        {
+            "id": 1,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "1/0 contest1",
+                    "roundIdx": 2,
+                    "estSampleSize": 6514,
+                    "estNewSampleSize": 4280,
+                    "estimationResult": {
+                        "roundIdx": 2,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 0,
+                        "startingTestStatistic": 2.326558261318729,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            355,
+                            509,
+                            612,
+                            899,
+                            1153,
+                            1305,
+                            1488,
+                            1616,
+                            1626,
+                            1669,
+                            1860,
+                            1976,
+                            3531,
+                            3921,
+                            3948,
+                            4161,
+                            4756,
+                            4875,
+                            5078,
+                            5105
+                        ],
+                        "lastIndex": 6398,
+                        "quantile": 80,
+                        "ntrials": 20,
+                        "simNewMvrs": 4280,
+                        "simMvrs": 6514
+                    },
+                    "auditResult": {
+                        "desc": "round=2 pmin=0.0486 plast=0.0486 nmvrs=6514 samplesUsed=3708 status=StatRejectNull measuredCounts=N/A",
+                        "roundIdx": 2,
+                        "nmvrs": 6514,
+                        "plast": 0.04860772344166602,
+                        "pmin": 0.04860772344166602,
+                        "samplesUsed": 3708,
+                        "status": "StatRejectNull",
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "roundProved": 2
+                }
+            ],
+            "roundIdx": 2,
+            "maxSampleAllowed": 6514,
+            "estMvrs": 6514,
+            "estNewMvrs": 4280,
+            "done": true,
+            "included": true,
+            "status": "StatRejectNull",
+            "haveSampleSize": 6514,
+            "haveNewSampleSize": 4280
+        }
+    ],
+    "auditWasDone": true,
+    "auditIsComplete": true,
+    "nmvrs": 6514,
+    "newmvrs": 4280,
+    "mvrsUnused": 3708,
+    "mvrsUsed": 2806
+}

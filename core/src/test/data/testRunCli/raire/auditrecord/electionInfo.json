@@ -1,0 +1,11 @@
+{
+    "electionName": "TestClcaElection",
+    "auditType": "CLCA",
+    "ncards": 15000,
+    "ncontests": 11,
+    "cvrsContainUndervotes": true,
+    "mvrSource": "testPrivateMvrs",
+    "metadata": {
+        "version": "unknown"
+    }
+}

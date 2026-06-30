@@ -276,7 +276,7 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
         // add all the failures from altContest
         fun addChildren(alreadyDone: MutableSet<String>): List<AltFailure> {
             alreadyDone.add(altContest.failure!!.assorter.shortName())
-            alreadyDone.add(altContest.failure!!.assorter.reverseName())
+            alreadyDone.add(altContest.failure.assorter.reverseName())
 
             val children = mutableListOf<AltFailure>()
             var idx = 1

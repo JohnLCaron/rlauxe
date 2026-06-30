@@ -12,18 +12,20 @@ import kotlin.test.Test
 
 class OneAuditNoErrors {
     val nruns = 100
-    val N = 50000
+    val N = 500000
 
     @Test
     fun oaNoErrorsPlots() {
         val margins =
             listOf(.005, .01, .015, .02, .03, .04, .05, .06, .07, .08, .10, .20)
-        val cvrPercents = listOf(0.50, 0.75, 0.83, 0.90, 0.96)
+        // original val cvrPercents = listOf(0.50, 0.75, 0.83, 0.90, 0.96)
+        val cvrPercents = listOf(0.01, 0.10, 0.25, 0.50, 0.75, 0.90)
 
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
         margins.forEach { margin ->
+            println("margin = $margin $stopwatch")
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
                 parameters=mapOf("nruns" to nruns, "cat" to "poll")
@@ -37,6 +39,8 @@ class OneAuditNoErrors {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             cvrPercents.forEach { cvrPercent ->
+                println("  cvrPercent = $cvrPercent $stopwatch")
+
                 val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     auditConfigIn = Config.from(AuditType.ONEAUDIT),
@@ -48,7 +52,7 @@ class OneAuditNoErrors {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks, nthreads=40)
         println(stopwatch.took())
 
-        val name = "OneAuditNoErrors"
+        val name = "OneAuditNoErrors3"
         val dirName = "$testdataDir/plots/oneaudit/$name"
 
         validateOutputDir(Path(dirName))

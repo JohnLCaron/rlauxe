@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.math.sqrt
 
 class RepeatedWorkflowRunner (val nruns: Int, val taskGenerator: ContestAuditTaskGenerator):
@@ -31,7 +32,6 @@ data class WorkflowResult(
     val nmvrs: Double, // nmvrs for this contest and round; avg nmvrs for successes
     val parameters: Map<String, Any>,
     val wtf: Double = 0.0,  // experimental, temporary field for whatever
-
     // only when averaging
     val failPct: Double = 100.0,
     val usedStddev: Double = 0.0, // success only
@@ -40,7 +40,11 @@ data class WorkflowResult(
     ////
     val startingRates: ClcaErrorCounts? = null, // starting error rates (clca only)
     val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
-) {
+
+    ///
+    val dist: List<Int> = emptyList()
+
+    ) {
     fun Dparam(key: String): Double {
         return (parameters[key]!! as String).toDouble()
     }
@@ -55,6 +59,7 @@ data class WorkflowResult(
 
 fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
     val successRuns = runs.filter { it.status.success }
+    val dist = mutableListOf<Int>()
 
     val result =  if (runs.isEmpty()) { // TODO why all empty?
         WorkflowResult(
@@ -84,6 +89,7 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
         val Nc = first.Nc
         val welford = Welford()
         successRuns.forEach { welford.update(it.samplesUsed) }
+        successRuns.forEach { dist.add( roundToClosest(it.nmvrs)) }
 
         WorkflowResult(
             first.name,

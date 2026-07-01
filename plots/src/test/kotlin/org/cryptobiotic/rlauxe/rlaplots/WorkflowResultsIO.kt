@@ -29,7 +29,7 @@ class WorkflowResultsIO(val filename: String) {
 
     fun writeResults(wrs: List<WorkflowResult>) {
         val writer: OutputStreamWriter = FileOutputStream(filename).writer()
-        writer.write("parameters, N, margin, status, nrounds, samplesUsed, notUsed, nmvrs, failPct, usedStddev, mvrMargin, extra/nrounds\n")
+        writer.write("parameters, N, margin, status, nrounds, samplesUsed, notUsed, nmvrs, failPct, usedStddev, mvrMargin, extra/nrounds, distribution\n")
         // "auditType=3.0 nruns=10.0 fuzzPct=0.02 ", 50000, 0.04002, StatRejectNull, 2.0, 293.5, 261.9, 0.0
         wrs.forEach {
             writer.write(toCSV(it))
@@ -39,7 +39,8 @@ class WorkflowResultsIO(val filename: String) {
 
     fun toCSV(wr: WorkflowResult) = buildString {
         append("${writeParameters(wr.parameters)}, ${wr.Nc}, ${wr.margin}, ${wr.status.name}, ${wr.nrounds}, ")
-        append("${wr.samplesUsed}, 0.0, ${wr.nmvrs}, ${wr.failPct}, ${wr.usedStddev}, ${wr.mvrMargin}, ${wr.wtf}")
+        append("${wr.samplesUsed}, 0.0, ${wr.nmvrs}, ${wr.failPct}, ${wr.usedStddev}, ${wr.mvrMargin}, ${wr.wtf},")
+        wr.dist.forEach { append(" $it")}
         appendLine()
     }
 
@@ -81,6 +82,7 @@ class WorkflowResultsIO(val filename: String) {
         val stddev = if (tokens.size > 9) ttokens[idx++].toDouble() else 0.0
         val mvrMargin = if (tokens.size > 10) ttokens[idx++].toDouble() else 0.0
         val wtf = if (tokens.size > 11) ttokens[idx++].toDouble() else 0.0
+        val dist = if (tokens.size > 12) ttokens.toList().drop(12).map { it.toInt() } else emptyList()
 
         val status = enumValueOf(statusS, TestH0Status.entries) ?: TestH0Status.InProgress
         return WorkflowResult(
@@ -93,7 +95,8 @@ class WorkflowResultsIO(val filename: String) {
             wtf = wtf,
             failPct = failPct,
             usedStddev = stddev,
-            mvrMargin=mvrMargin
+            mvrMargin=mvrMargin,
+            dist = dist
         )
     }
 

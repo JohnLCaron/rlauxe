@@ -253,11 +253,21 @@ with several values of the CVR percentage, as a function of margin, and maxRisk 
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors3LogLinear.html" rel="OneAuditNoErrorsLogLinear">![OneAuditNoErrorsLogLinear](docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors3LogLinear.png)</a>
 
-OneAudit has a large variance due to the random sequence of pool values. Here are the one sigma intervals for
-the "best case" 90% CVR OneAudit. For example, a 2% margin contest has a one-sigma interval of (466, 2520) (click on the image
-to get an interactive plot):
+OneAudit has large variance due to the random sequence of pool values. Here are the standard deviations of the distributions of the previous plot
+vs the mean of the samples needed, on a log-log plot:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditWithStdDev/OneAuditWithStdDevLinear.html" rel="OneAuditWithStdDevLinear">![OneAuditWithStdDevLinear](docs/plots2/oneaudit/OneAuditWithStdDev/OneAuditWithStdDevLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/oa3StdDevVsSamplesNeededLogLog.html" rel="oa3StdDevVsSamplesNeededLogLog">![OneAuditNoErrorsLogLinear](docs/plots2/oneaudit/OneAuditNoErrors/oa3StdDevVsSamplesNeededLogLog.png)</a>
+
+This is approximately linear on a log-log play and independent of %cvr . A back of the envelope fit to `ln(y) = m * ln (x) + b` yields
+
+    y = 1.63 * x
+
+that is, OneAudit stddev is linear with the average samples needed, independent of the cvrs %. Further, the distribution is skewed to 
+needing more sampels that the average.
+This is important to understand when deciding how many samples to audit, vs number of rounds needed.
+
+TODO: capture the distribution(s) and display them.
+
 
 ## Samples needed when there are errors
 

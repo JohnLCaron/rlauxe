@@ -85,8 +85,8 @@ class SingleContestAuditTask(
     }
 }
 
-fun runRepeatedWorkflowsAndAverage(tasks: List<ConcurrentTask<List<WorkflowResult>>>, nthreads:Int = 40): List<WorkflowResult> {
-    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunner<List<WorkflowResult>>().run(tasks, nthreads=nthreads)
+fun runRepeatedWorkflowsAndAverage(tasks: List<ConcurrentTask<List<WorkflowResult>>>, nthreads:Int = 40, showTaskResult: Boolean = false): List<WorkflowResult> {
+    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunner<List<WorkflowResult>>(showTaskResult=showTaskResult).run(tasks, nthreads=nthreads)
     val results: List<WorkflowResult> = rresults.map { avgWorkflowResult(it) }
     return results
 }

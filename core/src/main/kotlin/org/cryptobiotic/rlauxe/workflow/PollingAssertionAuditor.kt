@@ -27,7 +27,13 @@ fun runPollingAuditRound(
     contestsNotDone.forEach { contest ->
         auditContestTasks.add( RunPollingContestTask(config, contest, mvrCvrs, roundIdx, onlyTask) )
     }
-    val complete: List<Boolean> = ConcurrentTaskRunner<Boolean>().run(auditContestTasks)
+    val complete = if (auditContestTasks.size == 1) {
+        // single contest - dont block
+        listOf( auditContestTasks.first().run())
+    } else {
+        // run all tasks concurrently
+        ConcurrentTaskRunner<Boolean>().run(auditContestTasks)
+    }
 
     // given the cvrPairs, and each ContestRound's maxSamplesUsed, count the cvrs that were not used
     val contestCounts = mutableMapOf<Int, Int>()

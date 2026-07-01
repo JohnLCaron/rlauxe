@@ -11,9 +11,10 @@
             <pattern>%date [%10r] %-5level %logger{15} - %msg %n</pattern>
         </encoder>
     </appender>
-    <root level="WARN">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>
     </root>
+    <logger name="ConcurrentTaskRunner" level="DEBUG" />
     <logger name="ch.qos.logback" level="WARN"/>
 </configuration>

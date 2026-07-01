@@ -60,9 +60,10 @@ class AuditsNoErrors {
     @Test
     fun regenPlots() {
         val subtitle = "Nc=${N} nruns=${nruns}"
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.Linear)
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLinear)
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog)
+        val datafileName = "$dirName/${name}.csv"
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.Linear)
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLinear)
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLog)
     }
 
     @Test
@@ -94,7 +95,8 @@ class AuditsNoErrors {
 
         //     fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String) {
         val subtitle = "Nc=${N} nruns=${nruns}"
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog)
+        val datafileName = "$dirName/${name}.csv"
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLog)
     }
 
     @Test
@@ -132,10 +134,10 @@ class AuditsNoErrors {
 
         //     fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String) {
         val subtitle = "Nc=${N} nruns=${nruns}"
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.Linear, catName="maxLoss")
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLinear, catName="maxLoss")
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog, catName="maxLoss")
-    }
+        val datafileName = "$dirName/${name}.csv"
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.Linear, catName="maxLoss")
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLinear, catName="maxLoss")
+     }
 
     @Test
     fun pollingNoErrorsOld() {
@@ -237,8 +239,8 @@ class AuditsNoErrors {
 
 }
 
-fun showSampleSizesVsMargin(name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String = "auditType") {
-    val io = WorkflowResultsIO("$dirName/${name}.csv")
+fun showSampleSizesVsMargin(datafileName: String, name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String = "auditType") {
+    val io = WorkflowResultsIO(datafileName)
     val data = io.readResults()
     wrsPlot(
         titleS = "$name samples needed",

@@ -49,7 +49,8 @@ class AuditsWithErrors {
         val name = "clcaFuzzByMargin"
         val dirName = "$testdataDir/plots/samplesNeeded/clcaFuzzByMargin"
         val subtitle = "Nc=${N} nruns=${nruns}"
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog, catName="fuzzPct")
+        val datafileName = "$dirName/${name}.csv"
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLog, catName="fuzzPct")
     }
 
     @Test
@@ -271,7 +272,6 @@ fun sampleSizesVsMarginWithErrorBars(
 }
 
 
-// fun showStddevVsMargin(name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String) {
 fun showStddevVsMargin(dataFile: String, name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String) {
     val io = WorkflowResultsIO(dataFile)
     val data = io.readResults()

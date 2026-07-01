@@ -58,7 +58,7 @@ class PollingSingleRoundAuditTaskGenerator(
     val quiet: Boolean = true,
     ): ContestAuditTaskGenerator {
 
-    override fun name() = "ClcaSingleRoundAuditTaskGenerator"
+    override fun name() = "PollingSingleRoundAuditTaskGenerator margin=$margin"
 
     override fun generateNewTask(): PollingSingleRoundAuditTask {
         val useConfig = auditConfig ?: Config.from(
@@ -80,7 +80,7 @@ class PollingSingleRoundAuditTaskGenerator(
             name(),
             pollingWorkflow,
             testMvrs,
-            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 2.0),
+            parameters,
             quiet,
         )
     }

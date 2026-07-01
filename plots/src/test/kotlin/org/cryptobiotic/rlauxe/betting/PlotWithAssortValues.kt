@@ -50,8 +50,10 @@ class PlotWithAssortValues {
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
         val subtitle = "Nc=${N} nruns=${nruns}"
+        val datafileName = "$dirName/${name}.csv"
+
         // fun showSampleSizesVsMargin(name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String = "auditType") {
-        showSampleSizesVsMargin(name, dirName, subtitle, yscale=ScaleType.LogLog,  catName="maxLoss")
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, yscale=ScaleType.LogLog,  catName="maxLoss")
         // fun sampleSizesVsMarginStdDev(dirName: String, name:String, subtitle: String,
         //                               catName: String, catfld: ((WorkflowResult) -> String) = { category(it) } ) {
         sampleSizesVsMarginWithErrorBars(dirName, name, subtitle,  catName="maxLoss")

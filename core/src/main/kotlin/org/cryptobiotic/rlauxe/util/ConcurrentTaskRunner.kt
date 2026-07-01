@@ -53,8 +53,9 @@ class ConcurrentTaskRunner<T>(val show: Boolean = false, val showTaskResult: Boo
         task: ConcurrentTask<T>,
     ): T {
         val stopwatch = Stopwatch()
+        logger.debug{"start task ${task.name()}"}
         val result = task.run()
-        if (showTaskResult) println("${task.name()} (${results.size}): ${stopwatch.elapsed(TimeUnit.SECONDS)}")
+        logger.debug{"finish task ${task.name()} (${results.size}): ${stopwatch.elapsed(TimeUnit.SECONDS)}"}
         return result
     }
 

@@ -34,10 +34,13 @@ fun runClcaAuditRound(
         auditContestTasks.add( RunClcaContestTask(config, contest, cvrPairs, auditor, roundIdx, parameters, onlyTask) )
     }
 
-    // run all tasks
-    // logger.debug { "runClcaAuditRound ($roundIdx) ${auditContestTasks.size} tasks for auditor ${auditor.javaClass.simpleName} " }
-    // println("---runClcaAuditRound running ${auditContestTasks.size} tasks")
-    val complete: List<Boolean> = ConcurrentTaskRunner<Boolean>().run(auditContestTasks)
+    val complete = if (auditContestTasks.size == 1) {
+        // single contest - dont block
+        listOf( auditContestTasks.first().run())
+    } else {
+        // run all tasks concurrently
+        ConcurrentTaskRunner<Boolean>().run(auditContestTasks)
+    }
 
     // given the cvrPairs, and each ContestRound's maxSamplesUsed, count the cvrs that were not used
     val contestCounts = mutableMapOf<Int, Int>()

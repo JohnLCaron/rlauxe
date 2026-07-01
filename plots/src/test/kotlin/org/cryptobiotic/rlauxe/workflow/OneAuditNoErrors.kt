@@ -13,6 +13,9 @@ import kotlin.test.Test
 class OneAuditNoErrors {
     val nruns = 100
     val N = 500000
+    val name = "OneAuditNoErrors3"
+    val dirName = "$testdataDir/plots/oneaudit/$name"
+    val datafileName = "$dirName/${name}.csv"
 
     @Test
     fun oaNoErrorsPlots() {
@@ -25,7 +28,6 @@ class OneAuditNoErrors {
 
         val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            println("margin = $margin $stopwatch")
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
                 parameters=mapOf("nruns" to nruns, "cat" to "poll")
@@ -39,8 +41,6 @@ class OneAuditNoErrors {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             cvrPercents.forEach { cvrPercent ->
-                println("  cvrPercent = $cvrPercent $stopwatch")
-
                 val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     auditConfigIn = Config.from(AuditType.ONEAUDIT),
@@ -49,10 +49,11 @@ class OneAuditNoErrors {
                 tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
             }
         }
-        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks, nthreads=40)
+        val nthreads=100
+        println("start ${tasks.size} tasks with $nthreads threads")
+        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks, nthreads=nthreads, showTaskResult=true)
         println(stopwatch.took())
 
-        val name = "OneAuditNoErrors3"
         val dirName = "$testdataDir/plots/oneaudit/$name"
 
         validateOutputDir(Path(dirName))
@@ -65,8 +66,39 @@ class OneAuditNoErrors {
     fun regenPlots(name: String, dirName:String) {
         val subtitle = "Nc=${N} nruns=${nruns}"
         //showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.Linear)
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLinear)
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLinear)
         //showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog)
+    }
+
+    @Test
+    fun oa3StdDev() {
+        val name = "OA3StdDev"
+        val subtitle3 = "Nc=${N} nruns=${nruns}"
+        // fun showStddevVsMargin(dataFile: String, name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String) {
+        showStddevVsMargin(datafileName, name, dirName, subtitle3, ScaleType.LogLog, catName="auditType")
+    }
+
+    @Test
+    fun oaStddevVsSamplesNeeded() {
+        val name3 = "oa3StdDevVsSamplesNeeded"
+        val subtitle3 = "Nc=${N} nruns=${nruns}"
+        showStddevVsSamplesNoClca(datafileName, name3, dirName, subtitle3, ScaleType.Linear, catName="audit")
+        showStddevVsSamplesNeeded(datafileName, name3, dirName, subtitle3, ScaleType.LogLog, catName="audit")
+    }
+
+    fun showStddevVsSamplesNoClca(dataFile: String, name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String) {
+        val io = WorkflowResultsIO(dataFile)
+        val data = io.readResults().filter { category(it) != "clca"}
+        wrsPlot(
+            titleS = "$name stddev vs samplesNeeded",
+            subtitleS = subtitle,
+            writeFile = "$dirName/${name}${yscale.name}",
+            wrs = data,
+            xname = "nsamples", xfld = { it.samplesUsed },
+            yname = "stddev", yfld = { it.usedStddev },
+            catName = catName, catfld = { category(it) },
+            scaleType = yscale
+        )
     }
 
 

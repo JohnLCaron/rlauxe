@@ -68,9 +68,7 @@ class ClcaSingleRoundAuditTaskGenerator(
 ): ContestAuditTaskGenerator {
     var countGeneratedTasks = 0
 
-    override fun name(): String {
-        return "ClcaSingleRoundAuditTaskGenerator"
-    }
+    override fun name() = "ClcaSingleRoundAuditTaskGenerator margin=$margin"
 
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
         val useConfig = config ?: Config.from(AuditType.CLCA)

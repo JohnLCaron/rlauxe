@@ -53,10 +53,13 @@ class EstimateAudit(
     val pools: List<CardPool>?,
     val styles: List<StyleIF>?,
     val sortedManifest: SortedManifest,
+    val nthreads: Int? = null,
+    val contestOnly: Int? = null
 ) {
     val auditType = config.auditType
 
-    fun run(nthreads: Int? = null, contestOnly: Int? = null): Map<Int, List<Int>> {
+    // fun run(nthreads: Int? = null, contestOnly: Int? = null): Map<Int, List<Int>> {
+    fun run(): Map<Int, List<Int>> {
         val contestsToAudit = if (contestOnly == null) contests.filter { !it.done && it.included } else
             listOf( contests.find { it.id == contestOnly}!! )
 
@@ -73,6 +76,7 @@ class EstimateAudit(
         repeat(ntrials) { run ->
             tasks.add(AuditTrialTask(topdir, roundIdx, run+1, config, contestsToAudit, pools, styles, sortedManifest))
         }
+
         val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunner<List<AssertionTrialIF>>().run(tasks, nthreads)
 
         val trackerResults = mutableMapOf<Int, MutableList<AssertionTrialIF>>() // contestId -> list(trial)

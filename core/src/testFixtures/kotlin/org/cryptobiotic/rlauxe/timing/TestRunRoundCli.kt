@@ -16,7 +16,8 @@ class TestRunRoundCli {
 
     @Test
     fun testRunRoundCli() {
-        val topdir = "$cases/corla/withCvrs/Colorado2020"
+        // val topdir = "$cases/corla/withCvrs/Colorado2020"
+        val topdir = "$cases/ga/ga2026"
 
         RunRlaRoundCli.main(
             arrayOf(

@@ -105,7 +105,7 @@ data class GeneralAdaptiveBetting(
         if (nonzeroRates.isEmpty() && oaAssortRates == null) return maxBet
 
         // for OneAudit we have trackerErrors.totalSamples changing. So only avoid for 10 samples at a time
-        if (errorRates == prevRates && avoidSeqCount < 10) {
+        if (prevSamples.numberOfSamples() > 10 && errorRates == prevRates && avoidSeqCount < 10) {
             avoidSeqCount++
             avoidCount.fetchAndAdd(1)
             return min(prevBet, maxBet) // comment out to run anyway and see how we would do...
@@ -187,6 +187,7 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
         val clcasum = clcaErrorRates.map{ it.value }.sum()
         val oasum = oaAssortRates?.sumRates ?: 0.0
         p0 = 1.0 - clcasum - oasum    // calculate against other values to get it exact
+        if (p0 < 1.0E-8) p0 = 0.0
         require (p0 >= 0.0) { "p0=$p0 less than 0" }
         if (debug) {
             println("GeneralOptimalLambda init: mui=$mui ")

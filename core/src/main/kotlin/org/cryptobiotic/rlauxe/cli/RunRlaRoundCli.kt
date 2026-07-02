@@ -40,6 +40,10 @@ object StartAuditFirstRoundCli {
         }
     }
 }
+/*
+java -classpath cases/build/libs/rlauxe-cases-0.10.1.0-uber.jar org.cryptobiotic.rlauxe.cli.StartAuditFirstRoundCli \
+    -in "/home/stormy/datadrive/rla/cases/ga/ga2026"
+*/
 
 /** Run one round of a PersistentAudit that has already been started. */
 object RunRlaRoundCli {

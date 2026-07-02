@@ -52,7 +52,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
             mvrManager().styles(),
             mvrManager.sortedManifest()
         )
-        estimate.run(nthreads=null, contestOnly=null)
+        estimate.run()
 
         logger.debug{"Estimate round ${roundIdx} took ${stopwatch}"}
 

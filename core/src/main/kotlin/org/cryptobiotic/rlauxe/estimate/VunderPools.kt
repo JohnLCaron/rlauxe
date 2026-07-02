@@ -85,6 +85,21 @@ class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId
 
     fun done() = vunderPickers.values.all { it.isEmpty() }
 
+    fun makeCardsForOneAuditPool(): List<AuditableCard> {
+        this.reset()
+        val cards = mutableListOf<AuditableCard>()
+        var index = 1
+        while (!this.done()) {
+            val cvrId = "${poolName}-${index}"
+            val cvb2 = AuditableCardBuilder(cvrId, null, index, 0, phantom = false, styleId=poolId, poolId=poolId, votesIn=null)
+            this.simulatePooledCard(cvb2)
+            cards.add(cvb2.build())
+            index++
+        }
+
+        return cards
+    }
+
     fun reset() {
         vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
     }
@@ -109,21 +124,7 @@ class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId
 //    val style: StyleIF? = null,
 //)
 
-fun makeCardsForVunderPool(pool: CardPool, styleId: Int, vunderpool: VunderPool): List<AuditableCard> {
-    vunderpool.reset()
-    val rcvrs = mutableListOf<AuditableCard>()
-    var count = 1
-    while (!vunderpool.done()) {
-        val cvrId = "${pool.name()}-redacted${count}"
-        val cvb2 = AuditableCardBuilder(cvrId, null, 0, 0, phantom = false, styleId=styleId, poolId=null, votesIn=null)
-        vunderpool.simulatePooledCard(cvb2)
-        rcvrs.add(cvb2.build())
-        count++
-    }
 
-    rcvrs.shuffle()
-    return rcvrs
-}
 
 // for viewer: ContestPoolsTable.showSimulatedCards.
 fun makeCvrsForVunderPool(pool: CardPool, vunderpool: VunderPool): List<Cvr> {

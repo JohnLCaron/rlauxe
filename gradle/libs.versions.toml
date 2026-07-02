@@ -1,10 +1,10 @@
 [versions]
-rlauxe = "0.10.1.0"  ## prerelease 0.MAJOR.MINOR.PATCH
+rlauxe = "0.10.2.0"  ## prerelease 0.MAJOR.MINOR.PATCH
 
 # main dependency versions
-kotlin = "2.3.21"
+kotlin = "2.3.20" # backout 2.3.21
 kotlinx-cli = "0.3.6"
-kotlinx-coroutines = "1.11.0"
+kotlinx-coroutines = "1.10.2" # backout 1.11.0
 oshai-version = "8.0.4"
 slf4j-version="2.0.17"
 

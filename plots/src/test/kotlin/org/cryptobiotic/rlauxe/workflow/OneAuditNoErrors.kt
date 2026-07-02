@@ -51,7 +51,7 @@ class OneAuditNoErrors {
         }
         val nthreads=100
         println("start ${tasks.size} tasks with $nthreads threads")
-        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks, nthreads=nthreads, showTaskResult=true)
+        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks, nthreads=nthreads)
         println(stopwatch.took())
 
         val dirName = "$testdataDir/plots/oneaudit/$name"
@@ -82,8 +82,7 @@ class OneAuditNoErrors {
     fun oaStddevVsSamplesNeeded() {
         val name3 = "oa3StdDevVsSamplesNeeded"
         val subtitle3 = "Nc=${N} nruns=${nruns}"
-        showStddevVsSamplesNoClca(datafileName, name3, dirName, subtitle3, ScaleType.Linear, catName="audit")
-        showStddevVsSamplesNeeded(datafileName, name3, dirName, subtitle3, ScaleType.LogLog, catName="audit")
+        showStddevVsSamplesNoClca(datafileName, name3, dirName, subtitle3, ScaleType.LogLog, catName="audit")
     }
 
     fun showStddevVsSamplesNoClca(dataFile: String, name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String) {

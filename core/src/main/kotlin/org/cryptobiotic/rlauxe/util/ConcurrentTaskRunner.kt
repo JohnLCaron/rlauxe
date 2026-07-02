@@ -16,16 +16,15 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
-import java.util.concurrent.TimeUnit
-
 
 interface ConcurrentTask<T> {
     fun name() : String
     fun run() : T
 }
 
+
 // runs a set of ConcurrentTask<T> concurrently, each task.run() returns T.
-class ConcurrentTaskRunner<T>(val show: Boolean = false, val showTaskResult: Boolean = false) {
+class ConcurrentTaskRunner<T>(val show: Boolean = false) {
     private val mutex = Mutex()
     private val results = mutableListOf<T>()
 
@@ -34,6 +33,7 @@ class ConcurrentTaskRunner<T>(val show: Boolean = false, val showTaskResult: Boo
         val stopwatch = Stopwatch()
         val useThreads = nthreads ?: 30
         logger.debug{"ConcurrentTaskRunner run ${tasks.size} concurrent tasks with $useThreads threads"}
+        // https://slack-chats.kotlinlang.org/t/33312068/can-this-be-fixed-for-the-final-1-11-0-build-coroutines-is-n
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()
@@ -53,9 +53,8 @@ class ConcurrentTaskRunner<T>(val show: Boolean = false, val showTaskResult: Boo
         task: ConcurrentTask<T>,
     ): T {
         val stopwatch = Stopwatch()
-        logger.debug{"start task ${task.name()}"}
         val result = task.run()
-        logger.debug{"finish task ${task.name()} (${results.size}): ${stopwatch.elapsed(TimeUnit.SECONDS)}"}
+        // if (showTaskResult) println("${task.name()} (${results.size}): ${stopwatch.elapsed(TimeUnit.SECONDS)}")
         return result
     }
 

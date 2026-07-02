@@ -99,11 +99,11 @@ open class CountyElectionSansCvrs (
 
     override fun cards(): CloseableIterator<AuditableCard> {
         // should we remove the votes?
-        return CardIteratorfromCountyFiles(countyPools, publisher, styles = allStyles)
+        return CardIteratorfromCountyPools(countyPools, publisher, styles = allStyles)
     }
 
     override fun unsortedMvrsInternal() = null
-    override fun unsortedMvrsExternal() = CardIteratorfromCountyFiles(countyPools, publisher, styles = allStyles)
+    override fun unsortedMvrsExternal() = CardIteratorfromCountyPools(countyPools, publisher, styles = allStyles)
 
     // read each county's generated cvrs in and create the "cvr" CountyPool out of it
     // since the cvr generation is approximate, we can compare it with the original
@@ -150,7 +150,7 @@ open class CountyElectionSansCvrs (
         }
     }
 
-    class CardIteratorfromCountyFiles(
+    class CardIteratorfromCountyPools(
         countyPools: List<CountyPools>,
         publisher: Publisher,
         val styles: List<StyleIF>

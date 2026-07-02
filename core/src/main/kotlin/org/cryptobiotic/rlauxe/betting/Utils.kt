@@ -116,8 +116,8 @@ fun estRisk(Npop: Int, bet:Double, noerror: Double, nsamples: Int): Double {
     return 1.0/Twor
 }
 
-// WR approximation
-fun payoff(bet:Double, noerror:Double,) = 1.0 + bet * (noerror - 0.5)
+// WR and mj = 1/2 approximation
+fun payoff(bet:Double, xs:Double,) = 1.0 + bet * (xs - 0.5)
 
 ///////////////////////////////////////
 // work backwards, if you have nsamples, whats the largest margin satisfying the risk limit?

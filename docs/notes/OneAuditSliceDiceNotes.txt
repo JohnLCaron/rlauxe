@@ -1,4 +1,4 @@
-OneAudit Dice
+"Dice, but don’t slice: Optimizing the efficiency of ONEAudit"
 
 Let mi denote the manual vote record for the ith card. 
 Card-level comparison audits (CLCAs, [22,24]) and ONEAudit [27] involve the difference

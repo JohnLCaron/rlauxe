@@ -137,7 +137,7 @@ class TestConsistentSampling {
                 mvrManager.styles(),
                 mvrManager.sortedManifest()
             )
-            estimate.run(nthreads=null, contestOnly=null)
+            estimate.run()
 
             /* contestRounds.forEach { contestRound ->
                 val contest = contestRound.contestUA

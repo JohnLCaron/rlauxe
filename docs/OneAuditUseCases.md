@@ -101,7 +101,7 @@ Here are 1 CLCA and 10 trials of OneAudit for Boulder2024. The total number of M
 
 The spread among all the trials (click to get an interactive chart):
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/boulder2024/Boulder2024AuditVarianceScatter/Boulder2024AuditVarianceScatterLogLog.html" rel="Boulder2024AuditVarianceScatterLogLog">![Boulder2024AuditVarianceScatterLogLog](plots/boulder2024/Boulder2024AuditVarianceScatter/Boulder2024AuditVarianceScatterLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/cases/Boulder2024AuditVarianceScatterLogLog.html" rel="Boulder2024AuditVarianceScatterLogLog">![Boulder2024AuditVarianceScatterLogLog](plots2/cases/Boulder2024AuditVarianceScatterLogLog.png)</a>
 
 * OneAudit suprisingly does better for the second and third lowest margins. TODO: investigate.
 * Most of the difference in total samples (table above) probably comes from the lowest margin assertion.

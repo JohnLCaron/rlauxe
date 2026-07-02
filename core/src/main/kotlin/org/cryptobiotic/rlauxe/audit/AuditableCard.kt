@@ -198,6 +198,11 @@ data class AuditableCard (
                 IntArray(0), IntArray(0),IntArray(0),
                 org.poolId,)
         }
+        fun removeVotesReplaceStyle(org: AuditableCard, replaceStyleId: Int): AuditableCard {
+            return AuditableCard(org.id, org.location, org.index, org.prn, org.phantom, replaceStyleId,
+                IntArray(0), IntArray(0),IntArray(0),
+                org.poolId,)
+        }
     }
 
 }

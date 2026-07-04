@@ -5,22 +5,58 @@ import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
+import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.cli.RunVerifyContests
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import kotlin.test.Test
 
 class MakeGaElection {
 
     @Test
-    fun testCreateGaElection() {
+    fun makeGa2Election() {
+        val inputdir = "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted"
+        val topdir = "$cases/ga/ga2026-2"
+
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05,)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimTrials = 11),
+            ContestSampleControl(minRecountMargin = .005, minMargin = .005, minSize = 10, contestSampleCutoff = 10000,
+                auditSampleCutoff = 200000, sampling = Sampling.consistent),
+            ClcaConfig(),
+        )
+
+        val contestsFile =
+            "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/downloads/contest_results_comparison.csv"
+
+        //     electionName: String,
+        //    version: String,
+        //    topdir: String,
+        //    creation: AuditCreationConfig,
+        //    roundConfig: AuditRoundConfig,
+        //    startFirstRound: Boolean = true,
+        createGa2Election(
+            "Ga2026Primary from ballot image audit",
+            contestsFile,
+            inputdir=inputdir,
+            topdir = topdir,
+            creation,
+            round,
+        )
+    }
+
+    @Test
+    fun makeGaElection() {
         val inputdir = "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted"
         val topdir = "$cases/ga/ga2026"
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05,)
         val round = AuditRoundConfig(
-            SimulationControl(nsimTrials = 22),
-            ContestSampleControl.NONE,
-            ClcaConfig(), null
+            SimulationControl(nsimTrials = 100),
+            ContestSampleControl(minRecountMargin = .005, minSize = 10, contestSampleCutoff = 10000,
+                auditSampleCutoff = 200000, sampling = Sampling.consistent),
+            ClcaConfig(),
         )
 
         //     electionName: String,
@@ -30,11 +66,21 @@ class MakeGaElection {
         //    roundConfig: AuditRoundConfig,
         //    startFirstRound: Boolean = true,
         createGaElection(
-            "Ga2026Primary",
+            "Ga2026Primary from manifests and candidate_totals",
             inputdir,
             topdir = topdir,
             creation,
             round,
         )
+    }
+
+    @Test
+    fun testVerifyGaElection() {
+        val topdir = "$cases/ga3/ga2026"
+        val record = AuditRecord.read(topdir)
+        println(record)
+        val results = RunVerifyContests.runVerifyContests(topdir, null, show = true)
+        println()
+        print(results)
     }
 }

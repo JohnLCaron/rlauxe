@@ -37,7 +37,9 @@ data class ContestInfo(
         if (choiceFunction.hasMinPct) require(minFraction != null) { "$choiceFunction requires minFraction" }
         if (!choiceFunction.hasMinPct)  require(minFraction == null) { "$choiceFunction may not have minFraction"}
         if (minFraction != null) require(minFraction in (0.0..1.0)) { "minFraction must be between 0 and 1"}
-        if (choiceFunction != SocialChoiceFunction.DHONDT) require(nwinners in (1..candidateNames.size)) { "nwinners between 1 and candidateNames.size"}
+        if (choiceFunction != SocialChoiceFunction.DHONDT) {
+            require(nwinners in (1..candidateNames.size)) { "nwinners between 1 and candidateNames.size"}
+        }
         require(voteForN in (1..candidateNames.size)) { "voteForN between 1 and candidateNames.size"}
 
         val candidateSet: Set<String> = candidateNames.toList().map { it.first }.toSet()

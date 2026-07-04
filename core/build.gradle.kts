@@ -66,14 +66,26 @@ kotlin {
     jvmToolchain(21)
 }
 
+tasks.jar {
+    manifest {
+        attributes(
+            mapOf(
+                "Implementation-Title" to subprojectName,
+                "Implementation-Version" to subprojectVersion,
+                "Built-By" to System.getProperty("user.name"),
+            )
+        )
+    }
+}
+
 tasks.register<Jar>("uberJar") {
     archiveClassifier = "uber"
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
         attributes("Main-Class" to "org.cryptobiotic.rlauxe.cli.verifier.RunVerifier")
-        attributes("Implementation-Title" to subprojectName)
-        attributes("Implementation-Version" to subprojectVersion)
+        // attributes("Implementation-Title" to subprojectName)
+        // attributes("Implementation-Version" to subprojectVersion)
     }
 
     from(sourceSets.main.get().output)

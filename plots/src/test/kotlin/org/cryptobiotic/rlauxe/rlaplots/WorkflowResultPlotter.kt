@@ -34,10 +34,11 @@ fun wrsPlot(
     yfld: (WorkflowResult) -> Double,
     catfld: (WorkflowResult) -> String,
     scaleType: ScaleType = ScaleType.Linear,
-    colorChoices: ((Set<String>) -> Array<Pair<String, Color>>)? = null
+    colorChoices: ((Set<String>) -> Array<Pair<String, Color>>)? = null,
+    catOrdering: Comparator<String>? = null,  // what order should the categries be in ?
 ) {
     // val useWrs = wrs.filter { it.status != TestH0Status.FailSimulationPct } // TODO
-    val groups = makeWrGroups(wrs, catfld)
+    val groups = makeWrGroups(wrs, catfld, catOrdering)
 
     val xvalues = mutableListOf<Double>()
     val yvalues = mutableListOf<Double>()
@@ -104,13 +105,16 @@ fun wrsPlot(
 }
 
 // make a map of all WorkflowResult for each catFld
-fun makeWrGroups(wrs: List<WorkflowResult>, catfld: (WorkflowResult) -> String): Map<String, List<WorkflowResult>> {
+fun makeWrGroups(wrs: List<WorkflowResult>, catfld: (WorkflowResult) -> String, catOrdering: Comparator<String>? = null): Map<String, List<WorkflowResult>> {
     val result = mutableMapOf<String, MutableList<WorkflowResult>>()
     wrs.forEach {
         val imap: MutableList<WorkflowResult> = result.getOrPut(catfld(it)) { mutableListOf() }
         imap.add(it)
     }
-    return result.toSortedMap()
+    // how to set the order ??
+    return if (catOrdering == null) result else {
+        result.toSortedMap(catOrdering )
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////

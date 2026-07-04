@@ -80,45 +80,54 @@ fun readCardCsv(line: String): AuditableCard {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
-    var idx = 0
-    val id = ttokens[idx++]
-    val locationToken = ttokens[idx++]
-    val location = locationToken.ifEmpty { null }
-    val index = ttokens[idx++].toInt()
-    val sampleNum = ttokens[idx++].toLong(radix=16)
-    val phantom = ttokens[idx++] == "yes"
-    val styleId = ttokens[idx++].trim().toInt()
-    val poolIdToken = ttokens[idx++]
-    val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()
+    try {
+        var idx = 0
+        val id = ttokens[idx++]
+        val locationToken = ttokens[idx++]
+        val location = locationToken.ifEmpty { null }
+        val index = ttokens[idx++].toInt()
+        val sampleNum = ttokens[idx++].toLong(radix = 16)
+        val phantom = ttokens[idx++] == "yes"
+        val styleId = ttokens[idx++].trim().toInt()
+        val poolIdToken = ttokens[idx++]
+        val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()
 
-    // if clca, list of actual contests and their votes
-    if (idx < ttokens.size-1) {
-        val contestsStr = ttokens[idx++].trim()
-        val contestsTokenTrimmed = contestsStr.split(" ").map { it.trim() }
+        // if clca, list of actual contests and their votes
+        if (idx < ttokens.size - 1) {
+            val contestsStr = ttokens[idx++].trim()
+            val contestsTokenTrimmed = contestsStr.split(" ").map { it.trim() }
 
-        val contestIds = mutableListOf<Int>()
-        contestsTokenTrimmed.forEach { tok ->
-            if (tok.isNotEmpty()) contestIds.add(tok.toInt())
-        }
+            val contestIds = mutableListOf<Int>()
+            contestsTokenTrimmed.forEach { tok ->
+                if (tok.isNotEmpty()) contestIds.add(tok.toInt())
+            }
 
-        val candidates = mutableListOf<Int>()
-        val contestStarts = mutableListOf<Int>()
-        var start = 0
+            val candidates = mutableListOf<Int>()
+            val contestStarts = mutableListOf<Int>()
+            var start = 0
 
-        contestIds.forEach {
-            contestStarts.add(start)
-            val vtokens = ttokens[idx++]
-            val cands: List<Int> =
-                if (vtokens.isEmpty()) emptyList()
-                else vtokens.split(" ").map { it.trim().toInt() }
-            candidates.addAll(cands)
-            start += cands.size
+            contestIds.forEach {
+                contestStarts.add(start)
+                val vtokens = ttokens[idx++]
+                val cands: List<Int> =
+                    if (vtokens.isEmpty()) emptyList()
+                    else vtokens.split(" ").map { it.trim().toInt() }
+                candidates.addAll(cands)
+                start += cands.size
+            }
+            return AuditableCard(
+                id, location, index, sampleNum, phantom, styleId,
+                contestIds.toIntArray(), contestStarts.toIntArray(), candidates.toIntArray(), poolId,
+            )
         }
         return AuditableCard(id, location, index, sampleNum, phantom, styleId,
-            contestIds.toIntArray(), contestStarts.toIntArray(), candidates.toIntArray(), poolId,)
+            intArrayOf(), intArrayOf(), intArrayOf(), poolId,)
+
+    } catch (e: Throwable) {
+        logger.error(e) { "Error while reading $line tokens=$tokens" }
+        throw e
     }
-    return AuditableCard(id, location, index, sampleNum, phantom, styleId,
-        intArrayOf(), intArrayOf(), intArrayOf(), poolId,)
+
 }
 
 class IteratorCardsCsvStream(input: InputStream, bufferSize: Int, val styles: List<StyleIF>?): CloseableIterator<AuditableCard> {

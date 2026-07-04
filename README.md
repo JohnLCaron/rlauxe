@@ -251,7 +251,7 @@ For OneAudit, results depend on the percent of CVRs vs pooled ballots, the pool 
 The following is a best case scenario with no errors in the CVRs, a single pool with the same margin as the CVRs, and a single card style, 
 with several values of the CVR percentage, as a function of margin, and maxRisk = 90%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors3LogLinear.html" rel="OneAuditNoErrorsLogLinear">![OneAuditNoErrorsLogLinear](docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors3LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors4LogLinear.html" rel="OneAuditNoErrorsLogLinear">![OneAuditNoErrorsLogLinear](docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors4LogLinear.png)</a>
 
 OneAudit has large variance due to the random sequence of pool values. Here are the standard deviations of the distributions of the previous plot
 vs the mean of the samples needed, on a log-log plot:

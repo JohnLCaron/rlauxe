@@ -26,6 +26,7 @@ class OneAuditNoErrors {
 
         val stopwatch = Stopwatch()
 
+        // does the order get preserved ?? NO
         val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
         margins.forEach { margin ->
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
@@ -63,10 +64,27 @@ class OneAuditNoErrors {
         regenPlots(name, dirName)
     }
 
+    @Test
+    fun regenPlots() {
+        regenPlots("OneAuditNoErrors4", dirName)
+    }
+
+    class CatOrdering: Comparator<String> {
+        override fun compare(o1: String, o2: String): Int {
+            return when {
+                (o1 == "poll") -> -1 // poll is first
+                (o2 == "poll") -> 1 //
+                (o1 == "clca") -> 1 // clca is last
+                (o2 == "clca") -> -1 //
+                else -> o1.compareTo(o2) // oneaudits are alphabetic
+            }
+        }
+    }
+
     fun regenPlots(name: String, dirName:String) {
         val subtitle = "Nc=${N} nruns=${nruns}"
         //showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.Linear)
-        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLinear)
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLinear, catOrdering=CatOrdering())
         //showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog)
     }
 
@@ -99,7 +117,6 @@ class OneAuditNoErrors {
             scaleType = yscale
         )
     }
-
 
     @Test
     fun oneauditWithStdDev() {

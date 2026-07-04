@@ -72,6 +72,7 @@ class EstimateAudit(
         // TODO use more simulations when the margin is low or calcNewMvrs are high ??
 
         // each trial is running all the contests in the round (but only the minAssertion)
+        // for OneAudit, cvr == mvr and the variation comes from which pool it comes from ??
         val ntrials = if (auditType.isClca()) 1 else config.round.simulation.nsimTrials
         repeat(ntrials) { run ->
             tasks.add(AuditTrialTask(topdir, roundIdx, run+1, config, contestsToAudit, pools, styles, sortedManifest))
@@ -99,7 +100,7 @@ class EstimateAudit(
                 }
                 // require( !contestResults.any { it.wantsMore() })
             }
-
+            //  TODO use quantile ?
             val distribution: List<Int> = contestResults.map { it.nmvrs() }.sorted()
             val newMvrs = roundUp(percentiles().index(pct).compute(*distribution.toIntArray()))
 
@@ -121,6 +122,7 @@ class EstimateAudit(
                 useAssertionRound.estMvrs = estMvrs
                 useAssertionRound.estNewMvrs = newMvrs
 
+                // TODO defer this calculation I think; remnant of experiment
                 val calcNewMvrsNeeded = if (auditType.isPolling()) 0 else useAssertionRound.calcNewMvrsNeeded(contestRound.contestUA, config)
 
                 val estimationResult = EstimationRoundResult(
@@ -145,7 +147,7 @@ class EstimateAudit(
 
                 // attach estimationResult to all the other assertions still to be done
                 // TODO kludge
-                contestRound.assertionRounds.filter { it != useAssertionRound}.forEach { round ->
+                contestRound.assertionRounds.filter { it != useAssertionRound }.forEach { round ->
                     val noerror = round.assertion.assorter.noerror(contestRound.contestUA.hasStyle)
                     // val nomargin = 2.0 * noerror - 1.0
                     // fun estSampleSize(Npop: Int, bet:Double, margin: Double, upper: Double, alpha: Double): Int {
@@ -187,7 +189,10 @@ class AuditTrialTask(
 
         // TODO use VunderPoolsFuzzer when cvrsContainUndervotes = false
         // used for OA and Polling; different simulated pool data each run; TODO could use VunderPoolsFuzzer
-        // TODO here is where we need the card.batch to point to the pool, not the batch. maybe dont write the batch is there are pools
+        // TODO here is where we need the card.batch to point to the pool, not the batch. maybe dont write the batch if there are pools
+        // used for OneAudit and Pools; given the manifest card, simulate an mvr from that pool whose vote distribution matches the pool total
+        // this is what creates the variance in the distribution...
+        // for CLCA, no need for multiple simulations if you dont have any apriori errors; but on rounds > 1, may have errors from previous rounds
         val vunderPools = if (pools != null && !config.isClca) VunderPools(pools) else null
 
         // Polling without pools, generate one VunderPool based on contest totals
@@ -218,7 +223,7 @@ class AuditTrialTask(
                     (onePool != null) -> onePool.simulatePooledCard(card)
                     else -> card // TODO was null; wtf ??
                 }
-
+                // feeding all the contests at once
                 var include = false
                 contestTrials.forEach { contestTrial ->
                     // does this contest want this card ?

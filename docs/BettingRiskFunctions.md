@@ -168,7 +168,7 @@ The next two plots compare the current OneAudit results to previous OneAudit whe
 
 **Current OneAudit using eq 2**
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors3LogLinear.html" rel="OneAuditNoErrors">![OneAuditNoErrors](plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors3LogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors4LogLinear.html" rel="OneAuditNoErrors">![OneAuditNoErrors](plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors4LogLinear.png)</a>
 
 **Previous OneAudit**
 

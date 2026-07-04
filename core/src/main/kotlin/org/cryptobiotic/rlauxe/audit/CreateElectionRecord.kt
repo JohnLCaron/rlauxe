@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.persist.json.writeElectionInfoJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeCardStylesJsonFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.today
 import org.cryptobiotic.rlauxe.verify.VerifyElectionCommitment
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
@@ -57,8 +58,9 @@ fun createElectionRecord(election: ElectionBuilder, topdir: String, control: Con
 
     val publisher = Publisher(topdir)
     val electionInfo = election.electionInfo()
-    val version = ElectionBuilder::class.java.getPackage().getImplementationVersion() ?: "unknown"
-    electionInfo.metadata["version"] = version
+    val version = ElectionBuilder::class.java.getPackage().getImplementationVersion() ?: org.cryptobiotic.rlauxe.util.version
+    electionInfo.addMetadata("version", version)
+    electionInfo.addMetadata("date created", today())
     writeElectionInfoJsonFile(electionInfo, publisher.electionInfoFile())
     logger.info{"createElectionRecord writeElectionInfoJsonFile to ${publisher.electionInfoFile()}\n  $electionInfo"}
 

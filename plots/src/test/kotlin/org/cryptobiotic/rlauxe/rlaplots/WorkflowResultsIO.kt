@@ -82,7 +82,9 @@ class WorkflowResultsIO(val filename: String) {
         val stddev = if (tokens.size > 9) ttokens[idx++].toDouble() else 0.0
         val mvrMargin = if (tokens.size > 10) ttokens[idx++].toDouble() else 0.0
         val wtf = if (tokens.size > 11) ttokens[idx++].toDouble() else 0.0
-        val dist = if (tokens.size > 12) ttokens.toList().drop(12).map { it.toInt() } else emptyList()
+        val dist = if (tokens.size > 12 && tokens[12].isNotEmpty()) {
+            ttokens.toList().drop(12).map { it.toInt() }
+        } else emptyList()
 
         val status = enumValueOf(statusS, TestH0Status.entries) ?: TestH0Status.InProgress
         return WorkflowResult(

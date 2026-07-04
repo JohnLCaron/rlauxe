@@ -85,16 +85,14 @@ class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId
 
     fun done() = vunderPickers.values.all { it.isEmpty() }
 
-    fun makeCardsForOneAuditPool(): List<AuditableCard> {
+    fun makeCardsForOneAuditPool(makeCard:() -> AuditableCardBuilder): List<AuditableCard> {
         this.reset()
         val cards = mutableListOf<AuditableCard>()
-        var index = 1
         while (!this.done()) {
-            val cvrId = "${poolName}-${index}"
-            val cvb2 = AuditableCardBuilder(cvrId, null, index, 0, phantom = false, styleId=poolId, poolId=poolId, votesIn=null)
+            val cvb2 = makeCard()
             this.simulatePooledCard(cvb2)
-            cards.add(cvb2.build())
-            index++
+            val card = cvb2.build()
+            cards.add(card)
         }
 
         return cards

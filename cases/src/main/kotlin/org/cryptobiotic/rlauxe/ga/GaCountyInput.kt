@@ -1,12 +1,13 @@
 package org.cryptobiotic.rlauxe.ga
 
-import java.io.BufferedReader
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVParser
 import java.io.File
+import java.nio.charset.StandardCharsets
 import kotlin.collections.forEach
 import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
-import kotlin.text.split
 
 data class GaCounty(val countyName: String, val batches: List<CountyBatch>) {
     fun ncards() = batches.sumOf { it.nballots }
@@ -22,7 +23,6 @@ data class GaContest(val contestName: String) {
         appendLine("Contest '$contestName'")
         candCount.forEach { appendLine("    $it") }
     }
-
 }
 
 data class Candidate(val contest: String, val candName: String)
@@ -38,85 +38,105 @@ data class CountyBatch(val type: String, val name: String, val nballots: Int) {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
 fun readCountyManifest(filename: String): List<CountyBatch> {
-    val reader: BufferedReader = File(filename).bufferedReader()
-    reader.readLine() // skip header line
+    val isBurke = filename.contains("Burke")
+    val parser = CSVParser.parse(File(filename), StandardCharsets.UTF_8, CSVFormat.DEFAULT)
+    val records = parser.iterator()
+
+    records.next() // skip header line
 
     val countyBatches = mutableListOf<CountyBatch>()
-    while (true) {
-        val line = reader.readLine()
-        if (line == null) break
+    while (records.hasNext()) {
+        val line = records.next()
+        if (line.all { it.isEmpty() }) continue
+        try {
+            val countyBatch = if (isBurke) {
+                val name = cleanup(line.get(0))
+                val nballots = line.get(1).trim().toInt()
+                val type = line.get(2).trim()
+                CountyBatch(type, name, nballots)
 
-        val tokens = line.split(",") // TODO look for quote, or use commons.csv ??
-        val type = tokens[0].trim()
-        val name = tokens[1].trim()
-        val nballots = tokens[2].trim().toInt()
-        countyBatches.add( CountyBatch(type, name, nballots))
+            } else {
+                val type = line.get(0).trim()
+                val name = cleanup(line.get(1))
+                val nballots = line.get(2).trim().toInt()
+                CountyBatch(type, name, nballots)
+            }
+            countyBatches.add(countyBatch)
+        } catch (e: Exception) {
+            println("*** ${e.message} $line")
+        }
     }
-    reader.close()
-
     return countyBatches
 }
 
-// class Contest(val name: String, val candidates: MutableList<Candidate> = mutableListOf<Candidate>())
 
 fun readCandidateTotals(filename: String, batches: List<CountyBatch>) {
-    val candidates = mutableListOf<Candidate>()
-
-    val reader: BufferedReader = File(filename).bufferedReader()
+    val parser = CSVParser.parse(File(filename), StandardCharsets.UTF_8, CSVFormat.DEFAULT)
+    val records = parser.iterator()
 
     // read the header
-    val headerLine = reader.readLine()
-    val tokens = headerLine.split(",")
-    // println(headerLine)
-    var idx = 1
-    while (idx < tokens.size) {
-        val contestCandidateHead = cleanup(tokens[idx])
-        val split = contestCandidateHead.lastIndexOf("-")
-        val contestName = contestCandidateHead.take(split-1).trim()
-        // val contest = contests.getOrPut(contestName) { Contest(contestName) }
+    val headerLine = records.next()
 
-        val candName = contestCandidateHead.substring(split + 1).trim()
-        candidates.add(Candidate(contestName, candName))
+    val candidates = mutableListOf<Candidate>()
+    var idx = 1
+    while (idx < headerLine.size()) {
+        if (headerLine[idx].isNotEmpty()) {   // trailing comma
+            val contestCandidateHead = cleanup(headerLine[idx])
+            val split = contestCandidateHead.lastIndexOf("-")
+            if (split < 0)
+                println("WRONG $idx $split")
+            val contestName = contestCandidateHead.take(split - 1).trim()
+            val candName = contestCandidateHead.substring(split + 1).trim()
+            candidates.add(Candidate(contestName, candName))
+        }
         idx++
     }
-    // candidates.forEach { println(it) }
 
     val batchMap = batches.associateBy { it.name }
 
     // read the body
-    while (true) {
-        val line = reader.readLine()
-        if (line == null) break
+    while (records.hasNext()) {
+        val line = records.next()
+        if (line.all { it.isEmpty() }) continue
 
-        val canditer = candidates.iterator()
-        val tokens = line.split(",")
-        val batchName = tokens[0].trim()
-        val batch = batchMap[batchName]
-        if (batch == null) {
-            println("  cant find batch name '$batchName'")
-        } else {
-            var idx = 1
-            while (idx < tokens.size) {
-                val voteCount = tokens[idx].trim().toInt()
-                batch.addCandidateCount(canditer.next(), voteCount)
-                idx++
+        try {
+            val canditer = candidates.iterator()
+            val batchName = cleanup(line[0])
+            val batch = batchMap[batchName]
+            if (batch == null) {
+                println("  cant find batch name '$batchName'")
+            } else {
+                var idx = 1
+                while (idx < line.size()) {
+                    if (line[idx].isNotEmpty()) {   // trailing comma
+                        val voteCount = line[idx].trim().toInt()
+                        batch.addCandidateCount(canditer.next(), voteCount)
+                    }
+                    idx++
+                }
             }
+        } catch (e: Exception) {
+            println("*** ${e.message}")
         }
     }
-    reader.close()
 }
 
 fun cleanup(s: String): String {
     val updated = s.replace("\"\"", "'")
-    return updated.replace("\"", "").trim()
+    val updated2 = updated.replace(",", "")
+    return updated2.replace("\"", "").trim()
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// read manifests and candidte_totals
 fun readGaCountyInputCsv(topdir: String): Pair<List<GaContest>, List<GaCounty>> {
     val contests = mutableMapOf<String, GaContest>()
     val counties = mutableListOf<GaCounty>()
-
-    val candidates  = mutableSetOf<String>()
 
     var count = 0
     val manifests = "$topdir/manifests"

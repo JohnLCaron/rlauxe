@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import kotlin.String
 import kotlin.io.path.Path
 import kotlin.math.log10
 import kotlin.test.Test
@@ -239,7 +240,8 @@ class AuditsNoErrors {
 
 }
 
-fun showSampleSizesVsMargin(datafileName: String, name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String = "auditType") {
+fun showSampleSizesVsMargin(datafileName: String, name: String, dirName: String, subtitle: String, yscale: ScaleType,
+                            catName: String = "auditType", catOrdering: Comparator<String>? = null) {
     val io = WorkflowResultsIO(datafileName)
     val data = io.readResults()
     wrsPlot(
@@ -250,6 +252,7 @@ fun showSampleSizesVsMargin(datafileName: String, name: String, dirName: String,
         xname = "margin", xfld = { it.margin },
         yname = "samplesNeeded", yfld = { it.samplesUsed },
         catName = catName, catfld = { category(it) },
-        scaleType = yscale
+        scaleType = yscale,
+        catOrdering = catOrdering,
     )
 }

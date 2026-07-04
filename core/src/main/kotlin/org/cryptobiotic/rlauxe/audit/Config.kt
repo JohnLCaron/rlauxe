@@ -51,6 +51,23 @@ data class Config(
         if (round.clcaConfig != null) appendLine("  ${round.clcaConfig} )")
         if (round.pollingConfig != null) appendLine("  ${round.pollingConfig} )")
     }
+    fun show() = buildString {
+        appendLine("Config(")
+        //         return "ElectionInfo(electionName='$electionName', auditType=$auditType, totalCardCount=$totalCardCount, contestCount=$contestCount, cvrsContainUndervotes=$cvrsContainUndervotes, pollingMode=$pollingMode, mvrSource=$mvrSource, metadata=$metadata)"
+        appendLine("  electionName='${election.electionName}'")
+        election.metadata.forEach{ appendLine("  ${it}") }
+        appendLine("  auditType='${election.auditType}'")
+        appendLine()
+        appendLine("  $election, ")
+        appendLine("  $creation, ")
+        appendLine("  $sampling)")
+        appendLine("  $simulation, ")
+        if (round.clcaConfig != null) appendLine("  ${round.clcaConfig} )")
+        if (round.pollingConfig != null) appendLine("  ${round.pollingConfig} )")
+        appendLine()
+        appendLine("  totalCardCount='${election.totalCardCount}'")
+        appendLine("  contestCount='${election.contestCount}'")
+    }
 
     companion object {
 
@@ -201,8 +218,7 @@ data class AuditRoundConfig(
     val simulation: SimulationControl,
     val sampling: ContestSampleControl,
     val clcaConfig: ClcaConfig?,
-    val pollingConfig: PollingConfig?,
-
+    val pollingConfig: PollingConfig? = null,
     val other: Map<String, String> = emptyMap(),    // soft parameters
 ) {
     companion object {

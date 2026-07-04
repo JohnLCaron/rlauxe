@@ -257,7 +257,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
 data class EstimationRoundResult(
     val roundIdx: Int,
     val strategy: String,
-    val calcNewMvrsNeeded: Int, // could just calculate on the fly ?
+    val calcNewMvrsNeeded: Int, // TODO could just calculate on the fly; remove?
     val startingTestStatistic: Double,
     val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation; informational
     val estimatedDistribution: List<Int>,   // distribution of estimated sample sizes
@@ -267,6 +267,7 @@ data class EstimationRoundResult(
     val simNewMvrsNeeded: Int,
     val simMvrsNeeded: Int = 0,
 ) {
+
     override fun toString() = "round=$roundIdx strategy=$strategy calcMvrsNeeded=$calcNewMvrsNeeded estimatedDistribution=$estimatedDistribution ($ntrials) " +
             "simNewMvrs=$simNewMvrsNeeded startingErrorRates=$startingErrorRates"
 

@@ -703,5 +703,5 @@ fun calcDeciles(distribution: List<Double>): Map<Int, Double> {
 fun calcDecilesFromInt(distribution: List<Int>): Map<Int, Int> {
     val decilePcts = IntArray(10) { 10 * (it+1) }
     val raw = Quantiles.percentiles().indexes(*decilePcts).compute(*distribution.toIntArray()).toMap()
-    return raw.mapValues { roundUp(100 * it.value) }
+    return raw.mapValues { roundUp(it.value) }
 }

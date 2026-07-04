@@ -31,8 +31,7 @@ import kotlin.use
 // pre audit verifaction; no access to mvrs.
 // for all audit types. Cards and CardPools must already be published, contests might not,
 // but only if you call cerify with the contests' note only then do you get contestUA.preAuditStatus saved
-class VerifyContests(val auditRecordLocation: String, val show: Boolean = false) {
-    // val auditRecord: AuditRecord
+class VerifyContests(val auditRecordLocation: String, val show: Boolean = false) { // val auditRecord: AuditRecord
     val config: Config
     val allContests: List<ContestWithAssertions>?
     val allInfos: Map<Int, ContestInfo>?
@@ -119,6 +118,8 @@ data class ContestSummary(
     val pooled: Map<Int, ContestTabulation>,
 )
 
+private val showProgress = false
+
 // all audits, including polling
 fun verifyManifest(
     config: Config,
@@ -137,26 +138,29 @@ fun verifyManifest(
     val indexSet = mutableSetOf<Int>()
     val indexList = mutableListOf<Pair<Int, Long>>()
 
+    var countDuplicateIds = 0
+    var countDuplicateIdxs = 0
+    var countDisorderPrns = 0
     var count = 0
     var lastCard: AuditableCard? = null
     cards.iterator().use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
-            //if (card.index in 100..150)
-            //    print("")
-
             // 1. Check that all card locations and indices are unique, and the card prns are in ascending order
             if (!locationSet.add(card.id())) {
-                results.addError("$count duplicate card.id ${card.id()}")
+                if (countDuplicateIds < 10) results.addError("$count duplicate card.id ${card.id()}")
+                countDuplicateIds++
             }
 
             if (!indexSet.add(card.index())) {
-                results.addError("$count duplicate card.index ${card.index()}")
+                if (countDuplicateIdxs < 10) results.addError("$count duplicate card.index ${card.index()}")
+                countDuplicateIdxs++
             }
 
             if (lastCard != null) {
                 if (card.prn() <= lastCard.prn()) {
-                    results.addError("$count prn out of order lastCard = $lastCard card = ${card}")
+                    if (countDisorderPrns < 10) results.addError("$count prn out of order lastCard = $lastCard card = ${card}")
+                    countDisorderPrns++
                 }
             }
 
@@ -192,13 +196,17 @@ fun verifyManifest(
                 }
             }
 
-            if (count % 1000 == 0) print("$count, ")
-            if (count % 10000 == 0) println()
-            if (count % 100000 == 0) println()
+            if (showProgress) {
+                if (count % 1000 == 0) print("$count, ")
+                if (count % 10000 == 0) println()
+                if (count % 100000 == 0) println()
+            }
         }
     }
     if (!results.hasErrors) {
         results.addMessage("  verified that $count cards in the Manifest are ordered with no duplicate locations or indices")
+    } else {
+        results.addMessage("  $count cards in the Manifest have $countDuplicateIds duplicateIds; $countDuplicateIdxs; duplicateIndex $countDisorderPrns out of order prns")
     }
     println("verifyManifest1 done")
 

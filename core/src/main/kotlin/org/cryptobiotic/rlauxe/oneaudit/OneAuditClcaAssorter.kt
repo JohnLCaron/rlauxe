@@ -150,7 +150,8 @@ class OneAuditClcaAssorter(
     // TODO modify this for WOR
     // expected sample size if there are no clca errors
     override fun sampleSizeNoErrors(Npop: Int, bet: Double, alpha: Double): Int {
-        val p0 = 1.0 - oaAssortRates.sumRates
+        var p0 = 1.0 - oaAssortRates.sumRates
+        if (p0 < 0.0) p0 = 0.0
         val noerrorTerm = ln(1.0 + bet * (noerror - 0.5)) * p0
 
         var sumOneAuditTerm = 0.0
@@ -168,7 +169,8 @@ class OneAuditClcaAssorter(
     // expected sample size if there are clca errors
     // for clcaErrorCounts with phantoms added, use AssertionRound.calcNewMvrsNeeded()
     override fun sampleSizeWithErrors(Npop: Int, bet: Double, alpha: Double, clcaErrorRates: ClcaErrorRates): Int {
-        val p0 = 1.0 - clcaErrorRates.sumRates()
+        var p0 = 1.0 - clcaErrorRates.sumRates()
+        if (p0 < 0.0) p0 = 0.0
         val noerrorTerm = ln(1.0 + bet * (noerror - 0.5)) * p0
 
         var sumErrors = 0.0

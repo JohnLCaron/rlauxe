@@ -4,23 +4,26 @@ package org.cryptobiotic.rlauxe.variance
 import org.cryptobiotic.rlauxe.audit.runAllRoundsAndVerify
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.cli.CreateCaseData
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import kotlin.io.path.Path
 
 class VarianceDataGenerator(
     val case: String,
     val toptopdir: String,
+    val otherParameters: Array<String> = emptyArray(),
     val nruns: Int,
     val nsimTrials: Int,
-    val nthreads: Int = 1,
+    val nthreads: Int = 1,  // can we increase this ??
 ) {
 
     fun createAndRunTasks() {
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<ConcurrentTask<Boolean>>()
         repeat(nruns) { run ->
-            tasks.add( RunVarianceTask(case, toptopdir, nsimTrials = nsimTrials, run+1))
+            tasks.add( RunVarianceTask(case, toptopdir, otherParameters, nsimTrials = nsimTrials, run+1))
         }
 
         val estResults = ConcurrentTaskRunner<Boolean>().run(tasks, nthreads = nthreads) // OOM, reduce threads
@@ -44,7 +47,8 @@ class VarianceDataGenerator(
     class RunVarianceTask(
         val case: String,
         val toptopdir: String,
-        val nsimTrials: Int,
+        val otherParameters: Array<String>,
+        val nsimTrials: Int, // wtf ?
         val runIndex: Int,
     ) : ConcurrentTask<Boolean> {
         val toptopdirn = "$toptopdir$runIndex"
@@ -52,12 +56,13 @@ class VarianceDataGenerator(
         override fun name() = "RunVarianceTask $runIndex"
 
         override fun run(): Boolean {
+            validateOutputDir(Path(toptopdirn))
 
             CreateCaseData.main(
                 arrayOf(
                     "--case", case,
                     "--output", toptopdirn,
-                )
+                ) + otherParameters
             )
 
             return runAllRoundsAndVerify(toptopdirn)

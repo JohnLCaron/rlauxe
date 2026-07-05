@@ -37,7 +37,7 @@ see [Getting Started](docs/Developer.md#getting-started).
     * [CLCA with errors](#clca-with-errors)
     * [Comparison of CLCA, Polling, and OneAudit](#comparison-of-clca-polling-and-oneaudit)
   * [Effect of Phantoms on Samples needed](#effect-of-phantoms-on-samples-needed)
-* [Estimating Sample Batch sizes](#estimating-sample-batch-sizes)
+* [Estimating Audit Round sample sizes](#estimating-audit-round-sample-sizes)
   * [Simulating MVRs](#simulating-mvrs)
   * [Choosing ballots](#choosing-ballots)
   * [Estimating extra mvrs and number of rounds](#estimating-extra-mvrs-and-number-of-rounds)
@@ -97,7 +97,7 @@ For each contest:
 - Describe each contest name, candidates, contest type (eg Plurality, IRV, Dhondt, ...), etc. in the _ContestInfo_.
 - Count the votes in the usual way. The reported winner(s) and the reported margins are based on this vote count.
   Use the votes, the number of valid cards (Nc), the number of votes cast (Ncast), and the ContestInfo to create the _Contest_.
-- If this is a multicontest election, you may need to create _Batch_ objects that describe each contest's _sample population_, 
+- If this is a multicontest election, you may need to create _Style_ objects that describe each contest's _sample population_, 
   the set of cards that might contain the contest. Count the number of cards in the population to get _Npop_ which is used to calculate
   the contest's _diluted margin_. See [SamplePopulations](docs/SamplePopulations.md) for details.
 - The rlauxe software generates the assertions needed to prove if the winners are correct. Add the assertions and Npop
@@ -105,7 +105,7 @@ For each contest:
 
 Commitment:
 - Configuration information is set in ElectionInfo.
-- Write the electionInfo, cardManifest, contest, and if needed, the pools and batches to a publically accessible "bulletin board".
+- Write the electionInfo, cardManifest, contest, and if needed, the pools and styles to a publically accessible "bulletin board".
 - Digitally sign these files; they constitute the "election commitment" and may not be altered once the seed is chosen.
 
 Verify:
@@ -189,8 +189,9 @@ OneAudit is a type of CLCA audit. It deals with the cases where:
 2. CVRS are available for all ballots, but some CVRs cannot be matched to physical ballots. The unmatched ballots
    are in one or more _pools_ for which subtotals are available. (This is the San Francisco case where
    mail-in ballots have matched CVRS, and in-person precinct votes have unmatched CVRs).
+3. CVRS are not available, but batch subtotals are available from whicj OneAudit pools can be created.
 
-In both cases we use the average assorter value in a pool as the assort value of the (missing) CVR.
+In all cases we use the average assorter value in a pool as the assort value of the (missing) CVR.
 When a ballot has been chosen for hand audit:
 
 1. If it has a CVR, use the standard CLCA overstatement assorter.
@@ -199,6 +200,8 @@ When a ballot has been chosen for hand audit:
 Thus, all cards must either have a CVR or be contained in a pool.
 
 See [Betting with OneAudit Pools](docs/BettingRiskFunctions.md#betting-with-oneaudit-pools) for an overview of OneAudit betting.
+
+See [Georgia 2026 Primary OneAudit](docs/cases/Ga2026.md) for a case study comparing OneAudit with Batch Audits.
 
 ## Polling Audits
 
@@ -213,8 +216,8 @@ Here  we characterize the number of samples needed for each audit type. For clar
 assume we have only one contest, and ignore the need to estimate sizes for each audit round. This is a 
 _one sample at a time_ audit, which terminates as soon as the risk limit is confirmed or rejected. 
 
-In the section [Estimating Sample Batch sizes](#estimating-sample-batch-sizes) below, we deal with the 
-need to estimate a batch size, and the extra overhead of audit rounds. In the section 
+In the section [Estimating Audit Round Sample sizes](#estimating-audit-round-sample-sizes) below, we deal with the 
+need to estimate a sample size each round, and ballot sample "overshoot". In the section 
 [Multiple Contest Auditing](#multiple-contest-auditing) below, we deal with the complexity of having multiple contests
 on ballots.
 
@@ -352,7 +355,7 @@ Varying phantom percent, up to and over the margin of 4.5%, with errors generate
 * All audits go to hand count when phantomPct gets close to the margin, as they should.
 * See [effect of Phantoms on samples needed](docs/ClcaErrors.md#phantom-ballots) to see how many extra ballots are needed for each phantom ballot sampled.
 
-# Estimating Sample Batch sizes
+# Estimating Audit Round sample sizes
 
 Audits are usually done in rounds. For each round, for each contest, we estimate the number of ballots needed to statistically prove the contest outcome.
 This generates a specific set of ballots needed for the round. The auditors track down where those ballots are, hand audit them,
@@ -410,7 +413,7 @@ The simulation of the MVR is done in the following way:
 ## Choosing ballots
 
 Once all of the contests' sample sizes are estimated, we choose which ballots/cards to sample.
-This step depends on the correctness of the CardManifest and the Batch/Pool information which tells which cards
+This step depends on the correctness of the CardManifest and the Style information which tells which cards
 may have which contests. The sampling must be uniform over the contest's populations for a statistically valid audit.
 
 The _consistent sampling_ algorithm reads through the sorted Card Manifest and chooses the first cards which may contain one or more wanted contests. Once the contest's estimated sample size is satisfied, it drops out of the wanted list. This continues until the wanted list is empty. The set of selected cards is written to disk and used for the real audit.

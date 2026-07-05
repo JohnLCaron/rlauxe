@@ -5,6 +5,8 @@ import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
+import org.cryptobiotic.rlauxe.audit.PollingConfig
+import org.cryptobiotic.rlauxe.audit.PollingMode
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.cases
@@ -47,7 +49,7 @@ class MakeGaElection {
     }
 
     @Test
-    fun makeGaElection() {
+    fun makeGaElectionOa() {
         val inputdir = "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted"
         val topdir = "$cases/ga/ga2026"
 
@@ -69,8 +71,40 @@ class MakeGaElection {
             "Ga2026Primary from manifests and candidate_totals",
             inputdir,
             topdir = topdir,
+            AuditType.ONEAUDIT,
             creation,
             round,
+        )
+    }
+
+    @Test
+    fun makeGaElectionPolling() {
+        val inputdir = "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted"
+        val topdir = "$cases/ga/ga2026poll"
+
+        val creation = AuditCreationConfig(AuditType.POLLING, riskLimit = .05,)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimTrials = 20),
+            ContestSampleControl(minRecountMargin = .005, minSize = 10, contestSampleCutoff = 10000,
+                auditSampleCutoff = 200000, sampling = Sampling.consistent),
+            clcaConfig = null,
+            pollingConfig = PollingConfig(),
+        )
+
+        //     electionName: String,
+        //    version: String,
+        //    topdir: String,
+        //    creation: AuditCreationConfig,
+        //    roundConfig: AuditRoundConfig,
+        //    startFirstRound: Boolean = true,
+        createGaElection(
+            "Ga2026Primary (polling) from manifests and candidate_totals",
+            inputdir,
+            topdir = topdir,
+            AuditType.POLLING,
+            creation,
+            round,
+            pollingMode = PollingMode.withPools,
         )
     }
 

@@ -5,25 +5,29 @@ import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
+import org.cryptobiotic.rlauxe.audit.PollingConfig
+import org.cryptobiotic.rlauxe.audit.PollingMode
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 
-fun makeGa2026(topdir: String, inputdir: String) {
-    val inputdir = "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted"
-
-    val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05,)
+fun makeGa2026(topdir: String, inputdir: String, auditTypeS: String?) {
+    val auditType = if (auditTypeS == "poll") AuditType.POLLING else AuditType.ONEAUDIT
+    val creation = AuditCreationConfig(auditType, riskLimit = .05,)
     val round = AuditRoundConfig(
-        SimulationControl(nsimTrials = 100),
+        SimulationControl(nsimTrials = if (auditType.isOA()) 100 else 10),
         ContestSampleControl(minRecountMargin = .005, minSize = 10, contestSampleCutoff = 10000,
             auditSampleCutoff = 200000, sampling = Sampling.consistent),
-        ClcaConfig(),
+        ClcaConfig(), PollingConfig()
     )
+
     createGaElection(
         "Ga2026Primary from manifests and candidate_totals",
         inputdir,
         topdir = topdir,
+        auditType,
         creation,
         round,
+        pollingMode = if (auditType.isPolling()) PollingMode.withPools else null,
     )
 }
 

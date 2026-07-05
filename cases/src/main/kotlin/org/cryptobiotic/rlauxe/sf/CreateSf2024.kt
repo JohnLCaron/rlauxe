@@ -14,10 +14,11 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.ZipReaderTour
 import java.io.FileOutputStream
 
-fun makeSFElectionOA(toptopdir: String) {
-    val castVoteRecordZip = "$toptopdir/CVR_Export_20241202143051.zip"
-    val cvrExportCsv = "$toptopdir/$cvrExportCsvFile"
-    val topdir = "$toptopdir/oa"
+// called from CreateCaseData; in cases-uber.jar; ie not a test class
+fun makeSFElectionOA(topdir: String, useCvrDir: String? = null) {
+    val cvrDir = useCvrDir ?: "/home/stormy/datadrive/rla/cases/sf/sf2024"
+    val castVoteRecordZip = "$cvrDir/CVR_Export_20241202143051.zip"
+    val cvrExportCsv = "$cvrDir/$cvrExportCsvFile"
 
     val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05,)
     val round = AuditRoundConfig(
@@ -36,10 +37,10 @@ fun makeSFElectionOA(toptopdir: String) {
     )
 }
 
-fun makeSFElectionClca(toptopdir: String) {
-    val castVoteRecordZip = "$toptopdir/CVR_Export_20241202143051.zip"
-    val cvrExportCsv = "$toptopdir/$cvrExportCsvFile"
-    val topdir = "$toptopdir/clca"
+fun makeSFElectionClca(topdir: String, useCvrDir: String? = null) {
+    val cvrDir = useCvrDir ?: "/home/stormy/datadrive/rla/cases/sf/sf2024"
+    val castVoteRecordZip = "$cvrDir/CVR_Export_20241202143051.zip"
+    val cvrExportCsv = "$cvrDir/$cvrExportCsvFile"
 
     val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, )
     val round = AuditRoundConfig(
@@ -60,11 +61,11 @@ fun makeSFElectionClca(toptopdir: String) {
 
 // extract the cvrExport from castVoteRecordZip zipped json files, write to cvrExport.csv
 // only need to do this once.
-fun createCvrExportCsvFile(toptopdir: String): DominionCvrExportJsonSummary {
-    val castVoteRecordZip = "$toptopdir/CVR_Export_20241202143051.zip"
+fun createCvrExportCsvFile(useCvrDir: String): DominionCvrExportJsonSummary {
+    val castVoteRecordZip = "$useCvrDir/CVR_Export_20241202143051.zip"
     val manifestFile = "ContestManifest.json"
     val stopwatch = Stopwatch()
-    val outputFilename = "$toptopdir/$cvrExportCsvFile"
+    val outputFilename = "$useCvrDir/$cvrExportCsvFile"
     val cvrExportCsvStream = FileOutputStream(outputFilename)
     cvrExportCsvStream.write(CvrExportCsvHeader.toByteArray())
 

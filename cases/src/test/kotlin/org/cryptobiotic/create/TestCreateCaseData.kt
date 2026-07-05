@@ -26,21 +26,21 @@ class TestCreateCaseData {
         CreateCaseData.main(
             arrayOf(
                 "--case", "sf2024",
-                "--output", "$cases/sf2024",
+                "--output", "$cases/sf/sf2024",
                 "--cvrExport",
             )
         )
         CreateCaseData.main(
             arrayOf(
                 "--case", "sf2024",
-                "--output", "$cases/sf2024",
+                "--output", "$cases/sf2024/oa",
                 "--auditType", "oa",
             )
         )
         CreateCaseData.main(
             arrayOf(
                 "--case", "sf2024",
-                "--output", "$cases/sf2024",
+                "--output", "$cases/sf2024/clca",
                 "--auditType", "clca",
             )
         )
@@ -75,14 +75,21 @@ class TestCreateCaseData {
                 "-sampling", "uniform"
             )
         )
+        CreateCaseData.main(
+            arrayOf(
+                "--case", "belgium",
+                "--output", "$cases/belgium2024",
+            )
+        )
     }
 
     @Test
     fun createNewCases() {
         CreateCaseData.main(
             arrayOf(
-                "--case", "belgium",
-                "--output", "$cases/belgium2024",
+                "--case", "ga2026",
+                "--output", "$cases/ga/ga2026",
+                "--input", "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted",
             )
         )
     }

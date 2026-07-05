@@ -367,7 +367,7 @@ fun createBoulderElection(
         val result = startFirstRound(topdir)
         if (result.isErr) logger.error { result.toString() }
     }
-    logger.info{"startFirstBoulderRound took $stopwatch"}
+    logger.info{"startFirstRound took $stopwatch"}
 }
 
 fun createBoulderElectionWithSovo(
@@ -400,7 +400,7 @@ fun createBoulderElectionWithSovo(
 
     val result = startFirstRound(topdir)
     if (result.isErr) logger.error{ result.toString() }
-    logger.info{"startFirstBoulderRound took $stopwatch"}
+    logger.info{"startFirstRound took $stopwatch"}
 
     return result
 }

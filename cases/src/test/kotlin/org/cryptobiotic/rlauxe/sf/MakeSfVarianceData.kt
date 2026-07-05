@@ -9,20 +9,21 @@ import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.audit.runAllRoundsAndVerify
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.collections.List
 import kotlin.collections.forEach
 import kotlin.test.Test
 
 class MakeSfVarianceData {
-    val sfDir = "$testdataDir/cases/sf2024"
+    val sfDir = "$cases/sf/sf2024"
     val castVoteRecordZip = "$sfDir/CVR_Export_20241202143051.zip"
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
 
     //// generates the OneAudits for CaseStudiesVarianceScatter for regular OA
     @Test
-    fun createSFOAvariance() {
-        val topdir = "$testdataDir/cases/sf2024oa"
+    fun createSFOaVariance() {
+        val topdir = "$cases/sf/sf2024oaVariance/sf2024oaVariance"
 
         val tasks = mutableListOf<ConcurrentTask<Boolean>>()
         repeat(1) { run ->

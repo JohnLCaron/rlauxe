@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.auditcenter.makeCorlaElectionUniform
 import org.cryptobiotic.rlauxe.belgium.createAllBelgiumElections
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionClca
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionOA
+import org.cryptobiotic.rlauxe.ga.makeGa2026
 import org.cryptobiotic.rlauxe.sf.createCvrExportCsvFile
 import org.cryptobiotic.rlauxe.sf.makeSFElectionClca
 import org.cryptobiotic.rlauxe.sf.makeSFElectionOA
@@ -21,7 +22,7 @@ object CreateCaseData {
         val case by parser.option(
             ArgType.String, // enum ??
             shortName = "case",
-            description = "belgium | boulder2024 | corla2020 | sf2024"
+            description = "belgium | boulder2024 | corla2020 | ga26p | sf2024"
         ).required()
         val output by parser.option(
             ArgType.String,
@@ -42,6 +43,11 @@ object CreateCaseData {
             ArgType.String, // enum ??
             shortName = "auditcenter",
             description = "auditcenter local git repo"
+        )
+        val input by parser.option(
+            ArgType.String, // enum ??
+            shortName = "input",
+            description = "input directory"
         )
         val sampleType by parser.option(
             ArgType.String, // enum ??
@@ -67,6 +73,11 @@ object CreateCaseData {
                 print("\n  using auditcenter local git repo at $auditcenter")
                 print(" sampling type = ${sampleType ?: "style"}")
             }
+            if (case == "ga26p") {
+                if (input == null) {
+                    println("You must set input directory to github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted")
+                    return
+                }            }
             println()
 
             // what if you're not running from a jar file ??
@@ -87,13 +98,16 @@ object CreateCaseData {
                         else -> makeCorlaElectionClca(toptopdir = output, auditcenter = auditcenter!!)
                     }
                 }
+                "ga26p" -> {
+                    makeGa2026(output, input!!)
+                }
                 "sf2024" -> {
                     if (cvrExport) {
-                        createCvrExportCsvFile(toptopdir = output)
+                        createCvrExportCsvFile(useCvrDir = output)
                     } else {
                         when (auditType) {
-                            "clca" -> makeSFElectionClca(toptopdir = output)
-                            else -> makeSFElectionOA(toptopdir = output)
+                            "clca" -> makeSFElectionClca(topdir = output)
+                            else -> makeSFElectionOA(topdir = output)
                         }
                     }
                 }

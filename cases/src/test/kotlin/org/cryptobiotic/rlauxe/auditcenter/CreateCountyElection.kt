@@ -180,7 +180,7 @@ fun createCountyElection(
         val result = startFirstRound(topdir)
         if (result.isErr) logger.error { result.toString() }
     }
-    logger.info{"startFirstBoulderRound took $stopwatch"}
+    logger.info{"startFirstRound took $stopwatch"}
 }
 
 fun parseContestNameAndVoteFor(name: String) : Pair<String, Int> {

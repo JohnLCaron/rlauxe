@@ -148,7 +148,7 @@ $ ./gradlew assemble uberjar
 The repo contains the needed input for belgium2024. To create the data:
 
 `
-java -classpath cases/build/libs/rlauxe-cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case belgium -topdir "/home/you/wherever/cases/belgium2024"
 `
 
@@ -164,7 +164,7 @@ See [here](https://github.com/JohnLCaron/rlauxe-viewer#special-features-for-belg
 The repo contains the needed input for boulder024. To create the data:
 
 `
-java -classpath cases/build/libs/rlauxe-cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case boulder2024 -topdir "/home/you/wherever/cases/boulder2024" -type oa
 `
 
@@ -180,9 +180,9 @@ git clone https://github.com/nealmcb/auditcenter
 Then run:
 
 `
-java -classpath cases/build/libs/rlauxe-cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case corla2020 -toptopdir "/home/you/wherever/cases/corla2020" \
-    -auditcenter "/home/you/wherever/git/auditcenter/directory" -sampling style
+    -auditcenter "/home/you/wherever/github/auditcenter/directory" -sampling style
 `
 
 * check _cases/build/libs/_ for the latest version of rlauxe-cases-uber.jar
@@ -193,6 +193,16 @@ java -classpath cases/build/libs/rlauxe-cases-0.10.0.0-uber.jar org.cryptobiotic
 This creates an election using style based sampling (CSD). To use uniform sampling, use the flag "-sampling uniform"
 
 See [here](https://github.com/JohnLCaron/rlauxe-viewer/docs/CorlaViewer.md
+
+### for the Georgia 2026 primary test case
+
+`
+java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+    -case ga26p -topdir "/home/you/wherever/cases/ga2026Primary" \
+    -input "/home/you/wherever/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted"
+`
+
+will create a OneAudit election. To create a CLCA election, use the flag "-type clca"
 
 
 ### for the San Francisco 2024 test case
@@ -206,7 +216,7 @@ Create the _top directory_ for this case (eg _$testdataDir/cases/sf2024/_), and 
 Then run:
 
 `
-java -classpath cases/build/libs/rlauxe-cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case sf2024 -toptopdir "/home/you/wherever/cases/sf2024" --cvrExport
 `
 to build the cvrExport.csv file, which will be written to topdir. This only needs to be done one time.
@@ -214,7 +224,7 @@ to build the cvrExport.csv file, which will be written to topdir. This only need
 To generate the sf2024 election data: 
 
 `
-java -classpath cases/build/libs/rlauxe-cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case sf2024 -toptopdir "/home/you/wherever/cases/sf2024"
 `
 
@@ -230,7 +240,7 @@ Download the [rlauxe-viewer repo](https://github.com/JohnLCaron/rlauxe-viewer) a
 if you download a new version of the library, you may have to regenerate any audit records (including tests case data), 
 before viewing them.
 
-**Quaeso ignosce mihi peccatum meum**: We are now using semantic versioning (with a leading 0 to indicate a prerelease): eg "0.10.0.0" = 0.MAJOR.MINOR.PATCH.
+**Quaeso ignosce mihi peccatum meum**: We are now using semantic versioning (with a leading 0 to indicate a prerelease): eg "0.10.2.0" = 0.MAJOR.MINOR.PATCH.
 The data format is rapidly changing in incompatible ways; when it does, the major version will increment.
 You will have to regenerate any data you have. The case study data can now be regenerated from the command line,
 see [Getting Started](docs/Developer.md#getting-started).

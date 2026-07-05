@@ -37,7 +37,7 @@ object CreateCaseData {
         val auditType by parser.option(
             ArgType.String, // enum ??
             shortName = "type",
-            description = "oa | clca"
+            description = "oa | clca | poll"
         )
         val auditcenter by parser.option(
             ArgType.String, // enum ??
@@ -58,6 +58,7 @@ object CreateCaseData {
         try {
             parser.parse(args)
             print("CreateCaseData for $case topdir = $output")
+
             if (case == "sf2024") {
                 if (cvrExport) print(" generate cvrExport file")
             }
@@ -67,7 +68,7 @@ object CreateCaseData {
             }
             if (case == "corla2020") {
                 if (auditcenter == null) {
-                    println("You must set auditcenter for corla cases ")
+                    println("\nYou must set auditcenter for corla cases ")
                     return
                 }
                 print("\n  using auditcenter local git repo at $auditcenter")
@@ -75,9 +76,10 @@ object CreateCaseData {
             }
             if (case == "ga26p") {
                 if (input == null) {
-                    println("You must set input directory to github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted")
+                    println("\nYou must set input directory to github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted")
                     return
-                }            }
+                }
+            }
             println()
 
             // what if you're not running from a jar file ??
@@ -86,28 +88,32 @@ object CreateCaseData {
 
             when (case) {
                 "belgium" -> createAllBelgiumElections(output)
+
                 "boulder2024" -> {
                     when (auditType) {
                         "clca" -> makeBoulderElectionClca(toptopdir = output)
                         else -> makeBoulderElectionOA(toptopdir = output)
                     }
                 }
+
                 "corla2020" -> {
                     when (sampleType) {
                         "uniform" -> makeCorlaElectionUniform(toptopdir = output, auditcenter = auditcenter!!)
                         else -> makeCorlaElectionClca(toptopdir = output, auditcenter = auditcenter!!)
                     }
                 }
+
                 "ga26p" -> {
-                    makeGa2026(output, input!!)
+                    makeGa2026(output, input!!, auditType)
                 }
+
                 "sf2024" -> {
                     if (cvrExport) {
                         createCvrExportCsvFile(useCvrDir = output)
                     } else {
                         when (auditType) {
-                            "clca" -> makeSFElectionClca(topdir = output)
-                            else -> makeSFElectionOA(topdir = output)
+                            "clca" -> makeSFElectionClca(topdir = output, useCvrDir = input)
+                            else -> makeSFElectionOA(topdir = output, useCvrDir = input)
                         }
                     }
                 }

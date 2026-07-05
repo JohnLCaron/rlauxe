@@ -23,7 +23,8 @@ import kotlin.collections.component2
 
 enum class ScaleType { Linear, LogLinear, LogLog }
 
-// generic multiple line plotter for WorkflowResult
+// also see generic versions
+// multiple line plotter for WorkflowResult
 fun wrsPlot(
     titleS: String,
     subtitleS: String,

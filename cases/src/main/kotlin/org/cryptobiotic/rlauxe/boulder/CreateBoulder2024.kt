@@ -18,7 +18,7 @@ import org.cryptobiotic.rlauxe.util.ZipReaderTour
 import java.io.FileOutputStream
 
 fun makeBoulderElectionOA(toptopdir: String) {
-    val topdir = "$toptopdir/oa"
+    val topdir = "$toptopdir"
 
     val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03, )
     val round = AuditRoundConfig(
@@ -44,7 +44,7 @@ fun makeBoulderElectionOA(toptopdir: String) {
 }
 
 fun makeBoulderElectionClca(toptopdir: String) {
-    val topdir = "$toptopdir/clca"
+    val topdir = "$toptopdir"
 
     val creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03, )
     val round = AuditRoundConfig(

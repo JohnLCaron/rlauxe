@@ -139,6 +139,7 @@ fun readGaCountyInputCsv(topdir: String): Pair<List<GaContest>, List<GaCounty>> 
     val counties = mutableListOf<GaCounty>()
 
     var count = 0
+    var countBatches = 0
     val manifests = "$topdir/manifests"
     Path(manifests).listDirectoryEntries().sorted().forEach { countyPath ->
         val countyName = countyPath.name
@@ -148,6 +149,7 @@ fun readGaCountyInputCsv(topdir: String): Pair<List<GaContest>, List<GaCounty>> 
             val manifests = "$topdir/manifests/$countyName"
             val manifestData = Path(manifests).listDirectoryEntries().first()
             val batches = readCountyManifest(manifestData.toString())
+            countBatches += batches.size
 
             val candidate_totals = "$topdir/candidate_totals/$countyName"
             val candData = Path(candidate_totals).listDirectoryEntries().first()
@@ -166,6 +168,7 @@ fun readGaCountyInputCsv(topdir: String): Pair<List<GaContest>, List<GaCounty>> 
         // }
         count++
     }
+    println("  ${countBatches} batches")
     println("  $count counties")
     println()
     println("Contests:")

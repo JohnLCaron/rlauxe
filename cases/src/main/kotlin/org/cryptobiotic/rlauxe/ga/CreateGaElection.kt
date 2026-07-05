@@ -12,6 +12,7 @@ import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MvrSource
+import org.cryptobiotic.rlauxe.audit.PollingMode
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.audit.createElectionRecord
@@ -23,6 +24,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
@@ -30,14 +32,17 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.TransformingIterator
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
+import java.nio.file.Path
 import kotlin.collections.forEach
 
 private val logger = KotlinLogging.logger("CreateGaElection")
 
 class CreateGaElection(
     val electionName: String,
+    val auditType: AuditType,
     val gacontests: List<GaContest>,
     val counties: List<GaCounty>,
+    val pollingMode: PollingMode? = null
 ): ElectionBuilder {
     val infos: Map<Int, ContestInfo>
     val ncards: Int
@@ -76,8 +81,8 @@ class CreateGaElection(
         }
         this.cardPools = pools.toList()
 
-        contestsUA = makeOneAuditContests(contests, pools)
-
+        contestsUA = if (auditType.isOA()) makeOneAuditContests(contests, pools) else
+            makePollingContests(contests)
         mvrs = makeMvrsFromPools() // once only
     }
 
@@ -107,8 +112,16 @@ class CreateGaElection(
         return contestsUA
     }
 
-    override fun electionInfo() = ElectionInfo(electionName, AuditType.ONEAUDIT, ncards(), contestsUA.size,
-        true, mvrSource=MvrSource.testPrivateMvrs)
+    fun makePollingContests(
+        wantContests: List<ContestIF>, // the contests you want to audit
+    ): List<ContestWithAssertions> {
+        return wantContests.filter{ !it.isIrv() }.map { contest ->
+            ContestWithAssertions(contest, isClca=false, hasStyle=false).addStandardAssertions()
+        }
+    }
+
+    override fun electionInfo() = ElectionInfo(electionName, auditType, ncards(), contestsUA.size,
+        true, mvrSource=MvrSource.testPrivateMvrs, pollingMode=pollingMode)
     override fun contestsUA() = contestsUA
     override fun cardStyles() = cardStyles
     override fun cardPools() = cardPools
@@ -148,20 +161,22 @@ class CreateGaElection(
 }
 
 ////////////////////////////////////////////////////////////////////
-// Clca: create simulated cvrs for the redacted groups, for a full CLCA audit with hasStyles=true.
-// OA: Create a OneAudit where pools are from the redacted cvrs.
 fun createGaElection(
     electionName: String,
     inputDir: String,
     topdir: String,
+    auditType: AuditType,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     startFirstRound: Boolean = true,
+    pollingMode: PollingMode? = null,
 ) {
     val stopwatch = Stopwatch()
 
     val (contests, counties) = readGaCountyInputCsv(inputDir)
-    val election = CreateGaElection(electionName, contests, counties)
+
+    validateOutputDir(Path.of(topdir))
+    val election = CreateGaElection(electionName, auditType, contests, counties, pollingMode)
 
     createElectionRecord(election, topdir = topdir)
     println("createGaElection took $stopwatch")

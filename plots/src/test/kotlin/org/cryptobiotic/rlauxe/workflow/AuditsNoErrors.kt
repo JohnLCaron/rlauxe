@@ -243,7 +243,7 @@ class AuditsNoErrors {
 fun showSampleSizesVsMargin(datafileName: String, name: String, dirName: String, subtitle: String, yscale: ScaleType,
                             catName: String = "auditType", catOrdering: Comparator<String>? = null) {
     val io = WorkflowResultsIO(datafileName)
-    val data = io.readResults()
+    val data = io.readResults().filter { it.margin > .03 && it.margin < .1 }
     wrsPlot(
         titleS = "$name samples needed",
         subtitleS = subtitle,

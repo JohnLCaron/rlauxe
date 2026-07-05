@@ -1,14 +1,8 @@
 package org.cryptobiotic.rlauxe.util
 
 import java.util.*
-import kotlin.Boolean
-import kotlin.DoubleArray
-import kotlin.IllegalArgumentException
-import kotlin.Int
-import kotlin.IntArray
-import kotlin.Long
-import kotlin.LongArray
-import kotlin.require
+import kotlin.math.min
+
 
 // Port from https://github.com/google/guava/blob/master/guava/src/com/google/common/math/Quantiles.java
 /*
@@ -704,4 +698,82 @@ fun calcDecilesFromInt(distribution: List<Int>): Map<Int, Int> {
     val decilePcts = IntArray(10) { 10 * (it+1) }
     val raw = Quantiles.percentiles().indexes(*decilePcts).compute(*distribution.toIntArray()).toMap()
     return raw.mapValues { roundUp(it.value) }
+}
+
+fun calcProbabilityMassFunction(dataset: List<Int>, numBins: Int): Map<Int, Double> {
+    val minVal = dataset.minOrNull() ?: return emptyMap()
+    val maxVal = dataset.maxOrNull() ?: return emptyMap()
+
+    val totalElements = dataset.size.toDouble()
+
+    // 1. Calculate the exact width of each bucket interval
+    val binWidthD = (maxVal - minVal) / numBins.toDouble()
+    val binWidth = roundUp(binWidthD)
+
+    // 2. Group data points by their assigned bin index
+    val binnedPmf = dataset.groupBy { value ->
+        // Calculate raw bin index based on distance from min
+        val rawIndex = ((value - minVal) / binWidth.toDouble()).toInt()
+        // Force the absolute maximum value into the last bin instead of creating an extra one
+        min(rawIndex, numBins - 1)
+    }.mapValues { (_, elementsInBin) ->
+        // 3. Normalize frequencies into probabilities: count / total
+        elementsInBin.size / totalElements
+    }.toSortedMap() // Keep results ordered from lowest bin to highest
+
+    // 4. Print the PMF distribution
+    binnedPmf.forEach { (binIndex, probability) ->
+        val lowerBound = minVal + (binIndex * binWidth)
+        val upperBound = lowerBound + binWidth
+        println("Range [${nfn(lowerBound, 4)} to ${nfn(upperBound, 4)}) -> P(X) = ${dfn(probability, 2)}")
+    }
+
+    // convert from binIndex to bin lowerBound
+    return binnedPmf.mapKeys { minVal + (it.key * binWidth) }
+}
+
+// binStart, count
+fun calcHistogram(dataset: List<Int>, numBins: Int): Map<Int, Int> {
+    val minVal = dataset.minOrNull() ?: return emptyMap()
+    val maxVal = dataset.maxOrNull() ?: return emptyMap()
+
+    val totalElements = dataset.size.toDouble()
+
+    // 1. Calculate the exact width of each bucket interval
+    val binWidthD = (maxVal - minVal) / numBins.toDouble()
+    val binWidth = roundUp(binWidthD)
+
+    // Group numbers into bins based on their floor-divided value
+    val histogram = dataset.groupBy { number ->
+        val bin = ((number - minVal) / binWidth)
+        val binStart = minVal + bin * binWidth
+        binStart
+    }.mapValues { it.value.size } // Count items in each bin
+    val sortedHistogram = histogram.toSortedMap()
+
+    // Print the result sorted by the bin range
+    sortedHistogram.forEach { (bin, count) ->
+        println("$bin: ${"*".repeat(count)} ($count)")
+    }
+    println("$maxVal ")
+
+    // convert from binIndex to bin lowerBound
+    return sortedHistogram
+}
+
+fun calcHistogramOrg(dataset: List<Int>, numBins: Int) {
+    val numbers = listOf(5, 12, 17, 23, 25, 28, 31, 45, 49, 50)
+    val binWidth = 10
+
+    // Group numbers into bins based on their floor-divided value
+    val histogram = numbers.groupBy { number ->
+        val binStart = (number / binWidth) * binWidth
+        val binEnd = binStart + binWidth - 1
+        "$binStart-$binEnd"
+    }.mapValues { it.value.size } // Count items in each bin
+
+    // Print the result sorted by the bin range
+    histogram.toSortedMap().forEach { (bin, count) ->
+        println("$bin: ${"*".repeat(count)} ($count)")
+    }
 }

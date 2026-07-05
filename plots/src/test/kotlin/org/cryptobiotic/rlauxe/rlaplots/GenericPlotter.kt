@@ -1,18 +1,30 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
+import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
 import org.jetbrains.kotlinx.kandy.dsl.categorical
 import org.jetbrains.kotlinx.kandy.dsl.continuousPos
 import org.jetbrains.kotlinx.kandy.dsl.plot
 import org.jetbrains.kotlinx.kandy.ir.scale.Scale
 import org.jetbrains.kotlinx.kandy.letsplot.export.save
 import org.jetbrains.kotlinx.kandy.letsplot.feature.layout
+import org.jetbrains.kotlinx.kandy.letsplot.layers.bars
 import org.jetbrains.kotlinx.kandy.letsplot.layers.hLine
 import org.jetbrains.kotlinx.kandy.letsplot.layers.line
 import org.jetbrains.kotlinx.kandy.letsplot.layers.points
 import org.jetbrains.kotlinx.kandy.letsplot.scales.Transformation
+import org.jetbrains.kotlinx.kandy.letsplot.settings.LineType
 import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
 import org.jetbrains.kotlinx.kandy.letsplot.tooltips.tooltips
 import org.jetbrains.kotlinx.kandy.util.color.Color
+import org.jetbrains.kotlinx.kandy.util.context.invoke
+import org.jetbrains.kotlinx.statistics.binning.BinsOption
+import org.jetbrains.kotlinx.statistics.distribution.NormalDistribution
+import org.jetbrains.kotlinx.statistics.kandy.layers.histogram
+import org.jetbrains.kotlinx.statistics.kandy.layers.smoothLine
+import org.jetbrains.kotlinx.statistics.kandy.statplots.histogram
+import org.jetbrains.kotlinx.statistics.kandy.stattransform.statBin
+import org.jetbrains.kotlinx.statistics.plotting.bin.statBin
+import kotlin.random.Random
 
 // generic multiple line plotter; dont need WorkflowResult
 fun <T> genericPlotter(
@@ -194,6 +206,94 @@ fun <T> genericScatter(
             }
         }
     }
+
+    plot.save("${writeFile}.png")
+    plot.save("${writeFile}.html")
+    println("saved to $writeFile")
+}
+
+fun plotExample(writeFile: String) {
+    // 1. Generate dataset
+    val random = Random(42)
+    val observations = List(1000) { random.nextDouble() }
+    val dataset = dataFrameOf("observations" to observations)
+
+    // 2. Build plot with Kandy DSL
+    val plot = dataset.plot {
+        histogram("observations") {
+            fillColor = org.jetbrains.kotlinx.kandy.util.color.Color.RED
+            width = 0.8
+            borderLine {
+                color = org.jetbrains.kotlinx.kandy.util.color.Color.BLACK
+                width = 0.5
+            }
+        }
+        layout.title = "Standalone Kotlin Histogram"
+    }
+
+    plot.save("${writeFile}.png")
+    plot.save("${writeFile}.html")
+    println("saved to $writeFile")
+}
+
+// generic multiple line plotter; dont need WorkflowResult
+fun plotHistogram(
+    titleS: String,
+    subtitleS: String,
+    writeFile: String,
+    xname: String,
+    yname: String,
+    xvalues: List<Number>,
+    // yvalues: List<Number>,
+) {
+    val weight = 100.0 / xvalues.size
+    val weights = xvalues.map { weight }
+
+    val df = dataFrameOf(xname to xvalues, yname to weights)
+    df.statBin(xname, yname, binsOption = BinsOption.byNumber(30))
+
+    val plot = df.plot {
+        histogram(xname) {
+            y(Stat.countWeighted)
+            y.axis.name = yname
+            fillColor = org.jetbrains.kotlinx.kandy.util.color.Color.RED
+            width = 0.8
+            borderLine {
+                color = org.jetbrains.kotlinx.kandy.util.color.Color.BLACK
+                width = 0.5
+            }
+        }
+        layout {
+            title = titleS
+            subtitle = subtitleS
+        }
+    }
+
+    /* val plot = plot {
+        histogram(depthList)
+        layout.title = "histogram"
+    } */
+
+    /* val plot = dataframe.plot  {
+        histogram(xname, binsOption = BinsOption.byNumber(30))
+
+        /* line {
+            x(xname) { scale = xScale }
+            y(yname) { scale = yScale }
+            color(catName)
+        } */
+
+       /*  hLine {
+            yIntercept.constant(0) // Sets the line position
+            color = Color.BLACK       // Customizes the line color
+            width = .3             // Customizes the line thickness
+        }
+
+        layout {
+            title = titleS
+            subtitle = subtitleS
+        } */
+    } */
 
     plot.save("${writeFile}.png")
     plot.save("${writeFile}.html")

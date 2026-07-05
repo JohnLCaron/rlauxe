@@ -648,6 +648,7 @@ How to set MaxRisk in an optimal way?
 * [Colorado Statewide election by Counties](docs/cases/CorlaCountyAudits.md)
 * [Colorado Statewide Election 2024](docs/cases/Colorado2024.md)
 * [Corla Notes](docs/notes/CorlaNotes.md)
+* [Georgis 2026 Primary](docs/cases/Ga2026.md)
 * [San Francisco County 2024](docs/cases/SF2024.md)
 
 ## Documentation Index

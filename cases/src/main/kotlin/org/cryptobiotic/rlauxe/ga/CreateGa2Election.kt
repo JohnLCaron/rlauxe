@@ -172,5 +172,5 @@ fun createGa2Election(
         val result = startFirstRound(topdir)
         if (result.isErr) logger.error { result.toString() }
     }
-    logger.info{"startFirstBoulderRound took $stopwatch"}
+    logger.info{"startFirstRound took $stopwatch"}
 }

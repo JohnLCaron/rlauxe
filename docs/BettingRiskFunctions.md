@@ -1,5 +1,5 @@
 # Risk and betting functions
-_last changed 06/30/2026_
+_last changed 07/05/2026_
 
 <!-- TOC -->
 * [Risk and betting functions](#risk-and-betting-functions)

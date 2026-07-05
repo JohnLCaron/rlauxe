@@ -202,7 +202,7 @@ java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic
     -input "/home/you/wherever/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted"
 `
 
-will create a OneAudit election. To create a CLCA election, use the flag "-type clca"
+will create a OneAudit election. 
 
 
 ### for the San Francisco 2024 test case

@@ -17,6 +17,7 @@ import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
 import org.jetbrains.kotlinx.kandy.letsplot.tooltips.tooltips
 import org.jetbrains.kotlinx.kandy.util.color.Color
 import org.jetbrains.kotlinx.kandy.util.context.invoke
+import org.jetbrains.kotlinx.statistics.binning.BinsAlign
 import org.jetbrains.kotlinx.statistics.binning.BinsOption
 import org.jetbrains.kotlinx.statistics.distribution.NormalDistribution
 import org.jetbrains.kotlinx.statistics.kandy.layers.histogram
@@ -24,6 +25,7 @@ import org.jetbrains.kotlinx.statistics.kandy.layers.smoothLine
 import org.jetbrains.kotlinx.statistics.kandy.statplots.histogram
 import org.jetbrains.kotlinx.statistics.kandy.stattransform.statBin
 import org.jetbrains.kotlinx.statistics.plotting.bin.statBin
+import org.jetbrains.kotlinx.statistics.stats.mean
 import kotlin.random.Random
 
 // generic multiple line plotter; dont need WorkflowResult
@@ -212,30 +214,6 @@ fun <T> genericScatter(
     println("saved to $writeFile")
 }
 
-fun plotExample(writeFile: String) {
-    // 1. Generate dataset
-    val random = Random(42)
-    val observations = List(1000) { random.nextDouble() }
-    val dataset = dataFrameOf("observations" to observations)
-
-    // 2. Build plot with Kandy DSL
-    val plot = dataset.plot {
-        histogram("observations") {
-            fillColor = org.jetbrains.kotlinx.kandy.util.color.Color.RED
-            width = 0.8
-            borderLine {
-                color = org.jetbrains.kotlinx.kandy.util.color.Color.BLACK
-                width = 0.5
-            }
-        }
-        layout.title = "Standalone Kotlin Histogram"
-    }
-
-    plot.save("${writeFile}.png")
-    plot.save("${writeFile}.html")
-    println("saved to $writeFile")
-}
-
 // generic multiple line plotter; dont need WorkflowResult
 fun plotHistogram(
     titleS: String,
@@ -244,13 +222,13 @@ fun plotHistogram(
     xname: String,
     yname: String,
     xvalues: List<Number>,
-    // yvalues: List<Number>,
 ) {
     val weight = 100.0 / xvalues.size
     val weights = xvalues.map { weight }
+    val mean = xvalues.mean()
 
     val df = dataFrameOf(xname to xvalues, yname to weights)
-    df.statBin(xname, yname, binsOption = BinsOption.byNumber(30))
+    df.statBin(xname, yname, binsOption = BinsOption.byWidth(2.0), binsAlign = BinsAlign.boundary(mean))
 
     val plot = df.plot {
         histogram(xname) {

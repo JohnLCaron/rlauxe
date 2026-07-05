@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.variance
 
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.util.calcDeciles
 import org.cryptobiotic.rlauxe.util.calcDecilesFromInt
 import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
@@ -53,7 +54,7 @@ class MakeVarianceData {
         println()
         println("nrounds")
         println(nrounds)
-        println(calcDecilesFromInt(nrounds))
+        println(calcDeciles(nrounds.map { it.toDouble() }))
     }
 }
 

@@ -83,8 +83,8 @@ class OneAuditNoErrors {
 
     fun regenPlots(name: String, dirName:String) {
         val subtitle = "Nc=${N} nruns=${nruns}"
-        //showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.Linear)
-        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLinear, catOrdering=CatOrdering())
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.Linear, catOrdering=CatOrdering())
+        // showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLinear, catOrdering=CatOrdering())
         //showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog)
     }
 

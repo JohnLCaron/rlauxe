@@ -158,6 +158,7 @@ class DHondtContest(
         }
     }
 
+    // TODO not needed
     override fun marginInVotes(assorter: AssorterIF): Int {
         return when (assorter) {
             is DHondtAssorter -> {

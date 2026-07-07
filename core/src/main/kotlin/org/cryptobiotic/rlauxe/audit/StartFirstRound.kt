@@ -52,6 +52,7 @@ fun startFirstRound(topdir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvr
         // this may change the auditStatus to misformed.
         val results = VerifyResults()
         preAuditContestCheck(auditRecord.contests,  config.sampling, results)
+
         // in case it changed TODO is this ok ??
         val publisher = auditRecord.publisher
         writeContestsJsonFile(auditRecord.contests, publisher.contestsFile())

@@ -54,7 +54,7 @@ class TestRunRoundCli {
 
     @Test
     fun testStartAuditFirstRound() {
-        val topdir = "/home/stormy/datadrive/rla/cases/corla/Colorado2020all"
+        val topdir = "$cases/ga/ga2026"
 
         StartAuditFirstRoundCli.main(
             arrayOf(

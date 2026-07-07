@@ -31,26 +31,22 @@ class OneAuditRatesFromPools(val pools: List<CardPoolIF>) {
     fun oaErrorRates(contestUA: ContestWithAssertions, oaCassorter: OneAuditClcaAssorter): OneAuditAssortValueRates { // sampleValue -> rate
         val pairs = mutableListOf<Pair<Double, Double>>()
         var totalInPools = 0
-        pools.filter{ it.hasContest(contestUA.id )}.forEach { pool ->
+        pools.filter { it.hasContest(contestUA.id) }.forEach { pool ->
             val poolAvg = oaCassorter.poolAverages.assortAverage[pool.poolId]
             if (poolAvg != null) {
                 val taus = TausOA(oaCassorter.assorter.upperBound(), poolAvg)
-
                 val tab = pool.contestTab(contestUA.id)!!
-                val winnerCounts: Int = tab.votes[oaCassorter.assorter.winner()] ?: 0
-                val loserCounts: Int = tab.votes[oaCassorter.assorter.loser()] ?: 0
-
-                val otherCounts = pool.ncards() - winnerCounts - loserCounts
-                totalInPools += pool.ncards()
-                val dencards = contestUA.Npop.toDouble() // rate is over entire population
+                val poolRates = oaCassorter.assorter.calcPoolRatesFromPoolTabulation(tab, contestUA.Npop)
 
                 // sampleValue -> rate
-                pairs.add(Pair(taus.tausOA[0].first * oaCassorter.noerror(), loserCounts / dencards))  // loser
-                pairs.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), otherCounts / dencards))  // other
-                pairs.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / dencards))  // winner
+                pairs.add(Pair(taus.tausOA[0].first * oaCassorter.noerror(), poolRates.loserRate))  // loser
+                pairs.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), poolRates.noneRate))  // undervotes
+                pairs.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), poolRates.winnerRate)) // winner
+                totalInPools += pool.ncards() // winner
             }
         }
 
+        // consolidate duplicate assort values
         val rates = mutableMapOf<Double, Double>()
         pairs.filter { it.second > 0.0 }.forEach {
             val rate = rates.getOrPut(it.first) { 0.0 }
@@ -59,6 +55,7 @@ class OneAuditRatesFromPools(val pools: List<CardPoolIF>) {
         return OneAuditAssortValueRates(rates.toSortedMap(), totalInPools)  // could also return a string description
     }
 
+    /*
     fun oaErrorRatesIrv(contestUA: ContestWithAssertions, oaCassorter: OneAuditClcaAssorter, raire: RaireAssorter): OneAuditAssortValueRates { // sampleValue -> rate
         val pairs = mutableListOf<Pair<Double, Double>>()
         var totalInPools = 0
@@ -75,12 +72,12 @@ class OneAuditRatesFromPools(val pools: List<CardPoolIF>) {
 
                 val otherCounts = pool.ncards() - winnerCounts - loserCounts
                 totalInPools += pool.ncards()
-                val dencards = contestUA.Npop.toDouble() // rate is over entire population
+                val denomCards = contestUA.Npop.toDouble() // rate is over entire population
 
                 // sampleValue -> rate
-                pairs.add(Pair(taus.tausOA[0].first * oaCassorter.noerror(), loserCounts / dencards))  // loser
-                pairs.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), otherCounts / dencards))  // other
-                pairs.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / dencards))  // winner
+                pairs.add(Pair(taus.tausOA[0].first * oaCassorter.noerror(), loserCounts / denomCards))  // loser
+                pairs.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), otherCounts / denomCards))  // other
+                pairs.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / denomCards))  // winner
             }
         }
 
@@ -90,7 +87,7 @@ class OneAuditRatesFromPools(val pools: List<CardPoolIF>) {
             rates[it.first] = rate + it.second
         }
         return OneAuditAssortValueRates(rates.toSortedMap(), totalInPools)  // could also return a string description
-    }
+    } */
 }
 
 // Consider a single pool and an assorter a, with upper bound u and avg assort value in the pool = poolAvg.

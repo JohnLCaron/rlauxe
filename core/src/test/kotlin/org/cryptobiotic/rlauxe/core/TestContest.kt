@@ -278,7 +278,7 @@ class TestContest {
         assertEquals(expectedShowCandidates, contestUAc.contest.showCandidates())
 
         val expectedShow = """Contest 'testContestInfo' (0) PLURALITY voteForN=1 votes={1=108, 0=100, 2=0} undervotes=1, winners=[1] Nc=211 Nphantoms=2 Nu=1 sumVotes=208 Npop=211 hasStyle=true
-   minAssertion= 1/0 votes=108/100 diff=8 (w-l)/w =0.0741 noerror=0.5097
+   minAssertion= 1/0 votes=108/100 diff=8 noerror=0.5097
 
    0 'cand0': votes=100 
    1 'cand1': votes=108  (winner)

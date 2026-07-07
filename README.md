@@ -256,7 +256,7 @@ with several values of the CVR percentage, as a function of margin, and maxRisk 
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors4LogLinear.html" rel="OneAuditNoErrorsLogLinear">![OneAuditNoErrorsLogLinear](docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors4LogLinear.png)</a>
 
-A close-up of same plot on a linear scale:
+A close-up of the same plot on a linear scale:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors4Linear.html" rel="OneAuditNoErrors4Linear">![OneAuditNoErrors4Linear](docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrors4Linear.png)</a>
 

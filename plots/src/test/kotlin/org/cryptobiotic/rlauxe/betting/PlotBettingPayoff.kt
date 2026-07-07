@@ -68,6 +68,7 @@ class PlotBettingPayoff {
             yfld = { it.t },
             // catfld = { df(it.tau) },
             catfld = { it.cat },
+            catOrdering = CatOrdering("noerror", "sum", "p2u", "p1u", "p1o", "p2o")
         )
     }
 }

@@ -1,7 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.math.min
 
@@ -9,11 +10,12 @@ private val logger = KotlinLogging.logger("Contest")
 
 // For a Contest; but a contest may have mixed Assertions, eg DHondt.
 enum class SocialChoiceFunction(val hasMinPct: Boolean) {
-    PLURALITY(false),
-    APPROVAL(false),
+    PLURALITY(false), // “first past the post”
+    APPROVAL(false), // choose as many candidates as they want, all the votes are added up, and the candidate with the most votes win.
     THRESHOLD(true),
-    IRV(false),
-    DHONDT(true)
+    IRV(false), // “preferential voting” or “instant runoff voting”
+    DHONDT(true),
+    RUNOFF(true),  // one majority winner or two runoff winners
 }
 
 /** pre-election information **/
@@ -21,16 +23,17 @@ data class ContestInfo(
     val name: String,
     val id: Int,
     val candidateNames: Map<String, Int>, // candidate name -> candidate id
-    val choiceFunction: SocialChoiceFunction,  // electionguard has "VoteVariationType"
-    val nwinners: Int = 1,              // aka "numberElected"; for Dhondt, its nseats
-    val voteForN: Int = nwinners,       // aka "contestSelectionLimit" or "optionSelectionLimit"
-    val minFraction: Double? = null,    // threshold and Dhondt assorters only.
+    val choiceFunction: SocialChoiceFunction,
+    val nwinners: Int = 1,              // max number of winners; for Dhondt == nseats; for RUNOFF, may be 1 or 2
+    val voteForN: Int = nwinners,       // how many votes can a user cast in this contest?
+    val minFraction: Double? = null,    // used in threshold, dhondt, runoff
 ) {
-    val candidateIds: List<Int> // same order as candidateNames
     val metadata = mutableMapOf<String, String>()
+    val candidateIds: List<Int> // same order as candidateNames
     val isIrv = choiceFunction == SocialChoiceFunction.IRV
-
+    // inverse of candidateNames
     val candidateIdToName: Map<Int, String> by lazy { candidateNames.entries.associate {(k,v) -> v to k } }
+    // needed for Raire
     val candidateIdToIdx: Map<Int, Int>
 
     init {
@@ -56,8 +59,6 @@ data class ContestInfo(
         val candidateIdSet = candidateIds.toSet()
         require(candidateIdSet.size == candidateIds.size) { "duplicate candidate id $candidateIds"}
     }
-
-    constructor(id: Int): this("", id, mapOf("name" to 1), SocialChoiceFunction.PLURALITY)
 
     fun desc() = buildString {
         append("'$name' ($id) candidates=${candidateIds} choiceFunction=$choiceFunction nwinners=$nwinners voteForN=${voteForN}")
@@ -126,7 +127,7 @@ open class Contest(
     override fun winners() = winners
     override fun losers() = losers
 
-    val votes: Map<Int, Int>  // candidateId -> nvotes; zero vote candidates have been added
+    val votes: Map<Int, Int>  // candidateId -> nvotes; zero vote candidates have been added; sorted by nvotes
     val undervotes: Int
 
     // overridden by DHondt
@@ -135,7 +136,7 @@ open class Contest(
     var losers: List<Int>
 
     init {
-        require(info.choiceFunction != SocialChoiceFunction.IRV) { "contest $id: use IrvContest for SocialChoiceFunction.IRV" }
+        require(info.choiceFunction != SocialChoiceFunction.IRV) { "contest $id: use DHondtContest for SocialChoiceFunction.IRV" }
         require(Ncast <= Nc) { "contest $id Ncast= $Ncast must be <= Nc= $Nc" }
 
         // verify that the candidateIds match whats in the ContestInfo
@@ -162,42 +163,37 @@ open class Contest(
         require(nvotes <= info.voteForN * Ncast) {
             "contest $id nvotes= $nvotes must be <= voteForN=${info.voteForN} * Ncast=$Ncast = ${info.voteForN * Ncast}"
         }
-
-        // SHANGRLA section 2, both undervotes and overvotes are given assort values of 0.5.
-        // So in setting up the contest we can add the undervotes and overvotes together like this:
-        // Boulder for example has
-        //           voteForN * (Ncast - boulderOvervotes) - nvotes = boulderUndervotes
-        //           voteForN * Ncast - nvotes = boulderUndervotes + voteForN * boulderOvervotes
-        // so
-        //       undervotes = voteForN * Ncast - nvotes = boulderUndervotes + voteForN * boulderOvervotes
-        //
-        // (well that should confuse everyone)
-
+        val sortedCandidateIds = votes.map { it.key } // candidate ids sorted by nvotes
+        
+        // maximum votes possible - actual votes
         undervotes = info.voteForN * Ncast - nvotes   // C1
 
-        //// find winners, check that the minimum value is satisfied
+        // check that the minimum value is satisfied
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
-        // TODO test; does this work for DHondt ??
-        //     // overridden by DHondt
-        //    var winnerNames: List<String>
-        //    var winners: List<Int>
-        //    var losers: List<Int>
         val useMin = info.minFraction ?: 0.0
-        val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }
-        val useNwinners = min(overTheMin.size, info.nwinners)
-        winners = overTheMin.subList(0, useNwinners).map { it.first }
-        val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) } // invert the map
-        winnerNames = winners.map { mapIdToName[it]!! }
+        val candidatesOverTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin } // Pair(candidateId, nvotes)
+        
+        //// find winners
+        if (choiceFunction == SocialChoiceFunction.RUNOFF) {
+            // TODO do we have to modify info.nwinners ??
+            // 2026-07-06 12:24:59.822 WARN  checkContestsCorrectlyFormed
+            // *** Contest US Senate - Rep (1) has 2 winners should be 1
+            if (candidatesOverTheMin.isEmpty()) {
+                winners = sortedCandidateIds.take(2) // first two go to runoff
+            } else {
+                winners  = listOf(sortedCandidateIds.first()) // passes majority
+            }
+        } else {
+            val useNwinners = min(candidatesOverTheMin.size, info.nwinners)
+            winners = sortedCandidateIds.take(useNwinners) 
+        }
+        
         if (winners.isEmpty()) {
             logger.info {"*** there are no winners for $info" }
         }
-
-        // find losers
-        val mlosers = mutableListOf<Int>()
-        info.candidateNames.forEach { (_, id) ->
-            if (!winners.contains(id)) mlosers.add(id)
-        }
-        losers = mlosers.toList()
+        
+        winnerNames = winners.map { info.candidateIdToName[it]!! }
+        losers = sortedCandidateIds.drop(winners.size)
     }
 
     fun reportedMargin(winnerId: Int, loserId: Int): Double {
@@ -213,21 +209,39 @@ open class Contest(
 
     override fun recountMargin(assorter: AssorterIF): Double  {
         val winner = votes[assorter.winner()]!!
-        val loser = votes[assorter.loser()]!!
-        return (winner - loser) / (winner.toDouble())
+        val marginInVotes = marginInVotes(assorter)
+        return marginInVotes / (winner.toDouble())
     }
 
     override fun showAssertionDifficulty(assorter: AssorterIF): String {
         val votes = votes()!!
-        val winner = votes[assorter.winner()]!!
-        val loser = votes[assorter.loser()]!!
-        return "${assorter.shortName()} votes=$winner/$loser diff=${winner-loser} (w-l)/w =${df(recountMargin(assorter))}"
+        val winner = votes[assorter.winner()]
+        val loser = votes[assorter.loser()] // may be null
+        val marginInVotes = marginInVotes(assorter)
+
+        return "${assorter.shortName()} votes=$winner/$loser diff=${marginInVotes}"
     }
 
     override fun marginInVotes(assorter: AssorterIF): Int {
-        val winner = votes[assorter.winner()]!!
-        val loser = votes[assorter.loser()]!!
-        return winner - loser
+        return when (assorter) {
+            is DHondtAssorter -> {
+                roundToClosest(assorter.voteDiff(votes[assorter.winner()]!!, votes[assorter.loser()]!!))
+            }
+
+            is BelowThreshold -> {
+                roundToClosest(assorter.t * nvotes() - votes[assorter.winner()]!!)
+            }
+
+            is AboveThreshold -> {
+                roundToClosest(votes[assorter.winner()]!! - assorter.t * nvotes())
+            }
+
+            else -> {
+                val winner = votes[assorter.winner()]!!
+                val loser = votes[assorter.loser()]!!
+                winner - loser
+            }
+        }
     }
 
     override fun show() = buildString {
@@ -238,7 +252,8 @@ open class Contest(
     override fun showCandidates() = buildString {
         info().candidateNames.forEach { (name, id) ->
             val win = if (winners().contains(id)) " (winner)" else ""
-            appendLine("   $id '$name': votes=${votes[id]} $win")
+            val pct = 100 * (votes[id] ?: 0) / nvotes().toDouble()
+            appendLine("   $id '$name': votes=${votes[id]} (${dfn(pct, 2)}%) $win")
         }
         append("    Total=${votes.values.sum()}")
     }

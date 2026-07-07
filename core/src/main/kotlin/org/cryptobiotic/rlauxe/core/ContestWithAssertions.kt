@@ -62,6 +62,7 @@ open class ContestWithAssertions(
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY -> makePluralityAssertions()
             SocialChoiceFunction.THRESHOLD -> makeThresholdAssertions()
+            SocialChoiceFunction.RUNOFF -> makeRunoffAssertions()
             else -> throw RuntimeException("choice function ${choiceFunction} is not supported")
         }
 
@@ -91,6 +92,29 @@ open class ContestWithAssertions(
         contest.winners().forEach { candId ->
             val assorter = AboveThreshold.makeFromVotes(contest as Contest, candId, Npop)
             assertions.add(Assertion(contest.info(), assorter))
+        }
+        return assertions
+    }
+
+    private fun makeRunoffAssertions(): List<Assertion> {
+        require(contest.info().minFraction != null)
+        val assertions = mutableListOf<Assertion>()
+
+        if (contest.winners().size == 1) {
+            // use makeFromVotes in order to calculate the assort margins
+            val assorter = AboveThreshold.makeFromVotes(contest as Contest, contest.winners().first(), Npop)
+            assertions.add(Assertion(contest.info(), assorter))
+        } else contest.winners().forEach {
+            val assorter = BelowThreshold.makeFromVotes(contest.info(), it, contest.votes()!!, contest.Nc(), Npop)
+            assertions.add(Assertion(contest.info(), assorter))
+        }
+
+        // test that every winner beats every loser.
+        contest.winners().forEach { winner ->
+            contest.losers().forEach { loser ->
+                val assorter = PluralityAssorter.makeWithVotes(contest, winner, loser, Npop)
+                assertions.add(Assertion(contest.info(), assorter))
+            }
         }
         return assertions
     }

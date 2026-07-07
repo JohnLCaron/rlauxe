@@ -4,6 +4,8 @@ import org.cryptobiotic.rlauxe.betting.estMarginUpperFromSamples
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.CvrIF
+import org.cryptobiotic.rlauxe.core.PoolRates
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -117,6 +119,18 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         val margin = mean2margin(hmean)
 
         return margin
+    }
+
+    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulation, Npop: Int): PoolRates {
+        val winnerVotes = poolTab.votes[winner()] ?: 0
+        val loserVotes = poolTab.votes[loser()] ?: 0
+        val nuetralCounts = poolTab.ncards() - winnerVotes - loserVotes // undervotes
+
+        //  winner, nuetral, loser
+        return PoolRates(winnerVotes/Npop.toDouble(),
+            nuetralCounts/Npop.toDouble(),
+            loserVotes/Npop.toDouble(),
+        )
     }
 
     override fun equals(other: Any?): Boolean {

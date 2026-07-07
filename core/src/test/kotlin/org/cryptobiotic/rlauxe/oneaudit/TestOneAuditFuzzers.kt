@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
 import org.cryptobiotic.rlauxe.util.tabulateCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
@@ -30,7 +31,7 @@ class TestOneAuditFuzzers {
             )
 
         val info = contestOA.contest.info()
-        val infos = mapOf(info.id to info, 2 to ContestInfo(2))
+        val infos = mapOf(info.id to info, 2 to makeInfo(2))
         val mvrTabs = tabulateCvrs(mvrs.iterator(), infos)
         val mvrTab = mvrTabs[info.id]!!
         println("mvrTab = $mvrTab")
@@ -84,3 +85,6 @@ class TestOneAuditFuzzers {
         assertEquals(cards.size, oaFuzzedPairs.size) */
     }
 }
+
+fun makeInfo(id: Int) = ContestInfo("", id, mapOf("name" to 1), SocialChoiceFunction.PLURALITY)
+

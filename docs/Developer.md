@@ -1,5 +1,5 @@
 # Developer Notes
-_06/29/2026_
+_07/06/2026_
 
 <!-- TOC -->
 * [Developer Notes](#developer-notes)
@@ -16,6 +16,7 @@ _06/29/2026_
     * [for the belgium 2024 test case](#for-the-belgium-2024-test-case)
     * [for the boulder 2024 test case](#for-the-boulder-2024-test-case)
     * [for the Colorado 2020 test case](#for-the-colorado-2020-test-case)
+    * [for the Georgia 2026 primary test case](#for-the-georgia-2026-primary-test-case)
     * [for the San Francisco 2024 test case](#for-the-san-francisco-2024-test-case)
   * [rlauxe viewer](#rlauxe-viewer)
 * [Notes and stats](#notes-and-stats)
@@ -513,6 +514,15 @@ simulateRaireTestContest: single raire contest
 * undervote Pct = totalVotes / (ncards * voteFor)
   maybe ok for Plurality with nwinners > 1
   but for IRV seems misleading. perhaps IRV undervote should mean "didnt vote in the contest"?
+
+# CLI
+
+class TestRunRoundCli {
+    fun testRunRoundCli() {
+    fun testRunAllRoundsCli() {
+    fun testStartAuditFirstRound() {
+    fun testResampleAndSaveResults() {
+    fun testRemoveAndResample() {
 
 
 

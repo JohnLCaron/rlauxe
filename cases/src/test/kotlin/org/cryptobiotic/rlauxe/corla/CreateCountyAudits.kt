@@ -76,7 +76,7 @@ class CreateCountyAudits(
         val npopMapm: Map<Int, Int> = manifestTabs.mapValues { it.value.ncardsTabulated }
         val npopMap: Map<Int, Int> = builders.associate { it.info.id to (it.Npop ?: npopMapm[it.info.id] ?: 1) } */
 
-        val npopMap: Map<Int, Int> = builders.associate { it.info.id to it.Npop!! }.toMap()
+        val npopMap: Map<Int, Int> = builders.associate { it.info.id to it.Npop }.toMap()
 
         contestsUA = ContestWithAssertions.make(contests, npopMap, isClca = true, hasStyle = hasStyle)
     }

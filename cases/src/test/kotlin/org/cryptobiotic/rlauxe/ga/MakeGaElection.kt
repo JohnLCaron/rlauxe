@@ -55,7 +55,7 @@ class MakeGaElection {
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05,)
         val round = AuditRoundConfig(
-            SimulationControl(nsimTrials = 100),
+            SimulationControl(nsimTrials = 10),
             ContestSampleControl(minRecountMargin = .005, minSize = 10, contestSampleCutoff = 10000,
                 auditSampleCutoff = 200000, sampling = Sampling.consistent),
             ClcaConfig(),

@@ -16,7 +16,7 @@ class VarianceDataGenerator(
     val otherParameters: Array<String> = emptyArray(),
     val nruns: Int,
     val nsimTrials: Int,
-    val nthreads: Int = 1,  // can we increase this ??
+    val nthreads: Int = 10,  // can we increase this ??
 ) {
 
     fun createAndRunTasks() {

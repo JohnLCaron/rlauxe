@@ -63,7 +63,7 @@ class MakeVarianceData {
     fun createGaPollingVariance() {
         val generator = VarianceDataGenerator(
             "ga26p",
-            "$cases/ga/ga2026pvariance/ga2026pvariance",
+            "$cases/ga/ga2026pvariance/ga2026pollVariance",
             otherParameters = arrayOf(
                 "--input",
                 "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted",

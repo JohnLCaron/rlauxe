@@ -46,7 +46,7 @@ class OneShotAudit(
             contestUA.assertions().forEach { assertion ->
                 val assertionRound = AssertionRound(assertion, 1, null)
                 val aa = if (config.isPolling) ContestPollingTrial(1, config.creation.riskLimit, config.round.pollingConfig!!, contestUA, assertionRound)
-                    else ContestClcaTrial(1, config.creation.riskLimit, config.round.clcaConfig!!, config.isOA, contestUA, assertionRound)
+                    else ContestClcaTrial(1, config.creation.riskLimit, config.sampleLimit, config.round.clcaConfig!!, config.isOA, contestUA, assertionRound)
                 assertionAudits.add( aa)
             }
         }

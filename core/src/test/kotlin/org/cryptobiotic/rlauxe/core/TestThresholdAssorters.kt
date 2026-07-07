@@ -1,15 +1,22 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
+import org.cryptobiotic.rlauxe.estimate.makeUndervoteForContest
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.collections.first
+import kotlin.collections.set
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -175,7 +182,7 @@ class TestThresholdAssorters {
         )
         val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc = 100, Ncast = 100)
 
-        val massorter = BelowThreshold.makeFromVotes(info, 2, contest.votes, f, contest.Nc)
+        val massorter = BelowThreshold.makeFromVotes(info, 2, contest.votes, contest.Nc)
         println(massorter.desc())
 
         assertEquals(2, massorter.winner())
@@ -280,6 +287,13 @@ data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double
 
         val winnerVotes = useVotes[winner()] ?: 0
         return winnerVotes/N.toDouble() + 0.45
+    }
+
+    override fun calcPoolRatesFromPoolTabulation(
+        poolTab: ContestTabulation,
+        Npop: Int,
+    ): PoolRates {
+        TODO("Not yet implemented")
     }
 
     override fun toString() = desc()

@@ -4,15 +4,14 @@ import org.cryptobiotic.rlauxe.oneaudit.TausOA
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
-import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.junit.jupiter.api.Assertions.assertEquals
 
-import org.junit.jupiter.api.Test
 import kotlin.io.path.Path
 import kotlin.math.ln
+import kotlin.math.pow
+import kotlin.test.Test
 
 
 // log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (assortValue_k - mui)) * p_k }
@@ -20,7 +19,6 @@ import kotlin.math.ln
 
 class PlotOneAuditPayoff {
     val dirName = "$testdataDir/plots/betting/oapayoff"
-    val filename = "oapayoff"
 
     @Test
     fun plotBettingPayoff() {
@@ -37,7 +35,7 @@ class PlotOneAuditPayoff {
         val poolOthers = 0 // TODO
 
         val margin = .02  // over entire ballots
-        val noerror = 1 / (2 - margin)
+        val noerror = 1 / (2 - margin/upper)
 
         val p0 = 1.0 - poolPct
         val pw = poolWinners / N
@@ -51,33 +49,95 @@ class PlotOneAuditPayoff {
 
             val t0 = 1.0 + lamda * (noerror - 0.5) * p0
             val t0ln = ln(1.0 + lamda * (noerror - 0.5)) * p0
-            results.add(OneAuditPayoff("noerror", lamda, t0, t0ln))
+            val te0 = (1.0 + lamda * (noerror - 0.5)).pow(p0)
+            results.add(OneAuditPayoff("cvrs", lamda, te0, t0ln))
 
             val loserTau = taus.tausOA[0].first
             val loserT = 1.0 + lamda * (noerror*loserTau - 0.5) * pl
             val loserTln = ln(1.0 + lamda * (noerror*loserTau - 0.5)) * pl
-            results.add(OneAuditPayoff("loser", lamda, loserT, loserTln))
+            val loserTe = (1.0 + lamda * (noerror*loserTau - 0.5)).pow(pl)
+            results.add(OneAuditPayoff("loser", lamda, loserTe, loserTln))
 
             val winnerTau = taus.tausOA[2].first
             val winnerT = 1.0 + lamda * (noerror*winnerTau - 0.5) * pw
             val winnerTln = ln(1.0 + lamda * (noerror*winnerTau - 0.5)) * pw
+            val winnerTe = (1.0 + lamda * (noerror*winnerTau - 0.5)).pow(pw)
             results.add(OneAuditPayoff("winner", lamda, winnerT, winnerTln))
 
-            val prod = t0 * loserT * winnerT
+            val prod = te0 * loserTe * winnerTe
             val sum = t0ln + loserTln + winnerTln
             results.add(OneAuditPayoff("sum", lamda, prod, sum))
         }
 
-        plotData(results, N, margin, noerror, poolPct, poolAvg)
+        plotData(results, N, margin, "oapayoff", poolMargin, poolPct)
     }
 
+    @Test
+    fun plotBettingPayoff2() {
+        val N = 100000
+        val uvPct = .1
+        val poolPct = 1.0
+        val poolMargin = .065
+        val poolAvg = margin2mean(poolMargin)
 
-    fun plotData(data: List<OneAuditPayoff>, N:Int, margin: Double, noerror: Double, poolPct:Double, poolAvg: Double) {
+        val poolNcards = poolPct * N
+        val poolVotes = (1 - uvPct) * poolNcards
+
+        val poolWinners = poolAvg * poolVotes
+        val poolLosers = poolVotes - poolWinners
+        val winPct = poolWinners / N
+        val losePct = poolLosers / N
+
+        val nsteps = 50
+        val upper = 1.0
+        val taus = TausOA(upper, poolAvg)
+
+        val margin = .065 // over entire ballots
+        val noerror = 1 / (2 - margin/upper)
+
+        val p0 = 1.0 - poolPct  // cvrs
+        val maxBet = 1.9
+
+        val results = mutableListOf<OneAuditPayoff>()
+        repeat(nsteps) { step ->
+            val lamda = (step + 1) * maxBet / nsteps
+
+            val t0 = 1.0 + lamda * (noerror - 0.5) * p0
+            val t0ln = ln(1.0 + lamda * (noerror - 0.5)) * p0
+            val te0 = (1.0 + lamda * (noerror - 0.5)).pow(p0)
+            results.add(OneAuditPayoff("cvrs", lamda, te0, t0ln))
+
+            val loserTau = taus.tausOA[0].first
+            val loserT = 1.0 + lamda * (noerror*loserTau - 0.5) * losePct // used ??
+            val loserTln = ln(1.0 + lamda * (noerror*loserTau - 0.5)) * losePct
+            val loserTe = (1.0 + lamda * (noerror*loserTau - 0.5)).pow(losePct)
+            results.add(OneAuditPayoff("loser", lamda, loserTe, loserTln))
+
+            val uvTau = taus.tausOA[1].first
+            val uvT = 1.0 + lamda * (noerror*uvTau - 0.5) * uvPct
+            val uvTln = ln(1.0 + lamda * (noerror*uvTau - 0.5)) * uvPct
+            // results.add(OneAuditPayoff("undervotes", lamda, uvT, uvTln))
+
+            val winnerTau = taus.tausOA[2].first
+            val winnerT = 1.0 + lamda * (noerror*winnerTau - 0.5) * winPct
+            val winnerTln = ln(1.0 + lamda * (noerror*winnerTau - 0.5)) * winPct
+            val winnerTe = (1.0 + lamda * (noerror*winnerTau - 0.5)).pow(winPct)
+            results.add(OneAuditPayoff("winner", lamda, winnerTe, winnerTln))
+
+            val prod = te0 * loserTe * winnerTe
+            val sum = t0ln + loserTln + winnerTln + uvTln
+            results.add(OneAuditPayoff("sum", lamda, prod, sum))
+        }
+
+        plotData(results, N, margin, "oapayoff2", poolMargin, poolPct)
+    }
+
+    fun plotData(data: List<OneAuditPayoff>, N:Int, margin: Double, filename: String, poolMargin:Double, poolPct: Double) {
         validateOutputDir(Path(dirName))
 
         genericPlotter(
             "OneAudit BettingPayoff",
-            "N=$N margin=$margin poolPct=$poolPct poolAvg=${dfn(poolAvg, 3)}",
+            "N=$N poolPct=$poolPct margin=$margin poolMargin=$poolMargin",
             "$dirName/$filename",
             data,
             "lamda", "ln(payoff)*rate", "cat",
@@ -85,15 +145,22 @@ class PlotOneAuditPayoff {
             yfld = { it.tln },
             // catfld = { df(it.tau) },
             catfld = { it.cat },
+            catOrdering = CatOrdering("winner", "cvrs", "sum", "undervotes", "loser")
         )
     }
 
     data class OneAuditPayoff(
         val cat: String,
         val lamda: Double,
-        val t: Double,
+        val te: Double,
         val tln: Double,
     )
+}
+
+class CatOrdering(vararg val cats: String): Comparator<String> {
+    override fun compare(o1: String, o2: String): Int {
+        return cats.indexOf(o1).compareTo(cats.indexOf(o2))
+    }
 }
 
 /* TODO

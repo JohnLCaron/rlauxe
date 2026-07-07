@@ -1,19 +1,38 @@
 <configuration>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>rlauxecases.log</file>
-        <append>true</append>
+    <!-- Monthly File Appender -->
+    <appender name="MONTHLY_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- Active log file path -->
+        <file>logs/rlauxe-cases.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- Monthly rollover via %d{yyyy-MM} with automatic zip compression -->
+            <fileNamePattern>logs/archived/rlauxe-cases.%d{yyyy-MM}.%i.log.zip</fileNamePattern>
+
+            <!-- Safety cap: splits file early if volume spikes unexpectedly -->
+            <maxFileSize>10MB</maxFileSize>
+
+            <!-- Retain 12 months (1 year) of history -->
+            <maxHistory>12</maxHistory>
+
+            <!-- Absolute hard cap for archive disk space -->
+            <totalSizeCap>1GB</totalSizeCap>
+
+            <!-- Cleans up old logs immediately when the application starts up -->
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+
         <encoder>
-            <pattern>%date [%10r] %-5level %logger{15} - %msg %n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="INFO">
-        <appender-ref ref="STDOUT"/>
-        <appender-ref ref="FILE"/>
+    <root level="DEBUG">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="MONTHLY_LOG"/>
     </root>
-    <logger name="ch.qos.logback" level="WARN"/>
+    <logger name="ch.qos.logback" level="INFO"/>
 </configuration>

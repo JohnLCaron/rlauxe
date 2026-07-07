@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.dfn
-import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
@@ -92,7 +92,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         append("g=[$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
     }
 
-    override fun shortName() = "BelowThreshold for '${info.candidateIdToName[winner()]}'"
+    override fun shortName() = "BelowThreshold for '${info.candidateIdToName[winner()]}' (${candId})"
 
     override fun hashcodeDesc() = "BelowThreshold ${candId} ${info.name}" // must be unique for serialization
 
@@ -125,6 +125,19 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
         val hmean =  (otherVotes * otherweight + nuetralVotes * 0.5) / N.toDouble()
         return mean2margin(hmean)
+    }
+
+    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulation, Npop: Int): PoolRates {
+        val candVotes = poolTab.votes[candId] ?: 0
+        val nonCandVotes = poolTab.votes.filter { it.key != candId }.values.sum() // votes for other candidates
+        val nuetralCounts = poolTab.ncards() - candVotes - nonCandVotes // undervotes
+
+        //  voting for the candidate argues against the assertion;
+        //  voting for a different candidate argues for the assertion;
+        return PoolRates(nonCandVotes/Npop.toDouble(),
+            nuetralCounts/Npop.toDouble(),
+            candVotes/Npop.toDouble(),
+        )
     }
 
     /* Olivier has
@@ -196,11 +209,11 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
     companion object {
 
-        fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int, Npop: Int? = null): BelowThreshold {
-            val result = BelowThreshold(info, partyId, minFraction)
+        fun makeFromVotes(info: ContestInfo, candId: Int, votes: Map<Int, Int>, Nc: Int, Npop: Int? = null): BelowThreshold {
+            val result = BelowThreshold(info, candId, info.minFraction!!)
 
-            val winnerVotes = votes[partyId] ?: 0
-            val otherVotes = votes.filter { it.key != partyId }.values.sum()
+            val winnerVotes = votes[candId] ?: 0
+            val otherVotes = votes.filter { it.key != candId }.values.sum()
             val nuetralVotes = Nc - winnerVotes - otherVotes
 
             val winnerweight = result.h2(result.lowerg) // should be 0
@@ -296,7 +309,7 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
     override fun upperBound() = h2(upperg)
 
-    override fun shortName() = "AboveThreshold for '${info.candidateIdToName[winner()]}'"
+    override fun shortName() = "AboveThreshold for '${info.candidateIdToName[winner()]}' (${winner()})"
 
     override fun desc() = buildString {
         append("${shortName()}: reportedMargin=${pfn(reportedMargin)}  dilutedMargin=${pfn(dilutedMargin)} noerror=${pfn(noerror(true) )}")
@@ -327,6 +340,18 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         return mean2margin(hmean)
     }
 
+    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulation, Npop: Int): PoolRates {
+        val winnerVotes = poolTab.votes[candId] ?: 0
+        val otherVotes = poolTab.votes.filter { it.key != candId }.values.sum() // votes for other candidates
+        val nuetralCounts = poolTab.ncards() - winnerVotes - otherVotes // undervotes
+
+        //  winner, nuetral, loser
+        return PoolRates(winnerVotes/Npop.toDouble(),
+            nuetralCounts/Npop.toDouble(),
+            otherVotes/Npop.toDouble(),
+        )
+    }
+
     fun showAssertionDifficulty(votesForWinner: Int, nvotes: Int): String {
         val pct = 100.0 * votesForWinner / nvotes
         return "votesForWinner=$votesForWinner pct=${dfn(pct, 4)} diff=${roundToClosest(votesForWinner - t * nvotes)} votes"
@@ -335,8 +360,6 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     fun difficulty(votesForWinner: Int, nvotes: Int): Double {
         return votesForWinner - t * nvotes
     }
-
-
 
     /* Olivier has:
     # Assertion:
@@ -425,19 +448,18 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
             return result
         }
 
-        fun makeFromVotes(contest: Contest, partyId: Int, Npop: Int? = null): AboveThreshold {
-            val result = AboveThreshold(contest.info, partyId, contest.info.minFraction!!)
+        fun makeFromVotes(contest: Contest, candId: Int, Npop: Int? = null): AboveThreshold {
+            val result = AboveThreshold(contest.info, candId, contest.info.minFraction!!)
 
             val votes = contest.votes()!!
-            val winnerVotes = votes[partyId] ?: 0
-            val otherVotes = votes.filter { it.key != partyId }.values.sum()
-
+            val winnerVotes = votes[candId] ?: 0
+            val otherVotes = votes.filter { it.key != candId }.values.sum() // votes for other candidates
 
             val winnerweight = result.h2(result.upperg)
             val otherweight = result.h2(result.lowerg) // should be 0
 
             val reportedVotes = contest.Nc
-            val nuetralVotesReported = reportedVotes - winnerVotes - otherVotes
+            val nuetralVotesReported = reportedVotes - winnerVotes - otherVotes  // undervotes
             val hmeanReported = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotesReported * 0.5) / reportedVotes
 
             val dilutedVotes = Npop ?: contest.Nc

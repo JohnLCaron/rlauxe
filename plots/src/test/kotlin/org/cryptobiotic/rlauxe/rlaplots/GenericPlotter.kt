@@ -1,32 +1,18 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
-import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
 import org.jetbrains.kotlinx.kandy.dsl.categorical
 import org.jetbrains.kotlinx.kandy.dsl.continuousPos
 import org.jetbrains.kotlinx.kandy.dsl.plot
 import org.jetbrains.kotlinx.kandy.ir.scale.Scale
 import org.jetbrains.kotlinx.kandy.letsplot.export.save
 import org.jetbrains.kotlinx.kandy.letsplot.feature.layout
-import org.jetbrains.kotlinx.kandy.letsplot.layers.bars
 import org.jetbrains.kotlinx.kandy.letsplot.layers.hLine
 import org.jetbrains.kotlinx.kandy.letsplot.layers.line
 import org.jetbrains.kotlinx.kandy.letsplot.layers.points
 import org.jetbrains.kotlinx.kandy.letsplot.scales.Transformation
-import org.jetbrains.kotlinx.kandy.letsplot.settings.LineType
 import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
 import org.jetbrains.kotlinx.kandy.letsplot.tooltips.tooltips
 import org.jetbrains.kotlinx.kandy.util.color.Color
-import org.jetbrains.kotlinx.kandy.util.context.invoke
-import org.jetbrains.kotlinx.statistics.binning.BinsAlign
-import org.jetbrains.kotlinx.statistics.binning.BinsOption
-import org.jetbrains.kotlinx.statistics.distribution.NormalDistribution
-import org.jetbrains.kotlinx.statistics.kandy.layers.histogram
-import org.jetbrains.kotlinx.statistics.kandy.layers.smoothLine
-import org.jetbrains.kotlinx.statistics.kandy.statplots.histogram
-import org.jetbrains.kotlinx.statistics.kandy.stattransform.statBin
-import org.jetbrains.kotlinx.statistics.plotting.bin.statBin
-import org.jetbrains.kotlinx.statistics.stats.mean
-import kotlin.random.Random
 
 // generic multiple line plotter; dont need WorkflowResult
 fun <T> genericPlotter(
@@ -43,9 +29,10 @@ fun <T> genericPlotter(
         addPoints: Boolean = true,
         scaleType: ScaleType = ScaleType.Linear,
         addHLineAt: Double? = null,
-    ) {
+        catOrdering: Comparator<String>? = null,  // what order should the categories be in ?
+) {
 
-    val groups = makeGGroups(data, catfld)
+    val groups = makeGGroups(data, catfld, catOrdering)
 
     val xvalues = mutableListOf<Double>()
     val yvalues = mutableListOf<Double>()
@@ -95,11 +82,12 @@ fun <T> genericPlotter(
                 }
             }
 
+            /*
             hLine {
                 yIntercept.constant(0) // Sets the line position
                 color = Color.BLACK       // Customizes the line color
                 width = .3             // Customizes the line thickness
-            }
+            } */
 
             if (addHLineAt != null) {
                 hLine {
@@ -122,15 +110,17 @@ fun <T> genericPlotter(
 }
 
 // make a map of all Ts for each catFld
-fun <T> makeGGroups(data: List<T>, catfld: (T) -> String): Map<String, List<T>> {
+fun <T> makeGGroups(data: List<T>, catfld: (T) -> String, catOrdering: Comparator<String>? = null): Map<String, List<T>> {
     val result: MutableMap<String, MutableList<T>> = mutableMapOf()
 
     data.forEach { it: T ->
         val imap: MutableList<T> = result.getOrPut(catfld(it)) { mutableListOf() }
         imap.add(it)
     }
-    return result // .toSortedMap()
-}
+    // sort using catOrdering if present
+    return if (catOrdering == null) result else {
+        result.toSortedMap(catOrdering )
+    }}
 
 fun <T> genericScatter(
     titleS: String,

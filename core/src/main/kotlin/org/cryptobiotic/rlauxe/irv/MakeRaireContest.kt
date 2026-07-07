@@ -18,6 +18,7 @@ import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
+import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.collections.forEach
@@ -210,7 +211,8 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
     }
 
     // use RaireAssorter with an ClcaAssorterOneAudit
-    setPoolAssorterAveragesForRaire(listOf(rcontestUA), oneAuditPools)
+    // setPoolAssorterAveragesForRaire(listOf(rcontestUA), oneAuditPools)
+    setPoolAssorterAverages(listOf(rcontestUA), oneAuditPools)
 
     val candidateIdxs = info.candidateIds.mapIndexed { idx, candidateId -> idx } // TODO use candidateIdToIndex?
     val irvCount = IrvCount(votes.votes, candidateIdxs)
@@ -228,6 +230,7 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
 }
 
 // use raireAssorter.calcMargin to set the pool assorter averages.
+/* TODO can we get rid of this ?
 fun setPoolAssorterAveragesForRaire(
     oaContests: List<ContestWithAssertions>,
     pools: List<CardPool>, // poolId -> pool
@@ -258,4 +261,4 @@ fun setPoolAssorterAveragesForRaire(
         }
         oaContest.clcaAssertions = clcaAssertions
     }
-}
+} */

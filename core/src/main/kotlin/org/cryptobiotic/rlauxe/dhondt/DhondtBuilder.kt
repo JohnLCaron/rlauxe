@@ -120,7 +120,7 @@ data class DhondtBuilder(
         parties.forEach { party ->
             if (party.isBelowMin) {
                 // decide which is cheaper
-                val bt = BelowThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, this.Nc,)
+                val bt = BelowThreshold.makeFromVotes(info, candId = party.id, votes, this.Nc,)
 
                 // is this parties round1 vote larger than the lastwinner ?
                 val partyCopy = party.copy()

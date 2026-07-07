@@ -12,7 +12,7 @@ private val logger = KotlinLogging.logger("preAuditContestCheck")
 
 fun preAuditContestCheck(contestsUA: List<ContestWithAssertions>, control: ContestSampleControl?, results: VerifyResults) {
 
-    results.addMessage("checkContestsCorrectlyFormed")
+    results.addMessage("preAuditContestCheck")
 
     checkContestInfos(contestsUA, results)
 
@@ -119,8 +119,8 @@ fun checkWinners(contestUA: ContestWithAssertions, results: VerifyResults) {
     // 3. verify that nwinners == min(ncandidates, info.nwinners)
     if (info.choiceFunction != SocialChoiceFunction.DHONDT) {
         val maxwinners = min(info.candidateIds.size, info.nwinners)
-        if (contest.winners().size != maxwinners) {
-            results.addError("Contest ${info.name} (${info.id}) has ${contest.winners().size} winners should be $maxwinners")
+        if (contest.winners().size > maxwinners) {
+            results.addError("Contest ${info.name} (${info.id}) has ${contest.winners().size} winners must be <= $maxwinners")
             contestUA.preAuditStatus = TestH0Status.ContestMisformed
         }
     }

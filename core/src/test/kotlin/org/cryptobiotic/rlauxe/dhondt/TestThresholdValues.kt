@@ -30,7 +30,7 @@ class TestThresholdValues {
         val contest = Contest(info, votes, Nc = 550514, Ncast = 550514)
 
         val pct = 12754/550514.0
-        val bt = BelowThreshold.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
+        val bt = BelowThreshold.makeFromVotes(info, 1, contest.votes, contest.Nc)
         val bte = bt.noerror(true)
         assertEquals(0.5122759791759759, bte)
         val margin = bt.margin(true)

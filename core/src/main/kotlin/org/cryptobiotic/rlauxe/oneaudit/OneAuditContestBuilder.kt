@@ -48,7 +48,7 @@ fun setPoolAssorterAverages(
 
     // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
     // create the clcaAssertions and add then to the oaContests
-    oaContests.filter { !it.isIrv}. forEach { oaContest ->
+    oaContests.forEach { oaContest ->
         val contestId = oaContest.id
         val clcaAssertions = oaContest.assertions.map { assertion ->
             val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
@@ -62,9 +62,7 @@ fun setPoolAssorterAverages(
                 }
             }
             val oaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, poolAverages = AssortAvgsInPools(assortAverages))
-
             oaAssorter.oaAssortRates = oneAuditErrorsFromPools.oaErrorRates(oaContest, oaAssorter)
-
             ClcaAssertion(assertion.info, oaAssorter)
         }
         oaContest.clcaAssertions = clcaAssertions

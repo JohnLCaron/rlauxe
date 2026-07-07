@@ -354,6 +354,21 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
         throw RuntimeException("RaireAssorter can't calculate margin from Regular Votes; use calcMarginFromVotes")
     }
 
+    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulation, Npop: Int): PoolRates {
+        val irvVotes: Votes = poolTab.irvVotes.makeVotes(info.candidateIds.size)
+        val winnerLoser = winnerLoserVotes(irvVotes)
+        val winnerCounts: Int = winnerLoser.first
+        val loserCounts: Int = winnerLoser.second
+
+        val otherCounts = poolTab.ncards() - winnerCounts - loserCounts
+
+        //  winner, nuetral, loser
+        return PoolRates(winnerCounts/Npop.toDouble(),
+            otherCounts/Npop.toDouble(),
+            loserCounts/Npop.toDouble(),
+        )
+    }
+
     override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {
         if (!cvr.hasContest(info.id)) return 0.5
         if (usePhantoms && cvr.phantom()) return 0.5

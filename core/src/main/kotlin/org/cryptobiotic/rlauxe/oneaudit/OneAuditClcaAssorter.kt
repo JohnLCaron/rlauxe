@@ -103,7 +103,7 @@ class OneAuditClcaAssorter(
     override fun classname() = this::class.simpleName
 
     // convenient place to put this; set from outside.
-    // TODO may be very large, may not want to serialize to Json, perhaps rehydrate from cardPool.csv
+    // TODO may be very large, may not want to serialize to Json, perhaps rehydrate from cardPool.csv ?
     var oaAssortRates = OneAuditAssortValueRates(emptyMap(), 0)
 
     fun poolAverage(poolId: Int?) = poolAverages.assortAverage[poolId]

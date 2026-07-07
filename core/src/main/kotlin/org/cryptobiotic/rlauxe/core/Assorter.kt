@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.pfn
 
@@ -26,7 +27,7 @@ import org.cryptobiotic.rlauxe.util.pfn
 interface AssorterIF {
     // usePhantoms=false for avgAssort = reportedMargin, and for the clca overstatement
     // usePhantoms=true for polling assort value
-    fun assort(cvr: CvrIF, usePhantoms: Boolean = false) : Double
+    fun assort(cvr: CvrIF, usePhantoms: Boolean = false): Double
 
     fun upperBound(): Double
     fun desc(): String
@@ -41,7 +42,7 @@ interface AssorterIF {
     fun dilutedMean(): Double = margin2mean(dilutedMargin())
 
     // only needed for CLCA, but can still use for polling
-    fun noerror(hasStyle: Boolean): Double  {
+    fun noerror(hasStyle: Boolean): Double {
         val ratio = margin(hasStyle) / upperBound()
         return 1.0 / (2.0 - ratio)
     }
@@ -55,7 +56,10 @@ interface AssorterIF {
     // dilutedMargin: Npop = sample population size
     // used when you need to calculate margin from some subset of regular votes eg pools; cant be used for IRV
     fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double
+    fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulation, Npop: Int): PoolRates
 }
+
+data class PoolRates(val winnerRate: Double, val noneRate: Double, val loserRate: Double)
 
 /** See SHANGRLA, section 2.1, p.4 */
 class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int): AssorterIF {
@@ -102,6 +106,18 @@ class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int):
         val winnerVotes = useVotes[winner()] ?: 0
         val loserVotes = useVotes[loser()] ?: 0
         return if (N == 0) 0.0 else (winnerVotes - loserVotes) / N.toDouble()
+    }
+
+    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulation, Npop: Int): PoolRates {
+        val winnerCounts: Int = poolTab.votes[winner()] ?: 0
+        val loserCounts: Int = poolTab.votes[loser()] ?: 0
+        val nuetralCounts = poolTab.nvotes() - winnerCounts - loserCounts // undervotes
+
+        //  winner, nuetral, loser
+        return PoolRates(winnerCounts/Npop.toDouble(),
+            nuetralCounts/Npop.toDouble(),
+            loserCounts/Npop.toDouble(),
+        )
     }
 
     override fun toString(): String = desc()

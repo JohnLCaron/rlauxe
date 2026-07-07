@@ -15,6 +15,7 @@ data class Config(
     val isOA = auditType == AuditType.ONEAUDIT
     val isPolling = auditType == AuditType.POLLING
     val isUniform = round.sampling.sampling == Sampling.uniform
+    val sampleLimit = round.sampling.contestSampleCutoff
 
     init {
         require(creation.auditType == election.auditType) {"creation.auditType must equal electionInfo.auditType"}

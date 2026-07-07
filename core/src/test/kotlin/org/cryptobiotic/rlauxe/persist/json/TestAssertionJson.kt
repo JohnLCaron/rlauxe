@@ -66,7 +66,7 @@ class TestAssertionJson {
         val otherCvr = makeCvr(2)
         val contest = makeContestFromCvrs(info, listOf(winnerCvr, winnerCvr, winnerCvr, loserCvr, otherCvr))
 
-        val assorter = AboveThreshold.makeFromVotes(contest, partyId = 0, contest.Nc)
+        val assorter = AboveThreshold.makeFromVotes(contest, candId = 0, contest.Nc)
         val target = Assertion(info, assorter)
 
         val json = target.publishIFJson()
@@ -90,7 +90,7 @@ class TestAssertionJson {
         val contest = makeContestFromCvrs(info, listOf(winnerCvr, winnerCvr, winnerCvr, loserCvr, otherCvr))
 
         //         fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): AboveThreshold {
-        val assorter = BelowThreshold.makeFromVotes(contest.info, partyId = 0, contest.votes()!!,  info.minFraction!!, contest.Nc)
+        val assorter = BelowThreshold.makeFromVotes(contest.info, candId = 0, contest.votes()!!, contest.Nc)
         val target = Assertion(info, assorter)
 
         val json = target.publishIFJson()

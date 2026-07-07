@@ -222,7 +222,7 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
         return result.point
     }
 
-    // TODO using mui here, which noramlly depends on eta, the null mean
+    // TODO using mui here, which normally depends on eta, the null mean
     fun expectedValueLogt(lam: Double, show: Boolean = false): Double {
         val noerrorTerm = ln(1.0 + lam * (noerror - mui)) * p0
 

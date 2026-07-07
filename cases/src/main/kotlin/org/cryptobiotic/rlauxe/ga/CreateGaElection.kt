@@ -89,9 +89,11 @@ class CreateGaElection(
     fun makeContests(useNc: Int): List<Contest> {
         var contestId = 1
         return gacontests.map { gacontest ->
+            // TODO we could calculate if any candidate has a majoity here, and set ContestInfo acordingly
             //     val candidateNames: Map<String, Int>, // candidate name -> candidate id
             val candidateMap = gacontest.candCount.keys.mapIndexed { idx, candidate -> Pair(candidate.candName, idx) }.toMap()
-            val info = ContestInfo( gacontest.contestName, contestId++, candidateMap, SocialChoiceFunction.PLURALITY, nwinners=1)
+            val info = ContestInfo( gacontest.contestName, contestId++, candidateMap, SocialChoiceFunction.RUNOFF,
+                nwinners=2, voteForN=1, minFraction=0.5)
 
             val candidateVotes = gacontest.candCount.map{ (candidate, votes) -> Pair(info.candidateNames[candidate.candName]!!, votes) }.toMap()
             Contest(info, candidateVotes, useNc, ncards)
@@ -144,6 +146,7 @@ class CreateGaElection(
     // this assigns votes, so its the mvrs and can only be done once;
     fun makeMvrsFromPools() : List<AuditableCard> { // contestId -> candidateId -> nvotes
         val cards = mutableListOf<AuditableCard>()
+        var cardIndex = 0
         cardPools.forEach { cardPool ->
             var poolIndex = 0
             val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
@@ -151,7 +154,7 @@ class CreateGaElection(
             val poolCards = vunderPool.makeCardsForOneAuditPool {
                 poolIndex++
                 val cvrId = "${cardPool.poolName}-${poolIndex}"
-                AuditableCardBuilder(cvrId, null, poolIndex, 0, phantom = false, styleId=cardPool.poolId, poolId=cardPool.poolId, votesIn=null)
+                AuditableCardBuilder(cvrId, null, cardIndex++, 0, phantom = false, styleId=cardPool.poolId, poolId=cardPool.poolId, votesIn=null)
             }
             cards.addAll( poolCards)
         }

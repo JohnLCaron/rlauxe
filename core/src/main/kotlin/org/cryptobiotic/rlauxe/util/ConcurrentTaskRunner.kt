@@ -32,7 +32,7 @@ class ConcurrentTaskRunner<T>(val show: Boolean = false) {
     fun run(tasks: List<ConcurrentTask<T>>, nthreads: Int? = null): List<T> {
         val stopwatch = Stopwatch()
         val useThreads = nthreads ?: 30
-        logger.debug{"ConcurrentTaskRunner run ${tasks.size} concurrent tasks with $useThreads threads"}
+        logger.debug{"ConcurrentTaskRunner will run ${tasks.size} concurrent tasks with $useThreads threads"}
         // https://slack-chats.kotlinlang.org/t/33312068/can-this-be-fixed-for-the-final-1-11-0-build-coroutines-is-n
         runBlocking {
             val taskProducer = produceTasks(tasks)

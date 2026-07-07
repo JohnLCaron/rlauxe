@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 07/05/2026_
+_last changed: 07/07/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -580,18 +580,12 @@ Also see [complete list of references](docs/papers/papers.txt).
 
 ## Extensions of SHANGRLA
 
-**Populations and hasStyle**
-
-Rlauxe uses Population objects as a way to capture the information about which cards are in which sample populations,
-in order to set the diluted margins correctly.
-This allows us to refine SHANGRLA's hasStyle flag. 
-See [SamplePopulations](docs/SamplePopulations.md) for more explanation and current thinking.
-
 **CardManifest**
 
-Rlauxe uses a CardManifest, which consists of a canonical list of AuditableCards, one for each possible card in the election, 
-and the list of Populations. OneAudit pools are subtypes of Populations. The CardManifest is one of the committments that
-the Prover must make before the random seed can be generated.
+Rlauxe uses a CardManifest, which consists of a canonical list of AuditableCards, one for each possible card in the election. 
+Each Auditable card references a Style object that lists the possible contests that the card might contain. Reading through 
+the manifest allows you to find the size of the contest's population.
+The CardManifest is one of the committments that the Prover must make before the random seed can be generated.
 
 **General Adaptive Betting**
 
@@ -603,24 +597,17 @@ See [BettingRiskFunctions](docs/BettingRiskFunctions.md) for more info.
 
 OneAudit uses GeneralizedAdaptiveBetting and includes the OneAudit assort values and their known
 frequencies in computing the optimal betting values. See [Betting with OneAudit pools](docs/BettingRiskFunctions.md#betting-with-oneaudit-pools) 
-to see how this improves OneAudit sample sizes.
-
-**MaxRisk for Betting**
-
-In order to prevent stalls in BettingMart, the maximum bet is bounded by a "maximum loss" value, which is the maximum
-percent of your "winnings" you are willing to lose on any one bet. The maximum loss can also be thought of as the percent
-of the maximum bet allowed.
+to see how this improves OneAudit sample sizes. I believe this approach makes OneAudit possible even 
+down to 0% Cvrs and allows replacing Batch Sampling.
 
 **Additional assorters**
 
 Dhondt, AboveThreshold and BelowThreshold assorters have been added to support Belgian elections using Dhondt proportional
 scoring. These assorters have an upper bound != 1, so are an important generalization of the Plurality assorter.
 
-**OneAudit Card Style Data**
+**Additional Social Choice Functions**
 
-Rlauxe adds the option that there may be Card Style Data (CSD) for OneAudit pooled data, in part to investigate the 
-difference between having CSD and not. Specifically, different OneAudit pools may have different values of
-_hasExactContests_ (aka _hasStyle_).  See [SamplePopulations](docs/SamplePopulations.md).
+Dhondt and (two round) Runoff contests have been added.
 
 **Multicontest audits**
 

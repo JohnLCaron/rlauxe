@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.belgium
 
-import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.cases
@@ -30,7 +29,7 @@ class MakeBelgiumElections {
 
     @Test
     fun createAllBelgiumElectionsFromResources() {
-        createAllBelgiumElections(toptopdir)
+        makeBelgium2024Data(toptopdir)
     }
 
     @Test

@@ -53,7 +53,7 @@ class TestCardPool {
         assertEquals(1, poolTabs.size)
         val tab = poolTabs.values.first()
         assertEquals(1, tab.contestId)
-        val poolVotes = cardPool.contestTabs[1]!!.votes
+        val poolVotes = cardPool.contestTab(1)!!.votes
         poolVotes.forEach { (cand, vote) ->
             assertEquals(2 * vote, tab.votes[cand])
         }

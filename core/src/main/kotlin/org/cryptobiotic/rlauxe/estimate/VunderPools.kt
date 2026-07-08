@@ -94,7 +94,6 @@ class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId
             val card = cvb2.build()
             cards.add(card)
         }
-
         return cards
     }
 

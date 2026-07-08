@@ -46,7 +46,7 @@ class CreateBoulderElection(
     val contests: List<ContestIF>
     val contestsUA : List<ContestWithAssertions>
     val simulatedCvrs: List<Cvr>  // redacted cvrs
-    val allCvrs: List<Cvr>  // redacted cvrs
+    val allCvrs: List<Cvr>  // unredacted cvrs
     val cardStyles: List<StyleIF>
 
     init {
@@ -313,7 +313,7 @@ class CreateBoulderElection(
     override fun contestsUA() = contestsUA
     override fun cardStyles() = cardStyles
     override fun cardPools() = if (auditType.isOA()) cardPoolBuilders else null
-    override fun unsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, cardPools())
+    override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, cardPools())
     override fun unsortedMvrsExternal() = null
 
     override fun cards() = createCards()

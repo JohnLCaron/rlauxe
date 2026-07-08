@@ -111,7 +111,7 @@ class TestCvrExportRedaction {
             var pnvotes = 0
             group.contestVotes.forEach { groupVoteMap: Map.Entry<Int, MutableMap<Int, Int>> ->
                 val lookup: ExportToCanonLookup = dominionConverter.exportToCanonLookup[groupVoteMap.key]!!
-                val poolTab = pool.contestTabs[lookup.canonContestId]
+                val poolTab = pool.contestTab(lookup.canonContestId)
                 if (poolTab != null) {
                     groupVoteMap.value.forEach { (rcandid, rvotes) ->
                         val canonCandId = lookup.candLookup[rcandid]

@@ -5,17 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
-import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.rlauxe.audit.SimulationControl
-import org.cryptobiotic.rlauxe.dominion.CvrExportCsvHeader
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportJsonSummary
-import org.cryptobiotic.rlauxe.dominion.convertCvrExportJsonToCsv
-import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
-import org.cryptobiotic.rlauxe.sf.createSfElection
-import org.cryptobiotic.rlauxe.sf.readContestManifestFromZip
-import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.ZipReaderTour
-import java.io.FileOutputStream
 
 fun makeBoulderElectionOA(toptopdir: String) {
     val topdir = "$toptopdir"

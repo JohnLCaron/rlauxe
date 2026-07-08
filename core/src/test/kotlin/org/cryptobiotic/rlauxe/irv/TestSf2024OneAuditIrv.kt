@@ -61,7 +61,7 @@ class TestSf2024OneAuditIrv() {
 
         val poolId = 3464
         val cardPool = cardPools.find { it.poolId == poolId }!! //random pool with contest 24 in it
-        val poolTab = cardPool.contestTabs[24]!!
+        val poolTab = cardPool.contestTab(24)!!
 
         rcontestUA.clcaAssertions.forEach { assertion ->
             val cassorter = assertion.cassorter as OneAuditClcaAssorter

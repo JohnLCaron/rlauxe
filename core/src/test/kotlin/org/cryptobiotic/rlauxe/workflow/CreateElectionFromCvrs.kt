@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.rlauxe.audit.PollingMode
-import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsListM
+import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsList
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.Closer
@@ -28,7 +28,7 @@ class CreateElectionFromCvrs (
         electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
         mvrSource = mvrSource, pollingMode = PollingMode.withBatches
     )
-    override fun unsortedMvrsInternal() = mvrsToAuditableCardsListM(cvrs, batches)
+    override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(cvrs, batches)
     override fun unsortedMvrsExternal() = null
     override fun cardStyles() = batches
     override fun cardPools() = cardPools

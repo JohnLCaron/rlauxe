@@ -2,7 +2,6 @@ package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
-import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.Config
@@ -20,11 +19,9 @@ import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2024General
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.corla.createCorlaElection
-import org.cryptobiotic.rlauxe.corla.createUniformElection
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.sf.CreatePrecinctAndStyle
 import org.cryptobiotic.rlauxe.sf.createSfElection
-import kotlin.test.Test
 import kotlin.test.fail
 
 class TestGenerateAllUseCases {
@@ -226,7 +223,7 @@ class TestGenerateAllUseCases {
 
     // @Test
     fun createAllBelgiumElections() {
-        org.cryptobiotic.rlauxe.belgium.createAllBelgiumElections(toptopdir)
+        org.cryptobiotic.rlauxe.belgium.makeBelgium2024Data(toptopdir)
     }
 
 }

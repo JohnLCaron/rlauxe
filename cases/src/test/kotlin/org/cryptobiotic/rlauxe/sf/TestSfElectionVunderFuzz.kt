@@ -117,7 +117,7 @@ class TestSfElectionVunderFuzz {
         val cardPoolMap = cardPools!!.associateBy { it.poolId }
         val useCardPool = cardPoolMap[useCardPoolId]!!
         print(useCardPool)
-        val tab = useCardPool.contestTabs[contestId]
+        val tab = useCardPool.contestTab(contestId)
         println(tab)
 
         val poolAvg = cassorter.poolAverages.assortAverage[useCardPoolId]!!

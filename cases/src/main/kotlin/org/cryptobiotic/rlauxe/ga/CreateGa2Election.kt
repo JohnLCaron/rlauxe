@@ -45,6 +45,7 @@ class CreateGa2Election(
 
     val contestsUA: List<ContestWithAssertions>
     val cardPools: List<CardPool>  // redacted cvrs
+
     // val cardStyles: List<StyleIF>
     val mvrs: List<AuditableCard>
 
@@ -52,7 +53,7 @@ class CreateGa2Election(
         val contestMap = contests.associateBy { it.name }
         val gacountyMap = gacounties.associateBy { munge(it.countyName.lowercase()) }
         this.ncards = gacounties.sumOf { it.ncards() }
-        infos = contests.associate { it.id  to it.info }
+        infos = contests.associate { it.id to it.info }
 
         // only one CardStyle NO
         // this.cardStyles = listOf(CardStyle(1, infos.keys.toSet()))
@@ -73,19 +74,20 @@ class CreateGa2Election(
                     // we want the contest subtotals for this county
                     val votes = countyContestia.candCount.map { (cand, votes) -> info.candidateNames[cand]!! to votes }
                         .toMap() // candId -> votes
-                    val tab = ContestTabulation(info, votes, countyContestia.ncards)  // TODO  or is it the county ncards ??
+                    val tab =
+                        ContestTabulation(info, votes, countyContestia.ncards)  // TODO  or is it the county ncards ??
                     contestTabs[contest.id] = tab
                 } else {
                     println("Cant find '${adjname}'")
                 }
             }
-            pools.add(CardPool(countyia.county, poolid++, hasExactContests=false, infos, contestTabs, countyNcards))
+            pools.add(CardPool(countyia.county, poolid++, hasExactContests = false, infos, contestTabs, countyNcards))
         }
         this.cardPools = pools.toList()
 
         contestsUA = makeOneAuditContests(contests, pools)
 
-        mvrs = makeMvrsFromPools() // once only
+        mvrs = makeMvrsFromPools(pools) // once only
     }
 
     fun makeOneAuditContests(
@@ -93,8 +95,8 @@ class CreateGa2Election(
         cardPools: List<CardPoolIF>,
     ): List<ContestWithAssertions> {
 
-        val contestsUA = wantContests.filter{ !it.isIrv() }.map { contest ->
-            ContestWithAssertions(contest, isClca=true, hasStyle=false).addStandardAssertions()
+        val contestsUA = wantContests.filter { !it.isIrv() }.map { contest ->
+            ContestWithAssertions(contest, isClca = true, hasStyle = false).addStandardAssertions()
         }
 
         // Its the OA assorters that make this a OneAudit contest
@@ -102,46 +104,30 @@ class CreateGa2Election(
         return contestsUA
     }
 
-    override fun electionInfo() = ElectionInfo(electionName, AuditType.ONEAUDIT, ncards(), contestsUA.size,
-        true, mvrSource=MvrSource.testPrivateMvrs)
+    override fun electionInfo() = ElectionInfo(
+        electionName, AuditType.ONEAUDIT, ncards(), contestsUA.size,
+        true, mvrSource = MvrSource.testPrivateMvrs
+    )
+
     override fun contestsUA() = contestsUA
     override fun cardStyles() = cardPools
     override fun cardPools() = cardPools
     override fun unsortedMvrsInternal() = mvrs
     override fun unsortedMvrsExternal() = null
 
-    override fun cards() = createCards()
+    override fun cards() = createCards2(mvrs)
     override fun ncards() = ncards
-
-    // the card manifest: munge the mvrs
-    fun createCards(): CloseableIterator<AuditableCard> {
-        // remove cvrs for cards in the pools
-        val mvrIter = Closer(this.mvrs.iterator())
-        val transformer = TransformingIterator<AuditableCard, AuditableCard>(mvrIter) { org ->
-            AuditableCard.removeVotes(org)
-        }
-        return transformer
-    }
-
-    // this assigns votes, so its the mvrs and can only be done once;
-    fun makeMvrsFromPools() : List<AuditableCard> { // contestId -> candidateId -> nvotes
-        val cards = mutableListOf<AuditableCard>()
-        cardPools.forEach { cardPool ->
-            var poolIndex = 0
-            val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
-            val vunderPool = VunderPool(poolVunders, cardPool.poolName, cardPool.poolId, cardPool.hasExactContests)
-            val poolCards = vunderPool.makeCardsForOneAuditPool {
-                poolIndex++
-                val cvrId = "${cardPool.poolName}-${poolIndex}"
-                AuditableCardBuilder(cvrId, null, poolIndex, 0, phantom = false, styleId=cardPool.poolId, poolId=cardPool.poolId, votesIn=null)
-            }
-            cards.addAll( poolCards)
-            println("added ${poolCards.size} cards for county ${cardPool.poolName}")
-        }
-
-        return cards
-    }
 }
+// TODO combine with createCards()
+fun createCards2(mvrs: List<AuditableCard>): CloseableIterator<AuditableCard> {
+    // remove cvrs for cards in the pools
+    val mvrIter = Closer(mvrs.iterator())
+    val transformer = TransformingIterator<AuditableCard, AuditableCard>(mvrIter) { org ->
+        AuditableCard.removeVotes(org)
+    }
+    return transformer
+}
+
 
 ////////////////////////////////////////////////////////////////////
 // Clca: create simulated cvrs for the redacted groups, for a full CLCA audit with hasStyles=true.

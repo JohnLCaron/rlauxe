@@ -58,7 +58,11 @@ class CreateSfElection(
         // println("contestNcs ${contestNcs}")
 
         // pass 1 through cvrs, make card pools, card Style, and contestTabulations
-        val (allCardPools, cardStyleProxy, cvrTabs, ncards) = createCardPoolsAndStyles(infos, cvrExportCsvFile, poolsHaveOneCardStyle)
+        val (allCardPools, cardStyleProxy, cvrTabs, ncards) = createCardPoolsAndStyles(
+            infos,
+            cvrExportCsvFile,
+            poolsHaveOneCardStyle
+        )
         this.cardStyleMap = cardStyleProxy
 
         cardPoolMapByName = allCardPools.filter { it.value.poolName != unpooled } // exclude the unpooled
@@ -72,8 +76,8 @@ class CreateSfElection(
         //        val cards: CloseableIterator<AuditableCard> = createCards(auditType)
         //        val auditableCardIter = MergeStylesIntoCardsM(cards, cardStyleMap.values.toList())
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsvFile)
-        val cardIter: CloseableIterator<AuditableCard>
-                = CvrExportToCardAdapter(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
+        val cardIter: CloseableIterator<AuditableCard> =
+            CvrExportToCardAdapter(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
         val cardTabulation = CardTabulation(cardIter, infos) { }
         val manifestTabs = cardTabulation.tabs
         val count = cardTabulation.cvrCount
@@ -88,7 +92,14 @@ class CreateSfElection(
         contestsUA = if (auditType.isClca()) {
             makeClcaContestsSF(infos, cvrTabs, contestNcs, contestNbs).sortedBy { it.id }
         } else if (auditType.isOA()) {
-            makeOneAuditContestsSF(infos, cvrTabs, contestNcs, contestNbs, unpooledPool, cardPools).sortedBy { it.id } // TODO
+            makeOneAuditContestsSF(
+                infos,
+                cvrTabs,
+                contestNcs,
+                contestNbs,
+                unpooledPool,
+                cardPools
+            ).sortedBy { it.id } // TODO
         } else {
             makePollingContestsSF(infos, cvrTabs, contestNcs, contestNbs).sortedBy { it.id }
         }
@@ -119,18 +130,24 @@ class CreateSfElection(
 
                 // pools
                 val pool = allCardPools.getOrPut(cvrExport.poolKey()) {
-                    OneAuditPoolFromCvrs(cvrExport.poolKey(), allCardPools.size + 1, poolsHaveOneCardStyle, contestInfos)
+                    OneAuditPoolFromCvrs(
+                        cvrExport.poolKey(),
+                        allCardPools.size + 1,
+                        poolsHaveOneCardStyle,
+                        contestInfos
+                    )
                 }
                 pool.accumulateVotes(cvrExport.toCvr(null, cvrExport.id))
 
                 // all cards will have one of these styles
-                val csc = cardStyles.getOrPut(cvrExport.votes.keys) { CardStyle(cardStyles.size + 1, cvrExport.votes.keys) }
+                val csc =
+                    cardStyles.getOrPut(cvrExport.votes.keys) { CardStyle(cardStyles.size + 1, cvrExport.votes.keys) }
                 csc.ncards++
 
                 // tabs
                 cvrExport.votes.forEach { (id, cands) ->
                     val contestTab = allCvrTabs.getOrPut(id) { ContestTabulation(contestInfos[id]!!) }
-                    contestTab.addVotes(cands, phantom=false)
+                    contestTab.addVotes(cands, phantom = false)
                 }
             }
         }
@@ -164,11 +181,32 @@ class CreateSfElection(
     override fun cards() = createCards(auditType)
     override fun ncards() = ncards
 
+    override fun unsortedMvrsExternal() = null
+
+    // TODO add optional fuzz or some other error method?
+    // convert the cvrExports to the private mvrs; must be in same order as createCards
+    // read in the dominion export cvrs, create mvrs
+    override fun unsortedMvrsInternal(): List<AuditableCard> {
+        // pass 3 through cvrExport
+        val cvrExportIter = cvrExportCsvIterator(cvrExportCsvFile)
+        val cardIter: CloseableIterator<AuditableCard> =
+            CvrExportToCardAdapter(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
+
+        val unsortedMvrs = mutableListOf<AuditableCard>()
+        cardIter.use { iter ->
+            while (iter.hasNext()) {
+                unsortedMvrs.add(iter.next())
+            }
+        }
+        return unsortedMvrs
+    }
+
+    // read in the dominion export cvrs, create card manifest
     fun createCards(auditType: AuditType): CloseableIterator<AuditableCard> {
         // pass 2 through cvrExport
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsvFile)
-        val cardIter: CloseableIterator<AuditableCard>
-            = CvrExportToCardAdapter(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
+        val cardIter: CloseableIterator<AuditableCard> =
+            CvrExportToCardAdapter(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
 
         // needed for final result, but cant be used in CvrExportToCardAdapter
         // remove cvrs for cards in the oneaudit pools
@@ -177,22 +215,6 @@ class CreateSfElection(
             if (hasCvr) org else AuditableCard.removeVotes(org)
         }
         return transformer
-    }
-
-    // TODO add optional fuzz or some other error method?
-    // convert the cvrExports to the private mvrs; must be in same order as createCards
-    override fun unsortedMvrsExternal() = null
-    override fun unsortedMvrsInternal(): List<AuditableCard> {
-        // pass 3 through cvrExport
-        val cvrExportIter = cvrExportCsvIterator(cvrExportCsvFile)
-        val cardIter: CloseableIterator<AuditableCard>
-                = CvrExportToCardAdapter(cvrExportIter, cardPools(), this.cardStyleMap, auditType.isOA())
-
-        val unsortedMvrs = mutableListOf<AuditableCard>()
-        cardIter.use { iter ->
-            while( iter.hasNext()) { unsortedMvrs.add (iter.next()) }
-        }
-        return unsortedMvrs
     }
 }
 

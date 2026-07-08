@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.persist.csv.CardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.Closer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -156,11 +155,7 @@ class TestAvgAssortValues {
         val testCards = test.makeCardsFromContests()
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
 
-        val cardIterable: CloseableIterable<AuditableCard> =
-            CloseableIterable { MergeStylesIntoCards(
-                Closer(testCards.iterator()),
-                styles = test.cardStyles,) }
-
+        val cardIterable: CloseableIterable<AuditableCard> = MergeStylesIntoCards(testCards, test.cardStyles)
         if (showCvrs) {
             println("\n$CardHeader")
             var count = 0
@@ -203,11 +198,7 @@ class TestAvgAssortValues {
         val testCards = test.makeCardsFromContests()
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
 
-        val cardIterable: CloseableIterable<AuditableCard> =
-            CloseableIterable { MergeStylesIntoCards(
-                Closer(testCards.iterator()),
-                styles = test.cardStyles,) }
-
+        val cardIterable: CloseableIterable<AuditableCard> = MergeStylesIntoCards(testCards, test.cardStyles)
         if (showCvrs) {
             println("\n$CardHeader")
             var count = 0

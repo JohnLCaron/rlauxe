@@ -234,7 +234,6 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
 fun setPoolAssorterAveragesForRaire(
     oaContests: List<ContestWithAssertions>,
     pools: List<CardPool>, // poolId -> pool
-    hasStyle: Boolean = true,
 ) {
     val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
 

@@ -182,7 +182,7 @@ class TestContest {
         assertEquals(227, contest.Nc)
         assertEquals(2, contest.Nphantoms())
         assertEquals(emptyList(), contest.winners)
-        assertEquals(listOf(0, 1, 2), contest.losers)
+        assertEquals(setOf(0, 1, 2), contest.losers.toSet())
         assertEquals(emptyList(), contest.winnerNames)
         assertEquals(
             "testContestInfo (0) Nc=227 Nphantoms=2 votes={1=123, 0=100, 2=2} undervotes=0, voteForN=1",
@@ -271,18 +271,18 @@ class TestContest {
         assertEquals(contestUAc2.toString(), contestUAc.toString())
         assertEquals(contestUAc2.showShort(), contestUAc.showShort())
 
-        val expectedShowCandidates = """   0 'cand0': votes=100 
-   1 'cand1': votes=108  (winner)
-   2 'cand2': votes=0 
+        val expectedShowCandidates = """   0 'cand0': votes=100 (48.08%) 
+   1 'cand1': votes=108 (51.92%)  (winner)
+   2 'cand2': votes=0 (0.00%) 
     Total=208""" // .replaceIndent("   ")
         assertEquals(expectedShowCandidates, contestUAc.contest.showCandidates())
 
         val expectedShow = """Contest 'testContestInfo' (0) PLURALITY voteForN=1 votes={1=108, 0=100, 2=0} undervotes=1, winners=[1] Nc=211 Nphantoms=2 Nu=1 sumVotes=208 Npop=211 hasStyle=true
    minAssertion= 1/0 votes=108/100 diff=8 noerror=0.5097
 
-   0 'cand0': votes=100 
-   1 'cand1': votes=108  (winner)
-   2 'cand2': votes=0 
+   0 'cand0': votes=100 (48.08%) 
+   1 'cand1': votes=108 (51.92%)  (winner)
+   2 'cand2': votes=0 (0.00%) 
     Total=208"""
         assertEquals(expectedShow, contestUAc.show())
 
@@ -295,7 +295,7 @@ class TestContest {
         val mess1 = assertFailsWith<RuntimeException> {
             val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc = 211, Ncast=211)
         }.message
-        assertEquals("contest 0: use IrvContest for SocialChoiceFunction.IRV", mess1)
+        assertEquals("contest 0: use DHondtContest for SocialChoiceFunction.IRV", mess1)
     }
 
     @Test

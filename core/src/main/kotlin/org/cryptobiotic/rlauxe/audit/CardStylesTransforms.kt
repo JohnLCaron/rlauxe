@@ -1,18 +1,19 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.TransformingIterator
 import kotlin.collections.get
 import kotlin.sequences.plus
 
 // merge styles and mvrs -> cards list
-fun mvrsToAuditableCardsListM(
+fun mvrsToAuditableCardsList(
     mvrs: List<Cvr>,
     styles: List<StyleIF>?,
 ): List<AuditableCard> {
-
     val styleMap = styles?.associateBy{ it.id() } ?: emptyMap()
-
     var cardIndex = 0 // 0 based index
 
     return mvrs.map { org ->
@@ -36,60 +37,6 @@ fun mvrsToAuditableCardsListM(
             poolId = org.poolId,
         )
     }
-}
-
-// merge styles and mvrs + phantoms -> cards iterator
-class MvrsToCardStylesIterator(
-    val mvrs: CloseableIterator<Cvr>,
-    styles: List<StyleIF>, //  either CardPool or CardStyle
-    phantomCvrs : List<Cvr>? = null,
-): CloseableIterator<AuditableCard> {
-
-    val allMvrs: Iterator<Cvr>
-
-    init {
-        allMvrs = if (phantomCvrs == null) {
-            mvrs
-        } else {
-            val mvrSeq = mvrs.iterator().asSequence()
-            val phantomSeq = phantomCvrs.asSequence()
-            (mvrSeq + phantomSeq).iterator()
-        }
-    }
-
-    val styleMap = styles.associateBy{ it.id() }
-    var cardIndex = 0 // 0 based index
-
-    override fun hasNext() = allMvrs.hasNext()
-
-    override fun next(): AuditableCard {
-        val org = allMvrs.next()
-        val style = styleMap[org.poolId]  // hijack poolId
-
-        val styleId = when {
-            (style != null) -> style.id()
-            org.phantom() -> CardStyle.phantomStyle.id()
-            else -> CardStyle.fromCvrStyle.id()
-        }
-
-        val (contestIds, contestStarts, candidates) = makeFromVotes(org.votes)
-        val cardm = AuditableCard(
-            id = org.id,
-            location = null,
-            index = cardIndex++,
-            prn = 0,
-            phantom=org.phantom,
-            styleId = styleId,
-            contestIds = contestIds,
-            contestStarts = contestStarts,
-            candidates = candidates,
-            poolId = org.poolId,
-        )
-        if (style != null) cardm.setStyle(style)
-        return cardm
-    }
-
-    override fun close() = mvrs.close()
 }
 
 // merge styles and cvrs + phantoms -> cards iterator
@@ -149,18 +96,20 @@ class CvrsToCardStylesIterator(
     override fun close() = cvrs.close()
 }
 
-// merge styles into cards iterator
+// merge styles into cards iterable, can be iterated multiple times
 class MergeStylesIntoCards(
-    val cardsIter: CloseableIterator<AuditableCard>,
-    styles: List<StyleIF>,
-): CloseableIterator<AuditableCard> {
+    val cardsIterable: Iterable<AuditableCard>,
+    val styles: List<StyleIF>,
+): CloseableIterable<AuditableCard> {
+    override fun iterator(): CloseableIterator<AuditableCard> {
+        return mergeStylesIntoCards(Closer(cardsIterable.iterator()), styles)
+    }
+}
+
+// merge styles into cards iterator, can be iterated once
+fun mergeStylesIntoCards(cardsIter: CloseableIterator<AuditableCard>, styles: List<StyleIF>): CloseableIterator<AuditableCard> {
     val styleMap = styles.associateBy{ it.id() }
-
-    override fun hasNext() = cardsIter.hasNext()
-
-    // styleName must be in styleMap
-    override fun next(): AuditableCard {
-        val org = cardsIter.next()
+    return TransformingIterator(cardsIter) { org ->
         val style = styleMap[org.styleId]
         val cardStyle = when {
             style != null -> style
@@ -168,9 +117,7 @@ class MergeStylesIntoCards(
             org.styleId == CardStyle.fromCvrStyle.id() -> CardStyle.fromCvrStyle
             else -> throw RuntimeException()
         }
-        return org.setStyle(cardStyle)
+        org.setStyle(cardStyle)
     }
-
-    override fun close() { cardsIter.close() }
 }
 

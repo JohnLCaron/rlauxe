@@ -84,7 +84,7 @@ class TestRelaxedAssertionReport {
         // interesting: the dcontest assorters didnt make it through the serialization..... TODO ??
         val dcontest = contestRound.contestUA.contest as DHondtContest
 
-        val cassertion = contestRound.contestUA.clcaAssertions.find { it.assorter.shortName() == "BelowThreshold for 'ECOLO'" }!!
+        val cassertion = contestRound.contestUA.clcaAssertions.find { it.assorter.shortName().contains("BelowThreshold for 'ECOLO'") }!!
         println( "Contest ${contestRound.contestUA.id} assertion ${cassertion.assorter.shortName()}")
         println( dcontest.showRelaxedAssertion(contestRound, cassertion) )
     }

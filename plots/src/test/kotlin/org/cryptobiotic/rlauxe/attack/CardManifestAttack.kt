@@ -19,7 +19,7 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsListM
+import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsList
 import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.util.Closer
@@ -272,7 +272,7 @@ class CreateElectionForAttack(
 ): ElectionBuilder {
 
     override fun electionInfo() = ElectionInfo("CardManifestAttack", AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true,)
-    override fun unsortedMvrsInternal() = mvrsToAuditableCardsListM(mvrs, populations)
+    override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(mvrs, populations)
     override fun unsortedMvrsExternal() = null
     override fun contestsUA() = contestsUA
     override fun cardStyles() = populations

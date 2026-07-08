@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CvrsToCardStylesIterator
 import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsListM
+import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsList
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.Vunder
@@ -215,7 +215,7 @@ fun makeCardManifest2(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<
     val expanded = CardStyle("expanded", 42, expandedContestIds, false)
 
     // make the cards with the expanded card style
-    return mvrsToAuditableCardsListM(mvrs, listOf(expanded))
+    return mvrsToAuditableCardsList(mvrs, listOf(expanded))
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

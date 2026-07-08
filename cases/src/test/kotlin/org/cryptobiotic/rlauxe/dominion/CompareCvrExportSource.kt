@@ -13,8 +13,9 @@ class CompareCvrExportSources {
     @Test
     fun compareBoulder20cvrs() {
         compareDominionCvrExport(
+            // cvr has 29 redacted groups, cvrOrg has 0
             DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv").read(),
-            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/Boulder CO.csv").read()
+            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvrOrg.csv").read()
         )
     }
 

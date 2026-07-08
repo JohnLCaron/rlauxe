@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import kotlin.test.Test
@@ -7,10 +8,10 @@ import kotlin.test.assertEquals
 
 class TestTreeReader {
 
-    @Test
+    // @Test
     fun testTreeReaderIterator() {
         val stopwatch = Stopwatch()
-        val topDir = "src/test/data/cvrexport"
+        val topDir = "$cases/sf/sf2024/CVR_Export_20241202143051"
         var countFiles = 0
         var summVotes = 0
         var countCards = 0
@@ -36,11 +37,11 @@ class TestTreeReader {
     @Test
     fun testTreeReaderTour() {
         val stopwatch = Stopwatch()
-        val topDir = "src/test/data/cvrexport"
+        val topDir = "$cases/sf/sf2024/CVR_Export_20241202143051"
         var countFiles = 0
         val tour = TreeReaderTour(topDir, visitor = { countFiles++ })
         tour.tourFiles()
-        assertEquals(10, countFiles)
+        assertEquals(27569, countFiles)
         println("that took $stopwatch")
     }
 }

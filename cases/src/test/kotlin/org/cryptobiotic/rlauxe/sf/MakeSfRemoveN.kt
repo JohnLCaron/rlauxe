@@ -18,8 +18,9 @@ class MakeSfRemoveN {
     val sfDir = "$cases/sf/sf2024"
     val castVoteRecordZip = "$sfDir/CVR_Export_20241202143051.zip"
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
+
     //// generates the CLCA for CaseStudiesRemoveNmax
-    @Test
+    // @Test
     fun createSfRemoveNclca() {
 
         val tasks = mutableListOf<ConcurrentTask<List<AuditResult2>>>()
@@ -36,7 +37,7 @@ class MakeSfRemoveN {
     }
 
     //// generates the OA for CaseStudiesRemoveNmax
-    @Test
+    // @Test
     fun createSfRemoveNoa() {
 
         val tasks = mutableListOf<ConcurrentTask<List<AuditResult2>>>()
@@ -118,7 +119,7 @@ class MakeSfRemoveN {
     }
 
     //// generates the OA for CaseStudiesRemoveNmax
-    @Test
+    // @Test
     fun createSfRemoveNsp() {
         val tasks = mutableListOf<ConcurrentTask<List<AuditResult2>>>()
         repeat(8) { removeN ->

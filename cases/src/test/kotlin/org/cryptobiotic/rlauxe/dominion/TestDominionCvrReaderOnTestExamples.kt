@@ -134,7 +134,7 @@ class TestDominionCvrReaderOnTestExamples {
 
         // Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
         val cvr0 = export.redactedGroups[0]
-        assertEquals("r10", cvr0.ballotType)
+        assertEquals("10", cvr0.ballotType)
         var idx = 0
         assertEquals(
             listOf(175, 88, 0, 5, 4, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0),

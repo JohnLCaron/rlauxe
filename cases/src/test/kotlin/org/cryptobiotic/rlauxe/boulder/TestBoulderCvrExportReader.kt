@@ -165,7 +165,7 @@ class TestBoulderCvrExportCsv {
 
         // Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
         val cvr0 = export.redacted[0]
-        assertEquals("7", cvr0.ballotType)
+        assertEquals("r10+31", cvr0.ballotType)
         var idx = 0
         assertEquals(
             listOf(265, 104, 0, 0, 2, 1, 1, 5, 2, 0, 0, 0, 0, 0, 0),

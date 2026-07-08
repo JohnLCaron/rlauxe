@@ -104,7 +104,10 @@ class TestCvrExportRedaction {
         var totalNcards = 0
         var totalNvotes = 0
         export.redactedGroups.forEach { group ->
-            val pool = poolMap[group.ballotType]!! // hmm maybe not unique?
+            val pool = poolMap[group.ballotType] // hmm maybe not unique?
+            if (pool == null) {
+                throw RuntimeException()
+            }
             var gnzCount = 0
             var pnzCount = 0
             var gnvotes = 0

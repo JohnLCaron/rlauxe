@@ -92,6 +92,7 @@ fun createBelgiumAndRunAllRounds(electionName: String,
 
     val partyIds = readPartyTxtResource("$belgiumData/parties.txt")
     validateOutputDir(Path.of(toptopdir))
+    // TODO why not read from resource ??
     copyResourceFile("$belgiumData/canonicalParties.txt", "$toptopdir/canonicalParties.txt")
 
     val dhondtParties = belgiumElectionJson.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, partyIds[it.PartyLabel]!!, it.NrOfVotes) }

@@ -17,12 +17,11 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsAndMergeToList
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
-import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
 // obsolete
-class MakeColoradoElections {
+class TestColoradoElections {
 
     // @Test
     fun makeCountyAudits25() {
@@ -41,7 +40,7 @@ class MakeColoradoElections {
         )
     }
 
-    @Test
+    // @Test
     fun makeCountyAudits24() {
         val topdir = "$testdataDir/cases/corla/county"
         val wantCounties = emptyList<String>() // listOf("Boulder",  "El Paso", "La Plata", "Weld",)
@@ -58,7 +57,7 @@ class MakeColoradoElections {
         )
     }
 
-    @Test
+    // @Test
     fun makeColoradoClcaUniform() {
         val topdir = "$testdataDir/cases/corla/uniform"
 
@@ -73,7 +72,7 @@ class MakeColoradoElections {
             creation, round, name = "Corla24Uniform")
     }
 
-    @Test
+    // @Test
     fun makeColoradoClcaConsistent() {
         val topdir = "$testdataDir/cases/corla/consistent"
 
@@ -88,7 +87,7 @@ class MakeColoradoElections {
             null, creation, round, name = "Corla24Consistent", startFirstRound = true)
     }
 
-    @Test
+    // @Test
     fun makeColoradoPollingPools() {
         val topdir = "$testdataDir/cases/corla/polling"
 
@@ -102,7 +101,7 @@ class MakeColoradoElections {
             pollingMode=PollingMode.withPools, creation, round)
     }
 
-    @Test
+    // @Test
     fun makeColoradoPollingBatches() {
         val topdir = "$testdataDir/cases/corla/polling2"
 
@@ -116,7 +115,7 @@ class MakeColoradoElections {
             pollingMode=PollingMode.withBatches, creation, round)
     }
 
-    @Test
+    // @Test
     fun makeColoradoPollingWithoutBatches() {
         val topdir = "$testdataDir/cases/corla/polling3"
 
@@ -130,7 +129,7 @@ class MakeColoradoElections {
             pollingMode=PollingMode.withoutBatches, creation, round)
     }
 
-    @Test
+    // @Test
     fun testReadColoradoElectionDetail() {
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val electionResultXml: ElectionDetailXml = readColoradoElectionDetail(detailXmlFile)

@@ -8,6 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import kotlin.use
 
 class TestZipReader {
 
@@ -37,7 +38,7 @@ class TestZipReader {
 
     @Test
     fun testZipReaderTourAndIter() {
-        val filename = "src/test/data/cvrExport.zip"
+        val filename = "src/test/data/cvrTree.zip"
         var countFiles = 0
         var countCards = 0
         var countPoolCards = 0
@@ -59,8 +60,8 @@ class TestZipReader {
         println("card Count: $countCards cardSet size ${cardSet.size}")
         println("countPoolCards: $countPoolCards")
 
-        assertEquals(10, countFiles)
-        assertEquals(4252, countCards)
+        assertEquals(2, countFiles)
+        assertEquals(195, countCards)
 
         //// ZipReaderIterator
         val cardSet2 = mutableSetOf<CvrExport>()

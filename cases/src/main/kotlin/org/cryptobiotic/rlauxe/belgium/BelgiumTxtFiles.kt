@@ -78,3 +78,25 @@ fun readRoyaumeTxtFile(filename: String): List<Royaume> {
     reader.close()
     return parties
 }
+
+fun readRoyaumeTxtResource(resourcePath: String): List<Royaume> {
+
+    val inputStream = object {}.javaClass.getResourceAsStream(resourcePath) ?:
+    throw RuntimeException("readPartyTxtResource $resourcePath does not exist")
+
+    val parties = mutableListOf<Royaume>()
+    inputStream.bufferedReader().use { reader ->
+        reader.readLine() // get rid of header line
+        while (true) {
+            val line = reader.readLine() ?: break
+            val tokens = line.split(";")
+            val ttokens = tokens.map { it.trim() }
+            val name = ttokens[0]
+            val seats = ttokens[1].toInt()
+            val votes = ttokens[2].toInt()
+            parties.add(Royaume(name, seats, votes))
+        }
+    }
+
+    return parties
+}

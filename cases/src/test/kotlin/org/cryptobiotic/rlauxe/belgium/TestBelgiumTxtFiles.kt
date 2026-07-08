@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.belgium
 
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.readCanonicalPartyTxtFile
 import org.cryptobiotic.rlauxe.persist.readCoalitionTxtFile
 import org.cryptobiotic.rlauxe.persist.readLimitsTxtFile
@@ -9,31 +10,31 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestReadBelgiumElection {
-    val partyFilename = "src/test/data/belgium2024/parties.txt"
-    val limitsFilename = "src/test/data/belgium2024/sampleLimits.txt"
-    val canonicalPartiesFilename = "src/test/data/belgium2024/canonicalParties.txt"
-    val royaumeFilename =  "src/test/data/belgium2024/2024_chambre-des-représentants_Royaume.csv"
+    val partyFilename = "$belgiumData/parties.txt"
+    val royaumeFilename =  "$belgiumData/2024_chambre-des-représentants_Royaume.csv"
+
+    val topdir = "$cases/belgium/belgium2024"
+    val limitsFilename = "$topdir/sampleLimits.txt"
+    val canonicalPartiesFilename = "$topdir/canonicalParties.txt"
 
     @Test
     fun testReadPartyTxtFile() {
-        val filename = partyFilename
-        val result = readPartyTxtFile(filename)
+        val result = readPartyTxtResource(partyFilename)
         result.forEach { (key, value) -> println("'$key': $value") }
         assertEquals(30, result.size)
     }
 
     @Test
     fun testReadRoyaumeTxtFile() {
-        val filename = royaumeFilename
-        val result = readRoyaumeTxtFile(filename).sortedByDescending { it.seats }
+        val result = readRoyaumeTxtResource(royaumeFilename).sortedByDescending { it.seats }
         result.forEach { println(it) }
         assertEquals(25, result.size)
     }
 
     @Test
     fun comparePartiesAndRoyaume() {
-        val parties = readPartyTxtFile(partyFilename)
-        val roys = readRoyaumeTxtFile(royaumeFilename).sortedBy { it.name }
+        val parties = readPartyTxtResource(partyFilename)
+        val roys = readRoyaumeTxtResource(royaumeFilename).sortedBy { it.name }
 
         println("RoyaumeTxtFile") // can be used to test our reported results
         roys.forEachIndexed { idx, roy ->

@@ -76,30 +76,11 @@ class TestBoulder2025Cvrs {
             Contest(info, inputVotes, contestTab.ncardsTabulated, contestTab.ncardsTabulated)
         }
 
-        /* from https://assets.bouldercounty.gov/wp-content/uploads/2024/11/2024G-Boulder-County-Official-Summary-of-Votes.pdf
-        val expected = mapOf(
-            "Kamala D. Harris / Tim Walz" to 150149,
-            "Donald J. Trump / JD Vance" to 40758,
-            "Blake Huber / Andrea Denault" to 123,
-            "Chase Russell Oliver / Mike ter Maat" to 1263,
-            "Jill Stein / Rudolph Ware" to 1499,
-            "Randall Terry / Stephen E Broden" to 147,
-            "Cornel West / Melina Abdullah" to 457,
-            "Robert F. Kennedy Jr. / Nicole Shanahan" to 1754,
-            "Chris Garrity / Cody Ballard" to 4,
-            "Claudia De la Cruz / Karina García" to 82,
-            "Shiva Ayyadurai / Crystal Ellis" to 2,
-            "Peter Sonski / Lauren Onak" to 65,
-            "Bill Frankel / Steve Jenkins" to 1,
-            "Brian Anthony Perry / Mark Sbani" to 0,
-        ) */
+        // some random sanity check
+        val selectedContest = contests.find { it.name.startsWith("City of Boulder Council")}!!
+        val candidatesById = selectedContest.info.candidateNames.map { (name, id) -> id to name }.toMap()
 
-        val contestPrez = contests.find { it.name.startsWith("President")}!!
-        val candidatesById = contestPrez.info.candidateNames.map { (name, id) -> id to name }.toMap()
-        val votesByCandidateName = contestPrez.votes.toSortedMap().map { (id, nvotes) ->
-            Pair(candidatesById[id]!!, nvotes)
-        }.toMap()
-        // assertEquals(expected, votesByCandidateName)
+        assertEquals(11, candidatesById.size)
     }
 
     @Test
@@ -108,7 +89,7 @@ class TestBoulder2025Cvrs {
         // redaction lines are present
         val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrFilename, "Boulder")
 
-        val electionSimCvrs = CreateBoulderElection(AuditType.CLCA, export, sovo)
+        val electionSimCvrs = CreateBoulderElection(AuditType.CLCA, export, sovo, distributeOvervotes=emptyList())
         val infos = electionSimCvrs.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 

@@ -38,18 +38,13 @@ data class CompositeAuditRecord(
     override val componentRecords: List<AuditRecord>,
 ): CompositeRecordIF  {
 
-    // used by viewer
+    // used by viewer TODO read from resource
     fun readPartyNames(): Map<Int, String> {
         return readCanonicalPartyTxtFile("$topdir/$canonicalPartiesFilename")
     }
 
     fun readSampleLimits(): List<SampleLimit> {
         return readLimitsTxtFile("$topdir/$limitsFilename")
-    }
-
-    // used ??
-    fun readCoalitions(): List<CoalitionList> {
-        return readCoalitionTxtFile("$topdir/$coalitionFilename")
     }
 
     override fun readSortedManifest(styles: List<StyleIF>?): SortedManifest {

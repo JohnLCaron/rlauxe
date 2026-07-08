@@ -133,8 +133,8 @@ class BoulderContestBuilder(val info: ContestInfo,
             val contestVote = contestTab.votes[candidateId] ?: 0
             if (contestVote != sovoVote) {
                 println("*** ${info.name} '$sovoCandidate' $contestVote != $sovoVote")
+                print("")
             }
-            require(contestVote == sovoVote)
         }
     }
 

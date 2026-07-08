@@ -151,7 +151,7 @@ class TestSimulateOneAuditRaire {
         println("cassorter.poolAverages.assortMargin = ${cassorterPoolMargin}")
 
         val pool = pools.first()
-        val poolIrvVotes = pool.contestTabs[rcontestUA.id]!!.irvVotes.makeVotes(rcontestUA.ncandidates)
+        val poolIrvVotes = pool.contestTab(rcontestUA.id)!!.irvVotes.makeVotes(rcontestUA.ncandidates)
         val poolIrvMargin = rassorter.calcMarginFromVotes(poolIrvVotes, pool.ncards())
         println("rassorter pool calcMargin = ${poolIrvMargin}")
 

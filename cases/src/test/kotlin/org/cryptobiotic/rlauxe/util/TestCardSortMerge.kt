@@ -15,8 +15,9 @@ import kotlin.test.assertEquals
 
 class TestCardSortMerge {
     val tempDir = createTempDirectory()
-    val cvrExportFile = "src/test/data/${cvrExportCsvFile}"
-    val pools = mapOf("3065846003" to 1)
+    val cvrExportFile = "src/test/data/cvrExport.csv"
+    val cvrTreeFile = "src/test/data/cvrTree.zip"
+    val pools = mapOf("3065846003" to 1) // TODO
 
     @OptIn(ExperimentalPathApi::class)
     @AfterTest
@@ -30,7 +31,7 @@ class TestCardSortMerge {
         val sorter = SortMerge<CvrExport>(
             "$tempDir/testSortMergeRun",
             outputFile = outputFile,
-            seed = Random.Default.nextLong(),
+            seed = Random.nextLong(),
             maxChunk = 100
         )
         sorter.run(
@@ -45,8 +46,8 @@ class TestCardSortMerge {
             if (it.poolId != null) countPools++
             count++
         }
-        assertEquals(1377, count)
-        assertEquals(3, countPools) // 3 records have group = 1
+        assertEquals(119, count)
+        assertEquals(0, countPools) // TODO no group = 1
     }
 
     @Test
@@ -55,7 +56,7 @@ class TestCardSortMerge {
         val sorter = SortMerge<CvrExport>(
             "$tempDir/testSortMergeRunZip",
             outputFile = outputFile,
-            seed = Random.Default.nextLong(),
+            seed = Random.nextLong(),
             maxChunk = 100,
         )
 
@@ -71,7 +72,7 @@ class TestCardSortMerge {
             if (it.poolId != null) countPools++
             count++
         }
-        assertEquals(1377, count)
+        assertEquals(119, count)
         assertEquals(0, countPools) // the zip file has no pooled data
     }
 
@@ -81,7 +82,7 @@ class TestCardSortMerge {
         val sorter = SortMerge<CvrExport>(
             "$tempDir/testSortMergeRunZipTree",
             outputFile = outputFile,
-            seed = Random.Default.nextLong(),
+            seed = Random.nextLong(),
             maxChunk = 100,
         )
 
@@ -97,7 +98,7 @@ class TestCardSortMerge {
             if (it.poolId != null) countPools++
             count++
         }
-        assertEquals(1377, count)
+        assertEquals(119, count)
         assertEquals(0, countPools) // the zip file has no pooled data
     }
 

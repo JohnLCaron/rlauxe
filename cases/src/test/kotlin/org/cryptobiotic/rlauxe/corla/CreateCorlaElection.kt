@@ -121,6 +121,62 @@ fun createAndSaveUnsortedMvrs(
     return unsortedMvrIterator.cardIndex // card count
 }
 
+
+// merge styles and mvrs + phantoms -> cards iterator
+class MvrsToCardStylesIterator(
+    val mvrs: CloseableIterator<Cvr>,
+    styles: List<StyleIF>, //  either CardPool or CardStyle
+    phantomCvrs : List<Cvr>? = null,
+): CloseableIterator<AuditableCard> {
+
+    val allMvrs: Iterator<Cvr>
+
+    init {
+        allMvrs = if (phantomCvrs == null) {
+            mvrs
+        } else {
+            val mvrSeq = mvrs.iterator().asSequence()
+            val phantomSeq = phantomCvrs.asSequence()
+            (mvrSeq + phantomSeq).iterator()
+        }
+    }
+
+    val styleMap = styles.associateBy{ it.id() }
+    var cardIndex = 0 // 0 based index
+
+    override fun hasNext() = allMvrs.hasNext()
+
+    override fun next(): AuditableCard {
+        val org = allMvrs.next()
+        val style = styleMap[org.poolId]  // hijack poolId
+
+        val styleId = when {
+            (style != null) -> style.id()
+            org.phantom() -> CardStyle.phantomStyle.id()
+            else -> CardStyle.fromCvrStyle.id()
+        }
+
+        val (contestIds, contestStarts, candidates) = makeFromVotes(org.votes)
+        val cardm = AuditableCard(
+            id = org.id,
+            location = null,
+            index = cardIndex++,
+            prn = 0,
+            phantom=org.phantom,
+            styleId = styleId,
+            contestIds = contestIds,
+            contestStarts = contestStarts,
+            candidates = candidates,
+            poolId = org.poolId,
+        )
+        if (style != null) cardm.setStyle(style)
+        return cardm
+    }
+
+    override fun close() = mvrs.close()
+}
+
+
 // dont load into memory all at once, just one pool at a time
 // this is random, cant do more than once. must do mvrs first
 // TODO can we use  VunderBatches(batches: List<StyleIF>, val onePool: VunderPool)?

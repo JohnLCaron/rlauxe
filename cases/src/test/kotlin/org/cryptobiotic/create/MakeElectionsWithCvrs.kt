@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.create
 
 import com.github.michaelbull.result.Result
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
@@ -54,9 +54,14 @@ class MakeElectionsWithCvrs {
                 sampling = Sampling.uniform),
             ClcaConfig(), null)
 
-        countyElectionWithCvrs(
-            allColorado2020Counties(), Colorado2020General(), topdir,
-            creation, round, name = "Colorado2020uniform", startFirstRound = true,
+        _root_ide_package_.org.cryptobiotic.rlauxe.auditcenter.countyElectionWithCvrs(
+            allColorado2020Counties(),
+            _root_ide_package_.org.cryptobiotic.rlauxe.auditcenter.Colorado2020General(),
+            topdir,
+            creation,
+            round,
+            name = "Colorado2020uniform",
+            startFirstRound = true,
             isUniform = true,
         )
     }
@@ -66,9 +71,14 @@ class MakeElectionsWithCvrs {
         val topdir = "$cases/corla/withCvrs/Colorado2020"
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.04, ) // TODO LOOK
 
-        countyElectionWithCvrs(
-            allColorado2020Counties(), Colorado2020General(), topdir,
-            creation, round, name = "Colorado2020", startFirstRound = true,
+        _root_ide_package_.org.cryptobiotic.rlauxe.auditcenter.countyElectionWithCvrs(
+            allColorado2020Counties(),
+            _root_ide_package_.org.cryptobiotic.rlauxe.auditcenter.Colorado2020General(),
+            topdir,
+            creation,
+            round,
+            name = "Colorado2020",
+            startFirstRound = true,
             isUniform = false,
         )
     }
@@ -78,12 +88,12 @@ class MakeElectionsWithCvrs {
         val topdir = "$cases/corla/withCvrs/Colorado2020"
         val auditRecord = AuditRecord.read(topdir)!!
 
-        val coloradoInput = Colorado2020General()
+        val coloradoInput = _root_ide_package_.org.cryptobiotic.rlauxe.auditcenter.Colorado2020General()
 
         // writeCountyData(topdir, coloradoInput.strataMap.values.toList())
 
         val contestMap = auditRecord.contests.associate { it.contest.info().name to it }
-        writeCountyContestData(topdir, contestMap, coloradoInput)
+        _root_ide_package_.org.cryptobiotic.rlauxe.auditcenter.writeCountyContestData(topdir, contestMap, coloradoInput)
     }
 
     @Test

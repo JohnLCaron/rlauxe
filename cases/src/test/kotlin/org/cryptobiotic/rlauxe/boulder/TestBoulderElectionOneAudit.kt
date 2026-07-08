@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import kotlin.test.Test
 
+// TODO just prints info out
 class TestBoulderElectionOneAudit {
 
     @Test

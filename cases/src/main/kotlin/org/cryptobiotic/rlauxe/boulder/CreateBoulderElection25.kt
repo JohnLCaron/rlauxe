@@ -19,6 +19,7 @@ import kotlin.math.max
 
 private val logger = KotlinLogging.logger("CreateBoulderElection25")
 
+// TODO cant we merge this into CreateBoulderElection? why is it special ??
 // Use OneAudit; redacted ballots are in pools. Cant do IRV because we dont have VoteConsolidators
 // this version assume that the redacted groups know how many cards are contained in each
 class CreateBoulderElection25(
@@ -42,7 +43,7 @@ class CreateBoulderElection25(
     val contests: List<ContestIF>
     val contestsUA : List<ContestWithAssertions>
     val simulatedCvrs: List<Cvr>  // redacted cvrs
-    val allCvrs: List<Cvr>  // redacted cvrs
+    val allCvrs: List<Cvr>  // unredacted cvrs
 
     init {
         /*
@@ -257,7 +258,7 @@ class CreateBoulderElection25(
             }
     }
     override fun cardPools() = cardPools
-    override fun unsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, cardPools())
+    override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, cardPools())
     override fun unsortedMvrsExternal() = null
 
     override fun cards() = createCards()

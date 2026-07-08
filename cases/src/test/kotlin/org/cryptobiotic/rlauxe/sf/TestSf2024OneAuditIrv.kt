@@ -7,12 +7,12 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.irv.RaireAssorter
 import org.cryptobiotic.rlauxe.irv.IrvContest
 import org.cryptobiotic.rlauxe.irv.RaireContestWithAssertions
-import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.SubsetIterator
@@ -39,7 +39,7 @@ class TestSf2024OneAuditIrv() {
     val mvrs: CloseableIterable<AuditableCard>
 
     init {
-        val topdir = "$testdataDir/cases/sf2024/oa"
+        val topdir = "$cases/sf/sf2024/oa"
         val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
         sortedManifest = mvrManager.sortedManifest()
@@ -50,7 +50,7 @@ class TestSf2024OneAuditIrv() {
         cardPools = auditRecord.readCardPools()!!
 
         // use the cvrs from the clca as the mvrs
-        val cvrdir = "$testdataDir/cases/sf2024/clca"
+        val cvrdir = "$cases/sf/sf2024/clca"
         val cvrPublisher = Publisher(cvrdir)
         mvrs = readSortedManifest(cvrPublisher, infos, auditRecord.electionInfo.totalCardCount).cards
     }

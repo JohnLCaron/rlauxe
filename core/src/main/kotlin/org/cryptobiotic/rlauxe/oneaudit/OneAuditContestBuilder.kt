@@ -1,8 +1,11 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import au.org.democracydevelopers.raire.irv.Votes
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
+import org.cryptobiotic.rlauxe.irv.RaireAssorter
 import org.cryptobiotic.rlauxe.util.margin2mean
 
 //// common code for building OneAudit contests
@@ -56,7 +59,14 @@ fun setPoolAssorterAverages(
                 if (cardPool.hasContest(contestId)) {
                     val tab = cardPool.contestTab(oaContest.id)!! // Irv not done here
                     if (cardPool.ncards() > 0) {
-                        val poolMargin = assertion.assorter.calcMarginFromRegVotes(tab.votes, cardPool.ncards())
+                        val poolMargin = if (oaContest.isIrv) {
+                            val tab = cardPool.contestTab(oaContest.id)!! // assumes that the cardPool has the irvVotes
+                            val irvVotes: Votes = tab.irvVotes.makeVotes(oaContest.ncandidates)
+                            val raireAssorter = assertion.assorter as RaireAssorter
+                            raireAssorter.calcMarginFromVotes(irvVotes, cardPool.ncards())
+                        } else {
+                            assertion.assorter.calcMarginFromRegVotes(tab.votes, cardPool.ncards())
+                        }
                         assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                     }
                 }

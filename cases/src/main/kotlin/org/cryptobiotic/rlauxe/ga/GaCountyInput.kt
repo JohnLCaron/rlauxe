@@ -133,7 +133,7 @@ fun cleanup(s: String): String {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// read manifests and candidte_totals
+// read manifests and candidate_totals
 fun readGaCountyInputCsv(topdir: String): Pair<List<GaContest>, List<GaCounty>> {
     val contests = mutableMapOf<String, GaContest>()
     val counties = mutableListOf<GaCounty>()

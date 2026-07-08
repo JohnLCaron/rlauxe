@@ -1,9 +1,10 @@
-package org.cryptobiotic.rlauxe.variance
+package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.util.calcDeciles
 import org.cryptobiotic.rlauxe.util.calcDecilesFromInt
+import org.cryptobiotic.rlauxe.variance.VarianceDataGenerator
 import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
@@ -12,11 +13,11 @@ class MakeVarianceData {
 
     @Test
     fun createBoulderOaVariance() {
-        val cvrDir = "$cases/sf/sf2024"
+        val cvrDir = "${cases}/sf/sf2024"
 
         val generator = VarianceDataGenerator(
             "boulder2024",
-            "$cases/boulder/boulder2024oaVariance/boulder2024oaVariance",
+            "${cases}/boulder/boulder2024oaVariance/boulder2024oaVariance",
             otherParameters = arrayOf(
                 "--input",
                 cvrDir,
@@ -29,11 +30,11 @@ class MakeVarianceData {
 
     @Test
     fun createSFOaVariance() {
-        val cvrDir = "$cases/sf/sf2024"
+        val cvrDir = "${cases}/sf/sf2024"
 
         val generator = VarianceDataGenerator(
             "sf2024",
-            "$cases/sf/sf2024oaVariance/sf2024oaVariance",
+            "${cases}/sf/sf2024oaVariance/sf2024oaVariance",
             otherParameters = arrayOf(
                 "--input",
                 cvrDir,
@@ -48,7 +49,7 @@ class MakeVarianceData {
     fun createGaVariance() {
         val generator = VarianceDataGenerator(
             "ga26p",
-            "$cases/ga/ga2026variance/ga2026variance",
+            "${cases}/ga/ga2026variance/ga2026variance",
             otherParameters = arrayOf(
                 "--input",
                 "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted",
@@ -63,7 +64,7 @@ class MakeVarianceData {
     fun createGaPollingVariance() {
         val generator = VarianceDataGenerator(
             "ga26p",
-            "$cases/ga/ga2026pvariance/ga2026pollVariance",
+            "${cases}/ga/ga2026pvariance/ga2026pollVariance",
             otherParameters = arrayOf(
                 "--input",
                 "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted",
@@ -78,7 +79,7 @@ class MakeVarianceData {
 
     @Test
     fun readVariance() {
-        val toptopdir = "$cases/ga/ga2026pvariance"
+        val toptopdir = "${cases}/ga/ga2026pvariance"
         val path = Path(toptopdir)
         val nmvrs = mutableListOf<Int>()
         val nrounds = mutableListOf<Int>()
@@ -99,4 +100,3 @@ class MakeVarianceData {
         println(calcDeciles(nrounds.map { it.toDouble() }))
     }
 }
-

@@ -40,7 +40,7 @@ class BelgiumClca (
     override fun cards() = createCards()
     override fun ncards() = allCvrs.size
 
-    override fun unsortedMvrsInternal() = mvrsToAuditableCardsListM(allCvrs, null)
+    override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, null)
     override fun unsortedMvrsExternal() = null
 
     fun createCards(): CloseableIterator<AuditableCard> {
@@ -92,6 +92,7 @@ fun createBelgiumAndRunAllRounds(electionName: String,
 
     val partyIds = readPartyTxtResource("$belgiumData/parties.txt")
     validateOutputDir(Path.of(toptopdir))
+    // TODO why not read from resource ??
     copyResourceFile("$belgiumData/canonicalParties.txt", "$toptopdir/canonicalParties.txt")
 
     val dhondtParties = belgiumElectionJson.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, partyIds[it.PartyLabel]!!, it.NrOfVotes) }
@@ -132,7 +133,7 @@ fun createBelgiumAndRunAllRounds(electionName: String,
     } else Pair(0, 0)
 }
 
-fun createAllBelgiumElections(toptopdir: String) {
+fun makeBelgium2024Data(toptopdir: String) {
     val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
     belgiumJsonInputResource.keys.forEachIndexed { idx, name ->
         val resourcePath = belgiumJsonInputResource[name]!!

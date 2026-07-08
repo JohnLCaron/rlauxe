@@ -104,14 +104,17 @@ class TestCvrExportRedaction {
         var totalNcards = 0
         var totalNvotes = 0
         export.redactedGroups.forEach { group ->
-            val pool = poolMap[group.ballotType]!! // hmm maybe not unique?
+            val pool = poolMap[group.ballotType] // hmm maybe not unique?
+            if (pool == null) {
+                throw RuntimeException()
+            }
             var gnzCount = 0
             var pnzCount = 0
             var gnvotes = 0
             var pnvotes = 0
             group.contestVotes.forEach { groupVoteMap: Map.Entry<Int, MutableMap<Int, Int>> ->
                 val lookup: ExportToCanonLookup = dominionConverter.exportToCanonLookup[groupVoteMap.key]!!
-                val poolTab = pool.contestTabs[lookup.canonContestId]
+                val poolTab = pool.contestTab(lookup.canonContestId)
                 if (poolTab != null) {
                     groupVoteMap.value.forEach { (rcandid, rvotes) ->
                         val canonCandId = lookup.candLookup[rcandid]

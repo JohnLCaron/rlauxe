@@ -6,7 +6,7 @@ import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.auditcenter.makeCorlaElectionClca
 import org.cryptobiotic.rlauxe.auditcenter.makeCorlaElectionUniform
-import org.cryptobiotic.rlauxe.belgium.createAllBelgiumElections
+import org.cryptobiotic.rlauxe.belgium.makeBelgium2024Data
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionClca
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionOA
 import org.cryptobiotic.rlauxe.ga.makeGa2026
@@ -87,7 +87,7 @@ object CreateCaseData {
             println("version=$version")
 
             when (case) {
-                "belgium" -> createAllBelgiumElections(output)
+                "belgium" -> makeBelgium2024Data(output)
 
                 "boulder2024" -> {
                     when (auditType) {

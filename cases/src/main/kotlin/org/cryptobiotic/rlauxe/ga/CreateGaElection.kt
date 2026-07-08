@@ -37,6 +37,7 @@ import kotlin.collections.forEach
 
 private val logger = KotlinLogging.logger("CreateGaElection")
 
+// Ga2026Primary from manifests and candidate_totals
 class CreateGaElection(
     val electionName: String,
     val auditType: AuditType,
@@ -49,15 +50,15 @@ class CreateGaElection(
 
     val contests: List<ContestIF>
     val contestsUA: List<ContestWithAssertions>
-    val cardPools: List<CardPool>  // redacted cvrs
+    val cardPools: List<CardPool>
     val cardStyles: List<StyleIF>
-    val mvrs: List<AuditableCard>
+    val mvrs: List<AuditableCard> // TODO in memory
 
     init {
         this.ncards = counties.sumOf { it.ncards() }
         contests = makeContests(this.ncards)
 
-        infos = contests.associate { it.id  to it.info }
+        infos = contests.associate { it.id to it.info }
 
         // only one CardStyle
         this.cardStyles = listOf(CardStyle(1, infos.keys.toSet()))
@@ -71,31 +72,44 @@ class CreateGaElection(
                 val contestTabs: Map<Int, ContestTabulation> = contests.map { contest ->
                     // (info: ContestInfo, votes: Map<Int, Int>, ncards: Int)
                     val info = contest.info
-                    val votes = batch.candCount.filter { it.key.contest == contest.name}.map { (cand, votes) ->
-                        info.candidateNames[cand.candName]!! to votes }.toMap() // candId -> votes
+                    val votes = batch.candCount.filter { it.key.contest == contest.name }.map { (cand, votes) ->
+                        info.candidateNames[cand.candName]!! to votes
+                    }.toMap() // candId -> votes
                     val tab = ContestTabulation(contest.info, votes, batch.nballots)
                     Pair(contest.id, tab)
                 }.toMap()
-                pools.add(CardPool("${county.countyName}-${batch.name}", poolid++, true, infos, contestTabs, batch.nballots))
+                pools.add(
+                    CardPool(
+                        "${county.countyName}-${batch.name}",
+                        poolid++,
+                        true,
+                        infos,
+                        contestTabs,
+                        batch.nballots
+                    )
+                )
             }
         }
         this.cardPools = pools.toList()
 
         contestsUA = if (auditType.isOA()) makeOneAuditContests(contests, pools) else
             makePollingContests(contests)
-        mvrs = makeMvrsFromPools() // once only
+        mvrs = makeMvrsFromPools(pools) // once only
     }
 
     fun makeContests(useNc: Int): List<Contest> {
         var contestId = 1
         return gacontests.map { gacontest ->
-            // TODO we could calculate if any candidate has a majoity here, and set ContestInfo acordingly
-            //     val candidateNames: Map<String, Int>, // candidate name -> candidate id
-            val candidateMap = gacontest.candCount.keys.mapIndexed { idx, candidate -> Pair(candidate.candName, idx) }.toMap()
-            val info = ContestInfo( gacontest.contestName, contestId++, candidateMap, SocialChoiceFunction.RUNOFF,
-                nwinners=2, voteForN=1, minFraction=0.5)
+            val candidateMap =
+                gacontest.candCount.keys.mapIndexed { idx, candidate -> Pair(candidate.candName, idx) }.toMap()
+            val info = ContestInfo(
+                gacontest.contestName, contestId++, candidateMap, SocialChoiceFunction.RUNOFF,
+                nwinners = 2, voteForN = 1, minFraction = 0.5
+            )
 
-            val candidateVotes = gacontest.candCount.map{ (candidate, votes) -> Pair(info.candidateNames[candidate.candName]!!, votes) }.toMap()
+            val candidateVotes =
+                gacontest.candCount.map { (candidate, votes) -> Pair(info.candidateNames[candidate.candName]!!, votes) }
+                    .toMap()
             Contest(info, candidateVotes, useNc, ncards)
         }
     }
@@ -105,8 +119,8 @@ class CreateGaElection(
         cardPools: List<CardPoolIF>,
     ): List<ContestWithAssertions> {
 
-        val contestsUA = wantContests.filter{ !it.isIrv() }.map { contest ->
-            ContestWithAssertions(contest, isClca=true, hasStyle=true).addStandardAssertions()
+        val contestsUA = wantContests.filter { !it.isIrv() }.map { contest ->
+            ContestWithAssertions(contest, isClca = true, hasStyle = true).addStandardAssertions()
         }
 
         // Its the OA assorters that make this a OneAudit contest
@@ -117,50 +131,53 @@ class CreateGaElection(
     fun makePollingContests(
         wantContests: List<ContestIF>, // the contests you want to audit
     ): List<ContestWithAssertions> {
-        return wantContests.filter{ !it.isIrv() }.map { contest ->
-            ContestWithAssertions(contest, isClca=false, hasStyle=false).addStandardAssertions()
+        return wantContests.filter { !it.isIrv() }.map { contest ->
+            ContestWithAssertions(contest, isClca = false, hasStyle = false).addStandardAssertions()
         }
     }
 
-    override fun electionInfo() = ElectionInfo(electionName, auditType, ncards(), contestsUA.size,
-        true, mvrSource=MvrSource.testPrivateMvrs, pollingMode=pollingMode)
+    override fun electionInfo() = ElectionInfo(
+        electionName, auditType, ncards(), contestsUA.size,
+        true, mvrSource = MvrSource.testPrivateMvrs, pollingMode = pollingMode
+    )
+
     override fun contestsUA() = contestsUA
     override fun cardStyles() = cardStyles
     override fun cardPools() = cardPools
     override fun unsortedMvrsInternal() = mvrs
     override fun unsortedMvrsExternal() = null
 
-    override fun cards() = createCards()
+    override fun cards() = createCards(mvrs)
     override fun ncards() = ncards
+}
 
-    // the card manifest: munge the mvrs
-    fun createCards(): CloseableIterator<AuditableCard> {
-        // remove cvrs for cards in the pools
-        val mvrIter = Closer(this.mvrs.iterator())
-        val transformer = TransformingIterator<AuditableCard, AuditableCard>(mvrIter) { org ->
-            AuditableCard.removeVotesReplaceStyle(org, 1)
+// the card manifest: munge the mvrs
+fun createCards(mvrs: List<AuditableCard>): CloseableIterator<AuditableCard> {
+    // remove cvrs for cards in the pools
+    val mvrIter = Closer(mvrs.iterator())
+    val transformer = TransformingIterator<AuditableCard, AuditableCard>(mvrIter) { org ->
+        AuditableCard.removeVotesReplaceStyle(org, 1)
+    }
+    return transformer
+}
+
+// this assigns votes, so its the mvrs and can only be done once;
+fun makeMvrsFromPools(cardPools: List<CardPool>) : List<AuditableCard> { // contestId -> candidateId -> nvotes
+    val cards = mutableListOf<AuditableCard>()
+    var cardIndex = 0
+    cardPools.forEach { cardPool ->
+        var poolIndex = 0
+        val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
+        val vunderPool = VunderPool(poolVunders, cardPool.poolName, cardPool.poolId, cardPool.hasExactContests)
+        val poolCards = vunderPool.makeCardsForOneAuditPool {
+            poolIndex++
+            val cvrId = "${cardPool.poolName}-${poolIndex}"
+            AuditableCardBuilder(cvrId, null, cardIndex++, 0, phantom = false, styleId=cardPool.poolId, poolId=cardPool.poolId, votesIn=null)
         }
-        return transformer
+        cards.addAll( poolCards)
     }
 
-    // this assigns votes, so its the mvrs and can only be done once;
-    fun makeMvrsFromPools() : List<AuditableCard> { // contestId -> candidateId -> nvotes
-        val cards = mutableListOf<AuditableCard>()
-        var cardIndex = 0
-        cardPools.forEach { cardPool ->
-            var poolIndex = 0
-            val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
-            val vunderPool = VunderPool(poolVunders, cardPool.poolName, cardPool.poolId, cardPool.hasExactContests)
-            val poolCards = vunderPool.makeCardsForOneAuditPool {
-                poolIndex++
-                val cvrId = "${cardPool.poolName}-${poolIndex}"
-                AuditableCardBuilder(cvrId, null, cardIndex++, 0, phantom = false, styleId=cardPool.poolId, poolId=cardPool.poolId, votesIn=null)
-            }
-            cards.addAll( poolCards)
-        }
-
-        return cards
-    }
+    return cards
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.sf
 
-import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
 import org.cryptobiotic.rlauxe.oneaudit.*
@@ -19,7 +19,7 @@ import kotlin.test.assertEquals
 import kotlin.use
 
 class TestSfElectionVunderFuzz {
-    val topdir = "$testdataDir/cases/sf2024/oa"
+    val topdir = "$cases/sf/sf2024/oa"
     val publisher = Publisher(topdir)
 
     val mvrManager: PersistedMvrManager
@@ -117,7 +117,7 @@ class TestSfElectionVunderFuzz {
         val cardPoolMap = cardPools!!.associateBy { it.poolId }
         val useCardPool = cardPoolMap[useCardPoolId]!!
         print(useCardPool)
-        val tab = useCardPool.contestTabs[contestId]
+        val tab = useCardPool.contestTab(contestId)
         println(tab)
 
         val poolAvg = cassorter.poolAverages.assortAverage[useCardPoolId]!!

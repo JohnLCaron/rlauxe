@@ -36,7 +36,7 @@ import kotlin.math.ln
 import kotlin.use
 
 private val logger = KotlinLogging.logger("EstimateAudit")
-private val showWork = true
+private val showWork = false
 
 // TODO  round > 1 we want to incorporate the measured errors from previous rounds
 //   cant use vunderPool to do so, that only uses fuzz
@@ -102,7 +102,8 @@ class EstimateAudit(
 
             //  TODO use quantile ?
             val distribution: List<Int> = contestResults.map { it.nmvrs() }.sorted()
-            val newMvrs = roundUp(percentiles().index(pct).compute(*distribution.toIntArray()))
+            val newMvrs = if (distribution.isEmpty()) 0 else
+                roundUp(percentiles().index(pct).compute(*distribution.toIntArray()))
 
             // TODO only estimating minAssertion; is that ok ?
             //   minAssertion can change when some assertions succeed in previous rounds
@@ -242,10 +243,12 @@ class AuditTrialTask(
                 }
                 cardSortedIndex++
 
-                if (cardSortedIndex % 1000 == 0)
-                    print(" $cardSortedIndex")
-                if (cardSortedIndex % 10000 == 0)
-                    println()
+                if (showWork) {
+                    if (cardSortedIndex % 1000 == 0)
+                        print(" $cardSortedIndex")
+                    if (cardSortedIndex % 10000 == 0)
+                        println()
+                }
             }
         }
         logger.debug { "roundIdx $roundIdx $run countEstimatedCards=$countEstimatedCards took $stopwatch" }

@@ -483,37 +483,3 @@ data class CoalitionOld(val name: String, val candidates: Set<Int>) {
         losers.forEach { appendLine("  ${it.assorter.hashcodeDesc()}") }
     }
 }
-
-// obsolete
-fun showCoalitionReport(auditRecord : CompositeAuditRecord) = buildString {
-    val coalitions = auditRecord.readCoalitions().map { CoalitionOld(it.name, it.candidates.toSet()) }
-    val lastRound = auditRecord.rounds.last()
-
-    val sampleLimits = auditRecord.readSampleLimits().associateBy { it.id }
-
-    val losers = mutableListOf<DhondtRiskFailure>()
-    lastRound.contestRounds.forEach { contestRound ->
-        val sampleLimit = sampleLimits[contestRound.id]
-        if (sampleLimit != null) {
-            contestRound.haveSampleSize = sampleLimit.limit
-        }
-
-        val dcontest = contestRound.contestUA.contest as DHondtContest
-        val builder = CandSeatRangeBuilderOld(dcontest, contestRound)
-        losers.addAll(builder.getFailures().map{ it.arms }.flatten() )
-        coalitions.forEach { coalition ->
-            coalition.addContestResult(dcontest)
-        }
-    }
-
-    coalitions.forEach { coalition ->
-        losers.forEach{ loser ->
-            coalition.addLoserResult( loser)
-        }
-    }
-
-    coalitions.forEach { coalition ->
-        println(coalition)
-    }
-
-}

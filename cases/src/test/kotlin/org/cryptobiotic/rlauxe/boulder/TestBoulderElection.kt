@@ -7,16 +7,13 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.SimulationControl
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
-import org.cryptobiotic.rlauxe.util.ConcurrentTask
-import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
-import org.cryptobiotic.rlauxe.audit.runAllRoundsAndVerify
-import kotlin.Int
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
-class MakeBoulderElection {
+class TestBoulderElection {
 
     // @Test
     fun createBoulder25oa() { // simulate CVRs
@@ -78,7 +75,7 @@ class MakeBoulderElection {
 
     @Test
     fun testRunVerifyBoulder24oa() {
-        val topdir = "$testdataDir/cases/boulder24/oa"
+        val topdir = "$cases/boulder/boulder2024/oa"
         val results = RunVerifyContests.runVerifyContests(topdir, null, show = false)
         println()
         print(results)
@@ -87,7 +84,7 @@ class MakeBoulderElection {
 
     // @Test
     fun createBoulder24clca() { // simulate CVRs
-        val topdir = "$testdataDir/cases/boulder24/clca"
+        val topdir = "$cases/boulder/boulder24/clca"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03, )
         val round = AuditRoundConfig(
@@ -109,7 +106,7 @@ class MakeBoulderElection {
 
     @Test
     fun testRunVerifyBoulder24clca() {
-        val topdir = "$testdataDir/cases/boulder24/clca"
+        val topdir = "$cases/boulder/boulder2024/clca"
         val results = RunVerifyContests.runVerifyContests(topdir, null, show = false)
         println()
         print(results)

@@ -47,13 +47,12 @@ class TestAssertions {
             assertEquals(if (it.loser == 3) 3.0/9.0 else 2.0/9.0, it.assorter.margin(contestUA.hasStyle), doublePrecision)
         }
 
-        val firstAssertion = assertions.first()
-        assertEquals("contest 0 winner: 4 loser: 0 upper: 1.0", firstAssertion.id())
+        val testAssertion = assertions.find{ it.id() == "contest 0 winner: 4 loser: 0 upper: 1.0"}!!
 
         val expectShow = """ contestInfo: 'AvB' (0) candidates=[0, 1, 2, 3, 4] choiceFunction=PLURALITY nwinners=2 voteForN=2
     assorter:  Plurality winner=4 loser=0 reportedMargin=22.2222% dilutedMargin=22.2222%
 """
-        assertEquals(expectShow, firstAssertion.show())
+        assertEquals(expectShow, testAssertion.show())
     }
 
     @Test
@@ -101,7 +100,7 @@ class TestAssertions {
         val firstAssertion = assertions.first()
         assertEquals(firstAssertion, firstAssertion)
         assertEquals(firstAssertion.hashCode(), firstAssertion.hashCode())
-        assertEquals("'AvB' (0) AboveThreshold for 'E': reportedMargin=14.2857%  dilutedMargin=14.2857% noerror=53.0303% g= [-0.4 .. 0.6] h = [0.0 .. 1.25]", firstAssertion.toString())
+        assertEquals("'AvB' (0) AboveThreshold for 'E' (4): reportedMargin=14.2857%  dilutedMargin=14.2857% noerror=53.0303% g= [-0.4 .. 0.6] h = [0.0 .. 1.25]", firstAssertion.toString())
     }
 
     @Test

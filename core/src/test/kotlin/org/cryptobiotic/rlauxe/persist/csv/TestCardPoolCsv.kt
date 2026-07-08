@@ -33,7 +33,7 @@ class TestCardPoolCsv {
             println(rpool)
 
             rpool.contestTabs.values.forEach{ rtab ->
-                val ttab = tpool.contestTabs[rtab.contestId]
+                val ttab = tpool.contestTab(rtab.contestId)
                 assertEquals(ttab, rtab)
             }
 

@@ -14,7 +14,7 @@ class TestExportSchema {
 
     @Test
     fun test2020CvrSchema() {
-        testCvrSchema("Boulder", "/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/Boulder CO.csv", Colorado2020General())
+        testCvrSchema("Boulder", "/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv", Colorado2020General())
         // testCvrSchema("/home/stormy/datadrive/votedatabase/cvr/Colorado/Otero/cvr.csv", colorado2020)
     }
 

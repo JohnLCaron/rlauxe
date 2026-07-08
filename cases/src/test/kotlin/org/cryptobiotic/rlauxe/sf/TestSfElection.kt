@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.AuditRecord
@@ -21,7 +22,7 @@ class TestSfElection {
 
     @Test
     fun testRunVerifySFoa() {
-        val topdir = "$testdataDir/cases/sf2024/oa"
+        val topdir = "$cases/sf/sf2024/oa"
         val results = RunVerifyContests.runVerifyContests(topdir, null, show = false)
         println()
         print(results)
@@ -30,7 +31,7 @@ class TestSfElection {
 
     @Test
     fun testSFoaPopulations() {
-        val topdir = "$testdataDir/cases/sf2024/oa"
+        val topdir = "$cases/sf/sf2024/oa"
 
         val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord, false)
@@ -100,7 +101,7 @@ class TestSfElection {
 
     @Test
     fun testSFmaxBet() {
-        val topdir = "$testdataDir/cases/sf2024/oa"
+        val topdir = "$cases/sf/sf2024/oa"
         val publisher = Publisher(topdir)
 
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())

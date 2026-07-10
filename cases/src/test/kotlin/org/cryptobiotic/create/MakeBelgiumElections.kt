@@ -2,6 +2,9 @@ package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.runRound
+import org.cryptobiotic.rlauxe.belgium.belgiumJsonInputResource
+import org.cryptobiotic.rlauxe.belgium.createAndRunOneBelgiumElection
+import org.cryptobiotic.rlauxe.belgium.makeBelgium2024Data
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
@@ -19,7 +22,7 @@ class MakeBelgiumElections {
     @Test
     fun createBelgiumElection() {
         val name = "Bruxelles"
-        _root_ide_package_.org.cryptobiotic.rlauxe.belgium.createAndRunOneBelgiumElection(
+        createAndRunOneBelgiumElection(
             name,
             toptopdir,
             contestId = 5
@@ -33,7 +36,7 @@ class MakeBelgiumElections {
 
     @Test
     fun createAllBelgiumElectionsFromResources() {
-        _root_ide_package_.org.cryptobiotic.rlauxe.belgium.makeBelgium2024Data(toptopdir)
+        makeBelgium2024Data(toptopdir)
     }
 
     @Test
@@ -48,7 +51,7 @@ class MakeBelgiumElections {
     @Test
     fun showAllBelgiumElection() {
         val allResults = mutableMapOf<String, Triple<Int, Int, AssorterIF>>()
-        _root_ide_package_.org.cryptobiotic.rlauxe.belgium.belgiumJsonInputResource.keys.forEach {
+        belgiumJsonInputResource.keys.forEach {
             allResults[it] = showBelgiumElection(it)
         }
 

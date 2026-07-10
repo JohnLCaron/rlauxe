@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
@@ -16,12 +15,9 @@ import org.cryptobiotic.rlauxe.audit.createElectionRecord
 import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.auditcenter.munge
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.estimate.VunderPool
-import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
-import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -33,6 +29,8 @@ import kotlin.collections.component2
 import kotlin.collections.forEach
 
 private val logger = KotlinLogging.logger("CreateGaElection")
+
+// Ga2026Primary from ballotImageAudit file
 
 class CreateGa2Election(
     val electionName: String,
@@ -85,23 +83,8 @@ class CreateGa2Election(
         }
         this.cardPools = pools.toList()
 
-        contestsUA = makeOneAuditContests(contests, pools)
-
+        contestsUA = makeOneAuditContests(contests, emptyMap(), pools, false)
         mvrs = makeMvrsFromPools(pools) // once only
-    }
-
-    fun makeOneAuditContests(
-        wantContests: List<ContestIF>, // the contests you want to audit
-        cardPools: List<CardPoolIF>,
-    ): List<ContestWithAssertions> {
-
-        val contestsUA = wantContests.filter { !it.isIrv() }.map { contest ->
-            ContestWithAssertions(contest, isClca = true, hasStyle = false).addStandardAssertions()
-        }
-
-        // Its the OA assorters that make this a OneAudit contest
-        setPoolAssorterAverages(contestsUA, cardPools)
-        return contestsUA
     }
 
     override fun electionInfo() = ElectionInfo(
@@ -130,8 +113,8 @@ fun createCards2(mvrs: List<AuditableCard>): CloseableIterator<AuditableCard> {
 
 
 ////////////////////////////////////////////////////////////////////
-// Clca: create simulated cvrs for the redacted groups, for a full CLCA audit with hasStyles=true.
-// OA: Create a OneAudit where pools are from the redacted cvrs.
+// OA: Create a OneAudit with each county being a pool
+// Clca: create simulated cvrs from the pools
 fun createGa2Election(
     electionName: String,
     contestsFile: String,

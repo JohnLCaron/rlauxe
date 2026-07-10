@@ -3,9 +3,6 @@ package org.cryptobiotic.rlauxe.boulder
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
-import org.cryptobiotic.rlauxe.audit.CardPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromBallotStyle
 import org.cryptobiotic.rlauxe.util.mergeReduce
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.collections.component1
@@ -17,10 +14,11 @@ import kotlin.random.Random
 private val logger = KotlinLogging.logger("BoulderContestBuilder")
 
 // TODO This is specific to distributeExpectedOvervotes. maybe if we can get undervotes correct we dont need that ?
+// TODO overly complicated
 class BoulderContestBuilder(val info: ContestInfo,
                             val sovoContest: BoulderContestVotes,
                             val cvrTab: ContestTabulation,
-                            val redTab: ContestTabulation): OneAuditContestBuilderIF {
+                            val redTab: ContestTabulation) {
 
     // there are no overvotes in the Cvrs; we treat them as blanks (not divided by voteForN)
     val sovoCards = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes
@@ -28,14 +26,17 @@ class BoulderContestBuilder(val info: ContestInfo,
 
     // sovo gives us an expected undervote for each contest
     val sovoUndervotes = sovoContest.totalUnderVotes + sovoContest.totalOverVotes * info.voteForN
+
     // missing undervotes we assume are in the redacted pools
-    val redUndervotes = sovoUndervotes  - cvrTab.undervotes
+    val redUndervotes = sovoUndervotes - cvrTab.undervotes
     val redVotes = redTab.nvotes()
+
     // then this is the total cards in the pools
     val redNcards = (redVotes + redUndervotes) / info.voteForN
+
     // then this is the total cards in the cvrs and the pools
-    val totalCards= redNcards + cvrTab.ncardsTabulated
-    override val contestId: Int = info.id
+    val totalCards = redNcards + cvrTab.ncardsTabulated
+    val contestId: Int = info.id
 
     var poolTotalCards: Int = 0
 
@@ -111,19 +112,17 @@ class BoulderContestBuilder(val info: ContestInfo,
     }
 
     // total number of cards for this contest in the pools. this is dynamic because the pools get adjusted
-    override fun poolTotalCards() = poolTotalCards
+    fun poolTotalCards() = poolTotalCards
 
-    override fun adjustPoolInfo(cardPools: List<CardPoolIF>) {
-        if (info.id == 18)
-            print("")
-        poolTotalCards = cardPools.filter{ it.hasContest(info.id)}.sumOf { it.ncards() }
+    fun adjustPoolInfo(cardPools: List<OneAuditPoolBuilder>) {
+        poolTotalCards = cardPools.filter { it.hasContest(info.id) }.sumOf { it.ncards() }
     }
 
     // calculated total cards in the pools
-    override fun expectedPoolNCards() = redNcards
+    fun expectedPoolNCards() = redNcards
 
     // ncards
-    fun sumAllCards() : Int {
+    fun sumAllCards(): Int {
         return poolTotalCards() + cvrTab.ncardsTabulated
     }
 
@@ -138,72 +137,66 @@ class BoulderContestBuilder(val info: ContestInfo,
         }
     }
 
-   fun checkNcards(contestTab: ContestTabulation) {
+    fun checkNcards(contestTab: ContestTabulation) {
         println("  ${info.id}: sovoContest.totalBallots=${sovoContest.totalBallots} - contestTab.ncards=${contestTab.ncardsTabulated} = ${sovoContest.totalBallots - contestTab.ncardsTabulated}")
         println("  ${info.id}: sumAllCards=${sumAllCards()} - contestTab.ncards=${contestTab.ncardsTabulated} = ${sumAllCards() - contestTab.ncardsTabulated}")
         println()
     }
-}
 
-//////////////////////////////////////////////////////////////////
+    // TODO can we get rid of? overly complicated
+    // we dont know how many cards are in the pool.
+    // so adjust the number of cards in the pools so that the sum of pool.undervotes agrees with the refContest
+    // this only works if the pool has a single style.
+    fun distributeExpectedOvervotes(cardPools: List<OneAuditPoolBuilder>) {
+        val poolCards = this.poolTotalCards()
+        val expectedCards = this.expectedPoolNCards()
+        val need = expectedCards - poolCards
+        println("${contestId} expectedCards=$expectedCards poolCards=$poolCards need = $need")
 
-// used by CreateBoulderElection and CreateColoradoElection. TODO Maybe only for 2024?
-// TODO could be in core so as to run unit tests on it
-
-
-// we dont know how many cards are in the pool.
-// so adjust the number of cards in the pools so that the sum of pool.undervotes agrees with the refContest
-// this only works if the pool has a single style.
-fun distributeExpectedOvervotes(refContest: OneAuditContestBuilderIF, cardPools: List<OneAuditPoolFromBallotStyle>) {
-    val contestId = refContest.contestId
-    val poolCards = refContest.poolTotalCards()
-    val expectedCards = refContest.expectedPoolNCards()
-    val need = expectedCards - poolCards
-    println("${refContest.contestId} expectedCards=$expectedCards poolCards=$poolCards need = $need")
-
-    var used = 0
-    val allocDiffPool = mutableMapOf<Int, Int>() // poolId -> adjusted undervotes
-    cardPools.forEach { pool ->
-        val minCardsNeeded = pool.minCardsNeeded[contestId]
-        if (minCardsNeeded != null) {
-            // distribute cards as proportion of totalVotes
-            val allocDiff = roundToClosest(need * (pool.maxMinCardsNeeded / poolCards.toDouble()))
-            used += allocDiff
-            allocDiffPool[pool.poolId] = allocDiff
-        }
-    }
-
-    // adjust random pools until used == diff
-    if (used < need) {
-        val keys = allocDiffPool.keys.toList()
-        while (used < need) {
-            val chooseOne = keys[Random.nextInt(allocDiffPool.size)]
-            val prev = allocDiffPool[chooseOne]!!
-            allocDiffPool[chooseOne] = prev + 1
-            used++
-        }
-    }
-    if (used > need) {
-        val keys = allocDiffPool.keys.toList()
-        while (used > need) {
-            val chooseOne = keys[Random.nextInt(allocDiffPool.size)]
-            val prev = allocDiffPool[chooseOne]!!
-            if (prev > 0) {
-                allocDiffPool[chooseOne] = prev - 1
-                used--
+        var used = 0
+        val allocDiffPool = mutableMapOf<Int, Int>() // poolId -> adjusted undervotes
+        cardPools.forEach { pool ->
+            val minCardsNeeded = pool.minCardsNeeded[contestId]
+            if (minCardsNeeded != null) {
+                // distribute cards as proportion of totalVotes
+                val allocDiff = roundToClosest(need * (pool.maxMinCardsNeeded / poolCards.toDouble()))
+                used += allocDiff
+                allocDiffPool[pool.poolId] = allocDiff
             }
         }
-    }
 
-    // check used == diff
-    if (allocDiffPool.values.sum()!= need) {
-        println("distributeExpectedOvervotes: ${allocDiffPool.values.sum()} should equal == $need")
-    }
+        // adjust random pools until used == diff
+        if (used < need) {
+            val keys = allocDiffPool.keys.toList()
+            while (used < need) {
+                val chooseOne = keys[Random.nextInt(allocDiffPool.size)]
+                val prev = allocDiffPool[chooseOne]!!
+                allocDiffPool[chooseOne] = prev + 1
+                used++
+            }
+        }
+        if (used > need) {
+            val keys = allocDiffPool.keys.toList()
+            while (used > need) {
+                val chooseOne = keys[Random.nextInt(allocDiffPool.size)]
+                val prev = allocDiffPool[chooseOne]!!
+                if (prev > 0) {
+                    allocDiffPool[chooseOne] = prev - 1
+                    used--
+                }
+            }
+        }
 
-    // adjust
-    val cardPoolMap = cardPools.associateBy { it.poolId }
-    allocDiffPool.forEach { (poolId, adjust) ->
-        cardPoolMap[poolId]!!.adjustCards(adjust, contestId)
+        // check used == diff
+        if (allocDiffPool.values.sum() != need) {
+            println("distributeExpectedOvervotes: ${allocDiffPool.values.sum()} should equal == $need")
+        }
+
+        // adjust
+        val cardPoolMap = cardPools.associateBy { it.poolId }
+        allocDiffPool.forEach { (poolId, adjust) ->
+            cardPoolMap[poolId]!!.adjustCards(adjust, contestId)
+        }
     }
 }
 

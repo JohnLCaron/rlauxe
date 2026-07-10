@@ -20,11 +20,11 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsList
-import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.estimate.Vunder
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
@@ -211,12 +211,7 @@ class CardManifestAttack {
 
         // The sample poulation sizes come from the cards
         val Npops = manifestTabs.mapValues { it.value.ncardsTabulated }
-
-        val contestsUA = contests.map {
-            ContestWithAssertions(it, true, NpopIn=Npops[it.id]).addStandardAssertions()
-        }
-        // The OA assort averages come from the card Pools
-        setPoolAssorterAverages(contestsUA, cardPools)
+        val contestsUA  = makeOneAuditContests(contests, Npops, cardPools, hasStyle = false)
 
         println("false Contest totals")
         contestsUA.forEach { contestUA -> println(contestUA.showSimple())}

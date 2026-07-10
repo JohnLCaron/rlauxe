@@ -6,6 +6,8 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
+import kotlin.Int
+import kotlin.collections.Map
 import kotlin.collections.get
 
 // for all pools, multiple contests
@@ -108,6 +110,37 @@ class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId
         }
     }
 }
+
+/* is this the  same?
+
+fun test(vunders: Map<Int, Vunder>, poolName: String, poolId: Int, hasExactContests: Boolean): List<AuditableCard> {
+    val vunderPool = VunderPool(vunders, poolName, poolId, hasExactContests)
+    var count = 1
+
+    return vunderPool.makeCardsForOneAuditPool {
+        val cvrId = "${poolName}.index-${count}"
+        val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = poolId)
+        //     constructor(id: String, location: String?, index: Int, poolId: Int?, styleId: Int):
+        AuditableCardBuilder(cvrId, null, index=count++, poolId = poolId, styleId=1)
+    }
+}
+
+fun makeCvrsForOnePoolSame(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasExactContests: Boolean): List<Cvr> {
+    val vunderpool = VunderPool(vunders, poolName, poolId ?: -1, hasExactContests)
+
+    val rcvrs = mutableListOf<Cvr>()
+    var count = 1
+    while (!vunderpool.done()) {
+        val cvrId = "${poolName}.index-${count}"
+        val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = poolId)
+        vunderpool.simulatePooledCvr(cvb2)
+        rcvrs.add(cvb2.build())
+        count++
+    }
+
+    rcvrs.shuffle()
+    return rcvrs
+} */
 
 // class AuditableCardBuilder(
 //    val id: String,

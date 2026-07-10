@@ -275,6 +275,27 @@ fun readLimitsTxtFile(filename: String): List<SampleLimit> {
     return limits
 }
 
+fun readCanonicalPartyTxtFile(filename: String): Map<Int, String> {
+    val reader: BufferedReader = File(filename).bufferedReader()
+    reader.readLine() // get rid of header line
+
+    val parties = mutableListOf<Pair<Int, String>>()
+    while (true) {
+        val line = reader.readLine() ?: break
+        val tokens = line.split(",")
+        val ttokens = tokens.map { it.trim() }
+        val id = ttokens[0].toInt()
+        val name = ttokens[1]
+        parties.add(Pair(id, name))
+    }
+    reader.close()
+    return parties.toMap()
+}
+
+
+///////////////////////////////////////////////////////////////////
+// not currently used
+
 data class CoalitionList(val name: String, val candidates: List<Int>) {
     override fun toString(): String {
         return "${sfn(name, 20)}:  candidates=$candidates"
@@ -298,22 +319,5 @@ fun readCoalitionTxtFile(filename: String): List<CoalitionList> {
     }
     reader.close()
     return coalitions
-}
-
-fun readCanonicalPartyTxtFile(filename: String): Map<Int, String> {
-    val reader: BufferedReader = File(filename).bufferedReader()
-    reader.readLine() // get rid of header line
-
-    val parties = mutableListOf<Pair<Int, String>>()
-    while (true) {
-        val line = reader.readLine() ?: break
-        val tokens = line.split(",")
-        val ttokens = tokens.map { it.trim() }
-        val id = ttokens[0].toInt()
-        val name = ttokens[1]
-        parties.add(Pair(id, name))
-    }
-    reader.close()
-    return parties.toMap()
 }
 

@@ -31,6 +31,10 @@ import kotlin.collections.forEach
 private val logger = KotlinLogging.logger("CreateSfElection")
 
 // SanFrancisco 2024 General Election.
+
+// group cards into pools using the first part of the cvr id.
+// this creates 4224 pools. The precinct/style grouping gives 2525. Perhaps can just add a variation that uses one or the other?
+// passing in (cvrExport) -> poolKey() ??
 class CreateSfElection(
     castVoteRecordZip: String,
     contestManifestFilename: String,
@@ -241,7 +245,8 @@ fun makeOneAuditContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, Co
 
     // make non IRV contests
     val regularContests = makeRegularContests(infos, allCvrTabs, unpooledPool, contestNcs)
-    val regularOAcontests = makeOneAuditContests(regularContests, contestNbs, oneAuditPools).sortedBy { it.id }
+    val regularOAcontests = makeOneAuditContests(regularContests, contestNbs, oneAuditPools,
+        hasStyle = false).sortedBy { it.id }
     contestsUAs.addAll(regularOAcontests)
 
     // now make the IRV contests

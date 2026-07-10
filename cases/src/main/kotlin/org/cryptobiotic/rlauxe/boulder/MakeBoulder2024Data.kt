@@ -24,7 +24,7 @@ fun makeBoulderElectionOA(toptopdir: String) {
 
     createBoulderElection(
         "2024",
-        "/resources/data/cases/boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.csv",
+        "/resources/data/cases/boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
         "/resources/data/cases/boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
         topdir = topdir,
         creation,
@@ -45,7 +45,7 @@ fun makeBoulderElectionClca(toptopdir: String) {
 
     createBoulderElection(
         "2024",
-        "/resources/data/cases/boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.csv",
+        "/resources/data/cases/boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
         "/resources/data/cases/boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
         topdir = topdir,
         creation,

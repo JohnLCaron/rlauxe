@@ -12,7 +12,7 @@ import kotlin.collections.set
 
 // convert DominionCvrExportCsv from export ids to canonical ids
 // each export is specific to a County.
-class DominionConverter(val county: String, export: DominionCvrCsvSummary, val infosByName: Map<String, ContestInfo>, coloradoInput: ColoradoInput) {
+class DominionConverter(val county: String, export: DominionCvrExportCsv, val infosByName: Map<String, ContestInfo>, coloradoInput: ColoradoInput) {
 
     val exportToCanonLookup = mutableMapOf<Int, ExportToCanonLookup>() // export contestId -> ExportToCanonLookup
     val cardStyles: Map<Set<Int>, CardStyle> // canonicalContestIdSet -> cardStyle
@@ -189,7 +189,7 @@ data class ExportContestInfo(
     val candidateIdToName: Map<Int, String> = candidateNames.entries.associate {(k,v) -> v to k }
 }
 
-fun DominionCvrCsvSummary.makeContestInfo(): List<ExportContestInfo> {
+fun DominionCvrExportCsv.makeContestInfo(): List<ExportContestInfo> {
     val columns = this.schema.columns
 
     return this.schema.contests.map { exportContest ->

@@ -201,21 +201,20 @@ class TestSfElectionVunderFuzz {
     */
 }
 
-fun findPoolAverageB(mvrs: CloseableIterator<AuditableCard>, cvrs: Iterator<AuditableCard>, contestId: Int, poolId: Int, cassorter: ClcaAssorter): AssortAvg {
+fun findPoolAverageB(mvrIter: CloseableIterator<AuditableCard>, cvrIter: Iterator<AuditableCard>, contestId: Int, poolId: Int, cassorter: ClcaAssorter): AssortAvg {
     var missingInMvr = 0
     val assortAvg = AssortAvg()
-    mvrs.use { iter ->
-        for (mvr in iter) {
-            val cvr = cvrs.next()
-            if (cvr.poolId() == poolId) {
-                if (cvr.hasContest(contestId)) {
-                    if (!mvr.hasContest(contestId)) {
-                        missingInMvr++
-                    }
-                    val assortVal = cassorter.bassort(mvr, cvr)
-                    assortAvg.totalAssort += assortVal
-                    assortAvg.ncards++
+    while ( mvrIter.hasNext() && cvrIter.hasNext()) {
+        val mvr = mvrIter.next()
+        val cvr = cvrIter.next()
+        if (cvr.poolId() == poolId) {
+            if (cvr.hasContest(contestId)) {
+                if (!mvr.hasContest(contestId)) {
+                    missingInMvr++
                 }
+                val assortVal = cassorter.bassort(mvr, cvr)
+                assortAvg.totalAssort += assortVal
+                assortAvg.ncards++
             }
         }
     }

@@ -24,6 +24,7 @@ import kotlin.String
 import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("ProtoCard")
+private val showWork = false
 
 @Serializable
 class ProtoCard (
@@ -124,8 +125,14 @@ fun writeProtoCards(cards: CloseableIterator<AuditableCard>, protoFilename: Stri
         val bytes = ProtoBuf.encodeToByteArray(protoCard)
         writeDelimitedTo(bytes, outputStream)
         count++
-        if (count % 10000 == 0) { print("$count, ")}
-        if (count % 100000 == 0) { println("$count, ")}
+        if (showWork) {
+            if (count % 10000 == 0) {
+                print("$count, ")
+            }
+            if (count % 100000 == 0) {
+                println("$count, ")
+            }
+        }
     }
     outputStream.close()
     return count

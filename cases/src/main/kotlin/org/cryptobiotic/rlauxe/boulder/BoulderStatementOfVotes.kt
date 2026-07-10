@@ -201,7 +201,7 @@ fun readBoulderSOVfromInputStream(input: InputStream, variation: String, inputSo
     val records = parser.iterator()
 
     // we expect the first line to be the headers
-    records.next()
+    val header = records.next()
     // val header = headerRecord.toList().joinToString(", ")
     // println(header)
 

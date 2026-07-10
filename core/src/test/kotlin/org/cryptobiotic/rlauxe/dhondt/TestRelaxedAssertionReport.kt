@@ -2,8 +2,6 @@ package org.cryptobiotic.rlauxe.dhondt
 
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.BelowThreshold
-import org.cryptobiotic.rlauxe.dhondt.CandSeatRanges.Companion.showMergedSeatRanges
-import org.cryptobiotic.rlauxe.dhondt.CandSeatRanges.Companion.showSeatRange
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import kotlin.test.Test
@@ -102,22 +100,6 @@ class TestRelaxedAssertionReport {
         val dcontest = contestRound.contestUA.contest as DHondtContest
         assertTrue(dcontest.assorters.isEmpty())
         println( dcontest.showRelaxedAssertion(contestRound, cassertion) )
-    }
-
-    @Test
-    fun testCoalitionReport() {
-        print( showCoalitionReport(auditRecord as CompositeAuditRecord))
-    }
-
-    @Test
-    fun testMergeSeatRanges() {
-        print( showMergedSeatRanges(lastRound))
-    }
-
-    @Test
-    fun testAltContest() {
-        val contestRound = lastRound.contestRounds.find { it.id == 5 }!!
-        print( showSeatRange(contestRound))
     }
 
     @Test

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.dominion
 
-import org.cryptobiotic.rlauxe.auditcenter.compareLists
 import org.cryptobiotic.rlauxe.votedatabase.colorado2020
 import kotlin.test.Test
 
@@ -11,7 +10,7 @@ class TestDominionCvrReader {
     fun showProblemCountyContests() {
         var filename = "$colorado2020/Washington/cvr.csv"
         println(filename)
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
         export.schema.contests.sortedBy { it.contestName }.forEach { contest ->
             println("  $contest")
         }
@@ -22,7 +21,7 @@ class TestDominionCvrReader {
     fun testReadGarfield() {
         var filename = "$colorado2020/Garfield/cvr.csv"  // with fixed headers, originally cvr2.csv
         println(filename)
-        val export: DominionCvrCsvSummary = GarfieldCsvReader(filename).read()
+        val export = GarfieldCsvReader(filename)
         export.schema.contests.sortedBy { it.contestName }.forEach { contest ->
             println("  $contest")
         }

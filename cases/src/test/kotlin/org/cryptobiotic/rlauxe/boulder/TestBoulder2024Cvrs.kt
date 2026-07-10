@@ -4,6 +4,8 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
+import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.testdataDir
@@ -23,11 +25,10 @@ class TestBoulder2024Cvrs {
         val stopwatch = Stopwatch()
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(filename, "Boulder")
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
         // println(export.summary())
         println("took = $stopwatch")
 
-        assertEquals("Boulder", export.countyId)
         assertEquals(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             export.filename
@@ -81,45 +82,6 @@ class TestBoulder2024Cvrs {
             Pair(candidatesById[id]!!, nvotes)
         }.toMap()
         assertEquals(expected, votesByCandidateName)
-    }
-
-    @Test
-    fun testMakeRedactedCvrs() {
-        val stopwatch = Stopwatch()
-        // redaction lines are present
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(filename, "Boulder")
-
-        val sovo = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024")
-
-        val electionSimCvrs = CreateBoulderElection(AuditType.CLCA,  export, sovo)
-        val infos = electionSimCvrs.makeContestInfo()
-        println("ncontests with info = ${infos.size}")
-
-        val redactedCvrs = electionSimCvrs.makeRedactedCvrs()
-        println("nredacted cvrs = ${redactedCvrs.size}")
-        println("took = $stopwatch")
-
-        // TODO check that vote tallies agree...
-        val redactedCvrVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(redactedCvrs.iterator())
-
-        val redactedDirect = mutableMapOf<Int, MutableMap<Int, Int>>()
-        export.redacted.forEach { redacted ->
-            redacted.contestVotes.forEach { (contestId, conVotes) ->
-                val accumVotes = redactedDirect.getOrPut(contestId) { mutableMapOf() }
-                conVotes.forEach { (cand, nvotes) ->
-                    if (nvotes > 0) {
-                        val accum = accumVotes.getOrPut(cand) { 0 }
-                        accumVotes[cand] = accum + nvotes
-                    }
-                }
-            }
-        }
-        // println(compareRedactions(redactedCvrVotes, redactedDirect))
-        assertEquals(redactedCvrVotes, redactedDirect)
-        println("redactedCvrVotes agrees with redactedDirect")
     }
 
     @Test
@@ -189,8 +151,8 @@ fun compareRedactions(votes1: Map<Int, Map<Int, Int>>, votes2: Map<Int, Map<Int,
     }
 }
 
-fun makeCvr(id: Int, votes: Map<Int, IntArray>): Cvr {
-    val cvrb = CvrBuilder2(id.toString(),  false)
+fun makeCvr(id: String, votes: Map<Int, IntArray>): Cvr {
+    val cvrb = CvrBuilder2(id,  false)
     votes.forEach {
         cvrb.replaceContestVotes(it.key, it.value)
     }

@@ -14,10 +14,7 @@ import kotlin.io.path.Path
 
 const val CvrExportCsvHeader = "id, group, style, precinct, contests, candidates0, candidates1, ...\n"
 
-// private val logger = KotlinLogging.logger("CvrExportCvs")
-
-// serialization of CvrExport (from Json) to/from our ah-hoc csv format
-// TODO probably merge with our ad-hoc card csv format
+// serialization of CvrExport (from Json) to/from our ad-hoc csv format
 
 fun readCvrExportCsv(line: String): CvrExport {
     val tokens = line.split(",")

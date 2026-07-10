@@ -126,7 +126,7 @@ class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
         }
     }
 
-    fun read(showFirst: Int? = null, showAfter: Int? = null): DominionCvrCsvSummary {
+    fun read(showFirst: Int? = null, showAfter: Int? = null): DominionCvrExportCsv {
 
         var cvrCount = 0
         while (records.hasNext()) {
@@ -155,7 +155,7 @@ class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
         lineno++
 
         val ballotTypes = ballotStyles.ballotTypes.values.sortedBy { it.countCards }.reversed()
-        return DominionCvrCsvSummary(
+        return DominionCvrExportCsv(
             "Garfield", "unknown", filename, schema, cvrs,
             ballotStyles.redactedGroups.toSortedMap().values.toList(),
             ballotTypes

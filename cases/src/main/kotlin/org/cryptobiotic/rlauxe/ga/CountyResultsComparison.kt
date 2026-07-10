@@ -9,54 +9,8 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import kotlin.String
 
-// "County","ContestId","ContestName","DetailId","DetailName","OriginalCount","AuditCount","Difference"
-
-data class CountyResultsComparison(
-    val county: String,
-    val contestId: Int,
-    val contestName: String,
-    val detailId: String,
-    val detailName: String,
-    val orgCount: Int,
-    val auditCount: Int,
-    val diffCount: Int,
-)
-
-fun readBallotImageAudit(filename: String): List<CountyResultsComparison> {
-    val parser = CSVParser.parse(File(filename), StandardCharsets.UTF_8, CSVFormat.DEFAULT)
-    val records = parser.iterator()
-    var countReplaceForCounty = 0
-
-    // read the header
-    val headerLine = records.next()
-    println(headerLine.values())
-
-    val crcs = mutableListOf<CountyResultsComparison>()
-    while (records.hasNext()) {
-        val line = records.next()
-        if (line.all { it.isEmpty() }) continue
-
-        try {
-            val countyName = line[0].replace("County", "").trim()
-            var contestName = canonContest(line[2]).trim()
-            val crc = CountyResultsComparison(
-                county=countyName,
-                line[1].toInt(),
-                contestName,
-                line[3].trim(),
-                canonCand(line[4].trim()),
-                if (line[5].isEmpty()) 0 else line[5].toInt(),
-                if (line[5].isEmpty()) 0 else line[6].toInt(),
-                if (line[5].isEmpty()) 0 else line[7].toInt(),
-            )
-            crcs.add(crc)
-        } catch (e: Exception) {
-            println("*** ${e.message} $line")
-        }
-    }
-    println("read ${crcs.size} rows countReplaceForCounty=$countReplaceForCounty")
-    return crcs
-}
+//// read ballotImageAudit file
+//// return CountyIAs and ContestIAs
 
 data class CountyIA(val county: String) {
     val contests = mutableMapOf<String, ContestIA>()
@@ -68,6 +22,7 @@ data class CountyIA(val county: String) {
     }
 }
 
+// used both for county subtotals (inside of CountyIA) and total across all counties
 data class ContestIA(val contestName: String, val contestId: Int) {
     val counties = mutableMapOf<String, ContestIA>()
     val candCount = mutableMapOf<String, Int>()
@@ -127,10 +82,63 @@ data class ContestIA(val contestName: String, val contestId: Int) {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// "County","ContestId","ContestName","DetailId","DetailName","OriginalCount","AuditCount","Difference"
+
+data class CountyResultsComparison(
+    val county: String,
+    val contestId: Int,
+    val contestName: String,
+    val detailId: String,
+    val detailName: String,
+    val orgCount: Int,
+    val auditCount: Int,
+    val diffCount: Int,
+)
+
+fun readBallotImageAudit(filename: String): List<CountyResultsComparison> {
+    val parser = CSVParser.parse(File(filename), StandardCharsets.UTF_8, CSVFormat.DEFAULT)
+    val records = parser.iterator()
+    var countReplaceForCounty = 0
+
+    // read the header
+    val headerLine = records.next()
+    println(headerLine.values())
+
+    val crcs = mutableListOf<CountyResultsComparison>()
+    while (records.hasNext()) {
+        val line = records.next()
+        if (line.all { it.isEmpty() }) continue
+
+        try {
+            val countyName = line[0].replace("County", "").trim()
+            var contestName = canonContest(line[2]).trim()
+            val crc = CountyResultsComparison(
+                county=countyName,
+                line[1].toInt(),
+                contestName,
+                line[3].trim(),
+                canonCand(line[4].trim()),
+                if (line[5].isEmpty()) 0 else line[5].toInt(),
+                if (line[5].isEmpty()) 0 else line[6].toInt(),
+                if (line[5].isEmpty()) 0 else line[7].toInt(),
+            )
+            crcs.add(crc)
+        } catch (e: Exception) {
+            println("*** ${e.message} $line")
+        }
+    }
+    println("read ${crcs.size} rows countReplaceForCounty=$countReplaceForCounty")
+    return crcs
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 fun makeContestsFromImageAuditFile(filename: String, showLevel: Int = 0): Triple<List<Contest>, List<CountyIA>, List<ContestIA>> {
     val countyResult = readBallotImageAudit(filename)
 
     // within county, combine candidates for the same contest
+    // TODO use contestId to disambiguate
     val counties = mutableMapOf<String, CountyIA>()
     countyResult.forEach {
         val county = counties.getOrPut(it.county) { CountyIA(it.county) }

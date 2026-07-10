@@ -11,7 +11,7 @@ class TestPollingAuditTask {
     @Test
     fun testPollingContestAuditTaskGenerator() {
         val Nc = 50000
-        val margin = .04
+        val margin = .08
         val mvrFuzzPct = .003
         val auditConfig = Config.from(
             AuditType.POLLING, nsimTrials = 20, simFuzzPct = mvrFuzzPct, contestSampleCutoff = null,

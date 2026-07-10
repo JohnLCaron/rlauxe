@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.sf
 
-import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
@@ -95,7 +94,7 @@ class TestSfElection {
 
         val pw = PersistedWorkflow(auditRecord, false)
 
-        val sumPools = pools.sumOf { (it as CardPool).ncards() }
+        val sumPools = pools.sumOf { it.ncards() }
         println("sumPools = $sumPools")
     }
 

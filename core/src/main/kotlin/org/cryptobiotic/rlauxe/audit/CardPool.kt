@@ -3,9 +3,11 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.estimate.Vunder
+import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
+import kotlin.math.max
 
 const val unpooled = "unpooled"
 
@@ -78,6 +80,26 @@ data class CardPool(
         result = 31 * result + infos.hashCode()
         result = 31 * result + contestTabs.hashCode()
         return result
+    }
+
+    companion object {
+        // used by OneAuditTest
+        fun fromMinCardsNeeded(poolName: String, poolId: Int, hasExactContests: Boolean,    // aka single style
+                    infos: Map<Int, ContestInfo>, // do we really need this ??
+                    contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
+                    adjust: Int): CardPool {
+
+            // you need at least this many cards for this pool
+            var minCardsNeeded = 0
+            contestTabs.forEach { (contestId, contestTab) ->
+                    val voteSum = contestTab.nvotes()
+                    val info = infos[contestId]!!
+                    // based on the contest's votes, you need at least this many cards for this contest
+                minCardsNeeded = max(minCardsNeeded, roundUp(voteSum.toDouble() / info.voteForN))
+            }
+
+            return CardPool(poolName, poolId, hasExactContests, infos, contestTabs, minCardsNeeded + adjust)
+        }
     }
 }
 

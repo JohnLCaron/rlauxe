@@ -25,7 +25,7 @@ const val cvrExportCsvFile = "cvrExport.csv"
 
 // this reads CvrExport_xxxxx.json files exported by Dominion.
 // we are getting these files from san francisco (SF2024).
-// We derive CvrExports from them, and serialze to csv files.
+// We derive CvrExports from them, and serialize to csv files.
 
 // // DominionCvrExportJsonSummary ??
 class DominionCvrExportJsonSummary(
@@ -52,7 +52,6 @@ class DominionCvrExportJsonSummary(
         }
     }
 }
-
 
 // intermediate CVR representation for DominionCvrExport from Json
 data class CvrExport(

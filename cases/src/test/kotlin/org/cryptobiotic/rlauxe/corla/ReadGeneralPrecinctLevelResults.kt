@@ -3,9 +3,12 @@ package org.cryptobiotic.rlauxe.corla
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import java.io.File
+import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
+import java.nio.charset.Charset
 
 // Parse the 2024GeneralPrecinctLevelResults.csv file
 
@@ -66,8 +69,9 @@ data class ColoradoPrecinctLevelLine(
 //"ADAMS","4285601241","Presidential Electors","Kamala D. Harris / Tim Walz","DEM",6
 
 fun readColoradoPrecinctLevelResults(inputStream: InputStream): List<ColoradoPrecinctLevelResults> {
-    val reader: Reader = InputStreamReader(inputStream, "ISO-8859-1")
-    val parser = CSVParser(reader, CSVFormat.DEFAULT)
+    val reader: Reader = InputStreamReader(inputStream, "UTF-8")
+    val parser = CSVParser.parse(reader, CSVFormat.DEFAULT)
+
     val records = parser.iterator()
 
     // we expect the first line to be the headers

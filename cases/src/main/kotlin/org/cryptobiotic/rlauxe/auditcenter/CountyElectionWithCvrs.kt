@@ -4,9 +4,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.DominionConverter
-import org.cryptobiotic.rlauxe.dominion.DominionCvrCsvSummary
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsvReader
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.GarfieldCsvReader
+import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
 import org.cryptobiotic.rlauxe.estimate.simulateCards
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
@@ -54,8 +54,8 @@ open class CountyElectionWithCvrs (
         var countyPoolId = 1
         counties.forEach { (county, exportFile) ->
             //// the cvrs
-            val export: DominionCvrCsvSummary = if (county == "Garfield") GarfieldCsvReader(exportFile).read() else
-                DominionCvrExportCsvReader(exportFile).read()
+            val export: DominionCvrExportCsv = if (county == "Garfield") GarfieldCsvReader(exportFile).read() else
+                readCvrExportsFromFile(exportFile)
             val dominionConverter = DominionConverter(county, export, infosByName, coloradoInput)
 
             val exportCvrs: List<AuditableCard> = export.cvrs.map { dominionConverter.convertToCard(it) }

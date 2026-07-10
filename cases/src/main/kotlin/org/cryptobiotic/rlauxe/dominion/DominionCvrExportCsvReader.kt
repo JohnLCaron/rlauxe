@@ -7,9 +7,12 @@ import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.boulder.isEmpty
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.File
+import java.io.IOException
+import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
 import java.nio.charset.Charset
+import java.util.zip.ZipInputStream
 
 // this reads csv files from "Dominion CVR export files", a standard Dominion csv format.
 // Note these record the cvr undervotes, but not for the redacted votes; a col is left empty when the ballot doesnt have that contest.
@@ -78,7 +81,61 @@ private val showRedactedGroups = false
 
 // TODO add the ncards foreach Redacted group. that lets us calculate the missing votes in the pool.
 
-class DominionCvrExportCsvReader(val filename: String, showHeaders: Boolean = false) {
+fun readCvrExportsFromFile(filename: String, showHeaders: Boolean = false): DominionCvrExportCsv {
+    val parser = if (filename.endsWith(".zip")) {
+        val zipReader = ZipReader(filename)
+        // by convention, the file inside is the filename with zip replaced by csv
+        val lastPart = filename.substringAfterLast("/")
+        val innerFilename = lastPart.replace(".zip", ".csv")
+        val inputStream = zipReader.inputStream(innerFilename)
+        val reader: Reader = InputStreamReader(inputStream, "UTF-8")
+        CSVParser.parse(reader, CSVFormat.DEFAULT)
+        // TODO if we could look ahead, we could give them the first row
+
+    } else {
+        CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
+    }
+
+    val reader = DominionCvrExportCsvReader(filename, parser, showHeaders)
+    return reader.read()
+}
+
+fun readCvrExportsFromResource(resourcePath: String): DominionCvrExportCsv {
+    val resourceStream = getCsvStreamFromResource(resourcePath)
+    val reader: Reader = InputStreamReader(resourceStream, "UTF-8")
+    val parser =  CSVParser.parse(reader, CSVFormat.DEFAULT)
+    val dreader = DominionCvrExportCsvReader(resourcePath, parser)
+    return dreader.read()
+}
+
+fun getCsvStreamFromResource(resourcePath: String): InputStream {
+    var resourceStream =
+        object {}.javaClass.getResourceAsStream(resourcePath) ?: throw IOException("$resourcePath does not exist")
+    if (resourcePath.endsWith(".zip")) {
+        val innerStream = getZippedCsvResourceStream(resourcePath, resourceStream)
+        if (innerStream == null) throw IOException("zipped $resourcePath does not have the csv file inside")
+        resourceStream = innerStream
+    }
+    return resourceStream
+}
+
+// InputStream implement Closeable
+fun getZippedCsvResourceStream(resourcePath: String, resourceStream: InputStream): InputStream? {
+    val lastPart = resourcePath.substringAfterLast("/")
+    val innerFilename = lastPart.replace(".zip", ".csv")
+    val zipStream = ZipInputStream(resourceStream)
+    var zipEntry = zipStream.nextEntry
+    while (zipEntry != null) {
+        if (!zipEntry.isDirectory && zipEntry.name == innerFilename) {
+            return zipStream
+        }
+        zipStream.closeEntry()
+        zipEntry = zipStream.nextEntry
+    }
+    return null
+}
+
+class DominionCvrExportCsvReader(val inputSource: String, val parser: CSVParser, showHeaders: Boolean = false) {
     val ballotStyles = BallotStyles()
     val records: Iterator<CSVRecord>
     var lineno = 0
@@ -92,20 +149,6 @@ class DominionCvrExportCsvReader(val filename: String, showHeaders: Boolean = fa
     var rcvRedacted = 0
 
     init {
-        val parser = if (filename.endsWith(".zip")) {
-            val zipReader = ZipReader(filename)
-            // by convention, the file inside is the filename with zip replaced by csv
-            val lastPart = filename.substringAfterLast("/")
-            val innerFilename = lastPart.replace(".zip", ".csv")
-            val inputStream = zipReader.inputStream(innerFilename)
-            val reader: Reader = InputStreamReader(inputStream, "UTF-8")
-            CSVParser.parse(reader, CSVFormat.DEFAULT)
-            // TODO if we could look ahead, we could give them the first row
-
-        } else {
-            CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
-        }
-
         records = parser.iterator()
         lineno++
 
@@ -140,7 +183,6 @@ class DominionCvrExportCsvReader(val filename: String, showHeaders: Boolean = fa
                 println(header2)
             }
 
-
             // make the column structure out of those 3 lines
             schema = makeSchema(contestLine, choiceLine, headerRecord)
             if (showSchema) {
@@ -158,7 +200,7 @@ class DominionCvrExportCsvReader(val filename: String, showHeaders: Boolean = fa
         }
     }
 
-    fun read(showFirst: Int? = null, showAfter: Int? = null): DominionCvrCsvSummary {
+    fun read(showFirst: Int? = null, showAfter: Int? = null): DominionCvrExportCsv {
 
         var cvrCount = 0
         while (records.hasNext()) {
@@ -192,6 +234,7 @@ class DominionCvrExportCsvReader(val filename: String, showHeaders: Boolean = fa
             cvrCount++
             lineno++
         }
+        parser.close()
 
         if (rcvRedacted > 0) println("  read $rcvRedacted RCV Redacted votes")
         if (showRedactedGroups) {
@@ -200,8 +243,8 @@ class DominionCvrExportCsvReader(val filename: String, showHeaders: Boolean = fa
         }
 
         val ballotTypes = ballotStyles.ballotTypes.values.sortedBy { it.countCards }.reversed()
-        return DominionCvrCsvSummary(
-            electionName, versionName, filename, schema, cvrs,
+        return DominionCvrExportCsv(
+            electionName, versionName, inputSource, schema, cvrs,
             ballotStyles.redactedGroups.toSortedMap().values.toList(),
             ballotTypes
         )

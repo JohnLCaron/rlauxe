@@ -4,6 +4,11 @@ import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.dominion.ContestVotes
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
+import org.cryptobiotic.rlauxe.dominion.DominionRedactedGroup
+import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
+import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromResource
 import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
@@ -19,16 +24,16 @@ import kotlin.collections.set
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger("CreateBoulderElection")
-private val debugUndervotes = false
-private val showCardStyles = true
+private val debugUndervotes = true
+private val showCardStyles = false
 
 // Use OneAudit; redacted ballots are in pools. Cant do IRV because we dont have VoteConsolidators
 // this version does a bunch of baloney to estimate the redacted undervotes
 class CreateBoulderElection(
     val auditType: AuditType,
-    val export: BoulderCvrExportCsv,
+    val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
-    val distributeOvervotes: List<Int> = listOf(0, 63), // maybe no default,
+    val distributeOvervotes: List<Int> = emptyList(), // maybe no default,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean = true,
 ): ElectionBuilder {
@@ -40,7 +45,7 @@ class CreateBoulderElection(
     val countCvrVotes = countCvrVotes()
     val countRedactedVotes = countRedactedVotes() // wrong
     val boulderContestBuilders: Map<Int, BoulderContestBuilder> = makeBoulderContestBuilders().associate { it.info.id to it}
-    val cardPoolBuilders: List<OneAuditPoolFromBallotStyle> = convertRedactedToCardPool()
+    val cardPoolBuilders: List<OneAuditPoolBuilder> = convertRedactedToCardPool()
     val ncards: Int
 
     val contests: List<ContestIF>
@@ -48,6 +53,7 @@ class CreateBoulderElection(
     val simulatedCvrs: List<Cvr>  // redacted cvrs
     val allCvrs: List<Cvr>  // unredacted cvrs
     val cardStyles: List<StyleIF>
+    val cardPools: List<CardPool>
 
     init {
         //// the redacted groups dont have undervotes, so we do some fancy dancing to generate reasonable undervote counts
@@ -60,19 +66,27 @@ class CreateBoulderElection(
         }
 
         // TODO used by 2024; do we need it for 2025 ?
-        // first even up with contest 0, since it has the fewest undervotes
+        // first even up with contest 0, since it has the fewest undervotes for A cards.
         // then contest 63 has fewest undervotes for card Bs
         distributeOvervotes.forEach { contestId ->
-            val oaContest = boulderContestBuilders[contestId]!!
-            distributeExpectedOvervotes(oaContest, cardPoolBuilders)
-            boulderContestBuilders.values.forEach { it.adjustPoolInfo(cardPoolBuilders)}
+            val contestBuilder = boulderContestBuilders[contestId]
+            if (contestBuilder == null)
+                print("NO contestBuilder $contestId")
+            else {
+                contestBuilder.distributeExpectedOvervotes(cardPoolBuilders)
+                boulderContestBuilders.values.forEach { it.adjustPoolInfo(cardPoolBuilders) }
+            }
         }
 
         if (debugUndervotes) {
+            var sumAfter = 0
             undervotesByContest.forEach { (cb, before) ->
                 val needAfter = cb.poolTotalCards() - cb.expectedPoolNCards()
+                sumAfter += needAfter
                 println("  ${cb.contestId} $before $needAfter ")
             }
+            val sumBefore = undervotesByContest.values.sumOf { it }
+            println(" undervote sumBefore = $sumBefore sumAfter = $sumAfter")
         }
 
         // we need to know the diluted Nb before we can create the UAs
@@ -83,12 +97,13 @@ class CreateBoulderElection(
         allCvrs = exportCvrs + simulatedCvrs + phantoms // TODO leave out phantoms ??
         val cardStyleMap = makeCardStyles(allCvrs)
         cardStyles = cardStyleMap.values.toList()
+        cardPools = cardPoolBuilders.map { it.build() }
 
         val npops = tabulateNpops(allCvrs, infoList)
         this.ncards = allCvrs.size
 
         contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true, hasStyle)
-            else makeOneAuditContests(contests, npops, cardPoolBuilders)
+            else makeOneAuditContests(contests, npops, cardPools, hasStyle=hasStyle)
 
         val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPoolBuilders.size} cardPools"}
@@ -97,6 +112,7 @@ class CreateBoulderElection(
         // checkNpops(allCvrs, createCards(), infoList)
     }
 
+    // TODO cant we use the ballot styles in the CvrExport ??
     fun makeCardStyles(cvrs: List<Cvr>): Map<Set<Int>, CardStyle> {
         val cardStyleMap = mutableMapOf<Set<Int>, CardStyle>()
         cvrs.forEach { cvr ->
@@ -151,10 +167,10 @@ class CreateBoulderElection(
         }
     }
 
-    private fun convertRedactedToCardPool(): List<OneAuditPoolFromBallotStyle> {
-        return export.redacted.mapIndexed { redactedIdx, redacted: RedactedGroup ->
+    private fun convertRedactedToCardPool(): List<OneAuditPoolBuilder> {
+        return export.redactedGroups.mapIndexed { redactedIdx, redacted: DominionRedactedGroup ->
             // each group becomes a pool
-            // correct bug adding contest 12 to pool 06
+            // correct bug adding contest 12 to pool 06: TODO Boulder24 only I assume
             val useContestVotes = if (redacted.ballotType.startsWith("06")) {
                     redacted.contestVotes.filter{ (key, _) -> key != 12 }
                 } else redacted.contestVotes
@@ -165,7 +181,7 @@ class CreateBoulderElection(
 
             val name = cleanCsvString(redacted.ballotType)
             val id = redactedIdx
-            OneAuditPoolFromBallotStyle(name, id, hasExactContests=true, contestTabs, infoMap)
+            OneAuditPoolBuilder(name, id, hasExactContests=true, contestTabs, infoMap)
         }
     }
 
@@ -175,32 +191,14 @@ class CreateBoulderElection(
         cardPoolBuilders.forEach { cardPool ->
             rcvrs.addAll(makeCvrsForOnePool(cardPool))
         }
-
-        /*
-        val infos = oaContests.mapValues { it.value.info }
-        val rcvrTabs = tabulateCvrs(rcvrs.iterator(), infos).toSortedMap()
-        rcvrTabs.forEach { contestId, contestTab ->
-            val oaContest: OneAuditContestBoulder = oaContests[contestId]!!
-            val redUndervotes = oaContest.redUndervotes
-            if (show) {
-                println("contestId=${contestId}")
-                println("  redacted= ${oaContest.red.votes}")
-                println("  contestTab=${contestTab.votes.toSortedMap()}")
-                println("  oaContest.undervotes= ${redUndervotes} == contestTab.undervotes = ${contestTab.undervotes}")
-                println()
-            }
-            require(checkEquivilentVotes(oaContest.red.votes, contestTab.votes))
-            // if (voteForN[contestId] == 1) require(redUndervotes == contestTab.undervotes) // TODO
-        } */
-
         return rcvrs
     }
 
     // make simulated CVRs for one pool, all contests
-    private fun makeCvrsForOnePool(cardPool: OneAuditPoolFromBallotStyle) : List<Cvr> { // contestId -> candidateId -> nvotes
+    private fun makeCvrsForOnePool(cardPool: OneAuditPoolBuilder) : List<Cvr> { // contestId -> candidateId -> nvotes
         val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
-        val cvrs =
-            makeCvrsForOnePool(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasExactContests)
+        val cvrs = makeCvrsForOnePool(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasExactContests)
+
         // TODO is it true that the number of cvrs can vary when there are multiple contests ?
         //if (cardPool.ncards() != cvrs.size)
         //    logger.warn{"cardPool.ncards ${cardPool.ncards()} != cvrs.size = ${cvrs.size}"}
@@ -284,7 +282,7 @@ class CreateBoulderElection(
     fun countRedactedVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
         val votes = mutableMapOf<Int, ContestTabulation>()
 
-        export.redacted.forEach { redacted: RedactedGroup ->
+        export.redactedGroups.forEach { redacted: DominionRedactedGroup ->
             redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
                 val tab = votes.getOrPut(contestId) { ContestTabulation(infoMap[contestId]!!) }
                 contestVote.forEach { (cand, vote) -> tab.addVote(cand, vote) }
@@ -312,7 +310,7 @@ class CreateBoulderElection(
         true, mvrSource=mvrSource)
     override fun contestsUA() = contestsUA
     override fun cardStyles() = cardStyles
-    override fun cardPools() = if (auditType.isOA()) cardPoolBuilders else null
+    override fun cardPools() = if (auditType.isOA()) cardPools else null
     override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, cardPools())
     override fun unsortedMvrsExternal() = null
 
@@ -343,19 +341,21 @@ fun createBoulderElection(
     distributeOvervotes: List<Int>, // maybe no default
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     startFirstRound: Boolean = true,
+    hasStyle: Boolean = true,
 ) {
 
     val stopwatch = Stopwatch()
 
     val variation = if (version == "2023") "Boulder2023" else "Boulder2024"
     val sovo = readBoulderSOVfromResourcePath(sovoFile, variation)
-    val export: BoulderCvrExportCsv = readBoulderCvrExportsFromResourcePath(cvrExportResourcePath, "Boulder")
+    val exportOld: BoulderCvrExportCsv = readBoulderCvrExportsFromResource(cvrExportResourcePath, "Boulder")
+    val export: DominionCvrExportCsv = readCvrExportsFromResource(cvrExportResourcePath)
 
     val election = if (version == "2025")
-        CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource, hasStyle = true)
+        CreateBoulderElection25(creation.auditType, exportOld, sovo, mvrSource = mvrSource, hasStyle = hasStyle)
     else
         CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource,
-            hasStyle = roundConfig.sampling.sampling == Sampling.consistent)
+            hasStyle = hasStyle)
 
     createElectionRecord(election, topdir = topdir)
     println("CreateBoulderElection took $stopwatch")
@@ -383,10 +383,11 @@ fun createBoulderElectionWithSovo(
 
     val stopwatch = Stopwatch()
 
-    val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrExportFile, "Boulder")
+    val exportOld: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrExportFile, "Boulder")
+    val export: DominionCvrExportCsv = readCvrExportsFromFile(cvrExportFile)
 
     val election = if (version == "2025")
-        CreateBoulderElection25(creation.auditType, export, sovo, mvrSource = mvrSource, hasStyle = true)
+        CreateBoulderElection25(creation.auditType, exportOld, sovo, mvrSource = mvrSource, hasStyle = true)
     else
         CreateBoulderElection(creation.auditType, export, sovo, distributeOvervotes, mvrSource = mvrSource,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent)

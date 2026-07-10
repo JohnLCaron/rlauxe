@@ -7,20 +7,13 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin
 import au.org.democracydevelopers.raire.irv.IRVResult
-import au.org.democracydevelopers.raire.irv.Votes
 import au.org.democracydevelopers.raire.time.TimeOut
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
 import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.collections.forEach
 
 private val quiet = true
@@ -225,39 +218,5 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
     }
     (rcontestUA.contest as IrvContest).roundsPaths.addAll(roundPathsById)
 
-
     return rcontestUA
 }
-
-// use raireAssorter.calcMargin to set the pool assorter averages.
-/* TODO can we get rid of this ?
-fun setPoolAssorterAveragesForRaire(
-    oaContests: List<ContestWithAssertions>,
-    pools: List<CardPool>, // poolId -> pool
-) {
-    val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
-
-    // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
-    // create the clcaAssertions and add then to the oaContests
-    oaContests.filter { it.isIrv }. forEach { oaContest ->
-        val contestId = oaContest.id
-        val clcaAssertions = oaContest.assertions.map { assertion ->
-            val raireAssorter = assertion.assorter as RaireAssorter
-            val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
-            pools.filter { it.ncards() > 0}.forEach { cardPool ->
-                if (cardPool.hasContest(contestId)) {
-                    val tab = cardPool.contestTabs[oaContest.id]!! // assumes that the cardPool has the irvVotes
-                    val irvVotes: Votes = tab.irvVotes.makeVotes(oaContest.ncandidates)
-                    val poolMargin = raireAssorter.calcMarginFromVotes(irvVotes, cardPool.ncards())
-                    assortAverages[cardPool.poolId] = margin2mean(poolMargin)
-                }
-            }
-            val oaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, poolAverages = AssortAvgsInPools(assortAverages))
-
-            oaAssorter.oaAssortRates = oneAuditErrorsFromPools.oaErrorRatesIrv(oaContest, oaAssorter, raireAssorter)
-
-            ClcaAssertion(assertion.info, oaAssorter)
-        }
-        oaContest.clcaAssertions = clcaAssertions
-    }
-} */

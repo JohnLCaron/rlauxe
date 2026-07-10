@@ -4,6 +4,8 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
+import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.collections.component1
@@ -46,11 +48,10 @@ class TestBoulder2025Cvrs {
     fun testCreateBoulderElection() {
         val stopwatch = Stopwatch()
         // redaction lines are present
-        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrFilename, "Boulder")
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(cvrFilename)
         // println(export.summary())
         println("took = $stopwatch")
 
-        assertEquals("Boulder", export.countyId)
         assertEquals(
             cvrFilename,
             export.filename
@@ -82,70 +83,5 @@ class TestBoulder2025Cvrs {
 
         assertEquals(11, candidatesById.size)
     }
-
-    @Test
-    fun testMakeRedactedCvrs() {
-        val stopwatch = Stopwatch()
-        // redaction lines are present
-        val export: BoulderCvrExportCsv = readBoulderCvrExportCsv(cvrFilename, "Boulder")
-
-        val electionSimCvrs = CreateBoulderElection(AuditType.CLCA, export, sovo, distributeOvervotes=emptyList())
-        val infos = electionSimCvrs.makeContestInfo()
-        println("ncontests with info = ${infos.size}")
-
-        val redactedCvrs = electionSimCvrs.makeRedactedCvrs()
-        println("nredacted cvrs = ${redactedCvrs.size}")
-        println("took = $stopwatch")
-
-        // TODO check that vote tallies agree...
-        val redactedCvrVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(redactedCvrs.iterator())
-
-        val redactedDirect = mutableMapOf<Int, MutableMap<Int, Int>>()
-        export.redacted.forEach { redacted ->
-            redacted.contestVotes.forEach { (contestId, conVotes) ->
-                val accumVotes = redactedDirect.getOrPut(contestId) { mutableMapOf() }
-                conVotes.forEach { (cand, nvotes) ->
-                    if (nvotes > 0) {
-                        val accum = accumVotes.getOrPut(cand) { 0 }
-                        accumVotes[cand] = accum + nvotes
-                    }
-                }
-            }
-        }
-        // println(compareRedactions(redactedCvrVotes, redactedDirect))
-        assertEquals(redactedCvrVotes, redactedDirect)
-        println("redactedCvrVotes agrees with redactedDirect")
-    }
-
-    /* code is currently specialized to 2025 general election TODO
-    @Test
-    fun testIrvRedactedCvrs() {
-        val stopwatch = Stopwatch()
-        // redaction lines are present
-        val filename = "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
-
-        val sovo = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes.csv", "Boulder2023")
-        // println("sovo = ${sovo.show()}")
-
-        val sovoRcv = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes-RCV.csv", "Boulder2023Rcv")
-        // println("sovoRcv = ${sovoRcv.show()}")
-        val irvContest: BoulderContestVotes = sovoRcv.contests.first()
-        // println("irvContest = ${irvContest}")
-
-        val combined = BoulderStatementOfVotes.combine(listOf(sovoRcv, sovo))
-
-        val electionSimCvrs = BoulderElectionOAnew(export, combined)
-        val contestUA = electionSimCvrs.makeContestsUA(true)
-        val irv = contestUA.find { it.isIrv }
-        if (irv != null) {
-            val countIrvCvrs = electionSimCvrs.cvrs.count { it.hasContest(irv.id) }
-            println("countIrvCvrs = $countIrvCvrs")
-            assertEquals(irvContest.totalBallots, countIrvCvrs)
-        }
-    }
-    */
 
 }

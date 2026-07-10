@@ -13,20 +13,24 @@ _07/06/2026_
   * [Using IntelliJ](#using-intellij)
   * [Modules](#modules)
   * [Generate Test Cases](#generate-test-cases-)
-    * [for the belgium 2024 test case](#for-the-belgium-2024-test-case)
-    * [for the boulder 2024 test case](#for-the-boulder-2024-test-case)
-    * [for the Colorado 2020 test case](#for-the-colorado-2020-test-case)
-    * [for the Georgia 2026 primary test case](#for-the-georgia-2026-primary-test-case)
-    * [for the San Francisco 2024 test case](#for-the-san-francisco-2024-test-case)
+    * [For the Belgium 2024 test case](#for-the-belgium-2024-test-case)
+    * [For the Boulder 2024 test case](#for-the-boulder-2024-test-case)
+    * [For the Colorado 2020 test case](#for-the-colorado-2020-test-case)
+    * [For the Georgia 2026 primary test case](#for-the-georgia-2026-primary-test-case)
+    * [For the San Francisco 2024 test case](#for-the-san-francisco-2024-test-case)
   * [rlauxe viewer](#rlauxe-viewer)
 * [Notes and stats](#notes-and-stats)
   * [Code Coverage (Lines of Codes)](#code-coverage-lines-of-codes)
+    * [core test coverage](#core-test-coverage)
+    * [core + cases test coverage](#core--cases-test-coverage)
+    * [complete test coverage](#complete-test-coverage)
   * [Time reading card manifest](#time-reading-card-manifest)
   * [UML](#uml)
   * [Miscellaneous Notes](#miscellaneous-notes)
     * [Documents](#documents)
     * [Fuzzing notes](#fuzzing-notes)
 * [TODO](#todo)
+* [CLI](#cli)
 <!-- TOC -->
 
 # Getting Started
@@ -144,7 +148,7 @@ build the uberjars:
 $ cd <devhome>/rlauxe
 $ ./gradlew assemble uberjar
 
-### for the belgium 2024 test case
+### For the Belgium 2024 test case
 
 The repo contains the needed input for belgium2024. To create the data:
 
@@ -160,7 +164,7 @@ Use `java -jar viewer/build/libs/viewer-uber.jar -belgiumAudit` to view this cas
 See [here](https://github.com/JohnLCaron/rlauxe-viewer#special-features-for-belgium-audits).
 
 
-### for the boulder 2024 test case
+### For the Boulder 2024 test case
 
 The repo contains the needed input for boulder024. To create the data:
 
@@ -172,7 +176,7 @@ java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic
 will create a OneAudit election. To create a CLCA election, use the flag "-type clca"
 
 
-### for the Colorado 2020 test case
+### For the Colorado 2020 test case
 
 The repo does not contain the test data input for Colorado. Clone the following git repository:
 
@@ -195,7 +199,7 @@ This creates an election using style based sampling (CSD). To use uniform sampli
 
 See [here](https://github.com/JohnLCaron/rlauxe-viewer/docs/CorlaViewer.md
 
-### for the Georgia 2026 primary test case
+### For the Georgia 2026 primary test case
 
 `
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
@@ -206,7 +210,7 @@ java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic
 will create a OneAudit election. 
 
 
-### for the San Francisco 2024 test case
+### For the San Francisco 2024 test case
 
 The repo does not contain the test data input for San Francisco. Download
 
@@ -229,8 +233,18 @@ java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic
     -case sf2024 -toptopdir "/home/you/wherever/cases/sf2024"
 `
 
-will create a OneAudit election. To create a CLCA election, add the flag "-type clca"
+will create a OneAudit election in "/home/you/wherever/cases/sf2024/oa". To create a CLCA election, add the flag "-type clca"
+which will create a Clca election in "/home/you/wherever/cases/sf2024/clca"
 
+If you want to control where the election is placed, use
+
+`
+java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+    -case sf2024 -toptopdir "/home/you/wherever/cases/sf2024" \
+    -output "/home/you/wherever/" -type [clca | oa]
+`
+
+will create a _type_ election in "/home/you/wherever", taking the cvrs from "/home/you/wherever/cases/sf2024".
 
 ## rlauxe viewer
 
@@ -251,36 +265,48 @@ Mea culpa, mea culpa, mea maxima culpa.
 
 ## Code Coverage (Lines of Codes)
 
- **core test coverage**
+ ### core test coverage
 
-| date       | pct      | cover/total LOC |
-|------------|----------|----------------|
-| 11/20/2025 | 84.0 %   | 5602/6667      |
-| 11/25/2025 | 85.2 %   | 5229/6136      |
-| 11/28/2025 | 85.9 %   | 5188/6039      |
-| 11/29/2025 | 86.3 %   | 5208/6034      |
-| 11/30/2025 | 86.7 %   | 5255/6058      |
-| 12/04/2025 | 85.0 %   | 5327/6265      |
-| 12/10/2025 | 80.5 %   | 5338/6634      |
-| 12/13/2025 | 82.8 %   | 5341/6449      |
-| 12/18/2025 | 83.9 %   | 5332/6357      |
-| 12/23/2025 | 83.9 %   | 5393/6431      |
-| 01/07/2026 | 84.5 %   | 5344/6327      |
-| 01/16/2026 | 87.5 %   | 5417/6190      |
-| 01/18/2026 | 90.2 %   | 5677/6294      |
-| 01/27/2026 | 87.6 %   | 6021/6871      |
-| 01/27/2026 | 87.8 %   | 5847/6658      |
-| 02/13/2026 | 87.2 %   | 6116/7014      |
-| 02/14/2026 | 87.8 %   | 6174/7034      |
-| 02/19/2026 | 89.1 %   | 6251/7017      |
-| 02/24/2026 | 90.2 %   | 6252/6934      |
-| 03/02/2026 | 90.6 %   | 6427/7090      |
-| 03/03/2026 | 91.5 %   | 6510/7116      |
-| 03/03/2026 | 90.1 %   | 6497/7208      |
-| 03/27/2026 | 89.4 %   | 6189/6919      |
-| 03/30/2026 | 90.5 %   | 6355/7022      |
-| 05/20/2026 | 81.3 %   | 6816/8383      |
-| 05/20/2026 | 86.7%    | 7212/8323      |
+| date       | pct    | cover/total LOC |
+|------------|--------|----------------|
+| 11/20/2025 | 84.0 % | 5602/6667      |
+| 11/25/2025 | 85.2 % | 5229/6136      |
+| 11/28/2025 | 85.9 % | 5188/6039      |
+| 11/29/2025 | 86.3 % | 5208/6034      |
+| 11/30/2025 | 86.7 % | 5255/6058      |
+| 12/04/2025 | 85.0 % | 5327/6265      |
+| 12/10/2025 | 80.5 % | 5338/6634      |
+| 12/13/2025 | 82.8 % | 5341/6449      |
+| 12/18/2025 | 83.9 % | 5332/6357      |
+| 12/23/2025 | 83.9 % | 5393/6431      |
+| 01/07/2026 | 84.5 % | 5344/6327      |
+| 01/16/2026 | 87.5 % | 5417/6190      |
+| 01/18/2026 | 90.2 % | 5677/6294      |
+| 01/27/2026 | 87.6 % | 6021/6871      |
+| 01/27/2026 | 87.8 % | 5847/6658      |
+| 02/13/2026 | 87.2 % | 6116/7014      |
+| 02/14/2026 | 87.8 % | 6174/7034      |
+| 02/19/2026 | 89.1 % | 6251/7017      |
+| 02/24/2026 | 90.2 % | 6252/6934      |
+| 03/02/2026 | 90.6 % | 6427/7090      |
+| 03/03/2026 | 91.5 % | 6510/7116      |
+| 03/03/2026 | 90.1 % | 6497/7208      |
+| 03/27/2026 | 89.4 % | 6189/6919      |
+| 03/30/2026 | 90.5 % | 6355/7022      |
+| 05/20/2026 | 81.3 % | 6816/8383      |
+| 05/20/2026 | 86.7%  | 7212/8323      |
+| 07/08/2026 | 79.9%  | 7796/9752      |
+| 07/09/2026 | 81.3%  | 7650/9407      |
+
+### core + cases test coverage
+
+Include TestCreateCaseData
+
+| date     | pct    | cover/total LOC |
+|----------|--------|-----------------|
+| 07/08/26 | 72.5 % | 10673/14726     |
+| 07/09/26 | 78.5 % | 11592/14769     |
+
 
 ## Time reading card manifest
 

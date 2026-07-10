@@ -12,24 +12,24 @@ import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.audit.createElectionRecord
 import org.cryptobiotic.rlauxe.audit.startFirstRound
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.sf.CreatePrecinctAndStyle
 import org.cryptobiotic.rlauxe.sf.createSfElection
-import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 import kotlin.test.fail
 
 class MakeSfElection {
     private val logger = KotlinLogging.logger("AuditRecord")
 
-    val sfDir = "${testdataDir}/cases/sf2024"
+    val sfDir = "$cases/sf/sf2024"
     val castVoteRecordZip = "$sfDir/CVR_Export_20241202143051.zip"
     val cvrExportCsv = "$sfDir/${cvrExportCsvFile}"
 
     @Test
     fun makeSFElectionOA() {
-        val topdir = "${testdataDir}/cases/sf2024/oa"
+        val topdir = "$cases/sf2024/oa"
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05,)
         val round = AuditRoundConfig(
@@ -56,7 +56,7 @@ class MakeSfElection {
 
     @Test
     fun testRunVerifySFoa() {
-        val topdir = "${testdataDir}/cases/sf2024/oa"
+        val topdir = "$cases/sf/sf2024/oa"
         val results = RunVerifyContests.runVerifyContests(topdir, null, show = false)
         println()
         print(results)
@@ -65,7 +65,7 @@ class MakeSfElection {
 
     @Test
     fun makeSFElectionClca() {
-        val topdir = "${testdataDir}/cases/sf2024/clca"
+        val topdir = "$cases/sf/sf2024/clca"
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .05,)
         val round = AuditRoundConfig(
@@ -87,7 +87,7 @@ class MakeSfElection {
 
     @Test
     fun makePrecinctAndStyleOA() {
-        val topdir = "${testdataDir}/cases/sf2024/oaps"
+        val topdir = "$cases/sf/sf2024/oaps"
         val contestManifestFilename = "ContestManifest.json"
         val candidateManifestFile = "CandidateManifest.json"
 

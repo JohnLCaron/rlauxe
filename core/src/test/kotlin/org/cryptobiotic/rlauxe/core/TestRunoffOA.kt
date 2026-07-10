@@ -2,19 +2,17 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
-import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeUndervoteForContest
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.TausOA
-import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Welford
@@ -23,9 +21,7 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
-import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class TestRunoffOA {
 
@@ -57,12 +53,11 @@ class TestRunoffOA {
     )
     val pools = listOf(cardPool1, cardPool2, cardPool3)
 
-    val contestOA = ContestWithAssertions(contest, isClca = true, hasStyle = true).addStandardAssertions()
+    val contestOA: ContestWithAssertions
     val oaAssorter: OneAuditClcaAssorter
 
     init {
-        // Its the OA assorters that make this a OneAudit contest
-        setPoolAssorterAverages(listOf(contestOA), pools)
+        contestOA = makeOneAuditContests(listOf(contest), emptyMap(), pools, hasStyle = true).first()
         oaAssorter = contestOA.clcaAssertions.first().cassorter as OneAuditClcaAssorter
     }
 

@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
 import org.cryptobiotic.rlauxe.dominion.DominionConverter
-import org.cryptobiotic.rlauxe.dominion.DominionCvrCsvSummary
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsvReader
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.makeContestInfo
+import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
 import kotlin.test.Test
 
 // compare cardStyles from coloradoInput.countyStyles (taken from mvr files)
@@ -20,7 +20,7 @@ class TestCardStyles {
 
     fun compareCvrSchemaVscoloradoInput(filename: String, coloradoInput: ColoradoInput) {
         // println(CastVoteRecord.header)
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
         val exportContestInfos = export.makeContestInfo().associateBy { it.id }
 
         // these contest id's are internal to the export.

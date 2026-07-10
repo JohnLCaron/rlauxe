@@ -23,6 +23,7 @@ data class ContestMvrCardAndPops(
     val pools: List<CardPool>,
 )
 
+// TODO overly complicated; refactor
 // simulate OneAudit Contest with extra cards in pool, to get Npop > Nc, and test hasStyle
 fun makeOneAuditTest(
     margin: Double,
@@ -98,14 +99,20 @@ fun makeOneAuditTest(
     val poolUnderVotes = roundToClosest(undervotes - cvrUndervotes)
 
     val poolNcards = votesPoolSum + poolUnderVotes
-    val pool = OneAuditPoolFromBallotStyle(
+    // a single pool
+    /* val pool = OneAuditPoolFromBallotStyle(
             "pool42",
             42, // poolId
             voteTotals = mapOf(1 to ContestTabulation(info1, votesNoCvr, ncards=noCvrSize)),
             hasExactContests = false,
             infos = infos,
         )
-    pool.adjustCards = poolUnderVotes
+    pool.adjustCards = poolUnderVotes */
+
+    val pool = CardPool.fromMinCardsNeeded("pool42", 42, /* poolId */ hasExactContests = false, infos = infos,
+        contestTabs = mapOf(1 to ContestTabulation(info1, votesNoCvr, ncards=noCvrSize)),
+        adjust = poolUnderVotes
+    )
     val pools = listOf(pool)
 
     val expectNc = noCvrSize + cvrSize + Np
@@ -123,6 +130,7 @@ fun makeOneAuditTest(
     val mvrs = makeMvrs(contest, cvrNc, cvrVotes, cvrUndervotes, pool, extraInPool)
     val cardManifest = makeCardManifest2(mvrs, pool)
 
+    // switch to OneAuditPoolFromCvrs; why ? they appear to be identical
     val (oaUA, cardPools) = makeOneAuditTestContests(infos, listOf(contest), listOf(pool), cardManifest, mvrs)
 
     return ContestMvrCardAndPops(oaUA.first(), mvrs, cardManifest, cardPools.map { it.toOneAuditPool() })
@@ -178,38 +186,7 @@ fun makeMvrs(
     return mvrs
 }
 
-// make the card manifest
-fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<AuditableCard> {
-    // the union of the first two styles
-    val expandedContestIds = pool.infos.keys.toList().toIntArray()
-
-    // make the cards with the expanded card style
-    val cardsNoBatch = CvrsToCardStylesIterator(
-        type = AuditType.ONEAUDIT,
-        cvrs = Closer(mvrs.iterator()),
-        phantomCvrs = null,
-        listOf(pool),
-    )
-    val cards = mutableListOf<AuditableCard>()
-    cardsNoBatch.forEach { card ->
-        // val batch = if (card.poolId == 42) pool else CardStyle.fromCvrBatch
-        cards.add( card.copy(styleId=pool.id()).setStyle(pool))
-    }
-
-    // we need to populate the pool tab with the votes
-    val poolTabs = OneAuditPoolFromCvrs("pool", 1, false, pool.infos)
-    expandedContestIds.forEach { id -> poolTabs.contestTabs[id] = ContestTabulation(pool.infos[id]!!) }
-    mvrs.forEach { mvr ->
-        if (mvr.poolId == pool.poolId) poolTabs.accumulateVotes(mvr)
-    }
-
-    // should be the same as pool, leave in as consistency check
-    assertEquals(pool.voteTotals[1]?.votes, poolTabs.contestTabs[1]?.votes)
-
-    return cards
-}
-
-fun makeCardManifest2(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<AuditableCard> {
+private fun makeCardManifest2(mvrs: List<Cvr>, pool: CardPool): List<AuditableCard> {
     // the union of the first two styles
     val expandedContestIds = pool.infos.keys.toList().toIntArray()
     val expanded = CardStyle("expanded", 42, expandedContestIds, false)
@@ -236,7 +213,7 @@ fun makeOneAuditTestContests(
     val poolsFromCvrs = calcOneAuditPoolsFromMvrs(infos, cardStyles, mvrs)
 
     // create the OneAudit contests
-    val contestsUA = makeOneAuditContests(contestsToAudit, npopMap, poolsFromCvrs)
+    val contestsUA = makeOneAuditContests(contestsToAudit, npopMap, poolsFromCvrs, hasStyle = false)
 
     return Pair(contestsUA, poolsFromCvrs)
 }

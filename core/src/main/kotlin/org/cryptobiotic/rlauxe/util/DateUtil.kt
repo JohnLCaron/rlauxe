@@ -8,7 +8,8 @@ fun datetime(): String {
     val today = LocalDateTime.now()
     // Custom pattern (Example: "Friday, July 03, 2026")
     val customFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy", Locale.getDefault())
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-DD HH:mm:ss")
+    //   date created=2026-07-190 16:09:39
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     return today.format(formatter)
 
     // Built-in localized format (Example: "Jul 3, 2026")

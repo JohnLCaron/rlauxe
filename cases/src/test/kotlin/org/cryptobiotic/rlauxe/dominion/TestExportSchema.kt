@@ -39,7 +39,7 @@ class TestExportSchema {
 }
 
 fun testCvrSchema(county: String, filename: String, coloradoInput: ColoradoInput): Int {
-    val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
+    val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
     var errs = 0
 
     println("========================================================================================")
@@ -51,7 +51,7 @@ fun testCvrSchema(county: String, filename: String, coloradoInput: ColoradoInput
     return errs
 }
 
-fun compareExportSchemaVsAuditCenter(county: String, export: DominionCvrCsvSummary, coloradoInput: ColoradoInput): Int {
+fun compareExportSchemaVsAuditCenter(county: String, export: DominionCvrExportCsv, coloradoInput: ColoradoInput): Int {
     val sinfos = export.makeContestInfo()
 
     var countErrs = 0
@@ -75,7 +75,7 @@ fun compareExportSchemaVsAuditCenter(county: String, export: DominionCvrCsvSumma
     return countErrs
 }
 
-fun compareCvrSchemaVsContestBuilder(county: String, export: DominionCvrCsvSummary, coloradoInput: ColoradoInput): Int {
+fun compareCvrSchemaVsContestBuilder(county: String, export: DominionCvrExportCsv, coloradoInput: ColoradoInput): Int {
     val exportContestInfos = export.makeContestInfo()
 
     // CountyContestBuilder only uses coloradoInput

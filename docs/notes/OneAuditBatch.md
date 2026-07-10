@@ -62,3 +62,66 @@ where
 ````
 
 And use this to find the optimal value of lambda for OneAudit bets.
+
+
+## Case Studies
+
+### Georgia
+
+We have county/batch subtotals for the two contests, as well as batch ncards. Use vunderPool.makeCardsForOneAuditPool
+to create mvrs for each batch. Assume a single style (1,2) for all cards.
+
+### Boulder
+
+We have "redacted pools" with subtotals but no ncards (2025 adds them).
+We have a "Statement of Vote" that gives votes subtotals by precinct and ncards:
+
+````
+"Precinct Code","Precinct Number","Contest Title","Choice Name","Active Voters","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
+"100","2181207100","Presidential Electors","Kamala D. Harris / Tim Walz","1,569","1,325",900,24,0
+...
+````
+
+1. Group by BoulderContestPrecinctVotes with key = "${it.contestTitle}#${it.precinctCode}#${it.precinctNumber}" including totalBallots (ncards?), totalUnderVotes, totalOverVotes.
+2. Aggregate into BoulderContestVotes.
+3. BoulderContestBuilder: 
+````
+    // there are no overvotes in the Cvrs; we treat them as blanks (not divided by voteForN)
+    val sovoCards = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes
+    val phantoms = sovoContest.totalBallots - sovoCards
+
+    // sovo gives us an expected undervote for each contest
+    val sovoUndervotes = sovoContest.totalUnderVotes + sovoContest.totalOverVotes * info.voteForN
+
+    // missing undervotes we assume are in the redacted pools
+    val redUndervotes = sovoUndervotes - cvrTab.undervotes
+    val redVotes = redTab.nvotes()
+
+    // then this is the total cards in the pools
+    val redNcards = (redVotes + redUndervotes) / info.voteForN
+
+    // then this is the total cards in the cvrs and the pools
+    val totalCards = redNcards + cvrTab.ncardsTabulated
+````
+
+5. Assume each pool has a single ballotStyle (this may be untrue)
+4. Adjust ncards to minimize the undervotes.
+
+````
+// multiple contests, one pool
+fun makeCvrsForOnePool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasExactContests: Boolean): List<Cvr> {
+````
+
+I guess its good enough.
+
+Summary: Hokey Baloney; we need to get ncards and ballot styles for redacted pools
+
+### San Francisco
+
+We have full cvrs, but the cvrs from "vote in person" cant be matched to the ballots.
+
+// group cards into pools using the first part of the cvr id.
+// this creates 4224 pools. The precinct/style grouping gives 2525. Perhaps can just add a variation that uses one or the other?
+
+We just use the real cvrs as the mvrs, and zero out the cotes if they are in a pool.
+

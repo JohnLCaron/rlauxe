@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ElectionBuilder
@@ -23,7 +22,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.VunderPool
-import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -38,6 +37,8 @@ import kotlin.collections.forEach
 private val logger = KotlinLogging.logger("CreateGaElection")
 
 // Ga2026Primary from manifests and candidate_totals
+// all cards are in pools
+
 class CreateGaElection(
     val electionName: String,
     val auditType: AuditType,
@@ -64,7 +65,7 @@ class CreateGaElection(
         this.cardStyles = listOf(CardStyle(1, infos.keys.toSet()))
         val phantoms = makePhantomCvrs(contests) // i dont think there are any
 
-        // each batch is a pool
+        // each county batch is a pool
         var poolid = 0
         val pools = mutableListOf<CardPool>()
         counties.forEach { county: GaCounty ->
@@ -78,6 +79,7 @@ class CreateGaElection(
                     val tab = ContestTabulation(contest.info, votes, batch.nballots)
                     Pair(contest.id, tab)
                 }.toMap()
+
                 pools.add(
                     CardPool(
                         "${county.countyName}-${batch.name}",
@@ -92,7 +94,7 @@ class CreateGaElection(
         }
         this.cardPools = pools.toList()
 
-        contestsUA = if (auditType.isOA()) makeOneAuditContests(contests, pools) else
+        contestsUA = if (auditType.isOA()) makeOneAuditContests(contests, emptyMap(), pools, false) else
             makePollingContests(contests)
         mvrs = makeMvrsFromPools(pools) // once only
     }
@@ -114,6 +116,7 @@ class CreateGaElection(
         }
     }
 
+    /*
     fun makeOneAuditContests(
         wantContests: List<ContestIF>, // the contests you want to audit
         cardPools: List<CardPoolIF>,
@@ -126,7 +129,7 @@ class CreateGaElection(
         // Its the OA assorters that make this a OneAudit contest
         setPoolAssorterAverages(contestsUA, cardPools)
         return contestsUA
-    }
+    } */
 
     fun makePollingContests(
         wantContests: List<ContestIF>, // the contests you want to audit

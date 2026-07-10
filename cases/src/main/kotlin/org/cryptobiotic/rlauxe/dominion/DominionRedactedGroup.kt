@@ -2,23 +2,31 @@ package org.cryptobiotic.rlauxe.dominion
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.boulder.RedactedGroup
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger("DominionRedactedGroup")
+private val showLines = false
 
+// voteForNs : contestId -> nvotes
 class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>) {
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
     private var exampleCsv : CSVRecord? = null // debugging
-
     var nlines: Int = 1  //used by the accumulating group
     var style : ExportCardStyle? = null
+
+    init {
+        if (ballotType.isEmpty())
+            println("ballotType.isEmpty()")
+    }
 
     fun contests() = contestVotes.keys.toSet()
 
     fun addVotes(schema: Schema, line: CSVRecord): DominionRedactedGroup {
+        if (showLines) println(line)
         var colidx = schema.nheaders // skip over the first 6 or 7 columns
         while (colidx < line.size()) {
             val valueAtIdx = line.get(colidx)
@@ -36,8 +44,8 @@ class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>
                         val prev = candidateVotes[candIdx] ?: 0
                         candidateVotes[candIdx] = prev + nvotes
                     }
-                    if (useContest.contestIdx == 31 && candidateVotes.values.sum() == 1)
-                        print("")
+                    if (useContestIdx == 31 && candidateVotes.values.sum() == 1)
+                        print("*** contestIdx == 31 votes = ${candidateVotes.values.sum()}")
                 }
                 colidx += useContest.ncols
             } else {
@@ -49,7 +57,7 @@ class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>
     }
 
     fun merge(other: DominionRedactedGroup): DominionRedactedGroup {
-        require(this.ballotType == other.ballotType)
+        // require (this.ballotType == other.ballotType)
         other.contestVotes.forEach { (contestId, otherCands) ->
             val mycands = contestVotes.getOrPut(contestId, { mutableMapOf() })
 
@@ -64,7 +72,8 @@ class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>
     }
 
     // method #1
-    // based on votes and voteForN, calculates the minimum number of cards that are in this redacted line
+    // based on votes and voteForN, calculates the minimum number of cards that are in this redacted group
+    // TODO does this still work when group are merged ?? I think you need to do it seperate for each group ??
     fun minCards(): Int {
         var minCards = 0
         contestVotes.forEach { (contestId, cands) ->
@@ -79,7 +88,7 @@ class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>
 
     override fun toString() = buildString {
         val contests = contestVotes.map { it.key }.sorted()
-        append("RedactedGroup('$ballotType', ncontests=${contests.size} nlines=$nlines, totalVotes=${totalVotes()})")
+        append("RedactedGroup('$ballotType', contests=${contests} nlines=$nlines, totalVotes=${totalVotes()})")
         // appendLine(csvRecord.toString())
     }
 
@@ -110,7 +119,7 @@ class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>
 }
 
 // see TestCvrExportRedaction
-fun assignStylesToRedactedGroups(export: DominionCvrCsvSummary) {
+fun assignStylesToRedactedGroups(export: DominionCvrExportCsv) {
     val voteForNs = export.schema.contests.associate { it.contestIdx to it.voteForN }
 
     val styles: Map<String, ExportCardStyle> = export.exportCardStyles.associateBy { it.name }

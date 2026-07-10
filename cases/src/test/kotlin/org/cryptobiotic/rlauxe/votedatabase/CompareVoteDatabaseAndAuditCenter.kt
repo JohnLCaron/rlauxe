@@ -3,8 +3,8 @@ package org.cryptobiotic.rlauxe.votedatabase
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
-import org.cryptobiotic.rlauxe.dominion.DominionCvrCsvSummary
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsvReader
+import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
+import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
 import org.cryptobiotic.rlauxe.dominion.GarfieldCsvReader
 import org.cryptobiotic.rlauxe.dominion.makeContestInfo
 import kotlin.io.path.Path
@@ -99,7 +99,7 @@ class CompareVoteDatabaseAndAuditCenter {
                     if (county != "Monroe" && county != "Garfield") { // no such county in Colorado && earlier format && Baca has copy of Heurfano
                         try {
                             val filename = entry.toString()
-                            val reader = DominionCvrExportCsvReader(filename)
+                            val reader = readCvrExportsFromFile(filename)
                             val star = if (reader.electionName.contains(county)) "" else "**"
                             println("  $star ${reader.electionName} : ${filename}")
                         } catch (e: Exception) {
@@ -117,8 +117,8 @@ class CompareVoteDatabaseAndAuditCenter {
         println("\n-----------------------------------")
         println("county=$county csvfile = $exportFile")
 
-        val export: DominionCvrCsvSummary = if (county == "Garfield") GarfieldCsvReader(exportFile).read() else
-            DominionCvrExportCsvReader(exportFile).read()
+        val export: DominionCvrExportCsv = if (county == "Garfield") GarfieldCsvReader(exportFile).read() else
+            readCvrExportsFromFile(exportFile)
         val sinfoList = export.makeContestInfo()
         var errs = 0
 

@@ -62,10 +62,6 @@ fun countPhantoms(sortedManifest: SortedManifest, contestId: Int) {
                 countPhantoms++
             }
             count++
-            if (count % 10000 == 0) {
-                // println("$count ${countPhantoms - lastPhantoms}")
-                lastPhantoms = countPhantoms
-            }
         }
     }
     println("\nnphantoms = $countPhantoms for contest $contestId")

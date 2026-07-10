@@ -10,13 +10,6 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 
 //// common code for building OneAudit contests
 
-interface OneAuditContestBuilderIF {
-    val contestId: Int
-    fun poolTotalCards(): Int // total cards in all pools for this contest
-    fun expectedPoolNCards(): Int // expected total pool cards for this contest, making assumptions about missing undervotes
-    fun adjustPoolInfo(cardPools: List<CardPoolIF>)
-}
-
 private const val debug = false
 
 // the contests share the card pools, so its convenient to process them all at once
@@ -24,10 +17,11 @@ fun makeOneAuditContests(
     wantContests: List<ContestIF>, // the contests you want to audit
     npopMap: Map<Int,Int>,  // contestId -> Npop
     cardPools: List<CardPoolIF>,
+    hasStyle: Boolean,
 ): List<ContestWithAssertions> {
 
     val contestsUA = wantContests.filter{ !it.isIrv() }.map { contest ->
-        val cua = ContestWithAssertions(contest, true, NpopIn=npopMap[contest.id], hasStyle = false).addStandardAssertions()
+        val cua = ContestWithAssertions(contest, true, NpopIn=npopMap[contest.id], hasStyle = hasStyle).addStandardAssertions()
         if (contest is DHondtContest) {
             cua.addAssertionsFromAssorters(contest.assorters)
         } else {

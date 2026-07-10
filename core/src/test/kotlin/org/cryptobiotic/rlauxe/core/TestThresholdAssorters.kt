@@ -1,15 +1,10 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
-import org.cryptobiotic.rlauxe.estimate.makeUndervoteForContest
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin

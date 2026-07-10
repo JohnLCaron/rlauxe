@@ -325,10 +325,11 @@ class ContestClcaTrial(val run: Int,
     override fun wantsMore(): Boolean {
         if (maxIndex > 0) return false
         if (sampleLimit == null) return true
-        if (countUsed > sampleLimit) {
-            logger.info{"sample limit exceeded - estimate terminated"}
-            return false
-        }
+        // TODO
+        //if (countUsed > sampleLimit) {
+         //   logger.info{"sample limit exceeded - estimate terminated"}
+         //   return false
+        //}
         return true
     }
 

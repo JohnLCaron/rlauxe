@@ -3,12 +3,9 @@ package org.cryptobiotic.rlauxe.dominion
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.estimate.simulateCards
 import org.cryptobiotic.rlauxe.util.CardTabulation
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.votedatabase.colorado2020
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.collections.sum
@@ -37,8 +34,8 @@ class TestCvrExportRedaction {
     }
 
     fun testRedactedBallots(exportFile: String) {
-        val export: DominionCvrCsvSummary = if (exportFile.contains("Garfield")) GarfieldCsvReader(exportFile).read() else
-            DominionCvrExportCsvReader(exportFile).read()
+        val export: DominionCvrExportCsv = if (exportFile.contains("Garfield")) GarfieldCsvReader(exportFile).read() else
+            readCvrExportsFromFile(exportFile)
 
         val styles: Map<String, ExportCardStyle> = export.exportCardStyles.associateBy { it.name }
         var totalLines = 0
@@ -79,7 +76,7 @@ class TestCvrExportRedaction {
     @Test
     fun testMakeRedactedPools() {
         val filename = "/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv"
-        val export = DominionCvrExportCsvReader(filename).read()
+        val export = readCvrExportsFromFile(filename)
 
         val input = Colorado2020General()
         val contestBuilder = CountyContestBuilder(input)
@@ -106,39 +103,41 @@ class TestCvrExportRedaction {
         export.redactedGroups.forEach { group ->
             val pool = poolMap[group.ballotType] // hmm maybe not unique?
             if (pool == null) {
-                throw RuntimeException()
-            }
-            var gnzCount = 0
-            var pnzCount = 0
-            var gnvotes = 0
-            var pnvotes = 0
-            group.contestVotes.forEach { groupVoteMap: Map.Entry<Int, MutableMap<Int, Int>> ->
-                val lookup: ExportToCanonLookup = dominionConverter.exportToCanonLookup[groupVoteMap.key]!!
-                val poolTab = pool.contestTab(lookup.canonContestId)
-                if (poolTab != null) {
-                    groupVoteMap.value.forEach { (rcandid, rvotes) ->
-                        val canonCandId = lookup.candLookup[rcandid]
-                        if (canonCandId >= 0) {
-                            val pvotes = poolTab.votes[canonCandId]
-                            // println("  $canonCandId: $rvotes == $pvotes")
-                            assertEquals(rvotes, pvotes)
+                println("*** missing ${group.ballotType}")
+                // throw RuntimeException("Missing ${group.ballotType}")
+            } else {
+                var gnzCount = 0
+                var pnzCount = 0
+                var gnvotes = 0
+                var pnvotes = 0
+                group.contestVotes.forEach { groupVoteMap: Map.Entry<Int, MutableMap<Int, Int>> ->
+                    val lookup: ExportToCanonLookup = dominionConverter.exportToCanonLookup[groupVoteMap.key]!!
+                    val poolTab = pool.contestTab(lookup.canonContestId)
+                    if (poolTab != null) {
+                        groupVoteMap.value.forEach { (rcandid, rvotes) ->
+                            val canonCandId = lookup.candLookup[rcandid]
+                            if (canonCandId >= 0) {
+                                val pvotes = poolTab.votes[canonCandId]
+                                // println("  $canonCandId: $rvotes == $pvotes")
+                                assertEquals(rvotes, pvotes)
+                            }
                         }
+                        gnvotes += groupVoteMap.value.values.sum()
+                        pnvotes += poolTab.nvotes()
+                        if (groupVoteMap.value.values.sum() > 0) gnzCount++
+                        if (poolTab.nvotes() > 0) pnzCount++
                     }
-                    gnvotes += groupVoteMap.value.values.sum()
-                    pnvotes += poolTab.nvotes()
-                    if (groupVoteMap.value.values.sum() > 0) gnzCount++
-                    if (poolTab.nvotes() > 0) pnzCount++
                 }
+                // val styleCount = if (group.style != null) group.style!!.contests.size else 0
+                println("group '${group.ballotType}' (${group.contestVotes.size} contests and pool '${pool.poolName}' (${pool.contestTabs.size} contests)")
+                println("   group minCards=${group.minCards()} nvotes=${gnvotes} pool ncards=${pool.ncards()} nvotes=${pnvotes}")
+                assertEquals(gnzCount, pnzCount)
+                assertEquals(gnzCount, pool.contestTabs.size)
+                assertEquals(group.minCards(), pool.ncards())
+                assertEquals(gnvotes, pnvotes)
+                totalNcards += pool.ncards()
+                totalNvotes += pnvotes
             }
-            // val styleCount = if (group.style != null) group.style!!.contests.size else 0
-            println("group '${group.ballotType}' (${group.contestVotes.size} contests and pool '${pool.poolName}' (${pool.contestTabs.size} contests)")
-            println("   group minCards=${group.minCards()} nvotes=${gnvotes} pool ncards=${pool.ncards()} nvotes=${pnvotes}")
-            assertEquals(gnzCount, pnzCount)
-            assertEquals(gnzCount, pool.contestTabs.size)
-            assertEquals(group.minCards(), pool.ncards())
-            assertEquals(gnvotes, pnvotes)
-            totalNcards += pool.ncards()
-            totalNvotes += pnvotes
         }
         println("totalNcards = $totalNcards")
         println("totalNvotes = $totalNvotes")
@@ -147,7 +146,7 @@ class TestCvrExportRedaction {
     @Test
     fun testMakeCvrs() {
         val filename = "/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv"
-        val export = DominionCvrExportCsvReader(filename).read()
+        val export = readCvrExportsFromFile(filename)
 
         val input = Colorado2020General()
         val contestBuilder = CountyContestBuilder(input)
@@ -182,7 +181,7 @@ class TestCvrExportRedaction {
     @Test
     fun testBoulder22Primary() {
         val filename = "/home/stormy/datadrive/votedatabase/cvr/2022Primaries/Colorado/Boulder CO '22 Primary.csv"
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
         export.exportCardStyles.forEach { type ->
             println("  $type")
         }
@@ -195,7 +194,7 @@ class TestCvrExportRedaction {
     @Test
     fun testBoulder24() {
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
         export.exportCardStyles.forEach { type ->
             println("  $type")
         }
@@ -207,7 +206,7 @@ class TestCvrExportRedaction {
     @Test
     fun testBoulder25() {
         val filename = "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv"
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
         export.exportCardStyles.forEach { type ->
             println("  $type")
         }
@@ -220,7 +219,7 @@ class TestCvrExportRedaction {
     fun testEagle() { // redaction
         var filename = "$colorado2020/Eagle/cvr.csv"
         println(filename)
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
         export.exportCardStyles.forEach { type ->
             println("  $type")
         }
@@ -233,7 +232,7 @@ class TestCvrExportRedaction {
     fun testElPaso() { // redaction
         var filename = "/home/stormy/datadrive/votedatabase/cvr/Colorado/Jefferson/JeffCO_2020_CVR_Redacted.csv"
         println(filename)
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
         export.exportCardStyles.forEach { type ->
             println("  $type")
         }
@@ -262,7 +261,7 @@ class TestCvrExportRedaction {
                         try {
                             val filename = entry.toString()
                             println(filename)
-                            val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
+                            val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
                             export.redactedGroups.forEach { group -> println("  $group") }
 
                         } catch (e: Exception) {

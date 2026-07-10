@@ -9,23 +9,12 @@ import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
+//// read from county batch manifests and candidate_totals files
+//// return GaContests and GaCounties
+
 data class GaCounty(val countyName: String, val batches: List<CountyBatch>) {
     fun ncards() = batches.sumOf { it.nballots }
 }
-data class GaContest(val contestName: String) {
-    val candCount = mutableMapOf<Candidate, Int>()
-    fun addCandidateCount(cand: Candidate, voteCount: Int) {
-        val accum = candCount.getOrPut(cand) { 0 }
-        candCount[cand] = accum + voteCount
-    }
-
-    override fun toString() = buildString {
-        appendLine("Contest '$contestName'")
-        candCount.forEach { appendLine("    $it") }
-    }
-}
-
-data class Candidate(val contest: String, val candName: String)
 
 data class CountyBatch(val type: String, val name: String, val nballots: Int) {
     val candCount = mutableMapOf<Candidate, Int>()
@@ -37,6 +26,20 @@ data class CountyBatch(val type: String, val name: String, val nballots: Int) {
         candCount.forEach { appendLine("  $it") }
     }
 }
+
+data class GaContest(val contestName: String) {
+    val candCount = mutableMapOf<Candidate, Int>()
+    fun addCandidateCount(cand: Candidate, voteCount: Int) {
+        val accum = candCount.getOrPut(cand) { 0 }
+        candCount[cand] = accum + voteCount
+    }
+    override fun toString() = buildString {
+        appendLine("Contest '$contestName'")
+        candCount.forEach { appendLine("    $it") }
+    }
+}
+
+data class Candidate(val contest: String, val candName: String)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -133,7 +136,7 @@ fun cleanup(s: String): String {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// read manifests and candidate_totals
+// read batch manifests and candidate_totals
 fun readGaCountyInputCsv(topdir: String): Pair<List<GaContest>, List<GaCounty>> {
     val contests = mutableMapOf<String, GaContest>()
     val counties = mutableListOf<GaCounty>()

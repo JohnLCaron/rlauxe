@@ -243,7 +243,7 @@ fun uniformSampling(
     //val contestsIncluded = auditRound.contestRounds.filter { !it.done && it.included }
     //if (contestsIncluded.isEmpty()) return emptyList()
 
-    var newMvrs = 0 // count when this card not in previous samples
+    var newMvrs = 0 // TODO count when this card not in previous samples
     auditRound.contestRounds.forEach {
         it.haveSampleSize = 0
         it.haveNewSampleSize = 0
@@ -312,71 +312,3 @@ fun counties(contestUA: ContestWithAssertions): List<String> {
     val stripped = CORLAcounties.drop(1).dropLast(1)
     return stripped.split(",".toRegex()).dropLastWhile { it.isEmpty() }
 }
-
-// we dont have an example of a uniform audit. Corla just using values from colorado-rla.
-fun uniformSamplingOld(
-    auditRound: AuditRoundIF,
-    samplingCards: CloseableIterable<SamplingCardIF>,
-    previousSamples: Set<Long> = emptySet(),
-): List<Long> {
-
-    // ignore included flag, eliminate done
-    val contestsIncluded = auditRound.contestRounds.filter { !it.done }
-    if (contestsIncluded.isEmpty()) return emptyList()
-
-    var newMvrs = 0 // count when this card not in previous samples
-    auditRound.contestRounds.forEach {
-        it.haveSampleSize = 0
-        it.haveNewSampleSize = 0
-    }
-
-    val sampledPrns = mutableListOf<Long>()
-    var cardIndex = 0  // track maximum index (not done yet)
-
-    // how many samples are wanted for each contest
-    contestsIncluded.forEach { if (it.auditorWantNewMvrs != null && it.auditorWantNewMvrs!! < 0) it.auditorWantNewMvrs = null } // TODO fix in viewer
-    val maxNewSamples = auditRound.auditorMaxNewMvrs // TODO test
-    if (maxNewSamples == null || maxNewSamples < 0) {
-        logger.warn{" You must set auditRound.auditorWantNewMvrs for uniform sampling"}
-        return emptyList()
-    }
-
-    // TODO on subsequent rounds, start from where you left off ??
-    val sortedCardIter = samplingCards.iterator()
-    while (
-        sortedCardIter.hasNext() &&
-        sampledPrns.size < maxNewSamples
-    ) {
-        // get the next card in sorted order
-        val card = sortedCardIter.next()
-        sampledPrns.add(card.prn())
-
-        //   If you assume that previousSamples had all contests audited, then previousSamples reflects ballots already audited,
-        //   (even if not used for this contest), so you dont need to sample them again, so theyre not new.
-        if (!previousSamples.contains(card.prn()))
-            newMvrs++
-
-        // track how many mvrs each contest has
-        contestsIncluded.forEach { contest ->
-            if (card.hasContest(contest.id)) {
-                contest.haveSampleSize++
-                if (!previousSamples.contains(card.prn())) {
-                    contest.haveNewSampleSize++
-                }
-                // contest.maxSampleAllowed = sampledPrns.size // probably not needed ??
-            }
-        }
-
-        cardIndex++
-    }
-
-    // set the results into the auditRound direclty
-    auditRound.nmvrs = sampledPrns.size
-    auditRound.newmvrs = newMvrs
-    auditRound.samplePrns = sampledPrns
-
-    logger.info{" uniformSamplingOld chose ${sampledPrns.size} cards"}
-    return sampledPrns
-}
-
-

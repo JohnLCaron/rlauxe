@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import kotlin.test.Test
 import kotlin.test.fail
 
-// slow - keep out of unit tests
+// TODO add this to the "complete coverage calculation"
 class TestVerifyUseCases {
     val show = false
 
@@ -30,7 +30,7 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifyBoulderClca() {
-        val topdir = "${cases}/boulder/boulder2024/clca"
+        val topdir = "${cases}/boulder/boulder2024/clcawo"
         val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)

@@ -22,8 +22,8 @@ import kotlin.collections.toList
 
 private val logger = KotlinLogging.logger("CreateSfprecinctOA")
 
-// obsolete ??
-// use precincts as the pools
+// obsolete ?? TOFO: revive ?? Perhaps can just add a variation thats uses one or the other
+// group cards into precincts from the "precinctPortionId", use precincts as the pools
 class CreatePrecinctAndStyle(
     castVoteRecordZip: String,
     contestManifestFilename: String,
@@ -92,7 +92,7 @@ class CreatePrecinctAndStyle(
         cvrExportCsv: String,
         poolsHaveOneCardStyle: Boolean,
     ): PrecinctData {
-        // TODO cardStyles ned to be for all cvrs
+        // TODO cardStyles need to be for all cvrs
         val cardStyles = mutableMapOf<Set<Int>, CardStyle>() // contests.hashCode -> contests
         val precinctPools: MutableMap<String, OneAuditPoolFromCvrs> = mutableMapOf()
         val unpool = OneAuditPoolFromCvrs("unpool", 0, true, contestInfos)

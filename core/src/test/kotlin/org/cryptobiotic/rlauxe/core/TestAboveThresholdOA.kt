@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeUndervoteForContest
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.TausOA
-import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Welford
@@ -56,12 +56,11 @@ class TestAboveThresholdOA {
     )
     val pools = listOf(cardPool1, cardPool2, cardPool3)
 
-    val contestOA = ContestWithAssertions(contest, isClca = true, hasStyle = true).addStandardAssertions()
+    val contestOA: ContestWithAssertions
     val oaAssorter: OneAuditClcaAssorter
 
     init {
-        // Its the OA assorters that make this a OneAudit contest
-        setPoolAssorterAverages(listOf(contestOA), pools)
+        contestOA = makeOneAuditContests(listOf(contest), emptyMap(), pools, hasStyle = true).first()
         oaAssorter = contestOA.clcaAssertions.first().cassorter as OneAuditClcaAssorter
     }
 

@@ -34,14 +34,14 @@ class TestDominionConverter {
 
     // this tests running and checking DominionCvrConverter
     fun testDominionConverter(county: String, filename: String, coloradoInput: ColoradoInput) {
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
         val contestBuilder = CountyContestBuilder(coloradoInput)
         val dominionConverter = DominionConverter(county, export, contestBuilder.infosByName, coloradoInput)
     }
 
     // this tests coverting all of the cvrs and checking them against the ExportCvr
     fun testDominionConverterCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
         val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
 
         val contestBuilder = CountyContestBuilder(coloradoInput)
@@ -78,7 +78,7 @@ class TestDominionConverter {
 
     // this tests coverting all of the cvrs and writing them to a file
     fun testWriteDominionCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
 
         val contestBuilder = CountyContestBuilder(coloradoInput)
         val dominionConverter = DominionConverter(county, export, contestBuilder.infosByName, coloradoInput)

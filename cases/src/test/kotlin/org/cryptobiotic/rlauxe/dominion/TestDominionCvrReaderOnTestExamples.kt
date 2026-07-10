@@ -19,7 +19,7 @@ class TestDominionCvrReaderOnTestExamples {
     @Test
     fun parseThreeCandidatesTenVotesSucceeds() {
         val filename = "src/test/data/corla/1misc/ThreeCandidatesTenVotes.csv"
-        val result: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename, ).read()
+        val result: DominionCvrExportCsv = readCvrExportsFromFile(filename, )
         println(result.show())
 
         // There should be one contest, the one we just read in.
@@ -40,7 +40,7 @@ class TestDominionCvrReaderOnTestExamples {
     @Test
     fun test4CvrsWithIRV() {
         val filename = "src/test/data/Boulder2023/Test4CvrsWithIRV.csv"
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename, ).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename, )
         // println(export.summary())
 
         assertEquals("src/test/data/Boulder2023/Test4CvrsWithIRV.csv", export.filename)
@@ -122,7 +122,7 @@ class TestDominionCvrReaderOnTestExamples {
     @Test
     fun testWithRedactions() {
         val filename = "src/test/data/Boulder2024/TestWithRedactions.csv"
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename, ).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename, )
         // println(export.summary())
 
         assertEquals("src/test/data/Boulder2024/TestWithRedactions.csv", export.filename)
@@ -149,7 +149,7 @@ class TestDominionCvrReaderOnTestExamples {
     // @Test failinf
     fun parseBoulder23Succeeds() {
         val filename = "src/test/data/Boulder2023/Boulder-2023-Coordinated-CVR-Redactions-removed.csv"
-        val result: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename, ).read()
+        val result: DominionCvrExportCsv = readCvrExportsFromFile(filename, )
         println(result.summary())
 
         val schema = result.schema
@@ -283,7 +283,7 @@ class TestDominionCvrReaderOnTestExamples {
     fun parseBoulder24Recount() {
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
-        val export: DominionCvrCsvSummary = DominionCvrExportCsvReader(filename, ).read()
+        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename, )
         println(export.summary())
 
         assertEquals(

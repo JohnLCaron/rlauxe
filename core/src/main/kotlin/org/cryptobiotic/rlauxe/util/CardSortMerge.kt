@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import java.nio.file.*
 
+private val showProgress = false
 private val maxChunkDefault = 100000
 private val logger = KotlinLogging.logger("SortMerge")
 
@@ -89,7 +90,7 @@ private class ChunkSorter<T>(val workingDirectory: String, val prng: Prng, val m
         val sortedCards = cards.sortedBy { it.prn }
         val filename = "$workingDirectory/sorted-cards-part-${countChunks}.csv"
         writeCardCsvFile(sortedCards, filename)
-        println("write $filename")
+        if (showProgress) println("write $filename")
         cards.clear()
         count = 0
         countChunks++
@@ -117,7 +118,7 @@ private class CardMerger(chunkFilenames: List<String>, val writer: CardCsvWriter
     fun writeMergedCards() {
         writer.write(cards)
         total += cards.size
-        println("write ${cards.size} total = $total")
+        if (showProgress) println("write ${cards.size} total = $total")
         cards.clear()
     }
 

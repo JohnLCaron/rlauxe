@@ -93,11 +93,11 @@ fun createCvrExportCsvFile(useCvrDir: String): DominionCvrExportJsonSummary {
 
 /*
 $ java -classpath cases/build/libs/cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData  \
-   -case sf2024 -toptopdir "/home/stormy/datadrive/rla/cases/sf2024" --cvrExport
+   -case sf2024 -toptopdir "/home/stormy/datadrive/rla/cases/sf/sf2024" --cvrExport
 
 $ java -classpath cases/build/libs/cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData  \
-   -case sf2024 -toptopdir "/home/stormy/datadrive/rla/cases/sf2024"
+   -case sf2024 -toptopdir "/home/stormy/datadrive/rla/cases/sf/sf2024"
 
 $ java -classpath cases/build/libs/cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData  \
-   -case sf2024 -toptopdir "/home/stormy/datadrive/rla/cases/sf2024" --auditType clca
+   -case sf2024 -toptopdir "/home/stormy/datadrive/rla/cases/sf/sf2024" --auditType clca
  */

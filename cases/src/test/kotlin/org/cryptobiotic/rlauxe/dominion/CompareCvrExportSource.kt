@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.dominion
 
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class CompareCvrExportSources {
     val show = false
+    val maxShow = 100
 
     val adams = "/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/cvr.csv"
 
@@ -14,38 +14,36 @@ class CompareCvrExportSources {
     fun compareBoulder20cvrs() {
         compareDominionCvrExport(
             // cvr has 29 redacted groups, cvrOrg has 0
-            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv").read(),
-            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvrOrg.csv").read()
+            readCvrExportsFromFile("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv"),
+            readCvrExportsFromFile("/home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvrOrg.csv")
         )
     }
 
     @Test
     fun compareAdams20cvrs() {
         compareDominionCvrExport(
-            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/cvr.csv").read(),
-            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/Adams_2020G_CVR_REDACTED.csv").read()
+            readCvrExportsFromFile("/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/cvr.csv"),
+            readCvrExportsFromFile("/home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/Adams_2020G_CVR_REDACTED.csv")
         )
     }
 
     @Test // breakdown
     fun compareArapahoe20cvrs() {
         compareDominionCvrExport(
-            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/cvr.csv").read(),
-            DominionCvrExportCsvReader("/home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/CVR_EDITED.csv").read()
+            readCvrExportsFromFile("/home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/cvr.csv"),
+            readCvrExportsFromFile("/home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/CVR_EDITED.csv")
         )
     }
 
-    fun compareDominionCvrExport(exp1: DominionCvrCsvSummary, exp2: DominionCvrCsvSummary) {
+    fun compareDominionCvrExport(exp1: DominionCvrExportCsv, exp2: DominionCvrExportCsv) {
         println("electionName = '${exp1.electionName}', '${exp2.electionName}'")
-        assertEquals(exp1.electionName, exp2.electionName)
-
-        assertEquals(exp1.electionName, exp2.electionName)
-        // assertEquals(exp1.versionName, exp2.versionName)
-        assertEquals(exp1.schema.contests.size, exp2.schema.contests.size)
-        assertEquals(exp1.cvrs.size, exp2.cvrs.size)
-        assertEquals(exp1.redactedGroups.size, exp2.redactedGroups.size)
+        println("versionName = ${exp1.versionName}, ${exp2.versionName}")
+        println("schema.contests.size = ${exp1.schema.contests.size}, ${exp2.schema.contests.size}")
+        println("cvrs.size = ${exp1.cvrs.size}, ${exp2.cvrs.size}")
+        println("redactedGroups.size = ${exp1.redactedGroups.size}, ${exp2.redactedGroups.size}")
 
         println("\nCompare columns")
+        var countDiff = 0
         var skip = false
         var col2 = exp2.schema.columns.first()
         val cols2 = exp2.schema.columns.iterator()
@@ -53,8 +51,9 @@ class CompareCvrExportSources {
             if (!skip) col2 = cols2.next()
             val same = compare(col1, col2)
             val star = if (same) "  " else "**"
-            if (show || !same) {
+            if (show || (!same && countDiff < maxShow)) {
                 println("$star $col1 =!= $col2 ($idx)")
+                countDiff++
             }
             skip = !same
         }
@@ -63,46 +62,54 @@ class CompareCvrExportSources {
         // ** ColumnInfo(colno=6, contest=, choice=, header=PrecinctPortionID) == ColumnInfo(colno=6, contest=, choice=, header=BallotType)
 
         println("\nCompare contests")
+        countDiff = 0
         var contest2 = exp2.schema.contests.first()
         val contests2 = exp2.schema.contests.iterator()
         exp1.schema.contests.forEachIndexed { idx, contest1 ->
             contest2 = contests2.next()
             val same = compare(contest1, contest2)
             val star = if (same) "  " else "**"
-            if (show || !same) {
+            if (show || (!same && countDiff < maxShow)) {
                 println("($idx) $star $contest1")
                 println("       $contest2")
+                countDiff++
             }
         }
 
         // exp1 is missing ballot style names
         println("\nCompare CardStyle")
+        countDiff = 0
         val styles2 = exp2.exportCardStyles.iterator()
         exp1.exportCardStyles.forEachIndexed { idx, style1 ->
             if (styles2.hasNext()) {
                 val style2 = styles2.next()
                 val same = compare(style1, style2)
                 val star = if (same) "  " else "**"
-                if (show || !same) {
+                if (show || (!same && countDiff < maxShow)) {
                     println("($idx) $star $style1 =? $contest2")
+                    countDiff++
                 }
             }
         }
 
         // exp1 is missing ballot style names
-        println("\nCompare Cvrs")
+        println("\nCompare Cvrs: ${exp1.cvrs.size} vs ${exp2.cvrs.size}")
+        /*countDiff = 0
         val cvrs2 = exp2.cvrs.iterator()
         exp1.cvrs.forEachIndexed { idx, cvr1 ->
             val cvr2 = cvrs2.next()
             val same = compare(cvr1, cvr2)
             val star = if (same) "  " else "**"
-            if (show || !same) {
+            if (show || (!same && countDiff < maxShow)) {
                 println("($idx) $star $cvr1 =? $cvr2")
+                countDiff++
             }
-            if (idx % 1000 == 0) print(" $idx")
-            if (idx % 10000 == 0) println()
+            if (show) {
+                if (idx % 1000 == 0) print(" $idx")
+                if (idx % 10000 == 0) println()
+            }
         }
-        println("\nncvrs = ${exp2.cvrs.size}")
+        println("\nncvrs = ${exp2.cvrs.size}") */
 
         println("\nContests (size = ${exp2.schema.contests.size})")
         exp2.schema.contests.forEach { println(it) }

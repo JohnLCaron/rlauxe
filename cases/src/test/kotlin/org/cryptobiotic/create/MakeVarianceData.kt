@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.util.calcDeciles
 import org.cryptobiotic.rlauxe.util.calcDecilesFromInt
-import org.cryptobiotic.rlauxe.variance.VarianceDataGenerator
 import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test

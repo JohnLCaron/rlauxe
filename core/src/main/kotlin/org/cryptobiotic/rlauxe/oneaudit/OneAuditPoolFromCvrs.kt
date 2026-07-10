@@ -12,7 +12,9 @@ import kotlin.collections.component2
 
 private val logger = KotlinLogging.logger("OneAuditPoolFromCvrs")
 
+// TODO This could be a builder instead of a pool
 // build pool from CVRs
+// used in makeOneAuditTestContests
 data class OneAuditPoolFromCvrs(
     override val poolName: String,
     override val poolId: Int,

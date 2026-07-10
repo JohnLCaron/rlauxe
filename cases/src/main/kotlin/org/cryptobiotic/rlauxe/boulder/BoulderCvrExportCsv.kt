@@ -3,24 +3,19 @@ package org.cryptobiotic.rlauxe.boulder
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.boulder.RedactedGroup.Companion.makeAccumulator
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.sf.StaxReader.StaxContest
+import org.cryptobiotic.rlauxe.dominion.getCsvStreamFromResource
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.ZipReader
 import org.cryptobiotic.rlauxe.util.roundUp
-import java.io.File
 import java.io.FileInputStream
-import java.io.IOException
 import java.io.InputStream
-import java.io.InputStreamReader
-import java.io.Reader
 import java.lang.StrictMath.sqrt
 import java.nio.charset.Charset
 import kotlin.collections.set
 import kotlin.math.max
 
-// TODO remove in favor of DominionCvrExportCsv
+// TODO integrate Boulder-specific reading
 
 // this reads csv files from "Dominion CVR export files", maybe standard Dominion csv format ?
 // We are getting these files from Boulder County, used by createBoulderElection()
@@ -205,12 +200,15 @@ class RedactedGroup(var ballotType: String) {
         return this
     }
 
+    fun totalVotes() = contestVotes.values.map{ it.values }.flatten().sum()
+
     // method #1
+    // voteForN: contestId -> voteForN
     // based on votes and voteForN, calculates the minimum number of cards that in this redacted line
-    fun minCards(voteForNmap: Map<Int, Int>): Int {
+    fun minCards(voteForNs: Map<Int, Int>): Int {
         var minCards = 0
         contestVotes.forEach { (contestId, cands) ->
-            val voteForN = voteForNmap[contestId]!!
+            val voteForN = voteForNs[contestId]!!
             val minCardsForContest = roundUp(cands.values.sum() / voteForN.toDouble())
             minCards = max(minCards, minCardsForContest)
         }
@@ -223,44 +221,6 @@ class RedactedGroup(var ballotType: String) {
         append("RedactedGroup('$ballotType', ncards=$ncards, contests=$contests totalVotes=$totalVotes)")
         // appendLine(csvRecord.toString())
     }
-
-    /* now we know the count, so we can calculate missing
-    fun undervote(infos: Map<Int, ContestInfo>): Map<Int, Int> {  // contest -> undervote
-        val undervote = contestVotes.map { (id, cands) ->
-            val info = infos[id]!!
-            val sum = cands.map { it.value }.sum()
-            Pair(id, count * info.voteForN - sum)
-        }
-        return undervote.toMap()
-    }
-
-
-    fun showVotes(wantIds: List<Int>) = buildString {
-        val maxc = maxCards()
-        append("${trunc(ballotType, 9)}:")
-        wantIds.forEach { id ->
-            val contestVote = contestVotes[id]
-            if (contestVote == null)
-                append("    |")
-            else {
-                val sum = contestVote.map { it.value } .sum()
-                append("${nfn(sum, 4)}|")
-            }
-        }
-        appendLine()
-
-        append("${trunc("", 9)}:")
-        wantIds.forEach { id ->
-            val contestVote = contestVotes[id]
-            if (contestVote == null)
-                append("    |")
-            else {
-                val sum = contestVote.map { it.value } .sum()
-                append("${nfn(maxc-sum, 4)}|")
-            }
-        }
-        appendLine()
-    } */
 
     companion object {
 
@@ -290,6 +250,7 @@ fun parseNCards(line:String): Int {
 private val showDontMatch = false
 private val showBallotStyles = false
 private val showRedactedGroups = false
+private val useBoulder31 = false
 
 data class BallotType(val name: String, val contests: Set<Int>, var count: Int = 0)
 
@@ -308,10 +269,10 @@ class BallotStyles {
     }
 
     fun add(redacted:RedactedGroup, voteForNmap: Map<Int, Int>) {
-        val rname = if (redacted.contestVotes.contains(31)) "r${redacted.ballotType}+31" else "r${redacted.ballotType}"
+        val rname = if (useBoulder31 && redacted.contestVotes.contains(31)) "${redacted.ballotType}+31" else redacted.ballotType
         val group = redactedGroups[rname]
         if (group == null) {
-            redactedGroups[rname] = makeAccumulator(redacted, rname, voteForNmap)
+            redactedGroups[rname] = RedactedGroup.makeAccumulator(redacted, rname, voteForNmap)
         } else {
             if (group.contests() == redacted.contests())
                 group.merge(redacted, voteForNmap)
@@ -355,9 +316,8 @@ fun readBoulderCvrExportCsv(filename: String, countyName: String): BoulderCvrExp
     return readBoulderCvrExportsFromInputStream(input, filename, countyName)
 }
 
-fun readBoulderCvrExportsFromResourcePath(resourcePath: String, countyName: String): BoulderCvrExportCsv {
-    val inputStream = object {}.javaClass.getResourceAsStream(resourcePath) ?:
-        throw IOException("$resourcePath does not exist")
+fun readBoulderCvrExportsFromResource(resourcePath: String, countyName: String): BoulderCvrExportCsv {
+    val inputStream = getCsvStreamFromResource(resourcePath)
     return readBoulderCvrExportsFromInputStream(inputStream, resourcePath, countyName)
 }
 
@@ -405,7 +365,6 @@ fun readBoulderCvrExportsFromInputStream(input: InputStream, inputName: String, 
 
     // make the column structure out of those 3 lines
     val schema = makeSchema(contestLine, choiceLine, headerRecord)
-    val nvotesMap = schema.contests.associate { it.contestIdx to it.voteForN }
     val ballotTypeIdx = if (schema.nheaders == 6) 5 else 6 // TODO see if BallotType == header 6
 
     val cvrs = mutableListOf<CastVoteRecord>()
@@ -419,7 +378,7 @@ fun readBoulderCvrExportsFromInputStream(input: InputStream, inputName: String, 
             val isB =  line.get(0).contains("B cards")
             val ballotStyle = line.get(ballotTypeIdx) + if (isA) "-A" else if (isB) "-B" else ""
             val redactedGroup = RedactedGroup(ballotStyle).addVotes(schema, line)
-            ballotStyles.add(redactedGroup, nvotesMap)
+            ballotStyles.add(redactedGroup, schema.votesForN)
 
         } else if (line.get(0).startsWith("RCV Redacted")) {
             val cvr = CastVoteRecord(
@@ -453,6 +412,8 @@ fun readBoulderCvrExportsFromInputStream(input: InputStream, inputName: String, 
             ballotStyles.add(cvr)
         }
     }
+    parser.close()
+
     if (rcvRedacted > 0) println("  read $rcvRedacted RCV Redacted votes")
 
     if (showBallotStyles) {
@@ -525,6 +486,7 @@ fun makeRegularVotes(schema: Schema, line: CSVRecord, exportContest: ExportConte
 
 class Schema(val columns: List<ColumnInfo>, val nheaders: Int, val contests: List<ExportContestInfo> ) {
     val writeIns : Set<Int> = columns.filter{ it.choice == "Write-in" }.map { it.colno }.toSet()
+    val votesForN = contests.associate { it.contestIdx to it.voteForN }
 
     fun choices(contestId: Int): List<String> {
         val contest = contests.find{ it.contestIdx == contestId }

@@ -10,7 +10,7 @@ import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.math.max
 
-// whats diff rom CardPool? allows "adjusting"
+// whats diff from CardPool? allows "adjusting"
 //data class CardPool(
 //    override val poolName: String,
 //    override val poolId: Int,
@@ -20,14 +20,13 @@ import kotlin.math.max
 //    val totalCards: Int,
 //): CardPoolIF {
 
-// TODO can we get rid of?
+// TODO remove
 data class OneAuditPoolBuilder(
     val poolName: String,
     val poolId: Int,
     val hasExactContests: Boolean,
     val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests and candidates with no votes
     val infos: Map<Int, ContestInfo>, // all contests
-    val ncards: Int? = null
 ) {
 
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
@@ -52,7 +51,7 @@ data class OneAuditPoolBuilder(
     fun hasContest(contestId: Int) = voteTotals.contains(contestId)
     fun possibleContests() = voteTotals.map { it.key }.toSortedSet().toIntArray()
 
-    fun ncards() = ncards ?: (maxMinCardsNeeded + adjustCards)
+    fun ncards() = (maxMinCardsNeeded + adjustCards)
 
     fun adjustCards(adjust: Int, contestId : Int) {
         if (!hasContest(contestId)) throw RuntimeException("NO CONTEST")
@@ -60,17 +59,6 @@ data class OneAuditPoolBuilder(
     }
 
     fun contestTab(contestId: Int) = voteTotals[contestId]
-
-    // TODO move to test
-    // undervotes per contest when single BallotStyle, no blanks
-    fun undervotesSingleBallotStyle(): Map<Int, Int> {  // contest -> undervote
-        val undervote = voteTotals.map { (id, contestTab) ->
-            val voteSum = contestTab.nvotes()
-            val info = infos[id]!!
-            Pair(id, ncards() * info.voteForN - voteSum)
-        }
-        return undervote.toMap().toSortedMap()
-    }
 
     //        val result = if (hasExactContests) {
     //            // if hasExactContests, then missing has to be zero

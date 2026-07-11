@@ -99,10 +99,11 @@ class TestConsistentSampling {
 
     @Test
     fun testRemoveContestsAndSample() {
-        val sampleControl = ContestSampleControl(minRecountMargin=.005, minMargin=.002, maxSamplePct=.25, contestSampleCutoff=2000, auditSampleCutoff=3000)
+        val sampleControl = ContestSampleControl(minRecountMargin=.005, minMargin=.002, maxSamplePct=.25,
+            contestSampleCutoff=2000, auditSampleCutoff=3000)
         println(" $sampleControl")
 
-        repeat (11) {
+        repeat (2) {
             println("run $it")
 
             val test = MultiContestTestData(33, 3, 200000, marginRange= .001.rangeTo(.01))

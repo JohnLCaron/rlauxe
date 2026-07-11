@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.test.assertEquals

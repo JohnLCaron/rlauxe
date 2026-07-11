@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.util.mergeReduce
@@ -114,7 +115,7 @@ class BoulderContestBuilder(val info: ContestInfo,
     // total number of cards for this contest in the pools. this is dynamic because the pools get adjusted
     fun poolTotalCards() = poolTotalCards
 
-    fun adjustPoolInfo(cardPools: List<OneAuditPoolBuilder>) {
+    fun adjustPoolInfo(cardPools: List<CardPoolBuilder>) {
         poolTotalCards = cardPools.filter { it.hasContest(info.id) }.sumOf { it.ncards() }
     }
 
@@ -147,7 +148,7 @@ class BoulderContestBuilder(val info: ContestInfo,
     // we dont know how many cards are in the pool.
     // so adjust the number of cards in the pools so that the sum of pool.undervotes agrees with the refContest
     // this only works if the pool has a single style.
-    fun distributeExpectedOvervotes(cardPools: List<OneAuditPoolBuilder>) {
+    fun distributeExpectedOvervotes(cardPools: List<CardPoolBuilder>) {
         val poolCards = this.poolTotalCards()
         val expectedCards = this.expectedPoolNCards()
         val need = expectedCards - poolCards

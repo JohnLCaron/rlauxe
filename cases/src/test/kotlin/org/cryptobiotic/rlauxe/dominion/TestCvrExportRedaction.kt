@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.estimate.simulateCards
 import org.cryptobiotic.rlauxe.util.CardTabulation
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.votedatabase.colorado2020
-import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.test.assertEquals
 import kotlin.collections.sum
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory

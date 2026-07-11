@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.doublesAreClose
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doublePrecision
-import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.test.assertTrue
 import kotlin.math.pow
 
 import kotlin.test.Test

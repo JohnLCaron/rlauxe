@@ -1,6 +1,5 @@
-package org.cryptobiotic.create
+package org.cryptobiotic.rlauxe
 
-import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.cli.CreateCaseData
 import kotlin.test.Test
 
@@ -20,7 +19,7 @@ class TestCreateCaseData {
         CreateCaseData.main(
             arrayOf(
                 "--case", "belgium",
-                "--toptopdir", "${cases}/belgium2024",
+                "--toptopdir", "${cases}/belgium/belgium2024",
             )
         )
 
@@ -49,14 +48,14 @@ class TestCreateCaseData {
         CreateCaseData.main(
             arrayOf(
                 "--case", "boulder2024",
-                "--toptopdir", "${cases}/boulder2024",
+                "--toptopdir", "${cases}/boulder/boulder2024/oa",
                 "--auditType", "oa",
             )
         )
         CreateCaseData.main(
             arrayOf(
                 "--case", "boulder2024",
-                "--toptopdir", "${cases}/boulder2024",
+                "--toptopdir", "${cases}/boulder/boulder2024/clca",
                 "--auditType", "clca",
             )
         )
@@ -64,22 +63,16 @@ class TestCreateCaseData {
         CreateCaseData.main(
             arrayOf(
                 "--case", "corla2020",
-                "--toptopdir", "${cases}/corla2020",
+                "--toptopdir", "${cases}/corla/corla2020",
                 "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
             )
         )
         CreateCaseData.main(
             arrayOf(
                 "--case", "corla2020",
-                "--toptopdir", "${cases}/corla2020",
+                "--toptopdir", "${cases}/corla/corla2020",
                 "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
                 "-sampling", "uniform"
-            )
-        )
-        CreateCaseData.main(
-            arrayOf(
-                "--case", "belgium",
-                "--toptopdir", "${cases}/belgium2024",
             )
         )
     }
@@ -88,7 +81,7 @@ class TestCreateCaseData {
     fun createNewCases() {
         CreateCaseData.main(
             arrayOf(
-                "--case", "ga2026",
+                "--case", "ga26p",
                 "--toptopdir", "${cases}/ga/ga2026",
                 "--input", "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted",
             )

@@ -7,9 +7,8 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.util.sfn
 
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.io.path.Path
 import kotlin.math.ln
 

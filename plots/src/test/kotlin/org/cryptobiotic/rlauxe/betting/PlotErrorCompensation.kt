@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.io.path.Path
 import kotlin.math.ln
 

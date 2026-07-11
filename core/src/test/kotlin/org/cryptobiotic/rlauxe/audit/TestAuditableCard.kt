@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.random.Random
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

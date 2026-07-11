@@ -1,11 +1,8 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.Cvr
+
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
-import org.junit.jupiter.api.Assertions
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -121,12 +118,12 @@ class TestContestTabulation {
         val cardTabulation = CardTabulation(Closer (cards.iterator() ), infos) { }
         val tabs = cardTabulation.tabs
         val count = cardTabulation.cvrCount
-        Assertions.assertEquals(cards.size, count)
+        assertEquals(cards.size, count)
 
         val tab2 = tabulateAuditableCards(Closer(cards.iterator()), infos)
         tabs.forEach { println(it) }
 
-        Assertions.assertEquals(tabs, tab2)
+        assertEquals(tabs, tab2)
     }
 
     @Test

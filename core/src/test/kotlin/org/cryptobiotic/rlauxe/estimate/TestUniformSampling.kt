@@ -78,8 +78,8 @@ class TestUniformSampling {
 
     @Test
     fun testRemoveContestsAndSample() {
-        val sampleControl = ContestSampleControl(minRecountMargin=.005, minMargin=.002, maxSamplePct=.25, contestSampleCutoff=2000, auditSampleCutoff=3000,
-            sampling = Sampling.uniform)
+        val sampleControl = ContestSampleControl(minRecountMargin=.005, minMargin=.002, maxSamplePct=.25,
+            contestSampleCutoff=2000, auditSampleCutoff=3000, sampling = Sampling.uniform)
         println(" $sampleControl")
 
         repeat (2) {

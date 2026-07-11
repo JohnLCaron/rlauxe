@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class TestReadTabulateCounty {
     val input: ColoradoInput = Colorado2020General()

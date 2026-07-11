@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.estMarginUpperFromSamples
 import org.cryptobiotic.rlauxe.betting.estRiskStandardBet
 import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
-import org.junit.Assert.assertTrue
 import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.pow
@@ -12,6 +11,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class TestUtils {
 

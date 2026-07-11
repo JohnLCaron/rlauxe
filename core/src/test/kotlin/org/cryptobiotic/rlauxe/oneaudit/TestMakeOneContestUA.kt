@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateOneAuditPools
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
-import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.test.assertEquals
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.abs

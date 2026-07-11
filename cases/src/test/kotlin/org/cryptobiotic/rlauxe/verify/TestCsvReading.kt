@@ -7,10 +7,10 @@ import org.cryptobiotic.rlauxe.dominion.writeCvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.auditdir
 import org.cryptobiotic.rlauxe.persist.csv.readCardsAndMergeToList
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
-import org.junit.jupiter.api.Assertions
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class TestCsvReading {
     val tempDir = createTempDirectory()
@@ -31,7 +31,7 @@ class TestCsvReading {
         val filenameIn = "$testdataDir/cases/sf2024/${cvrExportCsvFile}"
         val filenameOut = "$tempDir/${cvrExportCsvFile}"
         writeCvrExportCsvFile(cvrExportCsvIterator(filenameIn), filenameOut)
-        Assertions.assertTrue(areIteratorsEqual(cvrExportCsvIterator(filenameIn), cvrExportCsvIterator(filenameOut)))
+        assertTrue(areIteratorsEqual(cvrExportCsvIterator(filenameIn), cvrExportCsvIterator(filenameOut)))
     }
 
     fun <T> areIteratorsEqual(iterator1: Iterator<T>, iterator2: Iterator<T>): Boolean {

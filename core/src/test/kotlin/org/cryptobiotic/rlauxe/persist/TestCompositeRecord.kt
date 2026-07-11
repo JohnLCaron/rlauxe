@@ -1,10 +1,9 @@
 package org.cryptobiotic.rlauxe.persist
 
 import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
-import org.junit.Assert.assertTrue
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class TestCompositeRecord {
     val belgiumData = "$cases/belgium/belgium2024"

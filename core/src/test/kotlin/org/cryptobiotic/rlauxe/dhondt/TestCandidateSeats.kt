@@ -1,16 +1,14 @@
 package org.cryptobiotic.rlauxe.dhondt
 
 import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
-import org.cryptobiotic.rlauxe.testdataDir
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestCandidateSeats {
-    val topdir = "$cases/belgium2024/"
+    val topdir = "$cases/belgium/belgium2024/"
     val auditRecord = AuditRecord.read(topdir)!! as CompositeAuditRecord
     val contests = auditRecord.contests
     val partyNames = auditRecord.readPartyNames()

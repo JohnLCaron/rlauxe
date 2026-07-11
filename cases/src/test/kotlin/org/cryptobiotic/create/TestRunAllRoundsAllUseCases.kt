@@ -2,8 +2,7 @@ package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.audit.runAllRoundsAndVerify
 import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.testdataDir
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class TestRunAllRoundsAllUseCases {
     @Test

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
@@ -194,7 +195,7 @@ class TestBoulderVsDominionCvrExport25 {
         showPoolVotes(contestIds, election2.cardPoolBuilders)
     }
 
-    fun showPoolVotes(contestIds: List<Int>, cardPools: List<OneAuditPoolBuilder>, width:Int = 4) {
+    fun showPoolVotes(contestIds: List<Int>, cardPools: List<CardPoolBuilder>, width:Int = 4) {
         println("votes, undervotes")
         print("${trunc("poolName", 9)}:")
         contestIds.forEach {  print("${nfn(it, width)}|") }

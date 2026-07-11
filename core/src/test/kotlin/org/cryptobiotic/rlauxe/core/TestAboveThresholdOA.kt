@@ -23,7 +23,7 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
-import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.test.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

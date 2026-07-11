@@ -7,10 +7,11 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
 import org.cryptobiotic.rlauxe.util.tabulateCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
+import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 import kotlin.test.assertEquals
+
 
 class TestOneAuditFuzzers {
 

@@ -13,9 +13,9 @@ import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.test.assertFailsWith
 
 class TestSamplerTrackers {

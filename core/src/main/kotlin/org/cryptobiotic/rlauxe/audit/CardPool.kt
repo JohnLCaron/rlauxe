@@ -21,6 +21,8 @@ interface CardPoolIF: StyleIF {
 // A card pool could have multiple card styles, but doesnt know what they are.
 // Its main feature is that it knows the contest subtotals for the cards it contains.
 // So it was mainly developed for OneAudit pools.
+
+// CardPool is immutable
 data class CardPool(
     override val poolName: String,
     override val poolId: Int,
@@ -36,7 +38,6 @@ data class CardPool(
 
     override fun hasContest(contestId: Int) = contestTabs.contains(contestId)
     override fun possibleContests() = (contestTabs.map { it.key }).toSortedSet().toIntArray()
-
     override fun contestTab(contestId: Int) = contestTabs[contestId]
 
     override fun votesAndUndervotes(contestId: Int): Vunder {
@@ -58,32 +59,8 @@ data class CardPool(
         append("CardPool(poolName='$poolName', poolId=$poolId, totalCards=$totalCards")
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is CardPool) return false
-
-        if (poolId != other.poolId) return false
-        if (hasExactContests != other.hasExactContests) return false
-        if (totalCards != other.totalCards) return false
-        if (poolName != other.poolName) return false
-        if (infos != other.infos) return false
-        if (contestTabs != other.contestTabs) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = poolId
-        result = 31 * result + hasExactContests.hashCode()
-        result = 31 * result + totalCards
-        result = 31 * result + poolName.hashCode()
-        result = 31 * result + infos.hashCode()
-        result = 31 * result + contestTabs.hashCode()
-        return result
-    }
-
     companion object {
-        // used by OneAuditTest
+        // used by OneAuditTest; could also use CardPoolBuilder
         fun fromMinCardsNeeded(poolName: String, poolId: Int, hasExactContests: Boolean,    // aka single style
                     infos: Map<Int, ContestInfo>, // do we really need this ??
                     contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
@@ -103,14 +80,120 @@ data class CardPool(
     }
 }
 
-/*
-interface CountyPoolsIF {
-    val countyName: String
-    val countyPoolId: Int
-    val contestTabs: List<ContestTabulation>
-    val cardCount: Int
-    val styles: List<StyleIF>
-} */
+// CardPoolBuilder is mutable; used by CountyPoolsBuilder, BoulderContestBuilder
+class CardPoolBuilder(
+    val poolName: String,
+    val poolId: Int,
+    val hasExactContests: Boolean,
+    val infos: Map<Int, ContestInfo>, // all contests
+    val contestTabs: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests and candidates with no votes
+) {
+    var ncards: Int? = null // lame
+
+    val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
+    val maxMinCardsNeeded: Int
+    var adjustCards = 0 // adjusted number of cards, using distributeExpectedOvervotes() on one or more contests
+
+    init {
+        contestTabs.forEach { (contestId, contestTab) ->
+            val voteSum = contestTab.nvotes()
+            val info = infos[contestId]!!
+            // based on the contest's votes, you need at least this many cards for this contest
+            minCardsNeeded[contestId] = roundUp(voteSum.toDouble() / info.voteForN)
+        }
+        // you need at least this many cards for this pool
+        maxMinCardsNeeded = minCardsNeeded.values.max()
+    }
+
+    fun setNcards(ncards: Int): CardPoolBuilder {
+        this.ncards = ncards
+        return this
+    }
+
+    fun name() = poolName
+    fun id() = poolId
+    fun hasExactContests() = hasExactContests
+    fun ncards() = ncards ?: (maxMinCardsNeeded + adjustCards)
+
+    fun hasContest(contestId: Int) = contestTabs.contains(contestId)
+    fun possibleContests() = contestTabs.map { it.key }.toSortedSet().toIntArray()
+    fun contestTab(contestId: Int) = contestTabs[contestId]
+
+    // adjustCards becomes the maximum value of adjust. TODO seems lame
+    fun adjustCards(adjust: Int, contestId : Int) {
+        if (!hasContest(contestId)) throw RuntimeException("NO CONTEST")
+        adjustCards = max( adjust, adjustCards)
+    }
+
+    // TODO probably need to use this ??
+    fun votesAndUndervotes(contestId: Int): Vunder {
+        val poolUndervotes = undervoteForContest(contestId)
+        val contestTab = contestTabs[contestId]!!
+
+        // TODO why not use contestTab.votesAndUndervotes() ??
+
+        val voteCounts = contestTab.votes.map { Pair(intArrayOf(it.key), it.value) }
+        val voteSum = contestTab.votes.values.sum()
+
+        return if (hasExactContests) {
+            // if hasExactContests, then missing has to be zero
+            // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
+            // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
+            val undervotes = ncards() * contestTab.voteForN - voteSum
+            Vunder(contestId, poolId, voteCounts, undervotes, 0, contestTab.voteForN)
+        } else {
+            val missing = ncards() - (poolUndervotes + voteSum) / contestTab.voteForN
+            Vunder(contestId, poolId, voteCounts, poolUndervotes, missing, contestTab.voteForN)
+        }
+    }
+
+    // TODO how to distinguish between undervotes and missing ?? You need independent setting for pool ncards
+    // this assumes missing = 0; but then should set SingleBallotStyle = true ?
+    fun undervoteForContest(contestId: Int): Int {
+        val contestTab = contestTabs[contestId] ?: return 0
+        val voteSum = contestTab.nvotes()
+        val info = infos[contestId]!!
+        return ncards() * info.voteForN - voteSum
+    }
+
+    override fun toString(): String {
+        return "AdjustablePoolBuilder(poolName='$poolName', poolId=$poolId, #contests=${contestTabs.size}, maxMinCardsNeeded=$maxMinCardsNeeded)"
+    }
+
+    fun build(): CardPool {
+        return CardPool(this.poolName, this.poolId, this.hasExactContests, this.infos, this.contestTabs, this.ncards())
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is CardPoolBuilder) return false
+
+        if (poolId != other.poolId) return false
+        if (hasExactContests != other.hasExactContests) return false
+        if (ncards != other.ncards) return false
+        if (maxMinCardsNeeded != other.maxMinCardsNeeded) return false
+        if (adjustCards != other.adjustCards) return false
+        if (poolName != other.poolName) return false
+        if (infos != other.infos) return false
+        if (contestTabs != other.contestTabs) return false
+        if (minCardsNeeded != other.minCardsNeeded) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = poolId
+        result = 31 * result + hasExactContests.hashCode()
+        result = 31 * result + (ncards ?: 0)
+        result = 31 * result + maxMinCardsNeeded
+        result = 31 * result + adjustCards
+        result = 31 * result + poolName.hashCode()
+        result = 31 * result + infos.hashCode()
+        result = 31 * result + contestTabs.hashCode()
+        result = 31 * result + minCardsNeeded.hashCode()
+        return result
+    }
+}
 
 // CountyPool: pool with multiple CardStyles
 data class CountyPools (

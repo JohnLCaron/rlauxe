@@ -6,8 +6,8 @@ import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals

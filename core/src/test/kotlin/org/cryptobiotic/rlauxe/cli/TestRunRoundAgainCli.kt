@@ -66,7 +66,7 @@ class TestRunRoundAgainCli {
 
     @Test
     fun testRunRoundAgainComposite() {
-        val topdir = "$cases/belgium/2024"
+        val topdir = "$cases/belgium/belgium2024"
 
         RunRoundAgainCli.main(
             arrayOf(

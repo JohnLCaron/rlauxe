@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
@@ -175,7 +176,7 @@ class TestBoulderUndervotes {
         showPoolVotes(contestIds, election2.cardPoolBuilders)
     }
 
-    fun showPoolVotes(contestIds: List<Int>, cardPools: List<OneAuditPoolBuilder>, width:Int = 4) {
+    fun showPoolVotes(contestIds: List<Int>, cardPools: List<CardPoolBuilder>, width:Int = 4) {
         println("votes, undervotes")
         print("${trunc("poolName", 9)}:")
         contestIds.forEach {  print("${nfn(it, width)}|") }
@@ -411,7 +412,7 @@ class TestBoulderUndervotes {
     //      2|      2|      2|      2|     -5|     -3|     -1|      5|      4|     -2|     -4|      2|      4|      2|      2|      2|      0|     -5|     -3|     -2|    233|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      0|      0|      0|      0|      0|     11|     11|     11|     14|      3|    -13|     -7|     13|    -40|     -1|     -1|      2|      2|      7|      7|      0|    -10|
 }
 
-fun OneAuditPoolBuilder.showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
+fun CardPoolBuilder.showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
     append("${trunc(name(), 9)}:")
 
     contestIds.forEach { id ->
@@ -435,4 +436,14 @@ fun OneAuditPoolBuilder.showVotes(contestIds: Collection<Int>, width: Int=4) = b
         }
     }
     appendLine()
+}
+
+// undervotes per contest when single BallotStyle, no blanks
+fun CardPoolBuilder.undervotesSingleBallotStyle(): Map<Int, Int> {  // contest -> undervote
+    val undervote = contestTabs.map { (id, contestTab) ->
+        val voteSum = contestTab.nvotes()
+        val info = infos[id]!!
+        Pair(id, ncards() * info.voteForN - voteSum)
+    }
+    return undervote.toMap().toSortedMap()
 }

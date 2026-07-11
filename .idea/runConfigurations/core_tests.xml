@@ -14,10 +14,6 @@
         <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
-        <option name="PATTERN" value="org.cryptobiotic.rlauxe.boulder.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-      <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.ga.*" />
         <option name="ENABLED" value="true" />
         <option name="INCLUDE" value="false" />
@@ -37,10 +33,16 @@
         <option name="ENABLED" value="true" />
         <option name="INCLUDE" value="false" />
       </pattern>
+      <pattern>
+        <option name="PATTERN" value="org.cryptobiotic.rlauxe.boulder.*" />
+        <option name="ENABLED" value="true" />
+        <option name="INCLUDE" value="false" />
+      </pattern>
     </extension>
+    <option name="PACKAGE_NAME" value="" />
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
-    <option name="TEST_OBJECT" value="directory" />
+    <option name="TEST_OBJECT" value="package" />
     <dir value="$PROJECT_DIR$/core/src/test/kotlin/org/cryptobiotic/rlauxe" />
     <method v="2">
       <option name="Make" enabled="true" />

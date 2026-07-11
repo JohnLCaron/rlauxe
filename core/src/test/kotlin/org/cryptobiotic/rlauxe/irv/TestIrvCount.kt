@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.irv
 
-import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.test.assertTrue
 import kotlin.test.Test
 
 class TestIrvCount {

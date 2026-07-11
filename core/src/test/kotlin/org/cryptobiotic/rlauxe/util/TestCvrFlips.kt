@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.calcAssorterMargin
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
-import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.test.assertEquals
 import kotlin.test.Test
 
 class TestCvrFlips {

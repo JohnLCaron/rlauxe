@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.dominion
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
-import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.test.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

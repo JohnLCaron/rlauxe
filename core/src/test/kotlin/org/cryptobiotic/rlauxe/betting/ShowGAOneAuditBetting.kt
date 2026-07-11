@@ -9,8 +9,8 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.workflow.ClcaSampler
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals

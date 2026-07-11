@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
-import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.test.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

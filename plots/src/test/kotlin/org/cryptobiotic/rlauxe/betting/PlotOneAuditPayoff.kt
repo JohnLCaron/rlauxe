@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.test.assertEquals
 
 import kotlin.io.path.Path
 import kotlin.math.ln

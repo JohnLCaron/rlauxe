@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
-import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.test.assertTrue
 import kotlin.collections.first
 import kotlin.collections.set
 import kotlin.test.Test

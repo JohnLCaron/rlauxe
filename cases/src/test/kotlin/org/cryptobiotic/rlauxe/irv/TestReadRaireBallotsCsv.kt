@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.rairejson.import
 import org.cryptobiotic.rlauxe.rairejson.readRaireBallotsCsv
 import org.cryptobiotic.rlauxe.rairejson.readRaireResultsJson
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.junit.jupiter.api.Assertions
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,13 +46,13 @@ class TestReadRaireBallotsCsv {
     fun testReadAspenCityCouncilCvrs() {
         val cvrFile = "src/test/data/raire/ballotCsv/Aspen_2009_CityCouncil.raire"
         val raireCvrs: RaireCvrs = readRaireBallotsCsv(cvrFile)
-        Assertions.assertEquals(1, raireCvrs.contests.size)
+        assertEquals(1, raireCvrs.contests.size)
         val contest = raireCvrs.contests.first()
-        Assertions.assertEquals(1, contest.contestNumber)
-        Assertions.assertEquals(11, contest.candidates.size)
-        Assertions.assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11), contest.candidates)
-        Assertions.assertEquals(8, contest.winner)
-        Assertions.assertEquals(2487, contest.ncvrs)
+        assertEquals(1, contest.contestNumber)
+        assertEquals(11, contest.candidates.size)
+        assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11), contest.candidates)
+        assertEquals(8, contest.winner)
+        assertEquals(2487, contest.ncvrs)
     }
 
     // 1
@@ -66,13 +65,13 @@ class TestReadRaireBallotsCsv {
     fun testReadSfdaCvrs() { // ??
         val cvrFile = "src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
         val raireCvrs: RaireCvrs = readRaireBallotsCsv(cvrFile)
-        Assertions.assertEquals(1, raireCvrs.contests.size)
+        assertEquals(1, raireCvrs.contests.size)
         val contest = raireCvrs.contests.first()
-        Assertions.assertEquals(339, contest.contestNumber)
-        Assertions.assertEquals(4, contest.candidates.size)
-        Assertions.assertEquals(listOf(15, 16, 17, 18), contest.candidates)
-        Assertions.assertEquals(-1, contest.winner)
-        Assertions.assertEquals(146662, contest.ncvrs)
+        assertEquals(339, contest.contestNumber)
+        assertEquals(4, contest.candidates.size)
+        assertEquals(listOf(15, 16, 17, 18), contest.candidates)
+        assertEquals(-1, contest.winner)
+        assertEquals(146662, contest.ncvrs)
     }
 
     @Test

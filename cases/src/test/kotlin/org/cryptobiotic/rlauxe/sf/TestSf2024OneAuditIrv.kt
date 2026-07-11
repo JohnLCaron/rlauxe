@@ -25,7 +25,7 @@ import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.verify.AssortAvg
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import org.cryptobiotic.rlauxe.workflow.readSortedManifest
-import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.test.assertEquals
 import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.use

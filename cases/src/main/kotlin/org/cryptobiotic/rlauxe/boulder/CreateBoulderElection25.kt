@@ -35,9 +35,8 @@ class CreateBoulderElection25(
 
     //val cvrTabs = countCvrVotes()
     // val redTabs = countRedactedVotes() // wrong
-    //val cardPoolBuilders: List<OneAuditPoolBuilder> = convertRedactedToCardPool(export.redacted)
+    //val cardPoolBuilders: List<AdjustableCardPool> = convertRedactedToCardPool(export.redacted)
     //val boulderContestBuilders: Map<Int, BoulderContestBuilder25> = makeBoulderContestBuilders().associate { it.info.id to it}
-    val cardPoolBuilders: List<OneAuditPoolBuilder>
     val cardPools: List<CardPool>
     val ncards: Int
 
@@ -59,20 +58,20 @@ class CreateBoulderElection25(
 
         val cvrTabs = countCvrVotes()
         val poolTabs = countRedactedVotes() // wrong
-        cardPoolBuilders = convertRedactedToCardPool(export.redacted)
+        val cardPoolBuilders = convertRedactedToCardPool(export.redacted)
         val contestBuilders: Map<Int, BoulderContestBuilder25> = makeBoulderContestBuilders(cvrTabs, cardPoolBuilders, poolTabs)
             .associate { it.info.id to it}
+        cardPools = cardPoolBuilders.map { it.build() } // why ??
 
         // we need to know the diluted Nb before we can create the UAs
         contests = makeContests(contestBuilders)
-        simulatedCvrs = makeRedactedCvrs(cardPoolBuilders)
+        simulatedCvrs = makeRedactedCvrs(cardPools)
 
         val phantoms = makePhantomCvrs(contests)
         allCvrs = exportCvrs + simulatedCvrs + phantoms
 
         val npops = tabulateNpops(allCvrs, infoList)
         this.ncards = allCvrs.size
-        cardPools = cardPoolBuilders.map { it.build() }
 
         contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true, hasStyle = hasStyle)
             else makeOneAuditContests(contests, npops, cardPools, hasStyle = hasStyle)
@@ -120,7 +119,7 @@ class CreateBoulderElection25(
         }
     }
 
-    private fun convertRedactedToCardPool(redacteds: List<RedactedGroup>): List<OneAuditPoolBuilder> {
+    private fun convertRedactedToCardPool(redacteds: List<RedactedGroup>): List<CardPoolBuilder> {
         return redacteds.mapIndexed { redactedIdx, redacted: RedactedGroup ->
             // each group becomes a pool
             // correct bug adding contest 12 to pool 06
@@ -134,12 +133,12 @@ class CreateBoulderElection25(
 
             val name = cleanCsvString(redacted.ballotType)
             val id = redactedIdx
-            OneAuditPoolBuilder(name, id, hasExactContests=true, contestTabs, infos, ncards = redacted.ncards)
+            CardPoolBuilder(name, id, hasExactContests=true, infos, contestTabs).setNcards(redacted.ncards)
         }
     }
 
     // make simulated CVRs for all the pools
-    fun makeRedactedCvrs(cardPools: List<OneAuditPoolBuilder>) : List<Cvr> { // contestId -> candidateId -> nvotes
+    fun makeRedactedCvrs(cardPools: List<CardPool>) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
         cardPools.forEach { cardPool ->
             rcvrs.addAll(makeCvrsForOnePool(cardPool))
@@ -148,7 +147,7 @@ class CreateBoulderElection25(
     }
 
     // make simulated CVRs for one pool, all contests
-    private fun makeCvrsForOnePool(cardPool: OneAuditPoolBuilder) : List<Cvr> { // contestId -> candidateId -> nvotes
+    private fun makeCvrsForOnePool(cardPool: CardPool) : List<Cvr> { // contestId -> candidateId -> nvotes
         val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
         val cvrs =
             makeCvrsForOnePool(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasExactContests)
@@ -156,7 +155,7 @@ class CreateBoulderElection25(
         // check it
         val cvrTabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infos)
         poolVunders.forEach { (contestId, vunder) ->
-            val poolTab = cardPool.voteTotals[contestId]!!
+            val poolTab = cardPool.contestTabs[contestId]!!
             val cvrTab = cvrTabs[contestId]!!
             if (!checkEquivilentVotes(vunder.cands(), cvrTab.votes)) {
                 logger.warn{"cvrs differ from cardPool"}
@@ -191,7 +190,7 @@ class CreateBoulderElection25(
     }
 
     fun makeBoulderContestBuilders(cvrTabs: Map<Int, ContestTabulation>,
-                                   cardPools: List<OneAuditPoolBuilder>,
+                                   cardPools: List<CardPoolBuilder>,
                                    poolTabs: Map<Int, ContestTabulation>,
                                    ): List<BoulderContestBuilder25> {
         val oa2Contests = mutableListOf<BoulderContestBuilder25>()
@@ -248,7 +247,7 @@ class CreateBoulderElection25(
         ElectionInfo("Boulder25$auditType", auditType, ncards(), contestsUA.size, true, mvrSource=mvrSource)
     override fun contestsUA() = contestsUA
     override fun cardStyles(): List<StyleIF> {
-        val lastId = cardPoolBuilders.map{ it.id() }.max()
+        val lastId = cardPools.map{ it.id() }.max()
         return cardPools +
             export.ballotTypes.mapIndexed { idx, it ->
                 CardStyle(
@@ -284,7 +283,7 @@ class BoulderContestBuilder25(val info: ContestInfo,
                               val sovoContest: BoulderContestVotes,
                               val cvrTab: ContestTabulation,
                               poolTabulation: ContestTabulation?,
-                              val cardPools: List<OneAuditPoolBuilder>) {
+                              val cardPools: List<CardPoolBuilder>) {
 
     // there are no overvotes in the Cvrs; we treat them as blanks (not divided by voteForN)
     val sovoCards = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes

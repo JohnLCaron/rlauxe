@@ -96,7 +96,6 @@ class TestDeciles {
         println(" probability of 42 is = ${probability(deciles, 42)}")
         println(" probability of 99 is = ${probability(deciles, 99)}")
         println(" probability of 100 is = ${probability(deciles, 100)}")
-
     }
 
     @Test

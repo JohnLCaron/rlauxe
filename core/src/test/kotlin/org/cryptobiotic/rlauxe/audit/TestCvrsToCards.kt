@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolTest
 import org.cryptobiotic.rlauxe.util.Prng
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.assertEquals

@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.boulder
+package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -10,10 +10,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-class TestOneAuditPoolBuilder {
+class TestAdjustableCardPool {
 
     @Test
-    fun testOneAuditPoolBuilder() {
+    fun testCardPoolBuilder() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestWithAssertions> = test.contests.map {
             ContestWithAssertions(it, isClca = true).addStandardAssertions()
@@ -28,19 +28,21 @@ class TestOneAuditPoolBuilder {
             contestVotes[contestUA.id] = Vunder.fromNpop(contestUA.id, underVotes, contestUA.contest.Ncast(), candVotes, voteForN)
         }
 
-        // TODO val cvrs2 = makeCvrsFromPopulations(test.populations)
         val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, hasExactContests = false)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
         val cvrTabs = tabulateCvrs(cvrs.iterator(), infos)
 
-        val cardPool = OneAuditPoolBuilder("pool42", 42, false, cvrTabs, infos)
-        println(cardPool)
+        val cardPoolb = CardPoolBuilder("pool42", 42, false, infos, cvrTabs)
+        println(cardPoolb)
 
-        assertEquals(cardPool, cardPool)
-        assertEquals(cardPool.hashCode(), cardPool.hashCode())
+        assertEquals(cardPoolb, cardPoolb)
+        assertEquals(cardPoolb.hashCode(), cardPoolb.hashCode())
+        val cardPool = cardPoolb.build()
 
-        val cardPool2 = cardPool.copy(hasExactContests = true)
-        assertNotEquals(cardPool2, cardPool)
-        assertNotEquals(cardPool2.hashCode(), cardPool.hashCode())
+        cardPoolb.setNcards(4234)
+        val cardPool2 = cardPoolb.build()
+
+        assertNotEquals(cardPool, cardPool2)
+        assertNotEquals(cardPool.hashCode(), cardPool2.hashCode())
     }
 }

@@ -183,7 +183,7 @@ class CreateBoulderElection(
 
             val name = cleanCsvString(redacted.ballotType)
             val id = redactedIdx
-            CardPoolBuilder(name, id, hasExactContests=true, infoMap, contestTabs)
+            CardPoolBuilder.fromMinVotesNeeded(name, id, hasExactContests=true, infoMap, contestTabs)
         }
     }
 
@@ -198,7 +198,7 @@ class CreateBoulderElection(
 
     // make simulated CVRs for one pool, all contests
     private fun makeCvrsForOnePool(cardPool: CardPoolBuilder) : List<Cvr> { // contestId -> candidateId -> nvotes
-        val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
+        val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotesBoulder(it)) }.toMap()
         val cvrs = makeCvrsForOnePool(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasExactContests)
 
         // TODO is it true that the number of cvrs can vary when there are multiple contests ?

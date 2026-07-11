@@ -133,7 +133,7 @@ class CreateBoulderElection25(
 
             val name = cleanCsvString(redacted.ballotType)
             val id = redactedIdx
-            CardPoolBuilder(name, id, hasExactContests=true, infos, contestTabs).setNcards(redacted.ncards)
+            CardPoolBuilder.fromMinVotesNeeded(name, id, hasExactContests=true, infos, contestTabs).setNcards(redacted.ncards)
         }
     }
 

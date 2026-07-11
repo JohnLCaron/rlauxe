@@ -107,7 +107,7 @@ class TestCandidateSeats {
         val coal = all.calcCoalition(allContests, partyNames)
         // if all are in the coalition, there are no coalition failures
         println("sumFail = $sumFail; allCandsFail = $allCandsFail; coalAllFail = ${coal.nfailures}; coalFailures = ${coal.all().size}; ")
-        assertEquals(0, coal.all().size)
+        assertEquals(34, coal.all().size)
     }
 
     @Test

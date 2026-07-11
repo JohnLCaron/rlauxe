@@ -15,41 +15,20 @@ data class Strata(
     val population: Int,
 )
 
-// Neals algorithm: use the minimum rate across strata
-fun computeMulticountyStrata(name: String, counties: Set<String>, countyStrata: Map<String, Strata>): Strata {
-    var orgSamples = 0
-    val minRate = counties.map {
-        val s = countyStrata[it]
-        if (s == null) 1.0 else {
-            orgSamples += s.nmvrs
-            s.nmvrs / s.population.toDouble()
-        }
-    }.min()
-
-    var npop = 0
-    var nmvrs = 0
-    counties.forEach {
-        val strata = countyStrata[it]
-        if (strata != null) {
-            npop += strata.population
-            val truncSamples = roundToClosest(strata.population * minRate)
-            nmvrs += truncSamples
-        }
-    }
-    return Strata(name, nmvrs, npop)
-}
-
-// countyStrata holds the single contest counties haveMvrs
+//// calculate how many samples each contest has, using Neils algorithm for multicounty samples
+// this is used to measure the risk for ColoradoRLA uniform sampling
+// countyStrata input holds the single contest counties haveMvrs
+// val useAll = auditRound.auditorMaxNewMvrs != null
 fun setHaveSampleSize(contestsIncluded: List<ContestRound>, countyStrata: Map<String, Strata>, useAll: Boolean): Map<String, Int> {
     if (useAll) {
         contestsIncluded.forEach { contestRound: ContestRound ->
             val counties = counties(contestRound.contestUA)
             if (counties != null) {
-                var count = 0
+                var sumAcrossCounties = 0
                 counties.forEach {
-                    count += countyStrata[it]?.nmvrs ?: 0
+                    sumAcrossCounties += countyStrata[it]?.nmvrs ?: 0
                 }
-                contestRound.haveSampleSize = count
+                contestRound.haveSampleSize = sumAcrossCounties
             }
         }
         return countyStrata.mapValues { it.value.nmvrs }
@@ -77,7 +56,42 @@ fun setHaveSampleSize(contestsIncluded: List<ContestRound>, countyStrata: Map<St
     return wantFromPools
 }
 
+// Neals algorithm: use the minimum rate across strata
+private fun computeMulticountyStrata(name: String, counties: Set<String>, countyStrata: Map<String, Strata>): Strata {
+    var orgSamples = 0
+    val minRate = counties.map {
+        val s = countyStrata[it]
+        if (s == null) 1.0 else {
+            orgSamples += s.nmvrs
+            s.nmvrs / s.population.toDouble()
+        }
+    }.min()
+
+    var npop = 0
+    var nmvrs = 0
+    counties.forEach {
+        val strata = countyStrata[it]
+        if (strata != null) {
+            npop += strata.population
+            val truncSamples = roundToClosest(strata.population * minRate)
+            nmvrs += truncSamples
+        }
+    }
+    return Strata(name, nmvrs, npop)
+}
+
+// get list of counties that this contest has
+private fun counties(contestUA: ContestWithAssertions): List<String>? {
+    var counties = contestUA.contest.info().metadata.get("CORLAcounties")
+    if (counties == null) contestUA.contest.info().metadata.get("Counties")
+    if (counties == null) return null
+    if (counties.startsWith("["))
+        counties = counties.drop(1).dropLast(1) // [county1, county2]
+    return counties.split(",".toRegex()).dropLastWhile { it.isEmpty() }
+}
+
 ////////////////////////////
+// unused ??
 
 fun calcCountyStrataWant(contestsIncluded: List<ContestRound>, alpha: Double): List<Strata> {
     val wantFromPools = calcWantedFromCountyPools(contestsIncluded, alpha)
@@ -94,7 +108,7 @@ fun calcCountyStrataWant(contestsIncluded: List<ContestRound>, alpha: Double): L
     return countyStrata
 }
 
-fun calcWantedFromCountyPools(contestsIncluded: List<ContestRound>, alpha: Double): Map<String, Int> {
+private fun calcWantedFromCountyPools(contestsIncluded: List<ContestRound>, alpha: Double): Map<String, Int> {
     val wantFromPools = mutableMapOf<String, Int>()
     contestsIncluded.forEach { contestRound: ContestRound ->
         val counties = counties(contestRound.contestUA)
@@ -108,14 +122,7 @@ fun calcWantedFromCountyPools(contestsIncluded: List<ContestRound>, alpha: Doubl
     return wantFromPools
 }
 
-fun counties(contestUA: ContestWithAssertions): List<String>? {
-    val CORLAcounties = contestUA.contest.info().metadata.get("CORLAcounties")
-    if (CORLAcounties == null) return null
-    val stripped = CORLAcounties.drop(1).dropLast(1)
-    return stripped.split(",".toRegex()).dropLastWhile { it.isEmpty() }
-}
-
-fun calcEstMvrs(contestUA: ContestWithAssertions, alpha: Double): Int {
+private fun calcEstMvrs(contestUA: ContestWithAssertions, alpha: Double): Int {
     val minAssertion = contestUA.minClcaAssertion()
     if (minAssertion == null) return 0
     val noerror = minAssertion.noerror // TODO can we use this ??

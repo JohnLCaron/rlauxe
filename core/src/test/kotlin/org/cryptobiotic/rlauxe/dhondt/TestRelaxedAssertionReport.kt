@@ -14,7 +14,6 @@ class TestRelaxedAssertionReport {
     val partyNames = auditRecord.readPartyNames()
     val lastRound = auditRecord.rounds.last()
     val config = auditRecord.config
-    val sampleLimits = auditRecord.readSampleLimits()
     val sampleLimitMap = auditRecord.readSampleLimits().associateBy { it.id }
 
     @Test
@@ -104,13 +103,16 @@ class TestRelaxedAssertionReport {
 
     @Test
     fun testShowAllRelaxedAssertions() {
-        contests.forEach{ contestUA ->
-            val contestRound = lastRound.contestRounds.find { it.contestUA.id == contestUA.id }
-            if (contestRound != null) {
-                val result = (contestUA.contest as DHondtContest).showRelaxedAssertions(contestRound)
-                println(result)
-                println("=======================================================================================================")
+        lastRound.contestRounds.forEach { contestRound ->
+            println("for ${contestRound.name}")
+            val sampleLimit = sampleLimitMap[contestRound.id]
+            if (sampleLimit != null) {
+                contestRound.haveSampleSize = sampleLimit.limit
             }
+            val builder = CandSeatRangeBuilder(contestRound)
+
+            val ra = RelaxedAssertionReport(builder)
+            println(ra.showRelaxedAssertions())
         }
     }
 }

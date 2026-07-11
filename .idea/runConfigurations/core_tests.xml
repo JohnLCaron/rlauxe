@@ -4,11 +4,6 @@
     <shortenClasspath name="ARGS_FILE" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="org.cryptobiotic.rlauxe.auditcenter.*" />
-        <option name="ENABLED" value="true" />
-        <option name="INCLUDE" value="false" />
-      </pattern>
-      <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.belgium.*" />
         <option name="ENABLED" value="true" />
         <option name="INCLUDE" value="false" />
@@ -35,6 +30,11 @@
       </pattern>
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.boulder.*" />
+        <option name="ENABLED" value="true" />
+        <option name="INCLUDE" value="false" />
+      </pattern>
+      <pattern>
+        <option name="PATTERN" value="org.cryptobiotic.rlauxe.auditcenter.*" />
         <option name="ENABLED" value="true" />
         <option name="INCLUDE" value="false" />
       </pattern>

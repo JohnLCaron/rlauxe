@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe
+package org.cryptobiotic.create
 
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.cli.CreateCaseData
 import kotlin.test.Test
 
@@ -75,15 +76,23 @@ class TestCreateCaseData {
                 "-sampling", "uniform"
             )
         )
-    }
-
-    @Test
-    fun createNewCases() {
         CreateCaseData.main(
             arrayOf(
                 "--case", "ga26p",
                 "--toptopdir", "${cases}/ga/ga2026",
                 "--input", "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted",
+            )
+        )
+    }
+
+    @Test
+    fun createOneCase() {
+        CreateCaseData.main(
+            arrayOf(
+                "--case", "corla2020",
+                "--toptopdir", "${cases}/corla/corla2020",
+                "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
+                "-sampling", "uniform"
             )
         )
     }

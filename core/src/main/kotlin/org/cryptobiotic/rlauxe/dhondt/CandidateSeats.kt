@@ -294,7 +294,6 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
             }
             return children
         }
-
     }
 
     fun makeAltContestFromFlippedAssertion(fromContest: DHondtContest, failure: DhondtRiskFailure): AltContest {

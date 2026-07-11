@@ -14,7 +14,7 @@ fun makeCorlaElectionClca(toptopdir: String, auditcenter: String) {
     val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.04, ) // 2020 only
     val round = AuditRoundConfig(
         SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
-        ContestSampleControl(minRecountMargin = .005, minSize = 10, contestSampleCutoff = 10000,
+        ContestSampleControl(minRecountMargin = .005, minMargin = .01, minSize = 10, contestSampleCutoff = 10000,
             auditSampleCutoff = 200000, sampling = Sampling.consistent),
         ClcaConfig(), null)
 
@@ -29,7 +29,7 @@ fun makeCorlaElectionUniform(toptopdir: String, auditcenter: String)  {
         SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
         ContestSampleControl(
             minRecountMargin = .005,
-            minMargin = .005,
+            minMargin = .01,
             minSize = 10,
             contestSampleCutoff = 10000,
             auditSampleCutoff = 200000,

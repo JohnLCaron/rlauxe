@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CvrsToCardStylesIterator
 import org.cryptobiotic.rlauxe.audit.StyleIF
@@ -109,11 +110,12 @@ fun makeOneAuditTest(
         )
     pool.adjustCards = poolUnderVotes */
 
-    val pool = CardPool.fromMinCardsNeeded("pool42", 42, /* poolId */ hasExactContests = false, infos = infos,
+    val poolb = CardPoolBuilder.fromMinVotesNeeded("pool42", 42, /* poolId */ hasExactContests = false, infos = infos,
         contestTabs = mapOf(1 to ContestTabulation(info1, votesNoCvr, ncards=noCvrSize)),
-        adjust = poolUnderVotes
-    )
-    val pools = listOf(pool)
+        )
+    poolb.adjustCards = poolUnderVotes
+    val pool = poolb.build()
+    val pools = listOf( pool)
 
     val expectNc = noCvrSize + cvrSize + Np
     require (expectNc == Nc)

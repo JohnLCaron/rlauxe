@@ -227,15 +227,16 @@ class DHondtContest(
 
     // show altContests tree with this assertion as the root
     fun showRelaxedAssertion(contestRound: ContestRound, cassertion: ClcaAssertion): String {
-        val cands = CandSeatRangeBuilder(contestRound)
-        val relax = RelaxedAssertionReport(cands)
+        val candseats = CandSeatRangeBuilder(contestRound)
+        val relax = RelaxedAssertionReport(candseats)
         if (cassertion.assorter !is DHondtAssorter) {
-            val thrasher = cands.thrashers.find { it.thrasher.assorter.hashcodeDesc() == cassertion.assorter.hashcodeDesc() }
+            val thrasher = candseats.thrashers.find { it.thrasher.assorter.hashcodeDesc() == cassertion.assorter.hashcodeDesc() }
             if (thrasher != null) return relax.showAltThrasherAssertions(thrasher.altContest)
         }
 
-        val failure = cands.failureNodes.find { it.failure.assorter == cassertion.assorter }
-        if (failure == null) return "Not a failure: $cassertion"
+        val failure = candseats.failureNodes.find { it.failure.assorter == cassertion.assorter }
+        if (failure == null)
+            return "Not a failure: $cassertion"
 
         val done = mutableSetOf<String>()
         val result = relax.showAltFailureContestRecurse(failure.altContest, done)

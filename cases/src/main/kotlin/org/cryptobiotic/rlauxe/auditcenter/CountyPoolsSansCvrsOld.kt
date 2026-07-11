@@ -1,31 +1,34 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CountyPools
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.nfz
+import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.String
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 private val logger = KotlinLogging.logger("MakeCountyPools")
 
 // used by CountyElectionSansCvrs
 // one CountyPools for each County; make cardPools from Mvrs, then try to adjust to match ??
-class CountyPoolsSansCvrs(
+class CountyPoolsSansCvrsOld(
     corlaContestBuilders: List<CorlaContestBuilder>,
     val coloradoInput: ColoradoInput,
     onlyCounty: String? = null
 ) {
     val builders = corlaContestBuilders.associateBy { it.info.name }
     val infos = corlaContestBuilders.associate { it.info.id to it.info }
-    val countyPools: List<CountyPoolsBuilder>
+    val countyPools: List<CountyPoolsBuilderOld>
 
     init {
         val infosByName = corlaContestBuilders.associate { it.info.name to it.info }
@@ -55,11 +58,11 @@ class CountyPoolsSansCvrs(
         }
 
         // missingPools for each county
-        val missingPools: Map<String, CardPoolBuilder> = makeMissingPools(missingContestsByCounty)
+        val missingPools: Map<String, AdjustableStylePool> = makeMissingPools(missingContestsByCounty)
 
         countyPools = contestTabByCounty.filter { it.key !in coloradoInput.skipCounties }
             .map { (countyName, countyContest) ->
-                CountyPoolsBuilder(
+                CountyPoolsBuilderOld(
                 countyName, countyContest, mvrStylesMap[countyName]!!,
                 missingPools[countyName], distributeNc[countyName]!!, infosByName, coloradoInput)
         }
@@ -163,8 +166,8 @@ class CountyPoolsSansCvrs(
         return countyNc
     }
 
-    fun makeMissingPools(missingContestsByCounty: Map<String, List<CountyContestVotes>>): Map<String, CardPoolBuilder> {
-        val stylePools = mutableMapOf<String, CardPoolBuilder>()
+    fun makeMissingPools(missingContestsByCounty: Map<String, List<CountyContestVotes>>): Map<String, AdjustableStylePool> {
+        val stylePools = mutableMapOf<String, AdjustableStylePool>()
         missingContestsByCounty.forEach { (countyName, missingContests) ->
             val missingPool = makeMissingPool(countyName, missingContests)
             if (missingPool != null ) stylePools[countyName] = missingPool
@@ -174,7 +177,7 @@ class CountyPoolsSansCvrs(
 
     // the simplest thing to do is to munge all missing contests into a single style.
     // TODO look at contest.Nc, put disparate Nc into different stylePool
-    fun makeMissingPool(countyName: String, missingContests: List<CountyContestVotes>): CardPoolBuilder? {
+    fun makeMissingPool(countyName: String, missingContests: List<CountyContestVotes>): AdjustableStylePool? {
         val votesForStyle = mutableMapOf<Int, ContestTabulation>() // all contests, this style
         missingContests.forEach { contestTab ->
             val builder = builders[contestTab.contestName]
@@ -195,9 +198,9 @@ class CountyPoolsSansCvrs(
 
         if (votesForStyle.isEmpty()) return null
 
-        CountyPoolsBuilder.nextPoolId++
-        return CardPoolBuilder.fromMinCardsNeeded(
-            countyName, CountyPoolsBuilder.nextPoolId, hasExactContests = true, infos,
+        CountyPoolsBuilderOld.nextPoolId++
+        return AdjustableStylePool(
+            countyName, countyName, CountyPoolsBuilderOld.nextPoolId, hasExactContests = true, infos,
             contestTabs = votesForStyle,
         )
     }
@@ -211,17 +214,17 @@ class CountyPoolsSansCvrs(
 // we have county styles and subtotals, which get distributed to the various county styles in (rough) proportion to their cardCount.
 // as usual, we dont know the undervotes, so we will distribute that also in proportion
 
-data class CountyPoolsBuilder(
+data class CountyPoolsBuilderOld(
     val countyName: String,
     val cct: CountyTabAllContests, // the votes subtotal for each contest in the county
     val mvrStyles: CountyStylesFromMvrs, // Set<contestId> and reletive count within county
-    val missingPool: CardPoolBuilder?, // all the contests that werent in an mvrStyle TODO just their ids ??
+    val missingPool: AdjustableStylePool?, // all the contests that werent in an mvrStyle TODO just their ids ??
     val contestNc: Map<String, Int>, // contest name -> contest Nc for the county
     val infos: Map<String, ContestInfo>, // contest name -> ContestInfoval
     val coloradoInput: ColoradoInput,
 ) {
     val adjContestNc = contestNc //    TODO style specific ??  .mapValues { it.value - missingNcards }
-    val pools = mutableListOf<CardPoolBuilder>()
+    val pools = mutableListOf<AdjustableStylePool>()
 
     init {
         // convert MvrStyles to CardStyle, add in the missing style
@@ -282,7 +285,7 @@ data class CountyPoolsBuilder(
             }
 
             nextPoolId++
-            pools.add( CardPoolBuilder.fromMinCardsNeeded( "${countyName}-${nfz(style.id,2)}", nextPoolId,
+            pools.add(AdjustableStylePool( countyName, "${countyName}-${nfz(style.id,2)}", nextPoolId,
                     hasExactContests = true, infos.mapKeys { it.value.id }, contestTabs=votesForStyle))
          }
 
@@ -317,7 +320,7 @@ data class CountyPoolsBuilder(
         val totalCards = pools.sumOf { it.ncards() }
 
         return CountyPools(countyName, countyPoolId++,
-            contestTabs = tabs, styles = pools.map { it.build() }, cardCount = totalCards)
+            contestTabs = tabs, styles = pools, cardCount = totalCards)
     }
 
     companion object {
@@ -326,7 +329,7 @@ data class CountyPoolsBuilder(
     }
 }
 
-/*
+
 // TODO may not need to be a pool, just something to adjust the style counts
 // TODO same as OneAuditPoolBuilder
 
@@ -368,7 +371,9 @@ data class AdjustableStylePool(
     override fun hasContest(contestId: Int) = contestTabs.contains(contestId)
     override fun possibleContests() = contestTabs.map { it.key }.toSortedSet().toIntArray()
 
-    override fun ncards() = (maxMinCardsNeeded + adjustCards)
+    override fun ncards(): Int {
+        return (maxMinCardsNeeded + adjustCards)
+    }
 
     // modifying ncards just changes the undervotes
     fun adjustCards(adjust: Int, contestId : Int) {
@@ -410,4 +415,4 @@ data class AdjustableStylePool(
         result = 31 * result + contestTabs.hashCode()
         return result
     }
-} */
+}

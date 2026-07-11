@@ -7,7 +7,10 @@ import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
+import kotlin.collections.set
 import kotlin.math.max
+import kotlin.text.get
+import kotlin.text.toDouble
 
 const val unpooled = "unpooled"
 
@@ -56,54 +59,24 @@ data class CardPool(
     }
 
     override fun toString() = buildString {
-        append("CardPool(poolName='$poolName', poolId=$poolId, totalCards=$totalCards")
-    }
-
-    companion object {
-        // used by OneAuditTest; could also use CardPoolBuilder
-        fun fromMinCardsNeeded(poolName: String, poolId: Int, hasExactContests: Boolean,    // aka single style
-                    infos: Map<Int, ContestInfo>, // do we really need this ??
-                    contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
-                    adjust: Int): CardPool {
-
-            // you need at least this many cards for this pool
-            var minCardsNeeded = 0
-            contestTabs.forEach { (contestId, contestTab) ->
-                    val voteSum = contestTab.nvotes()
-                    val info = infos[contestId]!!
-                    // based on the contest's votes, you need at least this many cards for this contest
-                minCardsNeeded = max(minCardsNeeded, roundUp(voteSum.toDouble() / info.voteForN))
-            }
-
-            return CardPool(poolName, poolId, hasExactContests, infos, contestTabs, minCardsNeeded + adjust)
-        }
+        append("CardPool(poolName='$poolName', poolId=$poolId, totalCards=$totalCards)")
     }
 }
 
-// CardPoolBuilder is mutable; used by CountyPoolsBuilder, BoulderContestBuilder
+// CardPoolBuilder is mutable; used by Corla CountyPoolsBuilder, BoulderContestBuilder, OneAuditTest
 class CardPoolBuilder(
     val poolName: String,
     val poolId: Int,
     val hasExactContests: Boolean,
     val infos: Map<Int, ContestInfo>, // all contests
     val contestTabs: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests and candidates with no votes
+    val minCardsNeeded: Map<Int, Int>
 ) {
     var ncards: Int? = null // lame
-
-    val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
-    val maxMinCardsNeeded: Int
     var adjustCards = 0 // adjusted number of cards, using distributeExpectedOvervotes() on one or more contests
 
-    init {
-        contestTabs.forEach { (contestId, contestTab) ->
-            val voteSum = contestTab.nvotes()
-            val info = infos[contestId]!!
-            // based on the contest's votes, you need at least this many cards for this contest
-            minCardsNeeded[contestId] = roundUp(voteSum.toDouble() / info.voteForN)
-        }
-        // you need at least this many cards for this pool
-        maxMinCardsNeeded = minCardsNeeded.values.max()
-    }
+    // you need at least this many cards for this pool
+    val maxMinCardsNeeded: Int = minCardsNeeded.values.max()
 
     fun setNcards(ncards: Int): CardPoolBuilder {
         this.ncards = ncards
@@ -113,7 +86,9 @@ class CardPoolBuilder(
     fun name() = poolName
     fun id() = poolId
     fun hasExactContests() = hasExactContests
-    fun ncards() = ncards ?: (maxMinCardsNeeded + adjustCards)
+    fun ncards(): Int {
+        return ncards ?: (maxMinCardsNeeded + adjustCards)
+    }
 
     fun hasContest(contestId: Int) = contestTabs.contains(contestId)
     fun possibleContests() = contestTabs.map { it.key }.toSortedSet().toIntArray()
@@ -125,8 +100,14 @@ class CardPoolBuilder(
         adjustCards = max( adjust, adjustCards)
     }
 
-    // TODO probably need to use this ??
-    fun votesAndUndervotes(contestId: Int): Vunder {
+    // TODO probably need to use this for Corla
+    fun votesAndUndervotesCorla(contestId: Int): Vunder {
+        val contestTab = contestTabs[contestId]!!
+        return contestTab.votesAndUndervotes(poolId, ncards(), hasExactContests)
+    }
+
+    // TODO probably need to use this for Boulder
+    fun votesAndUndervotesBoulder(contestId: Int): Vunder {
         val poolUndervotes = undervoteForContest(contestId)
         val contestTab = contestTabs[contestId]!!
 
@@ -192,6 +173,43 @@ class CardPoolBuilder(
         result = 31 * result + contestTabs.hashCode()
         result = 31 * result + minCardsNeeded.hashCode()
         return result
+    }
+
+    companion object {
+        // probably corla
+        fun fromMinCardsNeeded(
+            poolName: String, poolId: Int, hasExactContests: Boolean,    // aka single style
+            infos: Map<Int, ContestInfo>, // do we really need this ??
+            contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
+        ): CardPoolBuilder {
+
+            // you need at least this many cards for this pool
+            val minCardsNeeded = mutableMapOf<Int, Int>()
+            contestTabs.forEach { (contestId, contestTab) ->
+                val ncards = contestTab.ncards() // nvotes was scaled by stylePct
+                val info = infos[contestId]!!
+                // based on the contest's votes, you need at least this many cards for this contest
+                minCardsNeeded[contestId] = roundUp(ncards.toDouble() / info.voteForN)
+            }
+            return CardPoolBuilder(poolName, poolId, hasExactContests, infos, contestTabs, minCardsNeeded)
+        }
+
+        // used by OneAuditTest, probably boulder
+        fun fromMinVotesNeeded(
+            poolName: String, poolId: Int, hasExactContests: Boolean,    // aka single style
+            infos: Map<Int, ContestInfo>, // do we really need this ??
+            contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
+        ): CardPoolBuilder {
+
+            val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
+            contestTabs.forEach { (contestId, contestTab) ->
+                val voteSum = contestTab.nvotes()
+                val info = infos[contestId]!!
+                // based on the contest's votes, you need at least this many cards for this contest
+                minCardsNeeded[contestId] = roundUp(voteSum.toDouble() / info.voteForN)
+            }
+            return CardPoolBuilder(poolName, poolId, hasExactContests, infos, contestTabs, minCardsNeeded)
+        }
     }
 }
 

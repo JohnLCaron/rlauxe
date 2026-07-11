@@ -50,6 +50,49 @@ open class CountyElectionSansCvrs (
         }
         val lastStyleId = allStyles.maxOf { it.id() }
 
+        /*
+        /////////////////
+        // why is CountyPoolsSansCvrsNew different ??
+
+        val makePoolsNew = CountyPoolsSansCvrsNew(contestBuilder.corlaContestBuilders, coloradoInput, onlyCounty)
+        val countyPoolBuildersNew: List<CountyPoolsBuilderNew> = makePoolsNew.countyPools
+        val countyPoolsNew = countyPoolBuildersNew.map { it.build() }
+        val poolsNewMap: Map<String, List<CardPoolBuilder>>  = countyPoolBuildersNew.associate { it.countyName to it.pools }
+
+        countyPools.forEach { countyPool: CountyPools ->
+            println("County ${countyPool.countyName}")
+            val countyPoolNew: List<CardPoolBuilder> = poolsNewMap[countyPool.countyName]!!
+            val countyPoolNewStyleMap = countyPoolNew.associateBy { it.name() }
+
+            countyPool.styles.forEach { style: StyleIF ->
+                val cardPoolNew: CardPoolBuilder = countyPoolNewStyleMap[style.name()]!!
+                // if (!compareStyle(style, styleNew)) {
+                if (style.ncards() != cardPoolNew.ncards()) {
+                    println("${style.ncards()} != ${cardPoolNew.ncards()}")
+                    val cardPool = style as CardPoolIF
+
+                    var allOk = true
+                    cardPool.possibleContests().forEach { contestId ->
+                        val tab = cardPool.contestTab(contestId)
+                        val tabNew = cardPoolNew.contestTab(contestId)
+                        if (tab != tabNew) {
+                            println(tab)
+                            println(tabNew)
+                            print("")
+                            allOk = false
+                        }
+                    }
+                    // how can all the contestTabs agree, but not the ncards ??
+                    if (!allOk)
+                        print("")
+                }
+            }
+            println()
+        }
+
+       //////////////////////////
+       */
+
         // synthesize the cvrs; these have auditcenter styles
         ncards = createAndSaveUnsortedMvrs(countyPools, publisher)
 
@@ -81,6 +124,14 @@ open class CountyElectionSansCvrs (
             }
             ContestWithAssertions(it, true, hasStyle).addStandardAssertions()
         }
+    } // init
+
+    fun compareStyle(style1: StyleIF, style2: StyleIF) : Boolean {
+        if (style1.name() != style2.name()) return false
+        if (style1.ncards() != style2.ncards()) return false
+        if (style1.hasExactContests() != style2.hasExactContests()) return false
+        if (style1.contestIdSet() != style2.contestIdSet()) return false
+        return true
     }
 
     override fun electionInfo() =
@@ -289,6 +340,6 @@ fun createCountyElectionSansCvrs(
     if (startFirstRound) {
         val result = startFirstRound(topdir)
         if (result.isErr) logger.error { result.toString() }
-        logger.info { "createCorlaElection took $stopwatch" }
+        logger.info { "createCountyElectionSansCvrs took $stopwatch" }
     }
 }

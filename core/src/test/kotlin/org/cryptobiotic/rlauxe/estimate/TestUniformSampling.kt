@@ -68,7 +68,7 @@ class TestUniformSampling {
             // println(" recountMargin=${contestUA.contest.recountMargin(assorter)} margin=${assorter.margin(contestUA.hasStyle)} marginInVotes=${contestUA.contest.marginInVotes(assorter)}")
         }
 
-        /*ouble check the number of cvrs == sampleSize, and the cvrs are marked as sampled
+        /* double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
         contestRounds.forEach { contest ->
             val cvrs = mvrManager.sortedCards.filter { it.hasContest(contest.id) }
             assertTrue(contest.estMvrs <= cvrs.size)
@@ -99,9 +99,11 @@ class TestUniformSampling {
 
             val contestRounds = contestsUAs.filter { it.preAuditStatus == TestH0Status.InProgress }
                 .map{ contest -> ContestRound(contest, 1) }
-            val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
 
-            // TODO hoe does uiform sampling affect EstimateAudit ??
+            val countyStrata = listOf(Strata("test", 42, 12087))
+            val auditRound = AuditRound(1, contestRounds, countyStrata = countyStrata, samplePrns = emptyList())
+
+            // TODO how does uniform sampling affect EstimateAudit ??
             // side effects:
             //   contestRound.estMvrs = estMvrs
             //   contestRound.estNewMvrs = newMvrs

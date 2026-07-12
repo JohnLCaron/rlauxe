@@ -140,7 +140,6 @@ open class AuditRecord(
         fun checkExists(topdir: String?): Boolean {
             if (topdir == null) return false
             if (CountyAuditRecord.checkExists(topdir)) return true
-            if (CountyComposite.checkExists(topdir)) return true
             if (CompositeAuditRecord.checkExists(topdir)) return true
             if (checkAuditRecordExists(topdir)) return true
             return false

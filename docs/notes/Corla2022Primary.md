@@ -1,6 +1,6 @@
 # Corla 2022 Primary
 
-Perhaps promaries are much easier because there are many uncontested contests, and not many close contests.
+Perhaps primaries are much easier because there are many uncontested contests, and not many close contests.
 
 ## summary
 

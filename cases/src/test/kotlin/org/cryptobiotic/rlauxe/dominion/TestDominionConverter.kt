@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.votedatabase.colorado2020
+import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
 import kotlin.collections.forEach
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,19 +16,19 @@ class TestDominionConverter {
 
     @Test
     fun testDominionConverter() {
-        val filename = "$colorado2020/Denver/cvr.csv"
+        val filename = "$votedatabase2020/Denver/cvr.csv"
         testDominionConverter("Denver", filename, coloradoInput = Colorado2020General())
     }
 
     @Test
     fun testDominionCvrConverter() {
-        val filename = "$colorado2020/Broomfield/cvr.csv"
+        val filename = "$votedatabase2020/Broomfield/cvr.csv"
         testDominionConverterCvrs("Broomfield", filename, coloradoInput = Colorado2020General())
     }
 
     @Test
     fun testDominionCvrWriting() {
-        val filename = "$colorado2020/Dolores/cvr.csv"
+        val filename = "$votedatabase2020/Dolores/cvr.csv"
         testWriteDominionCvrs("Dolores", filename, coloradoInput = Colorado2020General())
     }
 

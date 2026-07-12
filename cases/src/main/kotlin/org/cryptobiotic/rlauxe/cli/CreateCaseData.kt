@@ -4,8 +4,12 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
-import org.cryptobiotic.rlauxe.auditcenter.makeCorlaElectionClca
-import org.cryptobiotic.rlauxe.auditcenter.makeCorlaElectionUniform
+import org.cryptobiotic.rlauxe.auditcenter.makeCorla2020ClcaWithCvrs
+import org.cryptobiotic.rlauxe.auditcenter.makeCorla2020Clca
+import org.cryptobiotic.rlauxe.auditcenter.makeCorla2020Uniform
+import org.cryptobiotic.rlauxe.auditcenter.makeCorla2020UniformWithCvrs
+import org.cryptobiotic.rlauxe.auditcenter.makeCorla2022Primary
+import org.cryptobiotic.rlauxe.auditcenter.makeCorla2024
 import org.cryptobiotic.rlauxe.belgium.makeBelgium2024Data
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionClca
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionOA
@@ -22,7 +26,7 @@ object CreateCaseData {
         val case by parser.option(
             ArgType.String, // enum ??
             shortName = "case",
-            description = "belgium | boulder2024 | corla2020 | ga26p | sf2024"
+            description = "belgium | boulder2024 | corla2020 | corla2020withCvrs | corla2022p | corla2024 | ga26p | sf2024"
         ).required()
         val toptopdir by parser.option(
             ArgType.String,
@@ -71,12 +75,20 @@ object CreateCaseData {
                 if (auditType == "oa") print(" audit type = OneAudit")
                 else print(" audit type = CLCA")
             }
-            if (case == "corla2020") {
+            if (case.startsWith("corla")) {
                 if (auditcenter == null) {
                     println("\nYou must set auditcenter for corla cases ")
                     return
                 }
                 print("\n  using auditcenter local git repo at $auditcenter")
+                print(" sampling type = ${sampleType ?: "style"}")
+            }
+            if (case == "corla2020withCvrs") {
+                if (input == null) {
+                    println("\nYou must set input to 'votedatabase/cvr/Colorado'")
+                    return
+                }
+                print("\n  using votedatabase/ at $input")
                 print(" sampling type = ${sampleType ?: "style"}")
             }
             if (case == "ga26p") {
@@ -103,8 +115,25 @@ object CreateCaseData {
 
                 "corla2020" -> {
                     when (sampleType) {
-                        "uniform" -> makeCorlaElectionUniform(toptopdir = toptopdir, auditcenter = auditcenter!!)
-                        else -> makeCorlaElectionClca(toptopdir = toptopdir, auditcenter = auditcenter!!)
+                        "uniform" -> makeCorla2020Uniform(toptopdir = toptopdir, auditcenter = auditcenter!!)
+                        else -> makeCorla2020Clca(toptopdir = toptopdir, auditcenter = auditcenter!!)
+                    }
+                }
+
+                "corla2022p" -> {
+                    makeCorla2022Primary(toptopdir = toptopdir, auditcenter = auditcenter!!)
+                }
+
+                "corla2024" -> {
+                    makeCorla2024(toptopdir = toptopdir, auditcenter = auditcenter!!)
+                }
+
+                "corla2020withCvrs" -> {
+                    when (sampleType) {
+                        "uniform" -> makeCorla2020UniformWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!,
+                            votedatabase = input!!)
+                        else -> makeCorla2020ClcaWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!,
+                            votedatabase = input!!)
                     }
                 }
 

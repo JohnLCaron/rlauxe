@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.poolName
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.strata.Strata
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import java.io.BufferedReader
@@ -25,7 +26,7 @@ class CountyAuditRecord(
     contests: List<ContestWithAssertions>,
     rounds: List<AuditRound>,
     nmvrs: Int, // number of mvrs already sampled
-    val countyData: List<CountyData>,
+    val countyData: List<Strata>,
     val countyContestData: List<CountyContestData>, // used by viewer
 ): AuditRecord(topdir, config, contests, rounds, nmvrs)  {
 
@@ -33,7 +34,7 @@ class CountyAuditRecord(
 
     // for viewer
     // TODO assumes that we can see what county an mvr is from its styleName
-    fun countMvrsByCounty(): Map<String, CountyData> {
+    fun countMvrsByCounty(): Map<String, Strata> {
         if (rounds.isEmpty()) return emptyMap()
         val lastRound = rounds.last() // TODO last round that has results
 
@@ -49,7 +50,7 @@ class CountyAuditRecord(
             count++
         }
         val countyData = mvrCount.mapValues {
-            CountyData(it.key, it.value, 0) // hijack CountyData
+            Strata(it.key, it.value, 0) // hijack CountyData
         }
         logger.info{ "countMvrsByCounty mvrs=$count sumCounties = ${ countyData.values.sumOf { it.nmvrs } }"}
 
@@ -102,13 +103,13 @@ class CountyAuditRecord(
     }
 }
 
-data class CountyData(val countyName: String, val nmvrs: Int, val npop: Int)
+// data class CountyData(val countyName: String, val nmvrs: Int, val npop: Int)
 
-fun readCountyData(filename: String): List<CountyData> {
+fun readCountyData(filename: String): List<Strata> {
     val reader: BufferedReader = File(filename).bufferedReader()
     reader.readLine() // skip header line
 
-    val countyData = mutableListOf<CountyData>()
+    val countyData = mutableListOf<Strata>()
     while (true) {
         val line = reader.readLine()
         if (line == null) break
@@ -117,7 +118,7 @@ fun readCountyData(filename: String): List<CountyData> {
         val countyName = tokens[0]
         val nmvrs = tokens[1].trim().toInt()
         val npop = tokens[2].trim().toInt()
-        countyData.add( CountyData(countyName, nmvrs, npop))
+        countyData.add( Strata(countyName, nmvrs, npop))
     }
     reader.close()
 

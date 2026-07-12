@@ -15,6 +15,6 @@
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>
     </root>
-    <logger name="ConcurrentTaskRunner" level="DEBUG" />
+    <logger name="ConcurrentTaskRunner" level="INFO" />
     <logger name="ch.qos.logback" level="WARN"/>
 </configuration>

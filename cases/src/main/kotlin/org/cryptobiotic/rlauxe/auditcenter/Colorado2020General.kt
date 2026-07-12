@@ -634,8 +634,4 @@ class Colorado2020General(ac:String?=auditcenter): ColoradoInput(
             else -> name
         }
     }
-
-    companion object {
-        private val general2020 = "$auditcenter/2020/general"
-    }
 }

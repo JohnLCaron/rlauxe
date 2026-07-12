@@ -328,10 +328,18 @@ fun cleanChoiceName(choiceName: String) : String {
     val colonPos = work.indexOf(":")
     if (colonPos > 0)
         work = work.substring(0, colonPos)
-    // Boulder may have the ranl in parenthesis, eg Aaron Brockett(1)
-    val parenPos = work.indexOf("(")
-    if (parenPos > 0)
-        work = work.substring(0, parenPos)
+
+    // TODO Boulder may have the rank in parenthesis, eg Aaron Brockett(1)
+    //   but some canonical names have parentheses, eg "Jaclyn (Gabbel) Hurst"
+    //   only remove if parenthesis contains a number
+    val leftParen = work.indexOf("(")
+    val rightParen = work.indexOf(")")
+    if (leftParen > 0 && rightParen > 0 && leftParen < rightParen) {
+        val inside = work.substring(leftParen+1, rightParen)
+        if (inside.all { it.isDigit() }) {
+            work = work.substring(0, leftParen) // truncate
+        }
+    }
     return work.trim()
 }
 

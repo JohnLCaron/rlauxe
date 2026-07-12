@@ -26,28 +26,6 @@ class TestCreateCaseData {
 
         CreateCaseData.main(
             arrayOf(
-                "--case", "sf2024",
-                "--toptopdir", "${cases}/sf/sf2024",
-                "--cvrExport",
-            )
-        )
-        CreateCaseData.main(
-            arrayOf(
-                "--case", "sf2024",
-                "--toptopdir", "${cases}/sf/sf2024",
-                "--auditType", "oa",
-            )
-        )
-        CreateCaseData.main(
-            arrayOf(
-                "--case", "sf2024",
-                "--toptopdir", "${cases}/sf/sf2024",
-                "--auditType", "clca",
-            )
-        )
-
-        CreateCaseData.main(
-            arrayOf(
                 "--case", "boulder2024",
                 "--toptopdir", "${cases}/boulder/boulder2024/oa",
                 "--auditType", "oa",
@@ -76,6 +54,7 @@ class TestCreateCaseData {
                 "-sampling", "uniform"
             )
         )
+
         CreateCaseData.main(
             arrayOf(
                 "--case", "ga26p",
@@ -83,16 +62,62 @@ class TestCreateCaseData {
                 "--input", "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted",
             )
         )
+
+        CreateCaseData.main(
+            arrayOf(
+                "--case", "sf2024",
+                "--toptopdir", "${cases}/sf/sf2024",
+                "--cvrExport",
+            )
+        )
+        CreateCaseData.main(
+            arrayOf(
+                "--case", "sf2024",
+                "--toptopdir", "${cases}/sf/sf2024",
+                "--auditType", "oa",
+            )
+        )
+        CreateCaseData.main(
+            arrayOf(
+                "--case", "sf2024",
+                "--toptopdir", "${cases}/sf/sf2024",
+                "--auditType", "clca",
+            )
+        )
     }
 
     @Test
-    fun createOneCase() {
+    fun createNewCases() {
         CreateCaseData.main(
             arrayOf(
-                "--case", "corla2020",
+                "--case", "corla2020withCvrs",
+                "--toptopdir", "${cases}/corla/corla2020",
+                "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
+            )
+        )
+
+        CreateCaseData.main(
+            arrayOf(
+                "--case", "corla2020withCvrs",
                 "--toptopdir", "${cases}/corla/corla2020",
                 "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
                 "-sampling", "uniform"
+            )
+        )
+
+        CreateCaseData.main(
+            arrayOf(
+                "--case", "corla2024",
+                "--toptopdir", "${cases}/corla/corla2024",
+                "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
+            )
+        )
+
+        CreateCaseData.main(
+            arrayOf(
+                "--case", "corla2022p",
+                "--toptopdir", "${cases}/corla/corla2022p",
+                "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
             )
         )
     }

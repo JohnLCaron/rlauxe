@@ -45,7 +45,7 @@ class DominionConverter(val county: String, export: DominionCvrExportCsv, val in
                     val canonCandidateName = coloradoInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
                     // println("$exportCandidate -> $canonCandidateName")
                     if (canonCandidateName == null) {
-                        throw Exception("no match on exportCandidateName $exportCandidate")
+                        throw Exception("no match on exportCandidateName '$exportCandidate' in county $county")
                     }
                     val canonCandId = info.candidateNames[canonCandidateName] // what if this fails ??
                     if (canonCandId == null) {

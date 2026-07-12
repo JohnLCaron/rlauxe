@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-class Colorado2024General: ColoradoInput(
-    generalCanonicalFile = "$general2024/2024GeneralCanonicalList.csv",
-    contestRoundFile = "$general2024/round1/contest.csv",
-    tabulateCountyFile = "$general2024/tabulateCounty.csv",
-    mvrComparisonFile = "$general2024/round3/contestComparison.csv"
+class Colorado2024General(ac:String?=auditcenter): ColoradoInput(
+    generalCanonicalFile = "$ac/2024/general/2024GeneralCanonicalList.csv",
+    contestRoundFile = "$ac/2024/general/round1/contest.csv",
+    tabulateCountyFile = "$ac/2024/general/tabulateCounty.csv",
+    mvrComparisonFile = "$ac/2024/general/round3/contestComparison.csv"
 ) {
 
     override val skipCounties = listOf<String>()
@@ -28,7 +28,7 @@ class Colorado2024General: ColoradoInput(
         result.toSortedMap()
     }
 
-    ///////////////////////// not used
+    ///////////////////////// original cleanup attempt; not used
 
 
     // TODO County specific?
@@ -134,10 +134,6 @@ class Colorado2024General: ColoradoInput(
                 }
             }
         }
-    }
-
-    companion object {
-        private val general2024 = "$auditcenter/2024/general"
     }
 
 }

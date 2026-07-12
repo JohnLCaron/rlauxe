@@ -16,6 +16,8 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
     abstract fun auditRounds(): MutableList<AuditRoundIF>
     abstract fun contestsUA(): List<ContestWithAssertions>
 
+    open fun strata(): List<Strata>? = null
+
     // start new round and create estimated sample sizes
     open fun startNewRound(quiet: Boolean = true, onlyTask: OnlyTask? = null, auditorMaxNewMvrs: Int? = null): AuditRound {
         val auditRounds = auditRounds()
@@ -28,8 +30,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
             val contestRounds = contestsUA() // these have been filtered to InProgress only
                 .filter{ onlyTask == null || it.id == onlyTask.contestId }
                 .map { ContestRound(it, roundIdx) }
-            val countyStrata = if (config.isUniform) emptyList<Strata>() else null
-            AuditRound(roundIdx, contestRounds = contestRounds, countyStrata=countyStrata, samplePrns = emptyList())
+            AuditRound(roundIdx, contestRounds = contestRounds, countyStrata=strata(), samplePrns = emptyList())
         } else {
             // next time, create from previous round
             previousRound.createNextRound()
@@ -52,7 +53,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
             mvrManager().styles(),
             mvrManager.sortedManifest()
         )
-        estimate.run()
+        val need: Map<Int, List<Int>> = estimate.run()
 
         logger.debug{"Estimate round ${roundIdx} took ${stopwatch}"}
 

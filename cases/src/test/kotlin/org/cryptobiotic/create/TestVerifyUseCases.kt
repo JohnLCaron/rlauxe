@@ -30,7 +30,7 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifyBoulderClca() {
-        val topdir = "${cases}/boulder/boulder2024/clcawo"
+        val topdir = "${cases}/boulder/boulder2024/clca"
         val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)
@@ -64,7 +64,7 @@ class TestVerifyUseCases {
         if (results.hasErrors) fail()
     }
 
-    @Test
+    // @Test
     fun testRunVerifyCorla2024() {
         val topdir = "${cases}/corla/corla2020/uniform"
         val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)

@@ -15,7 +15,10 @@ _07/06/2026_
   * [Generate Test Cases](#generate-test-cases-)
     * [For the Belgium 2024 test case](#for-the-belgium-2024-test-case)
     * [For the Boulder 2024 test case](#for-the-boulder-2024-test-case)
-    * [For the Colorado 2020 test case](#for-the-colorado-2020-test-case)
+    * [For Colorado elections using auditcenter](#for-colorado-elections-using-auditcenter)
+      * [For Colorado 2020 General elections](#for-colorado-2020-general-elections)
+      * [For Colorado 2022 Primary election](#for-colorado-2022-primary-election)
+      * [For Colorado 2024 General election](#for-colorado-2024-general-election)
     * [For the Georgia 2026 primary test case](#for-the-georgia-2026-primary-test-case)
     * [For the San Francisco 2024 test case](#for-the-san-francisco-2024-test-case)
   * [rlauxe viewer](#rlauxe-viewer)
@@ -23,7 +26,7 @@ _07/06/2026_
   * [Code Coverage (Lines of Codes)](#code-coverage-lines-of-codes)
     * [core test coverage](#core-test-coverage)
     * [core + cases test coverage](#core--cases-test-coverage)
-    * [complete test coverage](#complete-test-coverage)
+    * [core + cases + CreateCases test coverage](#core--cases--createcases-test-coverage)
   * [Time reading card manifest](#time-reading-card-manifest)
   * [UML](#uml)
   * [Miscellaneous Notes](#miscellaneous-notes)
@@ -176,28 +179,53 @@ java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic
 will create a OneAudit election. To create a CLCA election, use the flag "-type clca"
 
 
-### For the Colorado 2020 test case
+### For Colorado elections using auditcenter
 
 The repo does not contain the test data input for Colorado. Clone the following git repository:
 
 git clone https://github.com/nealmcb/auditcenter
 
-Then run:
+#### For Colorado 2020 General elections
 
 `
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case corla2020 -toptopdir "/home/you/wherever/cases/corla2020" \
-    -auditcenter "/home/you/wherever/github/auditcenter/directory" -sampling style
+    -auditcenter "/home/you/wherever/github/auditcenter/directory" 
 `
 
 * check _cases/build/libs/_ for the latest version of rlauxe-cases-uber.jar
 * substitute your own "auditcenter" directory
 * substitute your own "toptopdir" directory where the data will be written.
 * currently we are only supporting the Colorado 2020 General election, but other elections will be added.
+* this creates an election using style based sampling (CSD). To use uniform sampling, use the flag "-sampling uniform".
 
-This creates an election using style based sampling (CSD). To use uniform sampling, use the flag "-sampling uniform"
+To use the viewer for Corla elections, see [here](https://github.com/JohnLCaron/rlauxe-viewer/docs/CorlaViewer.md)
 
-See [here](https://github.com/JohnLCaron/rlauxe-viewer/docs/CorlaViewer.md
+To run the Colorado 2020 election with cvrs from https://votedatabase.com, see [here](../notes/Corla2020notes.md). 
+Then use
+
+`
+java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+    -case corla2020withCvrs -toptopdir "/home/you/wherever/cases/corla2020withCvrs" \
+    -auditcenter "/home/you/wherever/github/auditcenter/directory" \
+    -input "/home/you/wherever/votedatabase/cvr/Colorado"
+`
+
+#### For Colorado 2022 Primary election
+
+`
+java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+    -case corla2022p -toptopdir "/home/you/wherever/cases/corla2022p" \
+    -auditcenter "/home/you/wherever/github/auditcenter/directory" 
+`
+
+#### For Colorado 2024 General election
+
+`
+java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+    -case corla2024 -toptopdir "/home/you/wherever/cases/corla2024" \
+    -auditcenter "/home/you/wherever/github/auditcenter/directory" 
+`
 
 ### For the Georgia 2026 primary test case
 
@@ -298,7 +326,7 @@ Mea culpa, mea culpa, mea maxima culpa.
 | 07/08/2026 | 79.9%  | 7796/9752       |
 | 07/09/2026 | 81.3%  | 7650/9407       |
 | 07/10/2026 | 78.6%  | 7437/9460       |
-| 07/11/2026 | 82.1%  | 7773/9462       |
+| 07/11/2026 | 83.0%  | 7819/9426       |
 
 ### core + cases test coverage
 
@@ -315,6 +343,7 @@ Include TestCreateCaseData
 | 07/08/26 | 72.5 % | 10673/14726     |
 | 07/09/26 | 78.5 % | 11592/14769     |
 | 07/10/26 | 75.4 % | 11140/14777     |
+| 07/11/26 | 77.2 % | 11527/14936     |
 
 
 ## Time reading card manifest

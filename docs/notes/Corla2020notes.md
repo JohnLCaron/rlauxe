@@ -1,4 +1,4 @@
-# Corla2020 Notes
+# Corla2020 Using votedatabase for Cvrs
 6/27/26
 
 We obtained the cvr data from https://votedatabase.com for the Colorado 2020 General elections, and used it to run

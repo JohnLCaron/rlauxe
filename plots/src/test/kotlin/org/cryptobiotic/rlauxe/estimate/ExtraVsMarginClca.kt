@@ -48,9 +48,7 @@ class ExtraVsMarginClca {
 
             val config = Config(
                 election, creation, round =
-                    AuditRoundConfig(
-                        SimulationControl(nsimTrials = nsimTrials), sampling =
-                            sampleControl,
+                    AuditRoundConfig(SimulationControl(nsimTrials = nsimTrials), sampling = sampleControl,
                         ClcaConfig(fuzzMvrs = fuzzMvrs), null
                     )
             )
@@ -81,18 +79,22 @@ class ExtraVsMarginClca {
     fun regenPlots() {
         val subtitle = "CLCA Nc=${Nc} phantomPct=$phantomPct ntrials=${ntrials} nsimTrials=$nsimTrials"
 
-        showExtraVsMargin(dirName, name, subtitle, ScaleType.LogLinear, "fuzzMvrs") { categoryFuzzMvrs(it) }
+        showExtraVsMargin(dirName, name, subtitle, ScaleType.LogLinear, "fuzzMvrs",
+            catfld = { categoryFuzzMvrs(it) }, catOrdering = ReverseOrder() )
         //showEstSizesVsMarginPct(dirName, name, subtitle, ScaleType.LogLinear, "fuzzMvrs")  { categoryFuzzMvrs(it) }
 
-        showExtraVsMargin(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs") { categoryFuzzMvrs(it) }
+       //  showExtraVsMargin(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs") { categoryFuzzMvrs(it) }
         //showEstSizesVsMarginPct(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs")  { categoryFuzzMvrs(it) }
-        showNroundsVsMargin(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs") { categoryFuzzMvrs(it) }
+        showNroundsVsMargin(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs",
+            catfld = { categoryFuzzMvrs(it) }, catOrdering = ReverseOrder() )
     }
 
 }
 
-fun showExtraVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
-                             catName: String, catfld: ((WorkflowResult) -> String) = { category(it) } ) {
+fun showExtraVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String,
+                      catfld: ((WorkflowResult) -> String) = { category(it) },
+                      catOrdering: Comparator<String>? = null)
+{
     val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
     wrsPlot(
@@ -103,7 +105,8 @@ fun showExtraVsMargin(dirName: String, name:String, subtitle: String, scaleType:
         xname = "margin", xfld = { it.margin},
         yname = "extraSamples", yfld = { it.nmvrs - it.samplesUsed },
         catName = catName, catfld = catfld,
-        scaleType = scaleType
+        scaleType = scaleType,
+        catOrdering = catOrdering
     )
 }
 
@@ -125,7 +128,10 @@ fun showEstSizesVsMarginPct(dirName: String, name:String, subtitle: String, scal
     )
 }
 
-fun showNroundsVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String, catfld: (WorkflowResult) -> String) {
+fun showNroundsVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String,
+                        catfld: ((WorkflowResult) -> String) = { category(it) },
+                        catOrdering: Comparator<String>? = null)
+{
     val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
 
@@ -137,7 +143,8 @@ fun showNroundsVsMargin(dirName: String, name:String, subtitle: String, scaleTyp
         xname = "margin", xfld = { it.margin },
         yname = "auditRounds", yfld = { it.nrounds },
         catName = catName, catfld = catfld,
-        scaleType = scaleType
+        scaleType = scaleType,
+        catOrdering = catOrdering,
     )
 }
 

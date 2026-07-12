@@ -83,12 +83,17 @@ class ExtraVsMarginPolling {
     fun regenPlots() {
         val subtitle = "Polling Nc=${Nc} ntrials=${ntrials} nsimTrials=$nsimTrials"
 
-        showExtraVsMargin(dirName, name, subtitle, ScaleType.LogLinear, "fuzzMvrs") { categoryFuzzMvrs(it) }
+        showExtraVsMargin(dirName, name, subtitle, ScaleType.LogLinear, "fuzzMvrs",
+            catfld = { categoryFuzzMvrs(it) }, catOrdering = ReverseOrder() )
+
         //showEstSizesVsMarginPct(dirName, name, subtitle, ScaleType.LogLinear, "fuzzMvrs")  { categoryFuzzMvrs(it) }
 
-        showExtraVsMargin(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs") { categoryFuzzMvrs(it) }
+        showExtraVsMargin(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs",
+            catfld = { categoryFuzzMvrs(it) }, catOrdering = ReverseOrder() )
+
         //showEstSizesVsMarginPct(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs")  { categoryFuzzMvrs(it) }
-        showNroundsVsMargin(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs")  { categoryFuzzMvrs(it) }
+        showNroundsVsMargin(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs",
+            catfld = { categoryFuzzMvrs(it) }, catOrdering = ReverseOrder() )
     }
 
     @Test

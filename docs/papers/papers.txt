@@ -1,14 +1,18 @@
 RLA papers
 
+2009    Efficient post-election audits of multiple contests: 2009 California tests
+    Philip B. Stark. August 3, 2009
+    MACRO: maximum across-contest relative overstatement; used by Arlo for batch level comparision.
+
 2010	Super-Simple Simultaneous Single-Ballot Risk-Limiting Audits
-    Stark
-	Used by Colorado RLA, see Audit.pValueApproximation().
+    Philip B. Stark. August 9, 2010
+	Used by Colorado RLA.
 
 2011	SOBA: Secrecy-preserving Observable Ballot-level Audit
-    Benolah, Jones, Lazerath,  Lindeman, Stark,.2 July, 2011
+    Benolah, Jones, Lazerath,  Lindeman, Stark, 2 July, 2011
 
 2012	A gentle introduction to risk-limiting audits
-    Mark Lindeman and Philip B. Stark
+    Mark Lindeman and Philip B. Stark. 16 March, 20212
 
 2012	Limiting Risk by Turning Manifest Phantoms into Evil Zombies
     Jorge H. Banuelos, Philip B. Stark. July 14, 2012
@@ -21,7 +25,7 @@ RLA papers
     Risk-Limiting Audits Working Group
 
 2014	Verifiable European Elections: Risk-limiting Audits for D’Hondt and its relatives
-    Stark and Teague
+    Philip B. Stark and Vanessa Teague. Dec 2014
 	proportional representation election systems
 
 2018	Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program
@@ -53,17 +57,12 @@ RLA papers
     WAUDBY-SMITH and RAMDAS; Submitted on 19 Oct 2020, Aug 29, 2022 (revised)
 	https://arxiv.org/abs/2010.09686.
 
-2020	More style, less work: card-style data decrease risk-limiting audit sample sizes	Amanda K. Glazer, Jacob V. Spertus, and Philip B. Stark; 6 Dec 2020
-	consistent sampling, card-style data (CSD) tracks which contests are on which cards. I guess ballot styles ( which contests are on which ballots) are a given.
-	see chapter 7 "Implementation"
-	MoreStyle.pdf
+2020	More style, less work: card-style data decrease risk-limiting audit sample sizes
+	Amanda K. Glazer, Jacob V. Spertus, and Philip B. Stark; 6 Dec 2020
+	consistent sampling, card-style data (CSD) tracks which contests are on which cards.
 
 2021	Risk-limiting Audits: A Practical Systematization of Knowledge
     Matt Bernhard
-
-2021	A Unified Evaluation of Two-Candidate Ballot-Polling Election Auditing Methods
-    Huang; 12 May 2021
-	unify ‘ballot-polling’ RLAs and Baysian Audits.
 
 2021	The ATHENA Class of Risk-Limiting Ballot Polling Audits
     Filip Zagórski, Grant McClearn, Sarah Morin, Neal McBurnett, and Poorvi L. Vora. February 23, 2021
@@ -92,10 +91,6 @@ RLA papers
 	investigates sample sizes for a range of combining functions, TSMs, and selection strategies for stratified comparison audits.
     https://arxiv.org/abs/2207.03379
 
-2022	PROVIDENCE: a Flexible Round-by-Round Risk-Limiting Audit
-    Oliver Broadrick, Poorvi L. Vora1, and Filip Zagórski; 17 Oct 2022
-	an audit with the efficiency of MINERVA and flexibility of BRAVO
-
 2023	ONEAudit: Overstatement-Net-Equivalent Risk-Limiting Audit
     Stark, P.B., 6 Mar 2023.
 	CLCA can use CVRs from the voting system for any number of cards and ONE CVRs created ad lib for the rest.
@@ -107,7 +102,7 @@ RLA papers
 
 2023 	Non(c)esuch Card-Level Comparison Risk-Limiting Audits
     Philip B. Stark		30 Aug 2023
-	a method for conducting CLCAs that maintains the risk limit even if the system does not print a genuine nonce on each ballot or misreports the identifiers it used.
+	Method for conducting CLCAs that maintains the risk limit even if the system does not print a genuine nonce on each ballot or misreports the identifiers it used.
 
 2023	Stylish Risk-Limiting Audits in Practice
     Amanda K. Glazer, Jacob V. Spertus, Philip B. Stark		16 Sep 2023

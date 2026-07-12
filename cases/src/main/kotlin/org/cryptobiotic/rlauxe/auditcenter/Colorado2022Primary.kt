@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-class Colorado2022Primary(): ColoradoInput(
-    generalCanonicalFile = "$primary2022/2022PrimaryRLACounty-CandidateList.csv",
-    contestRoundFile = "$primary2022/round_1/contest.csv",
-    tabulateCountyFile = "$primary2022/tabulate_county.csv",
-    mvrComparisonFile = "$primary2022/round_2/contest_comparison.csv"
+class Colorado2022Primary(ac:String?=auditcenter): ColoradoInput(
+    generalCanonicalFile = "$ac/2022/primary/2022PrimaryRLACounty-CandidateList.csv",
+    contestRoundFile = "$ac/2022/primary/round_1/contest.csv",
+    tabulateCountyFile = "$ac/2022/primary/tabulate_county.csv",
+    mvrComparisonFile = "$ac/2022/primary/round_2/contest_comparison.csv"
 ) {
     override val skipCounties = listOf<String>()
 
@@ -43,7 +43,30 @@ class Colorado2022Primary(): ColoradoInput(
     // Douglas,State Senator - District 27 - DEM,Tom Sullivan
     // Douglas,State Senator - District 27 - REP,"Tom Kim, JulieMarie A. Shepherd Macklin"
 
-    companion object {
-        private val primary2022 = "$auditcenter/2022/primary"
+    // same here - Garfield ??
+    // Adams,Adams County - United States Senator - REP,"Ron Hanks, Joe O'Dea, Daniel Hendricks"
+    // Gilpin,United States Senator - REP,"Ron Hanks, Joe O'Dea, Daniel Hendricks"
+    // Garfield,Garfield County - United States Senator - REP,"Ron Hanks, Joe O'Dea, Daniel Hendricks"
+
+    // ------------------------- checkContestTabulateHasCanonical
+    //    missing choice  'Daniel Hendricks' in contestTab 'Garfield County - United States Senator - REP'
+
+
+    override fun contestNameCleanup(county: String, name: String): String {
+
+        val transform = when (county) {
+            "Garfield" -> when (name) {
+                else -> null
+            }
+            else -> null
+        }
+        if (transform != null) return transform
+
+        // let counties have first pass as transform, then the general case
+        return name
+    }
+
+    override fun candidateNameCleanup(county: String, name: String): String {
+        return name
     }
 }

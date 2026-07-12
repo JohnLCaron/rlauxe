@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.betting
 import org.cryptobiotic.rlauxe.oneaudit.TausOA
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
+import org.cryptobiotic.rlauxe.rlaplots.CatOrdering
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -155,12 +156,6 @@ class PlotOneAuditPayoff {
         val te: Double,
         val tln: Double,
     )
-}
-
-class CatOrdering(vararg val cats: String): Comparator<String> {
-    override fun compare(o1: String, o2: String): Int {
-        return cats.indexOf(o1).compareTo(cats.indexOf(o2))
-    }
 }
 
 /* TODO

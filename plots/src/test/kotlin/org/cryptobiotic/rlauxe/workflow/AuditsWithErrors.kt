@@ -50,7 +50,7 @@ class AuditsWithErrors {
         val dirName = "$testdataDir/plots/samplesNeeded/clcaFuzzByMargin"
         val subtitle = "Nc=${N} nruns=${nruns}"
         val datafileName = "$dirName/${name}.csv"
-        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLog, catName="fuzzPct")
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLog, catName="fuzzPct", catOrdering = ReverseOrder())
     }
 
     @Test
@@ -61,7 +61,7 @@ class AuditsWithErrors {
         val subtitle3 = "Nc=${N} nruns=${nruns}"
         //showStddevVsMargin(dataFilename, name3, dirName, subtitle3, ScaleType.Linear, catName="fuzzPct")
         // showStddevVsMargin(dataFilename, name3, dirName, subtitle3, ScaleType.LogLinear, catName="fuzzPct")
-        showStddevVsMargin(dataFilename, name3, dirName, subtitle3, ScaleType.LogLog, catName="fuzzPct")
+        showStddevVsMargin(dataFilename, name3, dirName, subtitle3, ScaleType.LogLog, catName="fuzzPct", catOrdering = ReverseOrder())
     }
 
     @Test
@@ -272,7 +272,8 @@ fun sampleSizesVsMarginWithErrorBars(
 }
 
 
-fun showStddevVsMargin(dataFile: String, name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String) {
+fun showStddevVsMargin(dataFile: String, name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String,
+                       catOrdering: Comparator<String>? = null) {
     val io = WorkflowResultsIO(dataFile)
     val data = io.readResults()
     wrsPlot(
@@ -283,7 +284,8 @@ fun showStddevVsMargin(dataFile: String, name: String, dirName: String, subtitle
         xname = "margin", xfld = { it.margin },
         yname = "stddevSamples", yfld = { it.usedStddev },
         catName = catName, catfld = { category(it) },
-        scaleType = yscale
+        scaleType = yscale,
+        catOrdering = catOrdering,
     )
 }
 

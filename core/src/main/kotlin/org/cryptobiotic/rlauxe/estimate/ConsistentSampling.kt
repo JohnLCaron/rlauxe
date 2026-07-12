@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 import kotlin.text.drop
 
 private val verifyMaxIndex = false
-private val logger = KotlinLogging.logger("ConsistentSampling")
+private val logger = KotlinLogging.logger("ChooseSamples")
 
 // called from auditWorkflow.startNewRound
 // also called by rlauxe-viewer
@@ -222,7 +222,7 @@ fun consistentSampling(
     auditRound.newmvrs = newMvrs
     auditRound.samplePrns = sampledPrns
 
-    logger.info{" consistentSampling read $cardIndex and chose ${sampledPrns.size} cards; took $stopwatch"}
+    logger.debug {" consistentSampling read $cardIndex and chose ${sampledPrns.size} cards; took $stopwatch"}
     return sampledPrns
 }
 
@@ -234,6 +234,7 @@ fun uniformSampling(
 {
     val stopwatch = Stopwatch()
     if (auditRound.countyStrata == null)  return emptyList()
+    // what do you do if this isnt set ??
     val countyStrataWant: Map<String, Strata> = auditRound.countyStrata!!.associateBy { it.strataName }
     if (countyStrataWant.isEmpty()) return emptyList()
 
@@ -248,7 +249,6 @@ fun uniformSampling(
         it.haveSampleSize = 0
         it.haveNewSampleSize = 0
     }
-
     val wantFromPools = countyStrataWant.mapValues { it.value.nmvrs }
     val haveFromPools = mutableMapOf<String, Int>()
     val sampledPrns = mutableListOf<Long>()
@@ -281,11 +281,12 @@ fun uniformSampling(
         if (cardIndex % 5000 == 0) {
             val need = mutableMapOf<String, Int>()
             wantFromPools.forEach { (name, want) ->
-                val have = haveFromPools[countyName] ?: 0
+                val have = haveFromPools[name] ?: 0
                 val still = want - have
                 if (still > 0) need[name] = still
             }
-            logger.info { " after $cardIndex cards, have ${sampledPrns.size} and still need = $need"}
+            if (need.isNotEmpty())
+                logger.debug { " after $cardIndex cards, have ${sampledPrns.size} and still need = $need"}
         }
     }
 

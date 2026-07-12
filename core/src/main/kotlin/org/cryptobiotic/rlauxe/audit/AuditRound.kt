@@ -32,7 +32,7 @@ interface AuditRoundIF {
 data class AuditRound(
      override val roundIdx: Int,
      override val contestRounds: List<ContestRound>,
-     override var countyStrata: List<Strata>? = null, // for uniform audits
+     override var countyStrata: List<Strata>? = null, // for uniform audits TODO who sets this ??
 
      override var auditWasDone: Boolean = false,
      override var auditIsComplete: Boolean = false,

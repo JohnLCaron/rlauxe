@@ -69,7 +69,7 @@ class OneAuditNoErrors {
         regenPlots("OneAuditNoErrors4", dirName)
     }
 
-    class CatOrdering: Comparator<String> {
+    class AuditTypeOrdering: Comparator<String> {
         override fun compare(o1: String, o2: String): Int {
             return when {
                 (o1 == "poll") -> -1 // poll is first
@@ -83,7 +83,7 @@ class OneAuditNoErrors {
 
     fun regenPlots(name: String, dirName:String) {
         val subtitle = "Nc=${N} nruns=${nruns}"
-        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.Linear, catOrdering=CatOrdering())
+        showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.Linear, catOrdering=AuditTypeOrdering())
         // showSampleSizesVsMargin(datafileName, name, dirName, subtitle, ScaleType.LogLinear, catOrdering=CatOrdering())
         //showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog)
     }

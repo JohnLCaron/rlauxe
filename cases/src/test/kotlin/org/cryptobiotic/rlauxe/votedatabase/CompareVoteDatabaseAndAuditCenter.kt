@@ -17,19 +17,19 @@ import kotlin.text.split
 // see Corla2020notes
 
 val votedatabase = "/home/stormy/datadrive/votedatabase"
-val colorado2020 = "$votedatabase/cvr/Colorado"
+val votedatabase2020 = "$votedatabase/cvr/Colorado"
 
 class CompareVoteDatabaseAndAuditCenter {
 
     @Test
     fun testRedactionProblem() {
-        val errs = matchNames("Larimer", "$colorado2020/Larimer/cvr.csv", Colorado2020General())
+        val errs = matchNames("Larimer", "$votedatabase2020/Larimer/cvr.csv", Colorado2020General())
         assertEquals(0, errs)
     }
 
     @Test
     fun testGarfield() { // also Roosevelt
-        val errs = matchNames("Garfield", "$colorado2020/Garfield/cvr.csv", Colorado2020General())
+        val errs = matchNames("Garfield", "$votedatabase2020/Garfield/cvr.csv", Colorado2020General())
         assertEquals(0, errs)
     }
 
@@ -53,7 +53,7 @@ class CompareVoteDatabaseAndAuditCenter {
         }
         reader.close() */
 
-        matchNames("Garfield", "$colorado2020/Garfield/cvr.csv", Colorado2020General())
+        matchNames("Douglas", "$votedatabase2020/Douglas/cvr.csv", Colorado2020General())
         // assertEquals(0, errs)
     }
 
@@ -66,7 +66,7 @@ class CompareVoteDatabaseAndAuditCenter {
 
     @Test
     fun allColorado2020Counties() {
-        val path = Path(colorado2020)
+        val path = Path(votedatabase2020)
         val errCount = emptyMap<String, Int>() // mapOf("La Plata" to 2)
         path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202")}.forEach { subdir ->
             val county = subdir.fileName.toString()
@@ -86,7 +86,7 @@ class CompareVoteDatabaseAndAuditCenter {
 
     @Test
     fun showAllColorado2020Counties() {
-        val path = Path(colorado2020)
+        val path = Path(votedatabase2020)
         path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202") }
             .forEach { subdir ->
                 val county = subdir.fileName.toString()

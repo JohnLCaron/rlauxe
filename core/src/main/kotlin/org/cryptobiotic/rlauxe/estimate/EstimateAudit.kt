@@ -37,6 +37,7 @@ import kotlin.use
 
 private val logger = KotlinLogging.logger("EstimateAudit")
 private val showWork = false
+private val showBet = false
 
 // TODO  round > 1 we want to incorporate the measured errors from previous rounds
 //   cant use vunderPool to do so, that only uses fuzz
@@ -84,7 +85,7 @@ class EstimateAudit(
             tasks.add(AuditTrialTask(topdir, roundIdx, run+1, config, contestsToAudit, pools, styles, sortedManifest))
         }
 
-        val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunner<List<AssertionTrialIF>>().run(tasks, 1)
+        val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunner<List<AssertionTrialIF>>().run(tasks, nthreads)
 
         val trackerResults = mutableMapOf<Int, MutableList<AssertionTrialIF>>() // contestId -> list(trial)
         contestsToAudit.forEach { trackerResults[it.id] = mutableListOf() }
@@ -93,8 +94,15 @@ class EstimateAudit(
         }
 
         // transfer info to contestRound and minAssertion
-        contestsToAudit.forEach { contestRound ->
+        for (contestRound in contestsToAudit) {
             val contestResults: List<AssertionTrialIF> = trackerResults[contestRound.id]!!.filter { !it.wantsMore() }
+            if (contestResults.isEmpty()) {
+                trackerResults[contestRound.id]!!.forEach {
+                    if (it.wantsMore()) logger.warn{"wantsMore: $it" }
+                }
+                continue
+            }
+
             // seems like this should take into account the number of new mvrs wanted.
             // high pct when small, conservative when large ??
             // hard to get a one-size-fits-all. could try letting user have more control....
@@ -163,9 +171,9 @@ class EstimateAudit(
 
             if (showWork) println("  ${contestRound.id} quantile = $pct uses $newMvrs from ${distribution} lastIndex= ${useTrial.maxIndex()}")
         }
-        logger.info { "EstimateAudit ntrials=${ntrials} ncontests=${contestsToAudit.size} took $stopwatch" }
+        logger.debug { "EstimateAudit ntrials=${ntrials} ncontests=${contestsToAudit.size} took $stopwatch" }
 
-        // return contestId -> List<nmvrs>
+        // return contestId -> List<nmvrs>, ie distibution of estimated nmvrs
         return trackerResults.mapValues { it.value.map{ it.nmvrs() } }
     }
 }
@@ -215,7 +223,8 @@ class AuditTrialTask(
         sortedManifest.cards.iterator().use { sortedCardIter ->
             while (sortedCardIter.hasNext()) {
                 // does any contest need more cards ?
-                if (!contestTrials.any { it.wantsMore() }) break
+                if (!contestTrials.any { it.wantsMore() })
+                    break
 
                 // get the next card in sorted order
                 val card = sortedCardIter.next()
@@ -325,7 +334,8 @@ class ContestClcaTrial(val run: Int,
     override fun wantsMore(): Boolean {
         if (maxIndex > 0) return false
         if (sampleLimit == null) return true
-        // TODO
+        // TODO maybe if uniform ??
+        // withCvrs uniform has .01
         //if (countUsed > sampleLimit) {
          //   logger.info{"sample limit exceeded - estimate terminated"}
          //   return false
@@ -367,7 +377,7 @@ class ContestClcaTrial(val run: Int,
             oaTerm += ln(1.0 + bet * (assortValue - mui)) * rate
         }
 
-        if (countUsed % 1000 == 1) {
+        if (showBet && countUsed % 1000 == 1) {
             logger.debug{"contest ${contest.id} run $run bet=$bet oaTerm=$oaTerm"}
         }
 
@@ -527,7 +537,7 @@ interface AssertionTrialIF {
 }
 
 fun findClosestTrial(data: List<AssertionTrialIF>, nmvrs: Int): AssertionTrialIF {
-    require(data.isNotEmpty())
+    require (!data.isEmpty())
 
     var closestValue = Int.MAX_VALUE
     var closestTrial: AssertionTrialIF? = null

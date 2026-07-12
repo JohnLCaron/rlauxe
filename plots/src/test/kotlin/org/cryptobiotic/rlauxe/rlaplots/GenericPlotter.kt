@@ -219,3 +219,19 @@ fun symbolChoices(cats: Map<String, Symbol>): Array<Pair<String, Symbol>> {
     }
     return result.toTypedArray()
 }
+
+/////////////////////////////////////////////////////////
+
+class ReverseOrder: Comparator<String> {
+    override fun compare(o1: String, o2: String): Int {
+        return when {
+            else -> -o1.compareTo(o2) // oneaudits are alphabetic
+        }
+    }
+}
+
+class CatOrdering(vararg val cats: String): Comparator<String> {
+    override fun compare(o1: String, o2: String): Int {
+        return cats.indexOf(o1).compareTo(cats.indexOf(o2))
+    }
+}

@@ -5,7 +5,7 @@ import kotlin.test.assertTrue
 
 // check name consistency in ColoradoInput
 class TestColoradoInputNames {
-    val input: ColoradoInput = Colorado2020corrected()
+    val input: ColoradoInput = Colorado2022Primary()
 
     val canonical = readGeneralCanonicalList(input.generalCanonicalFile).associateBy { it.contestName }
     val canonicalContestNames = canonical.map{ it.key }

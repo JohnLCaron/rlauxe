@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 07/07/2026_
+_last changed: 07/12/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -441,15 +441,9 @@ CLCA at different values of fuzzed errors:
   even when there are phantoms.
 * Nrounds generally is 2 or less, which was the goal of the algorithm.
 
-The effect of 1% phantoms:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginWithPhantomsLogLinear.html" rel="extraVsMarginWithPhantoms">![extraVsMarginWithPhantoms](docs/plots2/estimate/extraVsMarginWithPhantomsLogLinear.png)</a>
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginWithPhantomsNroundsLinear.html" rel="extraVsMarginWithPhantomsNrounds">![extraVsMarginWithPhantomsNrounds](docs/plots2/estimate/extraVsMarginWithPhantomsNroundsLinear.png)</a>
-
 **OneAudit**
 
-OneAudit at different percentages of CVR data:
+OneAudit average "extra samples" and average number of rounds at different percentages of CVR data:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginOALogLinear.html" rel="extraVsMarginOA">![extraVsMarginOA](docs/plots2/estimate/extraVsMarginOALogLinear.png)</a>
 
@@ -458,6 +452,7 @@ OneAudit at different percentages of CVR data:
 * Extra Mvrs are quite high at lower margins and as the percentage CVRs decreases.
 * Nrounds averages are < 2. 
 * Possibly we could tweak the parameters to reduce extra samples and still keep average rounds < 2.
+* These plots just show averages; we expect large variances with long tails.
 
 **Polling**
 
@@ -641,6 +636,7 @@ How to set MaxRisk in an optimal way?
 * [Boulder County 2024](docs/cases/Boulder2024.md)
 * [Colorado Statewide election by Counties](docs/cases/CorlaCountyAudits.md)
 * [Colorado Statewide Election 2024](docs/cases/Colorado2024.md)
+* [Colorado Statewide Election 2020 using votedatabase for Cvrs](docs/notes/Corla2020notes.md)
 * [Corla Notes](docs/notes/CorlaNotes.md)
 * [Georgia 2026 Primary](docs/cases/Ga2026.md)
 * [San Francisco County 2024](docs/cases/SF2024.md)

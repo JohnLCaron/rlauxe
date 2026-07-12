@@ -2,16 +2,19 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.audit.Sampling.uniform
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.AuditRecordIF
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
+import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
+import org.cryptobiotic.rlauxe.strata.Strata
 
 /** AuditWorkflow with persistent state. */
 class PersistedWorkflow(
@@ -44,9 +47,13 @@ class PersistedWorkflow(
     override fun mvrManager() = mvrManager
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestWithAssertions> = auditContests
+    override fun strata(): List<Strata>? {
+        return if ((config.sampling.sampling == uniform) && (auditRecord is CountyAuditRecord))
+            auditRecord.countyData
+            else null
+    }
 
     override fun startNewRound(quiet: Boolean, onlyTask: OnlyTask?, auditorMaxNewMvrs: Int?): AuditRound {
-
         val nextRound = super.startNewRound(quiet, onlyTask, auditorMaxNewMvrs)
 
         if (nextRound.samplePrns.isEmpty()) {

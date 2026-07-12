@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
 import org.cryptobiotic.rlauxe.estimate.simulateCards
 import org.cryptobiotic.rlauxe.util.CardTabulation
 import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.votedatabase.colorado2020
+import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
 import kotlin.test.assertEquals
 import kotlin.collections.sum
 import kotlin.io.path.Path
@@ -217,7 +217,7 @@ class TestCvrExportRedaction {
 
     @Test
     fun testEagle() { // redaction
-        var filename = "$colorado2020/Eagle/cvr.csv"
+        var filename = "$votedatabase2020/Eagle/cvr.csv"
         println(filename)
         val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
         export.exportCardStyles.forEach { type ->
@@ -248,7 +248,7 @@ class TestCvrExportRedaction {
     //  RedactedGroup('r', ncards=1, contests=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29] totalVotes=62726)
     @Test
     fun allColorado2020Counties() {
-        val path = Path(colorado2020)
+        val path = Path(votedatabase2020)
         path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202") }
             .forEach { subdir ->
                 val county = subdir.fileName.toString()

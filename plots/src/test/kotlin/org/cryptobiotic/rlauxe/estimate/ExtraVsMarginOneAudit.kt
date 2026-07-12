@@ -29,8 +29,7 @@ class ExtraVsMarginOneAudit {
     @Test
     fun extraVsMargin() {
         val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .09, .10)
-        val mvrFuzzs = listOf(0.0, .001, .002, .003, .004, .005)
-        val cvrPercents = listOf(0.50, 0.75, 0.83, 0.90, 0.96)
+        val cvrPercents = listOf(0.01, 0.25, 0.50, 0.75, 0.90, 0.96)
 
         val election =
             ElectionInfo.forTest(AuditType.ONEAUDIT, MvrSource.testClcaSimulated) // TODO where do you get the mvrs ??
@@ -45,7 +44,6 @@ class ExtraVsMarginOneAudit {
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
-        // mvrFuzzs.forEach { fuzzMvrs ->
 
         val config = Config(
             election, creation, round =
@@ -92,19 +90,29 @@ class ExtraVsMarginOneAudit {
 
     @Test
     fun regenPlots() {
-        val subtitle = "OneAudit Nc=${Nc} ntrials=${ntrials} nsimTrials=$nsimTrials fuzzMvrs=$fuzzMvrs"
+        val subtitle = "OneAudit Nc=${Nc} ntrials=${ntrials} nsimTrials=$nsimTrials"
 
-        showExtraVsMargin(dirName, name, subtitle, ScaleType.LogLinear, "legend") { category(it) }
-        showEstSizesVsMarginPct(dirName, name, subtitle, ScaleType.LogLinear, "legend") { category(it) }
+        showExtraVsMargin(dirName, name, subtitle, ScaleType.LogLinear, "cvrPct",
+            catOrdering = CvrPctOrdering())
+        showEstSizesVsMarginPct(dirName, name, subtitle, ScaleType.LogLinear, "cvrPct") { category(it) }
 
-        showEstSizesVsMarginPct(dirName, name, subtitle, ScaleType.Linear, "legend") { category(it) }
-        showExtraVsMargin(dirName, name, subtitle, ScaleType.Linear, "legend") { category(it) }
-        showNroundsVsMargin(dirName, name, subtitle, ScaleType.Linear, "legend") { category(it) }
+        showEstSizesVsMarginPct(dirName, name, subtitle, ScaleType.Linear, "cvrPct") { category(it) }
+        showExtraVsMargin(dirName, name, subtitle, ScaleType.Linear, "cvrPct")
+        showNroundsVsMargin(dirName, name, subtitle, ScaleType.Linear, "cvrPct",
+            catOrdering = CvrPctOrdering())
     }
 
     @Test
     fun addFailures() {
         val subtitle = "OneAudit Nc=${Nc} ntrials=${ntrials} nsimTrials=$nsimTrials fuzzMvrs=$fuzzMvrs"
-        showFailuresVsMargin(dirName, name, subtitle, ScaleType.Linear, "legend") { category(it) }
+        showFailuresVsMargin(dirName, name, subtitle, ScaleType.Linear, "cvrPct") { category(it) }
+    }
+}
+
+class CvrPctOrdering: Comparator<String> {
+    override fun compare(o1: String, o2: String): Int {
+        val pct1 = o1.split("-","%")[1]
+        val pct2 = o2.split("-","%")[1]
+        return pct1.compareTo(pct2)
     }
 }

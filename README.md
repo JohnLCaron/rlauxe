@@ -1,4 +1,4 @@
-**rlauxe ("r-lux")**
+# rlauxe ("r-lux")
 
 WORK IN PROGRESS
 _last changed: 07/12/2026_
@@ -15,7 +15,7 @@ https://github.com/michelleblom/audit-irv-cp/tree/raire-branch, and released und
 
 See [Getting Started](docs/Developer.md#getting-started) if you are a developer wanting to compile and use the library.
 
-# Versioning
+**Versioning**
 
 We are now using semantic versioning (with a leading 0 to indicate a prerelease): eg "0.10.0.0" = 0.MAJOR.MINOR.PATCH.
 The data format is rapidly changing in incompatible ways; when it does, the major version will increment.
@@ -24,7 +24,7 @@ see [Getting Started](docs/Developer.md#getting-started).
 
 **Table of Contents**
 <!-- TOC -->
-* [Versioning](#versioning)
+* [rlauxe ("r-lux")](#rlauxe-r-lux)
 * [SHANGRLA framework](#shangrla-framework)
 * [Rlauxe Workflow Overview](#rlauxe-workflow-overview)
 * [Audit Types](#audit-types)

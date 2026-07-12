@@ -76,7 +76,6 @@ class ExtraVsMarginOneAudit {
             }
         }
 
-        // }
         println("run ${tasks.size} tasks $ntrials trials each with ${nsimTrials} simulations each trial")
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())

@@ -14,9 +14,9 @@ fun makeGa2026(topdir: String, inputdir: String, auditTypeS: String?) {
     val auditType = if (auditTypeS == "poll") AuditType.POLLING else AuditType.ONEAUDIT
     val creation = AuditCreationConfig(auditType, riskLimit = .05,)
     val round = AuditRoundConfig(
-        SimulationControl(nsimTrials = if (auditType.isOA()) 100 else 10),
-        ContestSampleControl(minRecountMargin = .005, minSize = 10, contestSampleCutoff = 10000,
-            auditSampleCutoff = 200000, sampling = Sampling.consistent),
+        SimulationControl(nsimTrials = 100), // TODO 10 or 100 ?
+        ContestSampleControl(minRecountMargin = .005, minSize = 10, contestSampleCutoff = null,
+            auditSampleCutoff = null, sampling = Sampling.consistent),
         ClcaConfig(), PollingConfig()
     )
 

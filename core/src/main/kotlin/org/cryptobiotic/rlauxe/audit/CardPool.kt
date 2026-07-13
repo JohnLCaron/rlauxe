@@ -178,7 +178,9 @@ class CardPoolBuilder(
     companion object {
         // probably corla
         fun fromMinCardsNeeded(
-            poolName: String, poolId: Int, hasExactContests: Boolean,    // aka single style
+            poolName: String,
+            poolId: Int,
+            hasExactContests: Boolean,    // aka single style
             infos: Map<Int, ContestInfo>, // do we really need this ??
             contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
         ): CardPoolBuilder {
@@ -196,7 +198,9 @@ class CardPoolBuilder(
 
         // used by OneAuditTest, probably boulder
         fun fromMinVotesNeeded(
-            poolName: String, poolId: Int, hasExactContests: Boolean,    // aka single style
+            poolName: String,
+            poolId: Int,
+            hasExactContests: Boolean,    // aka single style
             infos: Map<Int, ContestInfo>, // do we really need this ??
             contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
         ): CardPoolBuilder {

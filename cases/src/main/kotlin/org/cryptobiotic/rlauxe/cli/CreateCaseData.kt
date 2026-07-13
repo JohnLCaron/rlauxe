@@ -53,7 +53,7 @@ object CreateCaseData {
             shortName = "input",
             description = "input directory"
         )
-        val output by parser.option(
+        val output by parser.option(  // only used by sf
             ArgType.String, // enum ??
             shortName = "output",
             description = "output directory"

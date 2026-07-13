@@ -63,7 +63,7 @@ The minimum value of (µ_i - x_i) is when x_i = 0, since µ_i >= 0 and x_i >= 0:
     λ_i * µ_i < 1    
     λ_i < 1/µ_i
 
-How much less is TBD. 
+How much less is [TBD](#choosing-maxloss). 
 
 Let λmax be the largest allowed bet < 1/µ_i. The smallest payoff possible is when x_i = 0:
 
@@ -79,7 +79,8 @@ Limit that maximum loss to how much you are willing to lose on any one bet:
 
 Since maxLoss is < 1, λmax < 1/ µ_i.
 
-For now we let the user choose maxLoss, and set λmax accordingly. 
+For now we allow the user choose maxLoss, and set λmax accordingly.
+
 
 ## Betting when there are CLCA errors
 

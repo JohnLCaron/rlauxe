@@ -43,11 +43,12 @@ class VarianceDataGenerator(
         println("\n that took $stopwatch")
     }
 
+    // TODO sf is special
     class RunVarianceTask(
         val case: String,
         val toptopdir: String,
         val otherParameters: Array<String>,
-        val nsimTrials: Int, // wtf ?
+        val nsimTrials: Int, // TODO
         val runIndex: Int,
     ) : ConcurrentTask<Boolean> {
         val toptopdirn = "$toptopdir$runIndex"
@@ -59,8 +60,9 @@ class VarianceDataGenerator(
 
             CreateCaseData.main(
                 arrayOf(
+                    "--toptopdir", toptopdirn,
                     "--case", case,
-                    "--output", toptopdirn,
+                    // "--output", toptopdirn,
                 ) + otherParameters
             )
 

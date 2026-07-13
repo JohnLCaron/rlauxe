@@ -1,5 +1,5 @@
 # Sample Populations
-_04/11/26_
+_07/13/26_
 
 ## TL;DR
 
@@ -20,7 +20,7 @@ This field may be set independently on each Style, and replaces SHANGRLA's globa
 
 The hasExactContests field is used when deciding the assort value when an MVR is missing a contest, for all audits (TODO including Polling?).
 
-The use of populations is implicit in the "More styles, less work" paper. Setting hasStyle by population and using hasStyle in Polling audits is new. 
+The use of populations is implicit in the "More styles, less work" paper. Setting hasStyle by population and using hasStyle in Polling audits (TBD) is new. 
 These complexities arise in multi-contest audits and multi-card ballots.
 
 **Table of Contents**
@@ -44,29 +44,32 @@ These complexities arise in multi-contest audits and multi-card ballots.
 
 ## Definitions
 
-* **physical card** = pcard: the physical ballot or physical card if the ballot has multiple cards and the cards are scanned and stored separately.
-* **CVR**: scanned electronic record of a physical card
-* **MVR**: human audited physical card
-* **auditable card** = **card**:  internal computer representation of a physical card; contains the CVR if there is one. 
-  A card must have a _location_ which allows a human auditor to locate the physical card, and either a CVR or a _style_.
-
-* **Batches**: a complete partition of the cards.
-* **Batch**: one of the partitions of the cards with a list of contests that are in the batch.
-* **Batch.possibleContests**: list of contests that are on any of the cards in the batch.
-* **Batch.hasExactContests**: is true if all cards in the batch have the same Style, so that "we know exactly what contests are on each card".
-* **Style**: the list of possible contests on a card.
-* **Pool**: a batch that also has a subtotal of the votes and a count of the number of cards in the batch,
-  and a container of physical cards, from which we can retreive named cards (eg by an index into an ordered list of pcards).
-
-* **Contest population** = P_c: For each contest, the set of cards that may contain the contest. This is the sample population for the contest.
-* **Contest population size** = \|P_c\| = Npop: The size of the contest's population. Npop >= Nc.
-* **Contest upper limit**: For each contest, there is a trusted upper limit Nc of the number of cards containing the contest.
-* **phantom card** = auditable card added to ensure number of cards = Nc. Phantom cards arent in a batch; they contain their own list of contests.
+* **physical card**: the physical ballot or physical card if the ballot has multiple cards and the cards are scanned and stored separately.
+* **CVR**: _Cast Vote Record_: scanned electronic record of a physical card
+* **MVR**: _Manual Vote Record_: accurate electronic representation of the results of a human audit of a physical card. 
+* **auditable card** = **card**:  internal computer representation of what we know about each physical card in the election.
+  A card must have a _location_ which allows a human auditor to locate the physical card.
 * **card manifest** = complete list of auditable cards, one for each physical card and phantom card.
 
-* **Reported margin**: Each assorter has a reported margin with Nc as denominator; For Plurality it is (nwinners - nlosers) / Nc.
+* **Batches**: a complete partition of the cards.
+* **Batch**: one of the partitions of the cards.
+* **Batch.possibleContests**: list of contests that may be on any of the cards in the batch.
+* **Batch.hasExactContests**: true if all cards in the batch have the same Style, so that "we know exactly what contests are on each card".
+* **Style**: the list of possible contests on a card.
+* **Pool**: a batch that also has a subtotal of the votes and a count of the number of cards in the batch.
+  Implicity references a container of the physical cards, from which we can retreive named cards (eg by an index into an ordered list of pcards,
+  or an id printed on the physical card).
+
+* **Contest upper limit** = **Nc** : For each contest, a trusted upper limit of the number of cards containing the contest.
+* **Contest population** = P_c: For each contest, the set of cards that may contain the contest. Aka the _sample population for the contest_.
+* **Contest population size** = \|P_c\| = **Npop**: The size of the contest's population. Npop >= Nc.
+* **phantom card** = auditable card added to ensure number of cards in the card manifest = Nc. Phantom cards arent in a batch; they contain their own list of contests.
+
+* **Reported margin**: The margin with Nc as denominator; For Plurality it is (winnerVotes - loserVotes) / Nc.
   Other assorters have numerators possibly different.
-* **Diluted margin**:  Each assorter has a diluted margin with Npop as denominator; for Plurality it is (nwinners - nlosers) / Npop.
+* **Diluted margin**:  The margin with Npop as denominator; for Plurality it is (winnerVotes - loserVotes) / Npop.
+  Other assorters have numerators possibly different.
+* **Recount margin**:  The margin with winnerVotes as denominator; for Plurality it is (winnerVotes - loserVotes) / winnerVotes.
   Other assorters have numerators possibly different.
 
 ## Populations and Styles and Batches and Pools
@@ -76,15 +79,15 @@ When auditing, we sample consistently over P_c.
 
 Each AuditableCard has a **Style**, which has the possibleContests that might be on that card. Read through the manifest and count the cards that might contain a contest: that equals contest.Npop.
 
-A **Batch** emphasizes the partitioning of cards into physical containers. 
+A **Batch** emphasizes the partitioning of cards into physical containers; we may or may not have a vote subtotal for it. 
 
-A **Pool** is a batch with vote subtotals and a physical container distinct from other pools. We dont currently need Batches that arent Pools, so we will just use Pool instead of Batch here.
+A **Pool** is a batch with vote subtotals and a physical container distinct from other pools.
 
-A Pool is disjoint, a Style can be shared by many cards without implying the cards are stored in seperate containers. 
+Batch/Pool's have disjoint cards, but a Style can be shared by many cards without implying the cards are stored in seperate containers. 
 
-When a card is in a Pool, the card.poolId is set. To find out what cards are in a pool, read through the card manifest.
+For OneAudit, card.poolId is set iff a card is in a OneAudit Pool.  Otherwise, it may be set.  To find all cards in a pool, read through the card manifest.
 
-We allow the possibility that the card style may be different from the card.poolId (although our use cases for that have evaporated).
+In general, on a card, the Style is different from the Pool, but since a pool is a Style, they could also refer to the same object.
 
 ## Examples
 
@@ -99,13 +102,13 @@ For example, we know exactly which contests are on each card:
 2. When the cards are divided into batches that have only one Style.
 3. When each ballot has a known Style.
 
-In the real world, we have partitions: precincts, counties, possible other districts. These have distinct lists of contests. Consider the case where the physical ballots can be matched to their style by knowing their partition. Perhaps given the ballot id, we can look up the partition and card style.
+In the real world, we have partitions: precincts, counties, other administrative districts. These partition have distinct lists of contests. Consider the case where the physical ballots can be matched to their style by knowing their partition. Pr perhaps given the ballot id, we can look up the partition and card style.
 
-For the same audit and contest, you could have different batches with different values of hasExactContests. For example, one precinct has a
+For the same audit and contest, one could have different batches with different values of hasExactContests. For example, one precinct has a
 single Style containing contest c, and another has multiple Styles, not all of which contain contest c.
 
-Its worth noting that the EA (election authority) knows the card style for every voter and ballot. 
-So we are dealing with the limitations of associating CardStyles with the anonymous physical ballots and scanned cvrs.
+Its worth noting that the EA (election authority) always knows the card style for every voter and ballot. But in the 
+process of anonymizing ballots for privacy, the information is not kept.
 
 ### multi-card ballots, Polling audit (MoreStyle section 5)
 
@@ -116,7 +119,7 @@ the cards in the container will have contest S; otherwise, none of the cards in 
 Suppose a ballot has c cards to it. Suppose all ballots of the same style are kept in the same container, but the cards are
 scanned and separately addressable. If there are c cards, we know that only 1/c have the contest.
 
-The batch.possibleContests = all contests on the ballot (aka ballot style), and batch.hasExactContests = false, because there are c distinct CardStyles.
+Then batch.possibleContests = all contests on the ballot (aka ballot style), and batch.hasExactContests = false, because there are c distinct CardStyles.
 
 ### CLCA without undervotes
 
@@ -125,17 +128,27 @@ Then we need to use populations to specify where the contests are.
 
 ### OneAudit
 
-OneAudit handles two somewhat distinct use cases:
+OneAudit handles these distinct use cases:
 
 1. There are cvrs for all cards, but the precinct cvrs cant be matched to the physical ballot. We know exactly how many cards a contest has in the pool,
 and the pool's vote count. This is the SanFrancisco 2024 test case.
 
-2. We have cvrs from some cards, but not all. The remaining cards are in pools with pooled vote counts. 
+2. There are cvrs from some cards, but not all. The remaining cards are in pools with pooled vote counts. 
 Undervotes need to be included in the vote count. This is the Boulder 2024 test case. (Boulder 2024 does not
-record the undervotes for the redacted pools, so we guess what they are for the simulation.)
+record the undervotes for the redacted pools, so we have to guess what they are for the simulation.)
+
+3. There are no cvrs, all cvrs are in batches with known vote subtotals. This is the Georgia 2026 primary use case. Currently they use batch auditing on two chosen statewide contests. Each county has multiple batches with subtotals for each batch. Batches are randomly selected and then hand counted. 
 
 In San Francisco, the pools do not have one Style, so population.hasExactContests = false.
+
 In Boulder, each pool appears to have one Style, so population.hasExactContests = true.
+
+In Georgia, our simulation compares the current batch auditing to using OneAudit, with two use cases:
+
+    3.1. Audit just the two chosen statewide contests. Every batch has these two contests, so there is a single style. Npop is the total ballots in the election. 
+    
+    3.2. Audit all statewide contests. Different batches contain different contests, so each has a seperate style. Npop is found by counting which cards may contain the contest.
+
 
 ## Polling Modes
 
@@ -151,9 +164,6 @@ You may have distinct batches, where you know which contests are in each batch, 
 To run simulations one can use the card's batch to restrict the simulated Mvr to the possible contests for that card. (mode = withBatches)
 
 **TODO: characterize using Batch vs Pools for Polling audits.**
-
-Note that a Batch is a Style when hasExactContests = true. So this covers the case where you know the Style for each card.
-This allows Npop to be as small as possible.
 
 ### Example Corla 2024
 

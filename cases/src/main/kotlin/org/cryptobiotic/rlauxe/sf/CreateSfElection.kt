@@ -145,7 +145,7 @@ class CreateSfElection(
 
                 // all cards will have one of these styles
                 val csc =
-                    cardStyles.getOrPut(cvrExport.votes.keys) { CardStyle(cardStyles.size + 1, cvrExport.votes.keys) }
+                    cardStyles.getOrPut(cvrExport.votes.keys) { CardStyle(cardStyles.size + 1, cvrExport.votes.keys, false) }
                 csc.ncards++
 
                 // tabs

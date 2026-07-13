@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.audit
 
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.nfn
 import java.util.BitSet
 import kotlin.collections.forEach
@@ -36,7 +35,7 @@ data class CardStyle(
     val name: String,
     val id: Int,
     val possibleContests: IntArray,      // the list of possible contests.
-    val hasExactContests: Boolean,       // aka hasStyle: if all cards have exactly the contests in possibleContests; TODO why needed here ?
+    val hasExactContests: Boolean,       // aka hasStyle: if all cards have exactly the contests in possibleContests;
 ) : StyleIF {
     val maxId = possibleContests.maxOrNull() ?: 1
     val bitset: BitSet
@@ -47,7 +46,7 @@ data class CardStyle(
         possibleContests.forEach { bitset.set(it) }
     }
 
-    constructor(id: Int, contestIds: Set<Int>): this("style$id", id, contestIds.toList().sorted().toIntArray(), true)
+    constructor(id: Int, contestIds: Set<Int>, hasExactContests: Boolean): this("style$id", id, contestIds.toList().sorted().toIntArray(), hasExactContests)
 
     override fun ncards() = ncards
     fun setNcards(ncards:Int): CardStyle {
@@ -87,7 +86,7 @@ data class CardStyle(
 
     override fun toString(): String {
         val sortedContests = possibleContests.toList().sorted()
-        return "CardStyle(name=$name, id=$id, ncards= $ncards, contests=${sortedContests}"
+        return "CardStyle(name=$name, id=$id, ncards= $ncards, contests=${sortedContests} exact=$hasExactContests"
     }
 
     companion object {
@@ -108,6 +107,7 @@ data class CardStyle(
     }
 }
 
+/*
 fun makeCardStylesFromCvrs(cvrs: List<Cvr>, show: Boolean = false): Map<Set<Int>, CardStyle> {
     val cardStyleMap = mutableMapOf<Set<Int>, CardStyle>()
     cvrs.forEach { cvr ->
@@ -124,7 +124,7 @@ fun makeCardStylesFromCvrs(cvrs: List<Cvr>, show: Boolean = false): Map<Set<Int>
         }
     }
     return cardStyleMap
-}
+} */
 
 /*
 timeConsistentSampling with CardStyle.hasContest using

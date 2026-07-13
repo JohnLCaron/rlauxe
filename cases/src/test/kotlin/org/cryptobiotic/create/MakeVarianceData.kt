@@ -35,8 +35,7 @@ class MakeVarianceData {
             "sf2024",
             "${cases}/sf/sf2024oaVariance/sf2024oaVariance",
             otherParameters = arrayOf(
-                "--input",
-                cvrDir,
+                "--input", cvrDir,
             ),
             nruns = 2,
             nsimTrials = 10
@@ -47,14 +46,13 @@ class MakeVarianceData {
     @Test
     fun createGaVariance() {
         val generator = VarianceDataGenerator(
-            "ga26p",
-            "${cases}/ga/ga2026variance/ga2026variance",
+            case ="ga26p",
+            toptopdir = "${cases}/ga/ga2026variance/ga2026variance",
             otherParameters = arrayOf(
-                "--input",
-                "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted",
+                "--input", "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted",
             ),
             nruns = 100,
-            nsimTrials = 10
+            nsimTrials = 100 // TODO
         )
         generator.createAndRunTasks()
     }
@@ -65,13 +63,11 @@ class MakeVarianceData {
             "ga26p",
             "${cases}/ga/ga2026pvariance/ga2026pollVariance",
             otherParameters = arrayOf(
-                "--input",
-                "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted",
-                "--auditType",
-                "poll"
+                "--input", "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted",
+                "--auditType", "poll"
             ),
             nruns = 100,
-            nsimTrials = 10
+            nsimTrials = 100
         )
         generator.createAndRunTasks()
     }
@@ -90,7 +86,7 @@ class MakeVarianceData {
             println(" nmvrs = ${lastRound.nmvrs}")
             nmvrs.add(lastRound.nmvrs)
         }
-        println("nmvrs polling including overshoot")
+        println("nmvrs including overshoot")
         println(nmvrs)
         println(calcDecilesFromInt(nmvrs))
         println()

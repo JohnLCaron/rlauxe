@@ -118,7 +118,7 @@ class CreateBoulderElection(
     fun makeCardStyles(cvrs: List<Cvr>): Map<Set<Int>, CardStyle> {
         val cardStyleMap = mutableMapOf<Set<Int>, CardStyle>()
         cvrs.forEach { cvr ->
-            val csc = cardStyleMap.getOrPut(cvr.votes.keys) { CardStyle(cardStyleMap.size + 1, cvr.votes.keys) }
+            val csc = cardStyleMap.getOrPut(cvr.votes.keys) { CardStyle(cardStyleMap.size + 1, cvr.votes.keys, true) }
             csc.ncards++
         }
 

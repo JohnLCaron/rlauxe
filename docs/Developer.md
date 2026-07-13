@@ -1,5 +1,5 @@
 # Developer Notes
-_07/12/2026_
+_07/13/2026_
 
 <!-- TOC -->
 * [Developer Notes](#developer-notes)
@@ -22,18 +22,17 @@ _07/12/2026_
     * [For the Georgia 2026 primary test case](#for-the-georgia-2026-primary-test-case)
     * [For the San Francisco 2024 test case](#for-the-san-francisco-2024-test-case)
   * [rlauxe viewer](#rlauxe-viewer)
-* [Notes and stats](#notes-and-stats)
-  * [Code Coverage (Lines of Codes)](#code-coverage-lines-of-codes)
-    * [core test coverage](#core-test-coverage)
-    * [core + cases test coverage](#core--cases-test-coverage)
-    * [core + cases + CreateCases test coverage](#core--cases--createcases-test-coverage)
+* [UML](#uml)
+* [Code Coverage (Lines of Codes)](#code-coverage-lines-of-codes)
+  * [core test coverage](#core-test-coverage)
+  * [core + cases test coverage](#core--cases-test-coverage)
+  * [core + cases + CreateCases test coverage](#core--cases--createcases-test-coverage)
+* [Miscellaneous Internal Notes](#miscellaneous-internal-notes)
+  * [Documents](#documents)
+  * [Fuzzing notes](#fuzzing-notes)
   * [Time reading card manifest](#time-reading-card-manifest)
-  * [UML](#uml)
-  * [Miscellaneous Notes](#miscellaneous-notes)
-    * [Documents](#documents)
-    * [Fuzzing notes](#fuzzing-notes)
-* [TODO](#todo)
-* [CLI](#cli)
+  * [CLI](#cli)
+  * [TODO](#todo)
 <!-- TOC -->
 
 # Getting Started
@@ -93,18 +92,18 @@ to some directory on your system. Make sure the directory exists.
 
 To build the complete library and run the core tests:
 
-```
+````
     cd <devhome>/rlauxe
     ./gradlew clean assemble
     ./gradlew core:test
-```
+````
 
 To run a subset of tests in cases:
 
-```
+````
     cd <devhome>/rlauxe
     ./gradlew :cases:test --tests "org.cryptobiotic.create.*"
-```
+````
 
 
 ## Using IntelliJ
@@ -141,7 +140,7 @@ There's lots of online help for using IntelliJ.
 * **core**: core library
 * **docs**: documentation
 * **libs**: local copy of raire-java library
-* **plots**: code to generate plots for documentation
+* **plots**: code to generate plots used in the documentation
 
 
 ## Generate Test Cases 
@@ -155,10 +154,10 @@ $ ./gradlew assemble uberjar
 
 The repo contains the needed input for belgium2024. To create the data:
 
-`
+````
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case belgium -topdir "/home/you/wherever/cases/belgium2024"
-`
+````
 
 * check _cases/build/libs/_ for the latest version of rlauxe-cases-uber.jar and use that
 * substitute your own output "topdir" directory
@@ -171,10 +170,10 @@ See [here](https://github.com/JohnLCaron/rlauxe-viewer#special-features-for-belg
 
 The repo contains the needed input for boulder024. To create the data:
 
-`
+````
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case boulder2024 -topdir "/home/you/wherever/cases/boulder2024" -type oa
-`
+````
 
 will create a OneAudit election. To create a CLCA election, use the flag "-type clca"
 
@@ -187,11 +186,11 @@ git clone https://github.com/nealmcb/auditcenter
 
 #### For Colorado 2020 General elections
 
-`
+````
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case corla2020 -toptopdir "/home/you/wherever/cases/corla2020" \
     -auditcenter "/home/you/wherever/github/auditcenter/directory" 
-`
+````
 
 * check _cases/build/libs/_ for the latest version of rlauxe-cases-uber.jar
 * substitute your own "auditcenter" directory
@@ -204,36 +203,36 @@ To use the viewer for Corla elections, see [here](https://github.com/JohnLCaron/
 To run the Colorado 2020 election with cvrs from https://votedatabase.com, see [here](../notes/Corla2020notes.md). 
 Then use
 
-`
+````
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case corla2020withCvrs -toptopdir "/home/you/wherever/cases/corla2020withCvrs" \
     -auditcenter "/home/you/wherever/github/auditcenter/directory" \
     -input "/home/you/wherever/votedatabase/cvr/Colorado"
-`
+````
 
 #### For Colorado 2022 Primary election
 
-`
+````
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case corla2022p -toptopdir "/home/you/wherever/cases/corla2022p" \
     -auditcenter "/home/you/wherever/github/auditcenter/directory" 
-`
+````
 
 #### For Colorado 2024 General election
 
-`
+````
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case corla2024 -toptopdir "/home/you/wherever/cases/corla2024" \
     -auditcenter "/home/you/wherever/github/auditcenter/directory" 
-`
+`````
 
 ### For the Georgia 2026 primary test case
 
-`
+````
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case ga26p -topdir "/home/you/wherever/cases/ga2026Primary" \
     -input "/home/you/wherever/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted"
-`
+````
 
 will create a OneAudit election. 
 
@@ -248,29 +247,29 @@ Create the _top directory_ for this case (eg _$testdataDir/cases/sf2024/_), and 
 
 Then run:
 
-`
+````
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case sf2024 -toptopdir "/home/you/wherever/cases/sf2024" --cvrExport
-`
+````
 to build the cvrExport.csv file, which will be written to topdir. This only needs to be done one time.
 
 To generate the sf2024 election data: 
 
-`
+````
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case sf2024 -toptopdir "/home/you/wherever/cases/sf2024"
-`
+````
 
 will create a OneAudit election in "/home/you/wherever/cases/sf2024/oa". To create a CLCA election, add the flag "-type clca"
 which will create a Clca election in "/home/you/wherever/cases/sf2024/clca"
 
 If you want to control where the election is placed, use
 
-`
+````
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case sf2024 -toptopdir "/home/you/wherever/cases/sf2024" \
     -output "/home/you/wherever/" -type [clca | oa]
-`
+````
 
 will create a _type_ election in "/home/you/wherever", taking the cvrs from "/home/you/wherever/cases/sf2024".
 
@@ -289,11 +288,16 @@ You will have to regenerate any data you have. The case study data can now be re
 see [Getting Started](docs/Developer.md#getting-started).
 Mea culpa, mea culpa, mea maxima culpa.
 
-# Notes and stats
+# UML
+last changed: 01/07/2026
 
-## Code Coverage (Lines of Codes)
+![rlauxe core UML](images/coreUML.svg)
 
- ### core test coverage
+![rlauxe Audit UML](images/auditUML.svg)
+
+# Code Coverage (Lines of Codes)
+
+## core test coverage
 
 | date       | pct    | cover/total LOC |
 |------------|--------|-----------------|
@@ -328,13 +332,13 @@ Mea culpa, mea culpa, mea maxima culpa.
 | 07/10/2026 | 78.6%  | 7437/9460       |
 | 07/11/2026 | 83.0%  | 7819/9426       |
 
-### core + cases test coverage
+## core + cases test coverage
 
 | date     | pct    | cover/total LOC |
 |----------|--------|-----------------|
 | 07/11/26 | 70.1 % | 10502/14972     |
 
-### core + cases + CreateCases test coverage
+## core + cases + CreateCases test coverage
 
 Include TestCreateCaseData
 
@@ -346,31 +350,7 @@ Include TestCreateCaseData
 | 07/11/26 | 77.2 % | 11527/14936     |
 
 
-## Time reading card manifest
-
-
-````
-totalCardCount=4982774 (corla24 consistent)
-
-//// results ntrials = 20
-//          ProtoCardIteratorM: accum=1143043148 took 267.1 s = 13354.45 ms/trial count=20, mean=2.6801 stddev=0.0738 us/card  = 1.0
-//           CloseableIterable: accum=1143043148 took 263.1 s = 13151.8  ms/trial count=20, mean=2.6394 stddev=0.1009 us/card  =  .98
-//     CloseableIterableInline: accum=1143043148 took 383.4 s = 19169.4  ms/trial count=20, mean=3.8471 stddev=0.0841 us/card  = 1.43 = 43% slower (!)
-// CloseableIterableNonGeneric: accum=1143043148 took 261.5 s = 13071.6  ms/trial count=20, mean=2.6233 stddev=0.0713 us/card  =  .98
-//                 timeReadCsv: accum=1143043148 took 1068 s =  53387.0  ms/trial count=20, mean=10.714 stddev=0.2442 us/card  = 4.0 = 4x slower
-//            timeFastSampling:                  took 8.611 s =   429.0  ms/trial count=20, mean=0.0861 stddev=0.0118 us/card  = 31 times faster
-//      timeFastSamplingCached:                  took 1.120 s =    54.9  ms/trial count=20, mean=0.0110 stddev=0.0053 us/card  = 243 times faster
-
-````
-
-## UML
-last changed: 01/07/2026
-
-![rlauxe core UML](images/coreUML.svg)
-
-![rlauxe Audit UML](images/auditUML.svg)
-
-## Miscellaneous Notes
+# Miscellaneous Internal Notes
 
 There are two kinds of Contests, Regular (with votes) and Irv (with VoteConsolidator's).
 There are two kinds of Audits, Polling and Clca.
@@ -424,7 +404,7 @@ Assertion
     
 ````
 
-### Documents
+## Documents
 
 README
 
@@ -457,7 +437,7 @@ not:
     docs/GeneralizedAdaptiveBetting.md
     docs/RlaOptions.md
 
-### Fuzzing notes
+## Fuzzing notes
 
 Simulation 02/06/2026
 
@@ -545,8 +525,34 @@ OneAuditTest : One OA contest
 // Simulation of Raire Contest; pass in the parameters and simulate the cvrs; then call raire library to generate the assertions
 simulateRaireTestContest: single raire contest
 
+## Time reading card manifest
 
-# TODO
+````
+totalCardCount=4982774 (corla24 consistent)
+
+//// results ntrials = 20
+//          ProtoCardIteratorM: accum=1143043148 took 267.1 s = 13354.45 ms/trial count=20, mean=2.6801 stddev=0.0738 us/card  = 1.0
+//           CloseableIterable: accum=1143043148 took 263.1 s = 13151.8  ms/trial count=20, mean=2.6394 stddev=0.1009 us/card  =  .98
+//     CloseableIterableInline: accum=1143043148 took 383.4 s = 19169.4  ms/trial count=20, mean=3.8471 stddev=0.0841 us/card  = 1.43 = 43% slower (!)
+// CloseableIterableNonGeneric: accum=1143043148 took 261.5 s = 13071.6  ms/trial count=20, mean=2.6233 stddev=0.0713 us/card  =  .98
+//                 timeReadCsv: accum=1143043148 took 1068 s =  53387.0  ms/trial count=20, mean=10.714 stddev=0.2442 us/card  = 4.0 = 4x slower
+//            timeFastSampling:                  took 8.611 s =   429.0  ms/trial count=20, mean=0.0861 stddev=0.0118 us/card  = 31 times faster
+//      timeFastSamplingCached:                  took 1.120 s =    54.9  ms/trial count=20, mean=0.0110 stddev=0.0053 us/card  = 243 times faster
+
+````
+
+## CLI
+
+````
+class TestRunRoundCli {
+    fun testRunRoundCli() {
+    fun testRunAllRoundsCli() {
+    fun testStartAuditFirstRound() {
+    fun testResampleAndSaveResults() {
+    fun testRemoveAndResample() {
+````
+
+## TODO
 
 **TODO 12/11/25 (Belgium)**
 
@@ -578,15 +584,5 @@ simulateRaireTestContest: single raire contest
 * undervote Pct = totalVotes / (ncards * voteFor)
   maybe ok for Plurality with nwinners > 1
   but for IRV seems misleading. perhaps IRV undervote should mean "didnt vote in the contest"?
-
-# CLI
-
-class TestRunRoundCli {
-    fun testRunRoundCli() {
-    fun testRunAllRoundsCli() {
-    fun testStartAuditFirstRound() {
-    fun testResampleAndSaveResults() {
-    fun testRemoveAndResample() {
-
 
 

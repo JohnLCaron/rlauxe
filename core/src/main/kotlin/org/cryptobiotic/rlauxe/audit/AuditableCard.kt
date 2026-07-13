@@ -7,30 +7,13 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator
 
-/*
-interface AuditableCard: CvrIF, SamplingCardIF {
-    fun location(): String // enough info to find the card for a manual audit.
-    fun index(): Int  // index into the original, canonical list of cards
-
-    fun votes(): Map<Int, IntArray>?   // CVRs and phantoms
-    fun styleName(): String
-
-    fun style(): StyleIF?            // "fromCvr" if no cardStyle and its from a CVR (then votes is non null)
-    fun possibleContests() : IntArray
-
-    fun hasExactContests(): Boolean // TODO is this needed?
-
-    // fun show(): String
-    fun toCvr(): Cvr
-} */
-
 interface SamplingCardIF {
     fun hasContest(contestId: Int): Boolean
     fun prn(): Long
     fun poolName(): String
 }
 
-// mutable style, so we dont need multiple classes
+// AuditableCard are used for the CardManifest, and also for the Mvrs when being audited.
 data class AuditableCard (
     val id: String, // enough info to find the card for a manual audit.
     val location: String?, // enough info to find the card for a manual audit.
@@ -38,12 +21,15 @@ data class AuditableCard (
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
     val styleId: Int,
-    val contestIds: IntArray,   // these 3 form the votes map. set style if different
+    val contestIds: IntArray,   // these 3 form the cvr.votes map. will be empty if no cvr.
     val contestStarts: IntArray,
     val candidates: IntArray,
-    val poolId: Int?, // must be set if its from a CardPool
+    val poolId: Int?, // must be set if its from a OneAudit CardPool
 ): CvrIF, SamplingCardIF {
 
+    // trying to finesse if a card always has a style. During construction, it may have a style id but not a style.
+    // After construction, ie during the audit, it always has a style. This allows us to delegate "possible contests"
+    // to the style or cvr.votes.
     // you can change the style but not null it; could also prevent changing altogether after its set
     private var style: StyleIF? = null
     fun setStyle(style: StyleIF): AuditableCard {

@@ -62,7 +62,7 @@ class CreateGaElection(
         infos = contests.associate { it.id to it.info }
 
         // only one CardStyle
-        this.cardStyles = listOf(CardStyle(1, infos.keys.toSet()))
+        this.cardStyles = listOf(CardStyle(1, infos.keys.toSet(), false))
         val phantoms = makePhantomCvrs(contests) // i dont think there are any
 
         // each county batch is a pool
@@ -84,7 +84,7 @@ class CreateGaElection(
                     CardPool(
                         "${county.countyName}-${batch.name}",
                         poolid++,
-                        true,
+                        false,
                         infos,
                         contestTabs,
                         batch.nballots

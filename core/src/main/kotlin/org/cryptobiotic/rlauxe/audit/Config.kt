@@ -266,8 +266,8 @@ data class ContestSampleControl(
 
     //// consistentSampling: contestRound.status, depends on having estimation
     val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / Npop) greater than this
-    val contestSampleCutoff: Int? = 1000, // max number of cvrs for any one contest, set to null to use all
-    val auditSampleCutoff: Int? = 10000, // max number of cvrs in the audit, set to null to use all
+    val contestSampleCutoff: Int? = null, // max number of cvrs for any one contest, set to null to use all
+    val auditSampleCutoff: Int? = null, // max number of cvrs in the audit, set to null to use all
 
     // soft parameters
     val other: Map<String, String> = emptyMap(),    // soft parameters to ease migration

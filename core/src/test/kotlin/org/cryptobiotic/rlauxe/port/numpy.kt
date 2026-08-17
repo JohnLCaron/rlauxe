@@ -1,3 +1,5 @@
+@file:JvmName("numpy")
+
 package org.cryptobiotic.rlauxe.port
 
 import kotlin.math.abs
@@ -94,6 +96,7 @@ fun numpy_append(pfx: DoubleArray, a: DoubleArray) : DoubleArray {
 
 // computes the q-th quantile of data along the specified axis.
 // The q-th quantile represents the value below which q percent of the data falls.
+// i think a has to be sorted
 fun numpy_quantile(a: IntArray, q: Double): Int {
     // for (i=0, sum=0; i<n; i++) sum += Number[i];
     //tot = sum;

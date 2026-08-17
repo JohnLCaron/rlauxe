@@ -67,6 +67,11 @@ tasks.test {
     // systemProperty("kotest.framework.discovery.jar.scan.disable", "true")
     // systemProperty("kotest.framework.classpath.scanning.config.disable", "true")
     // systemProperty("kotest.framework.classpath.scanning.autoscan.disable", "true")
+
+    testLogging {
+        showStandardStreams = false
+        events("passed", "skipped", "failed")
+    }
 }
 
 kotlin {

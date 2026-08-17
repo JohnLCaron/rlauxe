@@ -1,29 +1,37 @@
 # The AuditRecord
-_last changed 05/20/2026_
+_last changed 08/17/2026_
 
-An _Audit Record_ may have the following files in it:
+Rlauxe uses the following directorey layout.
+
+The **auditrecord** directory contains the publically available data, for use by verifiers. It should be published to a seperate
+bulletin board or web server. Files not in auditrecord are internal with formats that may change. Files in the private directory are typically 
+only used in testing and must not be made public.
 
 ````
 $topdir/
-    countyData.csv  (county contests only)
-    countyContestData.csv (county contests only)
+    countyData.csv        // optional - county contests only
+    countyContestData.csv // optional - county contests only
+    sortedCards.proto     // optional? - same as sortedCards.csv in kotlin protobuf format
+    fastSampling.bin      // optional? - (prn, styleId) in binary, used for fast sampling
 
-    $auditdir/
+    auditrecord/
+    
         // election record - output of createElectionRecord
         cardManifest.csv      // AuditableCardCsv, may be zipped
-        cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool (optional)
-        cardStyles.json       // CardStylesJson: CardStyleIF -> CardStyle (optional)  
         contests.json         // ContestsUnderAuditJson
         electionInfo.json     // ElectionInfoJson 
+        cardPools.csv         // optional - CardPoolCsv
+        cardStyles.json       // optional - CardStylesJson  
+        countyCardPools.csv   // optional - CountyCardPoolCsv, when pools are from county totals
+        countyCvrPools.csv    // optional - CountyCardPoolCsv, compare countyCardPools to generated cvrs, used by viewer (TODO remove from audit record?)
 
         // auditRecord - output of createAuditRecord, after the seed has been chosen
         auditCreationConfig.json  // AuditCreationConfigJson 
-        auditRoundPrototype.json  // auditRoundConfigJson ; prototype for auditRoundConfigX
+        auditRoundConfig.json     // auditRoundConfigJson ; prototype for auditRoundConfigX
         sortedCards.csv           // AuditableCardCsv, sorted by prn, may be zipped
-        sortedCards.proto         // ProtoCard: same as sortedCards.csv in protobuf (4x faster than csv), optional
-        fastSampling.bin          // just prn, styleId in binary (30-240x faster than proto), optional
 
         roundX/
+            // output of runAuditRound
             auditEstX.json       // AuditRoundJson,  an audit state with estimation, ready for auditing
             auditRoundConfigX.json  // auditRoundConfigJson, configuration for this round
             auditStateX.json     // AuditRoundJson,  the results of the audit for this round
@@ -31,9 +39,14 @@ $topdir/
             sampleMvrsX.csv      // AuditableCardCsv, complete sorted mvrs used for this round; matches samplePrnsX.csv
             samplePrnsX.json     // SamplePrnsJson, complete sorted sample prns for this round
 
-        private/                  (test only - not part of the public record)
-            sortedMvrs.csv       // AuditableCardCsv, sorted by prn, matches sortedCards.csv, may be zipped
-            unsortedMvrs.csv     // AuditableCardCsv (optional)
+    private/                  (test only - not part of the public record)
+        sortedMvrs.csv      // AuditableCardCsv, sorted by prn, matches sortedCards.csv, may be zipped
+        unsortedMvrs.csv    // AuditableCardCsv (optional)
+        /<county/>.csv       // optional - AuditableCardCsv for specific county
+        
+    sortedChunks/
+        sorted-cards-part-X // optional - used for external sort of cardManifest.csv
+            
 ````
 
 Also see _core/src/main/kotlin/org/cryptobiotic/rlauxe/persist/Publisher.kt_. 

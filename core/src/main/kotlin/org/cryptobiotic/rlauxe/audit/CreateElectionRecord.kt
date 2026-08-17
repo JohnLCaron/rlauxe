@@ -85,7 +85,7 @@ fun createElectionRecord(election: ElectionBuilder, topdir: String, control: Con
     val countyCvrPools = election.countyCvrPools()
     if (!countyCvrPools.isNullOrEmpty()) {
         writeCountyCardPoolCsvFile(countyCvrPools, publisher.countyCvrPoolsFile())
-        logger.info { "createElectionRecord write ${countyCvrPools.size} countyCardPoolsFile to ${publisher.countyCardPoolsFile()}" }
+        logger.info { "createElectionRecord write ${countyCvrPools.size} countyCvrPools to ${publisher.countyCvrPoolsFile()}" }
     }
 
     val cards = election.cards()

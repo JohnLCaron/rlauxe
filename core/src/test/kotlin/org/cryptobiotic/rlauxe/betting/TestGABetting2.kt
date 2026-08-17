@@ -29,7 +29,7 @@ class TestGABetting2 {
             eta = 0.5,
             noerror = noerror,
             riskLimit=alpha,
-            Npop = Nc.toInt(),
+            Npop = Nc,
             Nphantoms=0,
         )
 

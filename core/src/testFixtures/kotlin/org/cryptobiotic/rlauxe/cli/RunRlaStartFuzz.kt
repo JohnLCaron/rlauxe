@@ -138,7 +138,7 @@ fun startTestElectionClca(
     createAuditRecord(config, election, topdir = topdir)
 
     val result = startFirstRound(topdir)
-    if (result.isErr) error{ result.toString() }
+    if (result.isErr) error { result.toString() }
 }
 
 class TestClcaElection(

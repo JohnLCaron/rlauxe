@@ -2,11 +2,11 @@
 rlauxe = "0.10.2.0"  ## prerelease 0.MAJOR.MINOR.PATCH
 
 # main dependency versions
-kotlin = "2.3.20" # backout 2.3.21
+kotlin = "2.4.10"
 kotlinx-cli = "0.3.6"
-kotlinx-coroutines = "1.10.2" # backout 1.11.0
+kotlinx-coroutines = "1.11.0"
 oshai-version = "8.0.4"
-slf4j-version="2.0.17"
+slf4j-version="2.0.18"
 
 # library versions
 bull-result = "2.3.1"
@@ -15,21 +15,21 @@ commons-math = "3.6.1"
 commons-poi = "5.5.1"
 kandy-letsPlot = "0.8.3"
 kotlin-statistics = "0.8.3"
-google-protobuf = "4.34.1"  # not used
+# google-protobuf = "4.34.1"  # not used
 serialization = "1.11.0"
-xmlutil-version = "0.91.3" # not used
+xmlutil-version = "1.0.2"
 
 # test only dependency versions
 junit-jupiter-params = "5.13.1"
-logback = "1.5.37"
+logback = "1.6.2"
 mockk = "1.14.9" # used ?
 kotest = "6.2.0"
 
 [libraries]
 
 # Kotlinx libraries
-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-cli = { module = "org.jetbrains.kotlinx:kotlinx-cli", version.ref = "kotlinx-cli" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-serialization-protobuf = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-protobuf", version.ref = "serialization" }
 
@@ -43,7 +43,7 @@ commons-csv = { module = "org.apache.commons:commons-csv", version.ref = "common
 commons-math = { module = "org.apache.commons:commons-math3", version.ref = "commons-math" }
 commons-poi = { module = "org.apache.poi:poi", version.ref = "commons-poi" }
 commons-poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "commons-poi" }
-google-protobuf = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "google-protobuf" }
+# google-protobuf = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "google-protobuf" }
 pdvrieze-xmlutil-core-xml = { module = "io.github.pdvrieze.xmlutil:core-jvmcommon", version.ref = "xmlutil-version" }
 pdvrieze-xmlutil-serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization-jvm", version.ref = "xmlutil-version" }
 
@@ -66,7 +66,7 @@ jvmtest = ["junit-jupiter-params", "kotlin-test-junit5", "logback-classic", "moc
 xmlutil = ["pdvrieze-xmlutil-core-xml", "pdvrieze-xmlutil-serialization-xml", ]
 
 [plugins]
-kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" } # must match kotlin
 # kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 # google-protobuf-kotlin = { id = "com.google.protobuf", version.ref = "google-protobuf" }
 

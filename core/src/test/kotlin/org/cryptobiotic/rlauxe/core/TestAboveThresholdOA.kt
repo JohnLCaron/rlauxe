@@ -224,11 +224,11 @@ class TestAboveThresholdOA {
                 }
                 bettingFun.bet(errorTracker, show = true) // debugging
 
-                val mvrVotes = mvr?.votes(wantId)?.contentToString() ?: "missing"
+                val mvrVotes = mvr.votes(wantId)?.contentToString() ?: "missing"
                 val cardVotes = cvr.votes(wantId)?.contentToString() ?: "N/A"
                 print("$countUsed, ${dfn(assortValue, 8)}, ${dfn(bet, 8)}, ${dfn(payoff, 8)}, ${dfn(testStatistic, 8)}, " +
                         "${sfn(cvr.location(), locWidth)}, ${mvrVotes}")
-                if (cvr.poolId() != null) print(", pool=${cvr.poolId()}, poolAvg=${df(oaAssorter?.poolAverage(cvr.poolId()))}")
+                if (cvr.poolId() != null) print(", pool=${cvr.poolId()}, poolAvg=${df(oaAssorter.poolAverage(cvr.poolId()))}")
                 else print(", votes=${cardVotes}")
                 println()
             }

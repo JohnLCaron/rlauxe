@@ -22,7 +22,7 @@ class TestProtoCard {
     @Test
     fun testProtoAndCsvAgree () {
         val topdir = "$cases/corla/corla2020/clca"
-        val publisher = Publisher("$topdir")
+        val publisher = Publisher(topdir)
         val bufferSize = 100_000
 
         val styles = readCardStylesJsonFile(publisher.cardStylesFile()).unwrap()

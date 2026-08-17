@@ -55,7 +55,6 @@ object RunCalcAssortAvg {
                 println(auditRecordResult.unwrapError())
                 return
             }
-            require(auditRecord is AuditRecord)
             val config = auditRecord.config
             println("auditRecord in $topdir isOA=${config.isOA}")
 

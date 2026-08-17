@@ -585,4 +585,9 @@ class TestRunRoundCli {
   maybe ok for Plurality with nwinners > 1
   but for IRV seems misleading. perhaps IRV undervote should mean "didnt vote in the contest"?
 
+**TODO 8/17/2026**
+
+* seems like most US cases would have have county subtotals, eg Corla (why not GA?)
+* where should countyCvrPools.csv be in the audit record ?? 
+
 

@@ -310,7 +310,7 @@ open class CountyElectionSansCvrs (
 }
 
 ////////////////////////////////////////////////////////////////////
-// Create audit where pools are from the precinct total. May be CLCA or OneAudit
+// Create audit where pools are from the county totals. May be CLCA or OneAudit
 fun createCountyElectionSansCvrs(
     topdir: String,
     coloradoInput: ColoradoInput,

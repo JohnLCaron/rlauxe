@@ -37,7 +37,7 @@ class TestFastSamplingCards {
     @Test
     fun readSamplingCards() {
         val topdir = "$cases/corla/corla2020/clca"
-        val publisher = Publisher("$topdir")
+        val publisher = Publisher(topdir)
 
         val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)

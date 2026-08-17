@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.strata
+package org.cryptobiotic.rlauxe.port
 
 // I think allocation refers to how many samples come from each strata.
 

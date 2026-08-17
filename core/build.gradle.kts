@@ -23,24 +23,31 @@ dependencies {
     implementation(libs.kotlinx.serialization.protobuf)
     implementation(libs.bundles.logging)
 
-    testImplementation(platform("org.junit:junit-bom:5.13.4"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("com.google.guava:guava:33.5.0-jre")
-    testImplementation("com.google.truth:truth:1.4.5")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    /*
+        testImplementation(platform("org.junit:junit-bom:5.13.4"))
+        testImplementation("org.junit.jupiter:junit-jupiter")
+        testImplementation("com.google.guava:guava:33.5.0-jre")
+        testImplementation("com.google.truth:truth:1.4.5")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher") */
 
     testFixturesImplementation(files("../libs/raire-java-1.0.2.jar"))
-    testFixturesImplementation(libs.bundles.jvmtest)
+    testFixturesImplementation(kotlin("test"))
+    testImplementation(libs.logback.classic)
+
+//    testFixturesImplementation(libs.bundles.jvmtest)
     testFixturesImplementation(libs.kotlinx.cli)
     testFixturesImplementation(libs.oshai.logging)
     testFixturesImplementation(libs.commons.math)
     testFixturesImplementation(libs.bull.result)
 
     // cant use testImplementation(kotlin("test")) and kotest together as they have diffrent jupitor versions....
-    testImplementation(libs.bundles.jvmtest)
+    /* testImplementation(libs.bundles.jvmtest)
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.logback.classic)
+    testImplementation(libs.logback.classic) */
 }
 
 tasks.test {
@@ -60,6 +67,11 @@ tasks.test {
     // systemProperty("kotest.framework.discovery.jar.scan.disable", "true")
     // systemProperty("kotest.framework.classpath.scanning.config.disable", "true")
     // systemProperty("kotest.framework.classpath.scanning.autoscan.disable", "true")
+
+    testLogging {
+        showStandardStreams = false
+        events("passed", "skipped", "failed")
+    }
 }
 
 kotlin {

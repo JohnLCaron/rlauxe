@@ -1,7 +1,7 @@
 # The AuditRecord
 _last changed 08/17/2026_
 
-Rlauxe uses the following directorey layout.
+Rlauxe uses the following directory layout.
 
 The **auditrecord** directory contains the publically available data, for use by verifiers. It should be published to a seperate
 bulletin board or web server. Files not in auditrecord are internal with formats that may change. Files in the private directory are typically 
@@ -42,7 +42,7 @@ $topdir/
     private/                  (test only - not part of the public record)
         sortedMvrs.csv      // AuditableCardCsv, sorted by prn, matches sortedCards.csv, may be zipped
         unsortedMvrs.csv    // AuditableCardCsv (optional)
-        /<county/>.csv       // optional - AuditableCardCsv for specific county
+        <county>.csv        // optional - AuditableCardCsv for specific county
         
     sortedChunks/
         sorted-cards-part-X // optional - used for external sort of cardManifest.csv
@@ -53,7 +53,7 @@ Also see _core/src/main/kotlin/org/cryptobiotic/rlauxe/persist/Publisher.kt_.
 
 ## Commitment Sequence
 
-1. CreateElectionRecord
+**1. CreateElectionRecord**
 
 The election information is contained in the following files. The EA (Election Authority) can modify these until satisfied that they
 are correct. Before the seed is chosen in step 2, they are digitally signed and published publically (aka _committed to the Audit Record_), 
@@ -66,7 +66,7 @@ and then may not be changed.
         cardStyles.json       // optional - CardStylesJson  
         countyCardPools.csv   // optional - CountyCardPoolCsv, when pools are from county totals
 
-2. CreateAuditRecord : PRNG seed chosen, cards assigned PRNs
+**2. CreateAuditRecord : PRNG seed chosen, cards assigned PRNs**
 
 The PRNG seed is chosen, and all the cards in the card manifest are assigned a PRN in sequence by the PRNG.
 The cards are then sorted by PRN and written to sortedCards.csv. These are commited to the Audit Record.
@@ -76,7 +76,7 @@ The PRNG seed can only be chosen once and the cards must be immediately committe
         auditRoundConfig.json     // auditRoundConfigJson ; prototype for auditRoundConfigX
         sortedCards.csv           // AuditableCardCsv, sorted by prn, may be zipped
 
-3. Audit Round X Sample Estimation
+**3. Audit Round X Sample Estimation**
 
 The EA decides which contests are in the audit, and what the configuration parameters are for the round.
 The EA can calculate estimated sample sizes, and modify contest sample sizes and AuditRoundConfig parameters as often as they want.
@@ -90,7 +90,7 @@ Once the EA is satisfied with sample sizes and auditing parameters, the followin
             auditEstX.json          // the estimation of sample sizes of the contests in this round
             samplePrnsX.json        // the chosen sample cards' prns for this round
 
-4. Audit Round X gather MVRs
+**4. Audit Round X gather MVRs**
 
 The physical ballots/cards are found that match samplePrnsX.json. These are hand-audited and their MVRs are written to sampleMvrsX.csv.
 The matching cards from the CardManifest are written to sampleCardsX.csv, for completeness and security.
@@ -100,7 +100,7 @@ Before the audit is run, these are committed to the Audit Record:
             sampleMvrsX.csv      // complete mvrs used for this round; matches samplePrnsX.csv
             sampleCardsX.csv     // complete cards used for this round; matches samplePrnsX.csv
 
-5. Run Audit Round X
+**5. Run Audit Round X**
 
 The audit is run for round X, and the following file is committed to the Audit Record:
 

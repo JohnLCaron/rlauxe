@@ -589,5 +589,6 @@ class TestRunRoundCli {
 
 * seems like most US cases would have have county subtotals, eg Corla (why not GA?)
 * where should countyCvrPools.csv be in the audit record ?? 
+* Add JaCoCo Runner.
 
 

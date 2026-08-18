@@ -1,17 +1,19 @@
 # SHANGRLA vs rlauxe: Comparison
+_last update: 8/17/2026_
 
-*This review was originally produced by a GitHub Copilot agent session in the nealmcb/SHANGRLA repository and is preserved here for reference.*
+* This review was originally produced by a GitHub Copilot agent session in the nealmcb/SHANGRLA repository and is preserved here for reference.*
+* Some of the Rlauxe details have been updated by hand.
 
 ---
 
 ## Overview
 
-| | SHANGRLA (nealmcb/SHANGRLA) | rlauxe (JohnLCaron/rlauxe) |
-|---|---|---|
-| Language | Python | Kotlin (JVM) |
-| Status | Research reference implementation | "Work in Progress" production-oriented library |
-| Build system | requirements.txt / no formal build | Gradle (multi-module) |
-| License | AGPL-3.0 | (uses AGPL via RAIRE-Java dependency) |
+|              | SHANGRLA (nealmcb/SHANGRLA)        | rlauxe (JohnLCaron/rlauxe)                     |
+|--------------|------------------------------------|------------------------------------------------|
+| Language     | Python                             | Kotlin (JVM)                                   |
+| Status       | Research reference implementation  | "Work in Progress" production-oriented library |
+| Build system | requirements.txt / no formal build | Gradle (multi-module)                          |
+| License      | AGPL-3.0                           | (uses AGPL via RAIRE-Java dependency)          |
 
 ---
 
@@ -25,12 +27,14 @@
 ### Contest types / Social choice functions
 
 - **SHANGRLA**: Plurality, Supermajority, IRV (via external RAIRE assertion generator).
-- **rlauxe**: Plurality, IRV (via embedded RAIRE-Java library), D'Hondt (proportional representation — a major addition absent from SHANGRLA).
+- **rlauxe**: Plurality, IRV (via embedded RAIRE-Java library), D'Hondt (proportional representation — a major addition absent from SHANGRLA),
+   RUNOFF (one majority winner or two runoff winners)
 
 ### Statistical methods / Risk functions
 
 - **SHANGRLA**: Kaplan-Markov, Kaplan-Wald, Kaplan-Kolmogorov, Wald SPRT (with/without replacement), Kaplan-Martingale. These are the older generation of methods.
-- **rlauxe**: AlphaMart (with truncated-shrinkage estimation for polling), BettingMart + GeneralAdaptiveBetting (for CLCA/OneAudit). These are the newer, more optimal betting-based methods from Stark et al.'s recent papers. SHANGRLA's older methods are not included (though rlauxe has a `port/` test package that cross-validates against SHANGRLA).
+- **rlauxe**: AlphaMart (with truncated-shrinkage estimation for polling), BettingMart + GeneralAdaptiveBetting (for CLCA/OneAudit). Samples without replacement. 
+  These are the newer, more optimal betting-based methods from Stark et al.'s recent papers. SHANGRLA's older methods are not included (though rlauxe has a `port/` test package that cross-validates against SHANGRLA).
 
 ### Workflow completeness
 
@@ -41,11 +45,12 @@
 
 - **SHANGRLA**: Basic sample-by-index utility; no explicit multi-contest consistent sampling.
 - **rlauxe**: Consistent sampling across multiple contests (reads CardManifest in PRNG-sorted order); explicit multi-round estimation via simulation (runs `nsimTrials` simulated audits to estimate batch sizes at a target percentile).
+  Can also use Uniform Sampling for comparison with Corla.
 
 ### CVR format support
 
 - **SHANGRLA**: Generic dict, RAIRE CSV format, Dominion CVR export (via `dominion_tools.py`), SUITE format (via `suite_tools.py`).
-- **rlauxe**: Proprietary JSON-based AuditableCard/CVR model; RAIRE via raire-java integration; OneAudit pool subtotals.
+- **rlauxe**: Can read Dominion CVR export to JSON or CSV. Internally, uses proprietary AuditableCard and CSV serialization; RAIRE via raire-java integration; OneAudit pool subtotals.
 
 ### Phantom/missing ballot handling
 
@@ -66,7 +71,8 @@ Both support phantom CVRs and MVRs with appropriate assorter treatment. rlauxe h
 
 ### rlauxe
 
-- **75,124 total lines of Kotlin across 452 files** (32,130 production lines + 42,994 test lines), organized across a structured module hierarchy: `audit`, `betting`, `cli`, `core`, `dhondt`, `estimate`, `irv`, `oneaudit`, `persist`, `util`, `verify`, `workflow`.
+- Core library has ~10,000 LOC. Core plus specialized "cases" library has ~15,000 LOC.
+- Including tests and plotting code, there are approx **75,124 total lines of Kotlin across 452 files** (32,130 production lines + 42,994 test lines), organized across a structured module hierarchy: `audit`, `betting`, `cli`, `core`, `dhondt`, `estimate`, `irv`, `oneaudit`, `persist`, `util`, `verify`, `workflow`.
 - Idiomatic Kotlin: data classes, sealed types, extension functions, coroutine-friendly structure.
 - Clear separation of concerns between layers.
 - Has a CLI (`cli` package) for command-line use.
@@ -104,7 +110,8 @@ Both support phantom CVRs and MVRs with appropriate assorter treatment. rlauxe h
 Neither repository has formal code coverage reporting (no `coverage.py`, no JaCoCo configuration visible).
 
 - **SHANGRLA**: Coverage is low by modern standards. Only `assertion_audit_utils.py` has tests; `suite_tools.py` (~932 lines), `dominion_tools.py`, and `IRVVisualisationUtils.py` have no associated automated tests. The test functions themselves skip some cases (`test_assorter_mean` is empty).
-- **rlauxe**: No coverage config found, but the test suite is structured to mirror every production module, and the cross-validation with SHANGRLA provides additional assurance on core statistical logic. Coverage is likely substantially higher, though not formally measured.
+- **rlauxe**: Uses IntelliJ proprietary coverage plugin. Runs sporadically. Core clibrary has ~ 83% coverage, core+cases ~ 78%, as of 7/11/26. See Developer.md.
+  The test suite is structured to mirror every production module, and the cross-validation with SHANGRLA provides additional assurance on core statistical logic. Coverage is likely substantially higher, though not formally measured.
 
 ---
 
@@ -127,19 +134,19 @@ Neither repository has formal code coverage reporting (no `coverage.py`, no JaCo
 
 ## Summary Table
 
-| Dimension | SHANGRLA | rlauxe |
-|---|---|---|
-| Audit types | CLCA, Polling | CLCA, OneAudit, Polling |
-| Contest types | Plurality, Supermajority, IRV | Plurality, IRV, D'Hondt |
-| Statistical methods | Kaplan family, Wald SPRT | AlphaMart, BettingMart (newer/more optimal) |
-| Workflow completeness | Primitives only | End-to-end incl. verification |
-| Consistent sampling | No | Yes |
-| Multi-round estimation | Basic | Simulation-based |
-| Tests | Ad-hoc functions, not automated | Full JUnit suite with cross-validation |
-| Coverage | Low (partial, informal) | Better structured (no metrics) |
-| Documentation | Good for research use | Extensive for implementors |
-| Code size | ~3,200 lines | 75,124 lines Kotlin (32,130 production + 42,994 test) |
-| Production readiness | Research prototype | More mature, though still WIP |
+| Dimension              | SHANGRLA                        | rlauxe                                      |
+|------------------------|---------------------------------|---------------------------------------------|
+| Audit types            | CLCA, Polling                   | CLCA, OneAudit, Polling                     |
+| Contest types          | Plurality, Supermajority, IRV   | Plurality, IRV, D'Hondt, Runoff             |
+| Statistical methods    | Kaplan family, Wald SPRT        | AlphaMart, BettingMart (newer/more optimal) |
+| Workflow completeness  | Primitives only                 | End-to-end incl. verification               |
+| Consistent sampling    | No                              | Yes                                         |
+| Multi-round estimation | Basic                           | Simulation-based                            |
+| Tests                  | Ad-hoc functions, not automated | Full JUnit suite with cross-validation      |
+| Coverage               | Low (partial, informal)         | Better structured (no metrics)              |
+| Documentation          | Good for research use           | Extensive for implementors                  |
+| Code size              | ~3,200 lines                    | 10-15K LOC                                  |
+| Production readiness   | Research prototype              | More mature, though still WIP               |
 
 **Bottom line:** SHANGRLA is the authoritative Python research prototype from Stark et al., excellent for understanding the mathematical foundations and for reproducing specific pilots. rlauxe is a more ambitious, production-oriented Kotlin reimplementation that adds OneAudit, D'Hondt, a complete audit workflow, and the newer betting-based risk functions — at the cost of being a much larger, more complex, still-evolving codebase. The two are complementary: rlauxe explicitly cross-validates against SHANGRLA in its test suite, treating SHANGRLA as the mathematical ground truth.
 

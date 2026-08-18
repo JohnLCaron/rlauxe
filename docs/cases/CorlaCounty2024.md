@@ -7,7 +7,7 @@ _last updated 06/16/2026_
 * 65 contests targeted for the RLA, to generate the sample sets
 * 4897 sampled ballot cards, and thus their corresponding CVRs and  Manual Vote Records (MVRs).
 * risk limit =  3%
-* This report based on subtotals by County, not CVRs
+* This report based on subtotals by County, with simulated CVRs
 
 <!-- TOC -->
 * [Colorado Statewide election by Counties 2024](#colorado-statewide-election-by-counties-2024)
@@ -85,7 +85,7 @@ Notes:
   _ComparisionAudit.riskMeasurement()_. The inputs are read from the database, so not able to see what values they are using.
   TODO: get copy of ReportRows.genSumResultsReport() output if possible.
 
-## Rlauxe simulated consistent sampling for CORLA24
+## Rlauxe simulated consistent sampling for CORLA 2024
 
 We want to compare how the current uniform sampling risk measurement compares with using consistent sampling and _Card-style data_ (CSD) as
 described in the "More style, less work" paper.
@@ -102,7 +102,7 @@ county manifests, we could do a very accurate simulation even without the actual
 created a list of _CardStyles_ (i.e. the list of contests on the card) found there. 
 
 There were still quite a few small contests that did not appear on any of the
-MVRs, and we just assumed that in each county, there was a single card style for all these ophan contests. (This is surely wrong and needs to be revisited).
+MVRs, so we just assumed that in each county, there was a single card style for all these ophan contests. (This is surely wrong and needs to be revisited).
 For each county, we then adjusted the number of counts of each CardStyle until the total vote counts were approximately equal to the known county subtotals 
 (this also needs to be revisited and made better).
 
@@ -214,57 +214,4 @@ number of Card Styles, and if these were included on the manifest, we could do c
 
 A _publicly verifiable_ audit needs the CVRs to be publically _commited to_ before the audit starts, to ensure that the election
 authority cant cheat on the audit. But if releasing the actual votes is impossible for now, then card styles in the manifest 
-would be a good first step. 
-
-
------------------------------------------
-
-The Colorado RLA software uses a "Conservative approximation of the Kaplan-Markov P-value" (from the "Gentle Introduction" and "Super Simple" papers) for its risk measuring function and to estimate the number of samples needed for each contest to achieve the risk limit.
-
-Corla chooses a targeted contest in each county to audit, and estimates the number of samples needed (estNmvrs). It uniformly samples estNmvrs cards across all the cards in the county.
-
-Independently, it chooses two statewide contests to audit, calculates estNmvrs, and uniformly samples across all the cards in the state.
-
-We want to estimate the risk level achieved based on these samples for all contests, not just the targeted ones.
-
-(Provisional Assumption 1) Because the sampling is uniform for both county and state, we think that we can combine both county and state samples together.
-
-When a contest lies within a single county, the RLA is straightforward.
-
-(Provisional Assumption 2) When a contest lies within multiple counties,  we think the following algorithm can be used:
-
-For each county that the contest is in, calculate the county sample rate as
-
-    countySampleRate = (number of combined samples in the county) / (total ballot cards in the county)
-
-Find the minimum countySampleRate over all counties that the contest is in. For each county, randomly choose and discard extra samples, until all counties have the same sample rate. The number of remaining samples for each county = nsamples(county).
-
-The total cards in each county = ncards(county).
-The margin in votes of a contest in a county = voteMargin(contest, county)
-The set of counties that the contest is in = countySet(contest)
-
-The number of samples for a contest is then
-
-    nsamples(contest) = Sum(nsamples(county)) over counties in countySet(contest)
-
-A contest's diluted margin is:
-
-    dilutedMargin(contest) = (Sum(voteMargin(contest, county)) over counties in countySet(contest)) /
-                    (Sum (ncards(county)) over counties in countySet(contest))
-
-The estimated risk from the betting martingale:
-
-    gamma = 1.03905
-    bet = 2/gamma    // aka the "maximum bet"
-    upper = 1 for plurality assorter
-
-    noerror = 1.0 / (2.0 - dilutedMargin(contest)/upper)
-    payoff = 1.0 + bet * (noerror - 0.5)
-
-    risk = (1 / payoff) ^ nsamples(contest)
-
-The estimated risk from the Kaplan-Markov formula:
-
-    payoff = 1.0 - dilutedMargin(contest)/(2*gamma)
-    risk = (1 / payoff) ^ nsamples(contest)
-
+would be a good first step.

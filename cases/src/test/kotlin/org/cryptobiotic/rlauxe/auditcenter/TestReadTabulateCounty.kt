@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestReadTabulateCounty {
-    val input: ColoradoInput = Colorado2020General()
+    val input: ColoradoInput = Colorado2026Primary()
 
     @Test
     fun readTabulateCounties() {

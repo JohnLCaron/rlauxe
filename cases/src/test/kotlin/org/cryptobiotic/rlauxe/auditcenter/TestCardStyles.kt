@@ -10,7 +10,7 @@ import kotlin.test.Test
 // vs what we see in DominionCvrExport (taken from cvrs)
 class TestCardStyles {
     val show = false
-    val colorado2020 = Colorado2020General()
+    val colorado2026 = Colorado2026Primary()
     val colorado2022 = Colorado2022Primary()
 
     @Test

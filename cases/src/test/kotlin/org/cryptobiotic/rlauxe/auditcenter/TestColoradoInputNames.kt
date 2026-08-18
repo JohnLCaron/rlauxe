@@ -5,7 +5,7 @@ import kotlin.test.assertTrue
 
 // check name consistency in ColoradoInput
 class TestColoradoInputNames {
-    val input: ColoradoInput = Colorado2022Primary()
+    val input: ColoradoInput = Colorado2026Primary()
 
     val canonical = readGeneralCanonicalList(input.generalCanonicalFile).associateBy { it.contestName }
     val canonicalContestNames = canonical.map{ it.key }
@@ -27,14 +27,16 @@ class TestColoradoInputNames {
             } else {
                 val canonicalChoices: Set<String> = canonical[contest.contestName]!!.choices.toSet()
                 val missingChoices = mutableListOf<String>()
+                var hasMissing = false
 
                 contest.choices.forEach {
                     if (!canonicalChoices.contains(it.key)) {
                         println("missing choice  '${it.key}' in contest '${contest.contestName}'")
                         missingChoices.add(it.key)
+                        hasMissing = true
                     }
-                    println()
                 }
+                if (hasMissing) println()
 
                 if (missingChoices.isNotEmpty()) {
                     println("\nadd the following to contestNameCleanup for contest ${contest.contestName}")
@@ -43,9 +45,11 @@ class TestColoradoInputNames {
             }
         }
 
-        println("\nadd the following to canonicalContests")
-        extras.forEach { println("  $it") }
-        println()
+        if (extras.isNotEmpty()) {
+            println("add the following to canonicalContests:")
+            extras.forEach { println("  $it") }
+            println()
+        }
     }
 
     @Test

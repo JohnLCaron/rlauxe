@@ -1,6 +1,8 @@
 # Colorado Statewide Election 2024
 03/13/2026
 
+This analysis is obsolete; see [Colorado 2024 Statewide election by Counties](docs/cases/CorlaCountyAudits.md)
+
 * 3,241,120 ballot cast (Colorado 2024 General Election) in 3199 precincts.
 * 146 contests, no IRV.
 * CO doesnt publically publish the CVRs, just precinct totals, see _2024GeneralPrecinctLevelResults.csv/zip/xlsx_.

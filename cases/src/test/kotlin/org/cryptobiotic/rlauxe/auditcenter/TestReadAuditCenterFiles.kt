@@ -6,9 +6,9 @@ import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.test.Test
 
 class TestReadAuditCenterFiles {
-    val input: ColoradoInput = Colorado2020General()
+    val input: ColoradoInput = Colorado2026Primary()
 
-    @Test
+    // @Test
     fun problem() {
         // heres what CountyContestBuilder uses
         val mcontest = input.mergedContestMap["Presidential Electors"]!!

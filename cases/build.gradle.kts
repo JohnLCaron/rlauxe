@@ -1,7 +1,6 @@
 
 plugins {
     kotlin("jvm")
-    // alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlinx.serialization)
     id ("java-test-fixtures")
 }
@@ -24,13 +23,12 @@ dependencies {
     implementation(libs.logback.classic)
 
     testImplementation(testFixtures(project(":rlauxe-core")))
-    testImplementation(libs.bundles.jvmtest)
+    testImplementation(kotlin("test"))
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.commons.poi)
     testImplementation(libs.commons.poi.ooxml)
     testImplementation(libs.bundles.xmlutil)
-
 }
 
 tasks.test {

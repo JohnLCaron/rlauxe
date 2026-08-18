@@ -15,15 +15,31 @@ val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
 private val logger = KotlinLogging.logger("ColoradoInput")
 
 /*
-   1. generalCanonicalFile can be used for the canonical contestName, choiceNames, and counties
-      subclasses add overrides
+   1. Identify the following 4 files in auditcenter
 
-   2. the following files are sufficient for calculating the uniform audit risks:
-        val tabulateCountyFile = "2024/general/tabulateCounty.csv"
-        val contestRoundFile =   "2024/general/round1/contest.csv"
-        val mvrComparisonFile =  "2024/general/round3/contestComparison.csv"
+   1a generalCanonicalFile is used for the canonical contestName, choiceNames, and counties
+        Canonical List (Final),,
+        CountyName,ContestName,ContestChoices
+        Adams,17th Judicial District Ballot Question 7B,"Yes/For,No/Against"
 
-   use TestColoradoInputNames to cross check names with generalCanonicalFile
+   1b. tabulateCountyFile has the totals by county
+        county_name,contest_name,choice,votes
+        Adams,Presidential Electors,Kamala D. Harris / Tim Walz,124050
+        Adams,Presidential Electors,Donald J. Trump / JD Vance,103011
+
+   1c. contestRoundFile has the selected contests
+        contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
+        17th Judicial District Ballot Question 7B,opportunistic_benefits,in_progress,1,516401,279529,"""No/Against""",37549,0.03000000,0,0,0,0,0,0,0,1.03905000,0,101,101
+        Adams 12 Five Star Schools Ballot Issue 5D,opportunistic_benefits,in_progress,1,516401,117043,"""No/Against""",12622,0.03000000,0,0,0,0,0,0,0,1.03905000,0,299,299
+        Adams 12 Five Star Schools Ballot Issue 5E,opportunistic_benefits,in_progress,1,516401,117043,"""Yes/For""",10481,0.03000000,0,0,0,0,0,0,0,1.03905000,0,360,360
+
+   1d. mvrComparisonFile has the selected mvrs
+        county_name,contest_name,imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,timestamp,cvr_id,audit_reason
+        Adams,17th Judicial District Ballot Question 7B,101-101-7,52,"""Yes/For""","""Yes/For""",YES,uploaded,"",2024-11-19 09:44:18.62646,178977,
+        Adams,17th Judicial District Ballot Question 7B,101-130-14,14,"""Yes/For""","""Yes/For""",YES,uploaded,"",2024-11-19 09:49:44.148182,240137,
+        Adams,17th Judicial District Ballot Question 7B,101-146-54,65,"""No/Against""","""No/Against""",YES,uploaded,"",2024-11-19 09:54:41.65526,250284,
+
+   2. use TestColoradoInputNames to cross check names with generalCanonicalFile
 
    additionally, we may need to make adjustments for cvrExport files, which tend to be divergent.
    subclasses provide contestNameCleanup and candidateNameCleanup

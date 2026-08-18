@@ -4,7 +4,7 @@ import kotlin.test.Test
 
 // check name consistency in ColoradoInput
 class TestColoradoInput {
-    val input: ColoradoInput = Colorado2020General()
+    val input: ColoradoInput = Colorado2026Primary()
     val canonical = input.canonicalContests()
 
     @Test

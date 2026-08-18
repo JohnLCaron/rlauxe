@@ -650,9 +650,9 @@ Specify amounts in dollars, but the main result would be relative costs, eg the 
 ## Case Studies
 * [Belgium 2024](docs/cases/Belgium2024.md)
 * [Boulder County 2024](docs/cases/Boulder2024.md)
-* [Colorado Statewide election by Counties](docs/cases/CorlaCountyAudits.md)
-* [Colorado Statewide Election 2024](docs/cases/Colorado2024.md)
-* [Colorado Statewide Election 2020 using votedatabase for Cvrs](docs/notes/Corla2020notes.md)
+* [Colorado 2026 Primary election by Counties](docs/cases/CorlaCounty2026P.md)
+* [Colorado 2024 Statewide election by Counties](docs/cases/CorlaCounty2024.md)
+* [Colorado 2020 Statewide Election using votedatabase for Cvrs](docs/notes/Corla2020notes.md)
 * [Corla Notes](docs/notes/CorlaNotes.md)
 * [Georgia 2026 Primary](docs/cases/Ga2026.md)
 * [San Francisco County 2024](docs/cases/SF2024.md)

@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2022Primary
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2024General
+import org.cryptobiotic.rlauxe.auditcenter.Colorado2026Primary
 import org.cryptobiotic.rlauxe.auditcenter.corlaCreationSettings
 import org.cryptobiotic.rlauxe.auditcenter.corlaRoundSettings
 import org.cryptobiotic.rlauxe.auditcenter.createCountyElectionSansCvrs
@@ -18,6 +19,18 @@ import kotlin.test.Test
 class MakeCorlaSansCvrs {
     val show = false
 
+    @Test
+    fun makeColorado2026Primary() {
+        val topdir = "$cases/corla/corla2026Primary"
+
+        createCountyElectionSansCvrs(
+            topdir, Colorado2026Primary(),
+            corlaCreationSettings(2026),
+            corlaRoundSettings(sampling = Sampling.consistent),
+            name = "Colorado2026Primary", startFirstRound = true
+        )
+    }
+
     // @Test
     fun makeCounty2024OnlyTeller() {
         val topdir = "$testdataDir/cases/auditcenter/County2024OnlyTeller"
@@ -30,7 +43,7 @@ class MakeCorlaSansCvrs {
         )
     }
 
-    @Test
+    // @Test
     fun makeCounty2024General() {
         val topdir = "$cases/corla/corla2024"
 
@@ -42,7 +55,7 @@ class MakeCorlaSansCvrs {
         )
     }
 
-    @Test
+    // @Test
     fun makeColorado2022Primary() {
         val topdir = "$cases/corla/corla2022Primary"
 
@@ -54,7 +67,7 @@ class MakeCorlaSansCvrs {
         )
     }
 
-    @Test
+    // @Test
     fun makeColorado2020General() {
         val topdir = "$cases/corla/corla2020/clca"
 
@@ -89,7 +102,7 @@ class MakeCorlaSansCvrs {
         println()
     }
 
-    @Test
+    // @Test
     fun writeCountyContestData() {
         val topdir = "$cases/corla/corla2020/clca"
         val auditRecord = AuditRecord.read(topdir)!!
@@ -100,20 +113,20 @@ class MakeCorlaSansCvrs {
     }
 
 
-    @Test
+    // @Test
     fun startFirstRound() {
         val topdir = "$cases/corla/withCvrs/Colorado2020uniform"
         val result = org.cryptobiotic.rlauxe.audit.startFirstRound(topdir)
         println(result)
     }
 
-    @Test
+    // @Test
     fun runRound() {
         val topdir = "$cases/corla/withCvrs/Colorado2020uniform"
         org.cryptobiotic.rlauxe.audit.runRound(topdir)
     }
 
-    @Test
+    // @Test
     fun resampleAndSaveResults() {
         val topdir = "$cases/corla/withCvrs/Colorado2020uniform"
         org.cryptobiotic.rlauxe.audit.resampleAndSaveResults(topdir)

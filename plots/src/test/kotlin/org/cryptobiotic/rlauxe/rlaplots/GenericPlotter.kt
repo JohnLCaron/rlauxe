@@ -9,6 +9,7 @@ import org.jetbrains.kotlinx.kandy.letsplot.feature.layout
 import org.jetbrains.kotlinx.kandy.letsplot.layers.hLine
 import org.jetbrains.kotlinx.kandy.letsplot.layers.line
 import org.jetbrains.kotlinx.kandy.letsplot.layers.points
+import org.jetbrains.kotlinx.kandy.letsplot.layers.vLine
 import org.jetbrains.kotlinx.kandy.letsplot.scales.Transformation
 import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
 import org.jetbrains.kotlinx.kandy.letsplot.tooltips.tooltips
@@ -29,6 +30,7 @@ fun <T> genericPlotter(
         addPoints: Boolean = true,
         scaleType: ScaleType = ScaleType.Linear,
         addHLineAt: Double? = null,
+        addVLineAt: Double? = null,
         catOrdering: Comparator<String>? = null,  // what order should the categories be in ?
 ) {
 
@@ -92,7 +94,15 @@ fun <T> genericPlotter(
             if (addHLineAt != null) {
                 hLine {
                     yIntercept.constant(addHLineAt) // Sets the line position
-                    color = Color.GREEN       // Customizes the line color
+                    color = Color.RED       // Customizes the line color
+                    width = .3           // Customizes the line thickness
+                }
+            }
+
+            if (addVLineAt != null) {
+                vLine {
+                    xIntercept.constant(addVLineAt) // Sets the line position
+                    color = Color.RED       // Customizes the line color
                     width = .3           // Customizes the line thickness
                 }
             }

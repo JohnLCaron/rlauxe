@@ -10,9 +10,9 @@ the redacted data is largely unaccounted for.
 * missing San Juan county
 * there are two counties (Monroe and Roosevelt) from some other state
 * Baca has a copy of Huerfano's cvrs instead of Baca's cvrs.
-* Garfield has an older or ad-hoc export format (workaround)
+* Garfield has an older or ad-hoc export format (added a workaround)
 * Las Animas only has 106 cards out of ~8000
-* Las Platas was missing the last 5 contest headers (fixed)
+* Las Platas was missing the last 5 contest headers (fixed in our copy of votedatabase)
 * El Paso generally reports .05% - .15% (40 - 600) more votes than auditcenter records
 
 ## redactions
@@ -20,7 +20,7 @@ the redacted data is largely unaccounted for.
 * Most counties have no obvious redactions
 * Boulder appears to be the only county that includes the redacted ballot counts in the export file. Adding them in made 
   Boulder County go from 66393 to 251 missing votes (2646 to 25 missing cards).
-* Except for Boulder I am ignoring redactions for now
+* Except for Boulder, ignore redactions for now.
 
 ## auditcenter
 
@@ -30,9 +30,9 @@ the redacted data is largely unaccounted for.
   but Natascha O'Flaherty is not listed in tabulate_county.csv. On purpose or accidental ? According to CVRs she has 496 votes
 * countyTabs.csv has inconsistent candidate naming
 
-## do votedatabase and auditcenter agree ?
+## Do votedatabase and auditcenter agree ?
 
-The cvr data very closely match the contest vote counts in auditcenter.
+The CVR data very closely match the contest vote counts in auditcenter, when we have both.
 All but 15 contests have cvrs within 1% of the auditcenter, and most are below .1%. 
 It seems likely most differences are due to redacted ballots.
 See [Vote Differences](Corla2020cvrDiff.md) for details.
@@ -40,7 +40,7 @@ See [Vote Differences](Corla2020cvrDiff.md) for details.
 ## Summary of data (with 4 missing counties)
 
 * missing counties are "Baca", "Gunnison", "Las Animas", "San Juan", which are left out of the audit
-* total cards = 4103490
+* total cards = 4,103,490
 * total contests = 651
 * 3 contests are below recountMargin of .005
 * 30 contests have only 5 cards
@@ -50,14 +50,15 @@ See [Vote Differences](Corla2020cvrDiff.md) for details.
 
 The Colorado 2020 General Election audit used a risk limit of 4%.
 
-Here are several scenarios that differ in which contests are chosen for the style-based audit. The uniform sample is what was actually done and does not vary.
+Here are several scenarios that differ in which contests are chosen for the style-based audit. The corla column is what was actually done in the audit, 
+and does not vary across scenarios.
 
 ### only targeted contests
 
-rlauxe nmvrs = 4153
-corla nmvrs = 8245
-contests under maxRisk (rlauxe) = 230 / 526 = 43%
-contests under maxRisk (corla) = 364 / 526 = 69%
+* rlauxe nmvrs = 4153
+* corla nmvrs = 8245
+* contests under maxRisk (rlauxe) = 230 / 526 = 43%
+* contests under maxRisk (corla) = 364 / 526 = 69%
 
 |               | rlauxe  |   corla  |
 |---------------|---------|----------|
@@ -69,11 +70,11 @@ contests under maxRisk (corla) = 364 / 526 = 69%
 
 ### targeted contests and contests with estMvrs <= maxMvrs
 
-maxMvrs = 120
-rlauxe nmvrs = 8223
-corla nmvrs = 8245
-contests under maxRisk (rlauxe) = 482 / 526 = 91%
-contests under maxRisk (corla) = 364 / 526 = 69%
+* maxMvrs = 120
+* rlauxe nmvrs = 8223
+* corla nmvrs = 8245
+* contests under maxRisk (rlauxe) = 482 / 526 = 91%
+* contests under maxRisk (corla) = 364 / 526 = 69%
 
 |               | rlauxe  |   corla  |
 |---------------|---------|----------|
@@ -105,10 +106,10 @@ contests under maxRisk (corla) = 364 / 526 = 69%
 
 ### all contests
 
-rlauxe nmvrs = 19404
-corla nmvrs = 8245
-contests under maxRisk (rlauxe) = 526 / 526 = 100%
-contests under maxRisk (corla) = 364 / 526 = 69%
+* rlauxe nmvrs = 19404
+* corla nmvrs = 8245
+* contests under maxRisk (rlauxe) = 526 / 526 = 100%
+* contests under maxRisk (corla) = 364 / 526 = 69%
 
 |               | rlauxe  |   corla  |
 |---------------|---------|----------|
@@ -122,15 +123,15 @@ contests under maxRisk (corla) = 364 / 526 = 69%
 
 ### all contests with relaxed risks
 
-* if estMvrs > 250, use 20% risk limit
-* if estMvrs > 150, use 10% risk limit
-* if estMvrs in [50, 150), use 5% risk kimit
-* if estMvrs < 50, use audit risk limit
+1. if estMvrs > 250, use 20% risk limit
+2. if estMvrs > 150, use 10% risk limit
+3. if estMvrs in [50, 150), use 5% risk kimit
+4. if estMvrs < 50, use audit risk limit
 
-rlauxe nmvrs = 14056
-corla nmvrs = 8245
-contests under maxRisk (rlauxe) = 526 / 526 = 100%
-contests under maxRisk (corla) = 367 / 526 = 69%
+* rlauxe nmvrs = 14056
+* corla nmvrs = 8245
+* contests under maxRisk (rlauxe) = 526 / 526 = 100%
+* contests under maxRisk (corla) = 367 / 526 = 69%
 
 |               | rlauxe  |   corla  |
 |---------------|---------|----------|
@@ -142,16 +143,16 @@ contests under maxRisk (corla) = 367 / 526 = 69%
 
 ### all contests > 500 with relaxed risks
 
-* if estMvrs > 500, do not include
-* if estMvrs > 250, use 20% risk limit
-* if estMvrs > 150, use 10% risk limit
-* if estMvrs in [50, 150), use 5% risk kimit
-* if estMvrs < 50, use audit risk limit
+1. if estMvrs > 500, do not include
+2. if estMvrs > 250, use 20% risk limit
+3. if estMvrs > 150, use 10% risk limit
+4. if estMvrs in [50, 150), use 5% risk kimit
+5. if estMvrs < 50, use audit risk limit
 
-rlauxe nmvrs = 11273
-corla nmvrs = 8245
-contests under maxRisk (rlauxe) = 519 / 526 = 98%
-contests under maxRisk (corla) = 367 / 526 = 69%
+* rlauxe nmvrs = 11273
+* corla nmvrs = 8245
+* contests under maxRisk (rlauxe) = 519 / 526 = 98%
+* contests under maxRisk (corla) = 367 / 526 = 69%
 
 |               | rlauxe  |   corla  |
 |---------------|---------|----------|
@@ -183,9 +184,9 @@ contests under maxRisk (corla) = 367 / 526 = 69%
 
 ## Appendix A Votes differences between auditcenter and votedatabase
 
-[See](Corla2020cvrDiff.md)
+[Colorado 2020 Vote Differences Table](Corla2020cvrDiff.md)
 
-**Use the rlauxe viewer to see these interactively.**
+**(Use the rlauxe viewer to see these interactively)**
 
 ## Appendix B track down bug in countyTabulation 
 

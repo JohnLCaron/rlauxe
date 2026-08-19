@@ -67,6 +67,16 @@ data class CorlaContestRoundCsv(
     val estimatedSamplesToAudit: Int,
 )
 
+class CorlaContestRoundAccum(val round1: CorlaContestRoundCsv) {
+    var ballotCardCount = 0
+    var contestBallotCardCount = 0
+    fun add(round: CorlaContestRoundCsv) {
+        ballotCardCount += round.ballotCardCount
+        contestBallotCardCount += round.contestBallotCardCount
+    }
+    fun build() = round1.copy(ballotCardCount=ballotCardCount, contestBallotCardCount=contestBallotCardCount)
+}
+
 fun readColoradoContestRoundCsv(filename: String): Map<String, CorlaContestRoundCsv> {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)

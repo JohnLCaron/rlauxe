@@ -8,9 +8,10 @@ class Colorado2020General(ac:String?=auditcenter): ColoradoInput(
 ) {
     override val skipCounties = listOf("Baca", "Gunnison", "Las Animas", "San Juan")
 
-    override val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
+    override fun contestTabsAllCounties(): Map<String, ContestTabAllCounties>  = contestTabsAllCounties
+    private val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
         val tabs = mutableMapOf<String, ContestTabAllCounties>()
-        countyTabsAllContests.values.filter { it.countyName !in listOf("Baca", "Gunnison", "Las Animas") }.forEach { countyTabAllContests ->
+        countyTabsAllContests().values.filter { it.countyName !in listOf("Baca", "Gunnison", "Las Animas") }.forEach { countyTabAllContests ->
             countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
                 val tab = tabs.getOrPut(contestName) { ContestTabAllCounties (contestName) }
                 tab.add(countyTabAllContests.countyName, countyContestVotes)

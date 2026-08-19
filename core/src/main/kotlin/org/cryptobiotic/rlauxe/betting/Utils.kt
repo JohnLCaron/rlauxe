@@ -121,7 +121,7 @@ fun payoff(bet:Double, xs:Double,) = 1.0 + bet * (xs - 0.5)
 
 ///////////////////////////////////////
 // work backwards, if you have nsamples, whats the largest margin satisfying the risk limit?
-// assumes no errors and a constant payout
+// assumes no errors and a constant payoff
 // return margin/upper
 fun estMarginUpperFromSamples(bet:Double, nsamples:Int, alpha: Double): Double {
     // payoff^n = 1/alpha

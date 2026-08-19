@@ -90,7 +90,7 @@ class CompareVoteDatabaseAndAuditCenter {
         path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202") }
             .forEach { subdir ->
                 val county = subdir.fileName.toString()
-                println("$county")
+                println(county)
                 subdir.listDirectoryEntries().filter {
                     !it.isDirectory() && it.fileName.toString().endsWith(".csv")
                             && it.fileName.toString() != "summary.csv"
@@ -152,7 +152,7 @@ class CompareVoteDatabaseAndAuditCenter {
         }
 
         // test every canon contest has a match in export
-        val countyContestTabs = input.countyTabsAllContests[county]!!
+        val countyContestTabs = input.countyTabsAllContests()[county]!!
         countyContestTabs.contests.keys.forEach { canonContest ->
             if (match[canonContest] == null) {
                 val match2 = sinfoList.find { it.name == canonContest } // probably not nneeded
@@ -168,7 +168,7 @@ class CompareVoteDatabaseAndAuditCenter {
 }
 
 fun suggest(county: String, contest: String, input: ColoradoInput): String {
-    val countyContestTabs = input.countyTabsAllContests[county]
+    val countyContestTabs = input.countyTabsAllContests()[county]
     if (countyContestTabs == null) return "unknown"
 
     for (canonContest in countyContestTabs.contests.keys) {

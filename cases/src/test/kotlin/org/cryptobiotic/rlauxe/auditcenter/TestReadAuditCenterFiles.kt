@@ -19,7 +19,7 @@ class TestReadAuditCenterFiles {
         println()
 
         // here we read it from the file
-        val contests: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties
+        val contests: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties()
 
         val pres = contests["Presidential Electors"]!!
         val ctacChoices = pres.choices.map { Pair(it.key, it.value) }.sortedBy { it.first }.toMap()
@@ -88,7 +88,7 @@ class TestReadAuditCenterFiles {
 
         println("\n${trunc("contest", -50)}   Npop,   Nc,   needSamples, auditReason")
         contests.values.forEach {
-            print("${trunc("${it.contestName}", -50)} ")
+            print("${trunc(it.contestName, -50)} ")
             print("${nfn(it.ballotCardCount, 7)}, ${
                 nfn(
                     it.contestBallotCardCount,
@@ -185,7 +185,7 @@ class TestReadAuditCenterFiles {
         println("\nMerged Contest Info")
         println("\n${trunc("contest", -50)}    Npop,      Nc, voteMargin, countyMvrs, stateMvrs, Ncounties, auditReason")
         mergedContestInfo.forEach {
-            print("${trunc("${it.contestName}", -50)} ")
+            print("${trunc(it.contestName, -50)} ")
             print("${nfn(it.npop, 7)}, ${nfn(it.nc, 7)}, ${nfn(it.marginInVotes, 7)},")
             print("   ${nfn(it.countyMvrs, 7)},  ${nfn(it.statewideMvrs, 7)}, ")
             println("         ${nfn(it.counties.size, 3)},   ${it.auditReason}")
@@ -201,7 +201,7 @@ class TestReadAuditCenterFiles {
 
         println("\n${trunc("statewideContests", -50)}     Npop, Nc,   needSamples, auditReason")
         statewideContests.forEach {
-            print("${trunc("${it.contestName}", -50)} ")
+            print("${trunc(it.contestName, -50)} ")
             print("${nfn(it.ballotCardCount, 7)}, ${
                 nfn(
                     it.contestBallotCardCount,

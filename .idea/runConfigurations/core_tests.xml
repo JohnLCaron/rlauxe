@@ -36,7 +36,6 @@
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.auditcenter.*" />
         <option name="ENABLED" value="true" />
-        <option name="INCLUDE" value="false" />
       </pattern>
     </extension>
     <option name="PACKAGE_NAME" value="org.cryptobiotic.rlauxe" />

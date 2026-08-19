@@ -46,7 +46,7 @@ open class CountyElectionWithCvrs (
         val infos = contestBuilder.infos
         val infosByName = infos.mapKeys{ it.value.name }
 
-        val countyTabMap = coloradoInput.countyTabsAllContests
+        val countyTabMap = coloradoInput.countyTabsAllContests()
         val totalPoolTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
 
         var totalCvrCardCount = 0

@@ -183,7 +183,7 @@ class TestUtils {
     ///////////////////////////////////////
     @Test
     fun calcMarginUpperFromSamples() {
-        val samples = 101
+        val samples = 171
         val bet = 2/1.03905
         val margin = estMarginUpperFromSamples(bet, samples, .03)
         println("samples=$samples margin=$margin")

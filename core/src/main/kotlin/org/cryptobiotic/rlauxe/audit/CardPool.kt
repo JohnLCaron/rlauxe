@@ -78,6 +78,11 @@ class CardPoolBuilder(
     // you need at least this many cards for this pool
     val maxMinCardsNeeded: Int = minCardsNeeded.values.max()
 
+    init {
+        if (poolName.startsWith("Pitkin"))
+            print("")
+    }
+
     fun setNcards(ncards: Int): CardPoolBuilder {
         this.ncards = ncards
         return this
@@ -225,6 +230,11 @@ data class CountyPools (
     val cardCount: Int,
     val styles: List<StyleIF>,
 ) {
+    init {
+        if (countyName == "Pitkin")
+            print("")
+    }
+
     override fun toString() = buildString {
         appendLine("CountyPools(countyName='$countyName', countyPoolId=$countyPoolId, totalCards=$cardCount")
         styles.forEach{ appendLine("cardStyle:  $it")}

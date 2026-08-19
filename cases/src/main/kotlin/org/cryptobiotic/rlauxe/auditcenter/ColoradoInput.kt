@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
-import kotlin.collections.get
 
 val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
 
@@ -17,7 +16,7 @@ private val logger = KotlinLogging.logger("ColoradoInput")
 /*
    1. Identify the following 4 files in auditcenter
 
-   1a generalCanonicalFile is used for the canonical contestName, choiceNames, and counties
+   1a. generalCanonicalFile is used for the canonical contestName, choiceNames, and counties
         Canonical List (Final),,
         CountyName,ContestName,ContestChoices
         Adams,17th Judicial District Ballot Question 7B,"Yes/For,No/Against"
@@ -52,10 +51,6 @@ abstract class ColoradoInput(
     val mvrComparisonFile: String
 ) {
     abstract val skipCounties: List<String>
-    /* open fun skipCandidate(candidateName: String) : Boolean {
-        val cleanup = munge(candidateName)
-        return cleanup.contains("writein")
-    } */
 
     //      CountyName,ContestName,ContestChoices
     //      El Paso,City of Colorado Springs Ballot Question 300,"Yes/For,No/Against"
@@ -66,6 +61,7 @@ abstract class ColoradoInput(
     //    val counties =  mutableSetOf<String>()
 
     abstract fun canonicalContests(): Map<String, CanonicalContest>
+
     fun counties(): List<String>  = canonicalContests().values.map { it.counties }
         .flatten()
         .filter { it: String -> it !in skipCounties }
@@ -86,9 +82,10 @@ abstract class ColoradoInput(
     //    val optimisticSamplesToAudit: Int,
     //    val estimatedSamplesToAudit: Int,
     //)
-    val roundContests: Map<String, CorlaContestRoundCsv> by lazy {
+    open fun roundContests(): Map<String, CorlaContestRoundCsv> = roundContests
+    private val roundContests: Map<String, CorlaContestRoundCsv> by lazy {
         readColoradoContestRoundCsv(contestRoundFile)
-    } // 725
+    }
 
     // data class CountyTabAllContests(val countyName: String) {
     //    val contests = Map<String, CountyContestVotes>() // contestName (canonical I think) -> CountyContestVotes
@@ -96,7 +93,8 @@ abstract class ColoradoInput(
     // data class CountyContestVotes(val contestName: String) {
     //    val choices = Map<String, Int>() // choice name (not canonical) -> votes in this county and contest
     //    var ncards = 0
-    val countyTabsAllContests: Map<String, CountyTabAllContests> by lazy {
+    open fun countyTabsAllContests(): Map<String, CountyTabAllContests> = countyTabsAllContests
+    private val countyTabsAllContests: Map<String, CountyTabAllContests> by lazy {
         readCountyTabulateCsv(tabulateCountyFile)
     }
 
@@ -104,9 +102,10 @@ abstract class ColoradoInput(
     //    val choices = Map<String, Int>() // // canonical choice name -> votes
     //    val counties = Set<String>()
     //    var totalCardsInContest: Int
-    open val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
+    open fun contestTabsAllCounties(): Map<String, ContestTabAllCounties> = contestTabsAllCounties
+    private val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
         val tabs = mutableMapOf<String, ContestTabAllCounties>()
-        countyTabsAllContests.values.forEach { countyTabAllContests ->
+        countyTabsAllContests().values.forEach { countyTabAllContests ->
             countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
                 val tab = tabs.getOrPut(contestName) { ContestTabAllCounties (contestName) }
                 tab.add(countyTabAllContests.countyName, countyContestVotes)
@@ -117,7 +116,8 @@ abstract class ColoradoInput(
 
     //////////
     // from the list of mvr, cvr comparisions, we derive the following:
-    val cardComparison: CardComparisonResults by lazy {
+    open fun cardComparison(): CardComparisonResults = cardComparison
+    private val cardComparison: CardComparisonResults by lazy {
         readContestComparisonCsv(mvrComparisonFile)
     }
 
@@ -125,19 +125,19 @@ abstract class ColoradoInput(
     // data class ContestMvrCount(val contestName: String) {
     //    var countMvr = 0
     //    var countStatewide = 0
-    val contestsFromMvrs: List<ContestMvrCount> by lazy { cardComparison.contestMvrs }
+    val contestsFromMvrs: List<ContestMvrCount> by lazy { cardComparison().contestMvrs }
 
     // for each county, over all contests
     // data class CountyMvrCount(val countyName: String) {
     //    var countMvr = 0
-    val countiesFromMvrs: List<CountyMvrCount> by lazy { cardComparison.countyMvrs }
+    val countiesFromMvrs: List<CountyMvrCount> by lazy { cardComparison().countyMvrs }
 
     // data class CountyStylesFromMvrs(
     //    val countyName: String
     //    val styles = Map<Set<String>, MvrStyle>
     // data class MvrStyle(val id: Int, val contests: Set<String>) {
     //    var cardCount = 0
-    val stylesFromMvrs: List<CountyStylesFromMvrs> by lazy { cardComparison.stylesByCounty }
+    val stylesFromMvrs: List<CountyStylesFromMvrs> by lazy { cardComparison().stylesByCounty }
 
     ///////////////////
     // merge info from all the above, derive the following
@@ -277,7 +277,7 @@ fun CanonicalContest.matchCandidateName(candidateName: String): String? {
 fun mergeContestInfo(input: ColoradoInput): MergedInfo {
     val canonical: Map<String, CanonicalContest> = input.canonicalContests() // has canonical name
 
-    val roundContests: Map<String, CorlaContestRoundCsv> = input.roundContests // not canonical name
+    val roundContests: Map<String, CorlaContestRoundCsv> = input.roundContests() // not canonical name
     val compareMap: Map<String, ContestMvrCount> = input.contestsFromMvrs.associateBy { it.contestName }
     val countyMap: Map<String, CountyMvrCount>  = input.countiesFromMvrs.associateBy { it.countyName }
 
@@ -305,27 +305,26 @@ fun mergeContestInfo(input: ColoradoInput): MergedInfo {
         )
     }
 
-    // pick out the contests that are the targeted ones; should have a single contest
-    // TODO what if theres more than one targeted county contest ?? More than one county ??
-    val strataInfo = mutableListOf<StrataInfo>()
+    // create a strata for each county
+    val strataMap = mutableMapOf<String, StrataInfo>()
     val statewideContests = mutableListOf<CorlaContestRoundCsv>()
     canonical.values.forEach { canonicalContest ->
-        val round: CorlaContestRoundCsv? = roundContests[canonicalContest.contestName]
-        if (round != null && round.auditReason == AuditReason.county_wide_contest) {
-            if (canonicalContest.counties.size != 1)
-                println("*** ${canonicalContest.contestName} has ncounties != 1: ${canonicalContest.counties}")
+        val contestRound: CorlaContestRoundCsv? = roundContests[canonicalContest.contestName]
+        if (contestRound != null && canonicalContest.counties.size == 1) {
             val county: String = canonicalContest.counties.first() // use the first county
             val countyMvr: CountyMvrCount = countyMap[county]!!
 
-            val countyInfo = StrataInfo(
-                county,
-                countyMvr.countMvr,
-                round.ballotCardCount
-            )
-            strataInfo.add(countyInfo)
+            if (strataMap[county] != null) {
+                val old = strataMap[county]?.ballotCardCount ?: 0
+                if (old != contestRound.ballotCardCount) {
+                    println("*** county $county has ballotCardCount $old != ${contestRound.ballotCardCount}")
+                }
+            } else {
+                strataMap[county] = StrataInfo(county, countyMvr.countMvr, contestRound.ballotCardCount)
+            }
         }
-        if (round != null && round.auditReason == AuditReason.state_wide_contest) {
-            statewideContests.add(round)
+        if (contestRound != null && contestRound.auditReason == AuditReason.state_wide_contest) {
+            statewideContests.add(contestRound)
         }
     }
 
@@ -333,9 +332,9 @@ fun mergeContestInfo(input: ColoradoInput): MergedInfo {
     val stateMvrCount = mergedContestInfo.filter { it.auditReason == AuditReason.state_wide_contest}.maxOf {
         it.statewideMvrs
     }
-    strataInfo.add(StrataInfo("Statewide", nmvrs = stateMvrCount, ballotCardCount= statewideBallots, ))
+    strataMap["Statewide"] = StrataInfo("Statewide", nmvrs = stateMvrCount, ballotCardCount= statewideBallots)
 
-    return MergedInfo(mergedContestInfo, strataInfo, statewideContests)
+    return MergedInfo(mergedContestInfo, strataMap.values.toList(), statewideContests)
 }
 
 fun CountyTabAllContests.makeContestTabs(canonicalContests: Map<String, CanonicalContest>,
@@ -381,7 +380,7 @@ fun writeCountyData(topdir: String, strataInfo: List<StrataInfo>) {
 //    val choices = mutableMapOf<String, Int>()
 
 fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAssertions>, coloradoInput: ColoradoInput) {
-    val countyTabs = coloradoInput.countyTabsAllContests
+    val countyTabs = coloradoInput.countyTabsAllContests()
     // misc data by county
     val outputFilename = "$topdir/${CountyAuditRecord.countyContestDataFile}"
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()

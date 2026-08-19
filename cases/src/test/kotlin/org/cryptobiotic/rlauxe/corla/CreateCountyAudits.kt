@@ -175,7 +175,7 @@ fun createCountyAudits(
     writeCountyAuditData(topdir, coloradoInput)
 
     val countyElection = CountyContestBuilder(coloradoInput)
-    val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabsAllContests
+    val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabsAllContests()
     val whichCounties = if (wantCounties.isNotEmpty()) wantCounties else contestTabByCounty.keys.toList()
 
     whichCounties.map { countyName ->

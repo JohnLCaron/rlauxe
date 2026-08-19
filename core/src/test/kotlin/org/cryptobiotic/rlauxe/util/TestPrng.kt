@@ -1,8 +1,10 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.corla.CorlaPRNG
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+
 
 class TestPrng {
 
@@ -17,6 +19,20 @@ class TestPrng {
         repeat (1000) {
             assertNotEquals(prng1.next(), prng3.next())
         }
+    }
+
+    @Test
+    fun testCorlaPrng() {
+        // apparently using BigInteger, not long
+        // ULong.MAX_VALUE = 18446744073709551615
+        //                   49006417086137856424
+        //val seed: ULong = 49006417086137856424UL
+
+        val corlaPRNG = CorlaPRNG("49006417086137856424", true, 1, 69640)
+        val (digest, bigint, pick) = corlaPRNG.digest(1)
+        println("digest = ${digest.contentToString()}")
+        println("bigint = $bigint")
+        println("pick = $pick")
     }
 
     /*

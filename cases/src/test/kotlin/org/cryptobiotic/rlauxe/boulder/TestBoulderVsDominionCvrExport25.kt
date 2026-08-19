@@ -235,7 +235,7 @@ class TestBoulderVsDominionCvrExport25 {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn((oaContest.redUndervotes), width)}|")
                 }
@@ -256,7 +256,7 @@ class TestBoulderVsDominionCvrExport25 {
                 val undervote2 = sum2[id]!!
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn((oaContest.redUndervotes - undervote2), width)}|")
                 }
@@ -294,7 +294,7 @@ class TestBoulderVsDominionCvrExport25 {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn((oaContest.redNcards), width)}|")
                 }
@@ -315,7 +315,7 @@ class TestBoulderVsDominionCvrExport25 {
                 val poolCards = sum2[id]!!
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn((oaContest.redNcards - poolCards), width)}|")
                 }
@@ -366,7 +366,7 @@ class TestBoulderVsDominionCvrExport25 {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn((oaContest.sovoContest.totalBallots), width)}|")
                 }
@@ -376,7 +376,7 @@ class TestBoulderVsDominionCvrExport25 {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn(oaContest.Nc() , width)}|")
                 }
@@ -386,7 +386,7 @@ class TestBoulderVsDominionCvrExport25 {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn(oaContest.Nc() - oaContest.totalCards, width)}|")
                 }
@@ -396,7 +396,7 @@ class TestBoulderVsDominionCvrExport25 {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn(oaContest.sumAllCards(), width)}|")
                 }
@@ -406,7 +406,7 @@ class TestBoulderVsDominionCvrExport25 {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn(oaContest.Nc() - oaContest.sumAllCards(), width)}|")
                 }

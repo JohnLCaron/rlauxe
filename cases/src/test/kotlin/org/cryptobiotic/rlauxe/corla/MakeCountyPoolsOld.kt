@@ -41,7 +41,7 @@ class MakeCountyPoolsOld(
 
         val distributeNc: Map<String, Map<String, Int>> = distributeNc() // county -> contest -> Nc for that contest in that county
 
-        val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabsAllContests
+        val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabsAllContests()
 
         val mvrStylesMap: Map<String, CountyStylesFromMvrs> = coloradoInput.stylesFromMvrs.associateBy { it.countyName }
 
@@ -143,7 +143,7 @@ class MakeCountyPoolsOld(
     // for each contest, distribte Nc to the counties it is in, proportional to votesInCounty / totalVotes
     fun distributeNc(): Map<String, Map<String, Int>> { // county -> contest -> Nc
         val countyNc = mutableMapOf<String, MutableMap<String, Int>>() // county -> contest -> Nc
-        coloradoInput.contestTabsAllCounties.values.forEach { contestTabByCounty ->
+        coloradoInput.contestTabsAllCounties().values.forEach { contestTabByCounty ->
             val contestName = contestTabByCounty.contestName
             val builder = builders[contestName]
             if (builder == null)
@@ -168,7 +168,7 @@ class MakeCountyPoolsOld(
                 contestSum[contestName] = contestAccum + contestVotes
             }
         }
-        coloradoInput.contestTabsAllCounties.values.forEach { contestTab ->
+        coloradoInput.contestTabsAllCounties().values.forEach { contestTab ->
             val contestName = contestTab.contestName
             val sum = contestSum[contestName]!!
             val builder = builders[contestName]!!

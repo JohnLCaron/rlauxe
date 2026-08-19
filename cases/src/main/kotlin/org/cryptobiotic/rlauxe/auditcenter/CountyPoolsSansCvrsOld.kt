@@ -28,7 +28,7 @@ class CountyPoolsSansCvrsOld(
 ) {
     val builders = corlaContestBuilders.associateBy { it.info.name }
     val infos = corlaContestBuilders.associate { it.info.id to it.info }
-    val countyPools: List<CountyPoolsBuilderOld>
+    val countyPools: List<CountyPoolsBuilderOlder>
 
     init {
         val infosByName = corlaContestBuilders.associate { it.info.name to it.info }
@@ -36,9 +36,9 @@ class CountyPoolsSansCvrsOld(
         val distributeNc: Map<String, Map<String, Int>> = distributeNc() // county -> contest -> Nc for that contest in that county
 
         val contestTabByCounty: Map<String, CountyTabAllContests> = if (onlyCounty == null)
-            coloradoInput.countyTabsAllContests
+            coloradoInput.countyTabsAllContests()
         else
-            mapOf(onlyCounty to coloradoInput.countyTabsAllContests[onlyCounty]!! )
+            mapOf(onlyCounty to coloradoInput.countyTabsAllContests()[onlyCounty]!! )
 
         val mvrStylesMap: Map<String, CountyStylesFromMvrs> = coloradoInput.stylesFromMvrs.associateBy { it.countyName }
 
@@ -62,7 +62,7 @@ class CountyPoolsSansCvrsOld(
 
         countyPools = contestTabByCounty.filter { it.key !in coloradoInput.skipCounties }
             .map { (countyName, countyContest) ->
-                CountyPoolsBuilderOld(
+                CountyPoolsBuilderOlder(
                 countyName, countyContest, mvrStylesMap[countyName]!!,
                 missingPools[countyName], distributeNc[countyName]!!, infosByName, coloradoInput)
         }
@@ -133,7 +133,7 @@ class CountyPoolsSansCvrsOld(
     // for each contest, distribte Nc to the counties it is in, proportional to votesInCounty / totalVotes
     fun distributeNc(): Map<String, Map<String, Int>> { // county -> contest -> Nc
         val countyNc = mutableMapOf<String, MutableMap<String, Int>>() // county -> contest -> Nc
-        coloradoInput.contestTabsAllCounties.values.forEach { contestTabAllCounties ->
+        coloradoInput.contestTabsAllCounties().values.forEach { contestTabAllCounties ->
             val contestName = contestTabAllCounties.contestName
             val contestTotalVotes = contestTabAllCounties.sumVotes()
             val builder = builders[contestName]
@@ -155,7 +155,7 @@ class CountyPoolsSansCvrsOld(
                 contestSum[contestName] = contestAccum + contestVotes
             }
         }
-        coloradoInput.contestTabsAllCounties.values.forEach { contestTabAllCounties ->
+        coloradoInput.contestTabsAllCounties().values.forEach { contestTabAllCounties ->
             val contestName = contestTabAllCounties.contestName
             val sum = contestSum[contestName]!!
             val builder = builders[contestName]!!
@@ -198,9 +198,9 @@ class CountyPoolsSansCvrsOld(
 
         if (votesForStyle.isEmpty()) return null
 
-        CountyPoolsBuilderOld.nextPoolId++
+        CountyPoolsBuilderOlder.nextPoolId++
         return AdjustableStylePool(
-            countyName, countyName, CountyPoolsBuilderOld.nextPoolId, hasExactContests = true, infos,
+            countyName, countyName, CountyPoolsBuilderOlder.nextPoolId, hasExactContests = true, infos,
             contestTabs = votesForStyle,
         )
     }
@@ -214,7 +214,7 @@ class CountyPoolsSansCvrsOld(
 // we have county styles and subtotals, which get distributed to the various county styles in (rough) proportion to their cardCount.
 // as usual, we dont know the undervotes, so we will distribute that also in proportion
 
-data class CountyPoolsBuilderOld(
+data class CountyPoolsBuilderOlder(
     val countyName: String,
     val cct: CountyTabAllContests, // the votes subtotal for each contest in the county
     val mvrStyles: CountyStylesFromMvrs, // Set<contestId> and reletive count within county

@@ -28,7 +28,7 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
 
         // canonical drives the boat
         mergedContestMap.values.forEach{ mcontest ->
-            val contestTabAllCounties = coloradoInput.contestTabsAllCounties[mcontest.contestName]
+            val contestTabAllCounties = coloradoInput.contestTabsAllCounties()[mcontest.contestName]
             if (contestTabAllCounties == null) {
                 logger.warn{"*** Cant find contestTab for '${mcontest.contestName}': remove from audit" }
                 // throw RuntimeException()
@@ -44,7 +44,13 @@ open class CountyContestBuilder(val coloradoInput: ColoradoInput) {
                 )
 
                 val strata = when {
-                    (mcontest.counties.size == 1) -> strataMap[mcontest.counties.first()]!!
+                    (mcontest.counties.size == 1) -> {
+                        val county1 = mcontest.counties.first()
+                        val strata1 = strataMap[county1]
+                        if (strata1 == null) {
+                            strataMap.values.first()
+                        } else strata1
+                    }
                     /* (mcontest.counties.size > 60) -> {
                     val contestsPlus = mcontest.counties // + listOf("Statewide")
                     computeStrataMinRate(mcontest.contestName, contestsPlus, strataMap)

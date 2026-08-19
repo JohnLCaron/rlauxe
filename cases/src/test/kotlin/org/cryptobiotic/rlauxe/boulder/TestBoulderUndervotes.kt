@@ -213,7 +213,7 @@ class TestBoulderUndervotes {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn((oaContest.redUndervotes), width)}|")
                 }
@@ -234,7 +234,7 @@ class TestBoulderUndervotes {
                 val undervote2 = sum2[id]!!
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn((oaContest.redUndervotes - undervote2), width)}|")
                 }
@@ -271,7 +271,7 @@ class TestBoulderUndervotes {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn((oaContest.redNcards), width)}|")
                 }
@@ -292,7 +292,7 @@ class TestBoulderUndervotes {
                 val poolCards = sum2[id]!!
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn((oaContest.redNcards - poolCards), width)}|")
                 }
@@ -342,7 +342,7 @@ class TestBoulderUndervotes {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn((oaContest.sovoContest.totalBallots), width)}|")
                 }
@@ -352,7 +352,7 @@ class TestBoulderUndervotes {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn(oaContest.Nc() , width)}|")
                 }
@@ -362,7 +362,7 @@ class TestBoulderUndervotes {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn(oaContest.Nc() - oaContest.totalCards, width)}|")
                 }
@@ -372,7 +372,7 @@ class TestBoulderUndervotes {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn(oaContest.sumAllCards(), width)}|")
                 }
@@ -382,7 +382,7 @@ class TestBoulderUndervotes {
             contestIds.forEach { id ->
                 val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
-                    ("     |")
+                    append("     |")
                 else {
                     append("${nfn(oaContest.Nc() - oaContest.sumAllCards(), width)}|")
                 }

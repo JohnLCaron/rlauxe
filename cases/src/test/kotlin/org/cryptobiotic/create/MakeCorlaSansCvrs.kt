@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2022Primary
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2024General
+import org.cryptobiotic.rlauxe.auditcenter.Colorado2026PMerged
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2026Primary
 import org.cryptobiotic.rlauxe.auditcenter.corlaCreationSettings
 import org.cryptobiotic.rlauxe.auditcenter.corlaRoundSettings
@@ -18,6 +19,18 @@ import kotlin.test.Test
 
 class MakeCorlaSansCvrs {
     val show = false
+
+    @Test
+    fun makeColorado2026PMerged() {
+        val topdir = "$cases/corla/corla2026PMerged"
+
+        createCountyElectionSansCvrs(
+            topdir, Colorado2026PMerged(),
+            corlaCreationSettings(2026),
+            corlaRoundSettings(sampling = Sampling.consistent),
+            name = "Colorado2026PrimaryMerged", startFirstRound = true
+        )
+    }
 
     @Test
     fun makeColorado2026Primary() {

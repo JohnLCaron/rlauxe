@@ -70,9 +70,16 @@ data class CountyMvrCount(val countyName: String) {
     var countMvr = 0
 }
 
-///////////////////////////////////////////
+data class CardComparisonResults(
+    val contestMvrs: List<ContestMvrCount>,
+    val countyMvrs: List<CountyMvrCount>,
+    val stylesByCounty: List<CountyStylesFromMvrs>
+)
 
-data class Card(val cvrId: Int) {
+///////////////////////////////////////////
+// internal
+
+private data class Card(val cvrId: Int) {
     val lines = mutableListOf<ComparisonLine>()
 
     fun add(line: ComparisonLine) {
@@ -105,7 +112,7 @@ data class Card(val cvrId: Int) {
     }
 }
 
-data class ComparisonLine(
+private data class ComparisonLine(
     val countyName: String,
     val contestName: String,
     val imprintedId: String,
@@ -127,7 +134,7 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
     // println("readContestComparisonCsv from $filename")
 
     val cards = mutableMapOf<Int, Card>()
-    var  count = 0
+    var count = 0
     var line: CSVRecord? = null
     try {
         while (records.hasNext()) {
@@ -191,9 +198,3 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
 
     return CardComparisonResults(contestMvrs.values.toList(), countyMvrs.values.toList(), stylesByCounty.values.toList())
 }
-
-data class CardComparisonResults(
-    val contestMvrs: List<ContestMvrCount>,
-    val countyMvrs: List<CountyMvrCount>,
-    val stylesByCounty: List<CountyStylesFromMvrs>
-)

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-class Colorado2026Primary(ac:String?=auditcenter): ColoradoInput(
+open class Colorado2026Primary(ac:String?=auditcenter): ColoradoInput(
     generalCanonicalFile = "$ac/2026/primary/finalReports/CanonicalListOfContestsAndChoices.csv",
     contestRoundFile = "$ac/2026/primary/finalReports/ContestsListRound1.csv",
     tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",
@@ -14,11 +14,8 @@ class Colorado2026Primary(ac:String?=auditcenter): ColoradoInput(
         val result: MutableMap<String, CanonicalContest> =
             readGeneralCanonicalList(generalCanonicalFile).associateBy { it.contestName }.toMutableMap()
 
-        /* add these missing contests:
-        val extras = listOf(
-            CanonicalContest("Adams County Assessor - DEM", choices=listOf("Ken Musso",)).addCounties(listOf("Adams",))
-        )
-        extras.forEach { result[it.contestName] = it } */
+        // remove these contests
+        result.remove("State Representative - District 7 (REP)")
 
         // add these missing candidates:
         addCandidates(result, "State Board of Education Member - Congressional District 7 - REP", listOf("Nick Morris"))
@@ -53,20 +50,14 @@ class Colorado2026Primary(ac:String?=auditcenter): ColoradoInput(
 
 
     override fun contestNameCleanup(county: String, name: String): String {
-
-        val transform = when (county) {
-            "Garfield" -> when (name) {
-                else -> null
-            }
-            else -> null
-        }
-        if (transform != null) return transform
-
-        // let counties have first pass as transform, then the general case
         return name
     }
 
     override fun candidateNameCleanup(county: String, name: String): String {
-        return name
+        val changed = when (name) {
+            "Keith Vieweg, Jr" -> "Keith Vieweg"
+            else -> name
+        }
+        return changed
     }
 }

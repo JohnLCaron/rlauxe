@@ -27,7 +27,7 @@ class PoolsforAllCountiesAndStyles(
 
         val countyNc: Map<String, Map<String, Int>> = distributeNc() // county -> contest -> Nc for that contest in that county
 
-        val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabsAllContests
+        val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabsAllContests()
         val stylesByCounty: Map<String, CountyStylesFromMvrs> = coloradoInput.stylesFromMvrs.associateBy { it.countyName }
 
         // merge the styles into the CountyContestTabs, pick out the contestTabs that dont have styles
@@ -105,7 +105,7 @@ class PoolsforAllCountiesAndStyles(
     // for each contest, distribte Nc to the counties it is in, proportional to votesInCounty / totalVotes
     fun distributeNc(): Map<String, Map<String, Int>> { // county -> contest -> Nc
         val countyNc = mutableMapOf<String, MutableMap<String, Int>>() // county -> contest -> Nc
-        coloradoInput.contestTabsAllCounties.values.forEach { contestTabAllCounties ->
+        coloradoInput.contestTabsAllCounties().values.forEach { contestTabAllCounties ->
             val contestName = contestTabAllCounties.contestName
             val builder = builders[contestName]
             if (builder == null)
@@ -127,7 +127,7 @@ class PoolsforAllCountiesAndStyles(
                 contestSum[contestName] = contestAccum + contestVotes
             }
         }
-        coloradoInput.contestTabsAllCounties.values.forEach { contestTab ->
+        coloradoInput.contestTabsAllCounties().values.forEach { contestTab ->
             val contestName = contestTab.contestName
             val sum = contestSum[contestName]!!
             val builder = builders[contestName]!!

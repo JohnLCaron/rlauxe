@@ -18,7 +18,7 @@ fun corlaCreationSettings(year: Int) =
 
 fun corlaRoundSettings(sampling: Sampling) = AuditRoundConfig(
     SimulationControl(nsimTrials = 10, estPercentile = listOf(50, 80)),
-    ContestSampleControl(minRecountMargin = .005, minMargin = .01, minSize = 10,
+    ContestSampleControl(minRecountMargin = .005, minSize = 10,
         contestSampleCutoff = 10000, auditSampleCutoff = 200000, sampling = sampling),
     ClcaConfig(), null)
 

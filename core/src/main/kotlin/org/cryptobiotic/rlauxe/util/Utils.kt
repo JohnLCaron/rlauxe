@@ -110,6 +110,25 @@ fun compareMaps(map1: Map<String, Any>, map2: Map<String, Any>, show: Boolean = 
     return allOk
 }
 
+fun findDiscreteMaximum(low: Int, high: Int, f: (Int) -> Double): Int {
+    var left = low
+    var right = high
+
+    while (left < right) {
+        val mid = left + (right - left) / 2
+
+        // Compare mid with the next element to see the trend
+        if (f(mid) < f(mid + 1)) {
+            // Slope is up: peak is to the right
+            left = mid + 1
+        } else {
+            // Slope is down: mid could be peak, or peak is to the left
+            right = mid
+        }
+    }
+    return left // Returns the integer input that maximizes the function
+}
+
 
 
 

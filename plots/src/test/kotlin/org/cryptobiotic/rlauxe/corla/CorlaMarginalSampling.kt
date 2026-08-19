@@ -24,11 +24,11 @@ class CorlaMarginalSampling {
 
     @Test
     fun makeCorla26PMarginal() {
-        val name = "Corla26Marginal"
+        val name = "Corla26MergedRelaxed"
         val dirName = "$testdataDir/plots/corla/$name"
         validateOutputDir(Path(dirName))
 
-        val topdir = "$cases/corla/corla2026Primary"
+        val topdir = "$cases/corla/corla2026PMerged"
         val corla26P = AuditRecord.read(topdir) as AuditRecord
         val round1: AuditRound = corla26P.rounds.first()
         val contests =
@@ -40,12 +40,12 @@ class CorlaMarginalSampling {
         val contestIter = contests.iterator()
 
         val mplotData = mutableListOf<MarginalPlotData>()
-        mplotData.add( MarginalPlotData(155.0, 7410.0, "corla"))
+        mplotData.add( MarginalPlotData(68.0, 7246.0, "corla"))
 
         var contestNo = 0
         while (contestNo < contests.size) {
             var count = 0
-            val limit = if (contestNo < 180) 10 else 1
+            val limit = if (contestNo < 90) 10 else 1
             while (contestIter.hasNext() && count < limit) {
                 contestIter.next().included = true
                 count++
@@ -56,10 +56,9 @@ class CorlaMarginalSampling {
             println("$contestNo, ${round1.nmvrs}")
         }
         mplotData.add( MarginalPlotData(contests.size.toDouble(), round1.nmvrs.toDouble(), "rlauxe"))
-        mplotData.add( MarginalPlotData(155.0, 7410.0, "corla"))
 
-        val title = "Corla26Primary incremental costs of including close contests"
-        val subtitle = "(Corla uses 7410 nmvrs for 155 contests under 3%)"
+        val title = "Corla26Primary (Merged, Relaxed risks) incremental costs of including close contests"
+        val subtitle = "(Corla uses 7246 nmvrs for 68 contests under 3%)"
         val scale = ScaleType.Linear
         makeMarginalPlot(
             writeFile = "$dirName/$name.$scale",
@@ -84,7 +83,7 @@ fun makeMarginalPlot(writeFile: String, title: String, subtitle: String, data: L
         yname = "nmvrs needed", yfld = { it.nmvrs },
         catName = "auditor", catfld = { it.cat },
         addPoints = true,
-        addHLineAt= 7410.0,
-        addVLineAt= 155.0,
+        addHLineAt= 7246.0,
+        addVLineAt= 68.0,
     )
 }

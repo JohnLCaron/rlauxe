@@ -99,6 +99,28 @@ fun makeCorla2024(toptopdir: String, auditcenter: String) {
     )
 }
 
+fun makeCorla2026p(toptopdir: String, auditcenter: String) {
+    val topdir = toptopdir
+
+    createCountyElectionSansCvrs(
+        topdir, Colorado2026Primary(auditcenter),
+        corlaCreationSettings(2026),
+        corlaRoundSettings(sampling = Sampling.consistent),
+        name = "Colorado2026PrimaryMerged", startFirstRound = true
+    )
+}
+
+fun makeCorla2026pm(toptopdir: String, auditcenter: String) {
+    val topdir = toptopdir
+
+    createCountyElectionSansCvrs(
+        topdir, Colorado2026PMerged(auditcenter),
+        corlaCreationSettings(2026),
+        corlaRoundSettings(sampling = Sampling.consistent),
+        name = "Colorado2026Primary", startFirstRound = true
+    )
+}
+
 fun allVotedatabaseCounties(votedatabase: String): Map<String, String> {
     val path = Path(votedatabase) // or does votedatabase include
 

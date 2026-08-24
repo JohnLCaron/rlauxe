@@ -10,13 +10,14 @@ import org.cryptobiotic.rlauxe.auditcenter.writeCountyContestData
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
+import kotlin.test.Test
 
 class MakeElectionsWithCvrs {
     val show = false
 
-    // @Test
+    @Test
     fun makeColorado2020() {
-        val topdir = "$cases/corla/withCvrs/Colorado2020"
+        val topdir = "$cases/corla/corla2020/withCvrs"
 
         countyElectionWithCvrs(
             allVotedatabaseCounties(votedatabase2020),

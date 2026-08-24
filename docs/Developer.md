@@ -1,5 +1,5 @@
 # Developer Notes
-_07/13/2026_
+_08/24/2026_
 
 <!-- TOC -->
 * [Developer Notes](#developer-notes)
@@ -17,8 +17,7 @@ _07/13/2026_
     * [For the Boulder 2024 test case](#for-the-boulder-2024-test-case)
     * [For Colorado elections using auditcenter](#for-colorado-elections-using-auditcenter)
       * [For Colorado 2020 General elections](#for-colorado-2020-general-elections)
-      * [For Colorado 2022 Primary election](#for-colorado-2022-primary-election)
-      * [For Colorado 2024 General election](#for-colorado-2024-general-election)
+      * [Other Colorado elections in auditcenter](#other-colorado-elections-in-auditcenter)
     * [For the Georgia 2026 primary test case](#for-the-georgia-2026-primary-test-case)
     * [For the San Francisco 2024 test case](#for-the-san-francisco-2024-test-case)
   * [rlauxe viewer](#rlauxe-viewer)
@@ -195,7 +194,6 @@ java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic
 * check _cases/build/libs/_ for the latest version of rlauxe-cases-uber.jar
 * substitute your own "auditcenter" directory
 * substitute your own "toptopdir" directory where the data will be written.
-* currently we are only supporting the Colorado 2020 General election, but other elections will be added.
 * this creates an election using style based sampling (CSD). To use uniform sampling, use the flag "-sampling uniform".
 
 To use the viewer for Corla elections, see [here](https://github.com/JohnLCaron/rlauxe-viewer/docs/CorlaViewer.md)
@@ -210,21 +208,16 @@ java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic
     -input "/home/you/wherever/votedatabase/cvr/Colorado"
 ````
 
-#### For Colorado 2022 Primary election
+#### Other Colorado elections in auditcenter
 
 ````
 java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
-    -case corla2022p -toptopdir "/home/you/wherever/cases/corla2022p" \
+    -case casename -toptopdir "/home/you/wherever/cases/casename" \
     -auditcenter "/home/you/wherever/github/auditcenter/directory" 
 ````
 
-#### For Colorado 2024 General election
+where casename = corla2022p | corla2024 | corla2026p | corla2026pm
 
-````
-java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
-    -case corla2024 -toptopdir "/home/you/wherever/cases/corla2024" \
-    -auditcenter "/home/you/wherever/github/auditcenter/directory" 
-`````
 
 ### For the Georgia 2026 primary test case
 
@@ -331,12 +324,14 @@ last changed: 01/07/2026
 | 07/09/2026 | 81.3%  | 7650/9407       |
 | 07/10/2026 | 78.6%  | 7437/9460       |
 | 07/11/2026 | 83.0%  | 7819/9426       |
+| 08/19/2026 | 83.1%  | 7820/9409       |
 
 ## core + cases test coverage
 
 | date     | pct    | cover/total LOC |
 |----------|--------|-----------------|
 | 07/11/26 | 70.1 % | 10502/14972     |
+| 08/19/26 | 75.0 % | 10974/14632     |
 
 ## core + cases + CreateCases test coverage
 
@@ -587,8 +582,8 @@ class TestRunRoundCli {
 
 **TODO 8/17/2026**
 
-* seems like most US cases would have have county subtotals, eg Corla (why not GA?)
+* seems like most US cases have county subtotals, eg Corla (why not GA?)
 * where should countyCvrPools.csv be in the audit record ?? 
-* Add JaCoCo Runner.
+* Add JaCoCo Runner?
 
 

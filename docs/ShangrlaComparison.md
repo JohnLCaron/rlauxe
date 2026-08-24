@@ -72,7 +72,8 @@ Both support phantom CVRs and MVRs with appropriate assorter treatment. rlauxe h
 ### rlauxe
 
 - Core library has ~10,000 LOC. Core plus specialized "cases" library has ~15,000 LOC.
-- Including tests and plotting code, there are approx **75,124 total lines of Kotlin across 452 files** (32,130 production lines + 42,994 test lines), organized across a structured module hierarchy: `audit`, `betting`, `cli`, `core`, `dhondt`, `estimate`, `irv`, `oneaudit`, `persist`, `util`, `verify`, `workflow`.
+- Including tests and plotting code, there are approx **75,124 total lines of Kotlin across 452 files** (32,130 production lines + 42,994 test lines), 
+- organized across a structured module hierarchy: `audit`, `betting`, `cli`, `core`, `dhondt`, `estimate`, `irv`, `oneaudit`, `persist`, `strata`, `util`, `verify`, `workflow`.
 - Idiomatic Kotlin: data classes, sealed types, extension functions, coroutine-friendly structure.
 - Clear separation of concerns between layers.
 - Has a CLI (`cli` package) for command-line use.
@@ -110,7 +111,7 @@ Both support phantom CVRs and MVRs with appropriate assorter treatment. rlauxe h
 Neither repository has formal code coverage reporting (no `coverage.py`, no JaCoCo configuration visible).
 
 - **SHANGRLA**: Coverage is low by modern standards. Only `assertion_audit_utils.py` has tests; `suite_tools.py` (~932 lines), `dominion_tools.py`, and `IRVVisualisationUtils.py` have no associated automated tests. The test functions themselves skip some cases (`test_assorter_mean` is empty).
-- **rlauxe**: Uses IntelliJ proprietary coverage plugin. Runs sporadically. Core clibrary has ~ 83% coverage, core+cases ~ 78%, as of 7/11/26. See Developer.md.
+- **rlauxe**: Uses IntelliJ proprietary coverage plugin. Runs sporadically. Core library has ~ 83% coverage, core+cases ~ 78%, as of 7/11/26. See Developer.md.
   The test suite is structured to mirror every production module, and the cross-validation with SHANGRLA provides additional assurance on core statistical logic. Coverage is likely substantially higher, though not formally measured.
 
 ---
@@ -143,7 +144,7 @@ Neither repository has formal code coverage reporting (no `coverage.py`, no JaCo
 | Consistent sampling    | No                              | Yes                                         |
 | Multi-round estimation | Basic                           | Simulation-based                            |
 | Tests                  | Ad-hoc functions, not automated | Full JUnit suite with cross-validation      |
-| Coverage               | Low (partial, informal)         | Better structured (no metrics)              |
+| Coverage               | Low (partial, informal)         | Better structured (internal IntelliJ)       |
 | Documentation          | Good for research use           | Extensive for implementors                  |
 | Code size              | ~3,200 lines                    | 10-15K LOC                                  |
 | Production readiness   | Research prototype              | More mature, though still WIP               |
@@ -220,7 +221,8 @@ The `sortedCards.csv` file then contains every card re-sorted by its PRNG-derive
 
 #### How to check the "signatures"
 
-rlauxe's commitment integrity relies on **PRNG recomputation rather than external cryptographic file signing**. The PRNG is implemented in [`Prng.kt`](../core/src/main/kotlin/org/cryptobiotic/rlauxe/util/Prng.kt) using **HmacSHA256** keyed on the published seed:
+rlauxe's commitment integrity relies on **PRNG recomputation rather than external cryptographic file signing**. The PRNG is implemented in [`Prng.kt`](../core/src/main/kotlin/org/cryptobiotic/rlauxe/util/Prng.kt) using **HmacSHA256** 
+keyed on the published seed:
 
 ```
 PRN(i) = HmacSHA256(seed_bytes, index_bytes)[0..8]   // truncated to Long, then absolute value

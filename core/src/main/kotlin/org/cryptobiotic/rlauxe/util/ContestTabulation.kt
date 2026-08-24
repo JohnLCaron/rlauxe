@@ -259,9 +259,9 @@ class CardTabulation(cards: CloseableIterator<AuditableCard>, infos: Map<Int, Co
                             if (card.phantom()) tab.nphantoms++
                             tab.ncardsTabulated++
                         }
-                        visitor(card)
                     }
                 }
+                visitor(card)
             }
         }
     }

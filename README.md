@@ -606,11 +606,11 @@ Dhondt and (two round) Runoff contests have been added.
 
 **Multicontest audits**
 
-Each contest has a canonical sequence of sampled cards, namely all the cards sorted by PRN, that may contain that contest.
+Each contest has a canonical sequence of sampled cards, namely all the cards sorted by PRN that may contain that contest.
 This sequence doesn't change when doing multicontest audits. 
-Multicontest audits choose what cards are sampled based on each contests' estimated sample size. An audit can take advantage
-of "extra" samples for a contest in the sample, as long as the canonical sequence is always used. Once a card in the sequence is skipped,
-the audit cant use more cards in the sample for that contest.
+Multicontest audits choose how many cards are sampled based on each contests' estimated sample size, and which cards from
+the canonical sequence. An audit can take advantage of "extra" samples for a contest in the sample, as long as the canonical sequence is always used. 
+Once a card in the sequence is skipped, the audit cant use more cards in the sample for that contest.
 
 ## Unanswered Questions
 

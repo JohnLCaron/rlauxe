@@ -51,14 +51,14 @@ class TestColoradoInput {
     //)
     @Test
     fun showMergedInfo() {
-        println("there are ${input.mergedInfo.mergedContestInfo.size} mergedContestInfo")
-        input.mergedInfo.mergedContestInfo.forEach { println( "  $it" )}
+        println("there are ${input.mergedInfo().mergedContestInfo.size} mergedContestInfo")
+        input.mergedInfo().mergedContestInfo.forEach { println( "  $it" )}
 
-        println("\nthere are ${input.mergedInfo.strataInfo.size} strataInfo")
-        input.mergedInfo.strataInfo.forEach { println( "  $it" )}
+        println("\nthere are ${input.mergedInfo().strataInfo.size} strataInfo")
+        input.mergedInfo().strataInfo.forEach { println( "  $it" )}
 
-        println("\nthere are ${input.mergedInfo.statewideContests.size} statewideContests")
-        input.mergedInfo.statewideContests.forEach { println( "  $it" )}
+        println("\nthere are ${input.mergedInfo().statewideContests.size} statewideContests")
+        input.mergedInfo().statewideContests.forEach { println( "  $it" )}
     }
 
     @Test

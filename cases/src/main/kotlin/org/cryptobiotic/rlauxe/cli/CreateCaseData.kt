@@ -10,6 +10,8 @@ import org.cryptobiotic.rlauxe.auditcenter.makeCorla2020Uniform
 import org.cryptobiotic.rlauxe.auditcenter.makeCorla2020UniformWithCvrs
 import org.cryptobiotic.rlauxe.auditcenter.makeCorla2022Primary
 import org.cryptobiotic.rlauxe.auditcenter.makeCorla2024
+import org.cryptobiotic.rlauxe.auditcenter.makeCorla2026p
+import org.cryptobiotic.rlauxe.auditcenter.makeCorla2026pm
 import org.cryptobiotic.rlauxe.belgium.makeBelgium2024Data
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionClca
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionOA
@@ -26,7 +28,7 @@ object CreateCaseData {
         val case by parser.option(
             ArgType.String, // enum ??
             shortName = "case",
-            description = "belgium | boulder2024 | corla2020 | corla2020withCvrs | corla2022p | corla2024 | ga26p | sf2024"
+            description = "belgium | boulder2024 | corla2020 | corla2020withCvrs | corla2022p | corla2024 | corla2026p corla2026pm | ga26p | sf2024"
         ).required()
         val toptopdir by parser.option(
             ArgType.String,
@@ -104,7 +106,17 @@ object CreateCaseData {
             println("version=$version")
 
             when (case) {
-                "belgium" -> makeBelgium2024Data(toptopdir)
+                "belgium" -> {
+                    makeBelgium2024Data(toptopdir)
+                }
+
+                "corla2026pm" -> {
+                    makeCorla2026pm(toptopdir = toptopdir, auditcenter = auditcenter!!)
+                }
+
+                "corla2026p" -> {
+                    makeCorla2026p(toptopdir = toptopdir, auditcenter = auditcenter!!)
+                }
 
                 "boulder2024" -> {
                     when (auditType) {

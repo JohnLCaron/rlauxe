@@ -63,7 +63,7 @@ data class CardPool(
     }
 }
 
-// CardPoolBuilder is mutable; used by Corla CountyPoolsBuilder, BoulderContestBuilder, OneAuditTest
+// CardPoolBuilder is mutable; used by BoulderContestBuilder, OneAuditTest
 class CardPoolBuilder(
     val poolName: String,
     val poolId: Int,
@@ -77,11 +77,6 @@ class CardPoolBuilder(
 
     // you need at least this many cards for this pool
     val maxMinCardsNeeded: Int = minCardsNeeded.values.max()
-
-    init {
-        if (poolName.startsWith("Pitkin"))
-            print("")
-    }
 
     fun setNcards(ncards: Int): CardPoolBuilder {
         this.ncards = ncards
@@ -103,12 +98,6 @@ class CardPoolBuilder(
     fun adjustCards(adjust: Int, contestId : Int) {
         if (!hasContest(contestId)) throw RuntimeException("NO CONTEST")
         adjustCards = max( adjust, adjustCards)
-    }
-
-    // TODO probably need to use this for Corla
-    fun votesAndUndervotesCorla(contestId: Int): Vunder {
-        val contestTab = contestTabs[contestId]!!
-        return contestTab.votesAndUndervotes(poolId, ncards(), hasExactContests)
     }
 
     // TODO probably need to use this for Boulder
@@ -181,26 +170,6 @@ class CardPoolBuilder(
     }
 
     companion object {
-        // probably corla
-        fun fromMinCardsNeeded(
-            poolName: String,
-            poolId: Int,
-            hasExactContests: Boolean,    // aka single style
-            infos: Map<Int, ContestInfo>, // do we really need this ??
-            contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
-        ): CardPoolBuilder {
-
-            // you need at least this many cards for this pool
-            val minCardsNeeded = mutableMapOf<Int, Int>()
-            contestTabs.forEach { (contestId, contestTab) ->
-                val ncards = contestTab.ncards() // nvotes was scaled by stylePct
-                val info = infos[contestId]!!
-                // based on the contest's votes, you need at least this many cards for this contest
-                minCardsNeeded[contestId] = roundUp(ncards.toDouble() / info.voteForN)
-            }
-            return CardPoolBuilder(poolName, poolId, hasExactContests, infos, contestTabs, minCardsNeeded)
-        }
-
         // used by OneAuditTest, probably boulder
         fun fromMinVotesNeeded(
             poolName: String,
@@ -222,7 +191,8 @@ class CardPoolBuilder(
     }
 }
 
-// CountyPool: pool with multiple CardStyles
+// CountyPool: for one county, a pool of cards with multiple CardStyles.
+// votes equal the County's subtotal, and ncards euals the county population.
 data class CountyPools (
     val countyName: String,
     val countyPoolId: Int,
@@ -230,11 +200,6 @@ data class CountyPools (
     val cardCount: Int,
     val styles: List<StyleIF>,
 ) {
-    init {
-        if (countyName == "Pitkin")
-            print("")
-    }
-
     override fun toString() = buildString {
         appendLine("CountyPools(countyName='$countyName', countyPoolId=$countyPoolId, totalCards=$cardCount")
         styles.forEach{ appendLine("cardStyle:  $it")}

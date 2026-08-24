@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
-import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
 import org.cryptobiotic.rlauxe.core.*
 
 private val logger = KotlinLogging.logger("ColoradoPolling")
@@ -11,7 +11,7 @@ private val logger = KotlinLogging.logger("ColoradoPolling")
 // // Create polling audits where precincts are used to calculate Nb and simulated mvrs
 class CreateColoradoPolling (
     coloradoInput: ColoradoInput,
-    countyElection: CountyContestBuilder,
+    countyElection: BuildCorlaContests,
     topdir: String,
     pollingMode: PollingMode,
 ): CreateCorlaElection(coloradoInput, countyElection, AuditType.POLLING, topdir, pollingMode=pollingMode, hasStyle = true) {

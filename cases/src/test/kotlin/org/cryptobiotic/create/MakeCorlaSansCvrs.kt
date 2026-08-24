@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.auditcenter.Colorado2026Primary
 import org.cryptobiotic.rlauxe.auditcenter.corlaCreationSettings
 import org.cryptobiotic.rlauxe.auditcenter.corlaRoundSettings
 import org.cryptobiotic.rlauxe.auditcenter.createCountyElectionSansCvrs
+import org.cryptobiotic.rlauxe.auditcenter.createCountyElectionSimCvrs
 import org.cryptobiotic.rlauxe.auditcenter.writeCountyContestData
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
@@ -32,7 +33,7 @@ class MakeCorlaSansCvrs {
         )
     }
 
-    @Test
+    // @Test
     fun makeColorado2026Primary() {
         val topdir = "$cases/corla/corla2026Primary"
 
@@ -80,11 +81,23 @@ class MakeCorlaSansCvrs {
         )
     }
 
-    // @Test
+    @Test
     fun makeColorado2020General() {
-        val topdir = "$cases/corla/corla2020/clca"
+        val topdir = "$cases/corla/corla2020/test2"
 
         createCountyElectionSansCvrs(
+            topdir, Colorado2020General(),
+            corlaCreationSettings(2020),
+            corlaRoundSettings(sampling = Sampling.consistent),
+            name = "Colorado2020clca", startFirstRound = true
+        )
+    }
+
+    @Test
+    fun makeColorado2020GeneralSim() {
+        val topdir = "$cases/corla/corla2020/sim"
+
+        createCountyElectionSimCvrs(
             topdir, Colorado2020General(),
             corlaCreationSettings(2020),
             corlaRoundSettings(sampling = Sampling.consistent),

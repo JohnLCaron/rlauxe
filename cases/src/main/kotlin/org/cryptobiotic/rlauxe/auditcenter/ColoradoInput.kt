@@ -141,7 +141,8 @@ abstract class ColoradoInput(
 
     ///////////////////
     // merge info from all the above, derive the following
-    val mergedInfo: MergedInfo by lazy {
+    open fun mergedInfo() = mergedInfo
+    private val mergedInfo: MergedInfo by lazy {
         mergeContestInfo(this)
     } // mergedContestInfo, strataInfo, statewideContests
 
@@ -164,16 +165,18 @@ abstract class ColoradoInput(
     //    val statewideMvrs: Int,
     //)
     val mergedContestMap: Map<String, MergedContestInfo> by lazy {
-        mergedInfo.mergedContestInfo.associateBy { it.contestName }
+        mergedInfo().mergedContestInfo.associateBy { it.contestName }
     }
 
+    // strata ~= county
     // data class StrataInfo(
     //    val strataName: String,
     //    val nmvrs: Int, // countyMvr.countMvr
     //    val ncards: Int,  // round.ballotCardCount
     //)
-    val strataMap: Map<String, StrataInfo> by lazy { mergedInfo.strataInfo.associateBy { it.strataName } } // strata ~= county
-    val statewideContests: List<CorlaContestRoundCsv> by lazy { mergedInfo.statewideContests }
+    val strataMap: Map<String, StrataInfo> by lazy { mergedInfo().strataInfo.associateBy { it.strataName } }
+    val strataPopulation: Map<String, Int> by lazy { mergedInfo().strataInfo.associate { it.strataName to it.ballotCardCount } } // county name to population
+    val statewideContests: List<CorlaContestRoundCsv> by lazy { mergedInfo().statewideContests }
 
     // dont use these directly, use matchCanonicalContest() and matchCanonicalCandidate()
     open fun contestNameCleanup(county: String, name: String) = name
@@ -193,6 +196,12 @@ abstract class ColoradoInput(
         var match = contest.choices.find { munge(it) == munge(transform) }
         if (match == null) match = contest.choices.find { it == yesno(exportCandidateName) }
         return match
+    }
+
+    // return canonical candidate name
+    fun matchCandidate(county: String, contestName: String, candName: String): String {
+        val canon = matchCanonicalContest(county, contestName)!!
+        return matchCanonicalCandidate(county, canon, candName)!!
     }
 
     private val canonicalContestMungedNames: Map<String, CanonicalContest> by lazy {
@@ -226,7 +235,7 @@ data class MergedContestInfo(
     // canonical
     val canonicalContest: CanonicalContest,
     val contestName: String,
-    val choices: List<String>,
+    val choices: List<String>, // TODO why cant we convert to canonical choices immediately ??
     val counties: Set<String>,
 
     // data class CorlaContestRoundCsv(

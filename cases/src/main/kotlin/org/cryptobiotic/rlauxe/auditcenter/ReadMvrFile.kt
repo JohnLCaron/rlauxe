@@ -43,20 +43,6 @@ data class CountyStylesFromMvrs(val countyName: String) {
     }
 }
 
-data class MvrStyle(val id: Int, val contests: Set<String>) {
-    var cardCount = 0
-    override fun toString()= buildString {
-        append("style $id has ${contests.size} contests cardCount=$cardCount")
-    }
-
-    fun show(contestNameToId: Map<String, Int>, sort:Boolean = true): String {
-        val contestIds = contests.map { contestNameToId[it]!! }
-        val useIds = if (sort) contestIds.sorted() else contestIds
-        return "  MvrStyle(${id}, contests=${useIds}, count= ${cardCount}"
-    }
-
-}
-
 ///////////////////////////////////////////////////////////////
 
 // for each contest, total mvrs over all counties

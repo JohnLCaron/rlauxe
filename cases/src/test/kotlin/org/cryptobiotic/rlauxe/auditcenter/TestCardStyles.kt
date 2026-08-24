@@ -31,7 +31,7 @@ class TestCardStyles {
         }
         println()
 
-        val contestBuilder = CountyContestBuilder(coloradoInput)
+        val contestBuilder = BuildCorlaContests(coloradoInput)
         val infosByName = contestBuilder.infos.mapKeys { it.value.name }
         val dominionConverter = DominionConverter("test", export, infosByName, coloradoInput, )
 

@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
 import org.cryptobiotic.rlauxe.auditcenter.CorlaContestBuilder
-import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
 import org.cryptobiotic.rlauxe.auditcenter.writeCountyContestData
 import org.cryptobiotic.rlauxe.auditcenter.writeCountyData
 import org.cryptobiotic.rlauxe.core.*
@@ -23,7 +23,7 @@ private val logger = KotlinLogging.logger("ColoradoOneAudit")
 // TODO replicate in CountyElection
 open class CreateUniformElection (
     val coloradoInput: ColoradoInput,
-    val stateElection: CountyContestBuilder,
+    val stateElection: BuildCorlaContests,
     val auditType: AuditType,
     val topdir: String,
     val pollingMode: PollingMode?,
@@ -92,7 +92,7 @@ fun createUniformElection(
     val stopwatch = Stopwatch()
     require (roundConfig.sampling.sampling == Sampling.uniform)
 
-    val countyElection = CountyContestBuilder(coloradoInput)
+    val countyElection = BuildCorlaContests(coloradoInput)
 
     val election =
         CreateUniformElection(coloradoInput, countyElection, creation.auditType, topdir, pollingMode=null, name=name)

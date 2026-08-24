@@ -42,7 +42,7 @@ open class CountyElectionWithCvrs (
     val publisher = Publisher(topdir)
 
     init {
-        val contestBuilder = CountyContestBuilder(coloradoInput)
+        val contestBuilder = BuildCorlaContests(coloradoInput)
         val infos = contestBuilder.infos
         val infosByName = infos.mapKeys{ it.value.name }
 

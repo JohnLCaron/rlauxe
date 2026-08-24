@@ -61,7 +61,7 @@ class Colorado2026PMerged(ac:String?=auditcenter): ColoradoInput(
             val ct = ctmap.getOrPut(org.countyName ) { CountyTabAllContests(org.countyName) }
             org.contests.values.forEach { ccvOrg ->
                 val key = contestNameMerge(ccvOrg.contestName)
-                val ccv = ct.contests.getOrPut(key) { CountyContestVotes(key) }
+                val ccv = ct.contests.getOrPut(key) { CountyContestVotes(org.countyName, key) }
                 ccvOrg.choices.forEach { (choice, vote) ->
                     ccv.addChoice(choice, vote)
                 }
@@ -124,6 +124,18 @@ class Colorado2026PMerged(ac:String?=auditcenter): ColoradoInput(
 
         CardComparisonResults(mergedMvrs.values.toList(), org.countyMvrs, countyStyles)
     }
+
+    override fun mergedInfo() = mergedInfo
+    private val mergedInfo: MergedInfo by lazy {
+        val orgInfo = mergeContestInfo(this)
+        val orgStrataInfo = orgInfo.strataInfo
+        //     val strataName: String,
+        //    val nmvrs: Int, // countyMvr.countMvr
+        //    val ballotCardCount: Int,  // round.ballot_card_count
+        val broomfield = StrataInfo("BroomField", 0, 22906)
+        orgInfo.copy(strataInfo = orgStrataInfo + listOf(broomfield))
+    } // mergedContestInfo, strataInfo, statewideContests
+
 
     private fun contestNameMerge(contestName: String): String {
         var name = merge(contestName, "Attorney General - DEM")

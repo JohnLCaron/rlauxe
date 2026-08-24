@@ -2,10 +2,10 @@ package org.cryptobiotic.rlauxe.auditcenter
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
 import org.cryptobiotic.rlauxe.audit.CountyPools
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.findDiscreteMaximum
 import org.cryptobiotic.rlauxe.util.nfz
@@ -20,8 +20,10 @@ import kotlin.math.roundToInt
 
 private val logger = KotlinLogging.logger("MakeCountyPools")
 
-// used by CountyElectionSansCvrs
-// one CountyPools for each County; make cardPools from Mvrs, then try to adjust to match ??
+// cards are partitioned by county.
+// We know Nc = the total number of cards for a Contest, the total number of cards for a County, and the vote subtotals by County.
+// We dont know the styles, or the number of cards per contest per county.
+
 class CountyPoolsSansCvrs(
     corlaContestBuilders: List<CorlaContestBuilder>,
     val coloradoInput: ColoradoInput,
@@ -29,7 +31,7 @@ class CountyPoolsSansCvrs(
 ) {
     val builders = corlaContestBuilders.associateBy { it.info.name }
     val infos = corlaContestBuilders.associate { it.info.id to it.info }
-    val countyPools: List<CountyPoolsBuilder>
+    val countyPools: List<CorlaCountyPoolsBuilder>
 
     init {
         val infosByName = corlaContestBuilders.associate { it.info.name to it.info }
@@ -39,13 +41,14 @@ class CountyPoolsSansCvrs(
         val contestTabByCounty: Map<String, CountyTabAllContests> = if (onlyCounty == null)
             coloradoInput.countyTabsAllContests()
         else
-            mapOf(onlyCounty to coloradoInput.countyTabsAllContests()[onlyCounty]!! )
+            mapOf(onlyCounty to coloradoInput.countyTabsAllContests()[onlyCounty]!!)
 
         val mvrStylesMap: Map<String, CountyStylesFromMvrs> = coloradoInput.stylesFromMvrs.associateBy { it.countyName }
 
         // the mvr styles are not complete. This seriously sucks.
         // pick out the contests that dont have styles that contain it
-        val missingContestsByCounty = mutableMapOf<String, MutableList<CountyContestVotes>>() // countyName -> contestTab
+        val missingContestsByCounty =
+            mutableMapOf<String, MutableList<CountyContestVotes>>() // countyName -> contestTab
         contestTabByCounty.map { (countyName, countyContest) ->
             val mvrStyles: CountyStylesFromMvrs = mvrStylesMap[countyName]!!
             countyContest.contests.forEach { (contestName, contestTab) ->
@@ -58,20 +61,20 @@ class CountyPoolsSansCvrs(
             }
         }
 
-        // missingPools for each county
-        val missingPools: Map<String, CardPoolBuilder> = makeMissingPools(missingContestsByCounty)
-
         countyPools = contestTabByCounty.filter { it.key !in coloradoInput.skipCounties }
             .map { (countyName, countyContest) ->
-                CountyPoolsBuilder(countyName, countyContest, mvrStylesMap[countyName]!!,
-                    // missingPools[countyName],
-                    distributeNc[countyName]!!, infosByName, coloradoInput)
-        }
+                CorlaCountyPoolsBuilder(
+                    countyName, countyContest, mvrStylesMap[countyName]!!,
+                    distributeNc[countyName]!!,
+                    infosByName,
+                    coloradoInput
+                )
+            }
 
     }
 
-    // TODO ??
     // for each contest, distribte Nc to the counties it is in, proportional to votesInCounty / totalVotes
+    // but clipped at the county population
     fun distributeNc(): Map<String, Map<String, Int>> { // county -> contest -> Nc
         val countyNc = mutableMapOf<String, MutableMap<String, Int>>() // county -> contest -> Nc
         coloradoInput.contestTabsAllCounties().values.forEach { contestTabAllCounties ->
@@ -96,55 +99,16 @@ class CountyPoolsSansCvrs(
                 contestSum[contestName] = contestAccum + contestVotes
             }
         }
+
         coloradoInput.contestTabsAllCounties().values.forEach { contestTabAllCounties ->
             val contestName = contestTabAllCounties.contestName
             val sum = contestSum[contestName]!!
             val builder = builders[contestName]!!
             val contestNc = builder.Nc
-            if (abs(contestNc-sum) > 5)
-                logger.warn{"makeCardPoolsFromCountyStyles has (contestNc-sum) ${abs(contestNc-sum)} > 5" }
+            if (abs(contestNc - sum) > 5)
+                logger.warn { "makeCardPoolsFromCountyStyles has (contestNc-sum) ${abs(contestNc - sum)} > 5" }
         }
         return countyNc
-    }
-
-    fun makeMissingPools(missingContestsByCounty: Map<String, List<CountyContestVotes>>): Map<String, CardPoolBuilder> {
-        val stylePools = mutableMapOf<String, CardPoolBuilder>()
-        missingContestsByCounty.forEach { (countyName, missingContests) ->
-            val missingPool = makeMissingPool(countyName, missingContests)
-            if (missingPool != null ) stylePools[countyName] = missingPool
-        }
-        return stylePools
-    }
-
-    // the simplest thing to do is to munge all missing contests into a single style.
-    // TODO look at contest.Nc, put disparate Nc into different stylePool
-    fun makeMissingPool(countyName: String, missingContests: List<CountyContestVotes>): CardPoolBuilder? {
-        val votesForStyle = mutableMapOf<Int, ContestTabulation>() // all contests, this style
-        missingContests.forEach { contestTab ->
-            val builder = builders[contestTab.contestName]
-            if (builder != null) {
-                val info = builder.info
-                val votes = mutableMapOf<Int, Int>() // this contest
-                contestTab.choices.forEach { (choiceName, choiceVote) ->
-                    val candId = info.candidateNames[choiceName]
-                    if (candId != null)
-                        votes[candId] = choiceVote
-                }
-                // distributeNc[countyName] doesnt have this county ....
-                // if missing contests is contained in this county, use Builder.Nc
-                // otherwise sum the votes
-                val ncards = if (builder.counties.size == 1) builder.Nc else votes.values.sum()
-                votesForStyle[info.id] = ContestTabulation(info, votes, ncards)
-            }
-        }
-
-        if (votesForStyle.isEmpty()) return null
-
-        CountyPoolsBuilder.nextPoolId++
-        return CardPoolBuilder.fromMinCardsNeeded(
-            countyName, CountyPoolsBuilder.nextPoolId, hasExactContests = true, infos,
-            contestTabs = votesForStyle,
-        )
     }
 }
 
@@ -156,44 +120,44 @@ class CountyPoolsSansCvrs(
 // we have county styles and subtotals, which get distributed to the various county styles in (rough) proportion to their cardCount.
 // as usual, we dont know the undervotes, so we will distribute that also in proportion
 
-data class CountyPoolsBuilder(
+data class CorlaCountyPoolsBuilder(
     val countyName: String,
     val cct: CountyTabAllContests, // the votes subtotal for each contest in the county
     val mvrStyles: CountyStylesFromMvrs, // Set<contestId> and reletive count within county
-    // val missingPool: CardPoolBuilder?, // all the contests that werent in an mvrStyle TODO just their ids ??
     val contestNc: Map<String, Int>, // contest name -> contest Nc for the county
     val infos: Map<String, ContestInfo>, // contest name -> ContestInfoval
     val coloradoInput: ColoradoInput,
 ) {
-    val adjContestNc = contestNc //    TODO style specific ??  .mapValues { it.value - missingNcards }
-    val pools = mutableListOf<CardPool>()
+    val pools = mutableListOf<CardPool>() // each style gets its own pool
 
     init {
         val strata = coloradoInput.strataMap[countyName]
         if (strata == null) {
             logger.warn{ "No strata info for $countyName"}
         }
-        val countyPopulation = strata?.ballotCardCount ?: 22906 // TODO
+        val countyPopulation = strata?.ballotCardCount ?: 9999 // TODO
 
         // class Solver(mvrStyles: List<MvrStyle>, contests: List<CountyContestVotes>, val totalCards: Int) {
-        val solver = Solver(countyName, mvrStyles.styles.values.toList(), cct.contests.values.toList(), countyPopulation)
-        solver.solve()
+        val styler =
+            CorlaStyleCardAllocation(countyName, mvrStyles.styles.values.toList(), cct.contests.values.toList(), contestNc, countyPopulation)
+        styler.allocate()
 
         // sum of ncards of Style's that contain this contest
-        val totalCardsForContestMap = mutableMapOf<Solver.Contest, Int>()
-        solver.allStyles.forEach { style ->
+        val totalCardsForContestMap = mutableMapOf<CorlaStyleCardAllocation.Contest, Int>()
+        styler.allStyles.forEach { style ->
             style.contests.forEach { contest ->
                 var totalCardsForContest = totalCardsForContestMap.getOrDefault(contest, 0)
-                totalCardsForContestMap[contest] = totalCardsForContest + style.ncards
+                totalCardsForContestMap[contest] = totalCardsForContest + style.ncards()
             }
         }
 
         val contestPcts = mutableMapOf<String, Double>() // checker
 
-        solver.allStyles.forEach { style: Solver.Style ->
+        // each style gets its own pool
+        styler.allStyles.forEach { style: CorlaStyleCardAllocation.Style ->
             val votesForStyle = mutableMapOf<Int, ContestTabulation>()
 
-            style.contests.forEach { contest: Solver.Contest ->
+            style.contests.forEach { contest: CorlaStyleCardAllocation.Contest ->
                 val contestName = contest.name
                 val info = infos[contestName]
                 if (info == null)
@@ -201,7 +165,7 @@ data class CountyPoolsBuilder(
 
                 // divide up the votes among Styles in proportion to mvrStyles.ncards
                 val denom = totalCardsForContestMap[contest]!!
-                val stylePct = if (denom == 0) 0.0 else style.ncards / denom.toDouble()
+                val stylePct = if (denom == 0) 0.0 else style.ncards() / denom.toDouble()
                 val contestPct = contestPcts.getOrDefault(contestName, 0.0)
                 contestPcts[contestName] = contestPct + stylePct
 
@@ -214,25 +178,24 @@ data class CountyPoolsBuilder(
                     }
                 }
                 // needs to be adjusted across the styles in proportion to how many cards used it
-                val Nc = adjContestNc[contestName]!!  // total Nc for this contest over all styles TODO really needed ?
+                val Nc = contestNc[contestName]!!
                 val ncards = (stylePct * Nc).roundToInt() // scale by stylePct
 
                 votesForStyle[info.id] = ContestTabulation(info, votes, ncards)
             }
 
             nextPoolId++
-            val pool = CardPool("${countyName}-${nfz(style.id,2)}", nextPoolId,
-                hasExactContests = true, infos.mapKeys { it.value.id }, contestTabs=votesForStyle, style.ncards)
+            val pool = CardPool(
+                "${countyName}-${nfz(style.id, 2)}", nextPoolId,
+                hasExactContests = true, infos.mapKeys { it.value.id }, contestTabs = votesForStyle, style.ncards()
+            )
             pools.add(pool)
-
-            //pools.add( CardPoolBuilder.fromMinCardsNeeded( "${countyName}-${nfz(style.id,2)}", nextPoolId,
-            //    hasExactContests = true, infos.mapKeys { it.value.id }, contestTabs=votesForStyle))
         }
 
         // check
         contestPcts.forEach { contestName, pct ->
             if (!doubleIsClose(pct, 1.0))
-                logger.warn { "$contestName sum of style pctTotal ${pct} != 1.0"}
+                logger.warn { "$contestName sum of style pctTotal ${pct} != 1.0" }
         }
     }
 
@@ -264,19 +227,24 @@ data class CountyPoolsBuilder(
 // data class CountyContestVotes(val contestName: String) {
 //    fun contestVotes() = choices.values.sumOf { it }
 
-class Solver(val countyName: String, mvrStyles: List<MvrStyle>, contests: List<CountyContestVotes>, val population: Int) {
+// TODO pass in Ncards[contest] for this pool, and use that, not contestVotes = countyContest.contestVotes()
+class CorlaStyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, contests: List<CountyContestVotes>,
+                               val contestNc: Map<String, Int>, val cardsinCountyPool: Int) {
     val show = false
     val allContests : List<Contest> = contests.map{ Contest(it) }
     val allStyles : List<Style>
+    val mvrTotal = mvrStyles.sumOf { it.cardCount }
 
     var nextContestId = 0
     var nextStyleId = 0
     var totalCards = 0
 
     init {
+        if (countyName == "Lake")
+            print("")
         val styles = mutableListOf<Style>()
-        mvrStyles.forEach{ styles.add(Style(it)) }
 
+        // all contests not contained in a style are put into a single "missingStyle"
         val missingContests = mutableListOf<Contest>()
         allContests.forEach { contest ->
             val stylesForContest: List<MvrStyle> = mvrStyles.filter { it: MvrStyle -> it.contests.contains(contest.name) }
@@ -284,40 +252,76 @@ class Solver(val countyName: String, mvrStyles: List<MvrStyle>, contests: List<C
                 missingContests.add(contest)
             }
         }
-
         if (missingContests.isNotEmpty()) {
-            val missingStyle = Style(missingContests)
+            val missingStyle = Style(missingContests, 0)
             styles.add(missingStyle)
+            missingContests.forEach { missingStyle.setMin(it.contestVotes) }
         }
+
+        mvrStyles.forEach{ styles.add(Style(it)) }
         allStyles = styles
     }
 
     inner class Contest(countyContest: CountyContestVotes) {
         val name = countyContest.contestName
         val id = nextContestId++
+        val contestCards = contestNc[countyContest.contestName]!!
         val contestVotes = countyContest.contestVotes()
+
+        init {
+            if (contestVotes > contestCards) {
+                logger.warn{" county $countyName has contestVotes $contestVotes > $contestCards contestCards"}
+            }
+        }
+
+        fun hasVotes(): Int {
+            return allStyles.filter { it.contests.contains(this) }.sumOf { it.ncards() }
+        }
+
+        // positive if it needs cards, negetive if it has more cards than it needs to satisfy its vote count
+        fun need(): Int {
+            return contestVotes - hasVotes()
+        }
+
+        fun undervotePct() = (hasVotes() - contestVotes)  / contestVotes.toDouble()
+
         var hasVotes = 0
-
         fun needs() = max(0, contestVotes - hasVotes)
-
         fun benefit(nvotes: Int): Int { // increases the votes used - overvotes added
             return if (nvotes < needs()) nvotes else 2 * needs() - nvotes
         }
 
         override fun toString(): String {
-            return "Contest($id, name='$name', contestVotes=$contestVotes, hasVotes=$hasVotes needs=${needs()})"
+            return "Contest($id, name='$name', contestCards=$contestCards, contestVotes=$contestVotes, need=${need()} undervotePct=${undervotePct()})"
         }
     }
 
-    inner class Style(val contests: List<Contest>) {
+    inner class Style(val contests: List<Contest>, mvrCount: Int) {
+        val mvrPct = mvrCount / mvrTotal.toDouble()
         val id = nextStyleId++
-        var ncards = 0
+        val contestV = allContests.map { if (contests.contains(it)) 1 else 0 }
 
-        constructor(mvrStyle: MvrStyle) : this(allContests.filter { mvrStyle.contests.contains(it.name) })
+        var minCards = 0  // minimum number of cards, eg from singletons
+        var optCards = 0  // extra cards that can be adjusted
+
+        constructor(mvrStyle: MvrStyle) : this(allContests.filter { mvrStyle.contests.contains(it.name)}, mvrStyle.cardCount )
+
+        fun ncards() = minCards + optCards
+
+        fun contestIds(): List<Int> = contests.map { it.id }
+
+        fun setMin(minCards: Int) {
+            this.minCards = max(this.minCards, minCards)
+        }
+
+        fun scalarMult(v: List<Int>): Int {
+            require (v.size == contestV.size)
+            return contestV.mapIndexed{ idx, cv -> v[idx] * cv }.sum()
+        }
 
         // search for ncards with maximum benefit
         fun optNCards(): Pair<Int, Double> {
-           val optNCards = findDiscreteMaximum(0, population) { ncards -> benefit(ncards) }
+           val optNCards = findDiscreteMaximum(0, cardsinCountyPool) { ncards -> benefit(ncards) }
             return Pair(optNCards, benefit(optNCards))
         }
 
@@ -326,44 +330,92 @@ class Solver(val countyName: String, mvrStyles: List<MvrStyle>, contests: List<C
         }
 
         override fun toString(): String {
-            return "Style($id, contests=${contests.map{it.id}}, ncards=$ncards)"
+            return "Style($id, contests=${contests.map{it.id}}, ncards=${ncards()})"
         }
     }
 
-    // whats the benefit of adding nvotes to style ?
-    //fun benefit(nvotes: Int, style: Style): Int {
-    //    return style.contests.sumOf{ it.benefit(nvotes) }
-    //}
-
+    /*
     fun addCards(style: Style, ncards: Int, ) {
         style.contests.forEach { it.hasVotes += ncards }
         style.ncards += ncards
         totalCards += ncards
-    }
+    } */
 
-    fun solve() {
+    fun allocate() {
         // find contests that are only included in one style
-        val singletons = mutableListOf<Triple<Contest, Style, Int>>()
         allContests.forEach { contest ->
             val useBy = allStyles.filter { it.contests.contains(contest) }
             if (useBy.size == 1) {
-                val style = useBy.first()
-                val benefit = style.benefit(contest.needs()).toInt()
-                singletons.add(Triple(contest, style, benefit))
-            }
-        }
-        if (singletons.isNotEmpty()) {
-            if (show) println("singletons")
-            singletons.sortByDescending { it.third }
-            singletons.forEach { (contest, style, _ ) ->
-                if (contest.needs() > 0) {
-                    print(" Contest ${contest.id} ")
-                    addCards(style, contest.needs())
-                }
+                val singletonStyle = useBy.first()
+                singletonStyle.setMin(contest.contestCards)
             }
         }
 
-        // TODO optNCards is too agressive in that it favors large styles, and smaller ones are starved.
+        // how many cards we have to distribute
+        val extraCards = cardsinCountyPool - allStyles.sumOf{ it.minCards }
+
+        // start by allocating in proportion to mvrCount
+        allStyles.forEach{ it.optCards = roundToClosest(it.mvrPct * extraCards) }
+        val check = allStyles.sumOf{ it.optCards }
+        val check2 = allStyles.sumOf{ it.minCards }
+
+        var show = false
+        if (countyName == "Lake") {
+            println("County $countyName")
+            println("Contests")
+            allContests.forEach { println(" Contest(${it.id}, need= ${it.need()}, uvPct= ${df(it.undervotePct())}, ${it.name})") }
+            println("Styles")
+            allStyles.forEach { println(" Style(${it.id}, ncontests=${it.contests.size}, minCards= ${it.minCards} optCards= ${it.optCards} ${it.contestIds()})") }
+            println()
+            // show = true
+        }
+
+        /*
+        val transferAtaTime = 10
+        var iterLimit = 10
+
+        while (iterLimit > 0) {
+            val beforeNeedV = allContests.map { it.need() }
+            val beforeScores =  allStyles.map{ it.scalarMult(beforeNeedV) }
+
+            val fromStyleIdx = beforeScores.withIndex().minBy { it.value }.index
+            val fromStyle = allStyles[fromStyleIdx]
+            val fromStyleScore = beforeScores[fromStyleIdx]
+
+            val toStyleIdx = beforeScores.withIndex().maxBy { it.value }.index
+            val toStyle = allStyles[toStyleIdx]
+            val toStyleScore = beforeScores[toStyleIdx]
+            toStyle.optCards += transferAtaTime
+            fromStyle.optCards -= transferAtaTime
+
+            val afterNeedV = allContests.map { it.need() }
+            val afterScores =  allStyles.map{ it.scalarMult(afterNeedV) }
+
+            if (show) {
+                println(" before contest.need $beforeNeedV")
+                println(" before style scores $beforeScores")
+                println(" fromStyleIdx $fromStyleIdx, fromStyleScore $fromStyleScore")
+                println(" toStyleIdx $toStyleIdx, toStyleScore $toStyleScore")
+                println()
+
+                println("contest need")
+                println(" idx, before, after, diff")
+                beforeNeedV.forEachIndexed { i, it ->
+                    println(" $i, $it, ${afterNeedV[i]}, ${it - afterNeedV[i]}")
+                }
+
+                println("\nstyle score")
+                println(" idx, before, after, diff")
+                beforeScores.forEachIndexed { i, it ->
+                    println(" $i, $it, ${afterScores[i]}, ${it - afterScores[i]}")
+                }
+                println()
+            }
+
+            iterLimit--
+        } */
+
+        /* TODO optNCards is too agressive in that it favors large styles, and smaller ones are starved.
         // each style gets one shot with optNCards
         var need = 1
         val useStyles = mutableSetOf<Style>()
@@ -375,7 +427,7 @@ class Solver(val countyName: String, mvrStyles: List<MvrStyle>, contests: List<C
                 Triple(it, optNCards, optBenefit)
             }
             val maxBenefits = styleBenefits.maxBy { it.third }
-// break ties
+// break ties ?
             need = maxBenefits.second
             if (need > 0) addCards(maxBenefits.first, maxBenefits.second)
             val worked = useStyles.remove(maxBenefits.first)
@@ -403,9 +455,10 @@ class Solver(val countyName: String, mvrStyles: List<MvrStyle>, contests: List<C
                 val frac = style.ncards / denom
                 addCards(style, roundToClosest(frac * overvotes))
             }
-        }
+        } */
+
         if (show) {
-            println("$countyName: totalCards=$totalCards population = $population diff=${totalCards - population}")
+            println("$countyName: totalCards=$totalCards population = $cardsinCountyPool diff=${totalCards - cardsinCountyPool}")
             allStyles.forEach { println(it) }
         }
     }
@@ -587,3 +640,64 @@ data class AdjustableStylePool(
         return result
     }
 } */
+
+/* ======================================
+contest.csv
+
+District Court Judge - 5th Judicial District - Granger,opportunistic_benefits,in_progress,1,88150,58756,"""Yes""",25669,0.04000000,0,0,0,0,0,0,0,1.03905000,0,23,23
+
+
+
+What we know
+1. Nc = 58756 from contest.csv:
+
+   District Court Judge - 5th Judicial District - Granger,opportunistic_benefits,in_progress,1,88150,58756,"""Yes""",25669,0.04000000,0,0,0,0,0,0,0,1.03905000,0,23,23
+
+2. The vote count for each contest in each County, from tabulate_county.csv:
+
+  Clear Creek,District Court Judge - 5th Judicial District - Granger,Yes,3937
+    Clear Creek,District Court Judge - 5th Judicial District - Granger,No,1300
+
+    Eagle,District Court Judge - 5th Judicial District - Granger,Yes,17813
+    Eagle,District Court Judge - 5th Judicial District - Granger,No,4425
+
+    Lake,District Court Judge - 5th Judicial District - Granger,Yes,2192
+    Lake,District Court Judge - 5th Judicial District - Granger,No,926
+
+    Summit,District Court Judge - 5th Judicial District - Granger,Yes,11120
+    Summit,District Court Judge - 5th Judicial District - Granger,No,2742
+
+distribute cards in the same proportion as votes to the county pools (np)
+
+58756  * (5237/44455) = 6922 = Ncards(Contest, County)
+58756  * (3118/44455) = 4121
+...
+
+Ideally we could solve for how many cards each style in the pool has.
+But we cant solve that equation because we dont even know what the styles actually are.
+
+So we estimate the styles for the county, and estimate the number of cards each style has Ncards(Style, County), subject to constraint:
+
+    Sum(cards(Style, County))) >=
+
+So we let the number of cards for a contest in the county pool Ncards(Contest, County)  not agree with  Ncp(county)
+
+
+But we have to insist that Ncards(Contest, County) >=  Nvotes(Contest, County), so that we have enough cards to exhaust the votes in the cvrs for that pool.
+ie  NVotes(Contest, County) cvrs == ac. So let the undervotes be different.
+
+when we look at this table:
+
+         county 	auditcenter   	cvrs
+                		ncards nvotes 	ncards nvotes
+    Clear Creek   	  6922      5237   	6608   4994
+          Eagle  	29392    22238  	34639  22238
+           Lake   	  4121      3118   	4010   3038
+         Summit  	18321    13862  	18217  13774
+          Total 		 58756   44455  	63474  44044
+
+we see cvr ncards >= ac ncards, but nvotes doesnt agree.
+we must be setting undervotes wrong  in vunderpools ?
+
+
+ */

@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2022Primary
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
-import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -79,7 +79,7 @@ fun compareCvrSchemaVsContestBuilder(county: String, export: DominionCvrExportCs
     val exportContestInfos = export.makeContestInfo()
 
     // CountyContestBuilder only uses coloradoInput
-    val contestBuilder = CountyContestBuilder(coloradoInput)
+    val contestBuilder = BuildCorlaContests(coloradoInput)
     val contests = contestBuilder.contests(emptyMap())
 
     var countErrs = 0

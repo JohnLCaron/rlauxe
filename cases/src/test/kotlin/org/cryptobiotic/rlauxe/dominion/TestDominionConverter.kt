@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.dominion
 
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
@@ -35,7 +35,7 @@ class TestDominionConverter {
     // this tests running and checking DominionCvrConverter
     fun testDominionConverter(county: String, filename: String, coloradoInput: ColoradoInput) {
         val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
-        val contestBuilder = CountyContestBuilder(coloradoInput)
+        val contestBuilder = BuildCorlaContests(coloradoInput)
         val dominionConverter = DominionConverter(county, export, contestBuilder.infosByName, coloradoInput)
     }
 
@@ -44,7 +44,7 @@ class TestDominionConverter {
         val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
         val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
 
-        val contestBuilder = CountyContestBuilder(coloradoInput)
+        val contestBuilder = BuildCorlaContests(coloradoInput)
         val contests = contestBuilder.contests(emptyMap())
         val contestMap = contests.associateBy{ it.name }
 
@@ -80,7 +80,7 @@ class TestDominionConverter {
     fun testWriteDominionCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
         val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
 
-        val contestBuilder = CountyContestBuilder(coloradoInput)
+        val contestBuilder = BuildCorlaContests(coloradoInput)
         val dominionConverter = DominionConverter(county, export, contestBuilder.infosByName, coloradoInput)
         val cards: List<AuditableCard> = export.cvrs.map { dominionConverter.convertToCard(it) }
         println("ncards = ${cards.size}")

@@ -26,11 +26,11 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlinx.coroutines.test)
 
-    /*
-        testImplementation(platform("org.junit:junit-bom:5.13.4"))
-        testImplementation("org.junit.jupiter:junit-jupiter")
+    /* too much trouble for QuantilesTest.java
         testImplementation("com.google.guava:guava:33.5.0-jre")
         testImplementation("com.google.truth:truth:1.4.5")
+        testImplementation(platform("org.junit:junit-bom:5.13.4"))
+        testImplementation("org.junit.jupiter:junit-jupiter")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher") */
 
     testFixturesImplementation(files("../libs/raire-java-1.0.2.jar"))
@@ -43,6 +43,7 @@ dependencies {
     testFixturesImplementation(libs.commons.math)
     testFixturesImplementation(libs.bull.result)
 
+    // remove kotest
     // cant use testImplementation(kotlin("test")) and kotest together as they have diffrent jupitor versions....
     /* testImplementation(libs.bundles.jvmtest)
     testImplementation(libs.kotest.property)

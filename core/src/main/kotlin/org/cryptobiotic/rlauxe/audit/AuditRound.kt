@@ -228,7 +228,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         }
     }
 
-    // TODO use contestRound.auditorWantsRisk
+    /* TODO use contestRound.auditorWantsRisk
     fun calcMvrsNeeded(contest: ContestWithAssertions, config : Config): Int {
         require(assertion is ClcaAssertion)
         val cassorter = assertion.cassorter
@@ -246,7 +246,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
             val maxBet = 2 * clcaConfig.maxLoss // TODO ??
             cassorter.sampleSizeWithErrors(contest.Npop, maxBet, alpha, ClcaErrorRates(noerror, upper, ratesWithPhantoms))
         }
-    }
+    } */
 
     override fun toString(): String {
         return "AssertionRound(roundIdx=$roundIdx, estMvrs=$estMvrs, estNewMvrs=$estNewMvrs, status=$status)"

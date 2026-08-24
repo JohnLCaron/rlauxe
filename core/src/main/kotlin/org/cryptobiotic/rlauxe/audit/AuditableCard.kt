@@ -193,6 +193,7 @@ data class AuditableCard (
 
 }
 
+/*
 fun makeVotes( contestIds: IntArray,  contestStarts: IntArray, candidates: IntArray): Map<Int, IntArray> {
     val lastIndex = contestIds.size-1
     val makeVotes = mutableMapOf<Int, IntArray>()
@@ -204,7 +205,7 @@ fun makeVotes( contestIds: IntArray,  contestStarts: IntArray, candidates: IntAr
         makeVotes[contestId] = candidates.sliceArray(start until end)
     }
     return makeVotes.toMap()
-}
+} */
 
 //         val (contestIds, contestStarts, candidates) = makeFromVotes(cvrExport.votes)
 fun makeFromVotes(votes: Map<Int, IntArray>?): Triple<IntArray, IntArray, IntArray> {

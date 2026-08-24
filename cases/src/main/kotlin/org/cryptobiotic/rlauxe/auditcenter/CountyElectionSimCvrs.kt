@@ -16,14 +16,17 @@ import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("CountyElectionSansCvrs")
 
-// We want to synnthesis cvrs and use them as the cvrPools
+// port CountyElectionSansCvrs using CountyPoolsSimCvrs
+
+// We want to synthesis cvrs and use them as the cvrPools
 // generate countyPools from auditcenter
-open class CountyElectionSansCvrs (
+open class CountyElectionSimCvrs (
     val coloradoInput: ColoradoInput,
     val topdir: String,
     val hasStyle: Boolean,
     val name: String,
     val onlyCounty: String? = null,
+    val onlyContest: String? = null,
 ): ElectionBuilder {
     val publisher = Publisher(topdir)
     val ncards: Int
@@ -36,14 +39,33 @@ open class CountyElectionSansCvrs (
     init {
         // contests made from auditcenter
         val contestBuilder = BuildCorlaContests(coloradoInput)
-        val infos = contestBuilder.infos
 
-        // countyTabs from auditcenter was already used by CountyContestBuilder to set official votes, Nc
-        // val countyTabs = coloradoInput.countyTabAllContests.associateBy { it.countyName }
+        val contestTabByCounty: Map<String, CountyTabAllContests> = if (onlyCounty == null)
+            coloradoInput.countyTabsAllContests().filter { it.key !in coloradoInput.skipCounties }
+        else
+            mapOf(onlyCounty to coloradoInput.countyTabsAllContests()[onlyCounty]!!)
 
         // make the pools from the auditcenter
-        val makePools = CountyPoolsSansCvrs(contestBuilder.corlaContestBuilders, coloradoInput, onlyCounty)
-        val countyPoolBuilders: List<CorlaCountyPoolsBuilder> = makePools.countyPools
+
+        // class CountyPoolsSimCvrs(
+        //    infos: List<ContestInfo>,
+        //    val contestNcs: Map<String, Int>,
+        //    val countiesTabs: Map<String, CountyTabAllContests2>, // county -> CountyTabAllContests2
+        //    val contestsTabs: Map<String, ContestTabAllCounties>, // contest name -> CountyTabAllContests2
+        //    val mvrStylesMap: Map<String, List<MvrStyle>>, // // county -> List<MvrStyle2>
+        //    val choiceMapper: (String) -> String,
+        val countyPoolsSimCvrs = CountyPoolsSimCvrs(
+            contestBuilder.infosByName,
+            contestBuilder.corlaContestBuilders.associate { it.info.name to it.Nc },
+            coloradoInput.strataPopulation,
+            contestTabByCounty,
+            coloradoInput.contestTabsAllCounties(),
+            coloradoInput.stylesFromMvrs.associate { it.countyName to it.styles.values.toList() },
+            { countyName, contestName, choiceName -> coloradoInput.matchCandidate(countyName, contestName, choiceName) },
+            onlyContest,
+        )
+
+        val countyPoolBuilders: List<CountyPoolsSimCvrs.CountyPoolsBuilder> = countyPoolsSimCvrs.countyPools
         countyPools = countyPoolBuilders.map { it.build() }
         countyPools.forEach {
             allStyles.addAll ( it.styles)
@@ -55,16 +77,14 @@ open class CountyElectionSansCvrs (
 
         // read back one county at a time, create the CvrCountyPools and recalc their styles
         var cvrCardCount = 0
-        val countyIterator = CvrPoolIteratorfromCountyFiles(countyPools, publisher, infos, lastStyleId+11)
+        val countyIterator = ReadCountyPools(countyPools, publisher, contestBuilder.infos, lastStyleId+11)  // TODO +11 ??
         countyIterator.forEach { cvrPool: CountyPools ->
             cvrCardCount += cvrPool.cardCount
             allStyles.addAll ( cvrPool.styles)
             cvrPools.add(cvrPool)
         }
-        if( ncards != cvrCardCount)
-            print("$ncards != $cvrCardCount")
         val totalCvrTabs = countyIterator.totalCvrTabs
-        val ncast: Map<Int, Int>  = totalCvrTabs.mapValues { it.value.ncards() }
+        // val ncast: Map<Int, Int>  = totalCvrTabs.mapValues { it.value.ncards() }
         // just leave it as Ncast = Nc, then the diff goes into the undervote
         val contests = contestBuilder.contests(emptyMap<Int, Int>())
 
@@ -72,7 +92,7 @@ open class CountyElectionSansCvrs (
         // can put them is a seperate pool as long as you include them in the unsorted iterator
         val phantoms = makePhantomCards(contests, 0) // TODO
 
-        // use Nc as Npop
+        // use Nc as Npop TODO wtf?
         contestsUA = contests.map {
             val contestCvrTab = totalCvrTabs[it.id]
             if (contestCvrTab != null) {
@@ -82,14 +102,6 @@ open class CountyElectionSansCvrs (
             ContestWithAssertions(it, true, hasStyle).addStandardAssertions()
         }
     } // init
-
-    fun compareStyle(style1: StyleIF, style2: StyleIF) : Boolean {
-        if (style1.name() != style2.name()) return false
-        if (style1.ncards() != style2.ncards()) return false
-        if (style1.hasExactContests() != style2.hasExactContests()) return false
-        if (style1.contestIdSet() != style2.contestIdSet()) return false
-        return true
-    }
 
     override fun electionInfo() =
         ElectionInfo(
@@ -113,9 +125,9 @@ open class CountyElectionSansCvrs (
     override fun unsortedMvrsInternal() = null
     override fun unsortedMvrsExternal() = CardIteratorfromCountyPools(countyPools, publisher, styles = allStyles)
 
-    // read each county's generated cvrs in and create the "cvr" CountyPool out of it
-    // since the cvr generation is approximate, we can compare it with the original
-    class CvrPoolIteratorfromCountyFiles(
+    // read each county's generated mvrs in and create the "cvr" CountyPool out of it
+    // since the cvr generation is approximate, we will compare it with the original for accuracy
+    private class ReadCountyPools(
         acPools: List<CountyPools>, // from the auditcenter
         publisher: Publisher,
         val infos: Map<Int, ContestInfo>,
@@ -192,6 +204,7 @@ open class CountyElectionSansCvrs (
     ): Int {
         val dir = publisher.unsortedMvrsDirectory()
         validateOutputDir(Path(dir))
+
         var totalCards = 0
         countyPools.forEach { countyPool ->
             val outfile = "$dir/${countyPool.countyName}.csv"
@@ -199,9 +212,8 @@ open class CountyElectionSansCvrs (
 
             // TODO makePhantomCvrs(contests)
             val unsortedMvrIterator = Closer(poolIterator)
-            writeCardCsvFile(unsortedMvrIterator, outfile)
+            totalCards += writeCardCsvFile(unsortedMvrIterator, outfile)
             logger.info { "createAndSaveUnsortedMvrs to ${outfile}" }
-            totalCards = poolIterator.cardno
         }
 
         return totalCards
@@ -210,7 +222,7 @@ open class CountyElectionSansCvrs (
 
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the county totals. May be CLCA or OneAudit
-fun createCountyElectionSansCvrs(
+fun createCountyElectionSimCvrs(
     topdir: String,
     coloradoInput: ColoradoInput,
     creation: AuditCreationConfig,
@@ -223,7 +235,7 @@ fun createCountyElectionSansCvrs(
     clearDirectory(Path(topdir))
 
     val election =
-        CountyElectionSansCvrs(coloradoInput,  topdir, name=name,
+        CountyElectionSimCvrs(coloradoInput,  topdir, name=name,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent,
             onlyCounty = onlyCounty)
 

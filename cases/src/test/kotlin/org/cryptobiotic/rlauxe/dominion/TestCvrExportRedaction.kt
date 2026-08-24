@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.dominion
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
-import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
 import org.cryptobiotic.rlauxe.estimate.simulateCards
 import org.cryptobiotic.rlauxe.util.CardTabulation
 import org.cryptobiotic.rlauxe.util.Closer
@@ -79,7 +79,7 @@ class TestCvrExportRedaction {
         val export = readCvrExportsFromFile(filename)
 
         val input = Colorado2020General()
-        val contestBuilder = CountyContestBuilder(input)
+        val contestBuilder = BuildCorlaContests(input)
         val infos = contestBuilder.infos
         val infosByName = infos.mapKeys{ it.value.name }
         val dominionConverter = DominionConverter("Boulder", export, infosByName, input)
@@ -149,7 +149,7 @@ class TestCvrExportRedaction {
         val export = readCvrExportsFromFile(filename)
 
         val input = Colorado2020General()
-        val contestBuilder = CountyContestBuilder(input)
+        val contestBuilder = BuildCorlaContests(input)
         val infos = contestBuilder.infos
         val infosByName = infos.mapKeys{ it.value.name }
 

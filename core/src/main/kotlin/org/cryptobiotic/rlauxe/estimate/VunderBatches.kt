@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CountyPools
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 
 // Vunder: One Contest, one pool
 // data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
@@ -56,15 +55,17 @@ class VunderBatches(styles: List<StyleIF>, val onePool: VunderPool) {
 }
 
 // from CountyElectionSansCvrs
-// use VunderBatches to constrain the votes to the CountyPools Tabulation
-class CvrIteratorfromCountyPools(val countyPool: CountyPools, val startCardno: Int) : Iterator<AuditableCard> {
+// use VunderBatches to constrain the votes to the CountyPools' Tabulation
+class CreateCardsForCountyPools(val countyPool: CountyPools, val startCardno: Int) : Iterator<AuditableCard> {
     val vunderBatches: VunderBatches // tracks all the cvrs for this county
     var cardPoolIter = countyPool.styles.iterator()
     var innerIter = CardsFromStyle(cardPoolIter.next())
     var cardno = startCardno
 
     init {
-        // use tab ncards as npop
+        if (countyPool.countyName == "Boulder")
+            print("")
+        // use tabulation ncards as npop
         val vunders =
             countyPool.contestTabs.mapValues { it.value.votesAndUndervotes(null, it.value.ncards(), true) }
         val onePool = VunderPool(vunders, countyPool.countyName, countyPool.countyPoolId, true)
@@ -81,15 +82,16 @@ class CvrIteratorfromCountyPools(val countyPool: CountyPools, val startCardno: I
             innerIter = CardsFromStyle(cardPoolIter.next())
             return hasNext()
         }
-        // should be all done with this CountyPool
+        // should be finished with this CountyPool
         println("done with ${countyPool.countyName} wrote ${cardno - startCardno} cards")
         vunderBatches.onePool.vunderPickers.values.forEach { picker ->
-            if (picker.isNotEmpty()) {
+            if (picker.isNotEmpty()) { // how is this possible ?? nvotes > ncards ??
+                println("${picker.vunder.show()}")
                 print("  ${picker.vunder.contestId} -> ")
                 picker.vunderRemaining.forEach { choice ->
                     if (choice.remaining > 0) print("cand=${choice.cands.contentToString()}: ${choice.remaining}, ")
                 }
-                println()
+                println(" remaining: ${picker.vunderLeft()}")
             }
         }
         return false
@@ -102,6 +104,7 @@ class CvrIteratorfromCountyPools(val countyPool: CountyPools, val startCardno: I
 
         override fun next(): AuditableCard {
             countCards++
+            // TODO use county manifests for location
             val card = AuditableCard.empty(id = "${poolName}.index-${cardno++}", phantom = false, styleId=cardPool.id())
             return vunderBatches.simulatePooledCard(card)
         }

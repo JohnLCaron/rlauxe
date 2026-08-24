@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
-import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
 import org.cryptobiotic.rlauxe.auditcenter.writeCountyContestData
 import org.cryptobiotic.rlauxe.auditcenter.writeCountyData
 import org.cryptobiotic.rlauxe.core.*
@@ -21,7 +21,7 @@ private val logger = KotlinLogging.logger("CreateCorlaElection")
 // obsolete
 open class CreateCorlaElection (
     val coloradoInput: ColoradoInput,
-    val countyElection: CountyContestBuilder,
+    val countyElection: BuildCorlaContests,
     val auditType: AuditType,
     val topdir: String,
     val hasStyle: Boolean,
@@ -234,7 +234,7 @@ fun createCorlaElection(
 ) {
     val stopwatch = Stopwatch()
 
-    val countyElection = CountyContestBuilder(coloradoInput)
+    val countyElection = BuildCorlaContests(coloradoInput)
 
     val election = if (creation.auditType.isClca())
             CreateCorlaElection(coloradoInput, countyElection,

@@ -16,7 +16,7 @@ import org.cryptobiotic.rlauxe.audit.createElectionRecord
 import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
 import org.cryptobiotic.rlauxe.auditcenter.CorlaContestBuilder
-import org.cryptobiotic.rlauxe.auditcenter.CountyContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.core.Contest
@@ -41,7 +41,7 @@ private val debugUndervotes = true
 class CreateCountyAudits(
     val countyName: String,
     val topdir: String,
-    val stateElection: CountyContestBuilder,
+    val stateElection: BuildCorlaContests,
     val countyContestTab: CountyTabAllContests,
     val hasStyle: Boolean,
 ): ElectionBuilder {
@@ -174,7 +174,7 @@ fun createCountyAudits(
     // misc data by county
     writeCountyAuditData(topdir, coloradoInput)
 
-    val countyElection = CountyContestBuilder(coloradoInput)
+    val countyElection = BuildCorlaContests(coloradoInput)
     val contestTabByCounty: Map<String, CountyTabAllContests> = coloradoInput.countyTabsAllContests()
     val whichCounties = if (wantCounties.isNotEmpty()) wantCounties else contestTabByCounty.keys.toList()
 

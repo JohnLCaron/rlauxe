@@ -19,8 +19,8 @@ import kotlin.text.appendLine
 // Adams,Presidential Electors,Robert F. Kennedy Jr. / Nicole Shanahan,2909
 
 // for one county, all contests
-data class CountyTabAllContests(val countyName: String) {
-    val contests = mutableMapOf<String, CountyContestVotes>() // contestName (canonical I think) -> CountyContestVotes
+data class CountyTabAllContests(override val countyName: String): CountyTabAllContestsIF {
+    override val contests = mutableMapOf<String, CountyContestVotes>() // contestName (canonical I think) -> CountyContestVotes
 
     override fun toString() = buildString {
         appendLine("'$countyName'")
@@ -28,15 +28,15 @@ data class CountyTabAllContests(val countyName: String) {
     }
 
     fun addChoiceVote(line: ChoiceVote) {
-        val contest = contests.getOrPut(line.contestName ) { CountyContestVotes(line.contestName) }
+        val contest = contests.getOrPut(line.contestName ) { CountyContestVotes(countyName, line.contestName) }
         contest.addChoice(line.choiceName, line.countyVote)
     }
 }
 
 // we only know votes, not ncards or undervotes.
 // for one county, one contest
-data class CountyContestVotes(val contestName: String) {
-    val choices = mutableMapOf<String, Int>() // choice name (not canonical) -> contest choice vote in this county
+data class CountyContestVotes(override val countyName: String, override val contestName: String): CountyContestVotesIF {
+    override val choices = mutableMapOf<String, Int>() // choice name (not canonical) -> contest choice vote in this county
 
     fun addChoice(choiceName: String, choiceVote: Int) {
         val accum = choices.getOrDefault(choiceName, 0)
@@ -49,7 +49,7 @@ data class CountyContestVotes(val contestName: String) {
         }
     }
 
-    fun contestVotes() = choices.values.sumOf { it }
+    override fun contestVotes() = choices.values.sumOf { it }
 
     override fun toString() = buildString {
         append("'$contestName': $choices")
@@ -100,10 +100,10 @@ fun readCountyTabulateCsv(filename: String): Map<String, CountyTabAllContests> {
     return counties.toSortedMap()
 }
 
-data class ContestTabAllCounties(val contestName: String) {
-    val choices = mutableMapOf<String, Int>() // original choice name -> votes
-    val counties = mutableSetOf<String>()     // countyNames
-    val countyVotes = mutableMapOf<String, Int>()     // countyName -> total votes for this contest in this county
+data class ContestTabAllCounties(override val contestName: String): ContestTabAllCountiesIF {
+    override val choices = mutableMapOf<String, Int>() // original choice name -> votes
+    override val counties = mutableSetOf<String>()     // countyNames
+    override val countyVotes = mutableMapOf<String, Int>()     // countyName -> total votes for this contest in this county
 
     fun add(countyName: String, votes: CountyContestVotes) {
         votes.choices.forEach { (choiceName, votes) ->
@@ -130,7 +130,7 @@ data class ContestTabAllCounties(val contestName: String) {
         return result
     }
 
-    fun sumVotes() = choices.values.sumOf { it }
+    override fun sumVotes() = choices.values.sumOf { it }
 
     override fun toString() = buildString {
         appendLine("'$contestName'")

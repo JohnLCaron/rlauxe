@@ -156,3 +156,22 @@ The same when using "relaxed risk limits"
 ````
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/cases/Corla26/Corla26MergedRelaxed.Linear.html" rel="Corla26MergedRelaxed">![Corla26MergedRelaxed](Corla26/Corla26MergedRelaxed.Linear.png)</a>
+
+## Limits of Colorado data
+
+1. Need CVRs to conduct publically verifiable elections.
+2. Need Ballot Styles (or CVRs) to conduct a CLCA.
+3. County subtotal data does not include count of number of cards or undervotes by contest. If we had that, we could at least make accurate simulations.
+
+##### SOS BEAC 8/14/26 notes
+
+voted   register
+ 582793 2071995   ind 72/28% dem/rep
+ 486525 1007781   dem
+ 371183  909608   rep
+1444308 4488997 total
+
+24K in person 1.7%
+
+RLA modernization group
+STV Longmont ballot initiative 2029

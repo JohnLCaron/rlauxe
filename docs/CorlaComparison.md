@@ -1,5 +1,5 @@
 # Compare Rlauxe and Corla
-last updated 8/18/2026
+last updated 8/19/2026
 
 ## PRNG
 
@@ -29,7 +29,7 @@ in (1 .. ncards), creating a random sort of the manifest, and samples those card
         return Triple(digest, bigint, pick)
     }
 ````
-This creates a uniform sample over each county manifest. Corla uses "sample-with-replacement".
+This creates a uniform sample over each county manifest. 
 
 Because they use BigInteger, this algorithm supports full 20 decimal digits (10^20).
 
@@ -38,6 +38,11 @@ TODO: what about "statewide contests" ?
 **Rlauxe** assigns each card an unsigned long PRN (Maximum Value: 18,446,744,073,709,551,615 (2⁶⁴ - 1) = 1.844674407×10¹⁹.
 These PRNS are unique across counties.
 
-Rlauxe creates and stores the manifest sorted by the PRN, for speed of sampling. This creates a uniform or card-style sample over the entire election.
-Rlauxe uses "sample-without-replacement".
+Rlauxe creates and stores the manifest sorted by the PRN, for speed of sampling. This creates either a uniform (take the first n of the sorted manifest),
+or a card-style sample (take the first n_k of samples that contain contest k).
+
+## Sampling with/without replacement
+
+Corla uses "sample-with-replacement". Rlauxe uses "sample-without-replacement". The main difference is the computasion of the 
+expected value of the mean for the null hypothosis. See function populationMeanIfH0() in betting/Utils.kt in the core library.
 

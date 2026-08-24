@@ -31,6 +31,11 @@ data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pai
     val vunder: List<Pair<IntArray, Int>> = voteCounts + Pair(intArrayOf(), undervotes) + Pair(intArrayOf(), missing)
     val nvunder = vunder.size  // ncandidates + 2
 
+    init {
+         if (nvotes > ncards && voteForN == 1)
+             println("contest $contestId $nvotes > $ncards undervotes=$undervotes voteForN=$voteForN")
+    }
+
     // only for non-IRV
     fun cands(): Map<Int, Int> {
         return voteCounts.map{ Pair(it.first[0], it.second) }.sortedBy { it.first }.toMap()
@@ -38,6 +43,10 @@ data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pai
 
     override fun toString() = buildString {
         append("Vunder contestId=$contestId, voteForN=$voteForN, votes=${cands()}, nvotes=$nvotes ncards=$ncards, undervotes=$undervotes, missing=$missing")
+    }
+
+    fun show() = buildString {
+        append("Vunder contestId=$contestId, nvotes=$nvotes ncards=$ncards, undervotes=$undervotes, missing=$missing, voteForN=$voteForN")
     }
 
     companion object {

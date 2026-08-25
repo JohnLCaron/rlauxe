@@ -36,7 +36,7 @@ class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>
                 if (useContest.isIRV) {
                     // I think these are just regular Cvrs but the IRV contest was made seperate for privacy reasons
                     // "RCV Redacted & Randomly Sorted",,,,,"DS-01",0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-                    println("*** IRV RedactedVotes shouldnt get here!")
+                    logger.warn{"*** IRV RedactedVotes shouldnt get here!"}
                 } else {
                     val candidateVotes = contestVotes.getOrPut(useContestIdx, { mutableMapOf() })
                     for (candIdx in 0 until useContest.ncols) {
@@ -45,7 +45,7 @@ class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>
                         candidateVotes[candIdx] = prev + nvotes
                     }
                     if (useContestIdx == 31 && candidateVotes.values.sum() == 1)
-                        print("*** contestIdx == 31 votes = ${candidateVotes.values.sum()}")
+                        logger.debug{"*** contestIdx == 31 votes = ${candidateVotes.values.sum()}"}
                 }
                 colidx += useContest.ncols
             } else {

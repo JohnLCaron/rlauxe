@@ -63,7 +63,7 @@ class CheckCanonicalNames( val input: ColoradoInput) {
         var allOk = true
 
         // same as raw input; no mods
-        input.countyTabsAllContests().filter{it.key !in input.skipCounties }.forEach { (countyName, ct: CountyTabAllContests) ->
+        input.countyTabsAllContests().filter{!input.skipCounties(it.key) }.forEach { (countyName, ct: CountyTabAllContests) ->
             ct.contests.forEach { (contestName, countyTabAllContests) ->
                 val canonicalContest = input.canonicalContests()[contestName]
                 if (canonicalContest == null) {

@@ -2,7 +2,10 @@ package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
-import org.cryptobiotic.rlauxe.auditcenter.allVotedatabaseCounties
+import org.cryptobiotic.rlauxe.auditcenter.Colorado2026PwithCvrs
+import org.cryptobiotic.rlauxe.auditcenter.auditcenter
+import org.cryptobiotic.rlauxe.auditcenter.auditcenter2026Counties
+import org.cryptobiotic.rlauxe.auditcenter.votedatabase2020Counties
 import org.cryptobiotic.rlauxe.auditcenter.corlaCreationSettings
 import org.cryptobiotic.rlauxe.auditcenter.corlaRoundSettings
 import org.cryptobiotic.rlauxe.auditcenter.countyElectionWithCvrs
@@ -20,7 +23,7 @@ class MakeElectionsWithCvrs {
         val topdir = "$cases/corla/corla2020/withCvrs"
 
         countyElectionWithCvrs(
-            allVotedatabaseCounties(votedatabase2020),
+            votedatabase2020Counties(votedatabase2020),
             Colorado2020General(),
             topdir,
             corlaCreationSettings(2020),
@@ -31,12 +34,28 @@ class MakeElectionsWithCvrs {
         )
     }
 
+    @Test
+    fun makeColorado2026P() {
+        val topdir = "$cases/corla/corla2026/primaryCvrs2"
+
+        countyElectionWithCvrs(
+            auditcenter2026Counties("$auditcenter/2026/primary/observerfiles"),
+            Colorado2026PwithCvrs(),
+            topdir,
+            corlaCreationSettings(2026),
+            corlaRoundSettings(sampling = Sampling.consistent),
+            name = "Colorado2026Pcvrs",
+            startFirstRound = true,
+            isUniform = false,
+        )
+    }
+
     // @Test
     fun makeColorado2020uniform() {
         val topdir = "$cases/corla/withCvrs/Colorado2020uniform"
 
         countyElectionWithCvrs(
-            allVotedatabaseCounties(votedatabase2020),
+            votedatabase2020Counties(votedatabase2020),
             Colorado2020General(),
             topdir,
             corlaCreationSettings(2020),

@@ -1,6 +1,6 @@
 # 2026 Colorado Statewide primary election
 
-_last updated 08/19/2026_
+_last updated 08/25/2026_
 
 * 1,444,041 cards cast in 63 Counties.
 * 707 contests, no IRV.
@@ -107,33 +107,33 @@ The following are simulated Rlauxe audits for different scenarios of which conte
 
 ### All contests
 
-* rlauxe nmvrs = 8780
-* corla nmvrs = 7246
-* contests under maxRisk (rlauxe) = 96 / 103 = 93%
-* contests under maxRisk (corla) = 68 / 103 = 66%
+*  rlauxe nmvrs = 8914
+*  corla nmvrs = 7246
+*  contests under maxRisk (rlauxe) = 103 / 103 = 100%
+*  contests under maxRisk (corla) = 60 / 103 = 58%
 
 |               | rlauxe  |   corla  |
 |---------------|---------|----------|
-| under maxRisk |    96   |     68   |
-| under      5% |    96   |     68   |
-| under     10% |    96   |     72   |
-| under     20% |    96   |     79   |
-| under     30% |    96   |     81   |
+| under maxRisk |   103   |     60   |
+| under      5% |   103   |     60   |
+| under     10% |   103   |     64   |
+| under     20% |   103   |     71   |
+| under     30% |   103   |     73   |
 
 ### All contests with relaxed risk levels
 
-* rlauxe nmvrs = 5379
+* rlauxe nmvrs = 5520
 * corla nmvrs = 7246
-* contests under maxRisk (rlauxe) = 96 / 103 = 93%
-* contests under maxRisk (corla) = 68 / 103 = 66%
+* contests under maxRisk (rlauxe) = 103 / 103 = 100%
+* contests under maxRisk (corla) = 60 / 103 = 58%
 
 |               | rlauxe  |   corla  |
 |---------------|---------|----------|
-| under maxRisk |    96   |     68   |
-| under      5% |    84   |     68   |
-| under     10% |    87   |     72   |
-| under     20% |    96   |     79   |
-| under     30% |    96   |     81   |
+| under maxRisk |   103   |     60   |
+| under      5% |    91   |     60   |
+| under     10% |    94   |     64   |
+| under     20% |   103   |     71   |
+| under     30% |   103   |     73   |
 
 
 ### Incremental Costs of including close contests
@@ -157,11 +157,21 @@ The same when using "relaxed risk limits"
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/cases/Corla26/Corla26MergedRelaxed.Linear.html" rel="Corla26MergedRelaxed">![Corla26MergedRelaxed](Corla26/Corla26MergedRelaxed.Linear.png)</a>
 
-## Limits of Colorado data
+# Merged 2026 primary election with 3 Counties' CVRs
+
+* "La Plata", "Morgan","Weld"
+* Successfully read in the CVRS with a few hiccups:
+    * candidate name "Paul Noel Fiorino" has 2 variants that had to be corrected
+    * La Plata had contest "Secretary of State - LBR" misnamed as "Secretary of State" 
+* missing values of Nc(contest); currently not able to run an accurate audit.
+
+
+# Limits of Colorado data
 
 1. Need CVRs to conduct publically verifiable elections.
 2. Need Ballot Styles (or CVRs) to conduct a CLCA.
 3. County subtotal data does not include count of number of cards or undervotes by contest. If we had that, we could at least make accurate simulations.
+4. Need to know ncards in the Aggregated data; then can put them into a OneAudit pool.
 
 ##### SOS BEAC 8/14/26 notes
 

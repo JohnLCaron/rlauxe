@@ -29,7 +29,7 @@ class VunderBatches(styles: List<StyleIF>, val onePool: VunderPool) {
         val cardb = AuditableCardBuilder.fromCard(card)
 
         if (style == null) {
-            println("style ${card.styleId} not found")
+            logger.warn{"style ${card.styleId} not found"}
             return cardb.build()
         }
 
@@ -63,8 +63,6 @@ class CreateCardsForCountyPools(val countyPool: CountyPools, val startCardno: In
     var cardno = startCardno
 
     init {
-        if (countyPool.countyName == "Boulder")
-            print("")
         // use tabulation ncards as npop
         val vunders =
             countyPool.contestTabs.mapValues { it.value.votesAndUndervotes(null, it.value.ncards(), true) }
@@ -83,15 +81,17 @@ class CreateCardsForCountyPools(val countyPool: CountyPools, val startCardno: In
             return hasNext()
         }
         // should be finished with this CountyPool
-        println("done with ${countyPool.countyName} wrote ${cardno - startCardno} cards")
         vunderBatches.onePool.vunderPickers.values.forEach { picker ->
             if (picker.isNotEmpty()) { // how is this possible ?? nvotes > ncards ??
-                println("${picker.vunder.show()}")
-                print("  ${picker.vunder.contestId} -> ")
-                picker.vunderRemaining.forEach { choice ->
-                    if (choice.remaining > 0) print("cand=${choice.cands.contentToString()}: ${choice.remaining}, ")
+                val msg = buildString {
+                    append(picker.vunder.show())
+                    append("  ${picker.vunder.contestId} -> ")
+                    picker.vunderRemaining.forEach { choice ->
+                        if (choice.remaining > 0) append("cand=${choice.cands.contentToString()}: ${choice.remaining}, ")
+                    }
+                    append(" remaining: ${picker.vunderLeft()}")
                 }
-                println(" remaining: ${picker.vunderLeft()}")
+                logger.warn { msg }
             }
         }
         return false
@@ -121,7 +121,7 @@ fun simulateCards(cardPool: CardPool, startCardno: Int = 0): List<AuditableCard>
 }
 
 // use VunderBatches to constrain the votes to the cardPool Tabulations
-class CvrIteratorFromCardPool(val cardPool: CardPool, val startCardno: Int) : Iterator<AuditableCard> {
+class CvrIteratorFromCardPool(val cardPool: CardPool, startCardno: Int) : Iterator<AuditableCard> {
     val vunderBatches: VunderBatches // tracks all the cvrs for this county
     var cardno = startCardno
     val poolName = cardPool.name()
@@ -145,7 +145,6 @@ class CvrIteratorFromCardPool(val cardPool: CardPool, val startCardno: Int) : It
         val more = countCards < cardPool.ncards()
         if (!more) {
             // should be all done with this CountyPool
-            if (show) println("done with ${cardPool.poolName} wrote ${cardno - startCardno} cards")
             vunderBatches.onePool.vunderPickers.values.forEach { picker ->
                 if (picker.isNotEmpty()) {
                     val mess = buildString {
@@ -153,7 +152,6 @@ class CvrIteratorFromCardPool(val cardPool: CardPool, val startCardno: Int) : It
                         picker.vunderRemaining.forEach { choice ->
                             if (choice.remaining > 0) append("cand=${choice.cands.contentToString()}: ${choice.remaining}, ")
                         }
-                        appendLine()
                     }
                     logger.info{"picker for contest ${picker.vunder.contestId} didnt finish\n$mess"}
                 }
@@ -164,4 +162,3 @@ class CvrIteratorFromCardPool(val cardPool: CardPool, val startCardno: Int) : It
 }
 
 private val logger = KotlinLogging.logger("VunderBatches")
-private val show = false

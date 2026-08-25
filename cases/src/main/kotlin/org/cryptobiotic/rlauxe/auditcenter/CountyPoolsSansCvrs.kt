@@ -61,7 +61,7 @@ class CountyPoolsSansCvrs(
             }
         }
 
-        countyPools = contestTabByCounty.filter { it.key !in coloradoInput.skipCounties }
+        countyPools = contestTabByCounty.filter { !coloradoInput.skipCounties(it.key) }
             .map { (countyName, countyContest) ->
                 CorlaCountyPoolsBuilder(
                     countyName, countyContest, mvrStylesMap[countyName]!!,

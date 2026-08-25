@@ -50,7 +50,7 @@ abstract class ColoradoInput(
     val tabulateCountyFile: String,
     val mvrComparisonFile: String
 ) {
-    abstract val skipCounties: List<String>
+    abstract fun skipCounties(countyName: String): Boolean
 
     //      CountyName,ContestName,ContestChoices
     //      El Paso,City of Colorado Springs Ballot Question 300,"Yes/For,No/Against"
@@ -64,7 +64,7 @@ abstract class ColoradoInput(
 
     fun counties(): List<String>  = canonicalContests().values.map { it.counties }
         .flatten()
-        .filter { it: String -> it !in skipCounties }
+        .filter { !skipCounties(it) }
         .toSet()
         .toList()
         .sorted()
@@ -175,7 +175,8 @@ abstract class ColoradoInput(
     //    val ncards: Int,  // round.ballotCardCount
     //)
     val strataMap: Map<String, StrataInfo> by lazy { mergedInfo().strataInfo.associateBy { it.strataName } }
-    val strataPopulation: Map<String, Int> by lazy { mergedInfo().strataInfo.associate { it.strataName to it.ballotCardCount } } // county name to population
+    open fun strataPopulation() = strataPopulation
+    private val strataPopulation: Map<String, Int> by lazy { mergedInfo().strataInfo.associate { it.strataName to it.ballotCardCount } } // county name to population
     val statewideContests: List<CorlaContestRoundCsv> by lazy { mergedInfo().statewideContests }
 
     // dont use these directly, use matchCanonicalContest() and matchCanonicalCandidate()
@@ -302,8 +303,8 @@ fun mergeContestInfo(input: ColoradoInput): MergedInfo {
 
             // TODO can we really tolerate missing the roundContest ??
             round?.auditReason ?: AuditReason.none,
-            round?.ballotCardCount ?: 0,
-            round?.contestBallotCardCount ?: 0,
+            npop = round?.ballotCardCount ?: 0,
+            nc = round?.contestBallotCardCount ?: 0,
             round?.nwinners ?: 1,
             round?.optimisticSamplesToAudit ?: 0,
             round?.minMargin ?: 0,
@@ -326,7 +327,7 @@ fun mergeContestInfo(input: ColoradoInput): MergedInfo {
             if (strataMap[county] != null) {
                 val old = strataMap[county]?.ballotCardCount ?: 0
                 if (old != contestRound.ballotCardCount) {
-                    println("*** county $county has ballotCardCount $old != ${contestRound.ballotCardCount}")
+                    logger.warn{"*** contest ${canonicalContest.contestName} county $county has ballotCardCount $old != ${contestRound.ballotCardCount}"}
                 }
             } else {
                 strataMap[county] = StrataInfo(county, countyMvr.countMvr, contestRound.ballotCardCount)
@@ -380,7 +381,7 @@ fun writeCountyData(topdir: String, strataInfo: List<StrataInfo>) {
         writer.write("${it.strataName}, ${nfn(it.nmvrs, 5)}, ${nfn(it.ballotCardCount, 5)}\n")
     }
     writer.close()
-    println("wrote ${strataInfo.size} countyData to $outputFilename")
+    logger.info{"wrote ${strataInfo.size} countyData to $outputFilename"}
 }
 
 // data class CountyContestTab(val countyName: String) {
@@ -421,5 +422,5 @@ fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAs
         }
     }
     writer.close()
-    println("wrote ${count}  countyContestData to $outputFilename")
+    logger.info{"wrote ${count}  countyContestData to $outputFilename"}
 }

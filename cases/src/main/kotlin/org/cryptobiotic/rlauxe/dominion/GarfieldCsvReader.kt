@@ -14,7 +14,7 @@ import java.nio.charset.Charset
 // this reads csv files from a "Dominion CVR export files", for Garfield County, Colorado 2020 General election.
 // presumable some earlier version ??
 
-private val logger = KotlinLogging.logger("DominionCvrExportReader")
+private val logger = KotlinLogging.logger("GarfieldCsvReader")
 
 private val d3f = "%3d"
 private val showHeader = false

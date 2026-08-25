@@ -6,7 +6,7 @@ class Colorado2022Primary(ac:String?=auditcenter): ColoradoInput(
     tabulateCountyFile = "$ac/2022/primary/tabulate_county.csv",
     mvrComparisonFile = "$ac/2022/primary/round_2/contest_comparison.csv"
 ) {
-    override val skipCounties = listOf<String>()
+    override fun skipCounties(countyName: String) = false
 
     // canonical contests and choices
     override fun canonicalContests() = canonicalContests

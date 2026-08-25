@@ -6,7 +6,7 @@ open class Colorado2026Primary(ac:String?=auditcenter): ColoradoInput(
     tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",
     mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv"
 ) {
-    override val skipCounties = listOf<String>()
+    override fun skipCounties(countyName: String) = false
 
     // canonical contests and choices
     override fun canonicalContests() = canonicalContests
@@ -54,8 +54,10 @@ open class Colorado2026Primary(ac:String?=auditcenter): ColoradoInput(
     }
 
     override fun candidateNameCleanup(county: String, name: String): String {
+        if (name.contains("Fiorino")) return "Paul Noel Fiorino"
         val changed = when (name) {
             "Keith Vieweg, Jr" -> "Keith Vieweg"
+            "Paul Noël Fiorino" -> "Paul Noel Fiorino"
             else -> name
         }
         return changed

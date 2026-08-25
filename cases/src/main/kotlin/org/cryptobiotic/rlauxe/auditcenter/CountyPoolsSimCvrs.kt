@@ -46,7 +46,31 @@ class CountyPoolsSimCvrs(
     val countyPools: List<CountyPoolsBuilder>
 
     init {
+        val distributeCardsOld: Map<String, Map<String, Int>> = distributeNc() // county -> contest -> pctCards in that county for that contest
         val distributeCards: Map<String, Map<String, Int>> = distributeCards() // county -> contest -> pctCards in that county for that contest
+
+        /* if (distributeCardsOld != distributeCards) {
+            distributeCards.forEach { (county, ncMap) ->
+                val ncMapOld = distributeCardsOld[county]!!
+                if (ncMap != ncMapOld) {
+                    ncMap.forEach { (contest, nc) ->
+                        if (nc != ncMapOld[contest])
+                            println(" $county '$contest': $nc != ${ncMapOld[contest]}")
+                    }
+                }
+            }
+            println()
+        }
+
+        val d1 = distributeCards["Archuleta"] !!
+        val d2 = distributeCardsOld["Archuleta"]!!
+        if (d1 != d2) {
+            d1.forEach { (contest, nc) ->
+                if (nc != d2[contest])
+                    println(" '$contest': $nc != ${d2[contest]}")
+            }
+            println()
+        } */
 
         //     val countyName: String,
         //    val countyPopulation: Int,
@@ -66,7 +90,45 @@ class CountyPoolsSimCvrs(
                 mvrStylesMap[countyName]!!,
             )
         }
+    }
 
+    // from sans
+    fun distributeNc(): Map<String, Map<String, Int>> { // county -> contest -> Nc
+        val countyNc = mutableMapOf<String, MutableMap<String, Int>>() // county -> contest -> Nc
+        contestsTabs.values.forEach { contestTabAllCounties ->
+            val contestName = contestTabAllCounties.contestName
+            val contestTotalVotes = contestTabAllCounties.sumVotes()
+            val contestNc = contestNcs[contestName]!! // cards
+            if (contestNc != null) {
+                contestTabAllCounties.countyVotes.forEach { (countyName, countyVotes) ->
+                    val countyContest = countyNc.getOrPut(countyName) { mutableMapOf() }
+                    val fac = countyVotes / contestTotalVotes.toDouble()
+
+                    if (countyName == "Archuleta" && contestName.startsWith("District Attorney"))
+                        print("")
+                    countyContest[contestName] = (contestNc * fac).roundToInt()
+                }
+            }
+        }
+
+        //  consistency check
+        // sum over counties to get the contest sum
+        val contestSum = mutableMapOf<String, Int>()
+        countyNc.forEach { (_, countyVotes) ->
+            countyVotes.forEach { contestName, contestVotes ->
+                val contestAccum = contestSum.getOrDefault(contestName, 0)
+                contestSum[contestName] = contestAccum + contestVotes
+            }
+        }
+
+        contestsTabs.values.forEach { contestTabAllCounties ->
+            val contestName = contestTabAllCounties.contestName
+            val sum = contestSum[contestName]!!
+            val contestNc = contestNcs[contestName]!! // cards
+            if (abs(contestNc - sum) > 5)
+                logger.warn { "makeCardPoolsFromCountyStyles has (contestNc-sum) ${abs(contestNc - sum)} > 5" }
+        }
+        return countyNc
     }
 
     fun distributeCards(): Map<String, Map<String, Int>> { // county -> contest -> Nc
@@ -82,51 +144,55 @@ class CountyPoolsSimCvrs(
         return countyNc
     }
 
+    // do each contest seperately so we can move Nc to other counties if need be
     fun distributeContestCardsAcrossCounties(contestName: String): Map<String, Int> { // county -> contest -> Nc
         val countyContestNc = mutableMapOf<String, Int>() // county -> Nc
         val contestTab = contestsTabs[contestName]!!
         val contestName = contestTab.contestName
-        val contestTotalVotes = contestTab.sumVotes()
-        val contestNc = contestNcs[contestName]!!
+        val contestTotalVotes = contestTab.sumVotes() // votes
+        val contestNc = contestNcs[contestName]!! // cards
         val info = infos[contestName]!!
 
-        // first pass - look if Ncc more than the ncards in the population
-        var accum = 0
+        // first pass - check if Ncc is more than the ncards in the population
+        var accumCards = 0
         contestTab.countyVotes.forEach { (countyName, countyVotes) ->
-            val fac = countyVotes / info.voteForN / contestTotalVotes.toDouble() // convert from votes to cards
-            // must be <= the cards in the population
+            val fac = countyVotes / contestTotalVotes.toDouble() // convert from votes to cards
             val Ncc = (contestNc * fac).roundToInt()
-            val Npop = countyPopulations[countyName]!! * info.voteForN
+            val Npop = countyPopulations[countyName]
+            if (Npop == null)
+                logger.error{"Npop is null for $countyName"}
+            require (Npop != null)
+
             if (Ncc > Npop) {
-                countyContestNc[countyName] = Npop
-                //println(" $countyName $fac:  $Ncc > $Npop use $Npop")
-                accum += Npop
+                countyContestNc[countyName] = Npop // cant be bigger than the county population
+                logger.warn{" '$contestName'   $countyName :  $Ncc > $Npop use $Npop"}
+                accumCards += Npop
             }
         }
-        val cardsLeft = contestNc - accum
-        var sumVotesLeft = 0
+        val cardsLeft = contestNc - accumCards
+        var sumCardsLeft = 0
         contestTab.countyVotes.forEach { (countyName, countyVotes) ->
-            if (countyContestNc[countyName] == null ) {
-                sumVotesLeft += countyVotes / info.voteForN
+            if (countyContestNc[countyName] == null ) { // the counties that havent been set yet
+                sumCardsLeft += countyVotes / info.voteForN
             }
         }
 
-        // second pass - distribute the remaining counties
+        // second pass - distribute the remaining counties in proportion to sumVotesLeft
         contestTab.countyVotes.forEach { (countyName, countyVotes) ->
             if (countyContestNc[countyName] == null ) {
-                val fac = countyVotes / info.voteForN / sumVotesLeft.toDouble()
+                val fac = if (sumCardsLeft == 0) 0.0 else countyVotes / info.voteForN / sumCardsLeft.toDouble() // convert to cards
                 val Ncc = (cardsLeft * fac).roundToInt()
 
                 countyContestNc[countyName] = Ncc
                 //println(" $countyName $countyVotes $fac:  use $Ncc")
-                accum += Ncc
+                accumCards += Ncc
             }
         }
 
         // consistency check
         val contestSum = countyContestNc.values.sum()
         if (abs(contestNc - contestSum) > 5) {
-            logger.warn { "makeCardPoolsFromCountyStyles has (contestNc-sum) $contestNc != $contestSum for $contestName" }
+            logger.warn { "contest '$contestName' has distributed cards = $contestSum should be $contestNc" }
         }
         return countyContestNc
     }
@@ -169,8 +235,8 @@ class CountyPoolsSimCvrs(
                         throw Exception("cant find $contestName")
 
                     // divide up the votes among Styles in proportion to ncards in the pools
-                    val denom = totalCardsForContestMap[contest.name]!!
-                    val stylePct = style.ncards() / denom.toDouble()
+                    var denom = totalCardsForContestMap[contest.name]!!
+                    val stylePct = if (denom == 0) 0.0 else style.ncards() / denom.toDouble()
                     val contestPct = contestPcts.getOrDefault(contestName, 0.0)
                     contestPcts[contestName] = contestPct + stylePct
 
@@ -203,8 +269,8 @@ class CountyPoolsSimCvrs(
 
             // check
             contestPcts.forEach { contestName, pct ->
-                if (!doubleIsClose(pct, 1.0))
-                    logger.warn { "$contestName sum of style pctTotal ${pct} != 1.0" }
+                if (!doubleIsClose(pct, 1.0) && (pct != 0.0))
+                    logger.warn { "'$contestName' sum of style pcts ${pct} should be 1.0" }
             }
         }
 
@@ -222,7 +288,7 @@ class CountyPoolsSimCvrs(
             // if you change ncards, you change undervotes...
             val totalCards = pools.sumOf { it.ncards() }
             if (totalCards != countyPopulation)
-                logger.warn{"totalCards $totalCards != $countyPopulation countyPopulation"}
+                logger.warn{"county '$countyName' has totalCards $totalCards != $countyPopulation countyPopulation"}
             // require(totalCards == countyPopulation) // ??
             return CountyPools(countyName, countyPoolId++, contestTabs = contestTabs, styles = pools, cardCount = totalCards)
         }
@@ -245,8 +311,6 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
     var totalCards = 0
 
     init {
-        val styles = mutableListOf<StyleAllocation>()
-
         allContests.sumOf{ it.contestNc }
 
         // all contests not contained in a style are put into a single "missingStyle"
@@ -260,16 +324,16 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
 
         if (missingContests.isNotEmpty()) {
             val missingStyle = StyleAllocation(missingContests, 0)
-            styles.add(missingStyle)
+            allStyles.add(missingStyle)
             missingContests.forEach { missingStyle.setMin(it.contestNormalizedVotes) }
         }
-        mvrStyles.forEach{ styles.add(StyleAllocation(it)) }
+        mvrStyles.forEach{ allStyles.add(StyleAllocation(it)) }
 
-        // TODO does this help ??
+        // TODO does this help ?? 2020 generalSim failing without it
         // see if we need to add more styles
         var sumSingletons = 0
         allContests.forEach { contest ->
-            val useBy = styles.filter { it.contests.contains(contest) }
+            val useBy = allStyles.filter { it.contests.contains(contest) }
             if (useBy.size == 1) {
                 sumSingletons += contest.contestNormalizedVotes
             }
@@ -278,19 +342,18 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
         if (extraCards < 0) {
             // add more styles by breaking existing styles in half
             val extraStyles = mutableListOf<StyleAllocation>()
-            styles.forEach { style ->
+            allStyles.forEach { style ->
                 val ncontests = style.contests.size
                 if (ncontests > 3) {
                     extraStyles.add(StyleAllocation(style.contests.subList(0, ncontests / 2), 1))
                     extraStyles.add(StyleAllocation(style.contests.subList(ncontests / 2, ncontests), 1))
                 }
             }
-            styles.addAll(extraStyles)
-            styles.forEach { it .setMin(0) }
+            allStyles.addAll(extraStyles)
+            allStyles.forEach { it .setMin(0) }
             logger.info{"add ${extraStyles.size} more styles for county $countyName"}
         }
 
-        allStyles.addAll(styles)
         val mvrTotal = allStyles.sumOf { it.mvrCount }.toDouble()
         allStyles.forEach { it.mvrPct = it.mvrCount / mvrTotal }
     }
@@ -420,7 +483,7 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
         var checkNcardsInitial = allStyles.sumOf { it.ncards() }
         if (checkNcardsInitial != cardsinCountyPool ) {
             allStyles.last().optCards += (cardsinCountyPool - checkNcardsInitial)
-            println("correct ncards by ${cardsinCountyPool - checkNcardsInitial}" )
+            // println("correct ncards by ${cardsinCountyPool - checkNcardsInitial}" )
         }
         checkNcardsInitial = allStyles.sumOf { it.ncards() }
         require (checkNcardsInitial == cardsinCountyPool )
@@ -531,7 +594,7 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
             val extraStyle = StyleAllocation(contestsNotDone, 0)
             extraStyle.optCards = contestsNotDone.maxOf { it.need() }
             allStyles.add(extraStyle)
-            logger.warn{"County $countyName needed another Style $extraStyle so that ncards > nvotes"}
+            logger.warn{"county '$countyName' needs another Style '$extraStyle' so that ncards > nvotes"}
         } else {
             val checkNcards = allStyles.sumOf { it.ncards() }
             require(checkNcards == cardsinCountyPool)

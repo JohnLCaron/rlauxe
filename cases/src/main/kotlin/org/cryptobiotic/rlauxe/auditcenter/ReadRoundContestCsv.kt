@@ -100,8 +100,7 @@ fun readColoradoContestRoundCsv(filename: String): Map<String, CorlaContestRound
                 contestName = line.get(0).trim(),           // contest_name,
                 auditReason = getAuditReason(line.get(1).trim()),
                 nwinners = line.get(3).toInt(),             // winners_allowed,
-                ballotCardCount = line.get(4)
-                    .toInt(), // ballot_card_count,contest_ballot_card_count,winners,min_margin,
+                ballotCardCount = line.get(4).toInt(), // ballot_card_count,contest_ballot_card_count,winners,min_margin,
                 contestBallotCardCount = line.get(5).toInt(), // contest_ballot_card_count
                 winners = line.get(6), // winners
                 minMargin = line.get(7).toInt(),    // minMargin

@@ -131,7 +131,7 @@ fun startTestElectionClca(
         addRaire,
         addRaireCandidates)
 
-    createElectionRecord(election, topdir = topdir)
+    createElectionRecord(election, topdir = topdir, clear = true)
 
     val config = Config.from( election.electionInfo(), nsimTrials = 100, simFuzzPct = simFuzz, fuzzMvrs=fuzzMvrs)
 
@@ -235,7 +235,7 @@ fun startTestElectionPolling(
         ncontests,
         pollingMode
     )
-    createElectionRecord(election, topdir = topdir, )
+    createElectionRecord(election, topdir = topdir, clear = true)
 
     val config = Config.from(election.electionInfo(), nsimTrials = 20, simFuzzPct = simFuzz)
 

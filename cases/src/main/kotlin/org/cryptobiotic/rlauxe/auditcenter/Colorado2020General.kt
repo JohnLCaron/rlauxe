@@ -6,7 +6,8 @@ class Colorado2020General(ac:String?=auditcenter): ColoradoInput(
     tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
     mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
 ) {
-    override val skipCounties = listOf("Baca", "Gunnison", "Las Animas", "San Juan")
+    val skipCounties = listOf("Baca", "Gunnison", "Las Animas", "San Juan")
+    override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
 
     override fun contestTabsAllCounties(): Map<String, ContestTabAllCounties>  = contestTabsAllCounties
     private val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {

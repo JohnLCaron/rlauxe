@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
+import kotlin.collections.forEach
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
@@ -51,7 +52,7 @@ fun makeCorla2020ClcaWithCvrs(toptopdir: String, auditcenter: String, votedataba
     val topdir = "$toptopdir/clca"
 
     countyElectionWithCvrs(
-        allVotedatabaseCounties(votedatabase),
+        votedatabase2020Counties(votedatabase),
         Colorado2020General(auditcenter),
         topdir,
         corlaCreationSettings(2020),
@@ -66,7 +67,7 @@ fun makeCorla2020UniformWithCvrs(toptopdir: String, auditcenter: String, votedat
     val topdir = "$toptopdir/uniform"
 
     countyElectionWithCvrs(
-        allVotedatabaseCounties(votedatabase),
+        votedatabase2020Counties(votedatabase),
         Colorado2020General(auditcenter),
         topdir,
         corlaCreationSettings(2020),
@@ -121,7 +122,7 @@ fun makeCorla2026pm(toptopdir: String, auditcenter: String) {
     )
 }
 
-fun allVotedatabaseCounties(votedatabase: String): Map<String, String> {
+fun votedatabase2020Counties(votedatabase: String): Map<String, String> {
     val path = Path(votedatabase) // or does votedatabase include
 
     val cvrdata = mutableListOf<Pair<String, String>>()
@@ -141,6 +142,18 @@ fun allVotedatabaseCounties(votedatabase: String): Map<String, String> {
                 throw e
             }
         }
+    }
+    return cvrdata.toMap()
+}
+
+fun auditcenter2026Counties(topdir: String): Map<String, String> {
+    val path = Path(topdir) // or does votedatabase include
+
+    val cvrdata = mutableListOf<Pair<String, String>>()
+    path.listDirectoryEntries().sorted().filter { it.fileName.toString().contains("CVR_Export")}.forEach { file ->
+        var county = file.fileName.toString().split("_")[0]
+        if (county == "LaPlata") county = "La Plata"
+        cvrdata.add(Pair(county, file.toString()))
     }
     return cvrdata.toMap()
 }

@@ -42,7 +42,7 @@ interface ElectionBuilder {
 
 private val logger = KotlinLogging.logger("CreateElectionRecord")
 
-fun createElectionRecord(election: ElectionBuilder, topdir: String, control: ContestSampleControl? = null, clear: Boolean = true, validate: Boolean = false) {
+fun createElectionRecord(election: ElectionBuilder, topdir: String, control: ContestSampleControl? = null, clear: Boolean = false, validate: Boolean = false) {
     if (clear) clearDirectory(Path(topdir))
 
     val errs = validateOutputDir(Path.of(topdir))

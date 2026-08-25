@@ -29,7 +29,7 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs("testPersistedSingleClca", contestsUA, testMvrs, AuditType.CLCA, mvrSource=MvrSource.testPrivateMvrs)
-        createElectionRecord(election, topdir = topdir)
+        createElectionRecord(election, topdir = topdir, clear = true)
 
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01)
 
@@ -55,7 +55,7 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs("testPersistedAuditClca", contestsUA, testMvrs, AuditType.CLCA, mvrSource=MvrSource.testPrivateMvrs)
-        createElectionRecord(election, topdir = topdir)
+        createElectionRecord(election, topdir = topdir, clear = true)
 
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01)
         createAuditRecord(config, election, topdir = topdir, externalSortDir=topdir, validate = true)
@@ -91,7 +91,7 @@ class TestPersistedWorkflow {
 
         val election = CreateElectionFromCvrs("testPersistedOneAudit", contestsUA, mvrs, AuditType.ONEAUDIT,
             cardPools = cardPools, mvrSource=MvrSource.testPrivateMvrs)
-        createElectionRecord(election, topdir = topdir)
+        createElectionRecord(election, topdir = topdir, clear = true)
 
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 20000, simFuzzPct = .01)
 
@@ -135,7 +135,7 @@ class TestPersistedWorkflow {
 
         val election = CreateElectionFromCvrs("testPersistedOneAudit", contestsUA, mvrs, AuditType.ONEAUDIT,
             cardPools = pools, mvrSource=MvrSource.testPrivateMvrs)
-        createElectionRecord(election, topdir = topdir)
+        createElectionRecord(election, topdir = topdir, clear = true)
 
         createAuditRecord(config, election, topdir = topdir, externalSortDir=topdir, validate=true)
         startFirstRound(topdir)

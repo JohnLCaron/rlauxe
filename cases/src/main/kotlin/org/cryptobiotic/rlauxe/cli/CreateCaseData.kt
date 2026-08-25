@@ -105,6 +105,9 @@ object CreateCaseData {
             val version = CreateCaseData::class.java.getPackage().getImplementationVersion() ?: "unknown"
             println("version=$version")
 
+            Logging.addFileAppender("cases", "$toptopdir/logs.log")
+            println("log=$toptopdir/logs.log")
+
             when (case) {
                 "belgium" -> {
                     makeBelgium2024Data(toptopdir)

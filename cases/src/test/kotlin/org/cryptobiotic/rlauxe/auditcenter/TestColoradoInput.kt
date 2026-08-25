@@ -4,12 +4,12 @@ import kotlin.test.Test
 
 // check name consistency in ColoradoInput
 class TestColoradoInput {
-    val input: ColoradoInput = Colorado2026PMerged()
+    val input: ColoradoInput = Colorado2026PwithCvrs()
     val canonical = input.canonicalContests()
 
     @Test
     fun showCanonicalContests() {
-        canonical.values.map{ it.contestName }.sorted().forEach { println( it )}
+        canonical.forEach { println( it )}
         println("there are ${canonical.size} auditcenter contests")
     }
 
@@ -24,6 +24,12 @@ class TestColoradoInput {
     fun showRoundContests() {
         println("there are ${input.roundContests().size} roundContests")
         input.roundContests().forEach { println( it )}
+    }
+
+    @Test
+    fun showContestTabsAllCounties() {
+        println("there are ${input.contestTabsAllCounties().size } contestTabsAllCounties")
+        input.contestTabsAllCounties().values.forEach { println(" '${it.contestName}' == ${it.counties}")}
     }
 
     @Test
@@ -50,15 +56,34 @@ class TestColoradoInput {
     //    val statewideContests: List<CorlaContestRoundCsv>,
     //)
     @Test
-    fun showMergedInfo() {
+    fun showMergedContestInfo() {
         println("there are ${input.mergedInfo().mergedContestInfo.size} mergedContestInfo")
-        input.mergedInfo().mergedContestInfo.forEach { println( "  $it" )}
+        input.mergedInfo().mergedContestInfo.forEach { println("  $it") }
+    }
 
+    @Test
+    fun showCanonicalContestInfo() {
+        val mergedInfo = input.mergedInfo()
+        println("there are ${mergedInfo.mergedContestInfo.size} mergedContestInfo")
+        mergedInfo.mergedContestInfo.forEach { println("  ${it.contestName} == ${it.nc}") }
+    }
+
+    @Test
+    fun showStrataInfo() {
         println("\nthere are ${input.mergedInfo().strataInfo.size} strataInfo")
-        input.mergedInfo().strataInfo.forEach { println( "  $it" )}
+        input.mergedInfo().strataInfo.forEach { println("  $it") }
+    }
 
+    @Test
+    fun showStatewideContests() {
         println("\nthere are ${input.mergedInfo().statewideContests.size} statewideContests")
         input.mergedInfo().statewideContests.forEach { println( "  $it" )}
+    }
+
+    @Test
+    fun showStrataPopulation() {
+        println("\nthere are ${input.strataPopulation().size} strataPopulation")
+        input.strataPopulation().forEach { println("  $it") }
     }
 
     @Test

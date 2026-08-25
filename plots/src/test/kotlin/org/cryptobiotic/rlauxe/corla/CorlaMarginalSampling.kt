@@ -28,7 +28,7 @@ class CorlaMarginalSampling {
         val dirName = "$testdataDir/plots/corla/$name"
         validateOutputDir(Path(dirName))
 
-        val topdir = "$cases/corla/corla2026PMerged"
+        val topdir = "$cases/corla/corla2026/primaryMerged"
         val corla26P = AuditRecord.read(topdir) as AuditRecord
         val round1: AuditRound = corla26P.rounds.first()
         val contests =

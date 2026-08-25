@@ -21,7 +21,7 @@ class TestReadTabulateCounty {
     fun contestTabAllCounties() {
         val contestTabAllCounties: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties()
         contestTabAllCounties.forEach {
-            assertTrue(it.key !in input.skipCounties)
+            assertTrue(!input.skipCounties(it.key))
         }
     }
 }

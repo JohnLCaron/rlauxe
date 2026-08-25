@@ -208,6 +208,6 @@ fun writeCountyAuditData(topdir: String, coloradoInput: ColoradoInput) {
         writer.write("${it.countyName}, ${nfn(it.countMvr, 5)}\n")
     }
     writer.close()
-    println("wrote countyData to $outputFilename")
+    logger.info{"wrote ${countyMvrs.size} countyData to $outputFilename"}
 }
 

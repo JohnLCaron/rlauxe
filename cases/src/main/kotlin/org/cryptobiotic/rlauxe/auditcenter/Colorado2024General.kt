@@ -7,7 +7,7 @@ class Colorado2024General(ac:String?=auditcenter): ColoradoInput(
     mvrComparisonFile = "$ac/2024/general/round3/contestComparison.csv"
 ) {
 
-    override val skipCounties = listOf<String>()
+    override fun skipCounties(countyName: String) = false
 
     // canonical contests and choices
     override fun canonicalContests(): Map<String, CanonicalContest> = canonicalContests

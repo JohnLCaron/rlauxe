@@ -349,7 +349,7 @@ class TestHasStyles {
                 name, auditType, contestsUA, testCards, cardPools = null, batches = batches,
             mvrSource=MvrSource.testPrivateMvrs)
 
-        createElectionRecord(election, topdir = topdir)
+        createElectionRecord(election, topdir = topdir, clear = true)
 
         val creation = AuditCreationConfig(auditType, riskLimit=.05, seed = 123456789L)
         val round = AuditRoundConfig(

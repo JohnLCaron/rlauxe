@@ -45,7 +45,7 @@ import java.util.zip.ZipInputStream
 // ... (cvrs)
 // Redacted and Aggregated,,,,,,BallotType,DEM,REP,APV,LBR,GRN,ACN,UNI,UNA ...
 
-private val logger = KotlinLogging.logger("DominionCvrExportReader")
+private val logger = KotlinLogging.logger("DominionCvrExportCsvReader")
 
 private val d3f = "%3d"
 private val showSchema = false
@@ -210,7 +210,8 @@ class DominionCvrExportCsvReader(val inputSource: String, val parser: CSVParser,
                 try {
                     val test = removeLeadingEquals(line.get(3)).toInt()
                 } catch (e : Throwable) {
-                    println("barf on cvrCount $cvrCount $line")
+
+                    logger.error{"barf on cvrCount $cvrCount $line"}
                     break
                 }
 
@@ -236,7 +237,7 @@ class DominionCvrExportCsvReader(val inputSource: String, val parser: CSVParser,
         }
         parser.close()
 
-        if (rcvRedacted > 0) println("  read $rcvRedacted RCV Redacted votes")
+        if (rcvRedacted > 0) logger.info{"  read $rcvRedacted RCV Redacted votes from ${inputSource}"}
         if (showRedactedGroups) {
             println("Redacted Groups size = ${ballotStyles.redactedGroups.size}")
             ballotStyles.redactedGroups.toSortedMap().forEach { println("  ${it.value}") }
@@ -287,6 +288,19 @@ class DominionCvrExportCsvReader(val inputSource: String, val parser: CSVParser,
             rcvRedacted++
             cvrs.add(cvr.addVotes(schema, line, lineno))  // IRV redacted vote
             ballotStyles.add(cvr)
+            return true
+
+        } else if (line.get(0).startsWith("AGGREGATED")) { // Boulder >= 2024? IRV
+            val cvr = CastVoteRecord(
+                rcvRedacted,
+                0,
+                "N/A",
+                0,
+                "N/A",
+                line.get(ballotTypeIdx),
+            )
+            val redactedGroup = DominionRedactedGroup("AGGREGATED", schema.voteForNs).addVotes(schema, line)
+            ballotStyles.add(redactedGroup)
             return true
 
         } else if (line.get(0).isEmpty()) { // (2020) Boulder, Dolores; has votes, presumably the sum of the redactions

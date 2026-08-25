@@ -221,6 +221,8 @@ fun createCountyElectionSansCvrs(
 ) {
     val stopwatch = Stopwatch()
     clearDirectory(Path(topdir))
+    Logging.addFileAppender("cases", "$topdir/logs.log")
+    logger.info {"-------------- createCountyElectionSansCvrs $topdir"}
 
     val election =
         CountyElectionSansCvrs(coloradoInput,  topdir, name=name,

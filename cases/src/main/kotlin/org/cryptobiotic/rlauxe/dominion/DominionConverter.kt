@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.dominion
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardStyle
@@ -9,6 +10,8 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.collections.set
+
+private val logger = KotlinLogging.logger("DominionConverter")
 
 // convert DominionCvrExportCsv from export ids to canonical ids
 // each export is specific to a County.
@@ -30,12 +33,15 @@ class DominionConverter(val county: String, export: DominionCvrExportCsv, val in
         schemaInfos.forEach { schemaInfo ->
             val canonicalContest = coloradoInput.matchCanonicalContest(county, schemaInfo.name) // clean up your act, sheesh
             if (canonicalContest == null) {
-                println("  *** missing schema contest: '${schemaInfo.name}' in county $county")
+                logger.warn{"  *** missing schema contest: '${schemaInfo.name}' in county $county"}
                 countMissing++
             } else {
-                val info = infosByName[canonicalContest.contestName]!!
+                val info = infosByName[canonicalContest.contestName]
+                if (null == info)
+                    logger.error{" infosByName doesnt have canonicalContest ${canonicalContest.contestName}"}
+                require(info != null)
                 if (gotCanon.contains(info.id))
-                    println("  *** ${info.id} has duplicate contest: '${schemaInfo.name}' and '${gotCanon[info.id]}' ")
+                    logger.warn{"  *** ${info.id} has duplicate contest: '${schemaInfo.name}' and '${gotCanon[info.id]}' "}
                 gotCanon[info.id] = schemaInfo.name
 
                 val candPairs = mutableListOf<Pair<Int, Int>>()
@@ -43,15 +49,14 @@ class DominionConverter(val county: String, export: DominionCvrExportCsv, val in
                 schemaInfo.candidateNames.filter { !isWriteIn(it.key) }.forEach { (exportCandidate, schemaCandId) ->
                     // use a lookup instead of a map TODO worth the complexity ??
                     val canonCandidateName = coloradoInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
-                    // println("$exportCandidate -> $canonCandidateName")
                     if (canonCandidateName == null) {
+                        logger.error{"no match on exportCandidateName '$exportCandidate' in county $county"}
                         throw Exception("no match on exportCandidateName '$exportCandidate' in county $county")
                     }
                     val canonCandId = info.candidateNames[canonCandidateName] // what if this fails ??
                     if (canonCandId == null) {
+                        logger.error{"no match on info.candidateNames: canonCandidateName=$canonCandidateName orgName=$exportCandidate"}
                         throw Exception("no match on info.candidateNames: canonCandidateName=$canonCandidateName orgName=$exportCandidate")
-                        //println("  ** missing export candidate: '${exportCandidate}' in contest '${info.name}' county $county")
-                        //countMissingCand++
                     } else {
                         candPairs.add ( Pair(schemaCandId, canonCandId))
                     }
@@ -62,7 +67,6 @@ class DominionConverter(val county: String, export: DominionCvrExportCsv, val in
                 val lookup = ExportToCanonLookup(info.id, candLookup)
                 exportToCanonLookup[schemaInfo.id] = lookup
             }
-            print("")
         }
 
         // data class ExportCardStyle(val name: String, val contests: Set<Int>, var count: Int = 0)
@@ -93,7 +97,6 @@ class DominionConverter(val county: String, export: DominionCvrExportCsv, val in
             val lookup = exportToCanonLookup[exportContestId]
             if (lookup != null) convert.add(lookup.canonContestId)
         }
-        // println("$exportCardStyle -> $convert")
         val got = mutableSetOf<Int>()
         convert.forEach {
             got.add(it)
@@ -124,6 +127,7 @@ class DominionConverter(val county: String, export: DominionCvrExportCsv, val in
                 val cannonCandidateIds = contestVote.candVotes.map { lookup.candLookup[it] }.filter { it >= 0 }
                 cvrb.replaceContestVotes(lookup.canonContestId, cannonCandidateIds.toIntArray() )
             } else {
+                logger.error{"cant find exportToCanonLookup[${contestVote.contestId}] in county $county"}
                 throw Exception("cant find contest")
             }
         }

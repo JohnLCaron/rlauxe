@@ -59,7 +59,7 @@ fun createBelgiumElection(
     contestd: DHondtContest,
     creationConfig: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
-    clear: Boolean = true): Result<AuditRoundIF, ErrorMessages>
+    clear: Boolean = false): Result<AuditRoundIF, ErrorMessages>
 {
     val stopwatch = Stopwatch()
     val election = BelgiumClca(contestd, MvrSource.testPrivateMvrs)
@@ -90,6 +90,9 @@ fun createBelgiumAndRunAllRounds(electionName: String,
     println("\n======================================================")
     println("electionName $electionName")
 
+    val topdir = "$toptopdir/$electionName"
+    Logging.addFileAppender("cases", "$topdir/logs.log")
+
     val partyIds = readPartyTxtResource("$belgiumData/parties.txt")
     validateOutputDir(Path.of(toptopdir))
     // TODO why not read from resource ??
@@ -101,7 +104,6 @@ fun createBelgiumAndRunAllRounds(electionName: String,
 
     val dcontest = makeDhondtContest(electionName, contestId, dhondtParties, nwinners, totalVotes, belgiumElectionJson.NrOfBlankVotes,.05)
 
-    val topdir = "$toptopdir/$electionName"
     val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05)
     val round = AuditRoundConfig(
         SimulationControl(nsimTrials = 1),  // why only 1 ??

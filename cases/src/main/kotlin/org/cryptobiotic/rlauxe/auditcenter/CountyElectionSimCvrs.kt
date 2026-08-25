@@ -14,7 +14,7 @@ import kotlin.Int
 import kotlin.String
 import kotlin.io.path.Path
 
-private val logger = KotlinLogging.logger("CountyElectionSansCvrs")
+private val logger = KotlinLogging.logger("CountyElectionSimCvrs")
 
 // port CountyElectionSansCvrs using CountyPoolsSimCvrs
 
@@ -41,7 +41,7 @@ open class CountyElectionSimCvrs (
         val contestBuilder = BuildCorlaContests(coloradoInput)
 
         val contestTabByCounty: Map<String, CountyTabAllContests> = if (onlyCounty == null)
-            coloradoInput.countyTabsAllContests().filter { it.key !in coloradoInput.skipCounties }
+            coloradoInput.countyTabsAllContests().filter { !coloradoInput.skipCounties(it.key) }
         else
             mapOf(onlyCounty to coloradoInput.countyTabsAllContests()[onlyCounty]!!)
 
@@ -57,7 +57,7 @@ open class CountyElectionSimCvrs (
         val countyPoolsSimCvrs = CountyPoolsSimCvrs(
             contestBuilder.infosByName,
             contestBuilder.corlaContestBuilders.associate { it.info.name to it.Nc },
-            coloradoInput.strataPopulation,
+            coloradoInput.strataPopulation(),
             contestTabByCounty,
             coloradoInput.contestTabsAllCounties(),
             coloradoInput.stylesFromMvrs.associate { it.countyName to it.styles.values.toList() },
@@ -212,8 +212,9 @@ open class CountyElectionSimCvrs (
 
             // TODO makePhantomCvrs(contests)
             val unsortedMvrIterator = Closer(poolIterator)
-            totalCards += writeCardCsvFile(unsortedMvrIterator, outfile)
-            logger.info { "createAndSaveUnsortedMvrs to ${outfile}" }
+            val ncards = writeCardCsvFile(unsortedMvrIterator, outfile)
+            totalCards += ncards
+            logger.info { "createAndSave $ncards unsorted mvrs for ${countyPool.countyName} to ${outfile}" }
         }
 
         return totalCards
@@ -233,6 +234,8 @@ fun createCountyElectionSimCvrs(
 ) {
     val stopwatch = Stopwatch()
     clearDirectory(Path(topdir))
+    logger.info {"-------------- createCountyElectionSimCvrs $topdir"}
+    Logging.addFileAppender("cases", "$topdir/logs.log")
 
     val election =
         CountyElectionSimCvrs(coloradoInput,  topdir, name=name,

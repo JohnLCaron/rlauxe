@@ -8,11 +8,9 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.min
 
-private val logger = KotlinLogging.logger("preAuditContestCheck")
+private val logger = KotlinLogging.logger("PreAuditContestCheck")
 
 fun preAuditContestCheck(contestsUA: List<ContestWithAssertions>, control: ContestSampleControl?, results: VerifyResults) {
-
-    results.addMessage("preAuditContestCheck")
 
     checkContestInfos(contestsUA, results)
 

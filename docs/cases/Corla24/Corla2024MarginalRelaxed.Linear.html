@@ -1,0 +1,241 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;Vwo3TN&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;Vwo3TN&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;Corla2024 (Relaxed risks) incremental costs of including close contests&quot;,
+&quot;subtitle&quot;:&quot;(Corla uses 4897 nmvrs for 301 contests under 3%)&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;ncontests included, sorted by margin&quot;,
+&quot;y&quot;:&quot;nmvrs needed&quot;,
+&quot;color&quot;:&quot;auditor&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;corla&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;],
+&quot;ncontests included, sorted by margin&quot;:[301.0,50.0,100.0,150.0,200.0,250.0,300.0,350.0,400.0,450.0,500.0,550.0,560.0,570.0,580.0,590.0,600.0,606.0,606.0],
+&quot;nmvrs needed&quot;:[4897.0,418.0,936.0,1283.0,1758.0,2324.0,2779.0,3521.0,4406.0,5300.0,6541.0,9463.0,10283.0,11620.0,13335.0,15033.0,16708.0,20244.0,20244.0],
+&quot;auditor&quot;:[&quot;corla&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditor&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;ncontests included, sorted by margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;nmvrs needed&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;ncontests included, sorted by margin&quot;,
+&quot;y&quot;:&quot;nmvrs needed&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;corla&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;],
+&quot;nmvrs needed&quot;:[4897.0,418.0,936.0,1283.0,1758.0,2324.0,2779.0,3521.0,4406.0,5300.0,6541.0,9463.0,10283.0,11620.0,13335.0,15033.0,16708.0,20244.0,20244.0],
+&quot;ncontests included, sorted by margin&quot;:[301.0,50.0,100.0,150.0,200.0,250.0,300.0,350.0,400.0,450.0,500.0,550.0,560.0,570.0,580.0,590.0,600.0,606.0,606.0],
+&quot;auditor&quot;:[&quot;corla&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:16.0,
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditor&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;ncontests included, sorted by margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;nmvrs needed&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;ncontests included, sorted by margin&quot;,&quot;nmvrs needed&quot;,&quot;auditor&quot;],
+&quot;disable_splitting&quot;:true
+}
+},{
+&quot;mapping&quot;:{
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;yintercept&quot;:4897.0,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;corla&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;]
+},
+&quot;color&quot;:&quot;#ee6666&quot;,
+&quot;size&quot;:0.3,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;hline&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditor&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;ncontests included, sorted by margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;nmvrs needed&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;corla&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;,&quot;rlauxe&quot;]
+},
+&quot;color&quot;:&quot;#ee6666&quot;,
+&quot;size&quot;:0.3,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;xintercept&quot;:301.0,
+&quot;geom&quot;:&quot;vline&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;auditor&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;ncontests included, sorted by margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;nmvrs needed&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

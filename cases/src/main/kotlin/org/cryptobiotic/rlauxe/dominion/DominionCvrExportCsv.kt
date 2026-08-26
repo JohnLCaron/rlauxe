@@ -103,7 +103,7 @@ data class CastVoteRecord(
                     val colValue = colValueS.toInt()
                     if (colValue > 0) votes.add(i)
                 } catch (e: NumberFormatException) {
-                    logger.warn{ "Cant parse '$colValueS' at col $colno line $lineno; probably didnt catch the redacted line"}
+                    logger.warn{ "Cant parse '$colValueS' at col $colno line $lineno; probably didnt catch the redacted line; filename=${schema.inputSource}"}
                     return emptyList()
                 }
             }
@@ -203,7 +203,7 @@ class BallotStyles {
 
 /////////////////////////////////////////////////////////////////////////
 
-class Schema(val columns: List<SchemaColumnInfo>, val nheaders: Int, val contests: List<SchemaContestInfo>, val voteForNs: Map<Int, Int>) {
+class Schema(val inputSource: String, val columns: List<SchemaColumnInfo>, val nheaders: Int, val contests: List<SchemaContestInfo>, val voteForNs: Map<Int, Int>) {
     val writeIns : Set<Int> = columns.filter{ it.choice == "Write-in" }.map { it.colno }.toSet()
 
     fun choices(contestId: Int): List<String> {
@@ -284,7 +284,7 @@ data class SchemaContestInfo(val contestIdx: Int, val contestName: String, val s
 }
 
 // firstRow for debugging
-fun makeSchema(contests: CSVRecord, choices: CSVRecord, headers: CSVRecord, firstRow: CSVRecord? = null): Schema {
+fun makeSchema(inputSource: String,  contests: CSVRecord, choices: CSVRecord, headers: CSVRecord, firstRow: CSVRecord? = null): Schema {
     require(contests.size() <= choices.size())
     require(headers.size() == choices.size())
 
@@ -313,7 +313,7 @@ fun makeSchema(contests: CSVRecord, choices: CSVRecord, headers: CSVRecord, firs
     ccontests.add( SchemaContestInfo(currContestIdx, currContestName, startIdx, columns.size-startIdx) )
 
     val voteForNs = ccontests.associate { it.contestIdx to it.voteForN }
-    return Schema(columns, nheaders, ccontests, voteForNs)
+    return Schema(inputSource, columns, nheaders, ccontests, voteForNs)
 }
 
 fun cleanContestName(col: String) : String {

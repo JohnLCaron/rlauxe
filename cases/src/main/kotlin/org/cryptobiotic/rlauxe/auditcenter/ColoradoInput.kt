@@ -17,7 +17,6 @@ private val logger = KotlinLogging.logger("ColoradoInput")
    1. Identify the following 4 files in auditcenter
 
    1a. generalCanonicalFile is used for the canonical contestName, choiceNames, and counties
-        Canonical List (Final),,
         CountyName,ContestName,ContestChoices
         Adams,17th Judicial District Ballot Question 7B,"Yes/For,No/Against"
 
@@ -52,8 +51,6 @@ abstract class ColoradoInput(
 ) {
     abstract fun skipCounties(countyName: String): Boolean
 
-    //      CountyName,ContestName,ContestChoices
-    //      El Paso,City of Colorado Springs Ballot Question 300,"Yes/For,No/Against"
     //
     // data class CanonicalContest(
     //    val contestName: String,

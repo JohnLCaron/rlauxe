@@ -97,7 +97,7 @@ class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
             if (showLines) showLine("choice/candidate", headerChoiceLine)
             lineno++
 
-            schema = makeSchema(contestLine, headerChoiceLine, headerChoiceLine)
+            schema = makeSchema(filename, contestLine, headerChoiceLine, headerChoiceLine)
             // println(schema.showColumns())
             // println()
             // println(schema.showContests())

@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 
 // Create the appender: requires LoggerContext, Encoder, and File setting
 object Logging {
-    val pattern = "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36}: %msg%n"
+    val pattern = "%d{yyyy-MM-dd'T'HH:mm:ss} %-5level %logger{36}: %msg%n"
 
     fun addFileAppender(loggerName: String, filePath: String) {
         val lc = LoggerFactory.getILoggerFactory() as LoggerContext?

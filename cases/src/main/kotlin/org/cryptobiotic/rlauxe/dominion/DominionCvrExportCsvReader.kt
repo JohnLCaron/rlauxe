@@ -184,7 +184,7 @@ class DominionCvrExportCsvReader(val inputSource: String, val parser: CSVParser,
             }
 
             // make the column structure out of those 3 lines
-            schema = makeSchema(contestLine, choiceLine, headerRecord)
+            schema = makeSchema(inputSource, contestLine, choiceLine, headerRecord)
             if (showSchema) {
                 println(schema.showColumns())
                 println()

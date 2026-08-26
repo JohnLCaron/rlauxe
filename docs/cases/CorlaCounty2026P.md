@@ -81,7 +81,7 @@ The following are the actual Corla and simulated Rlauxe audits for different sce
 
 ### Incremental Costs of including close contests 
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/cases/Corla24Dist/Corla26Marginal.Linear.html" rel="TargetOnly">![Corla26Pincremental](Corla26/Corla26Marginal.Linear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/cases/Corla26/Corla26Marginal.Linear.html" rel="TargetOnly">![Corla26Pincremental](Corla26/Corla26Marginal.Linear.png)</a>
 
 * The contests are sorted by descending margin 
 * The contests are added to the audit 10 at a time, until the last 10.
@@ -163,7 +163,13 @@ The same when using "relaxed risk limits"
 * Successfully read in the CVRS with a few hiccups:
     * candidate name "Paul Noel Fiorino" has 2 variants that had to be corrected
     * La Plata had contest "Secretary of State - LBR" misnamed as "Secretary of State" 
-* missing values of Nc(contest); currently not able to run an accurate audit.
+    * Alamosa has 11 less cards in the manifests than reported in the population:
+````
+          CountyName, sumCards, population, diff
+             Alamosa,    3464,    3475     11
+````           
+
+We dont have values for Nc(county, contest); currently not able to run an accurate audit.
 
 
 # Limits of Colorado data

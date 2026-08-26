@@ -18,7 +18,7 @@ import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 
 // for multiple styles, multiple contests and one "pool" of subtotaled votes
 // used for estimation for OneAudit; generating cards for CountyElectionSansCvrs; genererating cards for redacted pools
-class VunderBatches(styles: List<StyleIF>, val onePool: VunderPool) {
+class VunderBatches(val name: String, styles: List<StyleIF>, val onePool: VunderPool) {
     val styleMap = styles.associateBy { it.id() }
 
     // for the given pooled card with no votes, simulate one with votes, using card.styleName
@@ -67,7 +67,7 @@ class CreateCardsForCountyPools(val countyPool: CountyPools, val startCardno: In
         val vunders =
             countyPool.contestTabs.mapValues { it.value.votesAndUndervotes(null, it.value.ncards(), true) }
         val onePool = VunderPool(vunders, countyPool.countyName, countyPool.countyPoolId, true)
-        vunderBatches = VunderBatches(countyPool.styles, onePool)
+        vunderBatches = VunderBatches(countyPool.countyName, countyPool.styles, onePool)
     }
 
     override fun next(): AuditableCard {
@@ -84,6 +84,7 @@ class CreateCardsForCountyPools(val countyPool: CountyPools, val startCardno: In
         vunderBatches.onePool.vunderPickers.values.forEach { picker ->
             if (picker.isNotEmpty()) { // how is this possible ?? nvotes > ncards ??
                 val msg = buildString {
+                    append(" ${vunderBatches.name} ")
                     append(picker.vunder.show())
                     append("  ${picker.vunder.contestId} -> ")
                     picker.vunderRemaining.forEach { choice ->
@@ -132,7 +133,7 @@ class CvrIteratorFromCardPool(val cardPool: CardPool, startCardno: Int) : Iterat
         val vunders =
             cardPool.contestTabs.mapValues { it.value.votesAndUndervotes(null, it.value.ncards(), true) }
         val onePool = VunderPool(vunders, cardPool.poolName, cardPool.poolId, true)
-        vunderBatches = VunderBatches(listOf(cardPool), onePool)
+        vunderBatches = VunderBatches(cardPool.poolName, listOf(cardPool), onePool)
     }
 
     override fun next(): AuditableCard {

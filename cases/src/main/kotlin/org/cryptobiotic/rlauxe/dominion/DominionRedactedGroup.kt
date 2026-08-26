@@ -20,7 +20,7 @@ class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>
 
     init {
         if (ballotType.isEmpty())
-            println("ballotType.isEmpty()")
+            println("DominionRedactedGroup $ballotType: ballotType.isEmpty()")
     }
 
     fun contests() = contestVotes.keys.toSet()

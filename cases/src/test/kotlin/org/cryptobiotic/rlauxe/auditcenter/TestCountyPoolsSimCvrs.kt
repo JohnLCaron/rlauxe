@@ -7,11 +7,11 @@ class TestCountyPoolsSimCvrs {
 
     @Test
     fun testCountyElectionSimCvrs() {
-        val topdir = "$cases/corla/corla2020/test2"
+        val topdir = "$cases/corla/corla2024test"
 
-        CountyElectionSimCvrs(Colorado2020General(),  topdir, name="testCountyElectionSimCvrs",
+        CountyElectionSimCvrs(Colorado2024General(),  topdir, name="testCountyElectionSimCvrs",
             hasStyle = true,
-            onlyCounty = "Logan",
+            onlyCounty = "Elbert",
         )
     }
 }

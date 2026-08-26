@@ -1,8 +1,15 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CountyPools
+import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
+import org.cryptobiotic.rlauxe.auditcenter.CorlaContestBuilder
+import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
+import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
+import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import org.cryptobiotic.rlauxe.auditcenter.MvrStyle
+import org.cryptobiotic.rlauxe.auditcenter.makeContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.df
@@ -19,6 +26,8 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 
 private val logger = KotlinLogging.logger("MakeCountyPools")
+
+// deprecated, use createCountyElectionSimCvrs
 
 // cards are partitioned by county.
 // We know Nc = the total number of cards for a Contest, the total number of cards for a County, and the vote subtotals by County.

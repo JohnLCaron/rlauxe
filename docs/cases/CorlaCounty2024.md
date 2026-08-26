@@ -1,11 +1,11 @@
 # Colorado Statewide election by Counties 2024
 
-_last updated 06/16/2026_
+_last updated 08/26/2026_
 
-* 4,767,518 cards cast (Colorado 2024 General Election) in 63 Counties.
-* 723 contests, no IRV.
-* 65 contests targeted for the RLA, to generate the sample sets
-* 4897 sampled ballot cards, and thus their corresponding CVRs and  Manual Vote Records (MVRs).
+* 4,746,866 cards cast (Colorado 2024 General Election) in 63 Counties.
+* 723 contests, 5 < minMargin, 112 uncontested, 606 auditable contests
+* no IRV
+* Corla targeted 65 contests, and sampled 4897 sampled ballot cards.
 * risk limit =  3%
 * This report based on subtotals by County, with simulated CVRs
 
@@ -13,12 +13,13 @@ _last updated 06/16/2026_
 * [Colorado Statewide election by Counties 2024](#colorado-statewide-election-by-counties-2024)
   * [Colorado-RLA (Corla) uniform sampling](#colorado-rla-corla-uniform-sampling)
     * [Risk estimation for uniform sampling](#risk-estimation-for-uniform-sampling)
-  * [Rlauxe simulated consistent sampling for CORLA24](#rlauxe-simulated-consistent-sampling-for-corla24)
+  * [Rlauxe simulated consistent sampling for CORLA 2024](#rlauxe-simulated-consistent-sampling-for-corla-2024)
   * [Results](#results)
     * [Targeted contests only](#targeted-contests-only)
     * [Targeted contests plus important contests](#targeted-contests-plus-important-contests)
     * [Targeted contests plus contests needing less than X samples](#targeted-contests-plus-contests-needing-less-than-x-samples)
     * [Targeted contests plus contests with margins greater than a cutuff](#targeted-contests-plus-contests-with-margins-greater-than-a-cutuff)
+    * [Incremental Costs of including close contests](#incremental-costs-of-including-close-contests)
   * [Uniform vs Consistent Sampling](#uniform-vs-consistent-sampling)
   * [County level sample size](#county-level-sample-size)
   * [CVRs vs Card Styles](#cvrs-vs-card-styles)
@@ -103,8 +104,8 @@ created a list of _CardStyles_ (i.e. the list of contests on the card) found the
 
 There were still quite a few small contests that did not appear on any of the
 MVRs, so we just assumed that in each county, there was a single card style for all these ophan contests. (This is surely wrong and needs to be revisited).
-For each county, we then adjusted the number of counts of each CardStyle until the total vote counts were approximately equal to the known county subtotals 
-(this also needs to be revisited and made better).
+For each county, we adjusted the number of counts of each CardStyle until the total vote counts were equal to the known county subtotals, and the number of 
+cards matched the values given by the auditcenter.
 
 Given these simulated CVRs, we ran the standard Rlauxe consistent sampling algorithm. The diluted margins in this case 
 are substantially better than in the uniform sampling "no-CSD" case:
@@ -179,6 +180,27 @@ The next three plots have the targeted contests plus all contests with margins g
 <a href="https://johnlcaron.github.io/rlauxe/docs/cases/Corla24Dist/Corla24Dist-AllGt02.html" rel="AllGt02">![AllGt02](Corla24Dist/Corla24Dist-AllGt02.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/cases/Corla24Dist/Corla24Dist-AllGt02.html" rel="AllGt01">![AllGt01](Corla24Dist/Corla24Dist-AllGt01.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/cases/Corla24Dist/Corla24Dist-AllGt005.html" rel="AllGt005">![AllGt005](Corla24Dist/Corla24Dist-AllGt005.png)</a>
+
+### Incremental Costs of including close contests
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/cases/Corla24/Corla24Marginal.Linear.html" rel="Corla24Marginal">![Corla24Marginal](Corla24/Corla24Marginal.Linear.png)</a>
+
+* The contests are sorted by descending margin
+* The contests are added to the audit 50 at a time, then 10 at a time over 550.
+* The steep rise at the end shows how the close contests sharply increase the samples needed.
+* Corla has a single point shown in red.
+* Not showing the average or variance here, just one example audit with simulated cvrs.
+
+Same as above but with relaxed risk limits as the margins get smaller.
+
+````
+    if (contest estimated mvrs >= 250) max risk = 20 %
+    else if (contest estimated mvrs >= 150) max risk = 10 %
+    else if (contest estimated mvrs >= 50) max risk = 5 %
+    else max risk = auditRiskLimit (typically 3 %)
+````
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/cases/Corla24/Corla24MarginalRelaxed.Linear.html" rel="Corla24MarginalRelaxed">![Corla24MarginalRelaxed](Corla24/Corla24MarginalRelaxed.Linear.png)</a>
 
 
 ## Uniform vs Consistent Sampling

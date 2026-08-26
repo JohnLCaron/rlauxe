@@ -21,14 +21,14 @@ import kotlin.math.roundToInt
 
 private val logger = KotlinLogging.logger("CountyPoolsSimCvrs")
 
-//// break out of Corla, probably move to core
+//// TODO break out of Corla, probably move to core
+// TODO anticipate knowing styles or Nc(county, contest)
 
 // cards are partitioned by county; make a CountyPools for each County; cvrs are generated independently for each CountyPools.
+// generate cvrs with the constraint that they must agree with county subtotals and county ncards.
 
 // We know Nc = the total number of cards for a Contest, the total number of cards for a County, and the vote subtotals by County.
 // We dont know the styles, or the number of cards per contest per county.
-
-// generate cvts with the constraint that they must agree with county subtotals and county ncards.
 
 class CountyPoolsSimCvrs(
     val infos: Map<String, ContestInfo>,
@@ -154,22 +154,23 @@ class CountyPoolsSimCvrs(
         val info = infos[contestName]!!
 
         // first pass - check if Ncc is more than the ncards in the population
-        var accumCards = 0
+        var distCards1 = 0
         contestTab.countyVotes.forEach { (countyName, countyVotes) ->
             val fac = countyVotes / contestTotalVotes.toDouble() // convert from votes to cards
-            val Ncc = (contestNc * fac).roundToInt()
+            val Ncc = (contestNc * fac).roundToInt() // Nc(County, contest)
             val Npop = countyPopulations[countyName]
             if (Npop == null)
-                logger.error{"Npop is null for $countyName"}
+                logger.error{"Npopulation is null for $countyName"}
             require (Npop != null)
 
             if (Ncc > Npop) {
-                countyContestNc[countyName] = Npop // cant be bigger than the county population
-                logger.warn{" '$contestName'   $countyName :  $Ncc > $Npop use $Npop"}
-                accumCards += Npop
+                countyContestNc[countyName] = Npop // Ncc cant be bigger than the county population
+                logger.debug{"distributeContestCardsAcrossCounties '$contestName'   $countyName :  est Ncc $Ncc > $Npop Npopulation; use $Npop"}
+                distCards1 += Npop
             }
         }
-        val cardsLeft = contestNc - accumCards
+        val ncToDistribute = contestNc - distCards1
+
         var sumCardsLeft = 0
         contestTab.countyVotes.forEach { (countyName, countyVotes) ->
             if (countyContestNc[countyName] == null ) { // the counties that havent been set yet
@@ -177,22 +178,27 @@ class CountyPoolsSimCvrs(
             }
         }
 
-        // second pass - distribute the remaining counties in proportion to sumVotesLeft
+        // second pass - distribute the remaining counties in proportion to sumCardsLeft
+        var distCards2 = 0
+        var sumFac = 0.0
         contestTab.countyVotes.forEach { (countyName, countyVotes) ->
             if (countyContestNc[countyName] == null ) {
-                val fac = if (sumCardsLeft == 0) 0.0 else countyVotes / info.voteForN / sumCardsLeft.toDouble() // convert to cards
-                val Ncc = (cardsLeft * fac).roundToInt()
+                val fac = if (sumCardsLeft == 0) 0.0 else (countyVotes / info.voteForN) / sumCardsLeft.toDouble() // convert to cards
+                val Ncc = (ncToDistribute * fac).roundToInt()
 
                 countyContestNc[countyName] = Ncc
                 //println(" $countyName $countyVotes $fac:  use $Ncc")
-                accumCards += Ncc
+                distCards2 += Ncc
+                sumFac += fac
             }
         }
+        val allDist = distCards1 + distCards2
 
         // consistency check
         val contestSum = countyContestNc.values.sum()
         if (abs(contestNc - contestSum) > 5) {
-            logger.warn { "contest '$contestName' has distributed cards = $contestSum should be $contestNc" }
+            // TODO Nc should be ajusted ??
+            logger.warn { "contest '$contestName' has distributed Nc sum = $contestSum should be Nc = $contestNc" }
         }
         return countyContestNc
     }
@@ -308,7 +314,7 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
 
     var nextContestId = 0
     var nextStyleId = 0
-    var totalCards = 0
+    var missingStyleAdded: StyleAllocation? = null
 
     init {
         allContests.sumOf{ it.contestNc }
@@ -326,6 +332,7 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
             val missingStyle = StyleAllocation(missingContests, 0)
             allStyles.add(missingStyle)
             missingContests.forEach { missingStyle.setMin(it.contestNormalizedVotes) }
+            missingStyleAdded = missingStyle
         }
         mvrStyles.forEach{ allStyles.add(StyleAllocation(it)) }
 
@@ -353,6 +360,7 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
             allStyles.forEach { it .setMin(0) }
             logger.info{"add ${extraStyles.size} more styles for county $countyName"}
         }
+        // end TODO
 
         val mvrTotal = allStyles.sumOf { it.mvrCount }.toDouble()
         allStyles.forEach { it.mvrPct = it.mvrCount / mvrTotal }
@@ -499,11 +507,13 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
             println()
         }
 
+        var showFinal = false
         var prevNeed = -1
         val transferAtaTime = 100
         var count = 0
-        var iterLimit = 111
-        while (iterLimit > 0) {
+        var countStall = 0
+        var iterLimit = 1111
+        while (iterLimit > 0 && countStall < 10) {
             // only use contests that need cards
             // val contestNeedV = allContests.map { it.need() }
             // val contestNeedV = allContests.filter{ it.need() > 0}.map { max(min(it.need(), transferAtaTime), 0) }
@@ -525,10 +535,6 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
             // dont transfer more than we need
             var maxTransfer = min(contestNeedBoundedV.max(), transferAtaTime)
 
-            /* choose fromStyle with largest optCards
-            val fromStyle = allStyles.filter{ it.id != toStyle.id}.maxBy { it.optCards }
-            val fromStyleScore = fromStyle.scoreFromVector(maxTransfer) */
-
             // now that we have toStyle, where to take from?
             val fromStyleScores = allStyles.map {
                 if (it.id == toStyle.id) Int.MAX_VALUE else it.scoreFrom(maxTransfer)
@@ -537,15 +543,13 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
 
             val minScore = fromStyleScores.min()
             val stylesAndFromScores = allStyles.zip(fromStyleScores)
+            // choose style with largest optCards when score is tied
             val stylesWithMinScores: List<StyleAllocation>  = stylesAndFromScores.filter { it.second == minScore }.map { it.first }
             val fromStyle = stylesWithMinScores.maxBy { it.optCards }
 
+            // dont transfer more than we have
             maxTransfer = min(maxTransfer, fromStyle.optCards)
             val fromStyleScore = fromStyle.scoreFromVector(maxTransfer)
-
-            //val stylesWithMinScore: List<StyleAllocation> = fromStyleScores.withIndex().map { allStyles[it.index] }
-            // choose style with largest optCards when score is tied
-            //val fromStyle = stylesWithMinScore.maxBy { it.optCards } */
 
             if (show)
                 println("$count: ** prevNeed= $prevNeed diff = ${prevNeed-sumNeed} sumNeed=$sumNeed;  transfer $maxTransfer from style ${fromStyle.id} ${fromStyleScore.sum()} to style ${toStyle.id} $maxScore")
@@ -558,26 +562,34 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
             val sumNeedAfter = contestNeedPositiveAfterV.sum()
 
             val width = 6
-            if (sumNeedAfter > sumNeed) {
-                println("$countyName $count: prevNeed= $prevNeed diff = ${prevNeed-sumNeed} sumNeed=$sumNeed;  transfer $maxTransfer from style ${fromStyle.id} $minScore to style ${toStyle.id} $maxScore")
-                println("$countyName $count: sumNeedAfter=$sumNeedAfter diff = ${sumNeedAfter-sumNeed}")
-                // val contestNeedVP = Vector(contestNeed).project( fromStyle.contestVec.add(toStyle.contestVec))
-                println("    needlimitV ${contestNeedV.show(width)}")
-                println("  needBoundedV ${contestNeedBoundedV.show(width)}")
-                println("fromStyleScore ${fromStyleScore.show(width)} = ${fromStyleScore.sum()}")
+            if (sumNeedAfter >= sumNeed) {
+                countStall++
+                if (showAll) {
+                    val msg = buildString {
+                        showFinal = true
+                        append("$countyName $count: prevNeed= $prevNeed diff = ${prevNeed - sumNeed} sumNeed=$sumNeed; ")
+                        append("  transfer $maxTransfer from style ${fromStyle.id} $minScore to style ${toStyle.id} $maxScore; ")
+                        appendLine("sumNeedAfter=$sumNeedAfter diff = ${sumNeedAfter - sumNeed}")
+                        // val contestNeedVP = Vector(contestNeed).project( fromStyle.contestVec.add(toStyle.contestVec))
+                        appendLine("    needlimitV ${contestNeedV.show(width)}")
+                        appendLine("  needBoundedV ${contestNeedBoundedV.show(width)}")
+                        appendLine("fromStyleScore ${fromStyleScore.show(width)} = ${fromStyleScore.sum()}")
 
-                println()
-                println("needLimitBefore${contestNeedPositiveV.show(width)}")
-                println("    needAfterV ${contestNeedAfterV.show(width)}")
-                println("needLimitAfter ${contestNeedPositiveAfterV.show(width)}")
-                val diffV = contestNeedPositiveAfterV.subtract(contestNeedPositiveV)
-                println("           diff${diffV.show(width)}; sum = ${diffV.sum()}")
-                println()
+                        appendLine("    needAfterV ${contestNeedAfterV.show(width)}")
+                        appendLine("needLimitAfter ${contestNeedPositiveAfterV.show(width)}")
+                        val diffV = contestNeedPositiveAfterV.subtract(contestNeedPositiveV)
+                        appendLine("           diff${diffV.show(width)}; sum = ${diffV.sum()}")
+                    }
+                logger.info{ msg }
+                }
             }
 
             prevNeed = sumNeed
             iterLimit--
             count++
+        }
+        if (showFinal) {
+            logger.info{"$countyName took ${count} iterations"}
         }
         if (showAll) {
             println("After")
@@ -588,21 +600,38 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
             println()
             // show = true
         }
+        var checkNcards = allStyles.sumOf { it.ncards() }
 
+        // TODO add the contestsNotDone to the missing style and run again
         val contestsNotDone = allContests.filter{ it.need() > 0 }
         if (contestsNotDone.isNotEmpty()) {
-            val extraStyle = StyleAllocation(contestsNotDone, 0)
-            extraStyle.optCards = contestsNotDone.maxOf { it.need() }
-            allStyles.add(extraStyle)
-            logger.warn{"county '$countyName' needs another Style '$extraStyle' so that ncards > nvotes"}
-        } else {
-            val checkNcards = allStyles.sumOf { it.ncards() }
-            require(checkNcards == cardsinCountyPool)
+            // add these to the missing style
+            if (missingStyleAdded == null) {
+                val extraStyle = StyleAllocation(contestsNotDone, 0)
+                extraStyle.optCards = contestsNotDone.maxOf { it.need() }
+                allStyles.add(extraStyle)
+                logger.warn { "county '$countyName' needs another Style '$extraStyle' so that ncards > nvotes" }
+            } else {
+                val missingStylePrev = missingStyleAdded!!
+                val contestsForMissingStyle = missingStylePrev.contests + contestsNotDone
+                val missingStyleUpdated = StyleAllocation( contests = contestsForMissingStyle, 0)
+                missingStyleUpdated.minCards = missingStylePrev.minCards
+                missingStyleUpdated.optCards = missingStylePrev.optCards
+                allStyles.remove(missingStylePrev)
+                allStyles.add(missingStyleUpdated)
+
+                checkNcards = allStyles.sumOf { it.ncards() }
+                val anyStillMissing = allContests.filter{ it.need() > 0 }
+                require(anyStillMissing.isEmpty())
+                logger.info { "county '$countyName' munged the missingStyle so that ncards > nvotes for all contests" }
+            }
         }
+
+        require(checkNcards == cardsinCountyPool)
         require(!allContests.any { it.need() > 0 })
 
-        if (show) {
-            println("$countyName: totalCards=$totalCards population = $cardsinCountyPool diff=${totalCards - cardsinCountyPool}")
+        if (showAll) {
+            println("$countyName: totalCards=$checkNcards population = $cardsinCountyPool diff=${checkNcards - cardsinCountyPool}")
             allStyles.forEach { println(it) }
         }
     }

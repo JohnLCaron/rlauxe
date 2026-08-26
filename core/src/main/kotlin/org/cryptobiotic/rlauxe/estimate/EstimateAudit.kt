@@ -210,7 +210,7 @@ class AuditTrialTask(
 
         // Use Batches if available
         val vunderBatches = if (onePool != null && styles != null && config.election.pollingMode?.withBatches() == true)
-            VunderBatches(styles, onePool) else null
+            VunderBatches(name(), styles, onePool) else null
 
         val contestTrials: List<AssertionTrialIF> = contestsToAudit.map {
             if (config.isPolling) ContestPollingTrial(run, config.creation.riskLimit, config.round.pollingConfig!!, it.contestUA, it.minAssertion()!!)

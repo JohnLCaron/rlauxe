@@ -1,7 +1,11 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
+import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
+import org.cryptobiotic.rlauxe.auditcenter.writeCountyContestData
+import org.cryptobiotic.rlauxe.auditcenter.writeCountyData
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.CreateCardsForCountyPools
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -16,6 +20,7 @@ import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("CountyElectionSansCvrs")
 
+// deprecated, use createCountyElectionSimCvrs
 // We want to synnthesis cvrs and use them as the cvrPools
 // generate countyPools from auditcenter
 open class CountyElectionSansCvrs (
@@ -210,6 +215,7 @@ open class CountyElectionSansCvrs (
 
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the county totals. May be CLCA or OneAudit
+// deprecated, use createCountyElectionSimCvrs
 fun createCountyElectionSansCvrs(
     topdir: String,
     coloradoInput: ColoradoInput,

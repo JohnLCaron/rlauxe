@@ -16,7 +16,7 @@ import java.io.File
 import java.nio.file.Files.notExists
 import java.nio.file.Path
 
-private val logger = KotlinLogging.logger("StartAudit")
+private val logger = KotlinLogging.logger("StartFirstRound")
 
 fun startFirstRound(topdir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvrs: Int? = null): Result<AuditRoundIF, ErrorMessages> {
     val errs = ErrorMessages("startFirstRound")
@@ -60,7 +60,7 @@ fun startFirstRound(topdir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvr
 
         if (results.hasErrors) {
             logger.warn{ results.toString() }
-        } else {
+        } else if (results.messes.isNotEmpty()){
             logger.info{ results.toString() }
         }
 

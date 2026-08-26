@@ -46,7 +46,9 @@ data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pai
     }
 
     fun show() = buildString {
-        append("Vunder contestId=$contestId, nvotes=$nvotes ncards=$ncards, undervotes=$undervotes, missing=$missing, voteForN=$voteForN")
+        append("Vunder")
+        if (poolId != null) append("poolId=$poolId, ")
+        append(" contestId=$contestId, nvotes=$nvotes ncards=$ncards, undervotes=$undervotes, missing=$missing, voteForN=$voteForN")
     }
 
     companion object {

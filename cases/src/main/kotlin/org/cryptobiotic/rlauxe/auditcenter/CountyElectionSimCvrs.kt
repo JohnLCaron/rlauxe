@@ -14,8 +14,6 @@ import kotlin.Int
 import kotlin.String
 import kotlin.io.path.Path
 
-private val logger = KotlinLogging.logger("CountyElectionSimCvrs")
-
 // port CountyElectionSansCvrs using CountyPoolsSimCvrs
 
 // We want to synthesis cvrs and use them as the cvrPools
@@ -219,6 +217,10 @@ open class CountyElectionSimCvrs (
 
         return totalCards
     }
+
+    companion object {
+        val logger = KotlinLogging.logger("CountyElectionSimCvrs")
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -234,8 +236,8 @@ fun createCountyElectionSimCvrs(
 ) {
     val stopwatch = Stopwatch()
     clearDirectory(Path(topdir))
-    logger.info {"-------------- createCountyElectionSimCvrs $topdir"}
     Logging.addFileAppender("cases", "$topdir/logs.log")
+    CountyElectionSimCvrs.logger.info {"-------------- createCountyElectionSimCvrs $topdir"}
 
     val election =
         CountyElectionSimCvrs(coloradoInput,  topdir, name=name,
@@ -253,7 +255,7 @@ fun createCountyElectionSimCvrs(
 
     if (startFirstRound) {
         val result = startFirstRound(topdir)
-        if (result.isErr) logger.error { result.toString() }
-        logger.info { "createCountyElectionSansCvrs took $stopwatch" }
+        if (result.isErr) CountyElectionSimCvrs.logger.error { result.toString() }
     }
+    CountyElectionSimCvrs.logger.info { "that took $stopwatch" }
 }

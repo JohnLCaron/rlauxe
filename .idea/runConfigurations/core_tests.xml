@@ -26,7 +26,6 @@
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.corla.*" />
         <option name="ENABLED" value="true" />
-        <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.boulder.*" />

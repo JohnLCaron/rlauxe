@@ -1,7 +1,7 @@
 # rlauxe ("r-lux")
 
 WORK IN PROGRESS
-_last changed: 08/19/2026_
+_last changed: 08/26/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -50,6 +50,7 @@ see [Getting Started](docs/Developer.md#getting-started).
   * [Unanswered Questions](#unanswered-questions)
   * [Also See](#also-see)
   * [Case Studies](#case-studies)
+    * [Key findings](#key-findings)
   * [Documentation Index](#documentation-index)
     * [Pending Review](#pending-review)
 <!-- TOC -->
@@ -656,6 +657,13 @@ Specify amounts in dollars, but the main result would be relative costs, eg the 
 * [Corla Notes](docs/notes/CorlaNotes.md)
 * [Georgia 2026 Primary](docs/cases/Ga2026.md)
 * [San Francisco County 2024](docs/cases/SF2024.md)
+
+### Key findings
+
+1. To conduct a _publically verifiable election_, we need publically published CVRs.
+2. To conduct a card-style audit, if we dont have CVRs, at a minimum we need Card Styles (ie a list of the contests om the card) attached to each card in the county manifests. 
+3. To make accurate simulations of card-style audits, we need the County subtotals data to include the number of cards (or undervotes) by county and contest.
+4. For privacy-redacted data, in addition to the vote subtotals by county and contest, we need to know the number of cards in each redacted pool.
 
 ## Documentation Index
 * [AlphaMart](docs/AlphaMart.md)

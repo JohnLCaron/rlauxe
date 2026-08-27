@@ -207,17 +207,17 @@ Same as above but with relaxed risk limits as the margins get smaller.
 
 The last scenarios emphasize getting as many contests as possible under the limit. Yet these contests are probably the least
 interesting because they arent close. The advantage of consistent sampling is that one explicity chooses which contests
-to audit, then seeing exactly what sample size is required. You can run "what if" scenarios until you are satisfied
+to audit, then you see exactly what sample size is required. You can run "what if" scenarios until you are satisfied
 with the result and the cost. 
 
 If you have estimates of expected error rates, Rlauxe can model the expected variance of the samples needed. One can then
 choose a quantile of the distribution for the sample size, which gives the probability that you will need more than one round.
-The advantage is that you can explicityly choose the tradeoff between extra samples vs the number of rounds needed.
+So you can explicitly choose the tradeoff between extra samples vs the number of rounds needed.
 
 ## County level sample size
 
 The number of samples needed can be shown by county. Each county might make its own choices of which contests to audit, 
-and immediately see the likely number of samples the county would need to audit. It can iterate on these choices until
+and immediately see the variance of the number of samples the county would need to audit. It can iterate on these choices until
 satisfied with the cost and benefits.
 
 Here is an example from the "targeted plus important contests" scenario,
@@ -230,8 +230,8 @@ close contests, not the size of the county):
 ## CVRs vs Card Styles
 
 In order to do consistent sampling we would like to have full access to CVRs (and they must record the undervotes).
-However, consistent sampling doesn't actually need the CVR unless that sheet gets selected for the audit. What we do need is an 
-accurate list of the contests that are on each sheet, aka the _Card Style_. I imagine that each county has a relatively small 
+However, consistent sampling doesn't actually need the CVR unless that card gets selected for the audit. What we do need is an 
+accurate list of the contests that are on each card, aka the _Card Style_. I imagine that each county has a relatively small 
 number of Card Styles, and if these were included on the manifest, we could do consistent sampling from that.
 
 A _publicly verifiable_ audit needs the CVRs to be publically _commited to_ before the audit starts, to ensure that the election

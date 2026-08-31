@@ -39,7 +39,12 @@ data class AuditableCard (
         this.style = style
         return this
     }
-    fun style(): StyleIF? = style // could work harder so its not null
+    fun style(): StyleIF? {
+        return if (style != null) style
+        else if (styleId == -1) CardStyle.fromCvrStyle
+        else if (styleId == -2) CardStyle.phantomStyle
+        else null
+    } // could work harder so its not null
 
     private val votes: Map<Int, IntArray>? by lazy {
         if (contestIds.isEmpty()) null else {

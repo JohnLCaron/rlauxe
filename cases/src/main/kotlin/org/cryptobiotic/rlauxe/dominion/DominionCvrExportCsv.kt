@@ -2,8 +2,6 @@ package org.cryptobiotic.rlauxe.dominion
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.boulder.parseContestNameAndVoteFor
-import org.cryptobiotic.rlauxe.boulder.parseIrvContestName
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.auditcenter.munge
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
@@ -26,7 +24,6 @@ data class DominionCvrExportCsv(
     val cvrs: List<CastVoteRecord>, // includes both regular and IRV votes, but not redacted groups
     val redactedGroups: List<DominionRedactedGroup>,
     val exportCardStyles: List<ExportCardStyle>,
-    //     val ballotTypes: List<BallotType>,
 ) {
     fun show() = buildString {
         appendLine("filename = $filename")
@@ -103,7 +100,9 @@ data class CastVoteRecord(
                     val colValue = colValueS.toInt()
                     if (colValue > 0) votes.add(i)
                 } catch (e: NumberFormatException) {
-                    logger.warn{ "Cant parse '$colValueS' at col $colno line $lineno; probably didnt catch the redacted line; filename=${schema.inputSource}"}
+                    logger.warn{ "Cant parse '$colValueS' at col $colno line $lineno; probably didnt catch the redacted line; filename=${schema.inputSource}\n" +
+                            "$line"
+                        }
                     return emptyList()
                 }
             }
@@ -321,7 +320,8 @@ fun cleanContestName(col: String) : String {
     return if (pos > 0) col.substring(0, pos).trim() else col.trim()
 }
 
-// TODO maybe have to pass this funtion in ??
+// TODO maybe have to pass this function in ??
+//   is it ok not to clean anything here??
 fun cleanChoiceName(choiceName: String) : String {
     var work = choiceName
     // Garfield may have the party name appended to the choice name, eg "Donald J. Trump / Michael R. Pence:Republican"

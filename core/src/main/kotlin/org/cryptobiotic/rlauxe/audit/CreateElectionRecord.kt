@@ -28,12 +28,12 @@ interface ElectionBuilder {
     fun cards() : CloseableIterator<AuditableCard> // not sorted, dont need styles added yet
     fun ncards(): Int
 
-    // In EstimateAudit, we want to use pools to estimate with, if they exist. So the merging needs to merge pools, not the batches.
-    // So dont write batches if there are pools. Also its up to the reader to prefer pools.
+    // In EstimateAudit, we want to use pools to estimate with, if they exist. So the merging needs to merge pools, not the styles.
+    // So dont write styles if there are pools. Also its up to the reader to prefer pools.
     fun cardStyles(): List<StyleIF>?
     fun cardPools(): List<CardPoolIF>?
     fun countyCardPools(): List<CountyPools>? = null
-    fun countyCvrPools(): List<CountyPools>? = null
+    fun countyCvrPools(): List<CountyPools>? = null // for debugging
 
     // if (config.election.mvrSource == MvrSource.testPrivateMvrs), supply one or the other:
     fun unsortedMvrsInternal(): List<AuditableCard>? // for in-memory case, poolId used also as batch name?

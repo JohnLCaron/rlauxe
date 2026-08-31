@@ -4,11 +4,10 @@ import java.security.SecureRandom
 import kotlin.enums.EnumEntries
 import kotlin.math.abs
 import kotlin.math.ceil
-import kotlin.math.exp
 import kotlin.math.floor
-import kotlin.math.ln
 import kotlin.math.round
-val version = "0.10.2.0"
+
+val version = "0.10.3.0" // TODO auto update
 
 val secureRandom = SecureRandom.getInstanceStrong()!!
 const val doublePrecision = 1.0e-8

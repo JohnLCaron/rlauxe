@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.boulder
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.cvr.parseContestNameAndVoteFor
+import org.cryptobiotic.rlauxe.cvr.parseIrvContestName
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.DominionRedactedGroup
@@ -121,7 +123,7 @@ class TestBoulderVsDominionCvrExport {
         ballotTypes.toSortedMap().forEach { println(it) }
 
         val ballotTypesOld = mutableMapOf<String, MutableList<List<Int>>>()
-        exportOld.cvrs.forEach { cvr: org.cryptobiotic.rlauxe.boulder.CastVoteRecord ->
+        exportOld.cvrs.forEach { cvr: BoulderCastVoteRecord ->
             val contestIds = cvr.contestVotes.map { it.contestId }
             val prevContestIds = ballotTypesOld.getOrPut(cvr.ballotType) { mutableListOf() }
             if (!prevContestIds.contains(contestIds)) {
@@ -203,7 +205,7 @@ class TestBoulderVsDominionCvrExport {
         println("\nagree = $allOk")
     }
 
-    fun compareRedactedMaps(map1: Map<String, RedactedGroup>, map2: Map<String, DominionRedactedGroup>, show: Boolean = false, name1: String = "Boulder", name2: String = "Dominion"): Boolean {
+    fun compareRedactedMaps(map1: Map<String, BoulderRedactedGroup>, map2: Map<String, DominionRedactedGroup>, show: Boolean = false, name1: String = "Boulder", name2: String = "Dominion"): Boolean {
         var allOk = true
         map1.forEach { (id1, val1) ->
             val val2 = map2[id1]
@@ -222,7 +224,7 @@ class TestBoulderVsDominionCvrExport {
         return allOk
     }
 
-    fun compareRedactedGroup(g1: RedactedGroup?, g2: DominionRedactedGroup?): Boolean {
+    fun compareRedactedGroup(g1: BoulderRedactedGroup?, g2: DominionRedactedGroup?): Boolean {
         if ((g1 == null) == (g2 == null)) return true
         if ((g1 == null) || (g2 == null)) return false
         if (g1.ballotType != g2.ballotType ) return false

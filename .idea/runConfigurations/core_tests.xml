@@ -21,7 +21,6 @@
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.dominion.*" />
         <option name="ENABLED" value="true" />
-        <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.corla.*" />
@@ -30,7 +29,6 @@
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.boulder.*" />
         <option name="ENABLED" value="true" />
-        <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.auditcenter.*" />

@@ -1,11 +1,10 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
+import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
+import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.testdataDir
@@ -25,24 +24,25 @@ class TestBoulder2024Cvrs {
         val stopwatch = Stopwatch()
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
+        val corlaCvrs = readCorlaCvrsFromFile(filename, showHeaders = false, showSchema = false, redaction = RedactionBoulder())
         // println(export.summary())
         println("took = $stopwatch")
 
         assertEquals(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            export.filename
+            corlaCvrs.inputSource
         )
-        assertEquals("2024 Boulder County General Election", export.electionName)
-        assertEquals("5.17.17.1", export.versionName)
-        assertEquals(65, export.schema.contests.size)
-        assertEquals(384384, export.cvrs.size)
+        assertEquals("2024 Boulder County General Election", corlaCvrs.electionName)
+        assertEquals("5.17.17.1", corlaCvrs.versionName)
+        assertEquals(65, corlaCvrs.schema.contests.size)
+        assertEquals(384384, corlaCvrs.cvrs.size)
 
         val sovo = readBoulderStatementOfVotes(
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val maker = CreateBoulderElection( AuditType.CLCA, export,  sovo, hasStyle = true)
+
+        val maker = CreateBoulderElectionClca( "parseBoulder24cvrs", AuditType.CLCA, corlaCvrs,  sovo, hasStyle = true)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 

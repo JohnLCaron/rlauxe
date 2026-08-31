@@ -1,19 +1,14 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
+import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
+import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
+import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.CvrBuilder2
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.contentToString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -26,37 +21,36 @@ class TestRedactedCvrs {
         val sovoFilename = "$datadir/2025C-Boulder-County-Official-Statement-of-Votes.utf8.csv"
         val sovo: BoulderStatementOfVotes = readBoulderStatementOfVotes(sovoFilename, "Boulder2024")
 
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(cvrFilename)
+        val export = readCorlaCvrsFromFile(cvrFilename, redaction = RedactionBoulder())
 
-        val electionSimCvrs = CreateBoulderElection(AuditType.CLCA, export, sovo, distributeOvervotes = emptyList())
-        testRedactedCvrTabulation(export, electionSimCvrs)
+        val electionSimCvrs = CreateBoulderElection("boulder2025", AuditType.CLCA, export, sovo, hasStyle = true)
+        testRedactedCvrTabulation(export, electionSimCvrs.makeRedactedCvrs(electionSimCvrs.redactedPools))
     }
 
     @Test
     fun test2024RedactedCvrs() {
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
+        val export = readCorlaCvrsFromFile(filename, redaction = RedactionBoulder())
 
         val sovo = readBoulderStatementOfVotes(
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val electionSimCvrs = CreateBoulderElection(AuditType.CLCA,  export, sovo)
+        val electionSimCvrs = CreateBoulderElectionClca("boulder2024", AuditType.CLCA,  export, sovo)
         val infos = electionSimCvrs.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
-        testRedactedCvrTabulation(export, electionSimCvrs)
+        testRedactedCvrTabulation(export, electionSimCvrs.makeRedactedCvrs())
     }
 
-    fun testRedactedCvrTabulation(export: DominionCvrExportCsv, electionSimCvrs: CreateBoulderElection) {
-        val redactedCvrs = electionSimCvrs.makeRedactedCvrs()
+    fun testRedactedCvrTabulation(export: CorlaCvrs, redactedCvrs: List<Cvr>) {
         println("nredacted cvrs = ${redactedCvrs.size}")
 
         val redactedCvrVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(redactedCvrs.iterator())
 
         val redactedDirect = mutableMapOf<Int, MutableMap<Int, Int>>()
-        export.redactedGroups.forEach { redacted ->
+        export.redactedGroups().forEach { redacted ->
             redacted.contestVotes.forEach { (contestId, conVotes) ->
                 val accumVotes = redactedDirect.getOrPut(contestId) { mutableMapOf() }
                 conVotes.forEach { (cand, nvotes) ->

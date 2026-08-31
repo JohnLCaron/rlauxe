@@ -661,7 +661,7 @@ Specify amounts in dollars, but the main result would be relative costs, eg the 
 ### Key findings
 
 1. To conduct a _publically verifiable election_, we need publically published CVRs.
-2. To conduct a card-style audit, if we dont have CVRs, at a minimum we need Card Styles (ie a list of the contests om the card) attached to each card in the county manifests. 
+2. To conduct a card-style audit, if we dont have CVRs, at a minimum we need Card Styles (ie a list of the contests on the card) attached to each card in the county manifests. 
 3. To make accurate simulations of card-style audits, we need the County subtotals data to include the number of cards (or undervotes) by county and contest.
 4. For privacy-redacted data, in addition to the vote subtotals by county and contest, we need to know the number of cards in each redacted pool.
 

@@ -183,6 +183,8 @@ The next three plots have the targeted contests plus all contests with margins g
 
 ### Incremental Costs of including close contests
 
+**Risk 3%**
+
 <a href="https://johnlcaron.github.io/rlauxe/docs/cases/Corla24/Corla24Marginal.Linear.html" rel="Corla24Marginal">![Corla24Marginal](Corla24/Corla24Marginal.Linear.png)</a>
 
 * The contests are sorted by descending margin
@@ -191,13 +193,13 @@ The next three plots have the targeted contests plus all contests with margins g
 * Corla has a single point shown in red.
 * Not showing the average or variance here, just one example audit with simulated cvrs.
 
-Same as above but with relaxed risk limits as the margins get smaller.
+**Relaxed Risk** Same as above but with relaxed risk limits as the margins get smaller:
 
 ````
     if (contest estimated mvrs >= 250) max risk = 20 %
     else if (contest estimated mvrs >= 150) max risk = 10 %
     else if (contest estimated mvrs >= 50) max risk = 5 %
-    else max risk = auditRiskLimit (typically 3 %)
+    else max risk = auditRiskLimit = 3%
 ````
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/cases/Corla24/Corla24MarginalRelaxed.Linear.html" rel="Corla24MarginalRelaxed">![Corla24MarginalRelaxed](Corla24/Corla24MarginalRelaxed.Linear.png)</a>

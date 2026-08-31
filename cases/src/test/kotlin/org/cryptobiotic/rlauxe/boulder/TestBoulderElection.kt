@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
+import org.cryptobiotic.rlauxe.cvr.parseContestNameAndVoteFor
+import org.cryptobiotic.rlauxe.cvr.parseIrvContestName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail

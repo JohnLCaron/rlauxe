@@ -273,3 +273,43 @@ class TestCvrExportRedaction {
             }
     }
 }
+
+// see TestCvrExportRedaction
+fun assignStylesToRedactedGroups(export: DominionCvrExportCsv) {
+    val voteForNs = export.schema.contests.associate { it.contestIdx to it.voteForN }
+
+    val styles: Map<String, ExportCardStyle> = export.exportCardStyles.associateBy { it.name }
+    var totalLines = 0
+    var totalVotes = 0
+    var totalMinCards = 0
+    export.redactedGroups.forEach { group ->
+        val minCards = group.minCards()
+        totalMinCards += minCards
+        print("  $group, minCards=$minCards")
+        totalLines += group.nlines
+        totalVotes += group.totalVotes()
+
+        val groupIds = group.contestVotes.filter { (key, cands) -> cands.any { it.value > 0 } }.map { it.key }.toSet()
+        val match = styles[group.ballotType]
+        if (match != null) {
+            // filter out where contests where no votes were seen
+            val missingInStyle = groupIds - match.contests
+            val missingInRedaction = match.contests - groupIds
+            if (missingInStyle.isNotEmpty() || missingInRedaction.isNotEmpty()) {
+                println(" matching style has=${match.contests.size} contest")
+            }
+            group.style = match
+        } else {
+            println(" *** no match for ${group.ballotType} with ${groupIds.size} non-zero contests ")
+        }
+        println()
+    }
+    println("ngroups = ${export.redactedGroups.size}")
+    println("totalLines = $totalLines")
+    println("sum votes = $totalVotes")
+    println("sum minCards = $totalMinCards")
+
+    // all redactions have 49 contests, probably put in 0 instead of blank
+    // but can match DS name, and use that as the card style. test if any contests are non-zero
+    // then add minCards cards for each style to the county pool
+}

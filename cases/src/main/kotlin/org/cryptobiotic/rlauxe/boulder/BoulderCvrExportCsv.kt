@@ -4,7 +4,10 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.dominion.getCsvStreamFromResource
+import org.cryptobiotic.rlauxe.cvr.isEmpty
+import org.cryptobiotic.rlauxe.cvr.parseContestNameAndVoteFor
+import org.cryptobiotic.rlauxe.cvr.parseIrvContestName
+import org.cryptobiotic.rlauxe.cvr.getCsvStreamFromResource
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.ZipReader
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -15,7 +18,7 @@ import java.nio.charset.Charset
 import kotlin.collections.set
 import kotlin.math.max
 
-// TODO integrate Boulder-specific reading
+// TODO integrate Boulder-specific reading into CorlaCvrs
 
 // this reads csv files from "Dominion CVR export files", maybe standard Dominion csv format ?
 // We are getting these files from Boulder County, used by createBoulderElection()
@@ -47,8 +50,8 @@ data class BoulderCvrExportCsv(
     val versionName: String,
     val filename: String,
     val schema: Schema,
-    val cvrs: List<CastVoteRecord>, // includes both regular and IRV votes, but not redacted groups
-    val redacted: List<RedactedGroup>,
+    val cvrs: List<BoulderCastVoteRecord>, // includes both regular and IRV votes, but not redacted groups
+    val redacted: List<BoulderRedactedGroup>,
     val ballotTypes: List<BallotType>,
 ) {
     fun show() = buildString {
@@ -81,7 +84,7 @@ data class BoulderCvrExportCsv(
 }
 
 // CvrNumber,TabulatorNum,BatchId,RecordId,ImprintedId,PrecinctPortion,BallotType
-data class CastVoteRecord(
+data class BoulderCastVoteRecord(
     val cvrNumber: Int,
     val tabulatorNum: Int,
     val batchId: String,
@@ -90,9 +93,9 @@ data class CastVoteRecord(
     val ballotType: String,
 ) {
     var precinctPortion: String? = null
-    var contestVotes =  mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
+    var contestVotes =  mutableListOf<BoulderContestVotes>() // equivilent to Map<contestId, IntArray>
 
-    fun addVotes(schema: Schema, line: CSVRecord): CastVoteRecord {
+    fun addVotes(schema: Schema, line: CSVRecord): BoulderCastVoteRecord {
         var colidx = schema.nheaders // skip over the first 6 or 7 columns
         while (colidx < line.size()) {
             if (line.get(colidx).isNotEmpty()) {
@@ -101,10 +104,10 @@ data class CastVoteRecord(
                 if (useContest.isIRV) {
                     // cvr.raw = makeRaw(line, useContest.startCol, useContest.ncols)
                     val candVotes = makeIrvVotes(schema, line, useContest)
-                    contestVotes.add(ContestVotes(useContestIdx, candVotes))
+                    contestVotes.add(BoulderContestVotes(useContestIdx, candVotes))
                 } else {
                     val candVotes  = makeRegularVotes(schema, line, useContest)
-                    contestVotes.add( ContestVotes(useContestIdx, candVotes))
+                    contestVotes.add( BoulderContestVotes(useContestIdx, candVotes))
                 }
                 colidx += useContest.ncols
             } else {
@@ -114,7 +117,7 @@ data class CastVoteRecord(
         return this
     }
 
-    fun voteFor(contest: Int): ContestVotes? = contestVotes.find { it.contestId == contest}
+    fun voteFor(contest: Int): BoulderContestVotes? = contestVotes.find { it.contestId == contest}
 
     fun show() = buildString {
         append("$cvrNumber, ")
@@ -142,21 +145,22 @@ data class CastVoteRecord(
 
 // contestIdx = contestId. Need to cross reference with contest name in the header to get that right
 // use colIdx to eliminate write-ins.
-data class ContestVotes(val contestId: Int, val candVotes: List<Int>)
+data class BoulderContestVotes(val contestId: Int, val candVotes: List<Int>)
 
 
 // raw data from Boulder, before we start to adjust it. Turn into a CardPool,
 // TODO check this: unfortunately, we dont know how many ballots this group represents, nor the number of undervotes
 // TODO merge groups of the same ballotType
-class RedactedGroup(var ballotType: String) {
+class BoulderRedactedGroup(var ballotType: String) {
     // dont have ContestInfos yet
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
     private var csvRecord : CSVRecord? = null // debugging
     var ncards: Int = 1  //used by the accumulating group
+    var singleCards = true
 
     fun contests() = contestVotes.keys.toSet()
 
-    fun addVotes(schema: Schema, line: CSVRecord): RedactedGroup {
+    fun addVotes(schema: Schema, line: CSVRecord): BoulderRedactedGroup {
         var colidx = schema.nheaders // skip over the first 6 or 7 columns
         while (colidx < line.size()) {
             val valueAtIdx = line.get(colidx)
@@ -173,6 +177,7 @@ class RedactedGroup(var ballotType: String) {
                         val nvotes = line.get(useContest.startCol + candIdx).toInt()
                         val prev = candidateVotes[candIdx] ?: 0
                         candidateVotes[candIdx] = prev + nvotes
+                        if (nvotes > 1) singleCards = false
                     }
                     if (useContest.contestIdx == 31 && candidateVotes.values.sum() == 1)
                         print("")
@@ -186,7 +191,7 @@ class RedactedGroup(var ballotType: String) {
         return this
     }
 
-    fun merge(other: RedactedGroup, voteForNmap: Map<Int, Int>): RedactedGroup {
+    fun merge(other: BoulderRedactedGroup, voteForNmap: Map<Int, Int>): BoulderRedactedGroup {
         other.contestVotes.forEach { (contestId, otherCands) ->
             val mycands = contestVotes.getOrPut(contestId, { mutableMapOf() })
 
@@ -218,14 +223,14 @@ class RedactedGroup(var ballotType: String) {
     override fun toString() = buildString {
         val contests = contestVotes.map { it.key }.sorted()
         val totalVotes = contestVotes.values.map{ it.values }.flatten().sum()
-        append("RedactedGroup('$ballotType', ncards=$ncards, contests=$contests totalVotes=$totalVotes)")
+        append("RedactedGroup('$ballotType', ncards=$ncards, contests=$contests totalVotes=$totalVotes singleCards=$singleCards)")
         // appendLine(csvRecord.toString())
     }
 
     companion object {
 
-        fun makeAccumulator(starting: RedactedGroup, accumName:String, voteForNmap: Map<Int, Int>): RedactedGroup {
-            val accum = RedactedGroup(accumName)
+        fun makeAccumulator(starting: BoulderRedactedGroup, accumName:String, voteForNmap: Map<Int, Int>): BoulderRedactedGroup {
+            val accum = BoulderRedactedGroup(accumName)
             accum.merge(starting, voteForNmap)
 
             // override with method #2
@@ -256,9 +261,9 @@ data class BallotType(val name: String, val contests: Set<Int>, var count: Int =
 
 class BallotStyles {
     val ballotTypes = mutableMapOf<String, BallotType>()
-    val redactedGroups = mutableMapOf<String, RedactedGroup>()
+    val redactedGroups = mutableMapOf<String, BoulderRedactedGroup>()
 
-    fun add(cvr:CastVoteRecord) {
+    fun add(cvr:BoulderCastVoteRecord) {
         val cvrContests = cvr.contestVotes.map { it.contestId }.toSet()
         val ballotType = ballotTypes.getOrPut(cvr.ballotType) { BallotType(cvr.ballotType, cvrContests) }
         if (ballotType.contests == cvrContests)
@@ -268,11 +273,11 @@ class BallotStyles {
         }
     }
 
-    fun add(redacted:RedactedGroup, voteForNmap: Map<Int, Int>) {
+    fun add(redacted:BoulderRedactedGroup, voteForNmap: Map<Int, Int>) {
         val rname = if (useBoulder31 && redacted.contestVotes.contains(31)) "${redacted.ballotType}+31" else redacted.ballotType
         val group = redactedGroups[rname]
         if (group == null) {
-            redactedGroups[rname] = RedactedGroup.makeAccumulator(redacted, rname, voteForNmap)
+            redactedGroups[rname] = BoulderRedactedGroup.makeAccumulator(redacted, rname, voteForNmap)
         } else {
             if (group.contests() == redacted.contests())
                 group.merge(redacted, voteForNmap)
@@ -367,7 +372,7 @@ fun readBoulderCvrExportsFromInputStream(input: InputStream, inputName: String, 
     val schema = makeSchema(contestLine, choiceLine, headerRecord)
     val ballotTypeIdx = if (schema.nheaders == 6) 5 else 6 // TODO see if BallotType == header 6
 
-    val cvrs = mutableListOf<CastVoteRecord>()
+    val cvrs = mutableListOf<BoulderCastVoteRecord>()
 
     var rcvRedacted = 0
     while (records.hasNext()) {
@@ -377,11 +382,11 @@ fun readBoulderCvrExportsFromInputStream(input: InputStream, inputName: String, 
             val isA =  line.get(0).contains("A cards")
             val isB =  line.get(0).contains("B cards")
             val ballotStyle = line.get(ballotTypeIdx) + if (isA) "-A" else if (isB) "-B" else ""
-            val redactedGroup = RedactedGroup(ballotStyle).addVotes(schema, line)
+            val redactedGroup = BoulderRedactedGroup(ballotStyle).addVotes(schema, line)
             ballotStyles.add(redactedGroup, schema.votesForN)
 
         } else if (line.get(0).startsWith("RCV Redacted")) {
-            val cvr = CastVoteRecord(
+            val cvr = BoulderCastVoteRecord(
                 rcvRedacted,
                 0,
                 "N/A",
@@ -400,7 +405,7 @@ fun readBoulderCvrExportsFromInputStream(input: InputStream, inputName: String, 
                 // println(line) // assume thats the end
                 break
             }
-            val cvr = CastVoteRecord(
+            val cvr = BoulderCastVoteRecord(
                 cvrNumber = line.get(0).toInt(),
                 tabulatorNum = line.get(1).toInt(),
                 batchId = line.get(2),
@@ -499,7 +504,7 @@ class Schema(val columns: List<ColumnInfo>, val nheaders: Int, val contests: Lis
         return result
     }
 
-    fun voteFor(contestId: Int, cvr: CastVoteRecord): List<String> {
+    fun voteFor(contestId: Int, cvr: BoulderCastVoteRecord): List<String> {
         val choices = choices(contestId)
         val contestVotes = cvr.voteFor(contestId)
         val result = mutableListOf<String>()

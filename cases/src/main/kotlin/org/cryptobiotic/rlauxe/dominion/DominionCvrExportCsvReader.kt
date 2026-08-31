@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.boulder.isEmpty
+import org.cryptobiotic.rlauxe.cvr.isEmpty
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.File
 import java.io.IOException

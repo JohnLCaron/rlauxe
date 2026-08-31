@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.boulder.isEmpty
+import org.cryptobiotic.rlauxe.cvr.isEmpty
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.File
 import java.io.InputStreamReader
@@ -12,7 +12,7 @@ import java.io.Reader
 import java.nio.charset.Charset
 
 // this reads csv files from a "Dominion CVR export files", for Garfield County, Colorado 2020 General election.
-// presumable some earlier version ??
+// perhaps some earlier version of the export file ??
 
 private val logger = KotlinLogging.logger("GarfieldCsvReader")
 

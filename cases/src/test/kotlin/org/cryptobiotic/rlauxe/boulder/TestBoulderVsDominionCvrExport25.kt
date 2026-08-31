@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.boulder
 import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
@@ -46,7 +47,7 @@ class TestBoulderVsDominionCvrExport25 {
         ballotTypes.toSortedMap().forEach { println(it) }
 
         val ballotTypesOld = mutableMapOf<String, MutableList<List<Int>>>()
-        exportOld.cvrs.forEach { cvr: org.cryptobiotic.rlauxe.boulder.CastVoteRecord ->
+        exportOld.cvrs.forEach { cvr: BoulderCastVoteRecord ->
             val contestIds = cvr.contestVotes.map { it.contestId }
             val prevContestIds = ballotTypesOld.getOrPut(cvr.ballotType) { mutableListOf() }
             if (!prevContestIds.contains(contestIds)) {
@@ -174,23 +175,23 @@ class TestBoulderVsDominionCvrExport25 {
 
     @Test
     fun showSovoContestDetail2() {
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(cvrFilename)
+        val export = readCorlaCvrsFromFile(cvrFilename)
 
-        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClca("test", AuditType.ONEAUDIT, export, sovo)
         println()
         election2.boulderContestBuilders.forEach { (_, oa) ->
-            println(BoulderContestVotes.header)
+            println(SovoContestVotes.header)
             println(oa.details())
         }
     }
 
     @Test
     fun showPoolVotes() {
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(cvrFilename)
+        val export = readCorlaCvrsFromFile(cvrFilename)
 
         println("votes, undervotes")
 
-        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClca("test", AuditType.ONEAUDIT, export, sovo)
         val contestIds = election2.infoList.map { it.id }
         showPoolVotes(contestIds, election2.cardPoolBuilders)
     }
@@ -208,10 +209,10 @@ class TestBoulderVsDominionCvrExport25 {
 
     @Test
     fun showRedactedUndervotes2() {
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(cvrFilename)
+        val export = readCorlaCvrsFromFile(cvrFilename)
 
         // val election1 = BoulderElectionOAsim(export, sovo)
-        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClca("boulder2025", AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -274,8 +275,8 @@ class TestBoulderVsDominionCvrExport25 {
 
     @Test
     fun showRedactedNcards() {
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(cvrFilename)
-        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
+        val export = readCorlaCvrsFromFile(cvrFilename)
+        val election2 = CreateBoulderElectionClca("boulder2025", AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -343,8 +344,9 @@ class TestBoulderVsDominionCvrExport25 {
 
     @Test
     fun showNcards() {
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(cvrFilename)
-        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
+        val export = readCorlaCvrsFromFile(cvrFilename)
+
+        val election2 = CreateBoulderElectionClca("boulder2025", AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 

@@ -50,7 +50,6 @@ class CvrsToCardStylesIterator(
 
     val styleMap = styles?.associateBy{ it.contestIdSet() } ?: emptyMap()
     val allCvrs: Iterator<Cvr>
-
     var cardIndex = 0 // 0 based index
 
     init {

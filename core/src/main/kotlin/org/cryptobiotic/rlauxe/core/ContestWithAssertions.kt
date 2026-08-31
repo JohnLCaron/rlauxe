@@ -204,7 +204,7 @@ open class ContestWithAssertions(
         val minAssertion = minAssertion()
         if (minAssertion != null) {
             val minAssorter = minAssertion.assorter
-            append("   minAssertion= ${contest.showAssertionDifficulty(minAssertion.assorter)}")
+            append("   minAssertion= ${contest.showAssertionDifficulty(minAssertion.assorter)} dilutedMargin=${minMargin()}")
             appendLine(" noerror=${dfn(noerror(minAssorter.dilutedMargin(), minAssorter.upperBound()), 4)}")
             appendLine()
         }

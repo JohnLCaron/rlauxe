@@ -14,10 +14,12 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.auditcenter.CountyElectionSimCvrs
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapter
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.irv.makeRaireOneAuditContest
 import org.cryptobiotic.rlauxe.irv.makeRaireContest
+import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.util.CardTabulation
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -27,6 +29,7 @@ import kotlin.Boolean
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
+import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("CreateSfElection")
 
@@ -368,6 +371,10 @@ fun createSfElection(
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
  ): Result<AuditRoundIF, ErrorMessages> {
     val stopwatch = Stopwatch()
+
+    clearDirectory(Path(topdir))
+    Logging.addFileAppender("cases", "$topdir/logs.log")
+    CountyElectionSimCvrs.logger.info {"-------------- createSfElection $topdir"}
 
     val election = CreateSfElection(
         castVoteRecordZip,

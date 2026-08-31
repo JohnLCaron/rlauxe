@@ -1,32 +1,83 @@
-package org.cryptobiotic.rlauxe.dominion
+package org.cryptobiotic.rlauxe.cvr
 
+import com.github.michaelbull.result.valuesOf
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.util.roundUp
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.math.max
+import kotlin.text.lowercase
+import kotlin.text.startsWith
 
-private val logger = KotlinLogging.logger("DominionRedactedGroup")
-private val showLines = false
+private val logger = KotlinLogging.logger("Redaction")
 
-// voteForNs : contestId -> nvotes
-class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>) {
+interface RedactionIF {
+    val nlines: Int
+    fun isRedaction(line: CSVRecord, corlaCvrs: CorlaCvrs): Boolean
+}
+
+// standard Redactor, eg for votedatabase
+class Redaction(val show: Boolean = false) : RedactionIF {
+    override var nlines = 0
+
+    // "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
+    // "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv"
+    override fun isRedaction(line: CSVRecord, corlaCvrs: CorlaCvrs): Boolean {
+        val ballotStyle = corlaCvrs.readColumn(line, "BallotType") ?: "noBallotType"
+
+        if (line.get(0).startsWith("AGGREGATED")) {
+            if (show) println("  ** redact: $line")
+            val redactedGroup = RedactedGroup("AGGREGATED", corlaCvrs.schema.voteForNs).addVotes(corlaCvrs.schema, line)
+            corlaCvrs.ballotStyles.add(redactedGroup)
+            nlines++
+            return true
+
+        } else if (line.get(0).isEmpty()) { // (2020) Boulder, Dolores; has votes, presumably the sum of the redactions
+            if (show) println("  ** redact: isEmpty $line")
+
+            val redactedGroup = RedactedGroup("redacted$nlines", corlaCvrs.schema.voteForNs).addVotes(corlaCvrs.schema, line)
+            corlaCvrs.ballotStyles.add(redactedGroup)
+            nlines++
+            return true
+
+        } else if (line.get(corlaCvrs.schema.nheaders).startsWith("*")) { // El Paso
+            if (show) println("  ** redact *: $line")
+            nlines++
+            return true
+        }
+
+        val values = line.toList().subList(corlaCvrs.schema.nheaders, line.size())
+        val hasRedacted = values.any { it.lowercase().startsWith("redacted") }
+        if (hasRedacted) {
+            if (show) println("  ** hasRedacted: $line")
+            nlines++
+            return true
+        }
+
+        val hasanX = values.any { it.startsWith("X") }
+        if (hasanX) { // Douglas, Pitkin
+            if (show) println("  ** redact X: $line")
+            nlines++
+            return true
+        }
+        return false
+    }
+}
+
+class RedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>) {
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
     private var exampleCsv : CSVRecord? = null // debugging
-    var nlines: Int = 1  // used by the accumulating group
-    var style : ExportCardStyle? = null
+    private var nlines: Int = 1  // used by the accumulating group
+    var style : CvrCardStyle? = null
     var singleCards = true
 
     init {
         if (ballotType.isEmpty())
-            println("DominionRedactedGroup $ballotType: ballotType.isEmpty()")
+            println("RedactedGroup $ballotType: ballotType.isEmpty()")
     }
 
     fun contests() = contestVotes.keys.toSet()
 
-    fun addVotes(schema: Schema, line: CSVRecord): DominionRedactedGroup {
-        if (showLines) println(line)
+    fun addVotes(schema: CvrSchema, line: CSVRecord): RedactedGroup {
         var colidx = schema.nheaders // skip over the first 6 or 7 columns
         while (colidx < line.size()) {
             val valueAtIdx = line.get(colidx)
@@ -57,7 +108,8 @@ class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>
         return this
     }
 
-    fun merge(other: DominionRedactedGroup): DominionRedactedGroup {
+    // merge two RedactedGroups together
+    fun merge(other: RedactedGroup): RedactedGroup  {
         // require (this.ballotType == other.ballotType)
         other.contestVotes.forEach { (contestId, otherCands) ->
             val mycands = contestVotes.getOrPut(contestId, { mutableMapOf() })
@@ -72,9 +124,6 @@ class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>
         return this
     }
 
-    // method #1
-    // based on votes and voteForN, calculates the minimum number of cards that are in this redacted group
-    // TODO does this still work when group are merged ?? I think you need to do it seperate for each group ??
     fun minCards(): Int {
         var minCards = 0
         contestVotes.forEach { (contestId, cands) ->
@@ -87,17 +136,19 @@ class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>
 
     fun totalVotes() = contestVotes.values.map{ it.values }.flatten().sum()
 
+    fun ncards() = max(nlines, minCards())
+
     override fun toString() = buildString {
         val contests = contestVotes.map { it.key }.sorted()
-        append("RedactedGroup('$ballotType', contests=${contests} nlines=$nlines, totalVotes=${totalVotes()}, singleCards = $singleCards)")
+        append("RedactedGroup('$ballotType', contests=${contests} nlines=$nlines, minCards= ${minCards()} totalVotes=${totalVotes()} singleCards = $singleCards)")
         // appendLine(csvRecord.toString())
     }
 
     companion object {
 
         // method #2: specific to Boulder24
-        fun makeAccumulator(starting: DominionRedactedGroup, accumName:String): DominionRedactedGroup {
-            val accum = DominionRedactedGroup(accumName, starting.voteForNs)
+        fun makeAccumulator(starting: RedactedGroup, accumName:String): RedactedGroup {
+            val accum = RedactedGroup(accumName, starting.voteForNs)
             accum.merge(starting)
 
             // override with method #2
@@ -107,7 +158,7 @@ class DominionRedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>
             return accum
         }
 
-        // method #2: specific to Boulder25; "Redacted and Consolidated 10 Ballots"
+        // method #2: specific to Boulder25,26; "Redacted and Consolidated 10 Ballots"
         fun parseNCards(line:String): Int {
             if (!line.contains("Redacted and Consolidated")) return 1
 

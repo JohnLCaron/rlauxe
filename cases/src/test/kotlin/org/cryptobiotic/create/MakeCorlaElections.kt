@@ -116,7 +116,7 @@ class MakeCorlaElections {
         )
     }
 
-    // @Test
+    @Test
     fun makeColorado2020uniform() {
         val topdir = "$cases/corla/corla2020/withCvrsUniform"
 

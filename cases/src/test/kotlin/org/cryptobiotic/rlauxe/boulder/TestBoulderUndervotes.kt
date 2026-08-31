@@ -3,10 +3,9 @@ package org.cryptobiotic.rlauxe.boulder
 import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.ExportCardStyle
-import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromResource
+import org.cryptobiotic.rlauxe.cvr.CvrCardStyle
+import org.cryptobiotic.rlauxe.cvr.CvrRow
+import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromResource
 import org.cryptobiotic.rlauxe.util.mergeReduce
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -18,7 +17,7 @@ import kotlin.text.appendLine
 
 class TestBoulderUndervotes {
     val cvrResource = "/resources/data/cases/boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-    val export: DominionCvrExportCsv = readCvrExportsFromResource(cvrResource)
+    val export = readCorlaCvrsFromResource(cvrResource)
 
     val sovoResource = "/resources/data/cases/boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv"
     val sovo = readBoulderSOVfromResourcePath(sovoResource, "Boulder2024")
@@ -27,7 +26,7 @@ class TestBoulderUndervotes {
     fun testBoulderBallotType() {
         var count = 0
         val ballotTypes = mutableMapOf<String, MutableList<List<Int>>>()
-        export.cvrs.forEach { cvr: CastVoteRecord ->
+        export.cvrs.forEach { cvr: CvrRow ->
             val contestIds = cvr.contestVotes.map { it.contestId }
             val prevContestIds = ballotTypes.getOrPut(cvr.ballotType) { mutableListOf() }
             if (!prevContestIds.contains(contestIds)) {
@@ -64,40 +63,40 @@ class TestBoulderUndervotes {
         }
 
         println("\nexport.exportCardStyles")
-        export.exportCardStyles.sortedBy { it.name }.forEach {
+        export.cardStyles().sortedBy { it.name }.forEach {
             println(it)
         }
 
         // these match; you could just split these apert
-        export.exportCardStyles.forEach { excs ->
+        export.cardStyles().forEach { excs ->
             val match = ballotTypes[excs.name]
             if (match == null) println("exportCardStyles no match on ${excs.name} in ballotTypes")
         }
-        val exportCardStylesMap = export.exportCardStyles.associateBy { it.name }
+        val exportCardStylesMap = export.cardStyles().associateBy { it.name }
         ballotTypes.keys.forEach { type ->
             val match = exportCardStylesMap[type]
             if (match == null) println("ballotTypes has no match on ${type} in exportCardStyles")
         }
 
-        val exportCardStyles = mutableMapOf<String, MutableList<ExportCardStyle>>()
-        export.exportCardStyles.forEach { excs ->
-            val exportCardStyle = exportCardStyles.getOrPut(excs.name) { mutableListOf() }
-            exportCardStyle.add(excs)
+        val exportCardStyles = mutableMapOf<String, MutableList<CvrCardStyle>>()
+        export.cardStyles().forEach { excs ->
+            val CvrCardStyle = exportCardStyles.getOrPut(excs.name) { mutableListOf() }
+            CvrCardStyle.add(excs)
         }
         val ecardStyles = mutableMapOf<String, CardStyle>()
         exportCardStyles.forEach { (key, value) ->
             if (value.size == 2) {
-                val (styleA, styleB) = if (value[0].contests.size > value[1].contests.size) {
+                val (styleA, styleB) = if (value[0].contestIds.size > value[1].contestIds.size) {
                     Pair(value[0], value[1])
                 } else {
                     Pair(value[1], value[0])
                 }
-                ecardStyles[key + "-A"] = CardStyle(key + "-A", styleId, styleA.contests.toIntArray(), true)
-                ecardStyles[key + "-B"] = CardStyle(key + "-B", styleId+1, styleB.contests.toIntArray(), true)
+                ecardStyles[key + "-A"] = CardStyle(key + "-A", styleId, styleA.contestIds.toIntArray(), true)
+                ecardStyles[key + "-B"] = CardStyle(key + "-B", styleId+1, styleB.contestIds.toIntArray(), true)
                 styleId += 2
             } else {
-                value.forEach { contestIds ->
-                    ecardStyles[key] = CardStyle(key, styleId, contestIds.contests.toIntArray(), true)
+                value.forEach { cardStyle ->
+                    ecardStyles[key] = CardStyle(key, styleId, cardStyle.contestIds.toIntArray(), true)
                     styleId++
                 }
             }
@@ -160,10 +159,10 @@ class TestBoulderUndervotes {
 
     @Test
     fun showSovoContestDetail2() {
-        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClca("test", AuditType.ONEAUDIT, export, sovo)
         println()
         election2.boulderContestBuilders.forEach { (_, oa) ->
-            println(BoulderContestVotes.header)
+            println(SovoContestVotes.header)
             println(oa.details())
         }
     }
@@ -171,7 +170,7 @@ class TestBoulderUndervotes {
     @Test
     fun showPoolVotes() {
         println("votes, undervotes")
-        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClca("test",AuditType.ONEAUDIT, export, sovo)
         val contestIds = election2.infoList.map { it.id }
         showPoolVotes(contestIds, election2.cardPoolBuilders)
     }
@@ -189,7 +188,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showRedactedUndervotes2() {
-        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClca("test",AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -252,7 +251,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showRedactedNcards() {
-        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClca("test", AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -320,7 +319,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showNcards() {
-        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClca("test", AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 

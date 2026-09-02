@@ -48,7 +48,7 @@ class TestVerifyUseCases {
 
     @Test
     fun testRunVerifyCorlaConsistent() {
-        val topdir = "${cases}/corla/corla2020/clca"
+        val topdir = "${cases}/corla/corla2020/sim"
         val results = RunVerifyContests.runVerifyContests(topdir, null, show = show)
         println()
         print(results)

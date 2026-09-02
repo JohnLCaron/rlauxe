@@ -1,13 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.persist.AuditRecord.Companion.read
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.io.File
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.test.Test
 
 class TestReadLogs {
@@ -15,7 +9,7 @@ class TestReadLogs {
 
     @Test
     fun testReadLogs() {
-        val logsFile = "/home/stormy/datadrive/rla/cases/corla/corla2026/primaryMerged/logs.log"
+        val logsFile = "/home/stormy/datadrive/rla/cases/corla/corla2026/primary/logs.log"
         val reader: BufferedReader = File(logsFile).bufferedReader()
         reader.readLine() // skip header line
 
@@ -36,7 +30,6 @@ class TestReadLogs {
                     logsBeans.add(lastBean)
                 }
             }
-            reader.close()
         }
         reader.close()
     }

@@ -14,6 +14,7 @@ class TestReadTabulateCounty {
         countyTabs.forEach {
             val tab2 = countyTabs2[it.key]
             assertEquals(it.value, tab2)
+            println(it.value)
         }
     }
 
@@ -22,6 +23,7 @@ class TestReadTabulateCounty {
         val contestTabAllCounties: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties()
         contestTabAllCounties.forEach {
             assertTrue(!input.skipCounties(it.key))
+            println(it)
         }
     }
 }

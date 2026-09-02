@@ -3,7 +3,12 @@ package org.cryptobiotic.rlauxe.boulder
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
+import org.cryptobiotic.rlauxe.cvr.Redaction
+import org.cryptobiotic.rlauxe.cvr.RedactionIF
 import org.cryptobiotic.rlauxe.cvr.isEmpty
+import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
+import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromResource
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -29,6 +34,7 @@ import kotlin.text.appendLine
 
 // replicate https://assets.bouldercounty.gov/wp-content/uploads/2024/11/2024G-Boulder-County-Official-Summary-of-Votes.pdf
 data class BoulderStatementOfVotes(val inputSource: String, val contests: List<SovoContestVotes>) {
+
     init {
         contests.forEachIndexed{ idx, it -> it.id = idx+1 }
     }
@@ -48,6 +54,17 @@ data class BoulderStatementOfVotes(val inputSource: String, val contests: List<S
         fun combine(sovos: List<BoulderStatementOfVotes>): BoulderStatementOfVotes {
             val combined = sovos.map { it.contests }.flatten()
             return BoulderStatementOfVotes("combined", combined)
+        }
+    }
+
+    fun setIds(contestIds:List<Pair<String, Int>>) {
+        var countSkip = -1
+        contests.forEach { sovoContest ->
+            val contestId = contestIds.find { sovoContest.contestTitle.contains(it.first) }
+            if (contestId == null)
+                sovoContest.id = countSkip--
+            else
+                sovoContest.id = contestId.second
         }
     }
 }
@@ -81,8 +98,12 @@ data class SovoContestVotes(
         candidateVotes[line.choiceName] = votes + line.totalVotes
     }
 
-    fun calcNcast(voteForN: Int): Int {
-        return (totalVotes + totalUnderVotes) / voteForN + totalOverVotes
+    fun calcNc(voteForN: Int): Int {
+        return (totalVotes + totalUnderVotes) / voteForN // + totalOverVotes // I think overvotes are discarded ?
+    }
+
+    fun checkTotalVotes(voteForN: Int): Boolean {
+        return totalBallots == calcNc(voteForN) + totalOverVotes
     }
 
     override fun toString() = buildString {
@@ -207,6 +228,11 @@ data class BoulderSovPrecinct(
     }
 }
 
+fun readBoulderSOV(source: String, electionName: String): BoulderStatementOfVotes {
+    return if (source.startsWith("/resources/")) readBoulderSOVfromResourcePath(source, electionName)
+           else readBoulderStatementOfVotes(source, electionName)
+}
+
 fun readBoulderSOVfromResourcePath(resourcePath: String, electionName: String): BoulderStatementOfVotes {
     val inputStream = object {}.javaClass.getResourceAsStream(resourcePath) ?:
     throw IOException("$resourcePath does not exist")
@@ -239,9 +265,9 @@ fun readBoulderSOVfromInputStream(input: InputStream, electionName: String, inpu
                 "Boulder2023" -> BoulderSovPrecinct.make2023(line)
                 "Boulder2023Rcv" -> BoulderSovPrecinct.make2023Rcv(line)
                 "Boulder2024clca" -> BoulderSovPrecinct.make2024(line)
-                "Boulder2024" -> BoulderSovPrecinct.make2024(line)
+                "Boulder2024",
                 "Boulder2025" -> BoulderSovPrecinct.make2024(line)
-                "Boulder2026" -> BoulderSovPrecinct.make2026(line)
+                "Boulder2026p" -> BoulderSovPrecinct.make2026(line)
                 else -> { throw RuntimeException("Unknown electionName $electionName")}
             }
             lines.add(bmi)

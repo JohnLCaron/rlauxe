@@ -15,10 +15,17 @@ import java.io.InputStreamReader
 import java.io.Reader
 import java.nio.charset.Charset
 import java.util.zip.ZipInputStream
+import kotlin.text.get
 
 // this reads CVRs from "Dominion CVR export files", a standard Dominion csv format.
 
 private val logger = KotlinLogging.logger("CorlaCvrs")
+
+fun readCorlaCvrs(source: String, redaction: RedactionIF = Redaction()): CorlaCvrs {
+    return if (source.startsWith("/resources/"))
+        readCorlaCvrsFromResource(source, redaction = redaction)
+    else readCorlaCvrsFromFile(source, redaction = redaction)
+}
 
 fun readCorlaCvrsFromFile(filename: String, showHeaders: Boolean = false, showSchema: Boolean = false,
                           redaction: RedactionIF = Redaction()): CorlaCvrs {
@@ -78,19 +85,26 @@ fun getZippedCsvResourceStream(resourcePath: String, resourceStream: InputStream
     return null
 }
 
+interface CorlaCvrsIF {
+    val electionName: String
+    val schema: CvrSchema
+    fun cvrs(): List<CvrRow>
+    fun redactedGroups(): List<RedactedGroup>
+    fun cardStyles() : List<CvrCardStyle>
+    fun nrows() : Int
+}
+
 class CorlaCvrs(val inputSource: String, val parser: CSVParser,
                 showHeaders: Boolean = false,
                 showSchema: Boolean = false,
                 val redaction: RedactionIF = Redaction(),
-) {
+): CorlaCvrsIF {
+
+    override val electionName: String
+    override val schema: CvrSchema
+    val versionName: String
 
     val records: Iterator<CSVRecord>  = parser.iterator()
-    val electionName: String
-    val versionName: String
-    val schema: CvrSchema
-    // val nvotesMap: Map<Int, Int> // not used ??
-    //val ballotTypeIdx: Int
-
     val ballotStyles = BallotStyles()
     val cvrs = mutableListOf<CvrRow>()
 
@@ -126,19 +140,25 @@ class CorlaCvrs(val inputSource: String, val parser: CSVParser,
     //// Garfield
     // RowNumber	BoxID	BoxPosition	BallotID	PrecinctID	BallotStyleID	PrecinctStyleName	ScanComputerName	Status	Remade	Choice_18_1:Presidential Electors:Vote For 1:Write-in:Non-Partisan
 
-    var lineno = 0
+    val cvrNumberIdx: Int?
+    val tabulatorIdx: Int
+    val batchIdIdx: Int
+    val recordIdIdx: Int
+    val imprintedIdIdx: Int
+    val ballotTypeIdx: Int
+    val precinctIdx: Int?
+
+    var rowCount = 0
     init {
         try {
             // we expect the first line to be the election name
             val electionLine = records.next()
-            lineno++
             if (showHeaders) showLine("electionName", electionLine)
             electionName = electionLine.get(0).replace("[^ -~]".toRegex(), "")
             versionName = electionLine.get(1).trim()
 
             // the contest names
             val contestLine = records.next()
-            lineno++
             if (showHeaders) {
                 println("contestLine has ${contestLine.toList().size} columns")
                 println("contestLine = ${contestLine.toList().joinToString(", ")}")
@@ -146,11 +166,9 @@ class CorlaCvrs(val inputSource: String, val parser: CSVParser,
 
             // the choice/candidate names
             val choiceLine = records.next()
-            lineno++
 
             // the header for the first columns, then (sometimes) the party affiliation of the candidates
             val headerRecord = records.next()
-            lineno++
             if (showHeaders) {
                 println("column headerRecord) has ${headerRecord.toList().size} columns")
                 println(headerRecord.toList().joinToString(", "))
@@ -164,6 +182,14 @@ class CorlaCvrs(val inputSource: String, val parser: CSVParser,
                 println()
                 println(schema.showContests())
             }
+
+            cvrNumberIdx = schema.headerMap["cvrnumber"]
+            tabulatorIdx = schema.headerMap["tabulatornum"]!!
+            batchIdIdx = schema.headerMap["batchid"]!!
+            recordIdIdx = schema.headerMap["recordid"]!!
+            imprintedIdIdx = schema.headerMap["imprintedid"]!!
+            precinctIdx = schema.headerMap["precinctportion"]
+            ballotTypeIdx = schema.headerMap["ballottype"]!!
 
             // TODO count on (Vote For=n) ?
             // nvotesMap = schema.contests.associate { it.contestIdx to it.voteForN }
@@ -179,58 +205,62 @@ class CorlaCvrs(val inputSource: String, val parser: CSVParser,
     fun readRows(showFirst: Int? = null, showAfter: Int? = null,
                  showRedactedGroups: Boolean = false) {
 
-        var cvrCount = 0
         while (records.hasNext()) {
             val line = records.next()
             if (line.isEmpty()) break
+            rowCount++
+
             if (!redaction.isRedaction(line, this)) {
                 try {
-                    val test = removeLeadingEquals(line.get(3)).toInt()
-                } catch (e : Throwable) {
-                    logger.error{"barf on cvrCount $cvrCount $line"}
-                    break
+                    val cvr = CvrRow(
+                        /*cvrNumber = removeLeadingEquals(line.get(0)).toInt(),
+                        tabulatorNum = removeLeadingEquals(line.get(1)).toInt(),
+                        batchId = removeLeadingEquals(line.get(2)),
+                        recordId = removeLeadingEquals(line.get(3)).toInt(),
+                        imprintedId = removeLeadingEquals(line.get(4)),
+                        ballotType = readColumn(line, "ballotType") ?: "noBallotType", // TODO
+                        precinctPortion = readColumn(line, "precinctPortion"), */
+                        cvrNumber = if (cvrNumberIdx != null) removeLeadingEquals(line.get(cvrNumberIdx)).toInt() else rowCount,
+                        tabulatorNum = removeLeadingEquals(line.get(tabulatorIdx)).toInt(),
+                        batchId = removeLeadingEquals(line.get(batchIdIdx)),
+                        recordId = removeLeadingEquals(line.get(recordIdIdx)).toInt(),
+                        imprintedId = removeLeadingEquals(line.get(imprintedIdIdx)),
+                        ballotType = removeLeadingEquals(line.get(ballotTypeIdx)),
+                        precinctPortion = if (precinctIdx != null) removeLeadingEquals(line.get(precinctIdx)) else null,
+                    ).addVotes(schema, line, rowCount)
+
+                    if (cvr.contestVotes.isNotEmpty()) {
+                        cvrs.add(cvr)
+                        ballotStyles.add(cvr)
+                    }
+
+                    if (showFirst != null && rowCount < showFirst) println(cvr.show())
+                    if (showAfter != null && rowCount >= showAfter) println(cvr.show())
+
+                } catch (e: Throwable) {
+                    logger.error { "recordId not an integer: '${line.get(3)}' rowCount=$rowCount $line" }
+                    throw e
                 }
-
-                val cvr = CvrRow(
-                    cvrNumber = removeLeadingEquals(line.get(0)).toInt(),
-                    tabulatorNum = removeLeadingEquals(line.get(1)).toInt(),
-                    batchId = removeLeadingEquals(line.get(2)),
-                    recordId = removeLeadingEquals(line.get(3)).toInt(),
-                    imprintedId = removeLeadingEquals(line.get(4)),
-                    ballotType = readColumn(line, "ballotType") ?: "noBallotType", // TODO
-                    precinctPortion = readColumn(line, "precinctPortion"),
-                ).addVotes(schema, line, lineno)
-
-                if (cvr.contestVotes.isNotEmpty()) {
-                    cvrs.add(cvr)
-                    ballotStyles.add(cvr)
-                }
-
-                if (showFirst != null && cvrCount < showFirst) println(cvr.show())
-                if (showAfter != null && cvrCount >= showAfter) println(cvr.show())
             }
-            cvrCount++
-            lineno++
         }
         parser.close()
 
         if (showRedactedGroups) {
             logger.info{"  read ${redaction.nlines} Redacted lines from ${inputSource}"}
-            println("number of Redacted Groups = ${ballotStyles.redactedGroups.size}")
-            ballotStyles.redactedGroups.toSortedMap().forEach { println("  ${it.value}") }
+            println("number of Redacted Groups = ${redaction.redactedGroups().size}")
+            redaction.redactedGroups().sortedBy{it.ballotType}.forEach { println("  $it") }
         }
+    }
+
+    fun getBallotType(line: CSVRecord): String {
+        val ballottype = removeLeadingEquals(line.get(ballotTypeIdx))
+        return if (ballottype.isEmpty()) "NoBallotType" else ballottype
     }
 
     fun readColumn(line: CSVRecord, colName: String): String? {
         val colIdx = schema.headerMap[colName.lowercase()]
         return if (colIdx != null) line.get(colIdx) else null
     }
-
-    // 6/15/2026
-    // some counties have first 5 fields of the vote rows as ="field". The quoting seems typical, the mistake is the leading =
-    // "CvrNumber","TabulatorNum","BatchId","RecordId","ImprintedId","CountingGroup","PrecinctPortion","BallotType","","","","","","","","","","","","","","","","","","","","","","","","","","DEM","REP","APV","UNI","LBR","","","","","REP","DEM","LBR","UNI","DEM","REP","REP","DEM","DEM","REP","DEM","REP","DEM","DEM","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
-    //="1",="2",="1",="24",="2-1-24","Mail","3356255005 (3356255005)","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","1","0","1","0","0","1","0","1","1","0","1","0","1","0","0","1","0","1","0","1","1","0","",""
-    //="2",="2",="1",="23",="2-1-23","Mail","3356255005
 
     fun showLine(what: String, line: CSVRecord) {
         println(what)
@@ -240,8 +270,10 @@ class CorlaCvrs(val inputSource: String, val parser: CSVParser,
         }
     }
 
-    fun redactedGroups() = ballotStyles.redactedGroups.values.toList()
-    fun cardStyles() = ballotStyles.cardStyles()
+    override fun redactedGroups() = redaction.redactedGroups()
+    override fun cardStyles() = ballotStyles.cardStyles()
+    override fun cvrs() = cvrs
+    override fun nrows() = rowCount
 }
 
 
@@ -251,51 +283,14 @@ class CorlaCvrs(val inputSource: String, val parser: CSVParser,
 data class ContestVotes(val contestId: Int, val candVotes: List<Int>)
 data class CvrCardStyle(val name: String, val contestIds: Set<Int>, var countCards: Int = 0)
 
-private val showDontMatch = true
-
 class BallotStyles {
     // keep track of all the card styles in the file
     val cardStyleMap = mutableMapOf<Set<Int>, CvrCardStyle>()
-    val redactedGroups = mutableMapOf<String, RedactedGroup>()
 
     fun add(cvr:CvrRow) {
         val cvrContests = cvr.contestVotes.map { it.contestId }.toSet()
         val ballotType = cardStyleMap.getOrPut(cvrContests) { CvrCardStyle(cvr.ballotType, cvrContests) }
         ballotType.countCards++
-    }
-
-    // TODO we might want to remove contests with vote count == 0 ??
-    fun add(redacted:RedactedGroup) {
-        // keep the r ??
-        val rname =  redacted.ballotType
-        val group = redactedGroups[rname]
-        if (group == null) {
-            redactedGroups[rname] = RedactedGroup.makeAccumulator(redacted, rname)
-        } else {
-            if (group.contests() == redacted.contests()) {
-                group.merge(redacted)
-            } else if ((group.contests() - redacted.contests()).size == 0) {
-                group.merge(redacted)
-            } else if (showDontMatch) {
-                println("    redacted ${redacted.ballotType} diff = ${redacted.contests() - group.contests()}, ${group.contests() - redacted.contests()}")
-                println("doesnt match c31 = ${redacted.contestVotes[31]}")
-            }
-        }
-    }
-
-    // Boulder 25 has strange anomoly with contest 31 = Coal Creek Canyon Fire Protection District Ballot Issue 7B
-    fun add31(redacted:RedactedGroup) {
-        // keep the r ??
-        val rname =  if (redacted.contestVotes.contains(31)) "${redacted.ballotType}+31" else redacted.ballotType
-        val group = redactedGroups[rname]
-        if (group == null) {
-            redactedGroups[rname] = RedactedGroup.makeAccumulator(redacted, rname)
-        } else {
-            if (group.contests() == redacted.contests())
-                group.merge(redacted)
-            else if (showDontMatch)
-                println("redacted $redacted doesnt match $group; c31 = ${redacted.contestVotes[31]}")
-        }
     }
 
     fun cardStyles(): List<CvrCardStyle> {
@@ -314,7 +309,12 @@ data class CvrRow(
     val ballotType: String, // might have to generate this ourselves?
     val precinctPortion: String?, // optional
 ) {
-     var contestVotes =  mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
+    var contestVotes = mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
+
+    init {
+        if (imprintedId != "${tabulatorNum}-${batchId}-${recordId}")
+            print("")
+    }
 
     fun addVotes(schema: CvrSchema, line: CSVRecord, lineno: Int): CvrRow {
         var colidx = schema.nheaders // skip over the first n columns
@@ -327,8 +327,8 @@ data class CvrRow(
                     val candVotes = makeIrvVotes(schema, line, lineno, useContest)
                     contestVotes.add(ContestVotes(useContestIdx, candVotes))
                 } else {
-                    val candVotes  = makeRegularVotes(schema, line, lineno, useContest)
-                    contestVotes.add( ContestVotes(useContestIdx, candVotes))
+                    val candVotes = makeRegularVotes(schema, line, lineno, useContest)
+                    contestVotes.add(ContestVotes(useContestIdx, candVotes))
                 }
                 colidx += useContest.ncols
             } else {
@@ -352,8 +352,10 @@ data class CvrRow(
                     val colValue = colValueS.toInt()
                     if (colValue > 0) votes.add(i)
                 } catch (e: NumberFormatException) {
-                    logger.warn{ "Cant parse '$colValueS' at col $colno line $lineno; probably didnt catch the redacted line; filename=${schema.inputSource}\n"+
-                                 "       $line"}
+                    logger.warn {
+                        "Cant parse '$colValueS' at col $colno line $lineno; probably didnt catch the redacted line; filename=${schema.inputSource}\n" +
+                                "       $line"
+                    }
                     return emptyList()
                 }
             }
@@ -367,11 +369,11 @@ data class CvrRow(
     fun makeIrvVotes(schema: CvrSchema, line: CSVRecord, lineno: Int, exportContest: SchemaContestInfo): List<Int> {
         val raw = mutableListOf<Int>()
         for (i in 0 until exportContest.ncols) {
-            raw.add( line.get(exportContest.startCol + i).toInt() )
+            raw.add(line.get(exportContest.startCol + i).toInt())
         }
         val cands = mutableListOf<IntArray>()
         for (cand in 0 until exportContest.nchoices) {
-            val candArray = IntArray(exportContest.nchoices) { i -> raw[cand + exportContest.nchoices*i] }
+            val candArray = IntArray(exportContest.nchoices) { i -> raw[cand + exportContest.nchoices * i] }
             cands.add(candArray)
         }
         val ranked = mutableListOf<Int>()
@@ -383,7 +385,7 @@ data class CvrRow(
         return ranked
     }
 
-    fun voteFor(contest: Int): ContestVotes? = contestVotes.find { it.contestId == contest}
+    fun voteFor(contest: Int): ContestVotes? = contestVotes.find { it.contestId == contest }
 
     fun show() = buildString {
         append("$cvrNumber, ")
@@ -401,7 +403,7 @@ data class CvrRow(
     // this assumes that you have a single schema you use for the ContestInfo....
     fun convertToCvr(): Cvr {
         val cvrb = CvrBuilder2(this.imprintedId, false)
-        this.contestVotes.forEach{
+        this.contestVotes.forEach {
             cvrb.replaceContestVotes(it.contestId, it.candVotes.toIntArray())
         }
         return cvrb.build()
@@ -410,12 +412,18 @@ data class CvrRow(
     companion object {
         val header = "cvrNumber, tabulatorNum, batchId, recordId, imprintedId, ballotType, contest:votes"
     }
-
 }
 
+// 6/15/2026
+// some counties have first 5 fields of the vote rows as ="field". The quoting seems typical, the mistake is the leading =
+// "CvrNumber","TabulatorNum","BatchId","RecordId","ImprintedId","CountingGroup","PrecinctPortion","BallotType","","","","","","","","","","","","","","","","","","","","","","","","","","DEM","REP","APV","UNI","LBR","","","","","REP","DEM","LBR","UNI","DEM","REP","REP","DEM","DEM","REP","DEM","REP","DEM","DEM","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
+//="1",="2",="1",="24",="2-1-24","Mail","3356255005 (3356255005)","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","1","0","1","0","0","1","0","1","1","0","1","0","1","0","0","1","0","1","0","1","1","0","",""
+//="2",="2",="1",="23",="2-1-23","Mail","3356255005
 private val regexLE = Regex("[=\"]") // matches a quote or equals
 fun removeLeadingEquals(input: String): String {
-    val result = if (input.startsWith("=")) input.replace(regexLE, "") else input
+    val result = if (input.startsWith("="))
+            input.replace(regexLE, "")
+        else input
     return result
 }
 
@@ -429,6 +437,10 @@ fun CSVRecord.isEmpty(): Boolean {
 }
 
 fun parseContestNameAndVoteFor(name: String) : Pair<String, Int> {
+    if (name.contains("(Vote For1")) {
+        val clean = name.substringBefore("(")
+        return Pair(clean.trim(), 1)
+    }
     if (!name.contains("(Vote For=")) return Pair(name.trim(), 1)
 
     val tokens = name.split("(Vote For=")

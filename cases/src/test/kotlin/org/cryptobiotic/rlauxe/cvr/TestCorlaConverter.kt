@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.dominion
+package org.cryptobiotic.rlauxe.cvr
 
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
@@ -12,47 +12,47 @@ import kotlin.collections.forEach
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestDominionConverter {
+class TestCorlaConverter {
 
     @Test
-    fun testDominionConverter() {
+    fun testCorlaConverter() {
         val filename = "$votedatabase2020/Denver/cvr.csv"
-        testDominionConverter("Denver", filename, coloradoInput = Colorado2020General())
+        testCorlaConverter("Denver", filename, coloradoInput = Colorado2020General())
     }
 
     @Test
-    fun testDominionCvrConverter() {
+    fun testCorlaCvrConverter() {
         val filename = "$votedatabase2020/Broomfield/cvr.csv"
-        testDominionConverterCvrs("Broomfield", filename, coloradoInput = Colorado2020General())
+        testCorlaConverterCvrs("Broomfield", filename, coloradoInput = Colorado2020General())
     }
 
     @Test
-    fun testDominionCvrWriting() {
+    fun testCorlaCvrWriting() {
         val filename = "$votedatabase2020/Dolores/cvr.csv"
-        testWriteDominionCvrs("Dolores", filename, coloradoInput = Colorado2020General())
+        testWriteCorlaCvrs("Dolores", filename, coloradoInput = Colorado2020General())
     }
 
-    // this tests running and checking DominionCvrConverter
-    fun testDominionConverter(county: String, filename: String, coloradoInput: ColoradoInput) {
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
+    // this tests running and checking CorlaCvrConverter
+    fun testCorlaConverter(county: String, filename: String, coloradoInput: ColoradoInput) {
+        val export = readCorlaCvrs(filename)
         val contestBuilder = BuildCorlaContests(coloradoInput)
-        val dominionConverter = DominionConverter(county, export, contestBuilder.infosByName, coloradoInput)
+        val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
     }
 
     // this tests coverting all of the cvrs and checking them against the ExportCvr
-    fun testDominionConverterCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
+    fun testCorlaConverterCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
+        val export = readCorlaCvrs(filename)
         val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
 
         val contestBuilder = BuildCorlaContests(coloradoInput)
         val contests = contestBuilder.contests(emptyMap())
         val contestMap = contests.associateBy{ it.name }
 
-        val dominionConverter = DominionConverter(county, export, contestBuilder.infosByName, coloradoInput)
+        val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
         var count = 0
         var countOutOfOrder = 0
-        export.cvrs.map { cvr: CastVoteRecord ->
-            val card = dominionConverter.convertToCard(cvr)
+        export.cvrs.map { cvr: CvrRow ->
+            val card = CorlaConverter.convertToCard(cvr)
             assertEquals(cvr.imprintedId, card.id)
             cvr.contestVotes.forEach { contestVote: ContestVotes ->
                 val sinfo = schemaInfoMap[contestVote.contestId]!!
@@ -77,14 +77,14 @@ class TestDominionConverter {
     }
 
     // this tests coverting all of the cvrs and writing them to a file
-    fun testWriteDominionCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
+    fun testWriteCorlaCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
+        val export = readCorlaCvrs(filename)
 
         val contestBuilder = BuildCorlaContests(coloradoInput)
-        val dominionConverter = DominionConverter(county, export, contestBuilder.infosByName, coloradoInput)
-        val cards: List<AuditableCard> = export.cvrs.map { dominionConverter.convertToCard(it) }
+        val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
+        val cards: List<AuditableCard> = export.cvrs.map { CorlaConverter.convertToCard(it) }
         println("ncards = ${cards.size}")
-        val filename = "$testdataDir/tests/scratch/testWriteDominionCvrs.csv"
+        val filename = "$testdataDir/tests/scratch/testWriteCorlaCvrs.csv"
         writeCardCsvFile(cards, filename)
     }
 }

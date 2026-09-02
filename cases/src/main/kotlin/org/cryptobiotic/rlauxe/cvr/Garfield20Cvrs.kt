@@ -1,10 +1,9 @@
-package org.cryptobiotic.rlauxe.dominion
+package org.cryptobiotic.rlauxe.cvr
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.cvr.isEmpty
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.File
 import java.io.InputStreamReader
@@ -46,13 +45,10 @@ private val showRedactedGroups = false
 
 // modified cvr2 and renamed as cvr
 
-class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
-    val ballotStyles = BallotStyles()
-    val records: Iterator<CSVRecord>
-    var lineno = 0
-    // val electionName: String
-    // val versionName: String
-    val schema: Schema
+class Garfield20Cvrs(val filename: String, showHeaders: Boolean = false): CorlaCvrsIF {
+
+    override val electionName = "Garfield2020"
+    override val schema: CvrSchema
     val nvotesMap: Map<Int, Int>
 
     val cvrNumberIdx: Int
@@ -60,9 +56,12 @@ class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
     val recordIdIdx: Int
     val imprintedIdIdx: Int
     val ballotTypeIdx: Int
+    val precinctIdx: Int
 
-    val cvrs = mutableListOf<CastVoteRecord>()
-    var rcvRedacted = 0
+    val ballotStyles = BallotStyles()
+    val records: Iterator<CSVRecord>
+    var lineno = 0
+    val cvrs = mutableListOf<CvrRow>()
 
     init {
         val parser = if (filename.endsWith(".zip")) {
@@ -87,7 +86,6 @@ class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
         electionName = electionLine.get(0).replace("[^ -~]".toRegex(), "")
         versionName = electionLine.get(1).trim() */
 
-
         try {
             val contestLine = records.next()
             lineno++
@@ -97,10 +95,10 @@ class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
             if (showLines) showLine("choice/candidate", headerChoiceLine)
             lineno++
 
-            schema = makeSchema(filename, contestLine, headerChoiceLine, headerChoiceLine)
-            // println(schema.showColumns())
+            schema = makeCvrSchema(filename, contestLine, headerChoiceLine, headerChoiceLine)
+            // println(CvrSchema.showColumns())
             // println()
-            // println(schema.showContests())
+            // println(CvrSchema.showContests())
 
             // 3) match on header name
             // colno,          header name, firstRow
@@ -113,34 +111,37 @@ class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
             //    6,           PrecinctID, 17
             //    7,        BallotStyleID, 3
 
-            cvrNumberIdx = schema.columns.find { it.header == "RowNumber"}!!.colno
-            batchIdIdx = schema.columns.find { it.header == "BoxID"}!!.colno
-            recordIdIdx = schema.columns.find { it.header == "BoxPosition"}!!.colno
-            imprintedIdIdx = schema.columns.find { it.header == "BallotID"}!!.colno
-            ballotTypeIdx = schema.columns.find { it.header == "BallotStyleID"}!!.colno
+            cvrNumberIdx = schema.headerMap["RowNumber"]!!
+            batchIdIdx = schema.headerMap["BoxID"]!!
+            recordIdIdx = schema.headerMap["BoxPosition"]!!
+            imprintedIdIdx = schema.headerMap["BallotID"]!!
+            ballotTypeIdx = schema.headerMap["BallotStyleID"]!!
+            precinctIdx = schema.headerMap["PrecinctID"]!!
 
             nvotesMap = schema.contests.associate { it.contestIdx to it.voteForN }
+
+            read()
         } catch (e: Throwable) {
             e.printStackTrace()
             throw e
         }
     }
 
-    fun read(showFirst: Int? = null, showAfter: Int? = null): DominionCvrExportCsv {
+    fun read(showFirst: Int? = null, showAfter: Int? = null) {
 
-        var cvrCount = 0
         while (records.hasNext()) {
             val line = records.next()
             if (line.isEmpty()) break
 
             // 3) use header name matching
-            val cvr = CastVoteRecord(
+            val cvr = CvrRow(
                 cvrNumber = line.get(cvrNumberIdx).toInt(),
                 tabulatorNum = -1,
                 batchId = line.get(batchIdIdx),
                 recordId = line.get(recordIdIdx).toInt(),
                 imprintedId = line.get(imprintedIdIdx),
                 ballotType = line.get(ballotTypeIdx),
+                precinctPortion = line.get(precinctIdx),
             ).addVotes(schema, line, lineno)
 
             if (cvr.contestVotes.isNotEmpty()) {
@@ -148,18 +149,10 @@ class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
                 ballotStyles.add(cvr)
             }
 
-            if (showFirst != null && cvrCount < showFirst) println(cvr.show())
-            if (showAfter != null && cvrCount >= showAfter) println(cvr.show())
+            if (showFirst != null && lineno < showFirst) println(cvr.show())
+            if (showAfter != null && lineno >= showAfter) println(cvr.show())
         }
-        cvrCount++
         lineno++
-
-        val ballotTypes = ballotStyles.ballotTypes.values.sortedBy { it.countCards }.reversed()
-        return DominionCvrExportCsv(
-            "Garfield", "unknown", filename, schema, cvrs,
-            ballotStyles.redactedGroups.toSortedMap().values.toList(),
-            ballotTypes
-        )
     }
 
     fun showLine(what: String, line: CSVRecord) {
@@ -169,4 +162,9 @@ class GarfieldCsvReader(val filename: String, showHeaders: Boolean = false) {
             if (it.isNotEmpty()) println("  ${d3f.format(idx)}: $it")
         }
     }
+
+    override fun redactedGroups() = emptyList<RedactedGroup>()
+    override fun cardStyles() = ballotStyles.cardStyles()
+    override fun cvrs() = cvrs
+    override fun nrows() = lineno
 }

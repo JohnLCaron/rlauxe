@@ -173,6 +173,7 @@ class RaireContestWithAssertions(
                 Ncast = Ncast,
                 undervotes = undervotes,
             )
+             // TODO why do we think that hasStyle=true? (jeesh how long will this haunt us)
             return RaireContestWithAssertions(contest, assertions, hasStyle=true, Npop)
         }
     }

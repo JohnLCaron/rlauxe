@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.dominion
+package org.cryptobiotic.rlauxe.cvr
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
@@ -15,7 +15,7 @@ private val logger = KotlinLogging.logger("DominionConverter")
 
 // convert DominionCvrExportCsv from export ids to canonical ids
 // each export is specific to a County.
-class DominionConverter(val county: String, export: DominionCvrExportCsv, val infosByName: Map<String, ContestInfo>, coloradoInput: ColoradoInput) {
+class CorlaCvrConverter(val county: String, export: CorlaCvrsIF, val infosByName: Map<String, ContestInfo>, coloradoInput: ColoradoInput) {
 
     val exportToCanonLookup = mutableMapOf<Int, ExportToCanonLookup>() // export contestId -> ExportToCanonLookup
     val cardStyles: Map<Set<Int>, CardStyle> // canonicalContestIdSet -> cardStyle
@@ -23,8 +23,11 @@ class DominionConverter(val county: String, export: DominionCvrExportCsv, val in
     val infos = infosByName.mapKeys { it.value.id }
 
     init {
+        if (county == "Denver")
+            print("")
+
         // val infosByName: Map<String, ContestIF> = contests.associateBy { it.name }
-        val schemaInfos: List<ExportContestInfo> = export.makeContestInfo() // specific to this exported file
+        val schemaInfos: List<CorlaContestInfo> = export.makeContestInfo() // specific to this exported file
 
         val gotCanon = mutableMapOf<Int, String>()  // canon contest id -> export contest name
         // each contest in the schema must be matched to a ContestIF by name
@@ -74,7 +77,7 @@ class DominionConverter(val county: String, export: DominionCvrExportCsv, val in
         // which is what we just built !!
         // turn those into CardStyle
 
-        cardStyles = export.exportCardStyles.map { it ->
+        cardStyles = export.cardStyles().map { it ->
             val canonicalContestIdSet = convertExportCardStyleToCanonical(it)
             val cleanupName = truncateCommas(it.name)
             val cardStyle = CardStyle("$county-${cleanupName}", cardStyleId++, canonicalContestIdSet.toIntArray(), true)
@@ -83,7 +86,7 @@ class DominionConverter(val county: String, export: DominionCvrExportCsv, val in
         }.toMap()
 
         // one for each redacted group // TODO could use original style
-        redactedPools = export.redactedGroups.map { group ->
+        redactedPools = export.redactedGroups().map { group ->
             val contestTabs = convertToContestTabulation(group)
             val cleanupName = truncateCommas(group.ballotType)
             CardPool("$county-${cleanupName}.Redacted", cardStyleId++, true, infos, contestTabs, group.minCards())
@@ -91,9 +94,9 @@ class DominionConverter(val county: String, export: DominionCvrExportCsv, val in
     }
 
     // return corresponding contest Ids in canonical
-    fun convertExportCardStyleToCanonical(exportCardStyle: ExportCardStyle): Set<Int> {
+    fun convertExportCardStyleToCanonical(exportCardStyle: CvrCardStyle): Set<Int> {
         val convert = mutableSetOf<Int>()
-        exportCardStyle.contests.forEach { exportContestId ->
+        exportCardStyle.contestIds.forEach { exportContestId ->
             val lookup = exportToCanonLookup[exportContestId]
             if (lookup != null) convert.add(lookup.canonContestId)
         }
@@ -113,7 +116,7 @@ class DominionConverter(val county: String, export: DominionCvrExportCsv, val in
         return convert.toSet()
     }
 
-    fun convertToCard(dcvr: CastVoteRecord): AuditableCard {
+    fun convertToCard(dcvr: CvrRow): AuditableCard {
         // must convert to canoncal contestIDs to use cardStyles
         val contestSchemaIdSet = dcvr.contestVotes.map { it.contestId }.toSet()
         val canonicalIdSet = convertExportContestIdSetToCanonical(contestSchemaIdSet)
@@ -134,7 +137,7 @@ class DominionConverter(val county: String, export: DominionCvrExportCsv, val in
         return cvrb.build()
     }
 
-    fun convertToContestTabulation(rgroup: DominionRedactedGroup): Map<Int, ContestTabulation> {
+    fun convertToContestTabulation(rgroup: RedactedGroup): Map<Int, ContestTabulation> {
         // have to map both contestId and candVotes
         // contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>
         val canonVotes = mutableMapOf<Int, ContestTabulation>()
@@ -184,7 +187,7 @@ data class ExportToCanonLookup(val canonContestId: Int, val candLookup: IntArray
 // make schema specific ContestInfo from export.schema.contests; uses local contestId and candidateId
 // Use DominionCvrConverter to convert to global ContestInfo
 
-data class ExportContestInfo(
+data class CorlaContestInfo(
     val name: String,
     val id: Int,
     val candidateNames: Map<String, Int>,
@@ -193,7 +196,7 @@ data class ExportContestInfo(
     val candidateIdToName: Map<Int, String> = candidateNames.entries.associate {(k,v) -> v to k }
 }
 
-fun DominionCvrExportCsv.makeContestInfo(): List<ExportContestInfo> {
+fun CorlaCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
     val columns = this.schema.columns
 
     return this.schema.contests.map { exportContest ->
@@ -222,10 +225,11 @@ fun DominionCvrExportCsv.makeContestInfo(): List<ExportContestInfo> {
         }
 
         val (name, nwinners) = if (exportContest.isIRV) parseIrvContestName(exportContest.contestName) else parseContestNameAndVoteFor(exportContest.contestName)
-        ExportContestInfo( name, exportContest.contestIdx, candidateMap, exportContest.isIRV, nwinners)
+        CorlaContestInfo( name, exportContest.contestIdx, candidateMap, exportContest.isIRV, nwinners)
     }
 }
 
+/*
 fun parseContestNameAndVoteFor(name: String) : Pair<String, Int> {
     if (name.contains("(Vote For1")) {
         val clean = name.substringBefore("(")
@@ -249,4 +253,4 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
     val namet = tokens[0].trim()
     val ncand = tokens[1].substringBefore(",").toInt()
     return Pair(namet, ncand)
-}
+} */

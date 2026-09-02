@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.boulder
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
+import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.cvr.cleanCsvString
 import org.cryptobiotic.rlauxe.cvr.parseContestNameAndVoteFor
 import org.cryptobiotic.rlauxe.cvr.ContestVotes
@@ -31,16 +31,16 @@ private val showCardStyles = false
 // TODO this is old; merge boulder25
 // Use OneAudit; redacted ballots are in pools. Cant do IRV because we dont have VoteConsolidators
 // this version does a bunch of baloney to estimate the redacted undervotes
-class CreateBoulderElectionClca(
+class CreateBoulderElectionClcaOld(
     val electionName: String,
     val auditType: AuditType,
-    val corlaCvrs: CorlaCvrs,
+    val corlaCvrs: CorlaCvrsIF,
     val sovo: BoulderStatementOfVotes,
     val distributeOvervotes: List<Int> = emptyList(), // maybe no default,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean = true,
 ): ElectionBuilder {
-    val exportCvrs: List<Cvr> = corlaCvrs.cvrs.map { it.convertToCvr() }
+    val exportCvrs: List<Cvr> = corlaCvrs.cvrs().map { it.convertToCvr() }
 
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infos = infoList.associateBy { it.id }
@@ -292,7 +292,7 @@ class CreateBoulderElectionClca(
     fun countCvrVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
         val votes = mutableMapOf<Int, ContestTabulation>()
 
-        corlaCvrs.cvrs.forEach { cvr ->
+        corlaCvrs.cvrs().forEach { cvr ->
             cvr.contestVotes.forEach { contestVote: ContestVotes ->
                 val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation(infos[contestVote.contestId]!!) }
                 tab.addVotes(contestVote.candVotes.toIntArray(), phantom=false)

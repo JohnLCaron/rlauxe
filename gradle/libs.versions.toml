@@ -1,5 +1,5 @@
 [versions]
-rlauxe = "0.10.3.0"  ## prerelease 0.MAJOR.MINOR.PATCH
+rlauxe = "0.10.3.1"  ## prerelease 0.MAJOR.MINOR.PATCH
 
 # main dependency versions
 kotlin = "2.4.10"

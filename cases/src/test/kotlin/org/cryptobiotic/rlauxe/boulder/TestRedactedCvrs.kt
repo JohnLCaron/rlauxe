@@ -37,7 +37,7 @@ class TestRedactedCvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val electionSimCvrs = CreateBoulderElectionClca("boulder2024", AuditType.CLCA,  export, sovo)
+        val electionSimCvrs = CreateBoulderElectionClcaOld("boulder2024", AuditType.CLCA,  export, sovo)
         val infos = electionSimCvrs.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 

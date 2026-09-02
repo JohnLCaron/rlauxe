@@ -19,9 +19,8 @@ import kotlin.collections.forEach
 private val quiet = true
 private val logger = KotlinLogging.logger("MakeRaireContest")
 
-// make RaireContestWithAssertions from ContestTabulation; get RaireAssertions from raire-java libray
-// note ivrRoundsPaths are filled in
-// used by CreateSfElection
+// make RaireContestWithAssertions from ContestTabulation; assumes contestTab.irvVotes are present
+// this calls raire-java libray to generate the RaireAssertions, and fills in the ivrRoundsPaths
 fun makeRaireContest(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int): RaireContestWithAssertions {
     // TODO consistency checks on voteConsolidator
     // all candidate indexes

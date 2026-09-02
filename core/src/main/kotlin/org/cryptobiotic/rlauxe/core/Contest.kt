@@ -136,7 +136,9 @@ open class Contest(
     var losers: List<Int>
 
     init {
-        require(info.choiceFunction != SocialChoiceFunction.IRV) { "contest $id: use DHondtContest for SocialChoiceFunction.IRV" }
+        require(info.choiceFunction != SocialChoiceFunction.IRV) {
+            "contest $id: use IrvContest for SocialChoiceFunction.IRV"
+        }
         require(Ncast <= Nc) { "contest $id Ncast= $Ncast must be <= Nc= $Nc" }
 
         // verify that the candidateIds match whats in the ContestInfo

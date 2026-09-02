@@ -22,8 +22,8 @@ private val logger = KotlinLogging.logger("ReadCountyManifestCsv")
 
 data class ManifestBatch(
     val countyName: String,
-    val tabulatorId: Int,
-    val batch: String,
+    val tabulatorNum: Int,
+    val batchId: String,
     val nballotCards: Int,
     val location: String,
 )

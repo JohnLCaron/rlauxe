@@ -3,10 +3,11 @@ package org.cryptobiotic.rlauxe.auditcenter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dominion.DominionConverter
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.GarfieldCsvReader
-import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
+import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
+import org.cryptobiotic.rlauxe.cvr.Garfield20Cvrs
+import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
+import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
 import org.cryptobiotic.rlauxe.estimate.simulateCards
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
@@ -52,19 +53,22 @@ open class CountyElectionWithCvrs (
         var totalCvrCardCount = 0
         val totalCvrTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
         var countyPoolId = 1
+
         counties.forEach { (county, exportFile) ->
             //// the cvrs
-            val export: DominionCvrExportCsv = if (county == "Garfield") GarfieldCsvReader(exportFile).read() else
-                readCvrExportsFromFile(exportFile)
-            val dominionConverter = DominionConverter(county, export, infosByName, coloradoInput)
+            // println("CountyElectionWithCvrs county $county")
 
-            val exportCvrs: List<AuditableCard> = export.cvrs.map { dominionConverter.convertToCard(it) }
+            val export: CorlaCvrsIF = if (county == "Garfield") Garfield20Cvrs(exportFile)
+                else if (county == "Boulder") readCorlaCvrsFromFile(exportFile, redaction = RedactionBoulder())
+                else readCorlaCvrsFromFile(exportFile)
+
+            val dominionConverter = CorlaCvrConverter(county, export, infosByName, coloradoInput)
+
+            val exportCvrs: List<AuditableCard> = export.cvrs().map { dominionConverter.convertToCard(it) }
 
             val redactedCvrs = mutableListOf<AuditableCard>()
-            if (county == "Boulder") {
-                dominionConverter.redactedPools.forEach { pool ->
-                    redactedCvrs.addAll(simulateCards(pool))
-                }
+            dominionConverter.redactedPools.forEach { pool ->
+                redactedCvrs.addAll(simulateCards(pool))
             }
             val allCvrs: List<AuditableCard> = exportCvrs + redactedCvrs
 

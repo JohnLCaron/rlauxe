@@ -1,6 +1,18 @@
 # Colorado 2020 Vote Differences
-06/23/2026
+08/31/2026
 
+````
+El Paso  population = 382583 ncvrs = 383160  diff = -577
+
+manifest agrees with county population from round.ballotCardCount:
+/home/stormy/datadrive/github/nealmcb/auditcenter/2020/general/round_1/manifest-ElPaso.csv: sumCards = 382583
+````
+
+votedatabase El Paso cvrs dated 7/22/22
+
+most obvious answer is that the El Paso data was updated, but not round.ballotCardCount or 2020/general/round_1/manifest-ElPaso.csv.
+
+06/23/2026
 # Comparing cvr vote tabulation against auditcenter by County
 
 * at the undercount end is Garfield missing 701 cards and 17,043 votes (both 2.24%) as reported by auditcenter in round.ballotCardCount.

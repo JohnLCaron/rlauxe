@@ -177,7 +177,7 @@ class TestBoulderVsDominionCvrExport25 {
     fun showSovoContestDetail2() {
         val export = readCorlaCvrsFromFile(cvrFilename)
 
-        val election2 = CreateBoulderElectionClca("test", AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClcaOld("test", AuditType.ONEAUDIT, export, sovo)
         println()
         election2.boulderContestBuilders.forEach { (_, oa) ->
             println(SovoContestVotes.header)
@@ -191,7 +191,7 @@ class TestBoulderVsDominionCvrExport25 {
 
         println("votes, undervotes")
 
-        val election2 = CreateBoulderElectionClca("test", AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClcaOld("test", AuditType.ONEAUDIT, export, sovo)
         val contestIds = election2.infoList.map { it.id }
         showPoolVotes(contestIds, election2.cardPoolBuilders)
     }
@@ -212,7 +212,7 @@ class TestBoulderVsDominionCvrExport25 {
         val export = readCorlaCvrsFromFile(cvrFilename)
 
         // val election1 = BoulderElectionOAsim(export, sovo)
-        val election2 = CreateBoulderElectionClca("boulder2025", AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClcaOld("boulder2025", AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -276,7 +276,7 @@ class TestBoulderVsDominionCvrExport25 {
     @Test
     fun showRedactedNcards() {
         val export = readCorlaCvrsFromFile(cvrFilename)
-        val election2 = CreateBoulderElectionClca("boulder2025", AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClcaOld("boulder2025", AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -346,7 +346,7 @@ class TestBoulderVsDominionCvrExport25 {
     fun showNcards() {
         val export = readCorlaCvrsFromFile(cvrFilename)
 
-        val election2 = CreateBoulderElectionClca("boulder2025", AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClcaOld("boulder2025", AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 

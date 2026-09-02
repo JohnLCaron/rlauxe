@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.cvr
 
-import com.github.michaelbull.result.valuesOf
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -13,29 +12,48 @@ private val logger = KotlinLogging.logger("Redaction")
 interface RedactionIF {
     val nlines: Int
     fun isRedaction(line: CSVRecord, corlaCvrs: CorlaCvrs): Boolean
+    fun redactedGroups(): List<RedactedGroup>
 }
 
 // standard Redactor, eg for votedatabase
 class Redaction(val show: Boolean = false) : RedactionIF {
     override var nlines = 0
+    val redactedGroups = mutableMapOf<String, RedactedGroup>()
+    private val showDontMatch = true
+
+    override fun redactedGroups() =  redactedGroups.values.toList()
+
+    // TODO we might want to remove contests with vote count == 0 ??
+    fun addToGroups(redacted:RedactedGroup) {
+        val rname =  redacted.ballotType
+        val group = redactedGroups[rname]
+        if (group == null) {
+            redactedGroups[rname] = RedactedGroup.makeAccumulator(redacted, rname)
+        } else {
+            if (group.contests() == redacted.contests()) {
+                group.merge(redacted)
+            } else if ((group.contests() - redacted.contests()).size == 0) {
+                group.merge(redacted)
+            } else if (showDontMatch) {
+                println("    redacted ${redacted.ballotType} diff = ${redacted.contests() - group.contests()}, ${group.contests() - redacted.contests()}")
+                println("doesnt match c31 = ${redacted.contestVotes[31]}")
+            }
+        }
+    }
 
     // "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
     // "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv"
     override fun isRedaction(line: CSVRecord, corlaCvrs: CorlaCvrs): Boolean {
-        val ballotStyle = corlaCvrs.readColumn(line, "BallotType") ?: "noBallotType"
 
         if (line.get(0).startsWith("AGGREGATED")) {
             if (show) println("  ** redact: $line")
             val redactedGroup = RedactedGroup("AGGREGATED", corlaCvrs.schema.voteForNs).addVotes(corlaCvrs.schema, line)
-            corlaCvrs.ballotStyles.add(redactedGroup)
+            addToGroups(redactedGroup)
             nlines++
             return true
 
-        } else if (line.get(0).isEmpty()) { // (2020) Boulder, Dolores; has votes, presumably the sum of the redactions
-            if (show) println("  ** redact: isEmpty $line")
-
-            val redactedGroup = RedactedGroup("redacted$nlines", corlaCvrs.schema.voteForNs).addVotes(corlaCvrs.schema, line)
-            corlaCvrs.ballotStyles.add(redactedGroup)
+        } else if (line.get(0).isEmpty()) { // (2020) Dolores, Phillips: these are suntotals, not redactions
+            if (show) println("  ** discard: isEmpty $line")
             nlines++
             return true
 
@@ -46,7 +64,7 @@ class Redaction(val show: Boolean = false) : RedactionIF {
         }
 
         val values = line.toList().subList(corlaCvrs.schema.nheaders, line.size())
-        val hasRedacted = values.any { it.lowercase().startsWith("redacted") }
+        val hasRedacted = values.any { it.lowercase().startsWith("redacted") || it.lowercase().startsWith("redaction") }
         if (hasRedacted) {
             if (show) println("  ** hasRedacted: $line")
             nlines++
@@ -63,10 +81,10 @@ class Redaction(val show: Boolean = false) : RedactionIF {
     }
 }
 
-class RedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>) {
+data class RedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>) {
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
     private var exampleCsv : CSVRecord? = null // debugging
-    private var nlines: Int = 1  // used by the accumulating group
+    private var nlines = 0  // used by the accumulating group
     var style : CvrCardStyle? = null
     var singleCards = true
 
@@ -94,7 +112,8 @@ class RedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>) {
                         val nvotes = line.get(useContest.startCol + candIdx).toInt()
                         val prev = candidateVotes[candIdx] ?: 0
                         candidateVotes[candIdx] = prev + nvotes
-                        if (nvotes > 1) singleCards = false
+                        if (nvotes > 1)
+                            singleCards = false
                     }
                     if (useContestIdx == 31 && candidateVotes.values.sum() == 1)
                         logger.debug{"*** contestIdx == 31 votes = ${candidateVotes.values.sum()}"}
@@ -113,13 +132,13 @@ class RedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>) {
         // require (this.ballotType == other.ballotType)
         other.contestVotes.forEach { (contestId, otherCands) ->
             val mycands = contestVotes.getOrPut(contestId, { mutableMapOf() })
-
             otherCands.forEach { (cand, otherVote) ->
                 val myvotes = mycands[cand] ?: 0
                 mycands[cand] = myvotes + otherVote
             }
         }
         this.nlines += other.nlines // other.minCards(voteForNmap)
+        this.singleCards = this.singleCards && other.singleCards
 
         return this
     }
@@ -140,7 +159,7 @@ class RedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>) {
 
     override fun toString() = buildString {
         val contests = contestVotes.map { it.key }.sorted()
-        append("RedactedGroup('$ballotType', contests=${contests} nlines=$nlines, minCards= ${minCards()} totalVotes=${totalVotes()} singleCards = $singleCards)")
+        append("RedactedGroup('$ballotType', ncards=${ncards()}, nlines=$nlines, minCards= ${minCards()} totalVotes=${totalVotes()} singleCards = $singleCards, contests=${contests} )")
         // appendLine(csvRecord.toString())
     }
 
@@ -149,12 +168,13 @@ class RedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>) {
         // method #2: specific to Boulder24
         fun makeAccumulator(starting: RedactedGroup, accumName:String): RedactedGroup {
             val accum = RedactedGroup(accumName, starting.voteForNs)
-            accum.merge(starting)
 
             // override with method #2
             if (starting.exampleCsv != null) {
                 accum.nlines = parseNCards(starting.exampleCsv!!.values()[0])
             }
+
+            accum.merge(starting)
             return accum
         }
 

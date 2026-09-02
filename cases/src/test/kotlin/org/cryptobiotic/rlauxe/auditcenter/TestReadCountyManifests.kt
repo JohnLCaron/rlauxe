@@ -8,7 +8,7 @@ class TestReadCountyManifests {
     val input: ColoradoInput = Colorado2026Primary()
 
     @Test
-    fun readCountyManifests() {
+    fun readAllCountyManifests() {
         val corlaInput = Colorado2026Primary()
         val manifestDir = "$auditcenter/2026/primary/files"
         val countySet = corlaInput.counties().toSet()
@@ -36,4 +36,17 @@ class TestReadCountyManifests {
             println("\nfound all counties")
         }
     }
+
+    @Test
+    fun readOneCountyManifest() {
+        val corlaInput = Colorado2020General()
+        val manifestFile = "$auditcenter/2020/general/round_1/manifest-ElPaso.csv"
+        val manifestBatches = readCountyManifestCsv(manifestFile)
+        val stratas = corlaInput.strataPopulation()
+
+        val sumCards = manifestBatches.sumOf{ it.nballotCards }
+
+        println("$manifestFile: sumCards = $sumCards")
+    }
+
 }

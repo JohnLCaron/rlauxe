@@ -16,17 +16,15 @@ import kotlin.test.Test
 import kotlin.text.appendLine
 
 class TestBoulderUndervotes {
-    val cvrResource = "/resources/data/cases/boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-    val export = readCorlaCvrsFromResource(cvrResource)
-
-    val sovoResource = "/resources/data/cases/boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv"
-    val sovo = readBoulderSOVfromResourcePath(sovoResource, "Boulder2024")
+    val input = Boulder24Input()
+    val sovo = input.sovo()
+    val corlaCvrs = input.corlaCvrs()
 
     @Test
     fun testBoulderBallotType() {
         var count = 0
         val ballotTypes = mutableMapOf<String, MutableList<List<Int>>>()
-        export.cvrs.forEach { cvr: CvrRow ->
+        corlaCvrs.cvrs.forEach { cvr: CvrRow ->
             val contestIds = cvr.contestVotes.map { it.contestId }
             val prevContestIds = ballotTypes.getOrPut(cvr.ballotType) { mutableListOf() }
             if (!prevContestIds.contains(contestIds)) {
@@ -59,27 +57,27 @@ class TestBoulderUndervotes {
         }
         println("\ncardStyles constructed from cvrs")
         cardStyles.toSortedMap().forEach { (_, value) ->
-            println(value)
+            println("  $value")
         }
 
         println("\nexport.exportCardStyles")
-        export.cardStyles().sortedBy { it.name }.forEach {
-            println(it)
+        corlaCvrs.cardStyles().sortedBy { it.name }.forEach {
+            println("  $it")
         }
 
         // these match; you could just split these apert
-        export.cardStyles().forEach { excs ->
+        corlaCvrs.cardStyles().forEach { excs ->
             val match = ballotTypes[excs.name]
             if (match == null) println("exportCardStyles no match on ${excs.name} in ballotTypes")
         }
-        val exportCardStylesMap = export.cardStyles().associateBy { it.name }
+        val exportCardStylesMap = corlaCvrs.cardStyles().associateBy { it.name }
         ballotTypes.keys.forEach { type ->
             val match = exportCardStylesMap[type]
             if (match == null) println("ballotTypes has no match on ${type} in exportCardStyles")
         }
 
         val exportCardStyles = mutableMapOf<String, MutableList<CvrCardStyle>>()
-        export.cardStyles().forEach { excs ->
+        corlaCvrs.cardStyles().forEach { excs ->
             val CvrCardStyle = exportCardStyles.getOrPut(excs.name) { mutableListOf() }
             CvrCardStyle.add(excs)
         }
@@ -103,12 +101,13 @@ class TestBoulderUndervotes {
         }
         println("\ncardStyles constructed from export.exportCardStyles")
         ecardStyles.toSortedMap().forEach { (_, value) ->
-            println(value)
+            println("  $value")
         }
 
+        println("\nlook for exportCardStyles with no match on in cardStylesles")
         ecardStyles.forEach { (key, value) ->
             val match = cardStyles[key]
-            if (match == null) println("exportCardStyles no match on ${key} in cardStyles")
+            if (match == null) println("  exportCardStyles no match on ${key} in cardStyles")
             else {
                 if (match.contestIdSet() != value.possibleContests().toList().toSet()) {
                     println("match has different contests")
@@ -117,26 +116,42 @@ class TestBoulderUndervotes {
                 }
             }
         }
-
-
-
-        /*
         println()
-        export.redactedGroups.forEach { rgroup ->
-            println(rgroup)
+
+        println("\nlook for redactedGroups with no match in cardStyles:")
+        corlaCvrs.redactedGroups().forEach { rgroup ->
             // test if theres a cardStyle that matches
             val isA = rgroup.ballotType.contains("-A")
             val gcardStyle = extractBallotType(rgroup.ballotType) + "-" + if (isA) "A" else "B"
             val cardStyle = cardStyles[gcardStyle]
             if (cardStyle != null) {
                 val gids = rgroup.contestVotes.map { it.key }.sorted().toIntArray()
-                if (cardStyle.possibleContests().contentEquals(gids))
-                    println("*** rgroup '${rgroup.ballotType}'\n $gids !=\n ${cardStyle.possibleContests()} (${gcardStyle})")
+                if (!cardStyle.possibleContests().contentEquals(gids)) {
+                    println("  $rgroup")
+                    println("    ${gids.contentToString()} !=\n    ${cardStyle.possibleContests().contentToString()} (${gcardStyle})")
+                }
             } else {
-                println("***dont have cardStyle ${gcardStyle}")
+                println("  *** dont have cardStyle ${gcardStyle} from ${rgroup.ballotType}")
             }
-            println()
-        } */
+        }
+
+        println("\nafter calling removeContest12FromPool6:") // TODO is this worth it ??
+        if (input.electionName == "Boulder2024") { Boulder24Input.removeContest12FromPool6(corlaCvrs.redactedGroups()) }
+        corlaCvrs.redactedGroups().forEach { rgroup ->
+            // test if theres a cardStyle that matches
+            val isA = rgroup.ballotType.contains("-A")
+            val gcardStyle = extractBallotType(rgroup.ballotType) + "-" + if (isA) "A" else "B"
+            val cardStyle = cardStyles[gcardStyle]
+            if (cardStyle != null) {
+                val gids = rgroup.contestVotes.map { it.key }.sorted().toIntArray()
+                if (!cardStyle.possibleContests().contentEquals(gids)) {
+                    println("  $rgroup")
+                    println("    ${gids.contentToString()} !=\n    ${cardStyle.possibleContests().contentToString()} (${gcardStyle})")
+                }
+            } else {
+                println("  *** dont have cardStyle ${gcardStyle} from ${rgroup.ballotType}")
+            }
+        }
     }
     // with this exception, redacted groups match existing CardStyle:
     // RedactedGroup '06, 33, & 36-A', contestIds=[0, 1, 2, 3, 5, 10, 11, 12, 13, 14, 15, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42], totalVotes=8012
@@ -159,7 +174,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showSovoContestDetail2() {
-        val election2 = CreateBoulderElectionClca("test", AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClcaOld("test", AuditType.ONEAUDIT, corlaCvrs, sovo)
         println()
         election2.boulderContestBuilders.forEach { (_, oa) ->
             println(SovoContestVotes.header)
@@ -170,7 +185,7 @@ class TestBoulderUndervotes {
     @Test
     fun showPoolVotes() {
         println("votes, undervotes")
-        val election2 = CreateBoulderElectionClca("test",AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClcaOld("test",AuditType.ONEAUDIT, corlaCvrs, sovo)
         val contestIds = election2.infoList.map { it.id }
         showPoolVotes(contestIds, election2.cardPoolBuilders)
     }
@@ -188,7 +203,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showRedactedUndervotes2() {
-        val election2 = CreateBoulderElectionClca("test",AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClcaOld("test",AuditType.ONEAUDIT, corlaCvrs, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -251,7 +266,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showRedactedNcards() {
-        val election2 = CreateBoulderElectionClca("test", AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClcaOld("test", AuditType.ONEAUDIT, corlaCvrs, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -319,7 +334,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showNcards() {
-        val election2 = CreateBoulderElectionClca("test", AuditType.ONEAUDIT, export, sovo)
+        val election2 = CreateBoulderElectionClcaOld("test", AuditType.ONEAUDIT, corlaCvrs, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 

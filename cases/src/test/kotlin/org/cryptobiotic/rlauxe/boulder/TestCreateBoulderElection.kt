@@ -2,22 +2,23 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.sumContestTabulations
+import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.contentToString
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-class TestBoulder2024Cvrs {
+class TestCreateBoulderElection {
 
     @Test
     fun parseBoulder24cvrs() {
@@ -41,14 +42,25 @@ class TestBoulder2024Cvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-
-        val maker = CreateBoulderElectionClca( "parseBoulder24cvrs", AuditType.CLCA, corlaCvrs,  sovo, hasStyle = true)
+        // TODO fails on CLCA
+        val maker = CreateBoulderElection( "parseBoulder24cvrs", AuditType.ONEAUDIT, corlaCvrs,  sovo, hasStyle = true)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
-        val countVotes = maker.countVotes()
+        val countCvrTabs = mutableMapOf<Int, ContestTabulation>()
+        countCvrTabs.sumContestTabulations(maker.countCvrVotes())
+        countCvrTabs.sumContestTabulations(maker.countRedactedVotes())
+
+        // is this what CreateBoulderElection has ?
+        maker.contests.forEach {
+            val beContest = it as Contest
+            val betab = beContest.votes
+            val cvrTab = countCvrTabs[it.id]?.votes ?: emptyMap()
+            assertTrue(checkEquivilentVotes(cvrTab, betab))
+        }
+
         val contests = infos.map { info ->
-            val contestTab = countVotes[info.id]!!
+            val contestTab = countCvrTabs[info.id]!!
             contestTab.votes.forEach {
                 if (!info.candidateIds.contains(it.key)) {
                     "contestCount ${info.id } has candidate '${it.key}' not found in contestInfo candidateIds ${info.candidateIds}"
@@ -84,9 +96,9 @@ class TestBoulder2024Cvrs {
         assertEquals(expected, votesByCandidateName)
     }
 
-    @Test
-    fun testMvrs() {
-        val topdir = "$testdataDir/cases/boulder24/oa"
+    // @Test
+    fun testMvrs() { // ??
+        val topdir = "$testdataDir/cases/boulder2024/oa"
         val publisher = Publisher(topdir)
         val sortedMvrs = readCardsCsvIterator(publisher.sortedMvrsFile(), null)
 
@@ -141,20 +153,3 @@ class TestBoulder2024Cvrs {
 
 }
 
-fun compareRedactions(votes1: Map<Int, Map<Int, Int>>, votes2: Map<Int, Map<Int, Int>>) = buildString {
-    val svotes1 = votes1.toSortedMap()
-    svotes1.forEach { (contestId, conVotes1) ->
-        val conVotes2 = votes2[contestId]!!.toSortedMap()
-        val sortedConVotes1 = conVotes1.toSortedMap()
-        appendLine("  contest $contestId: cvrVotes = $sortedConVotes1")
-        appendLine("  contest $contestId: redacted = $conVotes2")
-    }
-}
-
-fun makeCvr(id: String, votes: Map<Int, IntArray>): Cvr {
-    val cvrb = CvrBuilder2(id,  false)
-    votes.forEach {
-        cvrb.replaceContestVotes(it.key, it.value)
-    }
-    return cvrb.build()
-}

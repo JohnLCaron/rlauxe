@@ -1,6 +1,9 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
+import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
+import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import kotlin.test.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -11,8 +14,8 @@ class TestBoulderCvrExportCsv {
     @Test
     fun parseThreeCandidatesTenVotesSucceeds() {
         val filename = "src/test/data/corla/1misc/ThreeCandidatesTenVotes.csv"
-        val export = readCvrExportsFromFile(filename)
-        println(export.show())
+        val export = readCorlaCvrsFromFile(filename)
+        println(export)
 
         // There should be one contest, the one we just read in.
         val schema = export.schema
@@ -32,10 +35,10 @@ class TestBoulderCvrExportCsv {
     @Test
     fun test4CvrsWithIRV() {
         val filename = "src/test/data/Boulder2023/Test4CvrsWithIRV.csv"
-        val export = readCvrExportsFromFile(filename)
-        println(export.summary())
+        val export = readCorlaCvrsFromFile(filename)
+        println(export)
 
-        assertEquals("src/test/data/Boulder2023/Test4CvrsWithIRV.csv", export.filename)
+        assertEquals("src/test/data/Boulder2023/Test4CvrsWithIRV.csv", export.inputSource)
         assertEquals("2023 Coordinated Election", export.electionName)
         assertEquals("5.17.17.1", export.versionName)
         assertEquals(38, export.schema.contests.size)
@@ -114,18 +117,18 @@ class TestBoulderCvrExportCsv {
     @Test
     fun testWithRedactions() {
         val filename = "src/test/data/Boulder2024/TestWithRedactions.csv"
-        val export = readCvrExportsFromFile(filename)
+        val export = readCorlaCvrsFromFile(filename, redaction = RedactionBoulder())
         // println(export.summary())
 
-        assertEquals(filename, export.filename)
+        assertEquals(filename, export.inputSource)
         assertEquals("2024 Boulder County GE Recounts", export.electionName)
         assertEquals("5.17.17.1", export.versionName)
         assertEquals(65, export.schema.contests.size)
-        assertEquals(8, export.redactedGroups.size)
+        assertEquals(8, export.redactedGroups().size)
         // export.redacted.forEach { println(it.contestVotes.toString()) }
 
         // Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
-        val group7 = export.redactedGroups.find { it.ballotType == "7"}!!
+        val group7 = export.redactedGroups().find { it.ballotType == "7"}!!
         var idx = 0
         assertEquals(listOf(265, 104, 0, 0, 2, 1, 1, 5, 2, 0, 0, 0, 0, 0, 0), group7.contestVotes[idx++]!!.toMap().values.toList())
         assertEquals(listOf(228, 74, 6, 2, 5, 0, 0,), group7.contestVotes[idx++]!!.toMap().values.toList())
@@ -197,8 +200,7 @@ class TestBoulderCvrExportCsv {
     @Test
     fun parseBoulder23Succeeds() {
         val filename = "src/test/data/Boulder2023/Boulder-2023-Coordinated-CVR-Redactions-removed.csv"
-        val export = readCvrExportsFromFile(filename)
-        println(export.summary())
+        val export = readCorlaCvrsFromFile(filename, redaction = RedactionBoulder())
 
         val schema = export.schema
         // There should be 38 contests. Check their metadata.
@@ -330,16 +332,33 @@ class TestBoulderCvrExportCsv {
     fun parseBoulder24Recount() {
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
-        val export = readCvrExportsFromFile(filename)
-        println(export.summary())
+        val export = readCorlaCvrsFromFile(filename, redaction = RedactionBoulder())
 
         assertEquals(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv",
-            export.filename
+            export.inputSource
         )
         assertEquals("2024 Boulder County GE Recounts", export.electionName)
         assertEquals("5.17.17.1", export.versionName)
         assertEquals(65, export.schema.contests.size)
         assertEquals(25430, export.cvrs.size)
     }
+}
+
+fun compareRedactions(votes1: Map<Int, Map<Int, Int>>, votes2: Map<Int, Map<Int, Int>>) = buildString {
+    val svotes1 = votes1.toSortedMap()
+    svotes1.forEach { (contestId, conVotes1) ->
+        val conVotes2 = votes2[contestId]!!.toSortedMap()
+        val sortedConVotes1 = conVotes1.toSortedMap()
+        appendLine("  contest $contestId: cvrVotes = $sortedConVotes1")
+        appendLine("  contest $contestId: redacted = $conVotes2")
+    }
+}
+
+fun makeCvr(id: String, votes: Map<Int, IntArray>): Cvr {
+    val cvrb = CvrBuilder2(id,  false)
+    votes.forEach {
+        cvrb.replaceContestVotes(it.key, it.value)
+    }
+    return cvrb.build()
 }

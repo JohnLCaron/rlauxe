@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.SimulationControl
+import org.cryptobiotic.rlauxe.boulder.Boulder24Input
 import org.cryptobiotic.rlauxe.boulder.BoulderStatementOfVotes
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.boulder.createBoulderElectionWithSovo
@@ -22,7 +23,7 @@ class MakeBoulderElection {
     fun createBoulder26p() {
         val topdir = "$cases/boulder/boulder2026p"
 
-        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03, )
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 22),
             ContestSampleControl(
@@ -94,8 +95,7 @@ class MakeBoulderElection {
 
         createBoulderElection(
             "Boulder2024",
-            "/resources/data/cases/boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            "/resources/data/cases/boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            Boulder24Input(),
             topdir = topdir,
             creation,
             round,

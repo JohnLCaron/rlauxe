@@ -102,7 +102,7 @@ class MakeCorlaElections {
 
     @Test
     fun makeColorado2020cvrs() {
-        val topdir = "$cases/corla/corla2020/withCvrs"
+        val topdir = "$cases/corla/corla2020/withCvrsNew"
 
         countyElectionWithCvrs(
             votedatabase2020Counties(votedatabase2020),

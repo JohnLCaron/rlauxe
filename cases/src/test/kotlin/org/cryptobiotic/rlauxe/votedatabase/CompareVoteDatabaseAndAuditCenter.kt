@@ -3,10 +3,10 @@ package org.cryptobiotic.rlauxe.votedatabase
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
-import org.cryptobiotic.rlauxe.dominion.GarfieldCsvReader
-import org.cryptobiotic.rlauxe.dominion.makeContestInfo
+import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
+import org.cryptobiotic.rlauxe.cvr.Garfield20Cvrs
+import org.cryptobiotic.rlauxe.cvr.makeContestInfo
+import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
@@ -96,10 +96,10 @@ class CompareVoteDatabaseAndAuditCenter {
                             && it.fileName.toString() != "summary.csv"
                             && !it.fileName.toString().contains("Manifest")
                 }.forEach { entry ->
-                    if (county != "Monroe" && county != "Garfield") { // no such county in Colorado && earlier format && Baca has copy of Heurfano
+                    if (county != "Monroe") { // no such county in Colorado && earlier format && Baca has copy of Heurfano
                         try {
                             val filename = entry.toString()
-                            val reader = readCvrExportsFromFile(filename)
+                            val reader: CorlaCvrsIF = readCvrExportsFromFile(county, filename)
                             val star = if (reader.electionName.contains(county)) "" else "**"
                             println("  $star ${reader.electionName} : ${filename}")
                         } catch (e: Exception) {
@@ -117,8 +117,7 @@ class CompareVoteDatabaseAndAuditCenter {
         println("\n-----------------------------------")
         println("county=$county csvfile = $exportFile")
 
-        val export: DominionCvrExportCsv = if (county == "Garfield") GarfieldCsvReader(exportFile).read() else
-            readCvrExportsFromFile(exportFile)
+        val export: CorlaCvrsIF = readCvrExportsFromFile(county, exportFile)
         val sinfoList = export.makeContestInfo()
         var errs = 0
 
@@ -165,6 +164,11 @@ class CompareVoteDatabaseAndAuditCenter {
 
         return errs
     }
+}
+
+fun readCvrExportsFromFile(county: String, cvrFile: String): CorlaCvrsIF {
+    return if (county == "Garfield") Garfield20Cvrs(cvrFile) else
+        readCorlaCvrsFromFile(cvrFile)
 }
 
 fun suggest(county: String, contest: String, input: ColoradoInput): String {

@@ -174,7 +174,7 @@ class MakeCorlaElections {
 
     // @Test
     fun writeCountyContestData() {
-        val topdir = "$cases/corla/corla2020/clca"
+        val topdir = "$cases/corla/corla2020/sim"
         val auditRecord = AuditRecord.read(topdir)!!
 
         val coloradoInput = Colorado2022Primary()

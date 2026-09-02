@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.cvr
 
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.auditcenter.munge
-import org.cryptobiotic.rlauxe.dominion.cleanChoiceName
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
 import java.lang.StrictMath.sqrt
@@ -139,4 +138,27 @@ fun makeCvrSchema(inputSource: String,  contests: CSVRecord, choices: CSVRecord,
 
     val voteForNs = ccontests.associate { it.contestIdx to it.voteForN }
     return CvrSchema(inputSource, headerMap, columns, nheaders, ccontests, voteForNs)
+}
+
+// TODO maybe have to pass this function in ??
+//   is it ok not to clean anything here??
+fun cleanChoiceName(choiceName: String) : String {
+    var work = choiceName
+    // Garfield may have the party name appended to the choice name, eg "Donald J. Trump / Michael R. Pence:Republican"
+    val colonPos = work.indexOf(":")
+    if (colonPos > 0)
+        work = work.substring(0, colonPos)
+
+    // TODO Boulder may have the rank in parenthesis, eg Aaron Brockett(1)
+    //   but some canonical names have parentheses, eg "Jaclyn (Gabbel) Hurst"
+    //   only remove if parenthesis contains a number
+    val leftParen = work.indexOf("(")
+    val rightParen = work.indexOf(")")
+    if (leftParen > 0 && rightParen > 0 && leftParen < rightParen) {
+        val inside = work.substring(leftParen+1, rightParen)
+        if (inside.all { it.isDigit() }) {
+            work = work.substring(0, leftParen) // truncate
+        }
+    }
+    return work.trim()
 }

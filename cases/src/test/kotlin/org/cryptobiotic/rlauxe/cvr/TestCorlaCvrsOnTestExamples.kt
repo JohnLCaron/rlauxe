@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.dominion
+package org.cryptobiotic.rlauxe.cvr
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
@@ -7,7 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class TestDominionCvrReaderOnTestExamples {
+class TestCorlaCvrsOnTestExamples {
 
     @Test
     fun testRemoveLeadingChar() {
@@ -19,8 +19,8 @@ class TestDominionCvrReaderOnTestExamples {
     @Test
     fun parseThreeCandidatesTenVotesSucceeds() {
         val filename = "src/test/data/corla/1misc/ThreeCandidatesTenVotes.csv"
-        val result: DominionCvrExportCsv = readCvrExportsFromFile(filename, )
-        println(result.show())
+        val result = readCorlaCvrs(filename,)
+        println(result)
 
         // There should be one contest, the one we just read in.
         val schema = result.schema
@@ -40,10 +40,10 @@ class TestDominionCvrReaderOnTestExamples {
     @Test
     fun test4CvrsWithIRV() {
         val filename = "src/test/data/Boulder2023/Test4CvrsWithIRV.csv"
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename, )
-        // println(export.summary())
+        val export = readCorlaCvrs(filename,)
+        println(export)
 
-        assertEquals("src/test/data/Boulder2023/Test4CvrsWithIRV.csv", export.filename)
+        assertEquals("src/test/data/Boulder2023/Test4CvrsWithIRV.csv", export.inputSource)
         assertEquals("2023 Coordinated Election", export.electionName)
         assertEquals("5.17.17.1", export.versionName)
         assertEquals(38, export.schema.contests.size)
@@ -122,35 +122,36 @@ class TestDominionCvrReaderOnTestExamples {
     @Test
     fun testWithRedactions() {
         val filename = "src/test/data/Boulder2024/TestWithRedactions.csv"
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename, )
-        // println(export.summary())
+        val export = readCorlaCvrs(filename, redaction = RedactionBoulder())
+        println(export)
 
-        assertEquals("src/test/data/Boulder2024/TestWithRedactions.csv", export.filename)
+        assertEquals("src/test/data/Boulder2024/TestWithRedactions.csv", export.inputSource)
         assertEquals("2024 Boulder County GE Recounts", export.electionName)
         assertEquals("5.17.17.1", export.versionName)
         assertEquals(65, export.schema.contests.size)
-        assertEquals(8, export.redactedGroups.size)
+        assertEquals(8, export.redactedGroups().size)
         // export.redacted.forEach { println(it.contestVotes.toString()) }
 
-        // Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
-        val cvr0 = export.redactedGroups[0]
-        assertEquals("10", cvr0.ballotType)
+        // RedactedGroup('7', ncards=380, nlines=1, minCards= 380 totalVotes=8855 singleCards = false, contests=[0, 1, 2, 3, 5, 8, 11, 13, 14, 15, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42] )Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
+        val redactedGroup = export.redactedGroups().first()
+        println(redactedGroup)
+        assertEquals("7", redactedGroup.ballotType)
         var idx = 0
         assertEquals(
-            listOf(175, 88, 0, 5, 4, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0),
-            cvr0.contestVotes[idx++]!!.toMap().values.toList()
+            listOf(265, 104, 0, 0, 2, 1, 1, 5, 2, 0, 0, 0, 0, 0, 0),
+            redactedGroup.contestVotes[idx++]!!.toMap().values.toList()
         )
-        assertEquals(listOf(164, 72, 4, 1, 8, 1, 0), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(178, 6, 0), cvr0.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(92, 135, 4, 7), cvr0.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(228, 74, 6, 2, 5, 0, 0), redactedGroup.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(233, 12, 0), redactedGroup.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(89, 209, 2, 5), redactedGroup.contestVotes[idx++]!!.toMap().values.toList())
     }
 
 
-    // @Test failinf
+    @Test
     fun parseBoulder23Succeeds() {
         val filename = "src/test/data/Boulder2023/Boulder-2023-Coordinated-CVR-Redactions-removed.csv"
-        val result: DominionCvrExportCsv = readCvrExportsFromFile(filename, )
-        println(result.summary())
+        val result = readCorlaCvrs(filename,)
+        println(result)
 
         val schema = result.schema
         // There should be 38 contests. Check their metadata.
@@ -183,12 +184,12 @@ class TestDominionCvrReaderOnTestExamples {
 
         // Check that the first cvr was correctly parsed.
         assertEquals(result.cvrs.size, 118669)
-        val cvr1: CastVoteRecord = result.cvrs.get(0)
+        val cvr1: CvrRow = result.cvrs.get(0)
 
         // IRV
         assertEquals(
             // listOf("Aaron Brockett", "Nicole Speer", "Bob Yates", "Paul Tweedlie"),
-            listOf("Aaron Brockett(1), Nicole Speer(1), Bob Yates(1), Paul Tweedlie(1)"),
+            listOf("Aaron Brockett", "Nicole Speer", "Bob Yates", "Paul Tweedlie"),
             schema.voteFor(boulderMayoral.contestIdx, cvr1),
         )
 
@@ -283,12 +284,12 @@ class TestDominionCvrReaderOnTestExamples {
     fun parseBoulder24Recount() {
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename, )
-        println(export.summary())
+        val export = readCorlaCvrs(filename, redaction = RedactionBoulder())
+        println(export)
 
         assertEquals(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv",
-            export.filename
+            export.inputSource
         )
         assertEquals("2024 Boulder County GE Recounts", export.electionName)
         assertEquals("5.17.17.1", export.versionName)

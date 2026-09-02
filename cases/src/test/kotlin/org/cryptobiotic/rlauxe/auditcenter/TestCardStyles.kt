@@ -1,9 +1,8 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.dominion.DominionConverter
-import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
-import org.cryptobiotic.rlauxe.dominion.makeContestInfo
-import org.cryptobiotic.rlauxe.dominion.readCvrExportsFromFile
+import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.cvr.makeContestInfo
+import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
 import kotlin.test.Test
 
 // compare cardStyles from coloradoInput.countyStyles (taken from mvr files)
@@ -20,23 +19,23 @@ class TestCardStyles {
 
     fun compareCvrSchemaVscoloradoInput(filename: String, coloradoInput: ColoradoInput) {
         // println(CastVoteRecord.header)
-        val export: DominionCvrExportCsv = readCvrExportsFromFile(filename)
+        val export = readCorlaCvrs(filename)
         val exportContestInfos = export.makeContestInfo().associateBy { it.id }
 
         // these contest id's are internal to the export.
         println("export.CardStyles")
         // BallotType(val name: String, val contests: Set<Int>, var count: Int = 0)
-        export.exportCardStyles.forEach { type ->
+        export.cardStyles().forEach { type ->
             println("  $type")
         }
         println()
 
         val contestBuilder = BuildCorlaContests(coloradoInput)
         val infosByName = contestBuilder.infos.mapKeys { it.value.name }
-        val dominionConverter = DominionConverter("test", export, infosByName, coloradoInput, )
+        val converter = CorlaCvrConverter("test", export, infosByName, coloradoInput,)
 
-        println("dominionConverter.ExportCardStyles")
-        dominionConverter.cardStyles.values.forEach {
+        println("converter.cardStyles")
+        converter.cardStyles.values.forEach {
             println("  ${it.show()}")
         }
         println()
@@ -60,7 +59,7 @@ class TestCardStyles {
             print("  ${style.show(contestNameToId)} -> ")
             // convert from Set<contestName> to Set<contestId>
             val contestIds = contestNames.map { contestMap[it]!!.id }.toSet()
-            val cardStyle = dominionConverter.cardStyles[contestIds]
+            val cardStyle = converter.cardStyles[contestIds]
             if (cardStyle != null) {
                 println("  ${cardStyle.show()} MATCH")
             } else {

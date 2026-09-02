@@ -36,7 +36,7 @@ class TestFastSamplingCards {
 
     @Test
     fun readSamplingCards() {
-        val topdir = "$cases/corla/corla2020/clca"
+        val topdir = "$cases/corla/corla2020/sim"
         val publisher = Publisher(topdir)
 
         val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord

@@ -21,7 +21,7 @@ class TestProtoCard {
 
     @Test
     fun testProtoAndCsvAgree () {
-        val topdir = "$cases/corla/corla2020/clca"
+        val topdir = "$cases/corla/corla2020/sim"
         val publisher = Publisher(topdir)
         val bufferSize = 100_000
 

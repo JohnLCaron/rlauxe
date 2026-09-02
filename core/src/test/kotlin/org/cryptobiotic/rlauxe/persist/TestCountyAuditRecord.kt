@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestCountyAuditRecord {
-    val corlaData = "$cases/corla/corla2020/clca"
+    val corlaData = "$cases/corla/corla2020/sim"
 
     @Test
     fun testReadFrom() {
@@ -21,9 +21,9 @@ class TestCountyAuditRecord {
         val manifest = manager.sortedManifest()
 
         assertEquals(0, manager.pools()?.size ?: 0)
-        assertEquals(914, manager.styles()?.size ?: 0)
+        assertEquals(1022, manager.styles()?.size ?: 0)
         println("manifest.ncards = ${manifest.ncards}")
-        assertEquals(4480944, manifest.ncards)
+        assertEquals(4166526, manifest.ncards)
 
         val countyPools = manager.countyPools()
         println("countyPools size = ${ countyPools?.size ?: 0 }")

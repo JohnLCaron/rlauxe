@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.util
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.Vunder
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePoolV
 import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import kotlin.random.Random
 
@@ -140,7 +140,7 @@ fun makeContestsWithUndervotesAndPhantoms(
         contestVotes[idx] = Vunder.fromCandVotes(idx, candVotes, undervotes[idx], missing=missing, voteForN = voteForN)
     }
 
-    val cvrs = makeCvrsForOnePool(contestVotes, "ballot", poolId=42, hasExactContests = false)
+    val cvrs = makeCvrsForOnePoolV(contestVotes, "ballot", poolId=42, hasExactContests = false)
 
     // make the infos
     val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())

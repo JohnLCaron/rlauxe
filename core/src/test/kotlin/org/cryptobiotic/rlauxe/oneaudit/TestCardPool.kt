@@ -4,13 +4,12 @@ import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.Vunder
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePoolV
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 class TestCardPool {
 
@@ -76,7 +75,7 @@ class TestCardPool {
         }
 
         //  TODO val cvrs2 = makeCvrsFromPopulations(test.populations)
-        val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, test.hasExactContests)
+        val cvrs = makeCvrsForOnePoolV(contestVotes, "poolName", poolId = 42, test.hasExactContests)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
 
         val cardPools = calcOneAuditPoolsFromMvrs(infos, test.cardStyles, cvrs)

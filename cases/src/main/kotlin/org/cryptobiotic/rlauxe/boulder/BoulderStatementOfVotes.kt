@@ -3,12 +3,7 @@ package org.cryptobiotic.rlauxe.boulder
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
-import org.cryptobiotic.rlauxe.cvr.Redaction
-import org.cryptobiotic.rlauxe.cvr.RedactionIF
 import org.cryptobiotic.rlauxe.cvr.isEmpty
-import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
-import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromResource
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -71,19 +66,21 @@ data class BoulderStatementOfVotes(val inputSource: String, val contests: List<S
 
 private val ContestNameWidth = 55
 
+
+// all the votes for one contest
 data class SovoContestVotes(
     val contestTitle: String,
 ) {
     var precinctCount: Int = 0
     var activeVoters: Int = 0
-    var totalBallots: Int = 0  // Nc
+    var totalBallots: Int = 0  // = (totalVotes + totalUnderVotes) / voteForN + totalOverVotes
     var totalVotes: Int = 0     // sum of votes
-    var totalUnderVotes: Int = 0  // undervotes
-    var totalOverVotes: Int = 0     // undervotes = voteForN * Ncast - nvotes = boulderUndervotes + voteForN * boulderOvervotes
+    var totalUnderVotes: Int = 0  // undervotes = voteForN * Ncast - nvotes
+    var totalOverVotes: Int = 0     // these are invalid, and are discarded
     val candidateVotes = mutableMapOf<String, Int>()  // candidateName -> number of votes
     var id = 0
 
-    fun addPrecinct(precinct: BoulderContestPrecinctVotes) {
+    fun addPrecinct(precinct: BoulderSovPrecinctContest) {
         precinctCount++
         activeVoters += precinct.activeVoters
         totalBallots += precinct.totalBallots
@@ -92,18 +89,18 @@ data class SovoContestVotes(
         precinct.lines.forEach { addLine(it) }
     }
 
-    fun addLine(line: BoulderSovPrecinct) {
+    fun addLine(line: BoulderSovPrecinctLine) {
         totalVotes += line.totalVotes
         val votes = candidateVotes.getOrDefault(line.choiceName, 0)
         candidateVotes[line.choiceName] = votes + line.totalVotes
     }
 
-    fun calcNc(voteForN: Int): Int {
-        return (totalVotes + totalUnderVotes) / voteForN // + totalOverVotes // I think overvotes are discarded ?
+    fun calcNcast(voteForN: Int): Int {
+        return (totalVotes + totalUnderVotes) / voteForN
     }
 
     fun checkTotalVotes(voteForN: Int): Boolean {
-        return totalBallots == calcNc(voteForN) + totalOverVotes
+        return totalBallots == calcNcast(voteForN) + totalOverVotes
     }
 
     override fun toString() = buildString {
@@ -122,7 +119,8 @@ data class SovoContestVotes(
     }
 }
 
-data class BoulderContestPrecinctVotes(
+// all the votes for one precinct and one contest
+data class BoulderSovPrecinctContest(
     val contestTitle: String,
     val precinctCode: String,
     val precinctNumber: String,
@@ -131,11 +129,11 @@ data class BoulderContestPrecinctVotes(
     val totalUnderVotes: Int,
     val totalOverVotes: Int,
 ) {
-    constructor(line: BoulderSovPrecinct): this(line.contestTitle, line.precinctCode, line.precinctNumber, line.activeVoters, line.totalBallots, line.totalUnderVotes, line.totalOverVotes)
+    constructor(line: BoulderSovPrecinctLine): this(line.contestTitle, line.precinctCode, line.precinctNumber, line.activeVoters, line.totalBallots, line.totalUnderVotes, line.totalOverVotes)
 
-    val lines = mutableListOf<BoulderSovPrecinct>()
+    val lines = mutableListOf<BoulderSovPrecinctLine>()
 
-    fun addLine(line: BoulderSovPrecinct) {
+    fun addLine(line: BoulderSovPrecinctLine) {
         lines.add(line)
     }
 }
@@ -145,7 +143,8 @@ data class BoulderContestPrecinctVotes(
 //100,2181207100,Presidential Electors,Donald J. Trump / JD Vance,"1,569","1,325",354,24,0
 //100,2181207100,Presidential Electors,Blake Huber / Andrea Denault,"1,569","1,325",1,24,0
 
-data class BoulderSovPrecinct(
+// all the votes for one precinct; recorded separately for each contest, no record of card style
+data class BoulderSovPrecinctLine(
     val precinctCode: String,
     val precinctNumber: String,
     val contestTitle: String,
@@ -159,8 +158,8 @@ data class BoulderSovPrecinct(
     companion object {
 
         // (2023) "Precinct Code","Precinct Number","Active Voters","Contest Title","Choice Name","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
-        fun make2023(line: CSVRecord): BoulderSovPrecinct {
-            return BoulderSovPrecinct(
+        fun make2023(line: CSVRecord): BoulderSovPrecinctLine {
+            return BoulderSovPrecinctLine(
                 line.get(0),    // code
                 line.get(1),    // precinct
                 line.get(3),    // contest
@@ -174,10 +173,10 @@ data class BoulderSovPrecinct(
         }
 
         // Note only place we have IRV contests
-        // Note we have "Round 1 Votes","Round 2 Votes": probably not useful, we need the ranks for each ballot
-        // "Precinct Code","Precinct Number","Active Voters","Contest Title","Candidate Name","Total Ballots","Round 1 Votes","Round 2 Votes","Total Votes","Total Blanks","Total Overvotes","Total Exhausted"
-        fun make2023Rcv(line: CSVRecord): BoulderSovPrecinct {
-            return BoulderSovPrecinct(
+        // Note we have "Round 1 Votes","Round 2 Votes": not useful for calculating Assertions, we need the ranks for each ballot
+        // (2023) "Precinct Code","Precinct Number","Active Voters","Contest Title","Candidate Name","Total Ballots","Round 1 Votes","Round 2 Votes","Total Votes","Total Blanks","Total Overvotes","Total Exhausted"
+        fun make2023Rcv(line: CSVRecord): BoulderSovPrecinctLine {
+            return BoulderSovPrecinctLine(
                 line.get(0),    // code
                 line.get(1),    // precinct
                 line.get(3),    // contest
@@ -192,9 +191,9 @@ data class BoulderSovPrecinct(
 
         // (2025) "Precinct Code","Precinct Number","Contest Title","Choice Name","Active Voters*","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
         // (2024) "Precinct Code","Precinct Number","Contest Title","Choice Name","Active Voters","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
-        fun make2024(line: CSVRecord): BoulderSovPrecinct {
+        fun make2024(line: CSVRecord): BoulderSovPrecinctLine {
             try {
-                return BoulderSovPrecinct(
+                return BoulderSovPrecinctLine(
                     line.get(0),
                     line.get(1),
                     line.get(2),
@@ -212,8 +211,8 @@ data class BoulderSovPrecinct(
         }
 
         // (2026) "Precinct Code","Precinct Number","Contest Title","Choice Name","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
-        fun make2026(line: CSVRecord): BoulderSovPrecinct {
-            return BoulderSovPrecinct(
+        fun make2026(line: CSVRecord): BoulderSovPrecinctLine {
+            return BoulderSovPrecinctLine(
                 line.get(0),    // code
                 line.get(1),    // precinct
                 line.get(2),    // contest
@@ -255,19 +254,19 @@ fun readBoulderSOVfromInputStream(input: InputStream, electionName: String, inpu
     // println(header)
 
     // subsequent lines contain ballot manifest info
-    val lines = mutableListOf<BoulderSovPrecinct>()
+    val lines = mutableListOf<BoulderSovPrecinctLine>()
     var line: CSVRecord? = null
     try {
         while (records.hasNext()) {
             line = records.next()
             if (line.isEmpty()) break // assume done when we see a blank line
-            val bmi: BoulderSovPrecinct = when (electionName) {
-                "Boulder2023" -> BoulderSovPrecinct.make2023(line)
-                "Boulder2023Rcv" -> BoulderSovPrecinct.make2023Rcv(line)
-                "Boulder2024clca" -> BoulderSovPrecinct.make2024(line)
+            val bmi: BoulderSovPrecinctLine = when (electionName) {
+                "Boulder2023" -> BoulderSovPrecinctLine.make2023(line)
+                "Boulder2023Rcv" -> BoulderSovPrecinctLine.make2023Rcv(line)
+                "Boulder2024clca" -> BoulderSovPrecinctLine.make2024(line)
                 "Boulder2024",
-                "Boulder2025" -> BoulderSovPrecinct.make2024(line)
-                "Boulder2026p" -> BoulderSovPrecinct.make2026(line)
+                "Boulder2025" -> BoulderSovPrecinctLine.make2024(line)
+                "Boulder2026p" -> BoulderSovPrecinctLine.make2026(line)
                 else -> { throw RuntimeException("Unknown electionName $electionName")}
             }
             lines.add(bmi)
@@ -277,15 +276,15 @@ fun readBoulderSOVfromInputStream(input: InputStream, electionName: String, inpu
         throw ex
     }
 
-    // first, group by precinct
-    val precincts = mutableMapOf<String, BoulderContestPrecinctVotes>()
+    // group by contest and precinct
+    val precincts = mutableMapOf<String, BoulderSovPrecinctContest>()
     lines.forEach {
         val key = "${it.contestTitle}#${it.precinctCode}#${it.precinctNumber}"
-        val precinct = precincts.getOrPut(key) { BoulderContestPrecinctVotes(it) }
+        val precinct = precincts.getOrPut(key) { BoulderSovPrecinctContest(it) }
         precinct.addLine(it)
     }
 
-    // now accumulate into contests
+    // accumulate into contests
     val contests = mutableMapOf<String, SovoContestVotes>()
     precincts.values.forEach { precinct ->
         val key = precinct.contestTitle

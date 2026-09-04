@@ -16,4 +16,5 @@ interface BoulderInput {
 
     fun corlaCvrs(): CorlaCvrs = readCorlaCvrs(cvrsSource, redaction = RedactionBoulder())
 
+    fun hasABgroups() = false
 }

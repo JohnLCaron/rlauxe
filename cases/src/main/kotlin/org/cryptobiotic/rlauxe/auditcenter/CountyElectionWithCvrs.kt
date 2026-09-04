@@ -131,7 +131,7 @@ open class CountyElectionWithCvrs (
 
         contestsUA = contests.map {
             // use strataSize or Nc as population size
-            val NpopIn = if (isUniform) it.info().metadata["CORLAstrataNcards"]!!.toInt() else null
+            val NpopIn = if (isUniform) it.info().metadata["CORLAstrataNcards"]!!.toInt() else null // TODO
             ContestWithAssertions(it, true, hasStyle, NpopIn = NpopIn).addStandardAssertions()
         }
     }

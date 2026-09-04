@@ -60,10 +60,6 @@ class DHondtContest(
 ): Contest(info, voteInput, Nc, Ncast) {
     val nvotes = votes.values.sum()
 
-    override fun Nc() = Nc
-    override fun Nphantoms() = Nc - Ncast
-    override fun Nundervotes() = undervotes
-    override fun info() = info
     override fun winnerNames() = winnerNames
     override fun winners() = winners
     override fun losers() = losers

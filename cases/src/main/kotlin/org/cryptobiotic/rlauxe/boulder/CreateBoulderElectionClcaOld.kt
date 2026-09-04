@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.cvr.ContestVotes
 import org.cryptobiotic.rlauxe.cvr.RedactedGroup
 import org.cryptobiotic.rlauxe.cvr.parseIrvContestName
 import org.cryptobiotic.rlauxe.estimate.Vunder
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePoolV
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
@@ -104,7 +104,7 @@ class CreateBoulderElectionClcaOld(
         val cardStyleMap = makeCardStyles(allCvrs)
         cardStyles = cardStyleMap.values.toList()
 
-        val npops = tabulateNpops(allCvrs, infoList)
+        val npops = emptyMap<Int,Int>() // tabulateNpops(allCvrs, infoList) TODO wrong
         this.ncards = allCvrs.size
 
         contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true, hasStyle)
@@ -215,7 +215,7 @@ class CreateBoulderElectionClcaOld(
     // make simulated CVRs for one pool, all contests
     private fun makeCvrsForOnePool(cardPool: CardPoolBuilder) : List<Cvr> { // contestId -> candidateId -> nvotes
         val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotesBoulder(it)) }.toMap()
-        val cvrs = makeCvrsForOnePool(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasExactContests)
+        val cvrs = makeCvrsForOnePoolV(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasExactContests)
 
         // TODO is it true that the number of cvrs can vary when there are multiple contests ?
         //if (cardPool.ncards() != cvrs.size)

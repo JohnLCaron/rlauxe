@@ -1,9 +1,12 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import kotlin.Int
@@ -222,7 +225,7 @@ class VunderPicker(val vunder: Vunder) {
 
 // multiple contests, one pool
 // set Vunder.missing to 0 when hasExactContests=true
-fun makeCvrsForOnePool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasExactContests: Boolean): List<Cvr> {
+fun makeCvrsForOnePoolV(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasExactContests: Boolean): List<Cvr> {
     val vunderpool = VunderPool(vunders, poolName, poolId ?: -1, hasExactContests)
 
     val rcvrs = mutableListOf<Cvr>()
@@ -231,6 +234,33 @@ fun makeCvrsForOnePool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?
         val cvrId = "${poolName}.index-${count}"
         val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = poolId)
         vunderpool.simulatePooledCvr(cvb2)
+        rcvrs.add(cvb2.build())
+        count++
+    }
+
+    rcvrs.shuffle()
+    return rcvrs
+}
+
+fun makeCardsForOnePoolV(vunders: Map<Int, Vunder>, pool: CardPool): List<AuditableCard> {
+    val vunderpool = VunderPool(vunders, pool.poolName, pool.poolId, pool.hasExactContests)
+
+    val rcvrs = mutableListOf<AuditableCard>()
+    var count = 1
+    while (!vunderpool.done()) {
+        val cardId = "${pool.poolName}.index-${count}"
+        //     val id: String,
+        //    val location: String?,
+        //    val index: Int,
+        //    val prn: Long,
+        //    val phantom: Boolean,
+        //    val styleId: Int,
+        //    val poolId: Int? = null,
+        //    votesIn: Map<Int, IntArray>?,
+        //    val style: StyleIF? = null,
+        val cvb2 = AuditableCardBuilder(cardId, location=null, index=count, prn=0L, phantom=false,
+            styleId = pool.poolId, poolId=pool.poolId, votesIn=null, style=pool)
+        vunderpool.simulatePooledCard(cvb2)
         rcvrs.add(cvb2.build())
         count++
     }

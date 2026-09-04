@@ -583,7 +583,14 @@ class TestRunRoundCli {
 **TODO 8/17/2026**
 
 * seems like most US cases have county subtotals, eg Corla (why not GA?)
-* where should countyCvrPools.csv be in the audit record ?? 
+* where should countyCvrPools.csv be in the audit record ?? DONE
 * Add JaCoCo Runner?
+
+**TODO 9/04/2026**
+
+* hasStyle wtf
+* redo cases with correct phantoms and Npop
+* IRV redactions
+* 
 
 

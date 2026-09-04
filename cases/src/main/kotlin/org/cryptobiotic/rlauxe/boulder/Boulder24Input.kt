@@ -18,6 +18,8 @@ class Boulder24Input: BoulderInput {
         return org
     }
 
+    override fun hasABgroups() = true
+
     // TODO Boulder24 only I assume. Or should this be in RedactionBoulder ??
 
     companion object {

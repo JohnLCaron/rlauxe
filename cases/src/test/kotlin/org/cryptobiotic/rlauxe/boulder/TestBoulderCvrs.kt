@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
 import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.cvr.SchemaContestInfo
 import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
+import org.cryptobiotic.rlauxe.estimate.tabulateCvrsWithVoteForNs
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.math.max
@@ -47,7 +48,9 @@ class TestBoulderCvrs {
         val sovo = input.sovo()
         println("\n${input.sovoSource}\nSOVO contests ${sovo.contests.size}")
 
-        val election = CreateBoulderElection(input.electionName, AuditType.ONEAUDIT, corlaCvrs, sovo, hasStyle = true)
+        val election = CreateBoulderElection(input.electionName, AuditType.ONEAUDIT, corlaCvrs, sovo, hasStyle = true,
+            variantEnum = BoulderVariantEnum.Styles
+        )
         val contestIds = election.contests.map { Pair(it.name, it.id) }
         println("\nCreateBoulderElection contests ${contestIds.size}")
 
@@ -72,7 +75,7 @@ class TestBoulderCvrs {
             }
             val vnsPair = voteForNs.find { vns -> vns.first.contains(sovoContest.contestTitle) }
             val votesForN = vnsPair?.second ?: 1
-            print("  ${sovoContest}       ${sovoContest.calcNc(votesForN)}, " )
+            print("  ${sovoContest}       ${sovoContest.calcNcast(votesForN)}, " )
             println("${if (!missing) "" else "MISS"} ${if (sovoContest.checkTotalVotes(votesForN)) "" else "checkTotalVotes"}" )
         }
         println("contests in sov missing in cvr schema = $miss\n")
@@ -98,10 +101,10 @@ class TestBoulderCvrs {
     fun testParseBoulderCvrs(corlaCvrs: CorlaCvrs, contestIds:List<Pair<String, Int>>, sumManifest: Int) {
         val exportCvrs: List<Cvr> = corlaCvrs.cvrs.map { it.convertToCvr() }
 
-        val votes = tabulateVotesFromCvrs(exportCvrs.iterator()).toSortedMap()
-        //votes.forEach { (contestId, votes) ->
-        //    println("  ${contestId}: ${votes.toSortedMap()}")
-        //}
+        val votes = tabulateCvrsWithVoteForNs(exportCvrs.iterator(), corlaCvrs.schema.voteForNs).toSortedMap()
+        votes.forEach { (contestId, tab) ->
+            println("  ${contestId}: ${tab}")
+        }
 
         println("\nCvr Contests")
         corlaCvrs.schema.contests.sortedBy {  it.contestName }.forEach { cvrContest ->

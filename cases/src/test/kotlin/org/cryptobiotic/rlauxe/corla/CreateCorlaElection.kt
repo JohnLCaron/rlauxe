@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
 import org.cryptobiotic.rlauxe.auditcenter.writeCountyContestData
 import org.cryptobiotic.rlauxe.auditcenter.writeCountyData
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePoolV
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
@@ -209,7 +209,7 @@ class CardsFromPool(val cardPool: CardPoolIF) : Iterator<Cvr> {
     init {
         val poolVunders = cardPool.possibleContests().map { Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
 
-        cvrs = makeCvrsForOnePool(
+        cvrs = makeCvrsForOnePoolV(
             poolVunders,
             cardPool.poolName,
             poolId = cardPool.poolId,

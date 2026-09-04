@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.Vunder
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePoolV
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.collections.forEach
 import kotlin.test.Test
@@ -28,7 +28,7 @@ class TestAdjustableCardPool {
             contestVotes[contestUA.id] = Vunder.fromNpop(contestUA.id, underVotes, contestUA.contest.Ncast(), candVotes, voteForN)
         }
 
-        val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, hasExactContests = false)
+        val cvrs = makeCvrsForOnePoolV(contestVotes, "poolName", poolId = 42, hasExactContests = false)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
         val cvrTabs = tabulateCvrs(cvrs.iterator(), infos)
 

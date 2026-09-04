@@ -10,9 +10,11 @@ private val logger = KotlinLogging.logger("Redaction")
 class RedactionBoulder(val show: Boolean = false) : RedactionIF {
     override var nlines = 0
     val redactedGroups = mutableMapOf<String, RedactedGroup>()
+    val redactedGroupsSet = mutableMapOf<Set<Int>, RedactedGroup>()
+
     private val showDontMatch = true
 
-    override fun redactedGroups() =  redactedGroups.values.toList()
+    override fun redactedGroups() =  (redactedGroups.values + redactedGroupsSet.values).toList()
 
     fun addToGroups(redacted:RedactedGroup) {
         val rname =  redacted.ballotType
@@ -22,29 +24,39 @@ class RedactionBoulder(val show: Boolean = false) : RedactionIF {
         } else {
             if (group.contests() == redacted.contests()) {
                 group.merge(redacted)
-            } else if ((group.contests() - redacted.contests()).size == 0) {
-                group.merge(redacted)
-            } else if (showDontMatch) {
-                println("    redacted ${redacted.ballotType} diff = ${redacted.contests() - group.contests()}, ${group.contests() - redacted.contests()}")
-                println("doesnt match c31 = ${redacted.contestVotes[31]}")
-            }
-        }
-
-        // Boulder 25 has strange anomoly with contest 31 = Coal Creek Canyon Fire Protection District Ballot Issue 7B
-        fun add31(redacted:RedactedGroup) {
-            // keep the r ??
-            val rname =  if (redacted.contestVotes.contains(31)) "${redacted.ballotType}+31" else redacted.ballotType
-            val group = redactedGroups[rname]
-            if (group == null) {
-                redactedGroups[rname] = RedactedGroup.makeAccumulator(redacted, rname)
             } else {
-                if (group.contests() == redacted.contests())
-                    group.merge(redacted)
-                else if (showDontMatch)
-                    println("redacted $redacted doesnt match $group; c31 = ${redacted.contestVotes[31]}")
+                val groupSet = redactedGroupsSet[redacted.contests()]
+                if (groupSet == null) {
+                    val rname =  if (redacted.contestVotes.contains(31)) "${redacted.ballotType}+31" else redacted.ballotType // wonky
+                    // println("add redactedGroupsSet $rname = ${redacted.contests()}")
+                    redactedGroupsSet[redacted.contests()] = RedactedGroup.makeAccumulator(redacted, rname)
+                } else {
+                    groupSet.merge(redacted)
+                }
             }
+        //    else if (!add31(group, redacted) && showDontMatch) {
+             //       println("    redacted ${redacted.ballotType} diff = ${redacted.contests() - group.contests()}, ${group.contests() - redacted.contests()}")
+             //       println("doesnt match c31 = ${redacted.contestVotes[31]}")
+             //   }
+            //}
         }
     }
+
+    // Boulder 25 has strange anomoly with contest 31 = Coal Creek Canyon Fire Protection District Ballot Issue 7B
+    // some styles are identical except with 31, byt they keep the same style type
+    /* fun add31(current:RedactedGroup, redacted:RedactedGroup): Boolean {
+        // keep the r ??
+        val rname =  if (redacted.contestVotes.contains(31)) "${redacted.ballotType}+31" else redacted.ballotType
+        val group = redactedGroups[rname]
+        if (group == null) {
+            redactedGroups[rname] = RedactedGroup.makeAccumulator(redacted, rname)
+        } else {
+            if (group.contests() == redacted.contests())
+                group.merge(redacted)
+            else if (showDontMatch)
+                println("redacted $redacted doesnt match $group; c31 = ${redacted.contestVotes[31]}")
+        }
+    } */
 
     // "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
     // "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv"

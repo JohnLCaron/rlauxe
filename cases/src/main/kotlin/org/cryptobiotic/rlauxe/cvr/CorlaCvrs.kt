@@ -4,6 +4,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.ZipReader
@@ -407,6 +409,14 @@ data class CvrRow(
             cvrb.replaceContestVotes(it.contestId, it.candVotes.toIntArray())
         }
         return cvrb.build()
+    }
+
+    fun convertToCard(): AuditableCard {
+        val votes = this.contestVotes.map { cv -> Pair(cv.contestId, cv.candVotes.toIntArray()) }.toMap()
+
+        // TODO location
+        return AuditableCard.fromVotes(this.imprintedId, null, 0, 0L, false, styleId = CardStyle.fromCvrStyle.id(),
+            votes=votes, poolId=null).setStyle(CardStyle.fromCvrStyle)
     }
 
     companion object {

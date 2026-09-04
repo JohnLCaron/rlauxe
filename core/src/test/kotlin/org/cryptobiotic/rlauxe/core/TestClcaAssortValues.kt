@@ -94,6 +94,28 @@ class TestClcaAssortValues {
         val cassorterNo = ClcaAssorter(info, assorter, false)
         testAll(cassorterNo, taus, listOf(winner,other,loser, phantom), hasStyle=false)
     }
+    /*
+ PluralityAssorter
+[0.0, 0.5, 1.0, 1.5, 2.0] * noerror=0.5555555555555556
+[p2o, p1o, noerror, p1u, p2u]
+    winner-winner tau= 1.0000 'noerror')
+     winner-other tau= 0.5000 '    p1o')
+     winner-loser tau= 0.0000 '    p2o')
+   winner-phantom tau= 0.0000 '    p2o')
+     other-winner tau= 1.5000 '    p1u')
+      other-other tau= 1.0000 'noerror')
+      other-loser tau= 0.5000 '    p1o')
+    other-phantom tau= 0.5000 '    p1o')
+     loser-winner tau= 2.0000 '    p2u')
+      loser-other tau= 1.5000 '    p1u')
+      loser-loser tau= 1.0000 'noerror')
+    loser-phantom tau= 1.0000 'noerror')
+   phantom-winner tau= 1.5000 '    p1u')
+    phantom-other tau= 1.0000 'noerror')
+    phantom-loser tau= 0.5000 '    p1o')
+  phantom-phantom tau= 0.5000 '    p1o')
+*/
+
     // output:
     // PluralityAssorter
     //[0.0, 0.5, 1.0, 1.5, 2.0] * noerror=0.5025125628140703

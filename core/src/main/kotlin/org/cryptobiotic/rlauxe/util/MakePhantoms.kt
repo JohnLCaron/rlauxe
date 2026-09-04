@@ -5,6 +5,9 @@ import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.Cvr
 
+//// each contest gets separate card
+// you have to make sure that the contest population is increased by the phantoms that contain it.
+
 // cvrs for single contest
 fun makePhantomCvrs(
     contestId: Int,
@@ -25,25 +28,37 @@ fun makePhantomCvrs(
     prefix: String = "phantom-",
 ): List<Cvr> {
 
-    val phantombs = mutableListOf<PhantomBuilder>()
-
+    val phantoms = mutableListOf<Cvr>()
     for (contest in contests) {
-        val phantoms_needed = contest.Nphantoms()
-        while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
-            phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}", 0))
-        }
-        // include this contest on the first n phantom CVRs
-        repeat(phantoms_needed) {
-            phantombs[it].contests.add(contest.id)
-        }
+        phantoms.addAll(makePhantomCvrs(contest.id, contest.Nphantoms(), prefix))
     }
-
-    val result =  phantombs.map { it.buildCvr() }
-    result.forEach { require(it.votes.isNotEmpty() )}
-    return result
+    return phantoms
 }
 
-fun makePhantomCvrs(
+fun makePhantomCards(
+    contests: List<ContestIF>,
+    startIdx: Int,
+    prefix: String = "phantom-",
+): List<AuditableCard> {
+    var idx = startIdx
+
+    val phantoms = mutableListOf<AuditableCard>()
+    contests.forEach { contest ->
+        val votes = mapOf( contest.id to intArrayOf() )
+        repeat(contest.Nphantoms()) {
+            val card = AuditableCard.fromVotes(id = "${prefix}${idx}", location = null, index = idx, prn = 0L, phantom = true,
+                    styleId=CardStyle.phantomStyle.id, poolId = null, votes=votes)
+                .setStyle(CardStyle.phantomStyle)
+
+            phantoms.add(card)
+            idx++
+        }
+    }
+    return phantoms
+}
+
+/*
+fun makeCountPhantomCvrs(
     phantomCount: Map<Int, Int>, // contestId -> Nphantoms
     prefix: String = "phantom-",
 ): List<Cvr> {
@@ -58,27 +73,6 @@ fun makePhantomCvrs(
         }
     }
     return phantombs.map { it.buildCvr() }
-}
-
-fun makePhantomCards(
-    contests: List<ContestIF>,
-    startIdx: Int,
-    prefix: String = "phantom-",
-): List<AuditableCard> {
-    var idx = startIdx
-
-    val phantombs = mutableListOf<PhantomBuilder>()
-    for (contest in contests) {
-        val phantoms_needed = contest.Nphantoms()
-        while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
-            phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}", idx++))
-        }
-        // include this contest on the first n phantom CVRs
-        repeat(phantoms_needed) {
-            phantombs[it].contests.add(contest.id)
-        }
-    }
-    return phantombs.map { it.buildCardM() }
 }
 
 class PhantomBuilder(val id: String, val idx: Int) {
@@ -96,4 +90,4 @@ class PhantomBuilder(val id: String, val idx: Int) {
             votes=votes).setStyle(CardStyle.phantomStyle)
     }
 
-}
+} */

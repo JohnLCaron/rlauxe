@@ -94,6 +94,7 @@ class CreateGaElection(
         }
         this.cardPools = pools.toList()
 
+        // TODO tabulateNpops
         contestsUA = if (auditType.isOA()) makeOneAuditContests(contests, emptyMap(), pools, false) else
             makePollingContests(contests)
         mvrs = makeMvrsFromPools(pools) // once only

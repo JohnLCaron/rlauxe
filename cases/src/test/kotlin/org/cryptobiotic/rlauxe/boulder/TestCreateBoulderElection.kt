@@ -43,7 +43,9 @@ class TestCreateBoulderElection {
             "Boulder2024")
 
         // TODO fails on CLCA
-        val maker = CreateBoulderElection( "parseBoulder24cvrs", AuditType.ONEAUDIT, corlaCvrs,  sovo, hasStyle = true)
+        val maker = CreateBoulderElection( "parseBoulder24cvrs", AuditType.ONEAUDIT, corlaCvrs,  sovo, hasStyle = true,
+            variantEnum = BoulderVariantEnum.Styles
+        )
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 

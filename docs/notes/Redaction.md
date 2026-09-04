@@ -79,9 +79,11 @@ where noerror = `1.0 / (2.0 - margin / upper)` goes to 1/2 as the margin goes to
       upper = upper bound of assorter, e.g. = 1 for plurality assorter
 ````
 
+Note that we miss the opportunity to discover genuinely missing cards (not in the unredacted CVR file).
+
 ## Redaction with a single OneAudit Pool
 
-We can find the manifest cards are not in the unredacted CVRs. We know that the redacted CVRs must be
+We can find the manifest cards that are not in the unredacted CVRs. We know that the redacted CVRs must be
 contained in this set. If we assume that all these "missing manifest cards" are redacted, we could create a OneAudit
 pool that contains them, and use the redacted aggregations as the pool subtotal. 
 
@@ -92,7 +94,7 @@ The CLCA assort value is:
 
 ````
     bassort = (1-(CVR-MVR)/upper)*noerror 
-            = \[1-avg, 1.5-avg, 2-avg] * noerror (when upper=1)
+            = [1-avg, 1.5-avg, 2-avg] * noerror (when upper=1)
 ````
 
 Note that noerror depends on the margin of the contest over all counties, while the average pool value depends on
@@ -111,6 +113,9 @@ However, cards in the pool have as "possible contests" all the contests that hav
 the contest sampling population larger, and so the margin is smaller. Whether this effect outweighs the advantage
 over phantoms depends on the composition of the redacted cards.
 
+Also, by assuming that the "missing manifest cards" are redacted, we miss the opportunity to discover genuinely missing cards
+(not in the unredacted CVR file).
+
 
 ## Redaction by Card Style
 
@@ -119,7 +124,9 @@ card style, and seperate aggregations made for each style. OneAuditPool are made
 that the contest sampling population stays as small as possible. However, we then need to know the identifiers of the
 CVRs in each group, in order to assign them to the correct pool.
 
-A redacted CVR file then might look like:
+Note that we now have the opportunity to discover genuinely missing cards (not in the unredacted CVR file).
+
+A redacted CVR file might look something like:
 
 ````
 ...
@@ -132,9 +139,9 @@ CvrNumber,TabulatorNum,BatchId,RecordId,ImprintedId,CountingGroup,BallotType, ..
 ,,,,111-19-12,Redacted,"01, 19, and 25",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 ...
 Redacted Aggregation,,,,,,10,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,, 7,18,17,10, 7,16,16,16,16,,,
-Redacted Cards      ,,,,,,10,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,55,55,55,55,22,22,50,50,50,,,
+Redacted Cards,,,,,,      10,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,55,55,55,55,22,22,50,50,50,,,
 Redacted Aggregation,,,,,,"01, 19, and 25",8,10,15,13,5,12,5,17,9,4,4,1,8,5,3,9,8,,10,,,,,7,18,17,10,7,16,16,16,16,,,,,,,,,,,,,,,,,,,,,,
-Redacted Cards,,,,,,"01, 19, and 25",111,111,111,111,111,111,111,111,19,19,14,14,28,28,31,31,31,,10,,,,,70,70,70,70,70,16,16,16,16,,,,,,,,,,,,,,,,,,,,,,
+Redacted Cards,,,,,,      "01, 19, and 25",111,111,111,111,111,111,111,111,19,19,14,14,28,28,31,31,31,,10,,,,,70,70,70,70,70,16,16,16,16,,,,,,,,,,,,,,,,,,,,,,
 ...
 
 ````
@@ -144,7 +151,7 @@ Redacted Cards,,,,,,"01, 19, and 25",111,111,111,111,111,111,111,111,19,19,14,14
 - "Redacted Cards" show the style and the ncards (replicated across choice column for the contest)
 - Styles may be combined and given new names, as long as the redacted CVR style matches the aggregation style
 
-This is somewhat similar to what Boulder25 and Boulder26p does, eg:
+This is somewhat similar to what Boulder County did in 2025 and 2026 primary, eg:
 
 ````
 ...
@@ -162,9 +169,11 @@ Redacted,,,,,,05,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,1,0,0,0,1,0,0,1,1,1,0,1,,,,
 
 - Aggregation done by style(s)
 - The individual redacted CVRS have identifiers removed and votes left in (instead of the opposite)
-- Redacted Cards are not given
+- Redacted number of cards are not given
 
 ### Compare redaction methods
+
+Some trials with the different variants, and a simulated audit with unredacted CVRs:
 
 |              | ncontests | nredactions | phantoms | onePool | styles | unredacted |
 |--------------|-----------|-------------|----------|---------|--------|------------|
@@ -175,12 +184,12 @@ Redacted,,,,,,05,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,1,0,0,0,1,0,0,1,1,1,0,1,,,,
 | Boulder2026p | 11        | 2913        | 3665     | 1148    | 614    | 426        |
 
 where
-  - ncontests : number of contests successfuly audited
-  - nredactions: number of redacted CVRs
-  - phantoms: all redactions become phantoms
-  - onePool: all redactions are placed in a single OneAudit pool
-  - styles: redactions are placed in a multiple OneAudit pools by card style
-  - unredacted: simulate audit without redactions
+  - _ncontests_ : number of contests successfuly audited
+  - _nredactions_: number of redacted CVRs
+  - _phantoms_: all redactions become phantoms
+  - _onePool_: all redactions are placed in a single OneAudit pool
+  - _styles_: redactions are placed in multiple OneAudit pools by card style
+  - _unredacted_: simulate audit without redactions
 
 * Each result is a single trial. Multiple trials are needed to find average and variance of the distribution.
 * In each contest, some of the contests are unauditable because number of phantoms > vote margin. For Boulder2023,
@@ -188,8 +197,9 @@ where
 
 ## IRV Redactions
 
-IRV contest votess cannot be aggregated like Plurality contests. Further, IRV contest assertions cannot be formed without the
-full set of ranked choices. However, the ranked choices can be aggregated something like:
+IRV contest votes cannot be aggregated like Plurality contests. Further, IRV contest assertions cannot be formed without the
+full set of ranked choices, and so an IRV audit cannot be done. However, the aggregated data needed for IRV has
+a simple form, just the number of times a particular ranking was chosen, something like (for each contest):
 
 count: rankings
 123: 4 1 5 8

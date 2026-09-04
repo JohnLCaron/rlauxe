@@ -58,7 +58,7 @@ class CreateBoulderElection(
     val contestsUA : List<ContestWithAssertions>
     val exportCvrs: List<AuditableCard>
     val redactedCvrs: List<AuditableCard>  // redacted cvrs
-    val allCvrs: List<AuditableCard>  // unredacted cvrs
+    val allCards: List<AuditableCard>
     val redactedPools: List<CardPool>
     val mvrs: List<AuditableCard>
     val ncards: Int
@@ -87,9 +87,9 @@ class CreateBoulderElection(
         val phantoms = makePhantomCards(contests, 1)
         logger.debug {"made ${phantoms.size} phantom cards"}
 
-        allCvrs = exportCvrs + redactedCvrs + phantoms // in memory
-        this.ncards = allCvrs.size
-        val npops = tabulateNpops(allCvrs, infoList)
+        allCards = exportCvrs + redactedCvrs + phantoms // in memory
+        this.ncards = allCards.size
+        val npops = tabulateNpops(allCards, infoList)
 
         // TODO cvrTabs dont have the irv part, so will fail in the raire library
         contestsUA = makeContestWAs(contests, npops, cvrTabs, redactedPools, )
@@ -103,7 +103,7 @@ class CreateBoulderElection(
         // TODO put in verify
         // checkNpops(allCvrs, createCards(), infoList)
 
-        mvrs = mvrsToAuditableCardsList(allCvrs, cardPools())
+        mvrs = mvrsToAuditableCardsList(allCards, cardPools())
     }
 
     // make ContestInfo from BoulderStatementOfVotes, and matching export.schema.contests
@@ -374,20 +374,19 @@ class BoulderContestBuilder(val auditType: AuditType,
                               val sovoContest: SovoContestVotes,
                               cvrTab: ContestTabulation?,
                               redactedTab: ContestTabulation?,
-                              variant: BoulderVariant): BoulderContestBuilderIF {
+                              val variant: BoulderVariant
+): BoulderContestBuilderIF {
 
     override val contestId = info.id
     override val contestName = info.name
 
+    val cvrsTotalCards: Int
     val poolTotalCards: Int
     val candVoteTotals: Map<Int, Int>
     val useNc: Int
-    var ncvrs: Int
+    val ncvrs: Int
 
     init {
-        if (info.id == 31)
-            print("")
-        poolTotalCards = redactedTab?.ncards() ?: 0 // redactedPools.filter{ it.hasContest(info.id) }.sumOf { it.ncards() }
         candVoteTotals = when {
             (cvrTab == null) -> redactedTab!!.votes
             (redactedTab) == null -> cvrTab.votes
@@ -398,10 +397,11 @@ class BoulderContestBuilder(val auditType: AuditType,
             }
         }
 
-        ncvrs = cvrTab?.ncardsTabulated ?: 0
-        if (!variant.phantoms) ncvrs += poolTotalCards
+        cvrsTotalCards = cvrTab?.ncardsTabulated ?: 0
+        poolTotalCards = redactedTab?.ncards() ?: 0
+        ncvrs = cvrsTotalCards + poolTotalCards
 
-        val diff = sovoContest.calcNcast(info.voteForN)-ncvrs
+        val diff = sovoContest.calcNcast(info.voteForN) - ncvrs
         if (ncvrs > sovoContest.calcNcast(info.voteForN)) {
             logger.warn{"contest ${info.id} ncvrs $ncvrs > ${sovoContest.calcNcast(info.voteForN)} sovoContest.calcNc; adjust Nc= ${-diff} "}
         } else if (ncvrs != sovoContest.calcNcast(info.voteForN)) {
@@ -415,7 +415,10 @@ class BoulderContestBuilder(val auditType: AuditType,
         info.metadata["PoolPct"] = (100.0 * poolTotalCards / useNc).toInt().toString()
         return if (info.isIrv) // TODO
                 IrvContest(info, winners=listOf(0), useNc, Ncast=ncvrs, undervotes=0) // TODO this is fake...
-            else
+            else if (variant.phantoms) {
+                val nphantoms = useNc - cvrsTotalCards // the redacted cards arent counted, so become phantoms
+                ContestWithPhantoms(info, candVotes, useNc, ncvrs, nphantoms)
+            } else
                 Contest(info, candVotes, useNc, ncvrs)
     }
 
@@ -428,6 +431,12 @@ class BoulderContestBuilder(val auditType: AuditType,
         val nameWidth = 50
         val header = " id, ${trunc("name", nameWidth)},    sovoNc,   ncvrs,    diff"
     }
+}
+
+class ContestWithPhantoms(info: ContestInfo, voteInput: Map<Int, Int>, Nc: Int, Ncast: Int,
+                          val nphantoms: Int
+): Contest(info, voteInput, Nc, Ncast) {
+    override fun Nphantoms() = nphantoms
 }
 
 ////////////////////////////////////////////////////////////////////

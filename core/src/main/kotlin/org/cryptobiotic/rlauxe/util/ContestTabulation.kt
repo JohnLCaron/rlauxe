@@ -201,11 +201,11 @@ fun tabulateOneAuditPools(cardPools: List<CardPoolIF>, infos: Map<Int, ContestIn
     return poolSums
 }
 
-// return contestId -> contest population size
+/* return contestId -> contest population size
 fun tabulateNpops(cvrs: List<Cvr>, infos: List<ContestInfo>): Map<Int, Int> {
     val tabs = tabulateCloseableCvrs(Closer(cvrs.iterator()), infos.associateBy { it.id })
     return tabs.mapValues { it.value.ncards() }
-}
+} */
 
 // return contestId -> ContestTabulation
 fun tabulateCvrs(cvrs: Iterator<Cvr>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
@@ -265,5 +265,25 @@ class CardTabulation(cards: CloseableIterator<AuditableCard>, infos: Map<Int, Co
             }
         }
     }
+}
+
+fun tabulateNpops(cards: List<AuditableCard>, infos: List<ContestInfo>): Map<Int, Int> {
+    return tabulateNpops(Closer(cards.iterator()), infos)
+}
+
+fun tabulateNpops(cards: CloseableIterator<AuditableCard>, infos: List<ContestInfo>): Map<Int, Int> {
+    val pops = mutableMapOf<Int, Int>()
+    cards.use { cardIter ->
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
+            infos.forEach { info ->
+                if (card.hasContest(info.id)) {
+                    val pop = pops.getOrDefault(info.id, 0)
+                    pops[info.id] = pop + 1
+                }
+            }
+        }
+    }
+    return pops
 }
 

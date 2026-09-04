@@ -8,7 +8,7 @@ import kotlin.math.min
 
 private val logger = KotlinLogging.logger("Contest")
 
-// For a Contest; but a contest may have mixed Assertions, eg DHondt.
+// For a Contest; note that a contest may have mixed Assertions, eg DHondt.
 enum class SocialChoiceFunction(val hasMinPct: Boolean) {
     PLURALITY(false), // “first past the post”
     APPROVAL(false), // choose as many candidates as they want, all the votes are added up, and the candidate with the most votes win.
@@ -80,8 +80,8 @@ interface ContestIF {
     val choiceFunction get() = info().choiceFunction
 
     fun Nc(): Int  // independent contest bound
-    fun Nphantoms(): Int  // number of phantoms
-    fun Ncast() = Nc() - Nphantoms()
+    fun Ncast(): Int // number of cvrs
+    fun Nphantoms() = Nc() - Ncast()  // number of phantoms
     fun Nundervotes(): Int  // number of undervotes
     fun info(): ContestInfo
     fun winnerNames(): List<String>
@@ -120,7 +120,7 @@ open class Contest(
 ): ContestIF {
 
     override fun Nc() = Nc
-    override fun Nphantoms() = Nc - Ncast
+    override fun Ncast() = Ncast
     override fun Nundervotes() = undervotes
     override fun info() = info
     override fun winnerNames() = winnerNames
@@ -156,15 +156,17 @@ open class Contest(
             }
         }
         votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap() // reverse sort by number of votes recieved, do not change
+        val nvotes = votes.values.sum()
+        // TODO redacted pools phantoms
         votes.forEach { (candId, candVotes) ->
             require(candVotes <= Ncast) { // LOOK
                 "contest $id candidate= $candId votes = $candVotes must be <= (Nc - Nphantoms) = ${Nc - Nphantoms()}"
             }
         }
-        val nvotes = votes.values.sum()
-        require(nvotes <= info.voteForN * Ncast) {
+        require(nvotes <= info.voteForN * Ncast) { // argues that the phantoms be settable rather than = Nc - Ncast??
             "contest $id nvotes= $nvotes must be <= voteForN=${info.voteForN} * Ncast=$Ncast = ${info.voteForN * Ncast}"
         }
+
         val sortedCandidateIds = votes.map { it.key } // candidate ids sorted by nvotes
         
         // maximum votes possible - actual votes

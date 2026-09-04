@@ -90,7 +90,7 @@ class CreateSfElection(
         val count = cardTabulation.cvrCount
 
         // val (manifestTabs, count) = tabulateCardsAndCount( auditableCardIter, infos)
-        val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated }
+        val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated } // TODO wrong; use tabulateNpops
         // println("contestNbs= ${contestNbs}")
         this.ncards = count
 

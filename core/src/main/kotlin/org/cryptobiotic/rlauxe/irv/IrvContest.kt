@@ -40,7 +40,7 @@ data class IrvContest(
     }
 
     override fun Nc() = Nc
-    override fun Nphantoms() = Nc - Ncast
+    override fun Ncast() = Ncast
     override fun Nundervotes() = undervotes
     override fun info() = info
     override fun winnerNames() = winnerNames

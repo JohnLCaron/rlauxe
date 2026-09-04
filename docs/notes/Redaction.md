@@ -168,6 +168,7 @@ Redacted,,,,,,05,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,1,0,0,0,1,0,0,1,1,1,0,1,,,,
 
 |              | ncontests | nredactions | phantoms | onePool | styles | unredacted |
 |--------------|-----------|-------------|----------|---------|--------|------------|
+| Boulder2023  | 32        | 1092        | *        | 2929    | 2380   | 1801       |
 | Boulder2023  | 32        | 1092        | *        | 3016    | 2701   | 1996       |
 | Boulder2024  | 54        | 11628       | 1233     | 1349    | 670    | 569        |
 | Boulder2025  | 22        | 1043        | 1984     | 1016    | 978    | 844        |
@@ -181,7 +182,7 @@ where
   - styles: redactions are placed in a multiple OneAudit pools by card style
   - unredacted: simulate audit without redactions
 
-* These results are for a single trial. multiple trials are needed to find average and variance of the distribution.
+* Each result is a single trial. Multiple trials are needed to find average and variance of the distribution.
 * In each contest, some of the contests are unauditable because number of phantoms > vote margin. For Boulder2023,
   phantoms variant was only able to audit 26 contests.
 

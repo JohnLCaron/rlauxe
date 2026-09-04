@@ -1,5 +1,5 @@
 # Developer Notes
-_08/24/2026_
+_09/04/2026_
 
 <!-- TOC -->
 * [Developer Notes](#developer-notes)
@@ -591,6 +591,6 @@ class TestRunRoundCli {
 * hasStyle wtf
 * redo cases with correct phantoms and Npop
 * IRV redactions
-* 
+* use manifest ids in the redaction cardManifest file
 
 

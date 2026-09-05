@@ -49,7 +49,7 @@ class TestRedactedCvrs {
     }
 
     fun testRedactedCvrTabulation(export: CorlaCvrs, election: CreateBoulderElection) {
-        val cards = election.makeRedactedCards(election.redactedPools)
+        val cards = election.makeSimulatedCards(election.redactedPools)
         println("nredacted cvrs = ${cards.size}")
 
         val redactedCvrVotes: Map<Int, ContestTabulation> = tabulateCards(cards.iterator(), election.infos)

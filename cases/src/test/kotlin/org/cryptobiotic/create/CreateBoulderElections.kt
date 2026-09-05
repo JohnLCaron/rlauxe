@@ -109,9 +109,9 @@ class CreateBoulderElections {
     }
 
     @Test
-    fun createBoulder24clca() {
-        val toptopdir = "$cases/boulder/boulder2025r"
-        val input= Boulder25Input()
+    fun createBoulder() {
+        val toptopdir = "$cases/boulder/boulder2023r"
+        val input= Boulder23Input()
 
         // redacted ballots are simulated
         createBoulderElection(
@@ -125,8 +125,8 @@ class CreateBoulderElections {
 
     @Test
     fun createBoulderVariants() {
-        val toptopdir = "$cases/boulder/boulder2024r"
-        val input= Boulder24Input()
+        val toptopdir = "$cases/boulder/boulder2026r"
+        val input= Boulder26pInput()
 
         // redacted ballots are simulated
         createBoulderElection(

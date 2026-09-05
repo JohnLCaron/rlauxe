@@ -62,12 +62,11 @@ open class CountyElectionWithCvrs (
                 else if (county == "Boulder") readCorlaCvrsFromFile(exportFile, redaction = RedactionBoulder())
                 else readCorlaCvrsFromFile(exportFile)
 
-            val dominionConverter = CorlaCvrConverter(county, export, infosByName, coloradoInput)
-
-            val exportCvrs: List<AuditableCard> = export.cvrs().map { dominionConverter.convertToCard(it) }
+            val converter = CorlaCvrConverter(county, export, infosByName, coloradoInput)
+            val exportCvrs: List<AuditableCard> = export.cvrs().map { converter.convertToCard(it) }
 
             val redactedCvrs = mutableListOf<AuditableCard>()
-            dominionConverter.redactedPools.forEach { pool ->
+            converter.redactedPools.forEach { pool ->
                 redactedCvrs.addAll(simulateCards(pool))
             }
             val allCvrs: List<AuditableCard> = exportCvrs + redactedCvrs
@@ -83,7 +82,7 @@ open class CountyElectionWithCvrs (
             writeUnsortedMvrs(county, publisher,Closer (allCvrs.iterator() ))
 
             // Get the card styles from the cvrs
-            val countyCardStyles: List<StyleIF> = dominionConverter.cardStyles.values.toList() + dominionConverter.redactedPools.map { it as StyleIF }
+            val countyCardStyles: List<StyleIF> = converter.cardStyles.values.toList() + converter.redactedPools.map { it as StyleIF }
 
             // take ncards from cvrs
             val ncards = cvrTabs.map { (contestId, contestTab) ->

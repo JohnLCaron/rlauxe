@@ -13,8 +13,8 @@ import kotlin.collections.set
 
 private val logger = KotlinLogging.logger("DominionConverter")
 
-// convert DominionCvrExportCsv from export ids to canonical ids
-// each export is specific to a County.
+// convert CorlaCvrsIF from CVRs ids to canonical ids in coloradoInput
+// each CorlaCvrsIF is specific to a County.
 class CorlaCvrConverter(val county: String, export: CorlaCvrsIF, val infosByName: Map<String, ContestInfo>, coloradoInput: ColoradoInput) {
 
     val exportToCanonLookup = mutableMapOf<Int, ExportToCanonLookup>() // export contestId -> ExportToCanonLookup
@@ -23,9 +23,6 @@ class CorlaCvrConverter(val county: String, export: CorlaCvrsIF, val infosByName
     val infos = infosByName.mapKeys { it.value.id }
 
     init {
-        if (county == "Denver")
-            print("")
-
         // val infosByName: Map<String, ContestIF> = contests.associateBy { it.name }
         val schemaInfos: List<CorlaContestInfo> = export.makeContestInfo() // specific to this exported file
 
@@ -41,7 +38,7 @@ class CorlaCvrConverter(val county: String, export: CorlaCvrsIF, val infosByName
             } else {
                 val info = infosByName[canonicalContest.contestName]
                 if (null == info)
-                    logger.error{" infosByName doesnt have canonicalContest ${canonicalContest.contestName}"}
+                    logger.error{" infosByName doesnt have canonicalContest '${canonicalContest.contestName}'"}
                 require(info != null)
                 if (gotCanon.contains(info.id))
                     logger.warn{"  *** ${info.id} has duplicate contest: '${schemaInfo.name}' and '${gotCanon[info.id]}' "}
@@ -116,8 +113,9 @@ class CorlaCvrConverter(val county: String, export: CorlaCvrsIF, val infosByName
         return convert.toSet()
     }
 
+    // you must use when converted to cards that map to canonical contests
     fun convertToCard(dcvr: CvrRow): AuditableCard {
-        // must convert to canoncal contestIDs to use cardStyles
+        // must convert to canonical contestIDs to use cardStyles
         val contestSchemaIdSet = dcvr.contestVotes.map { it.contestId }.toSet()
         val canonicalIdSet = convertExportContestIdSetToCanonical(contestSchemaIdSet)
         val cardStyle = cardStyles[canonicalIdSet]
@@ -137,6 +135,7 @@ class CorlaCvrConverter(val county: String, export: CorlaCvrsIF, val infosByName
         return cvrb.build()
     }
 
+    // you must use when creating Pools from RedactedGroup that map to canonical contests
     fun convertToContestTabulation(rgroup: RedactedGroup): Map<Int, ContestTabulation> {
         // have to map both contestId and candVotes
         // contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>

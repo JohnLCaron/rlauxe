@@ -25,6 +25,8 @@ interface ElectionBuilder {
     fun contestsUA(): List<ContestWithAssertions>
 
     // if you immediately write to disk, you only need one pass through the cards iterator
+    // this is the cardManifest, must have styleId matching cardStyles so style can be added when read back
+    // should not include the votes unless the cvr exists.
     fun cards() : CloseableIterator<AuditableCard> // not sorted, dont need styles added yet
     fun ncards(): Int
 
@@ -36,6 +38,7 @@ interface ElectionBuilder {
     fun countyCvrPools(): List<CountyPools>? = null // for debugging
 
     // if (config.election.mvrSource == MvrSource.testPrivateMvrs), supply one or the other:
+    // these are the mvrs, they must map 1-1 to cards(), and contain the votes
     fun unsortedMvrsInternal(): List<AuditableCard>? // for in-memory case, poolId used also as batch name?
     fun unsortedMvrsExternal(): CloseableIterator<AuditableCard>? // for out-of-memory case
 }

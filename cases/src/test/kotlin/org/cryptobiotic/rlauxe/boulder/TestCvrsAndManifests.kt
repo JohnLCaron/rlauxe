@@ -33,8 +33,6 @@ class TestCvrsAndManifests {
 
         println("${input.cvrsSource}: nrows = ${corlaCvrs.nrows()} cvrs size = ${corlaCvrs.cvrs().size}")
 
-        // does this matter ?
-        if (input.electionName == "Boulder2024") { Boulder24Input.removeContest12FromPool6(corlaCvrs.redactedGroups()) }
         val redactedCards = corlaCvrs.redactedGroups().sumOf {  it.ncards() }
         println("   redacted groups ${corlaCvrs.redactedGroups().size}")
         corlaCvrs.redactedGroups().forEach { println(it)}

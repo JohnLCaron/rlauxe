@@ -175,13 +175,14 @@ Redacted,,,,,,05,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,1,0,0,0,1,0,0,1,1,1,0,1,,,,
 
 Some trials with the different variants, and a simulated audit with unredacted CVRs:
 
-|              | ncontests | nredactions | phantoms | onePool | styles | unredacted |
-|--------------|-----------|-------------|----------|---------|--------|------------|
-| Boulder2023  | 32        | 1092        | *        | 2929    | 2380   | 1801       |
-| Boulder2023  | 32        | 1092        | *        | 3016    | 2701   | 1996       |
-| Boulder2024  | 54        | 11628       | 1233     | 1349    | 670    | 569        |
-| Boulder2025  | 22        | 1043        | 1984     | 1016    | 978    | 844        |
-| Boulder2026p | 11        | 2913        | 3665     | 1148    | 614    | 426        |
+|              | ncontests | nredactions | phantoms | onePool   | styles    | unredacted |
+|--------------|-----------|-------------|----------|-----------|-----------|------------|
+| Boulder2023  | 34        | 1092        | 554 (26) | 2812 (31) | 1481 (32) | 570 (32)   |
+| Boulder2023  | 32        | 1092        | *        | 2929      | 2380      | 1801       |
+| Boulder2023  | 32        | 1092        | *        | 3016      | 2701      | 1996       |
+| Boulder2024  | 54        | 11628       | 1233     | 1349      | 670       | 569        |
+| Boulder2025  | 22        | 1043        | 1984     | 1016      | 978       | 844        |
+| Boulder2026p | 11        | 2913        | 3665     | 1148      | 614       | 426        |
 
 where
   - _ncontests_ : number of contests successfuly audited

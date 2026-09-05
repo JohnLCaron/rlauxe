@@ -99,7 +99,7 @@ class TestBoulderCvrs {
     }
 
     fun testParseBoulderCvrs(corlaCvrs: CorlaCvrs, contestIds:List<Pair<String, Int>>, sumManifest: Int) {
-        val exportCvrs: List<Cvr> = corlaCvrs.cvrs.map { it.convertToCvr() }
+        val exportCvrs: List<Cvr> = corlaCvrs.cvrs.map { it.convertToCard().toCvr() }
 
         val votes = tabulateCvrsWithVoteForNs(exportCvrs.iterator(), corlaCvrs.schema.voteForNs).toSortedMap()
         votes.forEach { (contestId, tab) ->

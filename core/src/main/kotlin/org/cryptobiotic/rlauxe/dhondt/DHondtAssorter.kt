@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.PoolRates
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.ContestTabulationIF
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -121,7 +122,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         return margin
     }
 
-    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulation, Npop: Int): PoolRates {
+    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulationIF, Npop: Int): PoolRates {
         val winnerVotes = poolTab.votes[winner()] ?: 0
         val loserVotes = poolTab.votes[loser()] ?: 0
         val nuetralCounts = poolTab.ncards() - winnerVotes - loserVotes // undervotes

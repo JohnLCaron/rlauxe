@@ -464,7 +464,7 @@ fun createBoulderElection(
     Logging.addFileAppender("cases", "$topdir/logs.log")
     logger.info {"-------------- createBoulderElection ${input.electionName} in $topdir"}
 
-    createBoulderElectionWithSovo(input.electionName, input.corlaCvrs(), input.sovo(), topdir, creation, roundConfig,
+    createBoulderElectionWithSovo(input.electionName, input.readCorlaCvrs(), input.sovo(), topdir, creation, roundConfig,
         mvrSource, hasStyle, clear = false, variant)
 }
 

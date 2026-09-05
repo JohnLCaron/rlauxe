@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.ContestTabulationIF
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.pfn
 
@@ -56,7 +57,7 @@ interface AssorterIF {
     // dilutedMargin: Npop = sample population size
     // used when you need to calculate margin from some subset of regular votes eg pools; cant be used for IRV
     fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double
-    fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulation, Npop: Int): PoolRates
+    fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulationIF, Npop: Int): PoolRates
 }
 
 data class PoolRates(val winnerRate: Double, val noneRate: Double, val loserRate: Double)
@@ -108,7 +109,7 @@ class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int):
         return if (N == 0) 0.0 else (winnerVotes - loserVotes) / N.toDouble()
     }
 
-    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulation, Npop: Int): PoolRates {
+    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulationIF, Npop: Int): PoolRates {
         val winnerCounts: Int = poolTab.votes[winner()] ?: 0
         val loserCounts: Int = poolTab.votes[loser()] ?: 0
         val nuetralCounts = poolTab.nvotes() - winnerCounts - loserCounts // undervotes

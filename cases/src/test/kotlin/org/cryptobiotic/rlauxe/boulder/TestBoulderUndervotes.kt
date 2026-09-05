@@ -17,7 +17,7 @@ import kotlin.text.appendLine
 class TestBoulderUndervotes {
     val input = Boulder23Input()
     val sovo = input.sovo()
-    val corlaCvrs = input.corlaCvrs()
+    val corlaCvrs = input.readCorlaCvrs()
 
     @Test
     fun testBoulderBallotType() {

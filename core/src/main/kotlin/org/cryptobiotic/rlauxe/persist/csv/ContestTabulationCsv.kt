@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.ContestTabulationIF
 import java.io.*
 import kotlin.text.isEmpty
 import kotlin.text.split
@@ -30,8 +31,20 @@ private val logger = KotlinLogging.logger("ContestTabulationCsv")
 val ContestTabulationHeader = "contestId, voteForN, cands, ncards, novote, undervotes, overvotes, nphantoms, isIrv, cand:count ... \n"
 
 fun writeContestTabulationCsv(tab: ContestTabulation) = buildString {
-    append("${tab.contestId}, ${tab.voteForN}, ${tab.candidateIds.joinToString(" ")}, ${tab.ncardsTabulated}, ${tab.novote}, ")
-    append("${tab.undervotes}, ${tab.overvotes}, ${tab.nphantoms}, ${if (tab.isIrv) "yes" else ""}, ")
+    append("${tab.contestId}, ${tab.voteForN}, ${tab.candidateIds.joinToString(" ")}, ${tab.ncards()}, ${tab.novote}, ")
+    append("${tab.undervotes()}, ${tab.overvotes}, ${tab.nphantoms}, ${if (tab.isIrv) "yes" else ""}, ")
+
+    if (tab.isIrv) {
+        tab.irvVotes.votes().forEach { (votes, count) -> append("${votes.joinToString(" ")}:$count, ") }
+    } else {
+        tab.votes.forEach { (cand, vote) -> append("$cand:$vote, ") }
+    }
+    appendLine()
+}
+
+fun writeContestTabulationIF(tab: ContestTabulationIF) = buildString {
+    append("${tab.contestId}, ${tab.voteForN}, ${tab.candidateIds.joinToString(" ")}, ${tab.ncards()}, 0, ")
+    append("${tab.undervotes()}, 0, 0, ${if (tab.isIrv) "yes" else ""}, ")
 
     if (tab.isIrv) {
         tab.irvVotes.votes().forEach { (votes, count) -> append("${votes.joinToString(" ")}:$count, ") }

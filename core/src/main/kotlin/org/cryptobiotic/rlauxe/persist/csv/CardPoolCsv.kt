@@ -24,7 +24,11 @@ fun writeCardPoolCsv(pool: CardPoolIF) = buildString {
     append("${pool.poolId}, ${pool.poolName}, ${pool.hasExactContests()}, ${pool.ncards()}, ")
     pool.possibleContests().forEachIndexed { index, contestId ->
         if (index > 0) { append("${pool.poolId},,,, ") }
-        append(writeContestTabulationCsv(pool.contestTab(contestId)!!))
+        val tab = pool.contestTab(contestId)!!
+        if (tab is ContestTabulation)
+            append(writeContestTabulationCsv(tab))
+        else
+            append(writeContestTabulationIF(tab))
     }
 }
 

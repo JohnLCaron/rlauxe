@@ -242,7 +242,7 @@ fun makeCvrsForOnePoolV(vunders: Map<Int, Vunder>, poolName: String, poolId: Int
     return rcvrs
 }
 
-fun makeCardsForOnePoolV(vunders: Map<Int, Vunder>, pool: CardPool): List<AuditableCard> {
+fun makeCardsForOnePoolV(vunders: Map<Int, Vunder>, pool: CardPool, visit: ((AuditableCardBuilder) -> Unit)? = null): List<AuditableCard> {
     val vunderpool = VunderPool(vunders, pool.poolName, pool.poolId, pool.hasExactContests)
 
     val rcvrs = mutableListOf<AuditableCard>()
@@ -261,6 +261,7 @@ fun makeCardsForOnePoolV(vunders: Map<Int, Vunder>, pool: CardPool): List<Audita
         val cvb2 = AuditableCardBuilder(cardId, location=null, index=count, prn=0L, phantom=false,
             styleId = pool.poolId, poolId=pool.poolId, votesIn=null, style=pool)
         vunderpool.simulatePooledCard(cvb2)
+        if (visit != null) visit(cvb2)
         rcvrs.add(cvb2.build())
         count++
     }

@@ -5,8 +5,8 @@ import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
 import org.cryptobiotic.rlauxe.cvr.Redaction
 import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
 
-class Morgan26Input: CorlaCountyInput {
-    override val electionName= "Morgan2026"
+class Morgan26pInput: CorlaCountyInput {
+    override val electionName= "Morgan2026p"
     override val countyName= "Morgan"
     override val cvrsSource = "$auditcenter/2026/primary/observerfiles/Morgan_CVR_Export_20260709092315_Redacted.csv"
     override val manifestSource = "$auditcenter/2026/primary/observerfiles/Morgan_BallotManifest.csv"

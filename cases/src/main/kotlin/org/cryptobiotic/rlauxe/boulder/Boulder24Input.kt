@@ -12,15 +12,13 @@ class Boulder24Input: BoulderInput {
     override val cvrsSource = "/resources/data/cases/boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
     override val sovoSource = "/resources/data/cases/boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv"
 
-    override fun corlaCvrs(): CorlaCvrs {
+    override fun readCorlaCvrs(): CorlaCvrs {
        val org = readCorlaCvrs(cvrsSource, redaction = RedactionBoulder())
         removeContest12FromPool6(org.redactedGroups())
         return org
     }
 
     override fun hasABgroups() = true
-
-    // TODO Boulder24 only I assume. Or should this be in RedactionBoulder ??
 
     companion object {
         // from cases/src/test/kotlin/org/cryptobiotic/rlauxe/boulder/TestBoulderUndervotes.kt

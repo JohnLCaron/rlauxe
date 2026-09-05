@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.ContestTabulationIF
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -127,7 +128,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         return mean2margin(hmean)
     }
 
-    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulation, Npop: Int): PoolRates {
+    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulationIF, Npop: Int): PoolRates {
         val candVotes = poolTab.votes[candId] ?: 0
         val nonCandVotes = poolTab.votes.filter { it.key != candId }.values.sum() // votes for other candidates
         val nuetralCounts = poolTab.ncards() - candVotes - nonCandVotes // undervotes
@@ -340,7 +341,7 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         return mean2margin(hmean)
     }
 
-    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulation, Npop: Int): PoolRates {
+    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulationIF, Npop: Int): PoolRates {
         val winnerVotes = poolTab.votes[candId] ?: 0
         val otherVotes = poolTab.votes.filter { it.key != candId }.values.sum() // votes for other candidates
         val nuetralCounts = poolTab.ncards() - winnerVotes - otherVotes // undervotes

@@ -1,5 +1,5 @@
 # Redaction Notes
-last changed 9/04/2026
+last changed 9/05/2026
 
 # Corla County Election
 
@@ -173,7 +173,8 @@ Redacted,,,,,,05,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,1,0,0,0,1,0,0,1,1,1,0,1,,,,
 
 ### Compare redaction methods
 
-Some trials with the different variants, and a simulated audit with unredacted CVRs:
+
+Using CreatBoulderElection (obsolete)
 
 |              | ncontests | nredactions | phantoms | onePool   | styles    | unredacted |
 |--------------|-----------|-------------|----------|-----------|-----------|------------|
@@ -183,6 +184,17 @@ Some trials with the different variants, and a simulated audit with unredacted C
 | Boulder2024  | 54        | 11628       | 1233     | 1349      | 670       | 569        |
 | Boulder2025  | 22        | 1043        | 1984     | 1016      | 978       | 844        |
 | Boulder2026p | 11        | 2913        | 3665     | 1148      | 614       | 426        |
+
+Using CorlaCountyElection
+
+|              | ncontests | nredactions | phantoms | onePool | styles | unredacted |
+|--------------|-----------|-------------|----------|---------|--------|------------|
+| Boulder2024  | 58        | 13122       | *        | 2385    | 4034   | 1233       |
+| Boulder2024  | 56        | 13122       | 4500     | -       | 657    | -          | not finished yet
+| Boulder2026p | 11        | 3007        | 1213 (9) | 1324    | 540    | 429        |
+| Morgan2026p  | 6         | 25          | 191      | 169     | *      | 168        |
+| LaPlata2026p | 9         | 9           | 284      | 284     | *      | 284        |
+| Weld2026p    | 12        | 0           | 560      | *       | *      | 570        |  // est redacted ncards = 20
 
 where
   - _ncontests_ : number of contests successfuly audited

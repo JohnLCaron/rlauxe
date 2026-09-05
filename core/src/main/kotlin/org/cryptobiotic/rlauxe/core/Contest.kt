@@ -302,3 +302,9 @@ open class Contest(
     }
 }
 
+class ContestWithPhantoms(info: ContestInfo, voteInput: Map<Int, Int>, Nc: Int, Ncast: Int,
+                          val nphantoms: Int
+): Contest(info, voteInput, Nc, Ncast) {
+    override fun Nphantoms() = nphantoms
+}
+

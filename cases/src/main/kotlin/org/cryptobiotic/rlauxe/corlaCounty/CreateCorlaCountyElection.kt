@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
 import org.cryptobiotic.rlauxe.auditcenter.MergedContestInfo
 import org.cryptobiotic.rlauxe.auditcenter.StrataInfo
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
 import org.cryptobiotic.rlauxe.cvr.RedactedGroup
 import org.cryptobiotic.rlauxe.cvr.cleanCsvString
@@ -58,9 +59,9 @@ class CreateCorlaCountyElection(
     val infos = infoList.associateBy { it.id }
     val infosByName = infoList.associateBy { it.name } //  are the cvr names compatible ?
 
-    val corlaCvrs = countyInput.readCorlaCvrs()
-    val converter: CorlaCvrConverter = CorlaCvrConverter(county, corlaCvrs, infosByName, stateInput)
-    val convertedCvrs: List<AuditableCard> = corlaCvrs.cvrs().map { converter.convertToCard(it) }
+    //val corlaCvrs = countyInput.readCorlaCvrs()
+    //val converter: CorlaCvrConverter = CorlaCvrConverter(county, corlaCvrs, infosByName, stateInput)
+    //val convertedCvrs: List<AuditableCard> = corlaCvrs.cvrs().map { converter.convertToCard(it) }
 
     val contestBuilders: Map<Int, CCContestBuilder> // make visible for debugging
     val contests: List<ContestIF>
@@ -73,40 +74,47 @@ class CreateCorlaCountyElection(
     val countyInfo: StrataInfo
 
     init {
-        if (stateInput.strataMap[county] == null)
+        if (stateInput.strataMap[county] == null) {
+            stateInput.strataMap.keys.sorted().forEach { println(it)}
             throw RuntimeException("stateInput.strata doesnt have county $county")
+        }
         countyInfo = stateInput.strataMap[county]!!
 
-        val redactedTabs = countRedactedVotes()
-        val cardPoolBuilders = if (variant.onePool) convertRedactedToOneCardPool(corlaCvrs.redactedGroups())
-            else convertRedactedToCardPool(corlaCvrs.redactedGroups())
+        val cvrsFromManifest = CvrsFromManifest(variant, countyInput, stateInput, infos)
 
-        val cvrTabs = tabulateCards(convertedCvrs.iterator(), infos)
-        contestBuilders = makeContestBuilders(cvrTabs, redactedTabs).associate { it.contestId to it}
+        // val redactedTabs = countRedactedVotes()
+        //val cardPoolBuilders = if (variant.onePool) convertRedactedToOneCardPool(corlaCvrs.redactedGroups())
+        //    else convertRedactedToCardPool(corlaCvrs.redactedGroups())
+
+        contestBuilders = makeContestBuilders(cvrsFromManifest.convertedCvrTabs, cvrsFromManifest.redactedTabs).associate { it.contestId to it}
         contests = makeContests(contestBuilders)
 
-        redactedPools = cardPoolBuilders.map { it.build() }
+        redactedPools = cvrsFromManifest.redactedPools
 
-        // these are the mvrs
-        redactedCvrs = if (variant.phantoms) emptyList() else makeSimulatedCards(redactedPools)
+        // these are mvrs
+        // we should do this in cvrsFromManifest so we can use the manifest ids
+        redactedCvrs = cvrsFromManifest.makeSimulatedCards()
 
         // need to know the phantoms to calculate allCards and Npops
         val phantoms = makePhantomCards(contests, 1)
         logger.info {"made ${phantoms.size} phantom cards"}
 
-        allCards = convertedCvrs + redactedCvrs + phantoms // in memory
+        allCards = cvrsFromManifest.convertedCvrs + redactedCvrs + phantoms // in memory
         this.ncards = allCards.size
         val npops = tabulateNpops(allCards, infoList)
 
         // TODO cvrTabs dont have the irv part, so will fail in the raire library
-        contestsUA = makeContestWAs(contests, npops, cvrTabs, redactedPools, )
-        mvrs = addIndexToMvrs(allCards)
+        val allCardsTabs = tabulateCards(allCards.iterator(), infos)
 
-        val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
-        logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPoolBuilders.size} cardPools"}
+        contestsUA = makeContestWAs(contests, npops, allCardsTabs, redactedPools, )
+        mvrs = addIndexToMvrs(allCards)
+        logger.info {"made ${mvrs.size} mvrs"}
+
+        //val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
+        //logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPoolBuilders.size} cardPools"}
     }
 
-    // sum over all pools of the redactedGroups
+    /* sum over all pools of the redactedGroups
     fun countRedactedVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
         var sumTabs = mutableMapOf<Int, ContestTabulation>()
 
@@ -182,7 +190,7 @@ class CreateCorlaCountyElection(
             }
         }
         return cards
-    }
+    } */
 
     override fun electionInfo() =
         ElectionInfo(countyInput.electionName, variant.auditType, ncards(), contestsUA.size, true, mvrSource=mvrSource)
@@ -198,8 +206,6 @@ class CreateCorlaCountyElection(
 
     fun addIndexToMvrs(mvrs: List<AuditableCard>): List<AuditableCard> {
         var cardIndex = 1 // 1 based index
-
-        // add the index
         val result = mutableListOf<AuditableCard>()
         mvrs.forEach { org ->
             result.add(org.copy(index = cardIndex ))
@@ -309,7 +315,7 @@ class CreateCorlaCountyElection(
 
 class CCContestBuilder(
     val auditType: AuditType,
-    mcontest: MergedContestInfo,
+    mcontest2: MergedContestInfo, // not used i think
     val info: ContestInfo,
     cvrTab: ContestTabulation?,
     redactedTab: ContestTabulation?,
@@ -348,7 +354,7 @@ class CCContestBuilder(
 
         // useNc = mcontest.nc
         if (useNc < minCardsNeededFromVotes) {
-            logger.warn {"*** Contest '${info.name}' has $minCardsNeededFromVotes minCardsNeededFromVotes, but CorlaContestRoundCsv.contestBallotCardCount is ${mcontest.nc} - using minCardsNeeded" }
+            logger.warn {"*** Contest '${info.name}' has $minCardsNeededFromVotes minCardsNeededFromVotes, but ncvrs is ${ncvrs} - using minCardsNeeded" }
             useNc = minCardsNeededFromVotes
         }
         /* if (useNc < ncvrs) {
@@ -363,10 +369,7 @@ class CCContestBuilder(
         info.metadata["PoolPct"] = (100.0 * poolTotalCards / useNc).toInt().toString()
         return if (info.isIrv) // TODO
                 IrvContest(info, winners=listOf(0), useNc, Ncast=ncvrs, undervotes=0) // TODO this is fake...
-            else if (variant.phantoms) {
-                val nphantoms = useNc - cvrsTotalCards // the redacted cards arent counted, so become phantoms
-                ContestWithPhantoms(info, candVotes, useNc, ncvrs, nphantoms)
-            } else
+            else
                 Contest(info, candVotes, useNc, ncvrs)
     }
 

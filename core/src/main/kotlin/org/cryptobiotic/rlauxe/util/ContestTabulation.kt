@@ -13,25 +13,26 @@ import kotlin.collections.toMap
 
 // tabulate contest votes from cards or cvrs; can handle both regular and irv voting. mutable.
 class ContestTabulation(
-    val contestId: Int,
+    override val contestId: Int,
     voteForNin: Int, //
-    val isIrv: Boolean,
-    val candidateIds: List<Int>
-) {
+    override val isIrv: Boolean,
+    override val candidateIds: List<Int>
+) : ContestTabulationIF {
+
     constructor(info: ContestInfo) : this(info.id, info.voteForN, info.isIrv, info.candidateIds)
-    constructor(other: ContestTabulation) : this(other.contestId, other.voteForN, other.isIrv, other.candidateIds)
+    constructor(other: ContestTabulationIF) : this(other.contestId, other.voteForN, other.isIrv, other.candidateIds)
     constructor(info: ContestInfo, votes: Map<Int, Int>, ncards: Int): this(info) {
         votes.forEach{ this.addVote(it.key, it.value) }
         this.ncardsTabulated = ncards
         this.undervotes = ncards - nvotes()
     }
 
-    val voteForN = if (isIrv) 1 else voteForNin
-    val candidateIdToIdx by lazy { candidateIds.mapIndexed { idx, id -> Pair(id, idx) }.toMap() }
+    override val voteForN = if (isIrv) 1 else voteForNin
+    override val candidateIdToIdx by lazy { candidateIds.mapIndexed { idx, id -> Pair(id, idx) }.toMap() }
 
-    val votes = mutableMapOf<Int, Int>() // cand -> votes
-    val irvVotes = VoteConsolidator() // candidate indexes
-    val notfound = mutableMapOf<Int, Int>() // candidate -> nvotes; track candidates on the cvr but not in the contestInfo, for debugging
+    override val votes = mutableMapOf<Int, Int>() // cand -> votes
+    override val irvVotes = VoteConsolidator() // candidate indexes
+    // val notfound = mutableMapOf<Int, Int>() // candidate -> nvotes; track candidates on the cvr but not in the contestInfo, for debugging
 
     var ncardsTabulated = 0 // total cards added to the tabulation
     var novote = 0  // how many cards had no vote for this contest?
@@ -39,11 +40,11 @@ class ContestTabulation(
     var overvotes = 0  // how many overvotes = (voteForN < cands.size)
     var nphantoms = 0  // how many phantoms
 
-    fun ncards() = ncardsTabulated
-    fun undervotes() = undervotes
+    override fun ncards() = ncardsTabulated
+    override fun undervotes() = undervotes
 
-    fun nvotes() = if (isIrv) irvVotes.nvotes() else votes.map { it.value }.sum()
-    fun missing() = voteForN * ncards() - nvotes()
+    override fun nvotes() = if (isIrv) irvVotes.nvotes() else votes.map { it.value }.sum()
+    // override fun missing() = voteForN * ncards() - nvotes()
 
     fun addVotes(cands: IntArray, phantom:Boolean) {
         ncardsTabulated++
@@ -68,11 +69,11 @@ class ContestTabulation(
     }
 
     private fun addVotesIrv(candidateRanks: IntArray) {
-        candidateRanks.forEach {  // track for non IRV also?
+        /* candidateRanks.forEach {  // track for non IRV also?
             if (candidateIdToIdx[it] == null) {
                 notfound[it] = notfound.getOrDefault(it, 0) + 1
             }
-        }
+        } */
         // convert to index for Raire
         val mappedVotes = candidateRanks.map { candidateIdToIdx[it] }
         if (mappedVotes.isNotEmpty()) irvVotes.addVote(mappedVotes.filterNotNull().toIntArray())
@@ -81,20 +82,20 @@ class ContestTabulation(
     }
 
     // for summing multiple tabs into this one
-    fun sum(other: ContestTabulation) {
+    override fun sum(other: ContestTabulationIF) {
         require (contestId == other.contestId)
         if (this.isIrv) {
             this.irvVotes.addVotes(other.irvVotes)
         } else {
             other.votes.forEach { (candId, nvotes) -> addVote(candId, nvotes) }
         }
-        this.ncardsTabulated += other.ncardsTabulated
-        this.novote += other.novote
-        this.undervotes += other.undervotes
-        this.overvotes += other.overvotes
+        this.ncardsTabulated += other.ncards()
+        this.undervotes += other.undervotes()
+        // this.novote += other.novote
+        // this.overvotes += other.overvotes
     }
 
-    fun votesAndUndervotes(poolId: Int?, npop: Int, hasExactContests: Boolean): Vunder {
+    override fun votesAndUndervotes(poolId: Int?, npop: Int, hasExactContests: Boolean): Vunder {
         if (isIrv) return votesAndUndervotesIrv(poolId, npop, hasExactContests)
 
         val voteCounts = votes.map { Pair(intArrayOf(it.key), it.value) }
@@ -114,7 +115,7 @@ class ContestTabulation(
         return result
     }
 
-    fun votesAndUndervotesIrv(poolId: Int?, npop: Int, hasExactContests: Boolean): Vunder {
+    override fun votesAndUndervotesIrv(poolId: Int?, npop: Int, hasExactContests: Boolean): Vunder {
 
         val voteCounts = this.irvVotes.votes.map { (hIntArray, count) ->
             // convert indices back to ids
@@ -138,7 +139,7 @@ class ContestTabulation(
 
     override fun toString(): String {
         val sortedVotes = votes.entries.sortedBy { it.key }
-        return "ContestTabulation(id=${contestId} isIrv=$isIrv, voteForN=$voteForN, votes=$sortedVotes, nvotes=${nvotes()} ncards=$ncardsTabulated, undervotes=$undervotes, novote=$novote, overvotes=$overvotes)"
+        return "ContestTabulation(id=${contestId} isIrv=$isIrv, voteForN=$voteForN, votes=$sortedVotes, nvotes=${nvotes()} ncards=$ncardsTabulated, undervotes=$undervotes" // , novote=$novote, overvotes=$overvotes)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -174,8 +175,8 @@ class ContestTabulation(
     }
 }
 
-// add other into this
-fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, ContestTabulation>) {
+// add other into the reciever map
+fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, ContestTabulationIF>) {
     other.forEach { (contestId, otherTab) ->
         val contestSum = this.getOrPut(contestId) { ContestTabulation(otherTab) }
         contestSum.sum(otherTab)

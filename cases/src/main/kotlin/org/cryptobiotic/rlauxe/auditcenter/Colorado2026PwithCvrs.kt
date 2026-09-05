@@ -14,11 +14,11 @@ class Colorado2026PwithCvrs(ac:String?=auditcenter): ColoradoInput(
 ) {
     val parent = Colorado2026PMerged(ac)
 
-    val useCounties = setOf("La Plata", "Morgan","Weld") // the counties we have cvrs for
+    val useCounties = setOf("Boulder", "La Plata", "Morgan","Weld") // the counties we have cvrs for
     override fun skipCounties(countyName: String) = !useCounties.contains(countyName)
 
     // not needed
-    val countyPopulations = mapOf( "La Plata" to 16146, "Morgan" to 5220,"Weld" to 69640)
+    val countyPopulations = mapOf( "Boulder" to 100423, "La Plata" to 16146, "Morgan" to 5220,"Weld" to 69640)
 
     override fun canonicalContests() = canonicalContests
     private val canonicalContests: Map<String, CanonicalContest> by lazy {

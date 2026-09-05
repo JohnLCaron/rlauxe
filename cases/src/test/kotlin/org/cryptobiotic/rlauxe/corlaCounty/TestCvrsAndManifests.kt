@@ -1,12 +1,13 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
+import org.cryptobiotic.rlauxe.boulder.Boulder26pInput
 import kotlin.test.Test
 
 class TestCvrsAndManifests {
 
     @Test
-    fun testMorgan26match() {
-        val input = Morgan26Input()
+    fun testCorlaCountyInputMatch() {
+        val input = Boulder26pInput()
         compareCvrsAndManifests(input)
     }
 

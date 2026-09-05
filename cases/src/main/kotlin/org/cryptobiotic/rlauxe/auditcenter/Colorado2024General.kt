@@ -28,11 +28,32 @@ class Colorado2024General(ac:String?=auditcenter): ColoradoInput(
         result.toSortedMap()
     }
 
-    ///////////////////////// original cleanup attempt; not used
+    override fun contestNameCleanup(county: String, name: String): String {
+        return when (name) {
+            "Justice of the Colorado Supreme Court - Berkenkotter" -> "Colorado Supreme Court Justice - Berkenkotter"
+            "Justice of the Colorado Supreme Court - Boatright" -> "Colorado Supreme Court Justice - Boatright"
+            "Justice of the Colorado Supreme Court - Marquez" -> "Colorado Supreme Court Justice - Marquez"
+            "Colorado Court of Appeals Judge Román" -> "Colorado Court of Appeals Judge Roman"
+            else -> name
+        }
+    }
 
+    override fun candidateNameCleanup(county: String, name: String): String {
+        return when (name) {
+            "Randall Terry / Stephen E. Broden" -> "Randall Terry / Stephen E Broden"
+            "Claudia De la Cruz / Karina García" -> "Claudia De la Cruz / Karina Garcia"
+            "Colorado Supreme Court Justice Márquez" -> "Colorado Supreme Court Justice Marquez"
+            "Colorado Court of Appeals Judge Román" -> "Colorado Court of Appeals Judge Roman"
+            "Daniel Campaña" -> "Daniel Campana"
+            else -> name
+        }
+    }
+
+    ///////////////////////// original cleanup attempt; not used
+    // munge solved most of these
 
     // TODO County specific?
-    fun contestNameCleanup(name: String): String {
+    fun contestNameCleanupOld(name: String): String {
         var working = name
         // if (working.contains(" -")) working = working.replace(" -", "")
         // if (working.contains("-")) working = working.replace("-", " ")
@@ -107,7 +128,7 @@ class Colorado2024General(ac:String?=auditcenter): ColoradoInput(
 // Weld County School District No. RE-7 Ballot Issue 4A Mill Levy Override,opportunistic_benefits,in_progress,1,182397,2729,"""Yes/For""",731,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1819,1819
 //Weld County School District No. RE-7 Ballot Issue 4B Bonds,opportunistic_benefits,in_progress,1,182397,2729,"""Yes/For""",720,0.03000000,0,0,0,0,0,0,0,1.03905000,0,1847,1847
 
-    fun candidateNameCleanup(name: String): String {
+    fun candidateNameCleanupOld(county: String, name: String): String {
         var working = name
         if (working.contains("''")) working = working.replace("''", "'")
         if (working.contains("\"")) working = working.replace("\"", "'")

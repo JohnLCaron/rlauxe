@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePoolV
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.Test
@@ -44,10 +45,10 @@ class TestCardPool {
         assertEquals(cardPoolCvrs2.hashCode(), cardPoolCvrs.hashCode())
 
         val poolTabs = mutableMapOf<Int, ContestTabulation>()
-        cardPool.addTo(poolTabs)
+        poolTabs.sumContestTabulations(cardPool.contestTabs)
         assertEquals(cardPool.contestTabs, poolTabs)
 
-        cardPool.addTo(poolTabs)
+        poolTabs.sumContestTabulations(cardPool.contestTabs)
 
         assertEquals(1, poolTabs.size)
         val tab = poolTabs.values.first()

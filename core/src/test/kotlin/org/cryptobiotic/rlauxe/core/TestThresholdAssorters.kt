@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.ContestTabulationIF
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
@@ -268,7 +269,7 @@ data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double
     # Linearises to:              Proto-asserter:                  Minimum for b_a = 0, b_T = 1
     #     T_A - 0.05 * T_L > 0        => g(b) = b_A - 0.05 * b_T      => a = -.05
 
- difference is here:
+    # difference is here:
     # Minimum `a` of proto-assorter is > -.5 so we set `c = 1` and `h(b) = c * g(b) + .5 = b_A - 0.05 b_T + .5`.
     #
     # Assorter mean:
@@ -284,10 +285,7 @@ data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double
         return winnerVotes/N.toDouble() + 0.45
     }
 
-    override fun calcPoolRatesFromPoolTabulation(
-        poolTab: ContestTabulation,
-        Npop: Int,
-    ): PoolRates {
+    override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulationIF, Npop: Int): PoolRates {
         TODO("Not yet implemented")
     }
 

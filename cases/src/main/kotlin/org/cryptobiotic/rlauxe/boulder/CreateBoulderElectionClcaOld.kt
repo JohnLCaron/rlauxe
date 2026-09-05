@@ -40,7 +40,7 @@ class CreateBoulderElectionClcaOld(
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean = true,
 ): ElectionBuilder {
-    val exportCvrs: List<Cvr> = corlaCvrs.cvrs().map { it.convertToCvr() }
+    val exportCvrs: List<Cvr> = emptyList() // corlaCvrs.cvrs().map { it.convertToCvr() }
 
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infos = infoList.associateBy { it.id }

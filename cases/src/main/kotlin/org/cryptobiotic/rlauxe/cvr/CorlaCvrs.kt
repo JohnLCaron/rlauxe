@@ -282,6 +282,7 @@ class CorlaCvrs(val inputSource: String, val parser: CSVParser,
 ////////////////////////////////////////////////////////////////////////////////
 
 // note that these contestIds and candIds are internal to this file;  must cross reference with contest/candidate name
+// note that they will match the Styles and Redacted Groups
 data class ContestVotes(val contestId: Int, val candVotes: List<Int>)
 data class CvrCardStyle(val name: String, val contestIds: Set<Int>, var countCards: Int = 0)
 
@@ -402,15 +403,16 @@ data class CvrRow(
         }
     }
 
-    // this assumes that you have a single schema you use for the ContestInfo....
+    /* this assumes that you have a single schema you use for the ContestInfo....
     fun convertToCvr(): Cvr {
         val cvrb = CvrBuilder2(this.imprintedId, false)
         this.contestVotes.forEach {
             cvrb.replaceContestVotes(it.contestId, it.candVotes.toIntArray())
         }
         return cvrb.build()
-    }
+    } */
 
+    //// use CorlaCvrConverter when mapping to corla canonical contests
     fun convertToCard(): AuditableCard {
         val votes = this.contestVotes.map { cv -> Pair(cv.contestId, cv.candVotes.toIntArray()) }.toMap()
 

@@ -202,7 +202,7 @@ abstract class ColoradoInput(
         return matchCanonicalCandidate(county, canon, candName)!!
     }
 
-    private val canonicalContestMungedNames: Map<String, CanonicalContest> by lazy {
+    val canonicalContestMungedNames: Map<String, CanonicalContest> by lazy {
         canonicalContests().mapKeys { munge(it.key) }
     }
 }

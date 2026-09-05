@@ -202,7 +202,7 @@ data class Card(
     val Id: Int,
     val KeyInId: Int,
     val PaperIndex: Int,
-    val Contests: List<Contest>,
+    val Contests: List<ExportJsonContest>,
 ) {
     override fun toString() = buildString {
         appendLine("Card(Id=$Id, KeyInId=$KeyInId, PaperIndex=$PaperIndex)")
@@ -217,7 +217,7 @@ data class Card(
 // Note: explicit marks mean when the voter filled in the voting box directly.
 // Implicit means when the voting box was implied by a straight party ticket selection.
 @Serializable
-data class Contest(
+data class ExportJsonContest(
     val Id: Int,
     val ManifestationId: Int,
     val Undervotes: Int,

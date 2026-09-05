@@ -35,12 +35,9 @@ class BoulderVariant(variantEnum: BoulderVariantEnum) {
     val phantoms = (variantEnum == BoulderVariantEnum.Phantoms)
     val onePool = (variantEnum == BoulderVariantEnum.OnePool)
     val styles = (variantEnum == BoulderVariantEnum.Styles)
-    val sim = (variantEnum == BoulderVariantEnum.Sim)
+    val sim = (variantEnum == BoulderVariantEnum.Sim)   // created simulated cvrs from redacted pools
 }
 
-// TODO cant we merge this into CreateBoulderElection? why is it special ??
-// Use OneAudit; redacted ballots are in pools. Cant do IRV because we dont have VoteConsolidators
-// this version assume that the redacted groups know how many cards are contained in each
 class CreateBoulderElection(
     val electionName: String,
     val auditType: AuditType,
@@ -79,9 +76,9 @@ class CreateBoulderElection(
         // make fake IRV contest for the purpose of setting the phantoms.
         contests = makeContests(contestBuilders)
 
-        // these are the mvrs
+        // these are the mvrs, must have votes and styleIds,
         exportCvrs  = corlaCvrs.cvrs().map { it.convertToCard() }
-        redactedCvrs = if (auditType.isClca()) emptyList() else makeRedactedCards(redactedPools)
+        redactedCvrs = if (variant.phantoms) emptyList() else makeSimulatedCards(redactedPools)
 
         // need to know the phantoms to calculate allCvrs and Npops
         val phantoms = makePhantomCards(contests, 1)
@@ -103,7 +100,9 @@ class CreateBoulderElection(
         // TODO put in verify
         // checkNpops(allCvrs, createCards(), infoList)
 
-        mvrs = mvrsToAuditableCardsList(allCards, cardPools())
+        // needed ??
+        // mvrs = mvrsToAuditableCardsList(allCards, cardPools())
+        mvrs = addIndexToMvrs(allCards)
     }
 
     // make ContestInfo from BoulderStatementOfVotes, and matching export.schema.contests
@@ -120,6 +119,7 @@ class CreateBoulderElection(
                     var candIdx = 0
                     for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
                         if (columns[col].choice != "Write-in") { // remove write-ins
+                            candidateMap1[columns[col].choice] = candIdx
                             candidateMap1[columns[col].choice] = candIdx
                         }
                         candIdx++
@@ -176,7 +176,7 @@ class CreateBoulderElection(
     }
 
     // make simulated CVRs for all the pools
-    fun makeRedactedCards(cardPools: List<CardPool>) : List<AuditableCard> { // contestId -> candidateId -> nvotes
+    fun makeSimulatedCards(cardPools: List<CardPool>) : List<AuditableCard> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<AuditableCard>()
         cardPools.forEach { cardPool ->
             rcvrs.addAll(makeCardsForOnePool(cardPool))
@@ -187,7 +187,6 @@ class CreateBoulderElection(
     // make simulated CVRs for one pool, all contests
     private fun makeCardsForOnePool(cardPool: CardPool) : List<AuditableCard> { // contestId -> candidateId -> nvotes
         val poolVunders = cardPool.possibleContests().associate { Pair(it, cardPool.votesAndUndervotes(it)) }
-        // val cvrs = makeCvrsForOnePoolV(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasExactContests)
         val cards = makeCardsForOnePoolV(poolVunders, pool=cardPool)
 
         // check it
@@ -308,6 +307,8 @@ class CreateBoulderElection(
         return contestsUAs
     }
 
+    ////////////////////////////////////////////////////////////////
+
     override fun electionInfo() =
         ElectionInfo(electionName, auditType, ncards(), contestsUA.size, true, mvrSource=mvrSource)
     override fun contestsUA() = contestsUA
@@ -317,7 +318,7 @@ class CreateBoulderElection(
     override fun unsortedMvrsInternal() = mvrs
     override fun unsortedMvrsExternal() = null
 
-    override fun cards() = createCards(mvrs)
+    override fun cards() = createCardsFromMvrs(mvrs)
     override fun ncards() = ncards
 
     // TODO do you really need to do this ??
@@ -351,11 +352,23 @@ class CreateBoulderElection(
         }
     }
 
-    fun createCards(mvrs: List<AuditableCard>): CloseableIterator<AuditableCard> {
+    fun addIndexToMvrs(mvrs: List<AuditableCard>): List<AuditableCard> {
+        var cardIndex = 1 // 1 based index
+
+        // add the index
+        val result = mutableListOf<AuditableCard>()
+        mvrs.forEach { org ->
+            result.add(org.copy(index = cardIndex ))
+            cardIndex++
+        }
+        return result
+    }
+
+    fun createCardsFromMvrs(mvrs: List<AuditableCard>): CloseableIterator<AuditableCard> {
         // remove cvrs for cards in the pools
         val mvrIter = Closer(mvrs.iterator())
         val transformer = TransformingIterator<AuditableCard, AuditableCard>(mvrIter) { org ->
-            if (org.poolId != null) AuditableCard.removeVotes(org) else org
+            if (org.poolId != null && auditType.isOA()) AuditableCard.removeVotes(org) else org
         }
         return transformer
     }
@@ -433,12 +446,6 @@ class BoulderContestBuilder(val auditType: AuditType,
     }
 }
 
-class ContestWithPhantoms(info: ContestInfo, voteInput: Map<Int, Int>, Nc: Int, Ncast: Int,
-                          val nphantoms: Int
-): Contest(info, voteInput, Nc, Ncast) {
-    override fun Nphantoms() = nphantoms
-}
-
 ////////////////////////////////////////////////////////////////////
 // Clca: create simulated cvrs for the redacted groups, for a full CLCA audit with hasStyles=true.
 // OA: Create a OneAudit where pools are from the redacted cvrs.
@@ -455,9 +462,9 @@ fun createBoulderElection(
 
     clearDirectory(Path(topdir))
     Logging.addFileAppender("cases", "$topdir/logs.log")
-    CountyElectionSimCvrs.logger.info {"-------------- createBoulderElection ${input.electionName} in $topdir"}
+    logger.info {"-------------- createBoulderElection ${input.electionName} in $topdir"}
 
-    createBoulderElectionWithSovo(input.electionName, input.corlaCvrs(), input.sovo(), topdir, creation, roundConfig,
+    createBoulderElectionWithSovo(input.electionName, input.readCorlaCvrs(), input.sovo(), topdir, creation, roundConfig,
         mvrSource, hasStyle, clear = false, variant)
 }
 

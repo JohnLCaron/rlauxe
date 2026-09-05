@@ -66,7 +66,7 @@ class TestCorlaCvrsOnTestExamples {
             27 to intArrayOf(1),
         )
         val expected0 = makeCvr(cvr0.imprintedId, expectedVotes0)
-        val actual0 = cvr0.convertToCvr()
+        val actual0 = cvr0.convertToCard().toCvr()
         assertEquals(expected0, actual0)
 
         val cvr1 = export.cvrs[1]
@@ -77,7 +77,7 @@ class TestCorlaCvrsOnTestExamples {
             24 to intArrayOf(1),
         )
         val expected1 = makeCvr(cvr1.imprintedId, expectedVotes1)
-        val actual1 = cvr1.convertToCvr()
+        val actual1 = cvr1.convertToCard().toCvr()
         assertEquals(expected1, actual1)
 
         val cvr2 = export.cvrs[2]
@@ -95,7 +95,7 @@ class TestCorlaCvrsOnTestExamples {
             32 to intArrayOf(1),
         )
         val expected2 = makeCvr(cvr2.imprintedId, expectedVotes2)
-        val actual2 = cvr2.convertToCvr()
+        val actual2 = cvr2.convertToCard().toCvr()
         assertEquals(expected2, actual2)
 
         val cvr3 = export.cvrs[3]
@@ -115,7 +115,7 @@ class TestCorlaCvrsOnTestExamples {
             27 to intArrayOf(1),
         )
         val expected3 = makeCvr(cvr3.imprintedId, expectedVotes3)
-        val actual3 = cvr3.convertToCvr()
+        val actual3 = cvr3.convertToCard().toCvr()
         assertEquals(expected3, actual3)
     }
 

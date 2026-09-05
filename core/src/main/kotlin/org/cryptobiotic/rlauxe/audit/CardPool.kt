@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.estimate.Vunder
+import org.cryptobiotic.rlauxe.util.ContestTabulationIF
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -17,7 +18,7 @@ const val unpooled = "unpooled"
 interface CardPoolIF: StyleIF {
     val poolName: String
     val poolId: Int
-    fun contestTab(contestId: Int): ContestTabulation?
+    fun contestTab(contestId: Int): ContestTabulationIF?
     fun votesAndUndervotes(contestId: Int): Vunder // throws exception if bad contest id
 }
 
@@ -31,7 +32,7 @@ data class CardPool(
     override val poolId: Int,
     val hasExactContests: Boolean,    // aka single style
     val infos: Map<Int, ContestInfo>, // do we really need this ??
-    val contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
+    val contestTabs: Map<Int, ContestTabulationIF>,  // contestId -> ContestTabulation
     val totalCards: Int,
 ): CardPoolIF {
     override fun name() = poolName
@@ -48,22 +49,14 @@ data class CardPool(
         return contestTab.votesAndUndervotes(poolId, ncards(), hasExactContests)
     }
 
-    fun addTo(sumTab: MutableMap<Int, ContestTabulation>) {
-        this.contestTabs.forEach { (contestId, contestTab) ->
-            val info = infos[contestId]
-            if (info != null) { // skip IRV
-                val contestSumTab = sumTab.getOrPut(contestId) { ContestTabulation(info) }
-                contestSumTab.sum(contestTab)
-            }
-        }
-    }
-
     override fun toString() = buildString {
         append("CardPool(poolName='$poolName', poolId=$poolId, totalCards=$totalCards)")
     }
 }
 
-// CardPoolBuilder is mutable; used by BoulderContestBuilder, OneAuditTest
+// TODO doesnt this algorithm depend if there is a single style or not ?
+//   I think? the whole adjust thing is obsolete?
+//  otherwise just get the real ncards(contest) per group, already.
 class CardPoolBuilder(
     val poolName: String,
     val poolId: Int,
@@ -73,7 +66,7 @@ class CardPoolBuilder(
     val minCardsNeeded: Map<Int, Int>
 ) {
     var ncards: Int? = null // lame
-    var adjustCards = 0 // adjusted number of cards, using distributeExpectedOvervotes() on one or more contests
+    var adjustCards = 0 // adjusted number of cards, used in ncards()
 
     // you need at least this many cards for this pool
     val maxMinCardsNeeded: Int = minCardsNeeded.values.max()
@@ -100,12 +93,15 @@ class CardPoolBuilder(
         adjustCards = max( adjust, adjustCards)
     }
 
-    // TODO probably need to use this for Boulder
+    // TODO obsolete - used by CreateBoulderElectionClcaOld; functionality now in CardPool
+    //   have to change the contestTabs, see build()
+    // otherwise, CardPool has contestTabs with incorrect undervotes
+    // this recalculates the undervotes based on votes from contestTab and ncards()
+    // that is, it ignores the contestTab undervotes and nvotes
+    // thats why we dont just use contestTab.votesAndUndervotes()
     fun votesAndUndervotesBoulder(contestId: Int): Vunder {
         val poolUndervotes = undervoteForContest(contestId)
         val contestTab = contestTabs[contestId]!!
-
-        // TODO why not use contestTab.votesAndUndervotes() ??
 
         val voteCounts = contestTab.votes.map { Pair(intArrayOf(it.key), it.value) }
         val voteSum = contestTab.votes.values.sum()
@@ -123,8 +119,9 @@ class CardPoolBuilder(
     }
 
     // TODO how to distinguish between undervotes and missing ?? You need independent setting for pool ncards
+    // if you know ncards, then just use CardPool
     // this assumes missing = 0; but then should set SingleBallotStyle = true ?
-    fun undervoteForContest(contestId: Int): Int {
+    private fun undervoteForContest(contestId: Int): Int {
         val contestTab = contestTabs[contestId] ?: return 0
         val voteSum = contestTab.nvotes()
         val info = infos[contestId]!!
@@ -136,7 +133,13 @@ class CardPoolBuilder(
     }
 
     fun build(): CardPool {
-        return CardPool(this.poolName, this.poolId, this.hasExactContests, this.infos, this.contestTabs, this.ncards())
+        // adjust the tabs to the new undervotes and votes TODO make copy ??
+        val adjustedTabs: Map<Int, ContestTabulation> = this.contestTabs.mapValues {
+            it.value.undervotes =  undervoteForContest(it.key)
+            it.value.ncardsTabulated = ncards()
+            it.value
+        }
+        return CardPool(this.poolName, this.poolId, this.hasExactContests, this.infos, adjustedTabs, this.ncards())
     }
 
     override fun equals(other: Any?): Boolean {

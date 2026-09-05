@@ -81,17 +81,21 @@ class Redaction(val show: Boolean = false) : RedactionIF {
     }
 }
 
+// these are using local contest ids, candidate ids
 data class RedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>) {
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
     private var exampleCsv : CSVRecord? = null // debugging
     private var nlines = 0  // used by the accumulating group
     var style : CvrCardStyle? = null
     var singleCards = true
+    var setNcards: Int? = null
 
     init {
         if (ballotType.isEmpty())
             println("RedactedGroup $ballotType: ballotType.isEmpty()")
     }
+
+    fun setNcards(ncards: Int) { setNcards = ncards } // can be used to override
 
     fun contests() = contestVotes.keys.toSet()
 
@@ -155,7 +159,7 @@ data class RedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>) {
 
     fun totalVotes() = contestVotes.values.map{ it.values }.flatten().sum()
 
-    fun ncards() = max(nlines, minCards())
+    fun ncards() = setNcards ?:max(nlines, minCards())
 
     override fun toString() = buildString {
         val contests = contestVotes.map { it.key }.sorted()
@@ -165,6 +169,7 @@ data class RedactedGroup(val ballotType: String, val voteForNs: Map<Int, Int>) {
 
     companion object {
 
+        // TODO review this
         // method #2: specific to Boulder24
         fun makeAccumulator(starting: RedactedGroup, accumName:String): RedactedGroup {
             val accum = RedactedGroup(accumName, starting.voteForNs)

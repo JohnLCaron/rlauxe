@@ -6,17 +6,14 @@
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.belgium.*" />
         <option name="ENABLED" value="true" />
-        <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.ga.*" />
         <option name="ENABLED" value="true" />
-        <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.sf.*" />
         <option name="ENABLED" value="true" />
-        <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.dominion.*" />

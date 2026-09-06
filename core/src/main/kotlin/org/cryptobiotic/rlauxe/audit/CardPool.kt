@@ -9,9 +9,6 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.collections.set
-import kotlin.math.max
-import kotlin.text.get
-import kotlin.text.toDouble
 
 const val unpooled = "unpooled"
 
@@ -87,7 +84,7 @@ class CardPoolBuilder(
     fun possibleContests() = contestTabs.map { it.key }.toSortedSet().toIntArray()
     fun contestTab(contestId: Int) = contestTabs[contestId]
 
-    // adjustCards becomes the maximum value of adjust. TODO seems lame
+    /* adjustCards becomes the maximum value of adjust. TODO seems lame
     fun adjustCards(adjust: Int, contestId : Int) {
         if (!hasContest(contestId)) throw RuntimeException("NO CONTEST")
         adjustCards = max( adjust, adjustCards)
@@ -116,12 +113,12 @@ class CardPoolBuilder(
             val missing = ncards() - (poolUndervotes + voteSum) / contestTab.voteForN
             Vunder(contestId, poolId, voteCounts, poolUndervotes, missing, contestTab.voteForN)
         }
-    }
+    } */
 
     // TODO how to distinguish between undervotes and missing ?? You need independent setting for pool ncards
     // if you know ncards, then just use CardPool
     // this assumes missing = 0; but then should set SingleBallotStyle = true ?
-    private fun undervoteForContest(contestId: Int): Int {
+    fun undervoteForContest(contestId: Int): Int {
         val contestTab = contestTabs[contestId] ?: return 0
         val voteSum = contestTab.nvotes()
         val info = infos[contestId]!!

@@ -20,7 +20,7 @@ import org.cryptobiotic.rlauxe.sf.createSfElection
 import kotlin.test.Test
 import kotlin.test.fail
 
-class MakeSfElection {
+class SfElections {
     private val logger = KotlinLogging.logger("AuditRecord")
 
     val sfDir = "$cases/sf/sf2024"

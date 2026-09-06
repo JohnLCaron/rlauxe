@@ -32,7 +32,7 @@ the redacted data is largely unaccounted for.
 
 ## Do votedatabase and auditcenter agree ?
 
-The CVR data very closely match the contest vote counts in auditcenter, when we have both.
+The votedatabase CVR data very closely match the auditcenter contest vote counts, when we have both.
 All but 15 contests have cvrs within 1% of the auditcenter, and most are below .1%. 
 It seems likely most differences are due to redacted ballots.
 See [Vote Differences](Corla2020cvrDiff.md) for details.
@@ -180,7 +180,7 @@ contests under maxRisk (corla) = 364 / 526 = 69%
 
 ## TODO
 
-* show plot of incremental cost of adding the low margin contests: what do the lowest n contests cost ?
+* show plot of incremental cost of adding the low margin contests: what do the lowest n contests cost ? DONE
 
 ## Appendix A Votes differences between auditcenter and votedatabase
 

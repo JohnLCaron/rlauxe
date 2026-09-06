@@ -28,7 +28,7 @@ class ContestTabulation(
     }
 
     override val voteForN = if (isIrv) 1 else voteForNin
-    override val candidateIdToIdx by lazy { candidateIds.mapIndexed { idx, id -> Pair(id, idx) }.toMap() }
+    val candidateIdToIdx by lazy { candidateIds.mapIndexed { idx, id -> Pair(id, idx) }.toMap() }
 
     override val votes = mutableMapOf<Int, Int>() // cand -> votes
     override val irvVotes = VoteConsolidator() // candidate indexes

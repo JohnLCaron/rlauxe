@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
@@ -17,12 +18,16 @@ import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateCards
 import kotlin.math.max
+import kotlin.random.Random
+
+private val logger = KotlinLogging.logger("CvrsFromManifest")
+
 
 class CvrsFromManifest(val variant: ElectionVariant,
                        val countyInput: CorlaCountyInput,
                        val stateInput: ColoradoInput,
                        val infos: Map<Int, ContestInfo>,
-                       ) {
+) {
     val show = false
 
     val converter: CorlaCvrConverter
@@ -73,13 +78,13 @@ class CvrsFromManifest(val variant: ElectionVariant,
         }
 
         countUnmatched = manifestIdMap.values.count { it.card == null }
-        println("countMiss=$countMiss countUnmatched=$countUnmatched countDup=$countDup")
+        logger.info{"countMiss=$countMiss countUnmatched=$countUnmatched countDup=$countDup"}
 
-        redactedTabulation()
+        tabulateRedactedGroups()
         val redactedPoolBuilders = makeRedactedPools(variant)
 
         convertedCvrTabs = tabulateCards(convertedCvrs.iterator(), infos)
-        redactedTabs = redactedTabulation()
+        redactedTabs = tabulateRedactedGroups()
 
         // set ncards for each pool; when CardPool is built, the contestTabs are reset accordingly
         if (redactedPoolBuilders.size == 1) {
@@ -98,30 +103,64 @@ class CvrsFromManifest(val variant: ElectionVariant,
                 }
             }
         }
-
-        val usedCards = redactedPools.sumOf { it.ncards() }
-        println("usedCards=$usedCards countUnmatched=$countUnmatched")
     }
 
     fun setRedactedNCards(cvrTabs: Map<Int, ContestTabulation>, poolBuilders: List<CardPoolBuilder>) {
-        // assume that the undervote Pct in the redacted Groups is the same as in the unredacted CVRs
+        val adjustPool = mutableMapOf<Int, Int>()
         val undervotePct: Map<Int, Double> = cvrTabs.mapValues { it.value.undervotes() / it.value.ncards().toDouble() }
         poolBuilders.forEach { poolb ->
             var maxCards = 0
             poolb.contestTabs.forEach { (contestId, contestTab) ->
-                val uvPct = undervotePct[contestId] ?: 1.0 // its possible there are no cvrs for a contest
-                contestTab.undervotes = roundToClosest(uvPct * contestTab.ncards()) // TODO 1.0
+                // assume that the undervote Pct in the redacted Groups is the same as in the unredacted CVRs
+                val uvPct = undervotePct[contestId] // its possible there are no cvrs for a contest
+                if (uvPct != null) contestTab.undervotes = roundToClosest(uvPct * contestTab.ncards())
                 contestTab.ncardsTabulated = contestTab.undervotes + contestTab.nvotes()
                 maxCards = max(maxCards, contestTab.ncardsTabulated)
             }
+            adjustPool[poolb.poolId] = maxCards - poolb.ncards() // dded or subtracted from pool
             poolb.setNcards(maxCards)
         }
-        val usedCards = poolBuilders.sumOf { it.ncards() }
-        println("redactedCvrs=$usedCards countUnmatched=$countUnmatched")
-        // should adjust
+
+        adjust(poolBuilders.associateBy{ it.poolId }, adjustPool)
     }
 
-    fun redactedTabulation(): Map<Int, ContestTabulation> {
+    data class PoolAdjustment(val poolId: Int)
+
+    fun adjust(poolBuilderMap: Map<Int, CardPoolBuilder>, adjustPool: Map<Int, Int>) {
+        // we want the sum of redacted cards to equal countUnmatched
+        val sumCardsBefore = poolBuilderMap.values.sumOf { it.ncards() }
+        val adjust = sumCardsBefore-countUnmatched
+        logger.info {"sumCardsBefore=$sumCardsBefore countUnmatched=$countUnmatched adjust=$adjust"}
+
+        // adjust by adding or subtracting cards from a random pool
+        if (adjust > 0) {
+            val adjList = mutableListOf<PoolAdjustment>()
+            adjustPool.forEach { (poolId, ncards) ->
+                if (ncards > 0) repeat(ncards) { adjList.add(PoolAdjustment(poolId)) }
+            }
+            repeat (adjust) {
+                val randomIdx = Random.nextInt(adjList.size)
+                val randomAdj = adjList.get(randomIdx)
+                val poolb = poolBuilderMap[randomAdj.poolId]!!
+                poolb.setNcards(poolb.ncards() - 1)
+                adjList.removeAt(randomIdx)
+            }
+        } else if (adjust < 0) { // what if its minus ??
+            logger.warn{ }
+        }
+
+        val sumCardsAfter = poolBuilderMap.values.sumOf { it.ncards() }
+        logger.info {"sumCardsAfter=$sumCardsAfter countUnmatched=$countUnmatched"}
+
+        // ContestTabulationIF
+        //     val votes: MutableMap<Int, Int>  // candidateId -> nvotes
+        //    fun ncards(): Int
+        //    fun undervotes(): Int
+        //    fun nvotes(): Int
+
+    }
+
+    fun tabulateRedactedGroups(): Map<Int, ContestTabulation> {
         val sumTabs = mutableMapOf<Int, ContestTabulation>()
         redactedGroups.forEach { redacted: RedactedGroup ->
             val groupTab: Map<Int, ContestTabulation> = converter.convertToContestTabulation(redacted)
@@ -174,7 +213,7 @@ class CvrsFromManifest(val variant: ElectionVariant,
         redactedPools.forEach { cardPool ->
             rcvrs.addAll(makeCardsForOnePool(cardPool, redactedManifestIds))
         }
-        println("wanted=$countUnmatched got=${rcvrs.size} redactedManifestIds is finished = ${!redactedManifestIds.hasNext()}")
+        logger.info {"wanted=$countUnmatched got=${rcvrs.size} redactedManifestIds is finished = ${!redactedManifestIds.hasNext()}"}
         return rcvrs
     }
 
@@ -226,26 +265,6 @@ class RedactedManifestIds(val manifestIds: Iterator<ManifestId>): Iterator<Manif
         return false
     }
 
-}
-
-// used by CvrsFromManifest
-fun fromPctUndervotes(
-    poolName: String,
-    poolId: Int,
-    hasExactContests: Boolean,    // aka single style
-    infos: Map<Int, ContestInfo>, // do we really need this ??
-    contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
-    undervotePct: Map<Int, Double>, // undervotePct for each contest
-): CardPoolBuilder {
-
-    val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
-    contestTabs.forEach { (contestId, contestTab) ->
-        val voteSum = contestTab.nvotes()
-        val info = infos[contestId]!!
-        // based on the contest's votes, you need at least this many cards for this contest
-        minCardsNeeded[contestId] = roundUp(voteSum.toDouble() / info.voteForN)
-    }
-    return CardPoolBuilder(poolName, poolId, hasExactContests, infos, contestTabs, minCardsNeeded)
 }
 
 

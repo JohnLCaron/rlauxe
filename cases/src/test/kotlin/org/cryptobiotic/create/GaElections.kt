@@ -16,7 +16,7 @@ import org.cryptobiotic.rlauxe.ga.createGaElection
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import kotlin.test.Test
 
-class MakeGaElection {
+class GaElections {
 
     @Test
     fun makeGa2Election() {

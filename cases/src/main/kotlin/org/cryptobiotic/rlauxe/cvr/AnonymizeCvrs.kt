@@ -8,7 +8,6 @@ import kotlinx.cli.required
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.boulder.parseNCards
 import java.io.File
 import kotlin.math.abs
 import kotlin.math.max

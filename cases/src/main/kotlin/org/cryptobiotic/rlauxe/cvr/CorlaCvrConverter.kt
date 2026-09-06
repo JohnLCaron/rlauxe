@@ -117,7 +117,7 @@ class CorlaCvrConverter(val county: String, export: CorlaCvrsIF, val infosByName
     }
 
     // you must use when converting to cards that map to canonical contests
-    fun convertToCard(dcvr: CvrRow): AuditableCard {
+    fun convertToCard(dcvr: CvrRow, visit: ((AuditableCardBuilder) -> Unit)? = null): AuditableCard {
         // must convert to canonical contestIDs to use cardStyles
         val contestSchemaIdSet = dcvr.contestVotes.map { it.contestId }.toSet()
         val canonicalIdSet = convertExportContestIdSetToCanonical(contestSchemaIdSet)
@@ -135,6 +135,7 @@ class CorlaCvrConverter(val county: String, export: CorlaCvrsIF, val infosByName
                 throw Exception("cant find contest")
             }
         }
+        if (visit != null) visit(cvrb)
         return cvrb.build()
     }
 

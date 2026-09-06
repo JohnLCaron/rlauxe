@@ -38,14 +38,15 @@ class BoulderVariant(variantEnum: BoulderVariantEnum) {
     val sim = (variantEnum == BoulderVariantEnum.Sim)   // created simulated cvrs from redacted pools
 }
 
+// probably obsoleted by CorlaCountyElection
 class CreateBoulderElection(
     val electionName: String,
     val auditType: AuditType,
     val corlaCvrs: CorlaCvrsIF,
     val sovo: BoulderStatementOfVotes,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
-    val hasStyle: Boolean, // TODO
-    variantEnum: BoulderVariantEnum,
+    val hasStyle: Boolean = true, // TODO
+    variantEnum: BoulderVariantEnum = BoulderVariantEnum.Sim,
 ): ElectionBuilder {
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infos = infoList.associateBy { it.id }

@@ -45,8 +45,6 @@ class CvrsFromManifest(val variant: ElectionVariant,
         val corlaCvrs = countyInput.readCorlaCvrs()
         redactedGroups = corlaCvrs.redactedGroups()
 
-        converter = CorlaCvrConverter(countyInput.countyName, corlaCvrs, infosByName, stateInput)
-        convertedCvrs = corlaCvrs.cvrs().map { converter.convertToCard(it) }
 
         val manifestIdMap = mutableMapOf<String, ManifestId>()
         countyInput.readCountyManifest().forEach { batch ->
@@ -58,6 +56,13 @@ class CvrsFromManifest(val variant: ElectionVariant,
         manifestIds = manifestIdMap.values.toList()
         manifestSize = manifestIdMap.size
 
+        converter = CorlaCvrConverter(countyInput.countyName, corlaCvrs, infosByName, stateInput)
+        convertedCvrs = corlaCvrs.cvrs().map {
+            converter.convertToCard(it) { cvrb:AuditableCardBuilder ->
+                val manifestEntry = manifestIdMap[cvrb.id]
+                if (manifestEntry != null) cvrb.location = manifestEntry.location
+            }
+        }
         convertedCvrs.forEach { card ->
             val manifestMatch = manifestIdMap[card.id]
             if (manifestMatch != null) {

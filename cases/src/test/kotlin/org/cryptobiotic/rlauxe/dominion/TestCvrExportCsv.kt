@@ -28,7 +28,7 @@ class TestCvrExportCsv {
         print(CvrExportCsvHeader)
         println(csv)
 
-        val roundtrip = readCvrExportCsv(csv)
+        val roundtrip = readCvrExportJsonCsv(csv)
         assertEquals(target, roundtrip)
 
         val tempFile = createTempFile().toString()

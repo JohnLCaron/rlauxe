@@ -591,6 +591,7 @@ class TestRunRoundCli {
 * hasStyle wtf
 * redo cases with correct phantoms and Npop
 * IRV redactions
-* use manifest ids in the redaction cardManifest file
+* use manifest ids in the redaction cardManifest file DONE
+* manifest files should be part of the committed-to election revord
 
 

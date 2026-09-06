@@ -8,7 +8,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
 
-class MakeVarianceData {
+class VarianceData {
 
     @Test
     fun createBoulderOaVariance() {

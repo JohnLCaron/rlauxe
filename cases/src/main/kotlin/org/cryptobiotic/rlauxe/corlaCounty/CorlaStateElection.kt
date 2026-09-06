@@ -18,22 +18,13 @@ import kotlin.collections.plus
 import kotlin.collections.set
 import kotlin.io.path.Path
 
-private val logger = KotlinLogging.logger("CorlaCountyElection")
+private val logger = KotlinLogging.logger("CorlaStateElection")
 
-enum class ElectionVariantEnum { Phantoms, OnePool, Styles, Sim }
 
-class ElectionVariant(variantEnum: ElectionVariantEnum) {
-    val phantoms = (variantEnum == ElectionVariantEnum.Phantoms)
-    val onePool = (variantEnum == ElectionVariantEnum.OnePool)
-    val styles = (variantEnum == ElectionVariantEnum.Styles)
-    val sim = (variantEnum == ElectionVariantEnum.Sim)
-
-    val auditType = if (sim || phantoms) AuditType.CLCA else AuditType.ONEAUDIT
-    fun isClca() = auditType.isClca()
-    fun isOA() = auditType.isOA()
-}
-
-class CorlaCountyElection(
+// TODO cant we merge this into CreateBoulderElection? why is it special ??
+// Use OneAudit; redacted ballots are in pools. Cant do IRV because we dont have VoteConsolidators
+// this version assume that the redacted groups know how many cards are contained in each
+class CorlaStateElection(
     val countyInput: CorlaCountyInput,
     val stateInput: ColoradoInput,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
@@ -89,9 +80,6 @@ class CorlaCountyElection(
         contestsUA = makeContestWAs(contests, npops, allCardsTabs, redactedPools, )
         mvrs = addIndexToMvrs(allCards)
         logger.info {"made ${mvrs.size} mvrs"}
-
-        //val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
-        //logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPoolBuilders.size} cardPools"}
     }
 
     override fun electionInfo() =
@@ -215,79 +203,13 @@ class CorlaCountyElection(
     }
 }
 
-class CCContestBuilder(
-    val auditType: AuditType,
-    mcontest2: MergedContestInfo, // not used i think
-    val info: ContestInfo,
-    cvrTab: ContestTabulation?,
-    redactedTab: ContestTabulation?,
-    val variant: ElectionVariant
-) {
-    val contestId = info.id
-    val contestName = info.name
-
-    val cvrsTotalCards: Int
-    val poolTotalCards: Int
-    val candVoteTotals: Map<Int, Int>
-    var useNc: Int
-    val ncvrs: Int
-
-    init {
-
-        // TODO heres where the contest ids and names will differ
-        // candVoteTotals : candidateId -> candidateVote
-        candVoteTotals = when {
-            (cvrTab == null) -> redactedTab!!.votes
-            (redactedTab) == null -> cvrTab.votes
-            else -> {
-                val sum = mutableMapOf<Int, Int>()
-                sum.mergeReduce(listOf(cvrTab.votes, redactedTab.votes))
-                sum
-            }
-        }
-
-        cvrsTotalCards = cvrTab?.ncardsTabulated ?: 0
-        poolTotalCards = redactedTab?.ncards() ?: 0
-        ncvrs = cvrsTotalCards + poolTotalCards
-        useNc = ncvrs
-
-        // try to find Nc - number of votes for the contest in this county
-        val minCardsNeededFromVotes = roundUp(candVoteTotals.map { it.value }.sum() / info.voteForN.toDouble())
-
-        if (useNc < minCardsNeededFromVotes) {
-            logger.warn {"*** Contest '${info.name}' has $minCardsNeededFromVotes minCardsNeededFromVotes, but ncvrs is ${ncvrs} - using minCardsNeeded" }
-            useNc = minCardsNeededFromVotes
-        }
-    }
-
-    fun build(info: ContestInfo): ContestIF {
-        val candVotes = candVoteTotals.filter { info.candidateIds.contains(it.key) } // remove Write-Ins
-
-        info.metadata["PoolPct"] = (100.0 * poolTotalCards / useNc).toInt().toString()
-        return if (info.isIrv) // TODO
-                IrvContest(info, winners=listOf(0), useNc, Ncast=ncvrs, undervotes=0) // TODO this is fake...
-            else
-                Contest(info, candVotes, useNc, ncvrs)
-    }
-
-    override fun toString() = buildString {
-        append("${nfn(info.id,3)}, ${trunc(info.name, nameWidth)}, ")
-        append(" ${nfn(useNc, 8)}, ${nfn(ncvrs, 7)}, ${nfn(useNc-ncvrs, 7)}")
-    }
-
-    companion object {
-        val nameWidth = 50
-        val header = " id, ${trunc("name", nameWidth)},    Nc,   ncvrs,    diff"
-    }
-}
-
 ////////////////////////////////////////////////////////////////////
 // variant.Sim: CLCA with simulated cvrs for the redacted groups
 // variant.Styles: OneAudit with redacted cards in a multiple pools by style
 // variant.OnePool: OneAudit with redacted cards in a single pool
 // variant.Phantoms: OneAudit with redacted cards set to isPhantom
 
-fun createCorlaCountyElection(
+fun createCorlaStateElection(
     countyInput: CorlaCountyInput,
     stateInput: ColoradoInput,
     topdir: String,
@@ -301,9 +223,9 @@ fun createCorlaCountyElection(
 
     clearDirectory(Path(topdir))
     Logging.addFileAppender("cases", "$topdir/logs.log")
-    logger.info {"-------------- createCorlaCountyElection ${countyInput.electionName} in $topdir"}
+    logger.info {"-------------- createCorlaStateElection ${countyInput.electionName} in $topdir"}
 
-    val election = CorlaCountyElection(countyInput, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
+    val election = CorlaStateElection(countyInput, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
 
     createElectionRecord(election, topdir = topdir)
 

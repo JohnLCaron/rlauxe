@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -18,7 +19,7 @@ import java.nio.file.Path
 
 private val logger = KotlinLogging.logger("StartFirstRound")
 
-fun startFirstRound(topdir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvrs: Int? = null): Result<AuditRoundIF, ErrorMessages> {
+fun startFirstRound(topdir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvrs: Int? = null, onlyContests: List<Int>? = null): Result<AuditRoundIF, ErrorMessages> {
     val errs = ErrorMessages("startFirstRound")
 
     try {
@@ -52,6 +53,15 @@ fun startFirstRound(topdir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvr
         // this may change the auditStatus to misformed.
         val results = VerifyResults()
         preAuditContestCheck(auditRecord.contests,  config.sampling, results)
+
+        if (onlyContests != null) {
+            auditRecord.contests.forEach { contest ->
+                if (!onlyContests.contains(contest.id)) {
+                    contest.preAuditStatus = TestH0Status.AuditorRemoved
+                    logger.info { "${contest.id} preAuditStatus set to TestH0Status.AuditorRemoved" }
+                }
+            }
+        }
 
         // in case it changed TODO is this ok ??
         val publisher = auditRecord.publisher

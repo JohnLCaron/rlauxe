@@ -7,9 +7,9 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
+import org.cryptobiotic.rlauxe.corlaCounty.votedatabase2020Counties
 import kotlin.collections.forEach
 import kotlin.io.path.Path
-import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 
 fun corlaCreationSettings(year: Int) =
@@ -135,30 +135,6 @@ fun makeCorla2026Pcvrs(toptopdir: String, auditcenter: String) {
         startFirstRound = true,
         isUniform = false,
     )
-}
-
-fun votedatabase2020Counties(votedatabase: String): Map<String, String> {
-    val path = Path(votedatabase) // or does votedatabase include
-
-    val cvrdata = mutableListOf<Pair<String, String>>()
-    path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202")}.forEach { subdir ->
-        val county = subdir.fileName.toString()
-        // Baca duplicates Huerfano
-        // Gunnison is missing contest tabulation
-        // Las Animas has only 120 of 8000 cvrs
-        // San Juan is missing
-        // Monroe, Rooselvelt: no such county in Colorado
-        if (county !in listOf("Baca", "Gunnison", "Las Animas", "San Juan", "Monroe", "Roosevelt")) {
-            try {
-                val filename = "${subdir}/cvr.csv" // entry.toString()
-                cvrdata.add(Pair(county, filename))
-            } catch (e: Exception) {
-                println(e.message)
-                throw e
-            }
-        }
-    }
-    return cvrdata.toMap()
 }
 
 fun auditcenter2026Counties(topdir: String): Map<String, String> {

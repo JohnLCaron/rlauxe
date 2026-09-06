@@ -6,13 +6,13 @@ import org.cryptobiotic.rlauxe.irv.VoteConsolidator
 // perhaps split ContestTabulation and TabulationAccumulation, which allows you to scan cvrs and cards
 interface ContestTabulationIF {
     val contestId: Int
-    val isIrv: Boolean
     val candidateIds: List<Int>
     val voteForN: Int
-    val candidateIdToIdx: Map<Int, Int>
-    val votes: MutableMap<Int, Int>  // candidateId -> nvotes
+
+    val isIrv: Boolean
     val irvVotes: VoteConsolidator
 
+    val votes: MutableMap<Int, Int>  // candidateId -> nvotes
     fun ncards(): Int
     fun undervotes(): Int
     fun nvotes(): Int

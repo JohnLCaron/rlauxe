@@ -1,5 +1,5 @@
 # Redaction Notes
-last changed 9/05/2026
+last changed 9/06/2026
 
 # Corla County Election
 
@@ -173,35 +173,25 @@ Redacted,,,,,,05,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,1,0,0,0,1,0,0,1,1,1,0,1,,,,
 
 ### Compare redaction methods
 
-
-Using CreatBoulderElection (obsolete)
-
-|              | ncontests | nredactions | phantoms | onePool   | styles    | unredacted |
-|--------------|-----------|-------------|----------|-----------|-----------|------------|
-| Boulder2023  | 34        | 1092        | 554 (26) | 2812 (31) | 1481 (32) | 570 (32)   |
-| Boulder2023  | 32        | 1092        | *        | 2929      | 2380      | 1801       |
-| Boulder2023  | 32        | 1092        | *        | 3016      | 2701      | 1996       |
-| Boulder2024  | 54        | 11628       | 1233     | 1349      | 670       | 569        |
-| Boulder2025  | 22        | 1043        | 1984     | 1016      | 978       | 844        |
-| Boulder2026p | 11        | 2913        | 3665     | 1148      | 614       | 426        |
-
 Using CorlaCountyElection
 
-|              | ncontests | nredactions | phantoms | onePool | styles | unredacted |
-|--------------|-----------|-------------|----------|---------|--------|------------|
-| Boulder2024  | 58        | 13122       | *        | 2385    | 4034   | 1233       |
-| Boulder2024  | 56        | 13122       | 4500     | -       | 657    | -          | not finished yet
-| Boulder2026p | 11        | 3007        | 1213 (9) | 1324    | 540    | 429        |
-| Morgan2026p  | 6         | 25          | 191      | 169     | *      | 168        |
-| LaPlata2026p | 9         | 9           | 284      | 284     | *      | 284        |
-| Weld2026p    | 12        | 0           | 560      | *       | *      | 570        |  // est redacted ncards = 20
+|              | ncontests | nredactions | ncards | ngroups | phantoms  | onePool   | styles | unredacted |
+|--------------|-----------|-------------|--------|---------|-----------|-----------|--------|------------|
+| Boulder2024  | 58        | 12127       | 396511 | 60      | 3523 (54) | 2116 (54) | 5439   | 1245       |
+| Boulder2024  | 56        | 12127       | 396511 | 60      | 4356      | 1527      | 795    | 561        | 
+| Boulder2026p | 11        | 2966        | 100423 | 21      | 1502 (9)  | 1175      | 725    | 432        |
+| Boulder2026p | 10        | 2966        | 100423 | 21      | 2019      | 1227      | 613    | 425        |
+| Morgan2026p  | 6         | 25          | 5220   | 1       | 192       | 211       | 169    | 168        |
+| LaPlata2026p | 9         | 9           | 16146  | 1       | 299       | 284       | 284    | 284        |
+| Weld2026p    | 12        | 20 (est)    | 69620  | 1       | 560       | *         | *      | 570        | 
 
 where
   - _ncontests_ : number of contests successfuly audited
   - _nredactions_: number of redacted CVRs
+  - _nrgroups_: number of redacted groups
   - _phantoms_: all redactions become phantoms
   - _onePool_: all redactions are placed in a single OneAudit pool
-  - _styles_: redactions are placed in multiple OneAudit pools by card style
+  - _styles_: redactions are placed in multiple OneAudit pools
   - _unredacted_: simulate audit without redactions
 
 * Each result is a single trial. Multiple trials are needed to find average and variance of the distribution.

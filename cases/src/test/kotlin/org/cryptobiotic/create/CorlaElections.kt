@@ -13,8 +13,8 @@ import org.cryptobiotic.rlauxe.auditcenter.corlaCreationSettings
 import org.cryptobiotic.rlauxe.auditcenter.corlaRoundSettings
 import org.cryptobiotic.rlauxe.auditcenter.countyElectionWithCvrs
 import org.cryptobiotic.rlauxe.auditcenter.createCountyElectionSimCvrs
-import org.cryptobiotic.rlauxe.auditcenter.votedatabase2020Counties
 import org.cryptobiotic.rlauxe.auditcenter.writeCountyContestData
+import org.cryptobiotic.rlauxe.corlaCounty.votedatabase2020Counties
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
@@ -22,7 +22,7 @@ import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
 
 import kotlin.test.Test
 
-class MakeCorlaElections {
+class CorlaElections {
     val show = false
 
     @Test

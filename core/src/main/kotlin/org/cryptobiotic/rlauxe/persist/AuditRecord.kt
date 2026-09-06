@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.Config
+import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.CountyPools
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.persist.bin.FastSamplingCardIterator
@@ -119,6 +120,20 @@ open class AuditRecord(
             }
         }
         return result
+    }
+
+    // for each contest, the last round that was used (optional filter on success) and total mvrs used
+    fun contestRounds(successOnly: Boolean = false): Pair<Map<Int, ContestRound>, Int> {
+        val contestsMap = mutableMapOf<Int, ContestRound>()
+        var nmvrs = 0
+        rounds.forEach { auditRound ->
+            auditRound.contestRounds.forEach { contestRound ->
+                if (!successOnly || contestRound.status.success)
+                    contestsMap[contestRound.id] = contestRound
+            }
+            nmvrs += auditRound.newmvrs
+        }
+        return Pair(contestsMap, nmvrs)
     }
 
     fun showName(): String {

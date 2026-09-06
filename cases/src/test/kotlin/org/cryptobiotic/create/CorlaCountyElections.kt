@@ -2,6 +2,9 @@ package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.ContestRound
+import org.cryptobiotic.rlauxe.audit.runAllRoundsAndVerify
+import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2024General
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2026PMerged
 import org.cryptobiotic.rlauxe.auditcenter.Colorado2026PwithCvrs
@@ -18,6 +21,7 @@ import org.cryptobiotic.rlauxe.corlaCounty.LaPlata26pInput
 import org.cryptobiotic.rlauxe.corlaCounty.Morgan26pInput
 import org.cryptobiotic.rlauxe.corlaCounty.Weld26pInput
 import org.cryptobiotic.rlauxe.corlaCounty.createCorlaCountyElection
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import kotlin.test.Test
 
 class CorlaCountyElections {
@@ -40,10 +44,10 @@ class CorlaCountyElections {
         createCorlaCountyElection(
             input,
             stateInput,
-            topdir = "$toptopdir/phantoms",
-            creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
+            topdir = "$toptopdir/styles",
+            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
-            variant = ElectionVariantEnum.Phantoms,
+            variant = ElectionVariantEnum.Styles,
         )
     }
 
@@ -128,5 +132,42 @@ class CorlaCountyElections {
             roundConfig = boulderRoundSettings(),
             variant = ElectionVariantEnum.Styles,
         )
+    }
+
+    @Test
+    fun compareToPhantoms() {
+        val toptopdir = "$cases/corlaCounty/boulder24"
+        createBoulder24()
+        compareVariants(toptopdir, "phantoms", listOf("sim", "onepool", "styles"))
+    }
+
+    @Test
+    fun compareToSim() {
+        val toptopdir = "$cases/corlaCounty/boulder24"
+        createBoulder24()
+        compareVariants(toptopdir, "sim", listOf("phantoms", "onepool", "styles"))
+    }
+
+    // we want to get the audited contests from one variant, and run that with the other variants
+    fun compareVariants(toptopdir: String, from: String, compareOthers: List<String>) {
+        val fromtopdir = "$toptopdir/$from"
+        startFirstRound(fromtopdir)
+        runAllRoundsAndVerify(fromtopdir, 5, false)
+
+        val fromAuditRecord = AuditRecord.read(fromtopdir)!! as AuditRecord
+        val (successfulContests, nmvrs) = fromAuditRecord.contestRounds(successOnly = true)
+        println(">>>>>>>>>>>>>>>>>>>>>>>> $from has ${successfulContests.size} contests, nmvrs = $nmvrs")
+        val onlyContests = successfulContests.keys.toList()
+        compareOthers.forEach { other ->
+            val othertopdir = "$toptopdir/$other"
+
+            startFirstRound(othertopdir, onlyContests = onlyContests)
+            runAllRoundsAndVerify(othertopdir, 5, false)
+
+            val fromAuditRecord = AuditRecord.read(othertopdir)!! as AuditRecord
+            val (otherContests, nmvrs)  = fromAuditRecord.contestRounds(successOnly = true)
+            println(">>>>>>>>>>>>>>>>>>>>>>> $other has ${otherContests.size} contests, nmvrs=$nmvrs")
+        }
+
     }
 }

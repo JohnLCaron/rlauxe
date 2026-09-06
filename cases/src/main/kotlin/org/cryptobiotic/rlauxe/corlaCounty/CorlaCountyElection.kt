@@ -6,26 +6,17 @@ import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
 import org.cryptobiotic.rlauxe.auditcenter.MergedContestInfo
 import org.cryptobiotic.rlauxe.auditcenter.StrataInfo
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
-import org.cryptobiotic.rlauxe.cvr.RedactedGroup
-import org.cryptobiotic.rlauxe.cvr.cleanCsvString
-import org.cryptobiotic.rlauxe.estimate.makeCardsForOnePoolV
 import org.cryptobiotic.rlauxe.irv.IrvContest
 import org.cryptobiotic.rlauxe.irv.makeRaireContest
 import org.cryptobiotic.rlauxe.irv.makeRaireOneAuditContest
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.collections.map
 import kotlin.collections.plus
 import kotlin.collections.set
 import kotlin.io.path.Path
-import kotlin.math.max
 
 private val logger = KotlinLogging.logger("CreateBoulderElection")
 
@@ -45,7 +36,7 @@ class ElectionVariant(variantEnum: ElectionVariantEnum) {
 // TODO cant we merge this into CreateBoulderElection? why is it special ??
 // Use OneAudit; redacted ballots are in pools. Cant do IRV because we dont have VoteConsolidators
 // this version assume that the redacted groups know how many cards are contained in each
-class CreateCorlaCountyElection(
+class CorlaCountyElection(
     val countyInput: CorlaCountyInput,
     val stateInput: ColoradoInput,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
@@ -406,7 +397,7 @@ fun createCorlaCountyElection(
     Logging.addFileAppender("cases", "$topdir/logs.log")
     logger.info {"-------------- createCorlaCountyElection ${countyInput.electionName} in $topdir"}
 
-    val election = CreateCorlaCountyElection(countyInput, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
+    val election = CorlaCountyElection(countyInput, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
 
     createElectionRecord(election, topdir = topdir)
 

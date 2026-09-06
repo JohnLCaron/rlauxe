@@ -24,6 +24,7 @@ import org.cryptobiotic.rlauxe.util.CardTabulation
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.util.Logging
 import org.cryptobiotic.rlauxe.util.TransformingIterator
 import kotlin.Boolean
 import kotlin.collections.component1

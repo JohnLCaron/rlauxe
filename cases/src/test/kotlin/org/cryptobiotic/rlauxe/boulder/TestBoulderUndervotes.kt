@@ -51,7 +51,7 @@ class TestBoulderUndervotes {
                     Pair(value[1], value[0])
                 }
                 cardStyles[key + "-A"] = CardStyle(key + "-A", styleId, styleA.toIntArray(), true)
-                cardStyles[key + "-B"] = CardStyle(key + "-B", styleId+1, styleB.toIntArray(), true)
+                cardStyles[key + "-B"] = CardStyle(key + "-B", styleId + 1, styleB.toIntArray(), true)
                 styleId += 2
             } else {
                 value.forEach { contestIds ->
@@ -89,7 +89,7 @@ class TestBoulderUndervotes {
                     Pair(value[1], value[0])
                 }
                 ecardStyles[key + "-A"] = CardStyle(key + "-A", styleId, styleA.contestIds.toIntArray(), true)
-                ecardStyles[key + "-B"] = CardStyle(key + "-B", styleId+1, styleB.contestIds.toIntArray(), true)
+                ecardStyles[key + "-B"] = CardStyle(key + "-B", styleId + 1, styleB.contestIds.toIntArray(), true)
                 styleId += 2
             } else {
                 value.forEach { cardStyle ->
@@ -127,7 +127,11 @@ class TestBoulderUndervotes {
                 if (!cardStyle.possibleContests().contentEquals(gids)) {
                     println("  *** redacted group '${rgroup.ballotType}' contests dont match corresponding card style")
                     println("  $rgroup")
-                    println("    ${gids.contentToString()} !=\n    ${cardStyle.possibleContests().contentToString()} (${rgroup.ballotType})")
+                    println(
+                        "    ${gids.contentToString()} !=\n    ${
+                            cardStyle.possibleContests().contentToString()
+                        } (${rgroup.ballotType})"
+                    )
                 }
             } else {
                 println("  *** redacted group '${rgroup.ballotType}' doesnt have corresponding card style '${rgroup}'")
@@ -144,57 +148,22 @@ class TestBoulderUndervotes {
         // This is now done in Boulder24Input
         //         if (input.electionName == "Boulder2024") { Boulder24Input.removeContest12FromPool6(corlaCvrs.redactedGroups()) }
     }
+}
 
-/*    fun extractBallotType(ballotType: String): String {
-        val isA = ballotType.contains("-A")
-        val isB = ballotType.contains("-B")
+    // class CreateBoulderElection(
+    //    val electionName: String,
+    //    val auditType: AuditType,
+    //    val corlaCvrs: CorlaCvrsIF,
+    //    val sovo: BoulderStatementOfVotes,
+    //    val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
+    //    val hasStyle: Boolean, // TODO
+    //    variantEnum: BoulderVariantEnum,
+    //)
 
-        val gcardStyle = extractBallotType(rgroup.ballotType) + "-" + if (isA) "A" else "B"
-
-
-        val btoke = ballotType.split(" ", "-", ",")[0]
-        try {
-            val toke =  btoke.toInt().toString()
-            val isA = rgroup.ballotType.contains("-A")
-            val isB = rgroup.ballotType.contains("-B")
-        } catch (e: NumberFormatException) {
-            println("extractBallotType $btoke")
-            return ""
-        }
-    } */
-
-    @Test
-    fun showSovoContestDetail2() {
-        val election2 = CreateBoulderElectionClcaOld("test", AuditType.ONEAUDIT, corlaCvrs, sovo)
-        println()
-        election2.boulderContestBuilders.forEach { (_, oa) ->
-            println(SovoContestVotes.header)
-            println(oa.details())
-        }
-    }
-
-    @Test
-    fun showPoolVotes() {
-        println("votes, undervotes")
-        val election2 = CreateBoulderElectionClcaOld("test",AuditType.ONEAUDIT, corlaCvrs, sovo)
-        val contestIds = election2.infoList.map { it.id }
-        showPoolVotes(contestIds, election2.cardPoolBuilders)
-    }
-
-    fun showPoolVotes(contestIds: List<Int>, cardPools: List<CardPoolBuilder>, width:Int = 4) {
-        println("votes, undervotes")
-        print("${trunc("poolName", 9)}:")
-        contestIds.forEach {  print("${nfn(it, width)}|") }
-        println()
-
-        cardPools.forEach {
-            println(it.showVotes(contestIds, width))
-        }
-    }
-
+    /*
     @Test
     fun showRedactedUndervotes2() {
-        val election2 = CreateBoulderElectionClcaOld("test",AuditType.ONEAUDIT, corlaCvrs, sovo)
+        val election2 = CreateBoulderElectionOld("test", AuditType.ONEAUDIT, corlaCvrs, sovo, )
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -257,7 +226,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showRedactedNcards() {
-        val election2 = CreateBoulderElectionClcaOld("test", AuditType.ONEAUDIT, corlaCvrs, sovo)
+        val election2 = CreateBoulderElectionOld("test", AuditType.ONEAUDIT, corlaCvrs, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -325,7 +294,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showNcards() {
-        val election2 = CreateBoulderElectionClcaOld("test", AuditType.ONEAUDIT, corlaCvrs, sovo)
+        val election2 = CreateBoulderElectionOld("test", AuditType.ONEAUDIT, corlaCvrs, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -451,4 +420,4 @@ fun CardPoolBuilder.undervotesSingleBallotStyle(): Map<Int, Int> {  // contest -
         Pair(id, ncards() * info.voteForN - voteSum)
     }
     return undervote.toMap().toSortedMap()
-}
+} */

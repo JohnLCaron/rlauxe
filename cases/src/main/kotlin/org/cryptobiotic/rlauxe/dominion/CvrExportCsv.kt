@@ -16,7 +16,7 @@ const val CvrExportCsvHeader = "id, group, style, precinct, contests, candidates
 
 // serialization of CvrExport (from Json) to/from our ad-hoc csv format
 
-fun readCvrExportCsv(line: String): CvrExport {
+fun readCvrExportJsonCsv(line: String): CvrExport {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
@@ -75,7 +75,7 @@ class IteratorCvrExportStream(input: InputStream): CloseableIterator<CvrExport> 
     override fun next(): CvrExport {
         if (!hasNext())
             throw NoSuchElementException()
-        val result =  readCvrExportCsv(nextLine!!)
+        val result =  readCvrExportJsonCsv(nextLine!!)
         nextLine = null
         return result
     }

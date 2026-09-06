@@ -1,3 +1,5 @@
+package org.cryptobiotic.rlauxe.util
+
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.spi.ILoggingEvent

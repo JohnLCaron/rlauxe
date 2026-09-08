@@ -18,10 +18,11 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.verify.VerifyAuditCommitment
 import kotlin.use
 
-private val logger = KotlinLogging.logger("StartAudit")
+private val logger = KotlinLogging.logger("CreateAuditRecord")
 
+// fastSampling requires every card has a style; all styles must be in styleMap when reading (no fromCvr or phantoms)
 fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String, externalSortDir: String? = null,
-                      validate: Boolean = false, sortManifest: Boolean = true) {
+                      validate: Boolean = false, sortManifest: Boolean = true, fastSampling: Boolean = true) {
     val publisher = Publisher(topdir)
 
     writeAuditCreationConfigJsonFile(config.creation, publisher.auditCreationConfigFile())
@@ -36,7 +37,8 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String,
         } else {
             sortManifestExternal(externalSortDir, publisher, config.creation.seed)
         }
-        if (election.cardStyles() != null) { // TODO styles cant be optional
+        // TODO styles cant be optional; all styles must be in styleMap when reading (no fromCvr or phantoms)
+        if (fastSampling && election.cardStyles() != null) {
             makeFastCards(publisher, election.cardStyles()!!)
         }
 

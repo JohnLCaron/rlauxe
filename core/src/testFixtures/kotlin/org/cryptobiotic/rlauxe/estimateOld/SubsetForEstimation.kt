@@ -46,10 +46,10 @@ fun getSubsetForEstimation(
     if (contestsIncluded.isEmpty())
         return CardSamples(emptyList(), emptyMap())
 
-    val allInfos = if (debug) tabulateDebugInfo(sortedManifest.cards.iterator(), contestsIncluded, null) else null
+    val allInfos = if (debug) tabulateDebugInfo(sortedManifest.cardIterable.iterator(), contestsIncluded, null) else null
 
     // calculate how many samples are wanted for each contest.
-    val wantSampleSize: Map<Int, Int> = contestsIncluded.associate { it.id to estSamplesNeeded(config, it, sortedManifest.ncards) }
+    val wantSampleSize: Map<Int, Int> = contestsIncluded.associate { it.id to estSamplesNeeded(config, it) }
     val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
     val skippedContests = mutableSetOf<Int>()
     val usedByContests = mutableMapOf<Int, MutableList<Int>>()
@@ -63,7 +63,7 @@ fun getSubsetForEstimation(
 
     var countPhantoms = 0
     var countCardsLookedAt = 0
-    val sortedCardIter = sortedManifest.cards.iterator()
+    val sortedCardIter = sortedManifest.cardIterable.iterator()
     while (sortedCardIter.hasNext()) {
         if (!contestsIncluded.any { contestWantsMoreSamples(it)} ) break
 
@@ -174,7 +174,7 @@ private val fac = 10 // TODO pass in? check cardManifest, just use all if not to
 // TODO feels wrong
 // CLCA and OneAudit, not needed by Polling
 // we dont use this for the actual estimation....
-fun estSamplesNeeded(config: Config, contestRound: ContestRound, ncards: Int): Int {
+fun estSamplesNeeded(config: Config, contestRound: ContestRound): Int {
     val minAssertionRound = contestRound.minAssertion()
     if (minAssertionRound == null) {
         contestRound.minAssertion()

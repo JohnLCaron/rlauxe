@@ -314,10 +314,11 @@ data class CvrRow(
 ) {
     var contestVotes = mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
 
-    init {
+    /* init {
+    // Boulder2020:  9/1/1986 != 9-1-86; went through Excel spreadsheet and got munged
         if (imprintedId != "${tabulatorNum}-${batchId}-${recordId}")
-            print("")
-    }
+            println("$imprintedId != ${tabulatorNum}-${batchId}-${recordId}")
+    } */
 
     fun addVotes(schema: CvrSchema, line: CSVRecord, lineno: Int): CvrRow {
         var colidx = schema.nheaders // skip over the first n columns

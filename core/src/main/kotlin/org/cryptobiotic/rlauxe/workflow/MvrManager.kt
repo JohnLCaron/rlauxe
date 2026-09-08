@@ -23,7 +23,7 @@ interface MvrManager {
     fun writeMvrsForRound(round: Int): Int
     fun topdir() = "none"
 
-    fun samplingCards(): CloseableIterable<SamplingCardIF> = sortedManifest().cards
+    fun samplingCards(): CloseableIterable<SamplingCardIF> = sortedManifest().cardIterable
 }
 
 // when the MvrManager supplies the audited mvrs, its a test

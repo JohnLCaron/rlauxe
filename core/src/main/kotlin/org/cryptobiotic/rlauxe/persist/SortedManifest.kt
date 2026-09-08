@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 
 // TODO why in persist ??
 // TODO why is ncards here ??
-class SortedManifest(val cards: CloseableIterable<AuditableCard>, val ncards: Int) {
+class SortedManifest(val cardIterable: CloseableIterable<AuditableCard>, val ncards: Int) {
 
     companion object {
         fun createFromAList(cards: List<AuditableCard>) : SortedManifest {

@@ -49,7 +49,7 @@ class TestSfElectionVunderFuzz {
         var countCards = 0
 
         // use the first 30_000 actual cards
-        sortedManifest.cards.iterator().use { iter ->
+        sortedManifest.cardIterable.iterator().use { iter ->
             while (iter.hasNext() && countCards < ncards) {
                 val card = iter.next()
                 contestCards.add(card)
@@ -128,20 +128,20 @@ class TestSfElectionVunderFuzz {
         println()
 
         // over all cards
-        val countCardsInPool = countCardsInPool(sortedManifest.cards.iterator(), contestId, useCardPoolId)
+        val countCardsInPool = countCardsInPool(sortedManifest.cardIterable.iterator(), contestId, useCardPoolId)
         println("countCardsInPool=${countCardsInPool}")
 
         val privateMvrs = mvrManager.readCardsAndMerge(publisher.sortedMvrsFile())
         val mvrPoolAvg = findPoolAverage(privateMvrs, contestId, useCardPoolId, passorter)
         println("mvr poolAvg = ${mvrPoolAvg}")
 
-        val cvrPoolAvg = findPoolAverage(sortedManifest.cards.iterator(), contestId, useCardPoolId, passorter)
+        val cvrPoolAvg = findPoolAverage(sortedManifest.cardIterable.iterator(), contestId, useCardPoolId, passorter)
         println("cvrPoolAvg = ${cvrPoolAvg}")
 
         // over all mvr, cvr pairs
         val privateMvrs2 = mvrManager.readCardsAndMerge(publisher.sortedMvrsFile())
         val clcaPoolAvg =
-            findPoolAverageB(privateMvrs2, sortedManifest.cards.iterator(), contestId, useCardPoolId, cassorter)
+            findPoolAverageB(privateMvrs2, sortedManifest.cardIterable.iterator(), contestId, useCardPoolId, cassorter)
         println("clcaPoolAvg = ${clcaPoolAvg}")
 
         // TODO what can we test?
@@ -150,7 +150,7 @@ class TestSfElectionVunderFuzz {
         val contestCards = mutableListOf<AuditableCard>()
         val ncards = 100_000 // all
         var countCards = 0
-        sortedManifest.cards.iterator().use { iter ->
+        sortedManifest.cardIterable.iterator().use { iter ->
             while (iter.hasNext() && countCards < ncards) {
                 val card = iter.next()
                 contestCards.add(card)

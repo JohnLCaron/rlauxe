@@ -78,7 +78,7 @@ fun readAuditCommitment(topdir: String): Result<AuditCommitment, ErrorMessages> 
     val sortedManifest = mvrManager.sortedManifest()
 
     return if (errs.hasErrors()) Err(errs) else
-        Ok(AuditCommitment(electionInfo, config.creation, contests, styles, pools, sortedManifest.cards))
+        Ok(AuditCommitment(electionInfo, config.creation, contests, styles, pools, sortedManifest.cardIterable))
 }
 
 fun verifySortedCardManifest(

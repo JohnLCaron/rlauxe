@@ -1,10 +1,15 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
+import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
+import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
+import org.cryptobiotic.rlauxe.cvr.Garfield20Cvrs
 import org.cryptobiotic.rlauxe.cvr.Redaction
+import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
+import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
@@ -15,7 +20,11 @@ interface CorlaCountyInput {
     val manifestSource: String
     val cvrsSource: String
 
-    fun readCorlaCvrs(): CorlaCvrs = readCorlaCvrs(cvrsSource, redaction = Redaction())
+    fun readCorlaCvrs(): CorlaCvrsIF {
+        return if (countyName == "Garfield") Garfield20Cvrs(cvrsSource)
+            else if (countyName == "Boulder") readCorlaCvrs(cvrsSource, redaction = RedactionBoulder())
+            else readCorlaCvrs(cvrsSource, redaction = Redaction())
+    }
 
     fun hasABgroups() = false
 
@@ -25,6 +34,8 @@ interface CorlaCountyInput {
 }
 
 class CorlaCounty2020Input(override val countyName: String): CorlaCountyInput {
+    val countyPopulation = stateInput.strataPopulation()[countyName]!!
+
     override val electionName = "${countyName}2020"
     override val cvrsSource: String
     override val manifestSource: String
@@ -40,13 +51,14 @@ class CorlaCounty2020Input(override val countyName: String): CorlaCountyInput {
             countyName = countyName,
             tabulatorNum = 1,
             batchId = "1",
-            nballotCards = 42, // TODO
+            nballotCards = countyPopulation,
             location = countyName
         ))
     }
 
     companion object {
         val countyCvrs: Map<String, String> = votedatabase2020Counties("/home/stormy/datadrive/votedatabase/cvr/Colorado/")
+        val stateInput = Colorado2020General()
     }
 }
 

@@ -79,7 +79,7 @@ open class CountyElectionWithCvrs (
             totalCvrCardCount += cvrCount
 
             // write them out while we have them in memory
-            writeUnsortedMvrs(county, publisher,Closer (allCvrs.iterator() ))
+            writeUnsortedMvrs(county, publisher, Closer(allCvrs.iterator()))
 
             // Get the card styles from the cvrs
             val countyCardStyles: List<StyleIF> = converter.cardStyles.values.toList() + converter.redactedPools.map { it as StyleIF }

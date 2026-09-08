@@ -52,7 +52,7 @@ class TestSf2024OneAuditIrv() {
         // use the cvrs from the clca as the mvrs
         val cvrdir = "$cases/sf/sf2024/clca"
         val cvrPublisher = Publisher(cvrdir)
-        mvrs = readSortedManifest(cvrPublisher, infos, auditRecord.electionInfo.totalCardCount).cards
+        mvrs = readSortedManifest(cvrPublisher, infos, auditRecord.electionInfo.totalCardCount).cardIterable
     }
 
     @Test
@@ -84,7 +84,7 @@ class TestSf2024OneAuditIrv() {
         println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean())}")
 
         // the cards in the pools dont have votes
-        val cardTab = tabulateAuditableCards(sortedManifest.cards.iterator(), infos24).values.first()
+        val cardTab = tabulateAuditableCards(sortedManifest.cardIterable.iterator(), infos24).values.first()
         // println("cardTab.irvVotes = ${cardTab.irvVotes}")
         val cardIrvVotes = cardTab.irvVotes.makeVotes(rcontestUA.ncandidates)
         println("rassorter calcMargin from cvrs only = ${rassorter.calcMarginFromVotes(cardIrvVotes, Npop)}")
@@ -96,7 +96,7 @@ class TestSf2024OneAuditIrv() {
 
         // sum all the assorter values in one pass across all the cards, using PoolAverage when card is in a pool
         val avgWithPool = AssortAvg()
-        val cards = sortedManifest.cards.iterator()
+        val cards = sortedManifest.cardIterable.iterator()
         cards.use { cardIter ->
             while (cardIter.hasNext()) {
                 val card = cardIter.next()
@@ -192,14 +192,14 @@ class TestSf2024OneAuditIrv() {
         val poolMarginInVotes = sumMarginInVotes.roundToInt()
 
         // whats the margin in votes for the cvrs ??
-        val cvrTab = tabulateAuditableCards(sortedManifest.cards.iterator(), infos24).values.first()
+        val cvrTab = tabulateAuditableCards(sortedManifest.cardIterable.iterator(), infos24).values.first()
         val cvrVotes = cvrTab.irvVotes.makeVotes(rcontestUA.ncandidates)
         println("  cvrVotes calcMarginInVotes= ${rassorter.calcVoteMargin(cvrVotes)}")
         val cvrMarginInVotes = rassorter.calcVoteMargin(cvrVotes)
 
         // another way to compute the cvr margin
         val avgNoPool = AssortAvg()
-        val cards = sortedManifest.cards.iterator()
+        val cards = sortedManifest.cardIterable.iterator()
         cards.use { cardIter ->
             while (cardIter.hasNext()) {
                 val card = cardIter.next()
@@ -239,7 +239,7 @@ class TestSf2024OneAuditIrv() {
         val assortAvg = AssortAvg()
 
         // the cvrs
-        val iter = sortedManifest.cards.iterator()
+        val iter = sortedManifest.cardIterable.iterator()
         while (iter.hasNext()) {
             val card = iter.next()
             if (card.hasContest(contestId) && (card.poolId() == null)) {

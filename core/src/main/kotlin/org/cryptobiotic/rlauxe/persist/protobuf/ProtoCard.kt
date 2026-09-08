@@ -165,10 +165,8 @@ class ProtoCardIterable(val protoFilename: String, val bufferSize: Int = 100_000
         ProtoCardIterator(protoFilename, bufferSize, styles)
 }
 
-class ProtoCardIterator(filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCard> {
+class ProtoCardIterator(val filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCard> {
     val styleMap: Map<Int, StyleIF> = styles?.associateBy{ it.id() } ?: emptyMap()
-
-    val errs = ErrorMessages("readProtoCardsFile '${filename}'")
     val inputStream: InputStream
     var nextMessageSize = -1
 
@@ -189,6 +187,8 @@ class ProtoCardIterator(filename: String, bufferSize: Int = 100_000, val styles:
     override fun next(): AuditableCard {
         val bytes = ByteArray(nextMessageSize)
         val bytesRead = inputStream.read(bytes)
+        if (bytesRead != nextMessageSize)
+            logger.error { "damaged ProtoCard file = $filename" }
         val protoCard = ProtoBuf.decodeFromByteArray<ProtoCard>(bytes)
         return protoCard.import(styleMap)
     }

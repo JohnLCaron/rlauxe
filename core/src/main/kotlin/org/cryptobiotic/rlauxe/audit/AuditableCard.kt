@@ -20,13 +20,14 @@ data class AuditableCard (
     val index: Int,  // index into the original, canonical list of cards, aka manifest index
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    val styleId: Int, // must have an styleId
+    val styleId: Int, // must have a styleId
     val contestIds: IntArray,   // these 3 form the cvr.votes map. will be empty if no cvr.
     val contestStarts: IntArray,
     val candidates: IntArray,
     val poolId: Int?, // must be set if its from a OneAudit CardPool; if not OneAudit, ok to set anyway for visibility
 ): CvrIF, SamplingCardIF {
 
+    // In order to use fast sampling, must have a read style set, not fromCvr or fromPhantome
     // trying to finesse if a card always has a style. During construction, it may have a style id but not a style.
     // After construction, ie during the audit, it always has a style. This allows us to delegate "possible contests"
     // to the style or cvr.votes.

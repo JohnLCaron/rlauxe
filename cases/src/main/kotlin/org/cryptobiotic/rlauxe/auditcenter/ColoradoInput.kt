@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.auditcenter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.corlaCounty.CorlaCounty2020Input
+import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyInput
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
@@ -43,12 +45,18 @@ private val logger = KotlinLogging.logger("ColoradoInput")
    subclasses provide contestNameCleanup and candidateNameCleanup
  */
 
+interface ColoradoInputWithCvrs {
+    fun corlaCountyInput(countyName: String): CorlaCountyInput?
+}
+
 abstract class ColoradoInput(
     val generalCanonicalFile: String,
     val contestRoundFile: String,
     val tabulateCountyFile: String,
     val mvrComparisonFile: String
 ) {
+    val name = this.javaClass.simpleName
+
     abstract fun skipCounties(countyName: String): Boolean
 
     //
@@ -59,7 +67,7 @@ abstract class ColoradoInput(
 
     abstract fun canonicalContests(): Map<String, CanonicalContest>
 
-    fun counties(): List<String>  = canonicalContests().values.map { it.counties }
+    open fun counties(): List<String>  = canonicalContests().values.map { it.counties }
         .flatten()
         .filter { !skipCounties(it) }
         .toSet()

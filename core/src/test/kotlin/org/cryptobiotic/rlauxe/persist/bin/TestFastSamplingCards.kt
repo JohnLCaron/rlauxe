@@ -25,7 +25,7 @@ class TestFastSamplingCards {
         val styles = mvrManager.styles()!! // TODO maybe not optional ?
         val cardManifest = countyAudit.readSortedManifest(styles)
 
-        val cardIter = cardManifest.cards.iterator()
+        val cardIter = cardManifest.cardIterable.iterator()
 
         val stopwatch = Stopwatch()
         val ncards = writeFastSamplingCards(cardIter, testFastSamplFile)

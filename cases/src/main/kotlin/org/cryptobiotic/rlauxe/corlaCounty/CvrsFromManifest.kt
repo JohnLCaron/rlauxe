@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
@@ -23,12 +24,16 @@ import kotlin.random.Random
 private val logger = KotlinLogging.logger("CvrsFromManifest")
 
 
-class CvrsFromManifest(val variant: ElectionVariant,
-                       val countyInput: CorlaCountyInput,
-                       val stateInput: ColoradoInput,
-                       val infos: Map<Int, ContestInfo>,
+class CvrsFromManifest(
+    val variant: ElectionVariant,
+    val countyInput: CorlaCountyInput,
+    val stateInput: ColoradoInput,
+    val infos: Map<Int, ContestInfo>,
+    val stateElection: Boolean,
 ) {
     val show = false
+    val county = countyInput.countyName
+    val fakeManifest = countyInput.manifestSource == "fake"
 
     val converter: CorlaCvrConverter
     val infosByName = infos.mapKeys { it.value.name } //  are the cvr names compatible ?
@@ -50,22 +55,27 @@ class CvrsFromManifest(val variant: ElectionVariant,
         val corlaCvrs = countyInput.readCorlaCvrs()
         redactedGroups = corlaCvrs.redactedGroups()
 
-
         val manifestIdMap = mutableMapOf<String, ManifestId>()
-        countyInput.readCountyManifest().forEach { batch ->
-            repeat(batch.nballotCards) { recordId ->
-                val want = "${batch.tabulatorNum}-${batch.batchId}-${recordId + 1}"
-                manifestIdMap[want] = ManifestId(want, batch.location)
+        if (fakeManifest) {
+            manifestIds = emptyList()
+        } else {
+            countyInput.readCountyManifest().forEach { batch ->
+                repeat(batch.nballotCards) { recordId ->
+                    val want = "${batch.tabulatorNum}-${batch.batchId}-${recordId + 1}"
+                    manifestIdMap[want] = ManifestId(want, batch.location)
+                }
             }
+            manifestIds = manifestIdMap.values.toList()
         }
-        manifestIds = manifestIdMap.values.toList()
-        manifestSize = manifestIdMap.size
+        manifestSize = manifestIds.size
 
         converter = CorlaCvrConverter(countyInput.countyName, corlaCvrs, infosByName, stateInput)
         convertedCvrs = corlaCvrs.cvrs().map {
             converter.convertToCard(it) { cvrb:AuditableCardBuilder ->
+                if (stateElection) cvrb.id = "$county:${cvrb.id}"
                 val manifestEntry = manifestIdMap[cvrb.id]
-                if (manifestEntry != null) cvrb.location = manifestEntry.location
+                if (manifestEntry != null) cvrb.location = "$county:${manifestEntry.location}"
+                else if (cvrb.location != null) cvrb.location = "$county:${cvrb.location}"
             }
         }
         convertedCvrs.forEach { card ->
@@ -78,7 +88,7 @@ class CvrsFromManifest(val variant: ElectionVariant,
         }
 
         countUnmatched = manifestIdMap.values.count { it.card == null }
-        logger.info{"countMiss=$countMiss countUnmatched=$countUnmatched countDup=$countDup"}
+        logger.info{"$county: countMiss=$countMiss countUnmatched=$countUnmatched countDup=$countDup"}
 
         tabulateRedactedGroups()
         val redactedPoolBuilders = makeRedactedPools(variant)
@@ -120,8 +130,8 @@ class CvrsFromManifest(val variant: ElectionVariant,
             adjustPool[poolb.poolId] = maxCards - poolb.ncards() // dded or subtracted from pool
             poolb.setNcards(maxCards)
         }
-
-        adjust(poolBuilders.associateBy{ it.poolId }, adjustPool)
+        if (!fakeManifest) // TODO make them agree with population
+            adjust(poolBuilders.associateBy{ it.poolId }, adjustPool)
     }
 
     data class PoolAdjustment(val poolId: Int)
@@ -190,7 +200,7 @@ class CvrsFromManifest(val variant: ElectionVariant,
             val name = cleanCsvString(redacted.ballotType)
             val hasExactContests = !redacted.ballotType.contains("&") // has multiple card styles
             // TODO role of redacted.ncards() ?
-            CardPoolBuilder.fromMinVotesNeeded(name, id++, hasExactContests=hasExactContests, infos, contestTabs)
+            CardPoolBuilder.fromMinVotesNeeded("$county-$name", id++, hasExactContests=hasExactContests, infos, contestTabs)
                 .setNcards(redacted.ncards())
         }
     }
@@ -202,9 +212,8 @@ class CvrsFromManifest(val variant: ElectionVariant,
             val groupTab: Map<Int, ContestTabulation> = converter.convertToContestTabulation(redacted)
             sumTabs.sumContestTabulations(groupTab)
         }
-        return CardPoolBuilder.fromMinVotesNeeded("RedactedPool", 1, hasExactContests=false, infos, sumTabs)
+        return CardPoolBuilder.fromMinVotesNeeded("$county-RedactedPool", 1, hasExactContests=false, infos, sumTabs)
     }
-
 
     // make simulated CVRs for all the pools
     fun makeSimulatedCards() : List<AuditableCard> { // contestId -> candidateId -> nvotes
@@ -235,6 +244,8 @@ class CvrsFromManifest(val variant: ElectionVariant,
 
         return cardsForPool
     }
+
+    fun countyCardStyles(): List<StyleIF> = converter.cardStyles.values.toList() + converter.redactedPools.map { it as StyleIF }
 }
 
 data class ManifestId(val id: String, val location: String) {

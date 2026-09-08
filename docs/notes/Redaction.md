@@ -189,14 +189,15 @@ where
   - _ncontests_ : number of contests successfuly audited
   - _nredactions_: number of redacted CVRs
   - _nrgroups_: number of redacted groups
-  - _phantoms_: all redactions become phantoms
-  - _onePool_: all redactions are placed in a single OneAudit pool
-  - _styles_: redactions are placed in multiple OneAudit pools
-  - _unredacted_: simulate audit without redactions
+  - _phantoms_: mvrs when all redactions become phantoms
+  - _onePool_: mvrs when aall redactions are placed in a single OneAudit pool
+  - _styles_: mvrs when aredactions are placed in multiple OneAudit pools
+  - _unredacted_: mvrs when asimulate audit without redactions
+  - mvrs shown with (success contests for that variant), when that is different from ncontests
 
 * Each result is a single trial. Multiple trials are needed to find average and variance of the distribution.
-* In each contest, some of the contests are unauditable because number of phantoms > vote margin. For Boulder2023,
-  phantoms variant was only able to audit 26 contests.
+* The ncards in each redacted pool is estimated by assuming that for each contest, the percent undervotes are the same as 
+  for the unredacted cvrs. Then adjusting ncards so that the total cards in the county equals the manifest count.
 
 ## IRV Redactions
 

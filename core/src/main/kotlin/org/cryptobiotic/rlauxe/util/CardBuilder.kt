@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 
 // builds one AuditableCard
 class AuditableCardBuilder(
-    val id: String,
+    var id: String,
     var location: String?,
     val index: Int,
     val prn: Long,

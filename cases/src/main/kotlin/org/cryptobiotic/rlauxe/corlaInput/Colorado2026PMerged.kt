@@ -1,4 +1,15 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corlaInput
+
+import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
+import org.cryptobiotic.rlauxe.auditcenter.CardComparisonResults
+import org.cryptobiotic.rlauxe.auditcenter.ContestMvrCount
+import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
+import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundAccum
+import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundCsv
+import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
+import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
+import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import kotlin.collections.forEach
 
 // merge the contests back together
 // could ignore mvrComparisonFile and contestRoundFile (maybe)
@@ -75,7 +86,7 @@ class Colorado2026PMerged(ac:String?=auditcenter): ColoradoInput(
         val tabs = mutableMapOf<String, ContestTabAllCounties>()
         countyTabsAllContests().values.forEach { countyTabAllContests ->
             countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
-                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties (contestName) }
+                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties(contestName) }
                 tab.add(countyTabAllContests.countyName, countyContestVotes)
             }
         }

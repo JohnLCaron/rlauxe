@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.auditcenter.auditcenter
+import org.cryptobiotic.rlauxe.corlaInput.auditcenter
 
 class Boulder26pInput: BoulderInput  {
     override val electionName= "Boulder2026p"

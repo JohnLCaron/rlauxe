@@ -1,4 +1,16 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corlaInput
+
+import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
+import org.cryptobiotic.rlauxe.auditcenter.CardComparisonResults
+import org.cryptobiotic.rlauxe.auditcenter.ContestMvrCount
+import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
+import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundAccum
+import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundCsv
+import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
+import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
+import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import org.cryptobiotic.rlauxe.boulder.Boulder26pInput
+import kotlin.collections.forEach
 
 // merge the contests back together
 // could ignore mvrComparisonFile and contestRoundFile (maybe)
@@ -11,7 +23,7 @@ class Colorado2026PwithCvrs(ac:String?=auditcenter): ColoradoInput(
     contestRoundFile = "$ac/2026/primary/finalReports/ContestsListRound1.csv",
     tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",
     mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv"
-) {
+), ColoradoInputWithCvrs {
     val parent = Colorado2026PMerged(ac)
 
     val useCounties = setOf("Boulder", "La Plata", "Morgan","Weld") // the counties we have cvrs for
@@ -19,6 +31,16 @@ class Colorado2026PwithCvrs(ac:String?=auditcenter): ColoradoInput(
 
     // not needed
     val countyPopulations = mapOf( "Boulder" to 100423, "La Plata" to 16146, "Morgan" to 5220,"Weld" to 69640)
+
+    override fun corlaCountyInput(countyName: String): CorlaCountyInput? {
+        return when (countyName) {
+            "Boulder" -> Boulder26pInput()
+            "La Plata" -> LaPlata26pInput()
+            "Morgan" -> Morgan26pInput()
+            "Weld" -> Weld26pInput()
+            else -> null
+        }
+    }
 
     override fun canonicalContests() = canonicalContests
     private val canonicalContests: Map<String, CanonicalContest> by lazy {
@@ -151,7 +173,7 @@ class Colorado2026PwithCvrs(ac:String?=auditcenter): ColoradoInput(
     private val strataPopulation: Map<String, Int> by lazy { mergedInfo.strataInfo.associate { it.strataName to it.ballotCardCount } } // county name to population
 
     override fun contestNameCleanup(county: String, name: String): String {
-        if (county == "La Plata" && name == "Secretary of State") return "Secretary of State - LBR"
+        // if (county == "La Plata" && name == "Secretary of State") return "Secretary of State - LBR"
         return parent.contestNameMerge(name)
     }
 

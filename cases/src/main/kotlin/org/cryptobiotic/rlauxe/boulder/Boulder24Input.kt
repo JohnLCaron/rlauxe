@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.auditcenter.auditcenter
+import org.cryptobiotic.rlauxe.corlaInput.auditcenter
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
 import org.cryptobiotic.rlauxe.cvr.RedactedGroup
 import org.cryptobiotic.rlauxe.cvr.RedactionBoulder

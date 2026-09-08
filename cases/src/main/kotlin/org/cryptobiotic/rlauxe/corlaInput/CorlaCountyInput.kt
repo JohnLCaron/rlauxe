@@ -1,15 +1,12 @@
-package org.cryptobiotic.rlauxe.corlaCounty
+package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.cvr.Garfield20Cvrs
 import org.cryptobiotic.rlauxe.cvr.Redaction
 import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
-import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries

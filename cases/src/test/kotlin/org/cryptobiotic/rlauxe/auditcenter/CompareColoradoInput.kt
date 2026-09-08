@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import kotlin.test.Test
 
 // compare two sources of ColoradoInput supposedly identical

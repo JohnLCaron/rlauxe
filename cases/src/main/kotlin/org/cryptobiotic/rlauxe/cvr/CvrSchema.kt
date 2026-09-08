@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.cvr
 
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.auditcenter.munge
+import org.cryptobiotic.rlauxe.corlaInput.munge
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
 import java.lang.StrictMath.sqrt
@@ -80,13 +80,12 @@ data class SchemaContestInfo(val contestIdx: Int, val contestName: String, val s
 
     init {
         isIRV = contestName.contains("Number of ranks=") // Boulder 2023 IRV
-        if (isIRV)
-            print("")
         nchoices = if (!isIRV) ncols else {
             // val pos = contestName.("Number of ranks=") + "Number of ranks=".length
             sqrt(ncols.toDouble()).toInt() // WTF sqrt?
         }
 
+        // why arent we replacing the contest name here ?
         val (name, nwinners) = if (isIRV) parseIrvContestName(contestName) else parseContestNameAndVoteFor(contestName)
         voteForN = nwinners
     }
@@ -94,6 +93,7 @@ data class SchemaContestInfo(val contestIdx: Int, val contestName: String, val s
     fun show(): String {
         return "${nfn(contestIdx, 5)}, ${trunc(contestName, contestWidth)},      ${nfn(startCol, 3)},   ${nfn(ncols, 3)}, $isIRV"
     }
+
     companion object {
         val header = "contestIdx, ${trunc("contestName", contestWidth-3)}, startCol, ncols, isIRV, voteForN"
     }

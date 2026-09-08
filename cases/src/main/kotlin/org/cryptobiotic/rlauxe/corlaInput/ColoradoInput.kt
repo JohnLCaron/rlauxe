@@ -1,15 +1,27 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corlaInput
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.auditcenter.AuditReason
+import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
+import org.cryptobiotic.rlauxe.auditcenter.CardComparisonResults
+import org.cryptobiotic.rlauxe.auditcenter.ContestMvrCount
+import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
+import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundCsv
+import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
+import org.cryptobiotic.rlauxe.auditcenter.CountyMvrCount
+import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
+import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import org.cryptobiotic.rlauxe.auditcenter.readColoradoContestRoundCsv
+import org.cryptobiotic.rlauxe.auditcenter.readContestComparisonCsv
+import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.corlaCounty.CorlaCounty2020Input
-import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyInput
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
+import kotlin.collections.forEach
 
 val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
 
@@ -112,7 +124,7 @@ abstract class ColoradoInput(
         val tabs = mutableMapOf<String, ContestTabAllCounties>()
         countyTabsAllContests().values.forEach { countyTabAllContests ->
             countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
-                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties (contestName) }
+                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties(contestName) }
                 tab.add(countyTabAllContests.countyName, countyContestVotes)
             }
         }

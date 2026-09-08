@@ -1,4 +1,7 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corlaInput
+
+import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
+import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 
 class Colorado2022Primary(ac:String?=auditcenter): ColoradoInput(
     generalCanonicalFile = "$ac/2022/primary/2022PrimaryRLACounty-CandidateList.csv",
@@ -16,7 +19,7 @@ class Colorado2022Primary(ac:String?=auditcenter): ColoradoInput(
 
         // add these missing contests:
         val extras = listOf(
-            CanonicalContest("Adams County Assessor - DEM", choices=listOf("Ken Musso",)).addCounties(listOf("Adams",))
+            CanonicalContest("Adams County Assessor - DEM", choices = listOf("Ken Musso",)).addCounties(listOf("Adams",))
         )
         extras.forEach { result[it.contestName] = it }
 

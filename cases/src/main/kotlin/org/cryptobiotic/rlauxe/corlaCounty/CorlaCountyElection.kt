@@ -2,10 +2,11 @@ package org.cryptobiotic.rlauxe.corlaCounty
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
-import org.cryptobiotic.rlauxe.auditcenter.MergedContestInfo
-import org.cryptobiotic.rlauxe.auditcenter.StrataInfo
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.MergedContestInfo
+import org.cryptobiotic.rlauxe.corlaInput.StrataInfo
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
 import org.cryptobiotic.rlauxe.irv.IrvContest
 import org.cryptobiotic.rlauxe.irv.makeRaireContest
 import org.cryptobiotic.rlauxe.irv.makeRaireOneAuditContest

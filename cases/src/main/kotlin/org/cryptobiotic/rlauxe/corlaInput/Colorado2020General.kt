@@ -1,7 +1,8 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.corlaCounty.CorlaCounty2020Input
-import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyInput
+import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
+import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
+import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 
 class Colorado2020General(ac:String?=auditcenter): ColoradoInput(
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
@@ -19,14 +20,14 @@ class Colorado2020General(ac:String?=auditcenter): ColoradoInput(
     override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
 
     // temp override
-    override fun counties(): List<String> = listOf("Adams", "Boulder", "Chaffee")
+    // override fun counties(): List<String> = listOf("Adams", "Boulder", "Chaffee")
 
     override fun contestTabsAllCounties(): Map<String, ContestTabAllCounties>  = contestTabsAllCounties
     private val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
         val tabs = mutableMapOf<String, ContestTabAllCounties>()
         countyTabsAllContests().values.filter { it.countyName !in listOf("Baca", "Gunnison", "Las Animas") }.forEach { countyTabAllContests ->
             countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
-                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties (contestName) }
+                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties(contestName) }
                 tab.add(countyTabAllContests.countyName, countyContestVotes)
             }
         }

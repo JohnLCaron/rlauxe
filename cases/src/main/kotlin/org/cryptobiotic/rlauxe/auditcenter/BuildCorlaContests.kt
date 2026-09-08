@@ -3,6 +3,9 @@ package org.cryptobiotic.rlauxe.auditcenter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.MergedContestInfo
+import org.cryptobiotic.rlauxe.corlaInput.StrataInfo
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
 import kotlin.String

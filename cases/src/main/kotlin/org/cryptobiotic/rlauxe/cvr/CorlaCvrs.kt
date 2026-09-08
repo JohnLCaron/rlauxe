@@ -96,7 +96,8 @@ interface CorlaCvrsIF {
     fun nrows() : Int
 }
 
-class CorlaCvrs(val inputSource: String, val parser: CSVParser,
+class CorlaCvrs(val inputSource: String,
+                val parser: CSVParser,
                 showHeaders: Boolean = false,
                 showSchema: Boolean = false,
                 val redaction: RedactionIF = Redaction(),
@@ -449,6 +450,7 @@ fun CSVRecord.isEmpty(): Boolean {
     return true
 }
 
+// heres where we remove the (Vote For=N), why do we still see it
 fun parseContestNameAndVoteFor(name: String) : Pair<String, Int> {
     if (name.contains("(Vote For1")) {
         val clean = name.substringBefore("(")

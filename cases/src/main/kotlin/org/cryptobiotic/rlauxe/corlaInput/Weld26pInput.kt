@@ -1,9 +1,4 @@
-package org.cryptobiotic.rlauxe.corlaCounty
-
-import org.cryptobiotic.rlauxe.auditcenter.auditcenter
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
-import org.cryptobiotic.rlauxe.cvr.Redaction
-import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
+package org.cryptobiotic.rlauxe.corlaInput
 
 class Weld26pInput: CorlaCountyInput {
     override val electionName= "Weld2026p"

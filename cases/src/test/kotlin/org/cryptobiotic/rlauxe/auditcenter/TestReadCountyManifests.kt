@@ -1,5 +1,9 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.auditcenter
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.test.Test
@@ -10,7 +14,7 @@ class TestReadCountyManifests {
     @Test
     fun readAllCountyManifests() {
         val corlaInput = Colorado2026Primary()
-        val manifestDir = "$auditcenter/2026/primary/files"
+        val manifestDir = "${auditcenter}/2026/primary/files"
         val countySet = corlaInput.counties().toSet()
         val manifests = readAuditcenterManifests(manifestDir, countySet)
         val stratas = corlaInput.strataPopulation()
@@ -40,7 +44,7 @@ class TestReadCountyManifests {
     @Test
     fun readOneCountyManifest() {
         val corlaInput = Colorado2020General()
-        val manifestFile = "$auditcenter/2020/general/round_1/manifest-ElPaso.csv"
+        val manifestFile = "${auditcenter}/2020/general/round_1/manifest-ElPaso.csv"
         val manifestBatches = readCountyManifestCsv(manifestFile)
         val stratas = corlaInput.strataPopulation()
 

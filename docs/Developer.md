@@ -600,6 +600,6 @@ class TestRunRoundCli {
 * add county name on AuditableCard. also maybe pool and style
 * measure performance again for fastSampling and protoCard
 * cant use fast sampling without styles
-* hasStyle wtf2
+* hasStyle wwtf
 
 

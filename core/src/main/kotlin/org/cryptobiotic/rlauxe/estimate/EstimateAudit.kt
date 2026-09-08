@@ -220,7 +220,7 @@ class AuditTrialTask(
         var cardSortedIndex = 1 // 1 based
         var countEstimatedCards = 0
         var countPoolCards = 0
-        sortedManifest.cards.iterator().use { sortedCardIter ->
+        sortedManifest.cardIterable.iterator().use { sortedCardIter ->
             while (sortedCardIter.hasNext()) {
                 // does any contest need more cards ?
                 if (!contestTrials.any { it.wantsMore() })

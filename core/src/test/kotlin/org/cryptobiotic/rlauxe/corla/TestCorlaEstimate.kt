@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
@@ -55,7 +54,7 @@ fun countPhantoms(sortedManifest: SortedManifest, contestId: Int) {
     var count = 0
     var countPhantoms = 0
     var lastPhantoms = 0
-    sortedManifest.cards.iterator().use { cardIter ->
+    sortedManifest.cardIterable.iterator().use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
             if (card.phantom() && card.possibleContests().contains(contestId)) {

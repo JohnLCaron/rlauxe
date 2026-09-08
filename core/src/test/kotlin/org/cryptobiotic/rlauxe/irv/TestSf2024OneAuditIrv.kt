@@ -9,14 +9,12 @@ import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.SortedManifest
-import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.SubsetIterator
 
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.workflow.readSortedManifest
-import kotlin.test.Test
 import kotlin.use
 
 class TestSf2024OneAuditIrv() {
@@ -43,7 +41,7 @@ class TestSf2024OneAuditIrv() {
         val cvrdir = "$cases/sf/sf2024/clca"
         val cvrPublisher = Publisher(cvrdir)
         cardManifest = readSortedManifest(cvrPublisher, infos, auditRecord.electionInfo.totalCardCount)
-        mvrsIterable = cardManifest.cards
+        mvrsIterable = cardManifest.cardIterable
 
         mvrsIterable.iterator().use { iter ->
             while (iter.hasNext() && mvrs.size < 1000 ) {

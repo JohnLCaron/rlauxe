@@ -63,7 +63,7 @@ class OneShotAudit(
         var countCards = 1 // 1 based
         var countCardsIncluded = 0
         var countPoolCards = 0
-        cardManifest.cards.iterator().use { sortedCardIter ->
+        cardManifest.cardIterable.iterator().use { sortedCardIter ->
             while (sortedCardIter.hasNext()) {
                 // does any contest need more cards ?
                 if (!assertionAudits.any { it.wantsMore() }) break

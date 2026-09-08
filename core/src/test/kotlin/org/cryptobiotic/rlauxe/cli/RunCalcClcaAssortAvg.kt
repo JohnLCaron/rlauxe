@@ -124,7 +124,7 @@ object RunCalcAssortAvg {
         usePrivate: Boolean
     ) {
         var count = 0
-        sortedManifest.cards.iterator().use { cardIter ->
+        sortedManifest.cardIterable.iterator().use { cardIter ->
             while (cardIter.hasNext()) {
                 val card = cardIter.next()
                 val mvr = if (usePrivate) mvrIter!!.next() else card

@@ -42,7 +42,7 @@ class TestSfElection {
         var countCards = 0
         var count49 = 0
         var count49pools = 0
-        cardManifest.cards.iterator().use { iter ->
+        cardManifest.cardIterable.iterator().use { iter ->
             while (iter.hasNext()) {
                 val card = iter.next()
                 if (card.hasContest(49)) {

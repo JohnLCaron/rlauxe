@@ -592,6 +592,12 @@ class TestRunRoundCli {
 * redo cases with correct phantoms and Npop
 * IRV redactions
 * use manifest ids in the redaction cardManifest file DONE
-* manifest files should be part of the committed-to election revord
+* manifest files should be part of the committed-to election record
+
+**TODO 9/08/2026**
+
+* use bytearrays instead of longs for prn
+* add county name on AuditableCard. also maybe pool and style
+* measure performance again for fastSampling and protoCard
 
 

@@ -192,7 +192,7 @@ class CardPoolBuilder(
 }
 
 // CountyPool: for one county, a pool of cards with multiple CardStyles.
-// votes equal the County's subtotal, and ncards euals the county population.
+// votes equal the County's subtotal, and ncards equals the county population.
 data class CountyPools (
     val countyName: String,
     val countyPoolId: Int,

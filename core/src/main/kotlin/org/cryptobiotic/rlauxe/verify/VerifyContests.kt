@@ -67,14 +67,14 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         val infos = allInfos ?: contests.associate { it.id to it.contest.info() }
         preAuditContestCheck(contests, config.sampling, results)
         println("preAuditContestCheck done")
-        val contestSummary = verifyManifest(config, contests, sortedManifest.cards, infos, results)
+        val contestSummary = verifyManifest(config, contests, sortedManifest.cardIterable, infos, results)
         println("verifyManifest done")
 
         // OA
         if (config.isOA) {
             if (cardPools != null) {
                 verifyOAagainstCards(contests, contestSummary, cardPools, infos, results, show = show)
-                verifyOAassortAvg(contests, sortedManifest.cards.iterator(), results, show = show)
+                verifyOAassortAvg(contests, sortedManifest.cardIterable.iterator(), results, show = show)
                 verifyOApools(contests, contestSummary, cardPools, results, show = show)
             }
         }
@@ -84,7 +84,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
             verifyClcaAgainstCards(contests, contestSummary, results, show = show)
             println("verifyClcaAgainstCards done")
 
-            verifyClcaAssortAvg(contests, sortedManifest.cards.iterator(), results, show = show)
+            verifyClcaAssortAvg(contests, sortedManifest.cardIterable.iterator(), results, show = show)
             println("verifyClcaAssortAvg done")
 
         }

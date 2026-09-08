@@ -43,13 +43,13 @@ class CorlaCountyElection(
     val variant = ElectionVariant(variantEnum)
     val county: String = countyInput.countyName
 
-    val infoList = makeContestInfo().sortedBy{ it.id }
+    val infoList = makeContestInfo().sortedBy { it.id }
     val infos = infoList.associateBy { it.id }
     val infosByName = infoList.associateBy { it.name } //  are the cvr names compatible ?
 
     val contestBuilders: Map<Int, CCContestBuilder> // make visible for debugging
     val contests: List<ContestIF>
-    val contestsUA : List<ContestWithAssertions>
+    val contestsUA: List<ContestWithAssertions>
     val redactedCvrs: List<AuditableCard>  // redacted cvrs
     val allCards: List<AuditableCard>
     val redactedPools: List<CardPool>
@@ -59,25 +59,27 @@ class CorlaCountyElection(
 
     init {
         if (stateInput.strataMap[county] == null) {
-            stateInput.strataMap.keys.sorted().forEach { println(it)}
+            stateInput.strataMap.keys.sorted().forEach { println(it) }
             throw RuntimeException("stateInput.strata doesnt have county $county")
         }
         countyInfo = stateInput.strataMap[county]!!
 
-        val cvrsFromManifest = CvrsFromManifest(variant, countyInput, stateInput, infos)
+        val cvrsFromManifest = CvrsFromManifest(variant, countyInput, stateInput, infos, stateElection =  false)
 
-        contestBuilders = makeContestBuilders(cvrsFromManifest.convertedCvrTabs, cvrsFromManifest.redactedTabs).associate { it.contestId to it}
+        contestBuilders = makeContestBuilders(
+            cvrsFromManifest.convertedCvrTabs,
+            cvrsFromManifest.redactedTabs
+        ).associate { it.contestId to it }
         contests = makeContests(contestBuilders)
 
         redactedPools = cvrsFromManifest.redactedPools
 
         // these are mvrs
-        // we should do this in cvrsFromManifest so we can use the manifest ids
         redactedCvrs = cvrsFromManifest.makeSimulatedCards()
 
         // need to know the phantoms to calculate allCards and Npops
         val phantoms = makePhantomCards(contests, 1)
-        logger.info {"made ${phantoms.size} phantom cards"}
+        logger.info { "made ${phantoms.size} phantom cards" }
 
         allCards = cvrsFromManifest.convertedCvrs + redactedCvrs + phantoms // in memory
         this.ncards = allCards.size
@@ -86,16 +88,24 @@ class CorlaCountyElection(
         // TODO cvrTabs dont have the irv part, so will fail in the raire library
         val allCardsTabs = tabulateCards(allCards.iterator(), infos)
 
-        contestsUA = makeContestWAs(contests, npops, allCardsTabs, redactedPools, )
+        contestsUA = makeContestWAs(contests, npops, allCardsTabs, redactedPools,)
         mvrs = addIndexToMvrs(allCards)
-        logger.info {"made ${mvrs.size} mvrs"}
+        logger.info { "made ${mvrs.size} mvrs" }
 
         //val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
         //logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPoolBuilders.size} cardPools"}
     }
 
     override fun electionInfo() =
-        ElectionInfo(countyInput.electionName, variant.auditType, ncards(), contestsUA.size, true, mvrSource=mvrSource)
+        ElectionInfo(
+            countyInput.electionName,
+            variant.auditType,
+            ncards(),
+            contestsUA.size,
+            true,
+            mvrSource = mvrSource
+        )
+
     override fun contestsUA() = contestsUA
 
     override fun cardStyles() = null
@@ -110,7 +120,7 @@ class CorlaCountyElection(
         var cardIndex = 1 // 1 based index
         val result = mutableListOf<AuditableCard>()
         mvrs.forEach { org ->
-            result.add(org.copy(index = cardIndex ))
+            result.add(org.copy(index = cardIndex))
             cardIndex++
         }
         return result
@@ -125,8 +135,8 @@ class CorlaCountyElection(
         return transformer
     }
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-//// contest building
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //// contest building
 
     private fun makeContestInfo(): List<ContestInfo> {
         val mergedContestMap = stateInput.mergedContestMap

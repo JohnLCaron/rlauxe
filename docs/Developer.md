@@ -599,5 +599,7 @@ class TestRunRoundCli {
 * use bytearrays instead of longs for prn
 * add county name on AuditableCard. also maybe pool and style
 * measure performance again for fastSampling and protoCard
+* cant use fast sampling without styles
+* hasStyle wtf2
 
 

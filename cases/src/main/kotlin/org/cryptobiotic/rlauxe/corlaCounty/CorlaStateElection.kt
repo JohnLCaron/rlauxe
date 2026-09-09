@@ -58,7 +58,7 @@ class CorlaStateElection(
                 throw RuntimeException("stateInput.strata doesnt have county $countyName")
             }
             val countyInfo = stateInput.strataMap[countyName]!!
-            val countyPopulation = countyInput.countyPopulation
+            val countyPopulation = countyInput.countyPopulation()
 
             val cvrsFromManifest = CvrsFromManifest(variant, countyInput, stateInput, infos, stateElection =  true)
 
@@ -89,8 +89,9 @@ class CorlaStateElection(
             writeUnsortedMvrs(countyName, publisher, Closer(allCards.iterator()))
             totalCvrCardCount += allCards.size
 
-            // TODO to use fastSampleing, all cvrs must have stylesIds (no fromCvr or phantoms)
+            // TODO to use fastSampling, all cvrs must have stylesIds (no fromCvr or phantoms)
             //  styles cant be optional; all styles must be in styleMap when reading
+            // county styles dont have the global ids. Perhapa go back to using style name ??
             val countyCardStyles = cvrsFromManifest.countyCardStyles()
             allCardStyles.addAll(countyCardStyles)
 

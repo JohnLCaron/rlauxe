@@ -30,6 +30,7 @@ import kotlin.io.path.listDirectoryEntries
 
 private val logger = KotlinLogging.logger("CountyElectionWithCvrs")
 
+// obsolete use CorlaCountyElection
 open class CountyElectionWithCvrs (
     val counties: Map<String, String>, // countyName -> exportCvrFile
     val coloradoInput: ColoradoInput,

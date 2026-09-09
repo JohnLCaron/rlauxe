@@ -597,7 +597,8 @@ class TestRunRoundCli {
 **TODO 9/08/2026**
 
 * use bytearrays instead of longs for prn
-* add county name on AuditableCard. also maybe pool and style
+* add county name on AuditableCard? also maybe pool and style. or just location?
+* use styleName instead of id? easier to combine counties
 * measure performance again for fastSampling and protoCard
 * cant use fast sampling without styles
 * hasStyle wwtf

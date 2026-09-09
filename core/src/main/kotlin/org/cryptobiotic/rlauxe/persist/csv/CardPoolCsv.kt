@@ -48,18 +48,13 @@ fun readCardPoolCsv(line: String, infos: Map<Int, ContestInfo>): CardPoolBuilder
     // var popId : String? = null
     // var pcontests = intArrayOf()
 
-        var idx = 0
-        val poolId = ttokens[idx++].toInt()
-        val poolName = ttokens[idx++]
-        val hasExactContests = ttokens[idx++] == "true"
+    var idx = 0
+    val poolId = ttokens[idx++].toInt()
+    val poolName = ttokens[idx++]
+    val hasExactContests = ttokens[idx++] == "true"
 
-    try {
-        val totalCards = ttokens[idx].toInt()
-        return CardPoolBuilder(poolName, poolId, hasExactContests, infos, totalCards)
-    } catch (e:Throwable) {
-        println("whu")
-        throw e
-    }
+    val totalCards = ttokens[idx].toInt()
+    return CardPoolBuilder(poolName, poolId, hasExactContests, infos, totalCards)
 }
 
 fun readCardPoolContinuation(line: String, current: CardPoolBuilder): Boolean {
@@ -78,25 +73,29 @@ fun readCardPoolContinuation(line: String, current: CardPoolBuilder): Boolean {
 }
 
 fun readCardPoolCsvFile(filename: String, infos: Map<Int, ContestInfo>): List<CardPool> {
-    val reader: BufferedReader = File(filename).bufferedReader()
-    reader.readLine() // get rid of header line
-
     val pools = mutableListOf<CardPool>()
-    var line = reader.readLine()
-    var currentBuilder: CardPoolBuilder?
+    try {
+        val reader: BufferedReader = File(filename).bufferedReader()
+        reader.readLine() // get rid of header line
 
-    outerLoop@
-    while (true) {
-        currentBuilder = readCardPoolCsv(line, infos)
-        // read more contestTabs for current pool
-        while (readCardPoolContinuation(line, currentBuilder)) {
-            line = reader.readLine() ?: break@outerLoop
+        var line = reader.readLine()
+        var currentBuilder: CardPoolBuilder?
+
+        outerLoop@
+        while (true) {
+            currentBuilder = readCardPoolCsv(line, infos)
+            // read more contestTabs for current pool
+            while (readCardPoolContinuation(line, currentBuilder)) {
+                line = reader.readLine() ?: break@outerLoop
+            }
+            pools.add(currentBuilder.build())
         }
         pools.add(currentBuilder.build())
-    }
-    pools.add(currentBuilder.build())
 
-    reader.close()
+        reader.close()
+    } catch (e:Throwable) {
+        logger.error(e) { "error reading $filename" }
+    }
     return pools
 }
 

@@ -55,7 +55,7 @@ open class Colorado2026Primary(ac:String?=auditcenter): ColoradoInput(
     override fun contestNameCleanup(county: String, name: String): String {
 
         return when (county) {
-            "LaPlata" -> when (name) {
+            "La Plata" -> when (name) {
                 "Secretary of State" -> "Secretary of State - LBR"
                 else -> name
             }

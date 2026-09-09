@@ -32,41 +32,10 @@ class TestCorlaCvrConverter {
         testCorlaConverterCvrs("Broomfield", filename, coloradoInput = Colorado2020General())
     }
 
-    // this tests coverting all of the cvrs and checking them against the ExportCvr
-    fun testCorlaConverterCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
-        val export = readCorlaCvrs(filename)
-        val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
-
-        val contestBuilder = BuildCorlaContests(coloradoInput)
-        val contests = contestBuilder.contests(emptyMap())
-        val contestMap = contests.associateBy{ it.name }
-
-        val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
-        var count = 0
-        var countOutOfOrder = 0
-        export.cvrs.map { cvr: CvrRow ->
-            val card = CorlaConverter.convertToCard(cvr)
-            assertEquals(cvr.imprintedId, card.id)
-            cvr.contestVotes.forEach { contestVote: ContestVotes ->
-                val sinfo = schemaInfoMap[contestVote.contestId]!!
-                val canonicalContest = coloradoInput.matchCanonicalContest(county, sinfo.name)!!
-                val contest = contestMap[canonicalContest.contestName]
-                val cvrVotes = card.votes(contest!!.id)
-                if (contestVote.candVotes != cvrVotes!!.toList()) {
-                    val info = contest.info()
-                    val candNames = cvrVotes.map { info.candidateIdToName[it]!! }
-                    val scandNames = contestVote.candVotes.map {
-                        // coloradoInput.candidateNameCleanup(sinfo.candidateIdToName[it]!!)
-                        coloradoInput.matchCanonicalCandidate(county, canonicalContest, sinfo.candidateIdToName[it]!!)
-                    }
-                    // not a problem to be out of order as long as the names agree
-                    assertEquals(candNames, scandNames)
-                    countOutOfOrder++
-                }
-                count++
-            }
-        }
-        println("$count exported cvrs, $countOutOfOrder out of order")
+    @Test
+    fun testGarfieldCorlaCvrConverter() {
+        val filename = "$votedatabase2020/Broomfield/cvr.csv"
+        testCorlaConverterCvrs("Broomfield", filename, coloradoInput = Colorado2020General())
     }
 
     @Test
@@ -94,3 +63,47 @@ class TestCorlaCvrConverter {
 State Senator - District 17 -> State Senator - District 17
 (557180) ContestVotes(contestId=5, candVotes=[3]) != 543:  [2]
  */
+
+// this tests coverting all of the cvrs and checking them against the ExportCvr
+fun testCorlaConverterCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
+    val export = readCorlaCvrs(filename)
+    testCorlaConverterCvrs(county, export, coloradoInput)
+}
+
+fun testCorlaConverterCvrs(county: String, export: CorlaCvrsIF, coloradoInput: ColoradoInput) {
+
+    val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
+
+    val contestBuilder = BuildCorlaContests(coloradoInput)
+    val contests = contestBuilder.contests(emptyMap())
+    val contestMap = contests.associateBy{ it.name }
+
+    val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
+    var countCards = 0
+    var countVotes = 0
+    var countOutOfOrder = 0
+    export.cvrs().map { cvr: CvrRow ->
+        val card = CorlaConverter.convertToCard(cvr)
+        assertEquals(cvr.imprintedId, card.id)
+        countCards++
+        cvr.contestVotes.forEach { contestVote: ContestVotes ->
+            val sinfo = schemaInfoMap[contestVote.contestId]!!
+            val canonicalContest = coloradoInput.matchCanonicalContest(county, sinfo.name)!!
+            val contest = contestMap[canonicalContest.contestName]
+            val cvrVotes = card.votes(contest!!.id)
+            if (contestVote.candVotes != cvrVotes!!.toList()) {
+                val info = contest.info()
+                val candNames = cvrVotes.map { info.candidateIdToName[it]!! }
+                val scandNames = contestVote.candVotes.map {
+                    // coloradoInput.candidateNameCleanup(sinfo.candidateIdToName[it]!!)
+                    coloradoInput.matchCanonicalCandidate(county, canonicalContest, sinfo.candidateIdToName[it]!!)
+                }
+                // not a problem to be out of order as long as the names agree
+                assertEquals(candNames, scandNames)
+                countOutOfOrder++
+            }
+            countVotes++
+        }
+    }
+    println("$countCards cards, $countVotes count votes, $countOutOfOrder out of order candidates")
+}

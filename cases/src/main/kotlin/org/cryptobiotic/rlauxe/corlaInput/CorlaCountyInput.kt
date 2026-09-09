@@ -28,11 +28,11 @@ interface CorlaCountyInput {
     fun readCountyManifest(): List<ManifestBatch> {
         return readCountyManifestCsv(manifestSource)
     }
+
+    fun countyPopulation(): Int
 }
 
 class CorlaCounty2020Input(override val countyName: String): CorlaCountyInput {
-    val countyPopulation = stateInput.strataPopulation()[countyName]!!
-
     override val electionName = "${countyName}2020"
     override val cvrsSource: String
     override val manifestSource: String
@@ -48,10 +48,12 @@ class CorlaCounty2020Input(override val countyName: String): CorlaCountyInput {
             countyName = countyName,
             tabulatorNum = 1,
             batchId = "1",
-            nballotCards = countyPopulation,
+            nballotCards = countyPopulation(),
             location = countyName
         ))
     }
+
+    override fun countyPopulation() = stateInput.strataPopulation()[countyName]!!
 
     companion object {
         val countyCvrs: Map<String, String> = votedatabase2020Counties("/home/stormy/datadrive/votedatabase/cvr/Colorado/")

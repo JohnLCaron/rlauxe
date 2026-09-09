@@ -20,8 +20,10 @@ class CorlaCvrConverter(val county: String, corlaCvrs: CorlaCvrsIF, val infosByN
     // map export contest to canon contest, then an array mapping export cand id to canonical candidate id
     val exportToCanonLookup = mutableMapOf<Int, ExportToCanonLookup>() // export contestId -> ExportToCanonLookup
     val cardStyles: Map<Set<Int>, CardStyle> // canonicalContestIdSet -> cardStyle
-    val redactedPools: List<CardPool> // converted to canonical contests and candidates
+    val redactedPools: List<CardPool> // converted to canonical contests and candidates: obsolete use CvrsFromManifest
     val infos = infosByName.mapKeys { it.value.id }
+
+    var cardStyleId = 1
 
     init {
         // val infosByName: Map<String, ContestIF> = contests.associateBy { it.name }
@@ -86,12 +88,13 @@ class CorlaCvrConverter(val county: String, corlaCvrs: CorlaCvrsIF, val infosByN
             Pair(canonicalContestIdSet, cardStyle)
         }.toMap()
 
-        // one for each redacted group // TODO could use original style
+        // one for each redacted group // obsolete
         redactedPools = corlaCvrs.redactedGroups().map { group ->
             val contestTabs = convertToContestTabulation(group)
-            val cleanupName = truncateCommas(group.ballotType)
+            val cleanupName = truncateCommas(group.groupName)
             CardPool("$county-${cleanupName}.Redacted", cardStyleId++, true, infos, contestTabs, group.minCards())
         }
+        print("")
     }
 
     // return corresponding contest Ids in canonical
@@ -123,7 +126,7 @@ class CorlaCvrConverter(val county: String, corlaCvrs: CorlaCvrsIF, val infosByN
         val contestSchemaIdSet = dcvr.contestVotes.map { it.contestId }.toSet()
         val canonicalIdSet = convertExportContestIdSetToCanonical(contestSchemaIdSet)
         val cardStyle = cardStyles[canonicalIdSet]
-        val useCardStyleId = CardStyle.fromCvrStyle.id // cardStyle?.id() ?: CardStyle.fromCvrStyle.id
+        val useCardStyleId = cardStyle?.id() ?: throw RuntimeException("Cant find style") // CardStyle.fromCvrStyle.id // can this happen ??
         val cvrb = AuditableCardBuilder(dcvr.imprintedId, null,  0, 0L, false, styleId=useCardStyleId, poolId=null, votesIn=null)
         // have to map both contestId and candVotes
         dcvr.contestVotes.forEach { contestVote ->
@@ -156,15 +159,10 @@ class CorlaCvrConverter(val county: String, corlaCvrs: CorlaCvrsIF, val infosByN
         }
         return canonVotes
     }
-
-    companion object {
-        // all the cardStyles come out of here, so we can track the ids here
-        var cardStyleId = 1
-    }
 }
 
 // for a canonicalContest, lookup export candidate -> canonical candidate
-data class ExportToCanonLookup(val canonContestId: Int, val candLookup: IntArray ) {
+class ExportToCanonLookup(val canonContestId: Int, val candLookup: IntArray ) {
 
     // not 1-1 so cant use mapKeys. For example Write-In candidate was removed
     fun <T> convertCands(inp: Map<Int,T>): Map<Int,T> {

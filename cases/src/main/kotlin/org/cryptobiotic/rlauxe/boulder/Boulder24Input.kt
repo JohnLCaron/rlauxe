@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.auditcenter
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
 import org.cryptobiotic.rlauxe.cvr.RedactedGroup
@@ -20,6 +22,9 @@ class Boulder24Input: BoulderInput {
 
     override fun hasABgroups() = true
 
+    override fun countyPopulation() = stateInput.strataPopulation()[countyName]!!
+    val stateInput = Colorado2024General()
+
     companion object {
         // from cases/src/test/kotlin/org/cryptobiotic/rlauxe/boulder/TestBoulderUndervotes.kt
         // with this exception, redacted groups match existing CardStyle:
@@ -33,7 +38,7 @@ class Boulder24Input: BoulderInput {
         fun removeContest12FromPool6(redacteds: List<RedactedGroup>) { //}: List<RedactedGroup> {
             redacteds.map { redacted: RedactedGroup ->
                 // correct bug adding contest 12 to pool 06:
-                if (redacted.ballotType.startsWith("06")) {
+                if (redacted.groupName.startsWith("06")) {
                     redacted.contestVotes.remove(12)
                 }
             }

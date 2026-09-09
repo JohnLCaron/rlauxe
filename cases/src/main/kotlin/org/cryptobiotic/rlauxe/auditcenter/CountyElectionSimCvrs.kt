@@ -17,6 +17,8 @@ import kotlin.Int
 import kotlin.String
 import kotlin.io.path.Path
 
+// obsolete use CorlaCountyElection
+
 // port CountyElectionSansCvrs using CountyPoolsSimCvrs
 
 // We want to synthesis cvrs and use them as the cvrPools

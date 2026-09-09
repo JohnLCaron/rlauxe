@@ -6,4 +6,7 @@ class LaPlata26pInput: CorlaCountyInput {
     override val cvrsSource = "$auditcenter/2026/primary/observerfiles/LaPlata_RedactedTest_NoContestBalance_CVR_Export_20260709081424.csv"
     override val manifestSource = "$auditcenter/2026/primary/observerfiles/LaPlata_BallotManifest.csv"
     val otherManifest = "$auditcenter/2026/primary/files/LaPlata.csv"
+
+    override fun countyPopulation() = stateInput.strataPopulation()[countyName]!!
+    val stateInput = Colorado2026Primary()
 }

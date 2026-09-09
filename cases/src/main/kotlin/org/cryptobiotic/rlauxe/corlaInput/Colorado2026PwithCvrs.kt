@@ -173,7 +173,7 @@ class Colorado2026PwithCvrs(ac:String?=auditcenter): ColoradoInput(
     private val strataPopulation: Map<String, Int> by lazy { mergedInfo.strataInfo.associate { it.strataName to it.ballotCardCount } } // county name to population
 
     override fun contestNameCleanup(county: String, name: String): String {
-        // if (county == "La Plata" && name == "Secretary of State") return "Secretary of State - LBR"
+        if (county == "La Plata" && name == "Secretary of State") return "Secretary of State - LBR"
         return parent.contestNameMerge(name)
     }
 

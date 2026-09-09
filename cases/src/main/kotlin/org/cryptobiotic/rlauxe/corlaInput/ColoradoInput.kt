@@ -225,6 +225,11 @@ abstract class ColoradoInput(
     val canonicalContestMungedNames: Map<String, CanonicalContest> by lazy {
         canonicalContests().mapKeys { munge(it.key) }
     }
+
+    fun contestNameMunged(countyName: String, contestName: String): String {
+        val transform = contestNameCleanup(countyName, contestName)
+        return munge(transform)
+    }
 }
 
 private val alphnumRE = "[^A-Za-z0-9]".toRegex()

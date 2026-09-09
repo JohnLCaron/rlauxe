@@ -135,7 +135,7 @@ class TestCorlaCvrsOnTestExamples {
         // RedactedGroup('7', ncards=380, nlines=1, minCards= 380 totalVotes=8855 singleCards = false, contests=[0, 1, 2, 3, 5, 8, 11, 13, 14, 15, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42] )Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
         val redactedGroup = export.redactedGroups().first()
         println(redactedGroup)
-        assertEquals("7", redactedGroup.ballotType)
+        assertEquals("7", redactedGroup.groupName)
         var idx = 0
         assertEquals(
             listOf(265, 104, 0, 0, 2, 1, 1, 5, 2, 0, 0, 0, 0, 0, 0),

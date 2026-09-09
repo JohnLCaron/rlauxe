@@ -22,6 +22,8 @@ import kotlin.math.roundToInt
 
 private val logger = KotlinLogging.logger("CountyPoolsSimCvrs")
 
+// obsolete use CorlaCountyElection
+
 //// TODO break out of Corla, probably move to core
 // TODO anticipate knowing styles or Nc(county, contest)
 

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.auditcenter
 
 class Boulder25Input: BoulderInput  {
@@ -7,4 +8,9 @@ class Boulder25Input: BoulderInput  {
     override val manifestSource = "$auditcenter/2025/files/BoulderManifest.csv"
     override val cvrsSource = "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv"
     override val sovoSource = "src/test/data/Boulder2025/2025C-Boulder-County-Official-Statement-of-Votes.csv"
+
+    override fun countyPopulation(): Int {
+        val manifests = readCountyManifest()
+        return manifests.sumOf { it.nballotCards }
+    }
 }

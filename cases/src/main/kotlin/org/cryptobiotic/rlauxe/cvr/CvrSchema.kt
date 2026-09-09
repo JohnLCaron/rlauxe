@@ -73,20 +73,22 @@ data class SchemaColumnInfo(val colno:Int, val contest: String, val choice: Stri
     }
 }
 
-data class SchemaContestInfo(val contestIdx: Int, val contestName: String, val startCol: Int, val ncols: Int) {
+data class SchemaContestInfo(val contestIdx: Int, val orgName: String, val startCol: Int, val ncols: Int) {
     val isIRV: Boolean
     val nchoices: Int
     val voteForN: Int
+    val contestName: String
 
     init {
-        isIRV = contestName.contains("Number of ranks=") // Boulder 2023 IRV
+        isIRV = orgName.contains("Number of ranks=") // Boulder 2023 IRV
         nchoices = if (!isIRV) ncols else {
             // val pos = contestName.("Number of ranks=") + "Number of ranks=".length
             sqrt(ncols.toDouble()).toInt() // WTF sqrt?
         }
 
         // why arent we replacing the contest name here ?
-        val (name, nwinners) = if (isIRV) parseIrvContestName(contestName) else parseContestNameAndVoteFor(contestName)
+        val (parsedName, nwinners) = if (isIRV) parseIrvContestName(orgName) else parseContestNameAndVoteFor(orgName)
+        contestName = parsedName
         voteForN = nwinners
     }
 

@@ -56,14 +56,14 @@ class CorlaCountyElection(
     val redactedPools: List<CardPool>
     val mvrs: List<AuditableCard>
     val ncards: Int
-    val countyInfo: StrataInfo
+    val cardStyles: List<StyleIF>
 
     init {
         if (stateInput.strataMap[county] == null) {
             stateInput.strataMap.keys.sorted().forEach { println(it) }
             throw RuntimeException("stateInput.strata doesnt have county $county")
         }
-        countyInfo = stateInput.strataMap[county]!!
+        val countyInfo = stateInput.strataMap[county]!!
 
         val cvrsFromManifest = CvrsFromManifest(variant, countyInput, stateInput, infos, stateElection =  false)
 
@@ -74,6 +74,7 @@ class CorlaCountyElection(
         contests = makeContests(contestBuilders)
 
         redactedPools = cvrsFromManifest.redactedPools
+        cardStyles = cvrsFromManifest.countyCardStyles()
 
         // these are mvrs
         redactedCvrs = cvrsFromManifest.makeSimulatedCards()
@@ -109,7 +110,7 @@ class CorlaCountyElection(
 
     override fun contestsUA() = contestsUA
 
-    override fun cardStyles() = null
+    override fun cardStyles() = cardStyles
     override fun cardPools() = redactedPools
     override fun unsortedMvrsInternal() = mvrs
     override fun unsortedMvrsExternal() = null

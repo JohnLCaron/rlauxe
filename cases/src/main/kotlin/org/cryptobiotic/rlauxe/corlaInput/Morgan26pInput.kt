@@ -21,4 +21,6 @@ class Morgan26pInput: CorlaCountyInput {
         return org
     }
 
+    override fun countyPopulation() = stateInput.strataPopulation()[countyName]!!
+    val stateInput = Colorado2026Primary()
 }

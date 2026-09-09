@@ -12,7 +12,7 @@ import kotlin.String
 
 private val logger = KotlinLogging.logger("CountyContestBuilder")
 
-// Build Corla Contests from ColoradoInput
+// Build Corla Contests from ColoradoInput. used by CorlaStateElection
 open class BuildCorlaContests(val coloradoInput: ColoradoInput) {
     val corlaContestBuilders: List<CorlaContestBuilder> = makeContestBuilders() // 181
     val infos: Map<Int, ContestInfo> = corlaContestBuilders.map { it.info }.associateBy{ it.id }

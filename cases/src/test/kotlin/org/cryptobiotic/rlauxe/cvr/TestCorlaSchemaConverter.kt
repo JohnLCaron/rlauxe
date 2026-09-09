@@ -3,8 +3,9 @@ package org.cryptobiotic.rlauxe.cvr
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
-import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
-import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
@@ -12,31 +13,29 @@ import kotlin.collections.forEach
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestCorlaConverter {
+class TestCorlaSchemaConverter {
 
     @Test
-    fun testCorlaConverter() {
-        val filename = "$votedatabase2020/Denver/cvr.csv"
-        testCorlaConverter("Denver", filename, coloradoInput = Colorado2020General())
+    fun testBuildCorlaContests() {
+        val coloradoInput = Colorado2026PwithCvrs()
+        val countyName = "La Plata"
+        val countyInput = coloradoInput.corlaCountyInput(countyName)!!
+        val corlaCvrs = countyInput.readCorlaCvrs()
+        val contestBuilder = BuildCorlaContests(coloradoInput) // to get the infos by name
+        println("infosByName")
+        contestBuilder.infosByName.values.forEach { println("  $it" )}
+        println()
+
+        val converter = CorlaCvrConverter(countyName, corlaCvrs, contestBuilder.infosByName, coloradoInput)
+        //*** missing schema contest: 'Secretary of State' from county La Plata
+        println("exportToCanonLookup")
+        converter.exportToCanonLookup.forEach { println("  $it" )}
     }
 
     @Test
     fun testCorlaCvrConverter() {
         val filename = "$votedatabase2020/Broomfield/cvr.csv"
         testCorlaConverterCvrs("Broomfield", filename, coloradoInput = Colorado2020General())
-    }
-
-    @Test
-    fun testCorlaCvrWriting() {
-        val filename = "$votedatabase2020/Dolores/cvr.csv"
-        testWriteCorlaCvrs("Dolores", filename, coloradoInput = Colorado2020General())
-    }
-
-    // this tests running and checking CorlaCvrConverter
-    fun testCorlaConverter(county: String, filename: String, coloradoInput: ColoradoInput) {
-        val export = readCorlaCvrs(filename)
-        val contestBuilder = BuildCorlaContests(coloradoInput)
-        val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
     }
 
     // this tests coverting all of the cvrs and checking them against the ExportCvr
@@ -74,6 +73,12 @@ class TestCorlaConverter {
             }
         }
         println("$count exported cvrs, $countOutOfOrder out of order")
+    }
+
+    @Test
+    fun testCorlaCvrWriting() {
+        val filename = "$votedatabase2020/Dolores/cvr.csv"
+        testWriteCorlaCvrs("Dolores", filename, coloradoInput = Colorado2020General())
     }
 
     // this tests coverting all of the cvrs and writing them to a file

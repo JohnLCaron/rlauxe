@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2022Primary
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
 import org.cryptobiotic.rlauxe.cvr.makeContestInfo
 import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs

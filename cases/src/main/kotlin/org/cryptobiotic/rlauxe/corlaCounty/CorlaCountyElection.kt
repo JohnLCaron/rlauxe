@@ -2,10 +2,11 @@ package org.cryptobiotic.rlauxe.corlaCounty
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
-import org.cryptobiotic.rlauxe.auditcenter.MergedContestInfo
-import org.cryptobiotic.rlauxe.auditcenter.StrataInfo
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.MergedContestInfo
+import org.cryptobiotic.rlauxe.corlaInput.StrataInfo
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
 import org.cryptobiotic.rlauxe.irv.IrvContest
 import org.cryptobiotic.rlauxe.irv.makeRaireContest
 import org.cryptobiotic.rlauxe.irv.makeRaireOneAuditContest
@@ -55,14 +56,14 @@ class CorlaCountyElection(
     val redactedPools: List<CardPool>
     val mvrs: List<AuditableCard>
     val ncards: Int
-    val countyInfo: StrataInfo
+    val cardStyles: List<StyleIF>
 
     init {
         if (stateInput.strataMap[county] == null) {
             stateInput.strataMap.keys.sorted().forEach { println(it) }
             throw RuntimeException("stateInput.strata doesnt have county $county")
         }
-        countyInfo = stateInput.strataMap[county]!!
+        val countyInfo = stateInput.strataMap[county]!!
 
         val cvrsFromManifest = CvrsFromManifest(variant, countyInput, stateInput, infos, stateElection =  false)
 
@@ -73,6 +74,7 @@ class CorlaCountyElection(
         contests = makeContests(contestBuilders)
 
         redactedPools = cvrsFromManifest.redactedPools
+        cardStyles = cvrsFromManifest.countyCardStyles()
 
         // these are mvrs
         redactedCvrs = cvrsFromManifest.makeSimulatedCards()
@@ -108,7 +110,7 @@ class CorlaCountyElection(
 
     override fun contestsUA() = contestsUA
 
-    override fun cardStyles() = null
+    override fun cardStyles() = cardStyles
     override fun cardPools() = redactedPools
     override fun unsortedMvrsInternal() = mvrs
     override fun unsortedMvrsExternal() = null

@@ -6,8 +6,6 @@ import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.ZipReader
 import org.cryptobiotic.rlauxe.util.nfn
 import java.io.File
@@ -17,7 +15,6 @@ import java.io.InputStreamReader
 import java.io.Reader
 import java.nio.charset.Charset
 import java.util.zip.ZipInputStream
-import kotlin.text.get
 
 // this reads CVRs from "Dominion CVR export files", a standard Dominion csv format.
 
@@ -89,6 +86,7 @@ fun getZippedCsvResourceStream(resourcePath: String, resourceStream: InputStream
 
 interface CorlaCvrsIF {
     val electionName: String
+    val versionName: String
     val schema: CvrSchema
     fun cvrs(): List<CvrRow>
     fun redactedGroups(): List<RedactedGroup>
@@ -96,7 +94,8 @@ interface CorlaCvrsIF {
     fun nrows() : Int
 }
 
-class CorlaCvrs(val inputSource: String, val parser: CSVParser,
+class CorlaCvrs(val inputSource: String,
+                val parser: CSVParser,
                 showHeaders: Boolean = false,
                 showSchema: Boolean = false,
                 val redaction: RedactionIF = Redaction(),
@@ -104,7 +103,7 @@ class CorlaCvrs(val inputSource: String, val parser: CSVParser,
 
     override val electionName: String
     override val schema: CvrSchema
-    val versionName: String
+    override val versionName: String
 
     val records: Iterator<CSVRecord>  = parser.iterator()
     val ballotStyles = BallotStyles()
@@ -250,7 +249,7 @@ class CorlaCvrs(val inputSource: String, val parser: CSVParser,
         if (showRedactedGroups) {
             logger.info{"  read ${redaction.nlines} Redacted lines from ${inputSource}"}
             println("number of Redacted Groups = ${redaction.redactedGroups().size}")
-            redaction.redactedGroups().sortedBy{it.ballotType}.forEach { println("  $it") }
+            redaction.redactedGroups().sortedBy{it.groupName}.forEach { println("  $it") }
         }
     }
 
@@ -449,6 +448,7 @@ fun CSVRecord.isEmpty(): Boolean {
     return true
 }
 
+// heres where we remove the (Vote For=N), why do we still see it?
 fun parseContestNameAndVoteFor(name: String) : Pair<String, Int> {
     if (name.contains("(Vote For1")) {
         val clean = name.substringBefore("(")
@@ -474,7 +474,7 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
     return Pair(namet, ncand)
 }
 
-private val regexComma = Regex("[,]") // Matches '!', ',' or any digit
+private val regexComma = Regex("[,]") // Matches comma
 fun cleanCsvString(originalString: String) = originalString.replace(regexComma, "")
 
 fun truncateCommas(originalString: String): String {

@@ -4,11 +4,12 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
 import org.cryptobiotic.rlauxe.auditcenter.CardIteratorfromCountyMvrs
-import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
-import org.cryptobiotic.rlauxe.auditcenter.writeCountyContestData
-import org.cryptobiotic.rlauxe.auditcenter.writeCountyData
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.writeCountyContestData
+import org.cryptobiotic.rlauxe.corlaInput.writeCountyData
 import org.cryptobiotic.rlauxe.auditcenter.writeUnsortedMvrs
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.corlaInput.CorlaCounty2020Input
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.util.*
@@ -57,7 +58,7 @@ class CorlaStateElection(
                 throw RuntimeException("stateInput.strata doesnt have county $countyName")
             }
             val countyInfo = stateInput.strataMap[countyName]!!
-            val countyPopulation = countyInput.countyPopulation
+            val countyPopulation = countyInput.countyPopulation()
 
             val cvrsFromManifest = CvrsFromManifest(variant, countyInput, stateInput, infos, stateElection =  true)
 
@@ -88,8 +89,9 @@ class CorlaStateElection(
             writeUnsortedMvrs(countyName, publisher, Closer(allCards.iterator()))
             totalCvrCardCount += allCards.size
 
-            // TODO to use fastSampleing, all cvrs must have stylesIds (no fromCvr or phantoms)
+            // TODO to use fastSampling, all cvrs must have stylesIds (no fromCvr or phantoms)
             //  styles cant be optional; all styles must be in styleMap when reading
+            // county styles dont have the global ids. Perhapa go back to using style name ??
             val countyCardStyles = cvrsFromManifest.countyCardStyles()
             allCardStyles.addAll(countyCardStyles)
 

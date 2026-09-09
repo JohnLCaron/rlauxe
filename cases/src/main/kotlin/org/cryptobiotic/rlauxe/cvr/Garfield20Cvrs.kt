@@ -48,6 +48,7 @@ private val showRedactedGroups = false
 class Garfield20Cvrs(val filename: String, showHeaders: Boolean = false): CorlaCvrsIF {
 
     override val electionName = "Garfield2020"
+    override val versionName = "unknown"
     override val schema: CvrSchema
     val nvotesMap: Map<Int, Int>
 
@@ -77,7 +78,6 @@ class Garfield20Cvrs(val filename: String, showHeaders: Boolean = false): CorlaC
         }
 
         records = parser.iterator()
-        lineno++
 
         /* 1) no first line
         val electionLine = records.next()
@@ -88,6 +88,7 @@ class Garfield20Cvrs(val filename: String, showHeaders: Boolean = false): CorlaC
 
         try {
             val contestLine = records.next()
+            if (showLines) showLine("contestLine", contestLine)
             lineno++
 
             // 2) the header for the first n columns, then the choice/candidate name for that column
@@ -111,12 +112,12 @@ class Garfield20Cvrs(val filename: String, showHeaders: Boolean = false): CorlaC
             //    6,           PrecinctID, 17
             //    7,        BallotStyleID, 3
 
-            cvrNumberIdx = schema.headerMap["RowNumber"]!!
-            batchIdIdx = schema.headerMap["BoxID"]!!
-            recordIdIdx = schema.headerMap["BoxPosition"]!!
-            imprintedIdIdx = schema.headerMap["BallotID"]!!
-            ballotTypeIdx = schema.headerMap["BallotStyleID"]!!
-            precinctIdx = schema.headerMap["PrecinctID"]!!
+            cvrNumberIdx = schema.headerMap["RowNumber".lowercase()]!!
+            batchIdIdx = schema.headerMap["BoxID".lowercase()]!!
+            recordIdIdx = schema.headerMap["BoxPosition".lowercase()]!!
+            imprintedIdIdx = schema.headerMap["BallotID".lowercase()]!!
+            ballotTypeIdx = schema.headerMap["BallotStyleID".lowercase()]!!
+            precinctIdx = schema.headerMap["PrecinctID".lowercase()]!!
 
             nvotesMap = schema.contests.associate { it.contestIdx to it.voteForN }
 

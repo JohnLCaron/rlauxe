@@ -123,7 +123,7 @@ class BoulderElections {
 
     @Test
     fun createBoulderVariants() {
-        val toptopdir = "$cases/boulder/boulder2026r"
+        val toptopdir = "$cases/boulder/boulder2020r"
         val input= Boulder26pInput()
 
         // redacted ballots are simulated

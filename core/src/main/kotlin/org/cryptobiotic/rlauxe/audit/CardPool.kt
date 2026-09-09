@@ -60,16 +60,27 @@ class CardPoolBuilder(
     val hasExactContests: Boolean,
     val infos: Map<Int, ContestInfo>, // all contests
     val contestTabs: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests and candidates with no votes
-    val minCardsNeeded: Map<Int, Int>
+    // val minCardsNeeded: Map<Int, Int>
 ) {
     var ncards: Int? = null // lame
     var adjustCards = 0 // adjusted number of cards, used in ncards()
+    var maxMinCardsNeeded = 0
+    var ncardsAreFixed: Boolean = false
 
     // you need at least this many cards for this pool
-    val maxMinCardsNeeded: Int = minCardsNeeded.values.max()
+    fun setMinCardsNeeded(minCardsNeeded: Map<Int, Int>): CardPoolBuilder {
+        maxMinCardsNeeded = minCardsNeeded.values.max()
+        return this
+    }
 
     fun setNcards(ncards: Int): CardPoolBuilder {
+        if (ncardsAreFixed) throw RuntimeException("Cant change ncards for $poolName")
         this.ncards = ncards
+        return this
+    }
+
+    fun setNcardsAreFixed(ncardsAreFixed: Boolean): CardPoolBuilder {
+        this.ncardsAreFixed = ncardsAreFixed
         return this
     }
 
@@ -151,7 +162,6 @@ class CardPoolBuilder(
         if (poolName != other.poolName) return false
         if (infos != other.infos) return false
         if (contestTabs != other.contestTabs) return false
-        if (minCardsNeeded != other.minCardsNeeded) return false
 
         return true
     }
@@ -165,12 +175,11 @@ class CardPoolBuilder(
         result = 31 * result + poolName.hashCode()
         result = 31 * result + infos.hashCode()
         result = 31 * result + contestTabs.hashCode()
-        result = 31 * result + minCardsNeeded.hashCode()
         return result
     }
 
     companion object {
-        // used by OneAuditTest, probably boulder
+
         fun fromMinVotesNeeded(
             poolName: String,
             poolId: Int,
@@ -186,7 +195,7 @@ class CardPoolBuilder(
                 // based on the contest's votes, you need at least this many cards for this contest
                 minCardsNeeded[contestId] = roundUp(voteSum.toDouble() / info.voteForN)
             }
-            return CardPoolBuilder(poolName, poolId, hasExactContests, infos, contestTabs, minCardsNeeded)
+            return CardPoolBuilder(poolName, poolId, hasExactContests, infos, contestTabs).setMinCardsNeeded(minCardsNeeded)
         }
     }
 }

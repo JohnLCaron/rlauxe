@@ -2,11 +2,11 @@ package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.auditcenter.CorlaContestBuilder
 import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
-import org.cryptobiotic.rlauxe.auditcenter.writeCountyContestData
-import org.cryptobiotic.rlauxe.auditcenter.writeCountyData
+import org.cryptobiotic.rlauxe.corlaInput.writeCountyContestData
+import org.cryptobiotic.rlauxe.corlaInput.writeCountyData
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator

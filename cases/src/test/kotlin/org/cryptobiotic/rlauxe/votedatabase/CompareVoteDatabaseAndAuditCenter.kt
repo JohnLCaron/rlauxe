@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.votedatabase
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
-import org.cryptobiotic.rlauxe.auditcenter.Colorado2020General
-import org.cryptobiotic.rlauxe.auditcenter.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.cvr.Garfield20Cvrs
 import org.cryptobiotic.rlauxe.cvr.makeContestInfo

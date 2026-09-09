@@ -7,7 +7,13 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
-import org.cryptobiotic.rlauxe.corlaCounty.votedatabase2020Counties
+import org.cryptobiotic.rlauxe.corlaInput.votedatabase2020Counties
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2022Primary
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PMerged
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
 import kotlin.collections.forEach
 import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries

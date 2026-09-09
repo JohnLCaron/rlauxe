@@ -128,7 +128,7 @@ class TestBoulderCvrExportCsv {
         // export.redacted.forEach { println(it.contestVotes.toString()) }
 
         // Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
-        val group7 = export.redactedGroups().find { it.ballotType == "7"}!!
+        val group7 = export.redactedGroups().find { it.groupName == "7"}!!
         var idx = 0
         assertEquals(listOf(265, 104, 0, 0, 2, 1, 1, 5, 2, 0, 0, 0, 0, 0, 0), group7.contestVotes[idx++]!!.toMap().values.toList())
         assertEquals(listOf(228, 74, 6, 2, 5, 0, 0,), group7.contestVotes[idx++]!!.toMap().values.toList())

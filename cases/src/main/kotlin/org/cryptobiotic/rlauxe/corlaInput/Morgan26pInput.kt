@@ -1,6 +1,5 @@
-package org.cryptobiotic.rlauxe.corlaCounty
+package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.auditcenter.auditcenter
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
 import org.cryptobiotic.rlauxe.cvr.Redaction
 import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
@@ -22,4 +21,6 @@ class Morgan26pInput: CorlaCountyInput {
         return org
     }
 
+    override fun countyPopulation() = stateInput.strataPopulation()[countyName]!!
+    val stateInput = Colorado2026Primary()
 }

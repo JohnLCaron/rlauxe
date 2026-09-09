@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.audit.createElectionRecord
 import org.cryptobiotic.rlauxe.audit.startFirstRound
-import org.cryptobiotic.rlauxe.auditcenter.munge
+import org.cryptobiotic.rlauxe.corlaInput.munge
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions

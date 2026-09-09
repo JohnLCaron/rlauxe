@@ -66,6 +66,8 @@ fun writeContestTabulationCsvFile(tabs: List<ContestTabulation>, outputFilename:
 ////////////////////////////////////////////////////////////////////////////
 
 fun readContestTabulationCsv(ttokens: List<String>): ContestTabulation {
+    if (ttokens.size < 9)
+        print("")
     var idx = 0
     val contestId = ttokens[idx++].toInt()
     val voteForN = ttokens[idx++].toInt()

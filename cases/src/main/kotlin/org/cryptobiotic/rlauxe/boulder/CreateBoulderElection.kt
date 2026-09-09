@@ -157,9 +157,9 @@ class CreateBoulderElection(
             // but... now we are just setting the vote totals, ignoring ncards and undervotes.
             val contestTabs = redacted.contestVotes.mapValues{ ContestTabulation(infos[it.key]!!, it.value, ncards=0) }
 
-            val name = "redacted " + cleanCsvString(redacted.ballotType)
+            val name = "redacted " + cleanCsvString(redacted.groupName)
             // in this case, nlines == ncards
-            val hasExactContests = !redacted.ballotType.contains("&") // has multiple card styles
+            val hasExactContests = !redacted.groupName.contains("&") // has multiple card styles
             CardPoolBuilder.fromMinVotesNeeded(name, id++, hasExactContests=hasExactContests, infos, contestTabs).setNcards(redacted.ncards())
         }
     }

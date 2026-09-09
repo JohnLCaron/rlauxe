@@ -1,4 +1,7 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corlaInput
+
+import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
+import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 
 open class Colorado2026Primary(ac:String?=auditcenter): ColoradoInput(
     generalCanonicalFile = "$ac/2026/primary/finalReports/CanonicalListOfContestsAndChoices.csv",
@@ -52,7 +55,7 @@ open class Colorado2026Primary(ac:String?=auditcenter): ColoradoInput(
     override fun contestNameCleanup(county: String, name: String): String {
 
         return when (county) {
-            "LaPlata" -> when (name) {
+            "La Plata" -> when (name) {
                 "Secretary of State" -> "Secretary of State - LBR"
                 else -> name
             }

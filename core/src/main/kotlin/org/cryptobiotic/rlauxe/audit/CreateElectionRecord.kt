@@ -30,8 +30,9 @@ interface ElectionBuilder {
     fun cards() : CloseableIterator<AuditableCard> // not sorted, dont need styles added yet
     fun ncards(): Int
 
-    // In EstimateAudit, we want to use pools to estimate with, if they exist. So the merging needs to merge pools, not the styles.
-    // So dont write styles if there are pools. Also its up to the reader to prefer pools.
+    // TODO this is bullshit we need the full styles to rehydrate the card styles when reading
+    // WRONG In EstimateAudit, we want to use pools to estimate with, if they exist. So the merging needs to merge pools, not the styles.
+    //        So dont write styles if there are pools. Also its up to the reader to prefer pools.
     fun cardStyles(): List<StyleIF>?
     fun cardPools(): List<CardPoolIF>?
     fun countyCardPools(): List<CountyPools>? = null

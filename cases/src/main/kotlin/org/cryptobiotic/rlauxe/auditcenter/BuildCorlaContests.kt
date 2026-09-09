@@ -3,13 +3,16 @@ package org.cryptobiotic.rlauxe.auditcenter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.MergedContestInfo
+import org.cryptobiotic.rlauxe.corlaInput.StrataInfo
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
 import kotlin.String
 
 private val logger = KotlinLogging.logger("CountyContestBuilder")
 
-// Build Corla Contests from ColoradoInput
+// Build Corla Contests from ColoradoInput. used by CorlaStateElection
 open class BuildCorlaContests(val coloradoInput: ColoradoInput) {
     val corlaContestBuilders: List<CorlaContestBuilder> = makeContestBuilders() // 181
     val infos: Map<Int, ContestInfo> = corlaContestBuilders.map { it.info }.associateBy{ it.id }

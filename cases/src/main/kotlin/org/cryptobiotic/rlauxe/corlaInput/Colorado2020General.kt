@@ -1,7 +1,8 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.corlaCounty.CorlaCounty2020Input
-import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyInput
+import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
+import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
+import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 
 class Colorado2020General(ac:String?=auditcenter): ColoradoInput(
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
@@ -19,14 +20,14 @@ class Colorado2020General(ac:String?=auditcenter): ColoradoInput(
     override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
 
     // temp override
-    override fun counties(): List<String> = listOf("Adams", "Boulder", "Chaffee")
+    // override fun counties(): List<String> = listOf("Adams", "Boulder", "Chaffee")
 
     override fun contestTabsAllCounties(): Map<String, ContestTabAllCounties>  = contestTabsAllCounties
     private val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
         val tabs = mutableMapOf<String, ContestTabAllCounties>()
         countyTabsAllContests().values.filter { it.countyName !in listOf("Baca", "Gunnison", "Las Animas") }.forEach { countyTabAllContests ->
             countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
-                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties (contestName) }
+                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties(contestName) }
                 tab.add(countyTabAllContests.countyName, countyContestVotes)
             }
         }
@@ -88,7 +89,6 @@ class Colorado2020General(ac:String?=auditcenter): ColoradoInput(
     }
 
     override fun contestNameCleanup(county: String, name: String): String {
-
         val transform = when (county) {
             "Adams" -> when (name) {
                 "Adams County Court - Flaum" -> "Adams County Court Judge - Flaum"
@@ -391,39 +391,7 @@ class Colorado2020General(ac:String?=auditcenter): ColoradoInput(
                     "Mesa County Court - Grattan" -> "Mesa County Court Judge - Grattan"
                     "Mesa County Court - Henderson" -> "Mesa County Court Judge - Henderson"
                     "Ballot Question 6AA Formation of District Redlands 360 Metropolitan District No. 1" -> "Redlands 360 Metropolitan District No. 1 Ballot Question 6AA"
-                    "BALLOT ISSUE 6AB" -> "Redlands 360 Metropolitan District No. 1 Ballot Issue 6AB"
-                    "BALLOT ISSUE 6AC" -> "unknown" // ditto
-                    "BALLOT ISSUE 6AD" -> "unknown"
-                    "BALLOT ISSUE 6AE" -> "unknown"
-                    "BALLOT ISSUE 6AF" -> "unknown"
-                    "BALLOT ISSUE 6AG" -> "unknown"
-                    "BALLOT ISSUE 6AH" -> "unknown"
-                    "BALLOT ISSUE 6AI" -> "unknown"
-                    "BALLOT ISSUE 6AJ" -> "unknown"
-                    "BALLOT ISSUE 6AK" -> "unknown"
-                    "BALLOT ISSUE 6AL" -> "unknown"
-                    "BALLOT ISSUE 6AM" -> "unknown"
-                    "BALLOT ISSUE 6AN" -> "unknown"
-                    "BALLOT ISSUE 6AO" -> "unknown"
-                    "BALLOT ISSUE 6AP" -> "unknown"
-                    "BALLOT ISSUE 6AQ" -> "unknown"
                     "BALLOT QUESTION 6BA" -> "Redlands 360 Metropolitan District No. 9 Ballot Question 6BA"
-                    "BALLOT ISSUE 6BB" -> "Redlands 360 Metropolitan District No. 9 Ballot Issue 6BB"
-                    "BALLOT ISSUE 6BC" -> "unknown" // ditto
-                    "BALLOT ISSUE 6BD" -> "unknown"
-                    "BALLOT ISSUE 6BE" -> "unknown"
-                    "BALLOT ISSUE 6BF" -> "unknown"
-                    "BALLOT ISSUE 6BG" -> "unknown"
-                    "BALLOT ISSUE 6BH" -> "unknown"
-                    "BALLOT ISSUE 6BI" -> "unknown"
-                    "BALLOT ISSUE 6BJ" -> "unknown"
-                    "BALLOT ISSUE 6BK" -> "unknown"
-                    "BALLOT ISSUE 6BL" -> "unknown"
-                    "BALLOT ISSUE 6BM" -> "unknown"
-                    "BALLOT ISSUE 6BN" -> "unknown"
-                    "BALLOT ISSUE 6BO" -> "unknown"
-                    "BALLOT ISSUE 6BP" -> "unknown"
-                    "BALLOT ISSUE 6BQ" -> "unknown"
                     else -> null
                 }
             }
@@ -585,21 +553,21 @@ class Colorado2020General(ac:String?=auditcenter): ColoradoInput(
 
         // let counties have first pass as transform, then the general case
         return when (name) {
+            "Supreme Court Hart",
             "Colorado Supreme Court Justice - Hart" -> "Justice of the Colorado Supreme Court - Hart"
+            "Supreme Court Samour",
             "Colorado Supreme Court Justice - Samour" -> "Justice of the Colorado Supreme Court - Samour"
-            "Supreme Court Hart" -> "Justice of the Colorado Supreme Court - Hart"
-            "Supreme Court Samour" -> "Justice of the Colorado Supreme Court - Samour"
             else -> name
         }
     }
 
     override fun candidateNameCleanup(county: String, name: String): String {
-        when (name) {
+        /* when (name) {
             "Colorado Supreme Court Justice - Hart" -> return "Justice of the Colorado Supreme Court - Hart"
             "Colorado Supreme Court Justice - Samour" -> return "Justice of the Colorado Supreme Court - Samour"
             "Supreme Court Hart" -> return "Justice of the Colorado Supreme Court - Hart"
             "Supreme Court Samour" -> return "Justice of the Colorado Supreme Court - Samour"
-        }
+        } */
 
         return when (county) {
             "Adams" -> when (name) {

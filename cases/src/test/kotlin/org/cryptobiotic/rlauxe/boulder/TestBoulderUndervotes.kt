@@ -1,18 +1,12 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
-import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.cvr.CvrCardStyle
 import org.cryptobiotic.rlauxe.cvr.CvrRow
-import org.cryptobiotic.rlauxe.util.mergeReduce
-import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
 import kotlin.test.Test
-import kotlin.text.appendLine
 
 class TestBoulderUndervotes {
     val input = Boulder23Input()
@@ -121,20 +115,20 @@ class TestBoulderUndervotes {
         corlaCvrs.redactedGroups().forEach { rgroup ->
             // test if theres a cardStyle that matches
             //val gcardStyle = extractBallotType(rgroup.ballotType) + "-" + if (isA) "A" else "B"
-            val cardStyle = cardStyles[rgroup.ballotType]
+            val cardStyle = cardStyles[rgroup.groupName]
             if (cardStyle != null) {
                 val gids = rgroup.contestVotes.map { it.key }.sorted().toIntArray()
                 if (!cardStyle.possibleContests().contentEquals(gids)) {
-                    println("  *** redacted group '${rgroup.ballotType}' contests dont match corresponding card style")
+                    println("  *** redacted group '${rgroup.groupName}' contests dont match corresponding card style")
                     println("  $rgroup")
                     println(
                         "    ${gids.contentToString()} !=\n    ${
                             cardStyle.possibleContests().contentToString()
-                        } (${rgroup.ballotType})"
+                        } (${rgroup.groupName})"
                     )
                 }
             } else {
-                println("  *** redacted group '${rgroup.ballotType}' doesnt have corresponding card style '${rgroup}'")
+                println("  *** redacted group '${rgroup.groupName}' doesnt have corresponding card style '${rgroup}'")
             }
         }
         // with this exception, redacted groups match existing CardStyle:

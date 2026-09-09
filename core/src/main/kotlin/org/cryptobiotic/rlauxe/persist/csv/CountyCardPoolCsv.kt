@@ -76,25 +76,31 @@ fun readCountyCardPoolContinuation(line: String, current: CountyPoolBuilder): Bo
 
 fun readCountyPoolsCsvFile(filename: String, styles: List<StyleIF>): List<CountyPools> {
     val styleMap = styles.associateBy { it.id() }
-    val reader: BufferedReader = File(filename).bufferedReader()
-    reader.readLine() // get rid of header line
-
     val pools = mutableListOf<CountyPools>()
-    var line = reader.readLine()
-    var currentBuilder: CountyPoolBuilder?
 
-    outerLoop@
-    while (true) {
-        currentBuilder = readCountyCardPoolCsv(line)
-        // read more contestTabs for current pool
-        while (readCountyCardPoolContinuation(line, currentBuilder)) {
-            line = reader.readLine() ?: break@outerLoop
+    try {
+        val reader: BufferedReader = File(filename).bufferedReader()
+        reader.readLine() // get rid of header line
+
+        var line = reader.readLine()
+        var currentBuilder: CountyPoolBuilder?
+
+        outerLoop@
+        while (true) {
+            currentBuilder = readCountyCardPoolCsv(line)
+            // read more contestTabs for current pool
+            while (readCountyCardPoolContinuation(line, currentBuilder)) {
+                line = reader.readLine() ?: break@outerLoop
+            }
+            pools.add(currentBuilder.build(styleMap))
         }
         pools.add(currentBuilder.build(styleMap))
-    }
-    pools.add(currentBuilder.build(styleMap))
 
-    reader.close()
+        reader.close()
+
+    } catch (e:Throwable) {
+        logger.error(e) { "error reading $filename" }
+    }
     return pools
 }
 

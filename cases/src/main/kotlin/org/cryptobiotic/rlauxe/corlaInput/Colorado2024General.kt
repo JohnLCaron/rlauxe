@@ -1,4 +1,7 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corlaInput
+
+import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
+import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 
 class Colorado2024General(ac:String?=auditcenter): ColoradoInput(
     generalCanonicalFile = "$ac/2024/general/2024GeneralCanonicalList.csv",

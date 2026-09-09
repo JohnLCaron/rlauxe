@@ -1,16 +1,11 @@
 package org.cryptobiotic.rlauxe.ga
 
-import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.auditcenter.munge
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.collections.forEach
 import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 import kotlin.test.Test
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 class TestReadGaInputCsv {
     val topdir = "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted"

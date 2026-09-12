@@ -1,5 +1,5 @@
 # Redaction notes for Corla 2020 election
-last changed 9/12/2026
+last changed 9/11/2026
 
 See [Corla2020notes](Corla2020notes.md) for description of the cvr files.
 

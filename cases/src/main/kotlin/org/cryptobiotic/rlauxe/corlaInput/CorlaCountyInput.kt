@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
+import kotlin.text.replace
 
 interface CorlaCountyInput {
     val electionName: String
@@ -25,37 +26,38 @@ interface CorlaCountyInput {
 
     fun hasABgroups() = false
 
-    fun readCountyManifest(): List<ManifestBatch> {
-        return readCountyManifestCsv(manifestSource)
+    fun readCountyManifest(): CountyManifest {
+        return CountyManifest(manifestSource)
     }
 
     fun countyPopulation(): Int
 }
 
 class CorlaCounty2020Input(override val countyName: String): CorlaCountyInput {
+    val countyNameZ = countyName.replace(" ", "")
     override val electionName = "${countyName}2020"
-    override val cvrsSource: String
-    override val manifestSource: String
+    // TODO Gunnison has Manifest-Gunnison.csv; but Gunnison is an excluded county
+    override val manifestSource = "$manifestDir/manifest-${countyNameZ}.csv"
+    override val cvrsSource: String = countyCvrs[countyName]!!
 
-    init {
-        cvrsSource = countyCvrs[countyName]!!
-        manifestSource = "fake"
-    }
+    override fun readCountyManifest(): CountyManifest {
+        if (countyName == "Garfield") {
+            return GarfieldManifest(manifestSource)
+        }
 
-    // we dont have the manifests for 2020, use fake one where we just set the total number of cards for each county.
-    override fun readCountyManifest(): List<ManifestBatch> {
-        return listOf(ManifestBatch(
-            countyName = countyName,
-            tabulatorNum = 1,
-            batchId = "1",
-            nballotCards = countyPopulation(),
-            location = countyName
-        ))
+        var result = super.readCountyManifest()
+        if (countyName == "Douglas") {
+            // Douglas,1,Gen-2026,30,295 must be Douglas,1,GEN-2026,30,295
+            // Douglas,1,GEn-2045,100,299
+            result = result.uppercase()
+        }
+        return result
     }
 
     override fun countyPopulation() = stateInput.strataPopulation()[countyName]!!
 
     companion object {
+        val manifestDir = "$auditcenter/2020/general/round_1"
         val countyCvrs: Map<String, String> = votedatabase2020Counties("/home/stormy/datadrive/votedatabase/cvr/Colorado/")
         val stateInput = Colorado2020General()
     }

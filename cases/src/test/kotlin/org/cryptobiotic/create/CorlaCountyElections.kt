@@ -83,6 +83,24 @@ class CorlaCountyElections {
     }
 
     @Test
+    fun createSummit20() {
+        val stateInput = Colorado2020General()
+        createCorlaCountyVariants("$cases/corlaCounty/summit20",
+            stateInput.corlaCountyInput("Summit")!!,
+            stateInput,
+        )
+    }
+
+    @Test
+    fun createDouglas20() {
+        val stateInput = Colorado2020General()
+        createCorlaCountyVariants("$cases/corlaCounty/douglas20",
+            stateInput.corlaCountyInput("Douglas")!!,
+            stateInput,
+        )
+    }
+
+    @Test
     fun createLaPlata26p() {
         createCorlaCountyVariants("$cases/corlaCounty/laplata26p",
             LaPlata26pInput(),

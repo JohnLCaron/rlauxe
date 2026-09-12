@@ -17,11 +17,11 @@ class CorlaStateElections {
         val stateInput = Colorado2020General()
 
         createCorlaStateElection(
-            topdir = "$toptopdir/sim",
+            topdir = "$toptopdir/oneaudit",
             stateInput,
-            creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .04),
+            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .04),
             roundConfig = boulderRoundSettings(),
-            variant = ElectionVariantEnum.Sim,
+            variant = ElectionVariantEnum.OnePool,
         )
     }
 }

@@ -10,6 +10,7 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator
 import kotlin.collections.toMap
+import kotlin.math.max
 
 // tabulate contest votes from cards or cvrs; can handle both regular and irv voting. mutable.
 class ContestTabulation(
@@ -25,6 +26,9 @@ class ContestTabulation(
         votes.forEach{ this.addVote(it.key, it.value) }
         this.ncardsTabulated = ncards
         this.undervotes = ncards - nvotes()
+    }
+    constructor(info: ContestInfo, votes: Map<Int, Int>): this(info) {
+        votes.forEach{ this.addVote(it.key, it.value) }
     }
 
     override val voteForN = if (isIrv) 1 else voteForNin
@@ -68,6 +72,16 @@ class ContestTabulation(
         votes[cand] = accum + vote
     }
 
+    fun subtractVoteZ(cand: Int, vote: Int) {
+        val accum = votes.getOrPut(cand) { 0 }
+        votes[cand] = max(0, accum - vote) // cant go below 0
+    }
+
+    fun subtractVote(cand: Int, vote: Int) {
+        val accum = votes.getOrPut(cand) { 0 }
+        votes[cand] = accum - vote
+    }
+
     private fun addVotesIrv(candidateRanks: IntArray) {
         /* candidateRanks.forEach {  // track for non IRV also?
             if (candidateIdToIdx[it] == null) {
@@ -91,6 +105,34 @@ class ContestTabulation(
         }
         this.ncardsTabulated += other.ncards()
         this.undervotes += other.undervotes()
+        // this.novote += other.novote
+        // this.overvotes += other.overvotes
+    }
+
+    // for summing multiple tabs into this one. not for IRV
+    fun subtractZ(other: ContestTabulationIF) {
+        require (contestId == other.contestId)
+        if (this.isIrv) {
+            throw RuntimeException("cant call subtract on IRV")
+        } else {
+            other.votes.forEach { (candId, nvotes) -> subtractVoteZ(candId, nvotes) }
+        }
+        // this.ncardsTabulated += other.ncards()
+        // this.undervotes += other.undervotes()
+        // this.novote += other.novote
+        // this.overvotes += other.overvotes
+    }
+
+    // for summing multiple tabs into this one. not for IRV
+    fun subtract(other: ContestTabulationIF) {
+        require (contestId == other.contestId)
+        if (this.isIrv) {
+            throw RuntimeException("cant call subtract on IRV")
+        } else {
+            other.votes.forEach { (candId, nvotes) -> subtractVote(candId, nvotes) }
+        }
+        // this.ncardsTabulated += other.ncards()
+        // this.undervotes += other.undervotes()
         // this.novote += other.novote
         // this.overvotes += other.overvotes
     }
@@ -175,7 +217,11 @@ class ContestTabulation(
     }
 }
 
+//////////////////////////////////////////////////////////////////////
+
 // add other into the reciever map
+// val sumTabs = mutableMapOf<Int, ContestTabulation>()
+// sumTabs.sumContestTabulations(other)
 fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, ContestTabulationIF>) {
     other.forEach { (contestId, otherTab) ->
         val contestSum = this.getOrPut(contestId) { ContestTabulation(otherTab) }
@@ -183,6 +229,39 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
     }
 }
 
+// this - other, cant go below 0
+fun MutableMap<Int, ContestTabulation>.subtractContestTabulationZ(other: Map<Int, ContestTabulationIF>) {
+    other.forEach { (contestId, otherTab) ->
+        val contestSum = this.getOrPut(contestId) { ContestTabulation(otherTab) }
+        contestSum.subtractZ(otherTab)
+    }
+}
+
+// this - other
+fun MutableMap<Int, ContestTabulation>.subtractContestTabulation(other: Map<Int, ContestTabulationIF>) {
+    other.forEach { (contestId, otherTab) ->
+        val contestSum = this.getOrPut(contestId) { ContestTabulation(otherTab) }
+        contestSum.subtract(otherTab)
+    }
+}
+
+// op1 - op2
+fun subtractContestTabulations(op1: Map<Int, ContestTabulation>, op2: Map<Int, ContestTabulation>): Map<Int, ContestTabulation> {
+    val result = mutableMapOf<Int, ContestTabulation>()
+    result.sumContestTabulations(op1)
+    result.subtractContestTabulation(op2)
+    return result
+}
+
+// op1 - op2, cant go below 0
+fun subtractContestTabulationsZ(op1: Map<Int, ContestTabulation>, op2: Map<Int, ContestTabulation>): Map<Int, ContestTabulation> {
+    val result = mutableMapOf<Int, ContestTabulation>()
+    result.sumContestTabulations(op1)
+    result.subtractContestTabulationZ(op2)
+    return result
+}
+
+////////////////////////////////////////////////////////////////////
 //// also see Vunder
 
 // TODO only accumulates regular votes, not IRV; can we fix that?

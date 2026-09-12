@@ -17,7 +17,7 @@ class Morgan26pInput: CorlaCountyInput {
         val orgGroups = org.redactedGroups()
         require(orgGroups.size == 1)
         //   sumManifest - totalCvrs = 15;  single group should be set to 25, currently 10
-        orgGroups.first().setNcards(25)
+        orgGroups.first().setNcards(25) // TODO still needed ??
         return org
     }
 

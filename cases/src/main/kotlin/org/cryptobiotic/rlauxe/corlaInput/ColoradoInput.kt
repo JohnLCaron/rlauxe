@@ -17,11 +17,16 @@ import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
+import org.cryptobiotic.rlauxe.strata.Strata
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.sfn
+import java.io.BufferedReader
+import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import kotlin.collections.forEach
+import kotlin.text.split
 
 val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
 
@@ -112,7 +117,7 @@ abstract class ColoradoInput(
     //    var ncards = 0
     open fun countyTabsAllContests(): Map<String, CountyTabAllContests> = countyTabsAllContests
     private val countyTabsAllContests: Map<String, CountyTabAllContests> by lazy {
-        readCountyTabulateCsv(tabulateCountyFile)
+        readCountyTabulateCsv(tabulateCountyFile) // county -> CountyTabAllContests
     }
 
     // data class ContestTabAllCounties(val contestName: String) {
@@ -445,4 +450,45 @@ fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAs
     }
     writer.close()
     logger.info{"wrote ${count}  countyContestData to $outputFilename"}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// see WriteCountyInputData
+
+data class CountyInputData(val county: String, val manifestCount: Int, val ncvrs: Int, val nredactedCvrs: Int, val ngroups: Int, val minCards: Int)
+
+fun writeCountyInputData(outputFilename: String, data: List<CountyInputData>) {
+    // misc data by county
+    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
+    writer.write("            county,   manifestCount,   ncvrs, nredactedCvrs, ngroups, minCards\n")
+    data.sortedBy { it.county }.forEach {
+        writer.write(
+            "${sfn(it.county, 20)}, ${nfn(it.manifestCount, 7)}, ${nfn(it.ncvrs, 7)}, " +
+                "${nfn(it.nredactedCvrs, 5)}, ${nfn(it.ngroups, 5)}, ${nfn(it.minCards, 5)}\n"
+        )
+    }
+    writer.close()
+    println("wrote ${data.size} countyData to $outputFilename")
+}
+
+fun readCountyInputData(filename: String): List<CountyInputData> {
+    val reader: BufferedReader = File(filename).bufferedReader()
+    reader.readLine() // skip header line
+
+    val countyData = mutableListOf<CountyInputData>()
+    while (true) {
+        val line = reader.readLine() ?: break
+
+        val tokens = line.split(",")
+        val countyName = tokens[0].trim()
+        val manifestCount = tokens[1].trim().toInt()
+        val ncvrs = tokens[2].trim().toInt()
+        val nredactedRows = tokens[3].trim().toInt()
+        val ngroups = tokens[4].trim().toInt()
+        val minCards = tokens[5].trim().toInt()
+        countyData.add( CountyInputData(countyName, manifestCount, ncvrs, nredactedRows, ngroups, minCards))
+    }
+    reader.close()
+
+    return countyData
 }

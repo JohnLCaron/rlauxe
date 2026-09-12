@@ -40,7 +40,7 @@ class CountyPoolsSimCvrs(
     val countiesTabs: Map<String, CountyTabAllContestsIF>, // county -> CountyTabAllContests2
     val contestsTabs: Map<String, ContestTabAllCountiesIF>, // contest name -> CountyTabAllContests2
     val mvrStylesMap: Map<String, List<MvrStyle>>, // // county -> List<MvrStyle>
-    val choiceMapper: (String, String, String) -> String, // TODO van we get rid of ??
+    val choiceMapper: (String, String, String) -> String, // TODO can we get rid of ??
     val onlyContest: String? = null
 ) {
     // val builders = contestBuilders.associateBy { it.info.name }
@@ -642,6 +642,8 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
 
 /////////////////////////////////////////////////////////////
 // maybe should be interfaces ?
+// TODO get rid of ??
+//   trying to remove corla stuff i think
 
 interface ContestTabAllCountiesIF {
     val contestName: String 

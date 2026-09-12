@@ -11,6 +11,6 @@ class Boulder25Input: BoulderInput  {
 
     override fun countyPopulation(): Int {
         val manifests = readCountyManifest()
-        return manifests.sumOf { it.nballotCards }
+        return manifests.totalCards
     }
 }

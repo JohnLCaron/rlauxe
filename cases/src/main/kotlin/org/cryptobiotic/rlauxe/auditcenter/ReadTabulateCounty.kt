@@ -3,8 +3,13 @@ package org.cryptobiotic.rlauxe.auditcenter
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
 import org.cryptobiotic.rlauxe.corlaInput.matchCandidateName
+import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.nfn
 import java.io.File
 import java.nio.charset.Charset
 import kotlin.Int
@@ -24,9 +29,15 @@ import kotlin.text.appendLine
 data class CountyTabAllContests(override val countyName: String): CountyTabAllContestsIF {
     override val contests = mutableMapOf<String, CountyContestVotes>() // contestName (canonical I think) -> CountyContestVotes
 
-    override fun toString() = buildString {
-        appendLine("'$countyName'")
-        contests.values.forEach{ appendLine("  $it") }
+    fun show() = buildString {
+        appendLine("'$countyName' County")
+        contests.forEach{ (name, choices) ->
+            appendLine("  '$name':")
+            choices.choices.forEach { (choice, votes) ->
+                appendLine("    ${nfn(votes, 6)} '$choice'")
+            }
+            appendLine()
+        }
     }
 
     fun addChoiceVote(line: ChoiceVote) {
@@ -49,6 +60,17 @@ data class CountyContestVotes(override val countyName: String, override val cont
         return choices.filter { !isWriteIn(it.key) }.mapKeys {
             canonicalContest.matchCandidateName(it.key )!!
         }
+    }
+
+    fun makeContestTabulationCorla(info: ContestInfo, canonicalContest: CanonicalContest, ncards: Int): ContestTabulation {
+        val candidateVotes = canonicalChoices(canonicalContest).map { (canonicalChoiceName, vote) ->
+            if (info.candidateNames[canonicalChoiceName] == null)
+                throw RuntimeException("contestTab candidate name $canonicalChoiceName not found in info")
+
+            Pair( info.candidateNames[canonicalChoiceName]!!, vote)
+        }.toMap()
+
+        return ContestTabulation(info, candidateVotes, ncards)
     }
 
     override fun contestVotes() = choices.values.sumOf { it }

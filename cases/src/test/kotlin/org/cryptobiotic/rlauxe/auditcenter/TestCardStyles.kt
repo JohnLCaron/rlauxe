@@ -35,7 +35,7 @@ class TestCardStyles {
 
         val contestBuilder = BuildCorlaContests(coloradoInput)
         val infosByName = contestBuilder.infos.mapKeys { it.value.name }
-        val converter = CorlaCvrConverter("test", export, infosByName, coloradoInput,)
+        val converter = CorlaCvrConverter("test", export, infosByName, coloradoInput, 1,)
 
         println("converter.cardStyles")
         converter.cardStyles.values.forEach {

@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.corlaInput.munge
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
 import java.lang.StrictMath.sqrt
+import kotlin.text.get
 
 class CvrSchema(val inputSource: String,
                 val headerMap: Map<String, Int>, // column name -> column index
@@ -25,8 +26,17 @@ class CvrSchema(val inputSource: String,
         return result
     }
 
-    fun columnIndex(colName: String): Int? {
-        return headerMap[colName.lowercase()]
+    // given a choice name, what is its index in the contest, aka id ?
+    fun choiceIdx(choiceName: String): Int {
+        val column = columns.find { it.choice == choiceName }
+        if (column == null)
+            throw RuntimeException("cant find choice $choiceName")
+        // find contest it belongs to
+        var startCol = 0
+        contests.forEach {
+            if (it.startCol <= column.colno) startCol = it.startCol
+        }
+        return column.colno - startCol
     }
 
     fun voteFor(contestId: Int, cvr: CvrRow): List<String> {
@@ -86,7 +96,7 @@ data class SchemaContestInfo(val contestIdx: Int, val orgName: String, val start
             sqrt(ncols.toDouble()).toInt() // WTF sqrt?
         }
 
-        // why arent we replacing the contest name here ?
+        // replace the contest name here
         val (parsedName, nwinners) = if (isIRV) parseIrvContestName(orgName) else parseContestNameAndVoteFor(orgName)
         contestName = parsedName
         voteForN = nwinners

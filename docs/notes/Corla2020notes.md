@@ -19,7 +19,52 @@ the redacted data is largely unaccounted for.
   presumable checks (eg against the manifest), I would guess that it may have been changed
   in the votedatabase processing.
 
-### Compare votedatabase CVRS to auditcenter Manifest
+
+## auditcenter
+
+* Gunnison, San Juan are missing from tabulate.cvs and tabulate_county.csv
+* Perhaps can use CVR data to substitute for Gunnison (TODO)?. Note github/nealmcb/auditcenter/2020/general/gunnison/GunnisonAuditReport.pdf
+* Grand,Town of Granby Board of Trustees, "Chris Michalowski, Natascha O'Flaherty, Kristie DeLay, Mary (Cathy) Tindle, Rebecca Quesada"
+  but Natascha O'Flaherty is not listed in tabulate_county.csv. On purpose or accidental ? According to CVRs she has 496 votes
+* countyTabs.csv has inconsistent candidate naming
+
+### Final Report (from auditcenter)
+
+Each county has a final report in pdf
+that contains:
+
+````
+Total Ballot Cards In Manifest
+Total CVRs in CVR Export File
+Total Ballot Cards Audited
+Number of Audit Rounds
+
+Round Summary (for each round)
+Ballot Cards Audited
+Discrepancies (Audited Contests)
+Discrepancies (Non‐Audited Contests)
+Disagreements (Audited Contests)
+Disagreements (Non‐Audited Contests)
+
+Audited Contests 
+    Choice Votes Margin Diluted Margin %
+
+List of Discrepencies (for each round)
+    Discrepancies Recorded
+    No Disagreements Recorded
+    Ballot Cards Selected Imprinted ID
+````
+The Discrepencies show which ballots, but not which contests
+
+Spot check (need to parse pdf to do this systematically)
+Total Ballot Cards In Manifest == Total CVRs in CVR Export File
+Total Ballot Cards In Manifest == county population (total cards) from round.ballotCardCount
+
+TODO most of this data is also in github/nealmcb/auditcenter/2020/general/**round_last**/stateReport.xlsx
+
+ElPaso has 382583
+
+## Compare votedatabase CVRS to auditcenter Manifest
 
 **Arapahoe**
 
@@ -41,7 +86,8 @@ Douglas,1,Gen-2026,30,295 should be capitalized
 
 **Garfield
 
-![img.png](img.png)
+* has a different cvr file format than usual. see Garfield20cvrs.kt
+* has a different imprintedId than usual see GarfieldManifest.kt.
 
 ### Compare El Paso votedatabase CVRS to auditcenter Manifest
 
@@ -61,19 +107,9 @@ El Paso shows 577 more cvrs than are in the manifest.
 
 So 608 + 128 - 115 = 621 more CVRS than manifest
 
-
-
 ## redactions
 
 * Now catching redactions. See [Redaction2020](Redaction2020.md).
-
-## auditcenter
-
-* Gunnison, San Juan are missing from tabulate.cvs and tabulate_county.csv
-* Perhaps can use CVR data to substitute for Gunnison (TODO)?. Note github/nealmcb/auditcenter/2020/general/gunnison/GunnisonAuditReport.pdf
-* Grand,Town of Granby Board of Trustees, "Chris Michalowski, Natascha O'Flaherty, Kristie DeLay, Mary (Cathy) Tindle, Rebecca Quesada"
-  but Natascha O'Flaherty is not listed in tabulate_county.csv. On purpose or accidental ? According to CVRs she has 496 votes
-* countyTabs.csv has inconsistent candidate naming
 
 ## Do votedatabase and auditcenter agree ?
 

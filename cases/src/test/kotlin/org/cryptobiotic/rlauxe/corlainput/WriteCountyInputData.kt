@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corlainput
 
+import org.cryptobiotic.rlauxe.corlaCounty.CheckCvrsAndManifest
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
 import org.cryptobiotic.rlauxe.corlaInput.CountyInputData
 import org.cryptobiotic.rlauxe.corlaInput.readCountyInputData
@@ -17,21 +18,25 @@ class WriteCountyInputData {
         val stateInput = Colorado2020General()
         stateInput.counties().forEach { county ->
             val countyInput = stateInput.corlaCountyInput(county)!!
-            val corlaCvrs = countyInput.readCorlaCvrs()
-            val ncvrs = corlaCvrs.cvrs().size
+            val ccc = CheckCvrsAndManifest(stateInput, countyInput, showMatch = true, showMissingVotes = true)
+            val corlaCvrs = ccc.corlaCvrs
+            val manifestCount = ccc.manifestCount
+            val ncvrs = ccc.ncvrsInManifest
             val ngroups = corlaCvrs.ngroups()
-            val nrows = corlaCvrs.nrows()
-            val nredactedCvrs = corlaCvrs.redactedCvrs().size
+            val nredactedCvrs = corlaCvrs.redactedCvrs().size + corlaCvrs.redactedGroups().sumOf{ it.ncards()}
             // data class CountyInputData(val county: String, val cvrRows: Int, val ncvrs: Int, val nredactedCvrs: Int, val ngroups: Int,)
-            data.add(CountyInputData(county, nrows, ncvrs, nredactedCvrs, ngroups))
-            println("did $county == ${data.last()}")
+            data.add(CountyInputData(county, manifestCount, ncvrs, nredactedCvrs, ngroups, ccc.minCards))
+            println("wrote $county  ${data.last()}")
         }
         writeCountyInputData(filename, data)
 
+        println("totalManifest ${data.sumOf { it.manifestCount }}")
+        println("totalNcvrs ${data.sumOf { it.ncvrs }}")
+        println("totalMissing ${data.sumOf { it.manifestCount - it.ncvrs }}")
+        println("totalRedactedCvrs ${data.sumOf { it.nredactedCvrs }}")
+        println("totalNgroups ${data.sumOf { it.ngroups }}")
+
         val roundtrip = readCountyInputData(filename)
-        roundtrip.forEach {
-            println(it)
-        }
         assertEquals(data.sortedBy{it.county}, roundtrip)
     }
 }

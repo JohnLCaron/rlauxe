@@ -8,6 +8,8 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
+import org.cryptobiotic.rlauxe.corlaInput.ManifestEntry
+import org.cryptobiotic.rlauxe.corlaInput.ManifestCounts
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.cvr.CvrRow
@@ -16,7 +18,6 @@ import org.cryptobiotic.rlauxe.cvr.cleanCsvString
 import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.nfz
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.subtractContestTabulations
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
@@ -44,7 +45,7 @@ class CvrsFromManifest(
     var nextStyleId: Int
 
     val fakeManifest = countyInput.manifestSource == "fake"
-    val manifestIds: ManifestIds
+    val manifestIds: ManifestCounts
 
     val convertedCvrTabs : Map<Int, ContestTabulation>
 
@@ -56,7 +57,8 @@ class CvrsFromManifest(
         val corlaCvrs = countyInput.readCorlaCvrs()
         // corlaCvrs.redactedGroups()
 
-        manifestIds = if (fakeManifest) fakeManifestMatch(corlaCvrs.cvrs().size) else manifestMatch(corlaCvrs.cvrs())
+        val manifest = countyInput.readCountyManifest()
+        manifestIds = manifest.manifestCounts(corlaCvrs)
 
         converter = CorlaCvrConverter(countyInput.countyName, corlaCvrs, infosByName, stateInput, startingPoolId)
         cvrStyles = converter.cardStyles.values.toList()
@@ -64,11 +66,9 @@ class CvrsFromManifest(
 
         convertedCvrs = corlaCvrs.cvrs().map {
             converter.convertToCard(it) { cvrb:AuditableCardBuilder ->
-                val correctedId = reverseMunge(cvrb.id)
-                cvrb.id = correctedId
-                val manifestEntry = manifestIds.match[correctedId]
+                val manifestEntry = manifestIds.match[cvrb.id]
                 cvrb.location =
-                    if (manifestEntry != null) "$county:${manifestEntry.location}"
+                    if (manifestEntry != null) "$county:${manifestEntry.location()}"
                     else {
                         // we have a cvr without a manifest entry
                         if (cvrb.location != null) "$county:${cvrb.location}"
@@ -120,7 +120,7 @@ class CvrsFromManifest(
         redactedTabs = tabulateRedactedPools(redactedPools)
     }
 
-    // id matches the imprintedId, location is the manifest location field
+    /* id matches the imprintedId, location is the manifest location field
     data class ManifestId(val tab: Int, val batch: String, val record: Int, val location: String) {
         var matched = false // did we find a match yet?
         val id = "$tab-$batch-$record"
@@ -197,7 +197,7 @@ class CvrsFromManifest(
             ManifestId(1, "1", idx,"location$idx")
         }
         return ManifestIds(unmatched, emptyMap(), redactedIds)
-    }
+    } */
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -345,7 +345,7 @@ class CvrsFromManifest(
     }
 
     // make simulated CVRs for one pool, all contests, using the unmatched manifestIds
-    private fun makeCardsForOnePool(cardPool: CardPool, redactedIter: Iterator<ManifestId>) : List<AuditableCard> { // contestId -> candidateId -> nvotes
+    private fun makeCardsForOnePool(cardPool: CardPool, redactedIter: Iterator<ManifestEntry>) : List<AuditableCard> { // contestId -> candidateId -> nvotes
         val vunders = cardPool.possibleContests().associate { Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
         val vunderPool = VunderPool(vunders, cardPool.poolName, cardPool.poolId, cardPool.hasExactContests)
         val cardsForPool = mutableListOf<AuditableCard>()
@@ -353,7 +353,7 @@ class CvrsFromManifest(
         var count = 0
         while (redactedIter.hasNext() && count < cardPool.ncards()) {
             val manifestEntry = redactedIter.next()
-            val cvb2 = AuditableCardBuilder(manifestEntry.id, "$county:${manifestEntry.location}", count, 0L, variant.phantoms,
+            val cvb2 = AuditableCardBuilder(manifestEntry.imprintedId(), "$county:${manifestEntry.location()}", count, 0L, variant.phantoms,
                 cardPool.poolId, cardPool.poolId, null, null)
             vunderPool.simulatePooledCard(cvb2) // fill in the vote
             cardsForPool.add(cvb2.build())

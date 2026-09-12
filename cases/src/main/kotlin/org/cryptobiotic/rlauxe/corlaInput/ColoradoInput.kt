@@ -455,16 +455,16 @@ fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAs
 //////////////////////////////////////////////////////////////////////////////
 // see WriteCountyInputData
 
-data class CountyInputData(val county: String, val nrows: Int, val ncvrs: Int, val nredactedCvrs: Int, val ngroups: Int,)
+data class CountyInputData(val county: String, val manifestCount: Int, val ncvrs: Int, val nredactedCvrs: Int, val ngroups: Int, val minCards: Int)
 
 fun writeCountyInputData(outputFilename: String, data: List<CountyInputData>) {
     // misc data by county
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
-    writer.write("            county,   nrows,   ncvrs, nredactedCvrs, ngroups\n")
+    writer.write("            county,   manifestCount,   ncvrs, nredactedCvrs, ngroups, minCards\n")
     data.sortedBy { it.county }.forEach {
         writer.write(
-            "${sfn(it.county, 20)}, ${nfn(it.nrows, 7)}, ${nfn(it.ncvrs, 7)}, " +
-                "${nfn(it.nredactedCvrs, 5)}, ${nfn(it.ngroups, 5)}\n"
+            "${sfn(it.county, 20)}, ${nfn(it.manifestCount, 7)}, ${nfn(it.ncvrs, 7)}, " +
+                "${nfn(it.nredactedCvrs, 5)}, ${nfn(it.ngroups, 5)}, ${nfn(it.minCards, 5)}\n"
         )
     }
     writer.close()
@@ -481,11 +481,12 @@ fun readCountyInputData(filename: String): List<CountyInputData> {
 
         val tokens = line.split(",")
         val countyName = tokens[0].trim()
-        val nrows = tokens[1].trim().toInt()
+        val manifestCount = tokens[1].trim().toInt()
         val ncvrs = tokens[2].trim().toInt()
         val nredactedRows = tokens[3].trim().toInt()
         val ngroups = tokens[4].trim().toInt()
-        countyData.add( CountyInputData(countyName, nrows, ncvrs, nredactedRows, ngroups))
+        val minCards = tokens[5].trim().toInt()
+        countyData.add( CountyInputData(countyName, manifestCount, ncvrs, nredactedRows, ngroups, minCards))
     }
     reader.close()
 

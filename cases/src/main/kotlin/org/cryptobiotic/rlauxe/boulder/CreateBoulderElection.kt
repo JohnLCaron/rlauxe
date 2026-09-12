@@ -8,8 +8,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.cvr.RedactedGroup
 import org.cryptobiotic.rlauxe.cvr.cleanCsvString
-import org.cryptobiotic.rlauxe.cvr.parseContestNameAndVoteFor
-import org.cryptobiotic.rlauxe.cvr.parseIrvContestName
 import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.estimate.makeCardsForOnePoolV
 import org.cryptobiotic.rlauxe.irv.IrvContest
@@ -140,9 +138,10 @@ class CreateBoulderElection(
                 }
 
                 val choiceFunction = if (exportContest.isIRV) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY
-                val (name, nwinners) = if (exportContest.isIRV) parseIrvContestName(exportContest.contestName) else
-                    parseContestNameAndVoteFor(exportContest.contestName)
-                result.add(ContestInfo(name, exportContest.contestIdx, candidateMap, choiceFunction, nwinners))
+                //val (name, nwinners) = if (exportContest.isIRV) parseIrvContestName(exportContest.contestName) else
+                //    parseContestNameAndVoteFor(exportContest.contestName)
+                result.add(ContestInfo(exportContest.contestName, exportContest.contestIdx, candidateMap,
+                    choiceFunction, exportContest.voteForN))
             } else {
                 logger.warn{"Cant find contest ${sovoContest.contestTitle}"}
             }
@@ -166,7 +165,7 @@ class CreateBoulderElection(
 
     private fun convertRedactedToOneCardPool(redacteds: List<RedactedGroup>): List<CardPoolBuilder> {
         var ncards = 0
-        var sumTabs = mutableMapOf<Int, ContestTabulation>()
+        val sumTabs = mutableMapOf<Int, ContestTabulation>()
         redacteds.forEach { redacted: RedactedGroup ->
             val groupTab = redacted.contestVotes.mapValues{ ContestTabulation(infos[it.key]!!, it.value, ncards=0) }
             sumTabs.sumContestTabulations(groupTab)

@@ -12,7 +12,6 @@ import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.cvr.Garfield20Cvrs
 import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
-import org.cryptobiotic.rlauxe.estimate.simulateCards
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -58,6 +57,7 @@ open class CountyElectionWithCvrs (
         var totalCvrCardCount = 0
         val totalCvrTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
         var countyPoolId = 1
+        var nextStyleId = 1
 
         counties.forEach { (county, exportFile) ->
             //// the cvrs
@@ -67,14 +67,15 @@ open class CountyElectionWithCvrs (
                 else if (county == "Boulder") readCorlaCvrsFromFile(exportFile, redaction = RedactionBoulder())
                 else readCorlaCvrsFromFile(exportFile)
 
-            val converter = CorlaCvrConverter(county, export, infosByName, coloradoInput)
+            val converter = CorlaCvrConverter(county, export, infosByName, coloradoInput, nextStyleId)
             val exportCvrs: List<AuditableCard> = export.cvrs().map { converter.convertToCard(it) }
 
+            /*
             val redactedCvrs = mutableListOf<AuditableCard>()
             converter.redactedPools.forEach { pool ->
                 redactedCvrs.addAll(simulateCards(pool))
-            }
-            val allCvrs: List<AuditableCard> = exportCvrs + redactedCvrs
+            } */
+            val allCvrs: List<AuditableCard> = exportCvrs // + redactedCvrs
 
             val cardTabulation = CardTabulation(Closer (allCvrs.iterator() ), infos) { }
             val cvrTabs = cardTabulation.tabs
@@ -87,7 +88,7 @@ open class CountyElectionWithCvrs (
             writeUnsortedMvrs(county, publisher, Closer(allCvrs.iterator()))
 
             // Get the card styles from the cvrs
-            val countyCardStyles: List<StyleIF> = converter.cardStyles.values.toList() + converter.redactedPools.map { it as StyleIF }
+            val countyCardStyles: List<StyleIF> = converter.cardStyles.values.toList() // + converter.redactedPools.map { it as StyleIF }
 
             // take ncards from cvrs
             val ncards = cvrTabs.map { (contestId, contestTab) ->

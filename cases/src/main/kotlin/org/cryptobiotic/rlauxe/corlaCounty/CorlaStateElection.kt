@@ -29,10 +29,10 @@ class CorlaStateElection(
 ): ElectionBuilder {
     val variant = ElectionVariant(variantEnum)
     val publisher = Publisher(topdir)
-    val electionName = stateInput.javaClass.name
+    val electionName = stateInput.javaClass.simpleName
 
-    val allCardStyles = mutableListOf<StyleIF>()
-    val allCardPools = mutableListOf<CardPool>()
+    val allStyles = mutableListOf<StyleIF>()
+    val allPools = mutableListOf<CardPool>()
     val countyPools = mutableListOf<CountyPools>()
     val cvrPools = mutableListOf<CountyPools>()
     val contestsUA: List<ContestWithAssertions>
@@ -41,38 +41,29 @@ class CorlaStateElection(
     init {
         val contestBuilder = BuildCorlaContests(stateInput)
         val infos = contestBuilder.infos
-        val infosByName = infos.mapKeys{ it.value.name }
-
-        // val countyTabMap = stateInput.countyTabsAllContests()
         val totalPoolTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
 
         var totalCvrCardCount = 0
         val totalStateTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
+        var nextStyleId = 1
         var countyPoolId = 1
 
         stateInput.counties().forEach { countyName ->
             val countyInput = CorlaCounty2020Input(countyName)
-
-            if (stateInput.strataMap[countyName] == null) {
-                stateInput.strataMap.keys.sorted().forEach { println(it) }
-                throw RuntimeException("stateInput.strata doesnt have county $countyName")
-            }
-            val countyInfo = stateInput.strataMap[countyName]!!
             val countyPopulation = countyInput.countyPopulation()
 
-            val cvrsFromManifest = CvrsFromManifest(variant, countyInput, stateInput, infos, stateElection =  true)
+            val cvrsFromManifest = CvrsFromManifest(variant, countyInput, stateInput, infos, nextStyleId)
 
             val totalCountyTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
             totalCountyTabs.sumContestTabulations(cvrsFromManifest.convertedCvrTabs)
             totalCountyTabs.sumContestTabulations(cvrsFromManifest.redactedTabs)
             totalStateTabs.sumContestTabulations(totalCountyTabs)
 
-            /*
+            /* TODO instead of BuildCorlaContests ??
             val countyContestBuilders = makeContestBuilders(
                 cvrsFromManifest.convertedCvrTabs,
                 cvrsFromManifest.redactedTabs
             ).associate { it.contestId to it }
-
             val contests = makeContests(countyContestBuilders) */
 
             val redactedPools = cvrsFromManifest.redactedPools
@@ -84,29 +75,30 @@ class CorlaStateElection(
             // val phantoms = makePhantomCards(contests, 1)
             // logger.info { "made ${phantoms.size} phantom cards" }
 
-            val allCards = cvrsFromManifest.convertedCvrs + redactedCvrs // + phantoms // in memory
+            val allCountyCards = cvrsFromManifest.convertedCvrs + redactedCvrs // + phantoms // in memory
             // write them out while we have them in memory
-            writeUnsortedMvrs(countyName, publisher, Closer(allCards.iterator()))
-            totalCvrCardCount += allCards.size
+            writeUnsortedMvrs(countyName, publisher, Closer(allCountyCards.iterator()))
+            totalCvrCardCount += allCountyCards.size
 
             // TODO to use fastSampling, all cvrs must have stylesIds (no fromCvr or phantoms)
             //  styles cant be optional; all styles must be in styleMap when reading
             // county styles dont have the global ids. Perhapa go back to using style name ??
             val countyCardStyles = cvrsFromManifest.countyCardStyles()
-            allCardStyles.addAll(countyCardStyles)
+            allStyles.addAll(countyCardStyles)
+            nextStyleId += countyCardStyles.size
 
-            // TODO do we have cvrPools ?
-            // cvrPools.add(CountyPools(countyName, countyPoolId, cvrTabs, countyPopulation, countyCardStyles))
+            cvrPools.add(
+                CountyPools(countyName, countyPoolId, cvrsFromManifest.convertedCvrTabs, cvrsFromManifest.convertedCvrs.size, countyCardStyles)
+            )
             countyPools.add(
-                // make the county pool from auditcenter tabs plus cvr cardStyles and ncards
-                // TODO are we factoring out the style information, or leaving "fromCvr"?
                 CountyPools(countyName, countyPoolId++, totalCountyTabs, countyPopulation, countyCardStyles)
             )
 
-            allCardPools.addAll(redactedPools)
+            allPools.addAll(redactedPools)
             // totalPoolTabs.sumContestTabulations(contestTabs)
         }
 
+        // and then you make it again ??
         val contests = totalStateTabs.map { (contestId, contestTab) ->
             Contest(infos[contestId]!!, contestTab.votes, contestTab.ncardsTabulated, contestTab.ncardsTabulated)
         }
@@ -131,14 +123,18 @@ class CorlaStateElection(
 
         this.ncards = totalCvrCardCount // or totalPoolCardCount?
 
-        // probably should read cards back in ??
+        // TODO probably should read cards back in ??
         val npops = emptyMap<Int, Int>() // tabulateNpops(allCards, infoList)
 
-        contestsUA = contests.map {
+        // TODO need Irv tabs
+        contestsUA = makeContestWAs(contests, npops, emptyMap(), allPools,
+            variant, hasStyle)
+
+        //contestsUA = contests.map {
             // use strataSize or Nc as population size
             // val NpopIn = if (isUniform) it.info().metadata["CORLAstrataNcards"]!!.toInt() else null // TODO
-            ContestWithAssertions(it, true, hasStyle, NpopIn = npops[it.id]).addStandardAssertions()
-        }
+            //ContestWithAssertions(it, true, hasStyle, NpopIn = npops[it.id]).addStandardAssertions()
+        //}
 
     }
 
@@ -146,12 +142,14 @@ class CorlaStateElection(
         ElectionInfo(electionName, variant.auditType, ncards(), contestsUA.size, true, mvrSource=mvrSource)
 
     override fun contestsUA() = contestsUA
-    override fun cardStyles() = allCardStyles
-    override fun cardPools() = allCardPools
+    override fun cardStyles() = allStyles
+    override fun cardPools() = allPools
+
     override fun countyCardPools(): List<CountyPools> = countyPools
+    override fun countyCvrPools(): List<CountyPools> = cvrPools
 
     override fun unsortedMvrsInternal() = null
-    override fun unsortedMvrsExternal() = CardIteratorfromCountyMvrs(publisher, styles = allCardStyles)
+    override fun unsortedMvrsExternal() = CardIteratorfromCountyMvrs(publisher, styles = allStyles)
 
     // TODO do we need to munge the mvrs for the card manifest? Add the card styles ??
     override fun cards() = createCardsFromMvrs(unsortedMvrsExternal())
@@ -293,7 +291,7 @@ fun createCorlaStateElection(
     createElectionRecord(election, topdir = topdir)
 
     val config = Config(election.electionInfo(), creation, roundConfig)
-    createAuditRecord(config, election, topdir = topdir, externalSortDir = topdir, fastSampling = false)
+    createAuditRecord(config, election, topdir = topdir, externalSortDir = topdir, fastSampling = true)
 
     // TODO maybe just chosen counties ?
     writeCountyData(topdir, stateInput.strataMap.values.toList())

@@ -59,13 +59,10 @@ class CorlaCountyElection(
     val cardStyles: List<StyleIF>
 
     init {
-        if (stateInput.strataMap[county] == null) {
-            stateInput.strataMap.keys.sorted().forEach { println(it) }
-            throw RuntimeException("stateInput.strata doesnt have county $county")
-        }
-        val countyInfo = stateInput.strataMap[county]!!
-
-        val cvrsFromManifest = CvrsFromManifest(variant, countyInput, stateInput, infos, stateElection =  false)
+        val cvrsFromManifest = CvrsFromManifest(
+            variant, countyInput, stateInput, infos,
+            startingPoolId = 1
+        )
 
         contestBuilders = makeContestBuilders(
             cvrsFromManifest.convertedCvrTabs,
@@ -88,9 +85,10 @@ class CorlaCountyElection(
         val npops = tabulateNpops(allCards, infoList)
 
         // TODO cvrTabs dont have the irv part, so will fail in the raire library
-        val allCardsTabs = tabulateCards(allCards.iterator(), infos)
+        // val allCardsTabs = tabulateCards(allCards.iterator(), infos)
 
-        contestsUA = makeContestWAs(contests, npops, allCardsTabs, redactedPools,)
+        contestsUA = makeContestWAs(contests, npops, emptyMap(), redactedPools,
+            variant, hasStyle)
         mvrs = addIndexToMvrs(allCards)
         logger.info { "made ${mvrs.size} mvrs" }
 
@@ -118,6 +116,7 @@ class CorlaCountyElection(
     override fun cards() = createCardsFromMvrs(mvrs)
     override fun ncards() = ncards
 
+    // TODO doesnt someone else add the indices ??
     fun addIndexToMvrs(mvrs: List<AuditableCard>): List<AuditableCard> {
         var cardIndex = 1 // 1 based index
         val result = mutableListOf<AuditableCard>()
@@ -138,7 +137,7 @@ class CorlaCountyElection(
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    //// contest building
+    //// contest building TODO why so complicated ?? state uses BuildCorlaContests. how differ?
 
     private fun makeContestInfo(): List<ContestInfo> {
         val mergedContestMap = stateInput.mergedContestMap
@@ -149,7 +148,7 @@ class CorlaCountyElection(
             if (mcontest.counties.contains(countyInput.countyName)) {
                 val contestTabAllCounties = stateInput.contestTabsAllCounties()[mcontest.contestName] // needed ?
                 if (contestTabAllCounties == null) {
-                    logger.warn{"*** Cant find contestTab for '${mcontest.contestName}': remove from audit" }
+                    logger.warn { "*** Cant find contestTab for '${mcontest.contestName}': remove from audit" }
                 } else {
                     val candidateNames = mcontest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
 
@@ -168,8 +167,9 @@ class CorlaCountyElection(
         return infos
     }
 
-    fun makeContestBuilders(cvrTabs: Map<Int, ContestTabulation>,
-                            redactedTabs: Map<Int, ContestTabulation>,
+    fun makeContestBuilders(
+        cvrTabs: Map<Int, ContestTabulation>,
+        redactedTabs: Map<Int, ContestTabulation>,
     ): List<CCContestBuilder> {
         val mergedContestMap = stateInput.mergedContestMap
 
@@ -185,11 +185,11 @@ class CorlaCountyElection(
                         info,
                         cvrTabs[info.id],
                         redactedTabs[info.id],
-                        variant)
+                        variant
+                    )
                     ccContests.add(cb)
                 }
-            }
-            else logger.warn{"*** cant find contest '${info.name}' in stateInput.mergedContestMap"}
+            } else logger.warn { "*** cant find contest '${info.name}' in stateInput.mergedContestMap" }
         }
 
         return ccContests
@@ -201,30 +201,31 @@ class CorlaCountyElection(
             contestBuilder.build(info)
         }
     }
+}
 
-    fun makeContestWAs(
-        contests: List<ContestIF>,
-        npopMap: Map<Int, Int>,
-        allCvrTabs: Map<Int, ContestTabulation>,
-        oneAuditPools: List<CardPool>,
-    ): List<ContestWithAssertions> {
-        val contestsUAs = mutableListOf<ContestWithAssertions>()
+fun makeContestWAs(
+    contests: List<ContestIF>,
+    npopMap: Map<Int, Int>,
+    allIrvTabs: Map<Int, ContestTabulation>, // all tabs for IRV contests
+    oneAuditPools: List<CardPool>,
+    variant: ElectionVariant,
+    hasStyle: Boolean,
+): List<ContestWithAssertions> {
+    val contestsUAs = mutableListOf<ContestWithAssertions>()
 
-        val regular = ContestWithAssertions.make(contests.filter { !it.isIrv() }, npopMap, true, hasStyle)
-        if (variant.isOA()) setPoolAssorterAverages(regular, oneAuditPools)
-        contestsUAs.addAll(regular)
+    val regular = ContestWithAssertions.make(contests.filter { !it.isIrv() }, npopMap, true, hasStyle)
+    if (variant.isOA()) setPoolAssorterAverages(regular, oneAuditPools)
+    contestsUAs.addAll(regular)
 
-        contests.filter { it.isIrv() }.forEach {
-            // assumes contestTab.irvVotes are present
-            val irvContest = if (!variant.isOA())
-                makeRaireContest(it.info(), allCvrTabs[it.id]!!, it.Nc(), Nbin=npopMap[it.id]!!)
-            else
-                makeRaireOneAuditContest(it.info(), allCvrTabs[it.id]!!, it.Nc(), Nbin=npopMap[it.id]!!, oneAuditPools)
-            contestsUAs.add(irvContest)
-        }
-
-        return contestsUAs
+    contests.filter { it.isIrv() }.forEach {
+        // assumes contestTab.irvVotes are present
+        val irvContest = if (!variant.isOA())
+            makeRaireContest(it.info(), allIrvTabs[it.id]!!, it.Nc(), Nbin=npopMap[it.id]!!)
+        else
+            makeRaireOneAuditContest(it.info(), allIrvTabs[it.id]!!, it.Nc(), Nbin=npopMap[it.id]!!, oneAuditPools)
+        contestsUAs.add(irvContest)
     }
+    return contestsUAs
 }
 
 class CCContestBuilder(

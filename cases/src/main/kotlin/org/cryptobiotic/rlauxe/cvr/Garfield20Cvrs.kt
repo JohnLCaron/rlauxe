@@ -5,6 +5,7 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.util.ZipReader
+import org.cryptobiotic.rlauxe.util.nfn
 import java.io.File
 import java.io.InputStreamReader
 import java.io.Reader
@@ -15,13 +16,7 @@ import java.nio.charset.Charset
 
 private val logger = KotlinLogging.logger("GarfieldCsvReader")
 
-private val d3f = "%3d"
-private val showHeader = false
 private val showLines = false
-
-private val showDontMatch = false
-private val showBallotStyles = false
-private val showRedactedGroups = false
 
 // original files
 // cvr1
@@ -133,11 +128,12 @@ class Garfield20Cvrs(val filename: String, showHeaders: Boolean = false): CorlaC
         while (records.hasNext()) {
             val line = records.next()
             if (line.isEmpty()) break
+            lineno++
 
             // 3) use header name matching
             val cvr = CvrRow(
                 cvrNumber = line.get(cvrNumberIdx).toInt(),
-                tabulatorNum = -1,
+                tabulatorNum = 1,
                 batchId = line.get(batchIdIdx),
                 recordId = line.get(recordIdIdx).toInt(),
                 imprintedId = line.get(imprintedIdIdx),
@@ -153,19 +149,21 @@ class Garfield20Cvrs(val filename: String, showHeaders: Boolean = false): CorlaC
             if (showFirst != null && lineno < showFirst) println(cvr.show())
             if (showAfter != null && lineno >= showAfter) println(cvr.show())
         }
-        lineno++
     }
 
     fun showLine(what: String, line: CSVRecord) {
         println(what)
         val elems: List<String> = line.toList()
         elems.forEachIndexed { idx, it ->
-            if (it.isNotEmpty()) println("  ${d3f.format(idx)}: $it")
+            if (it.isNotEmpty()) println("  ${nfn(idx, 3)}: $it")
         }
     }
 
     override fun redactedGroups() = emptyList<RedactedGroup>()
+    override fun groupWithLines() = null
     override fun cardStyles() = ballotStyles.cardStyles()
     override fun cvrs() = cvrs
     override fun nrows() = lineno
+    override fun redactedCvrs() = emptyList<CvrRow>()
+    override fun ngroups() = 0
 }

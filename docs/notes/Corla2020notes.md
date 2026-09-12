@@ -1,5 +1,5 @@
 # Corla2020 Using votedatabase for Cvrs
-6/27/26
+9/11/26
 
 We obtained the cvr data from https://votedatabase.com for the Colorado 2020 General elections, and used it to run
 a real audit. This is for testing purposes only: the data is not official, some of the data is missing, in particular
@@ -13,19 +13,64 @@ the redacted data is largely unaccounted for.
 * Garfield has an older or ad-hoc export format (added a workaround)
 * Las Animas only has 106 cards out of ~8000
 * Las Platas was missing the last 5 contest headers (fixed in our copy of votedatabase)
-* El Paso generally reports .05% - .15% (40 - 600) more votes than auditcenter records
+
+* The CVR imprintedId field has sometimes been munged into a date format, eg "2-2-86" has been converted
+  somewhere to "02/02/1986". We are catching that and demunging. Since this would foul up all manner of
+  presumable checks (eg against the manifest), I would guess that it may have been changed
+  in the votedatabase processing.
+
+### Compare votedatabase CVRS to auditcenter Manifest
+
+**Arapahoe**
+
+Batch 3-260 record 1-100 has no match in the CVRs. 
+
+Assume lost CVRs, turn into phantoms? or redactions?
+
+**Boulder**
+
+redacted ncards = 2634
+need 15 more redacted cards
+
+2649  mvrs with no match in the CVRs
+
+**Douglas**
+
+from manifest:
+Douglas,1,Gen-2026,30,295 should be capitalized
+
+**Garfield
+
+![img.png](img.png)
+
+### Compare El Paso votedatabase CVRS to auditcenter Manifest
+
+El Paso shows 577 more cvrs than are in the manifest.
+
+1. tabulator 10
+* Manifest tabulator 10 has entries up to batch 888
+* Cvrs have 608 sequential entries from 10-889-1 to 10-907-1
+
+2. tabulator 82
+* Manifest tabulator 82 has entries up to batch 195
+* Cvrs have 128 sequential entries from 82-196-1 to 82-198-11
+
+3. possible mixup of batch 82-164 with 82-197 ?
+* manifest has batch 82-164 (records 1-115) not in the CVRs
+* Cvrs has batch 82-197 (records 1-115) not in the manifest
+
+So 608 + 128 - 115 = 621 more CVRS than manifest
+
+
 
 ## redactions
 
-* Most counties have no obvious redactions
-* Boulder appears to be the only county that includes the redacted ballot counts in the export file. Adding them in made 
-  Boulder County go from 66393 to 251 missing votes (2646 to 25 missing cards).
-* Except for Boulder, ignore redactions for now.
+* Now catching redactions. See [Redaction2020](Redaction2020.md).
 
 ## auditcenter
 
-* Gunnison, San Juan are missing from tabulate_county.csv
-* probably can use cvr data to substitute for Gunnison (TODO)
+* Gunnison, San Juan are missing from tabulate.cvs and tabulate_county.csv
+* Perhaps can use CVR data to substitute for Gunnison (TODO)?. Note github/nealmcb/auditcenter/2020/general/gunnison/GunnisonAuditReport.pdf
 * Grand,Town of Granby Board of Trustees, "Chris Michalowski, Natascha O'Flaherty, Kristie DeLay, Mary (Cathy) Tindle, Rebecca Quesada"
   but Natascha O'Flaherty is not listed in tabulate_county.csv. On purpose or accidental ? According to CVRs she has 496 votes
 * countyTabs.csv has inconsistent candidate naming
@@ -262,3 +307,19 @@ no matches for original candidate 'Stephan Seku Evans' for contest 'United State
 
 3 'Stephan "Seku" Evans': votes=1376      <-------
 
+## Contests by County (from auditcenter)
+
+has county contest ids:
+
+````
+county_id,county_name,contest_name,contest_id
+1,Adams,Presidential Electors,3739728
+1,Adams,United States Senator,3739730
+1,Adams,Representative to the 117th United States Congress - District 4,3739732
+...
+2,Alamosa,Presidential Electors,880210
+2,Alamosa,United States Senator,880212
+2,Alamosa,Representative to the 117th United States Congress - District 3,880214
+````
+
+that dont seem to relate to anything.

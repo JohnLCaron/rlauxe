@@ -1,12 +1,10 @@
 package org.cryptobiotic.rlauxe.cvr
 
-import io.kotest.matchers.comparables.shouldBeLessThan
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
 class TestRedactionVotedatabase {
     val show = false
@@ -139,7 +137,7 @@ fun lookForRedactions(filename: String,show: Boolean = false) {
             readCorlaCvrsFromResource(filename, redaction = redaction)
         else readCorlaCvrsFromFile(filename, redaction = redaction)
 
-        println("  nrows = ${corlaCvrs.nrows()} redacted lines = ${corlaCvrs.redaction.nlines} redacted groups = ${corlaCvrs.redactedGroups().size} ")
+        println("  nrows = ${corlaCvrs.nrows()} redacted cvrs = ${corlaCvrs.redactedCvrs().size} redacted groups = ${corlaCvrs.redactedGroups().size} ")
 
         if (corlaCvrs.redactedGroups().size > 0) {
             var sumInGroups = 0

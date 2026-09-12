@@ -9,7 +9,7 @@ class Boulder23Input: BoulderInput {
     // or use sovo ??
     override fun countyPopulation(): Int {
         val manifests = readCountyManifest()
-        return manifests.sumOf { it.nballotCards }
+        return manifests.totalCards
     }
 
     override fun sovo(): BoulderStatementOfVotes {

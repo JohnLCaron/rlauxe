@@ -4,6 +4,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
+import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
+import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -15,19 +18,24 @@ private val logger = KotlinLogging.logger("CorlaCvrConverter")
 
 // convert CorlaCvrsIF from CVRs ids to canonical ids in coloradoInput
 // each CorlaCvrsIF is specific to a County.
-class CorlaCvrConverter(val county: String, corlaCvrs: CorlaCvrsIF, val infosByName: Map<String, ContestInfo>, coloradoInput: ColoradoInput) {
+// infosByName is from canonical contests
+class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCvrsIF, val infosByName: Map<String, ContestInfo>,
+                        val coloradoInput: ColoradoInput, startingStyleId: Int = 1) {
 
     // map export contest to canon contest, then an array mapping export cand id to canonical candidate id
     val exportToCanonLookup = mutableMapOf<Int, ExportToCanonLookup>() // export contestId -> ExportToCanonLookup
+    val canonNameToLookup = mutableMapOf<String, ExportToCanonLookup>() // export contestId -> ExportToCanonLookup
     val cardStyles: Map<Set<Int>, CardStyle> // canonicalContestIdSet -> cardStyle
-    val redactedPools: List<CardPool> // converted to canonical contests and candidates: obsolete use CvrsFromManifest
+    // val redactedPools: List<CardPool> // converted to canonical contests and candidates: obsolete use CvrsFromManifest
     val infos = infosByName.mapKeys { it.value.id }
 
-    var cardStyleId = 1
+    val schemaContestId = mutableMapOf<String, Int>() // export contest name to export contest id
+    val schemaContestCanonId = mutableMapOf<String, Int>() // export contest name to canonical contest id
+    var cardStyleId = startingStyleId
 
     init {
         // val infosByName: Map<String, ContestIF> = contests.associateBy { it.name }
-        val schemaContestInfos: List<CorlaContestInfo> = corlaCvrs.makeContestInfo() // specific to this cvr file
+        val schemaContestInfos = corlaCvrs.makeContestInfo() // specific to this cvr file
 
         val gotCanon = mutableMapOf<Int, String>()  // canon contest id -> export contest name
         // each contest in the schema must be matched to a ContestIF by name
@@ -48,6 +56,9 @@ class CorlaCvrConverter(val county: String, corlaCvrs: CorlaCvrsIF, val infosByN
                 if (gotCanon.contains(info.id))
                     logger.warn{"  *** ${info.id} has duplicate contest: '${schemaContestInfo.name}' and '${gotCanon[info.id]}' "}
                 gotCanon[info.id] = schemaContestInfo.name
+
+                schemaContestId[schemaContestInfo.name] = schemaContestInfo.id
+                schemaContestCanonId[schemaContestInfo.name] = info.id
 
                 val candPairs = mutableListOf<Pair<Int, Int>>()
 
@@ -72,6 +83,7 @@ class CorlaCvrConverter(val county: String, corlaCvrs: CorlaCvrsIF, val infosByN
                 candPairs.forEach{ (schemaCandId, canonCandId) -> candLookup.set(schemaCandId, canonCandId) }
                 val lookup = ExportToCanonLookup(info.id, candLookup)
                 exportToCanonLookup[schemaContestInfo.id] = lookup
+                canonNameToLookup[info.name] = lookup
             }
         }
 
@@ -88,12 +100,12 @@ class CorlaCvrConverter(val county: String, corlaCvrs: CorlaCvrsIF, val infosByN
             Pair(canonicalContestIdSet, cardStyle)
         }.toMap()
 
-        // one for each redacted group // obsolete
+        /* one for each redacted group // obsolete
         redactedPools = corlaCvrs.redactedGroups().map { group ->
             val contestTabs = convertToContestTabulation(group)
             val cleanupName = truncateCommas(group.groupName)
             CardPool("$county-${cleanupName}.Redacted", cardStyleId++, true, infos, contestTabs, group.minCards())
-        }
+        } */
         print("")
     }
 
@@ -147,21 +159,46 @@ class CorlaCvrConverter(val county: String, corlaCvrs: CorlaCvrsIF, val infosByN
     fun convertToContestTabulation(rgroup: RedactedGroup): Map<Int, ContestTabulation> {
         // have to map both contestId and candVotes
         // contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>
-        val canonVotes = mutableMapOf<Int, ContestTabulation>()
+        val canonTabs = mutableMapOf<Int, ContestTabulation>()
         rgroup.contestVotes.forEach{ (contestId, rcands) ->
             val nz = rcands.values.sum()  // skip contests with no votes
             val lookup = exportToCanonLookup[contestId]
             if (nz > 0 && lookup != null) {
                 val cannonCands: Map<Int, Int> = lookup.convertCands(rcands)
                 val contestTabulation = ContestTabulation(infos[lookup.canonContestId]!!, cannonCands, rgroup.minCards())
-                canonVotes[lookup.canonContestId] = contestTabulation
+                canonTabs[lookup.canonContestId] = contestTabulation
             }
         }
-        return canonVotes
+        return canonTabs
+    }
+
+    fun convertToContestTabulation(countyTab: CountyTabAllContests): Map<Int, ContestTabulation> {
+        val canonTabs = mutableMapOf<Int, ContestTabulation>()
+        countyTab.contests.forEach{ (contestName, contestVotes: CountyContestVotes  ) ->
+            val canonicalContest = coloradoInput.matchCanonicalContest(county, contestName)!!
+            val info = infosByName[canonicalContest.contestName]!!
+
+            val contestTabulation = contestVotes.makeContestTabulationCorla(info, canonicalContest, 0)
+            canonTabs[info.id] = contestTabulation
+
+
+            /* change vote map of export candidate names to candidate index
+            val exportCandMap: Map<Int, Int> =
+                contestVotes.choices.mapKeys { corlaCvrs.schema.choiceIdx(it.key) }
+            // change vote map of export candidate id to canonical candidate id
+            exportCandMap.forEach { (id, vote) ->
+                if (id >= lookup.candLookup.size)
+                    print("")
+            }
+            val cannonCands: Map<Int, Int> = lookup.convertCands(exportCandMap)
+            val contestTabulation = ContestTabulation(infos[lookup.canonContestId]!!, cannonCands) // dont know ncards
+            canonTabs[lookup.canonContestId] = contestTabulation */
+        }
+        return canonTabs
     }
 }
 
-// for a canonicalContest, lookup export candidate -> canonical candidate
+// for a canonicalContest, lookup export candidate idx -> canonical candidate id
 class ExportToCanonLookup(val canonContestId: Int, val candLookup: IntArray ) {
 
     // not 1-1 so cant use mapKeys. For example Write-In candidate was removed
@@ -224,33 +261,8 @@ fun CorlaCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
             pairs.toMap()
         }
 
-        val (name, nwinners) = if (exportContest.isIRV) parseIrvContestName(exportContest.contestName) else parseContestNameAndVoteFor(exportContest.contestName)
-        CorlaContestInfo( name, exportContest.contestIdx, candidateMap, exportContest.isIRV, nwinners)
+        // val (name, nwinners) = if (exportContest.isIRV) parseIrvContestName(exportContest.contestName) else parseContestNameAndVoteFor(exportContest.contestName)
+        CorlaContestInfo( exportContest.contestName, exportContest.contestIdx, candidateMap, exportContest.isIRV,
+            exportContest.voteForN)
     }
 }
-
-/*
-fun parseContestNameAndVoteFor(name: String) : Pair<String, Int> {
-    if (name.contains("(Vote For1")) {
-        val clean = name.substringBefore("(")
-        return Pair(clean.trim(), 1)
-    }
-    if (!name.contains("(Vote For=")) return Pair(name.trim(), 1)
-
-    val tokens = name.split("(Vote For=")
-    require(tokens.size == 2) { "unexpected contest name $name" }
-    val namet = tokens[0].trim()
-    val ncand = tokens[1].substringBefore(")").toInt()
-    return Pair(namet, ncand)
-}
-
-// City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)
-fun parseIrvContestName(name: String) : Pair<String, Int> {
-    if (!name.contains("(Number of positions=")) return Pair(name.trim(), 1)
-
-    val tokens = name.split("(Number of positions=")
-    require(tokens.size == 2) { "unexpected contest name $name" }
-    val namet = tokens[0].trim()
-    val ncand = tokens[1].substringBefore(",").toInt()
-    return Pair(namet, ncand)
-} */

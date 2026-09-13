@@ -9,35 +9,31 @@ import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
-import org.cryptobiotic.rlauxe.boulder.Boulder26pInput
+import org.cryptobiotic.rlauxe.boulder.Boulder26PCvrs
 import kotlin.collections.forEach
 
-// merge the contests back together
-// could ignore mvrComparisonFile and contestRoundFile (maybe)
-//
-// the main issue is getting Nc and Npop
-//
-// we have La Plata, Morgan, Weld CVR_export files
-class Colorado2026PwithCvrs(ac:String?=auditcenter): ColoradoInput(
+// we have Boulder, La Plata, Morgan, and Weld CVR_export files
+class Colorado2026PwithCvrs(ac:String?=auditcenter): ColoradoInputWithCvrs(
     generalCanonicalFile = "$ac/2026/primary/finalReports/CanonicalListOfContestsAndChoices.csv",
     contestRoundFile = "$ac/2026/primary/finalReports/ContestsListRound1.csv",
     tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",
     mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv"
-), ColoradoInputWithCvrs {
+) {
     val parent = Colorado2026PMerged(ac)
 
-    val useCounties = setOf("Boulder", "La Plata", "Morgan","Weld") // the counties we have cvrs for
+    val useCounties = setOf("Boulder", "La Plata", "Morgan", "Weld") // the counties we have cvrs for
     override fun skipCounties(countyName: String) = !useCounties.contains(countyName)
+    override fun counties(): List<String> = useCounties.toList().sorted()
 
-    // not needed
+    // should not be needed TODO get from contestRoundFile
     val countyPopulations = mapOf( "Boulder" to 100423, "La Plata" to 16146, "Morgan" to 5220,"Weld" to 69640)
 
-    override fun corlaCountyInput(countyName: String): CorlaCountyInput? {
+    override fun corlaCountyCvrs(countyName: String): CorlaCountyCvrs? {
         return when (countyName) {
-            "Boulder" -> Boulder26pInput()
-            "La Plata" -> LaPlata26pInput()
-            "Morgan" -> Morgan26pInput()
-            "Weld" -> Weld26pInput()
+            "Boulder" -> Boulder26PCvrs()
+            "La Plata" -> LaPlata26PCvrs()
+            "Morgan" -> Morgan26PCvrs()
+            "Weld" -> Weld26PCvrs()
             else -> null
         }
     }

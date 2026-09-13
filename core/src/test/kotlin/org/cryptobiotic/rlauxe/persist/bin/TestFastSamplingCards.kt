@@ -1,21 +1,26 @@
 package org.cryptobiotic.rlauxe.persist.bin
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.makeFastCards
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 // dont run in tests
 class TestFastSamplingCards {
     val testFastSamplFile = "$testdataDir/temp/fastSampling.bin"
 
-    // @Test
+    @Test
     fun writeSamplingCards() {
         val topdir = "${testdataDir}/cases/corla/consistent"
         val publisher = Publisher("$topdir")
@@ -32,6 +37,26 @@ class TestFastSamplingCards {
         cardIter.close()
 
         println("writeSamplingCards ncards = $ncards, took $stopwatch")
+    }
+
+    @Test
+    fun testPhantomCards() {
+        val votes = mapOf( 42 to intArrayOf() )
+
+        val phantomCard = AuditableCard.fromVotes(id = "testing123", location = null, index = 0, prn = 666L, phantom = true,
+            styleId=CardStyle.phantomStyle.id, poolId = null, votes=votes).setStyle(CardStyle.phantomStyle)
+        val cards = listOf(phantomCard)
+
+        val stopwatch = Stopwatch()
+        val ncards = writeFastSamplingCards(Closer(cards.iterator()), testFastSamplFile)
+
+        val cardIter = FastSamplingCardIterator(testFastSamplFile, emptyList<StyleIF>(), 100)
+        while (cardIter.hasNext()) { //  && ncards < 1000_000) {
+            val card = cardIter.next()
+            println(card)
+            val wtf = card.style
+            assertEquals(42, card.style.possibleContests()[0])
+        }
     }
 
     @Test

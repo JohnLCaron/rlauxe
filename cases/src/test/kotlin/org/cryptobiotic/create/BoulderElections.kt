@@ -2,8 +2,8 @@ package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.boulder.Boulder23Input
-import org.cryptobiotic.rlauxe.boulder.Boulder26pInput
+import org.cryptobiotic.rlauxe.boulder.Boulder23Cvrs
+import org.cryptobiotic.rlauxe.boulder.Boulder26PCvrs
 import org.cryptobiotic.rlauxe.boulder.BoulderVariantEnum
 import org.cryptobiotic.rlauxe.boulder.boulderRoundSettings
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
@@ -19,7 +19,7 @@ class BoulderElections {
         val topdir = "$cases/boulder/boulder2026p"
 
         createBoulderElection(
-            input= Boulder26pInput(),
+            input= Boulder26PCvrs(),
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
@@ -31,7 +31,7 @@ class BoulderElections {
         val topdir = "$cases/boulder/boulder2025"
 
         createBoulderElection(
-            input= Boulder25Input(),
+            input= Boulder25Cvrs(),
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
@@ -49,7 +49,7 @@ class BoulderElections {
 
         // redacted ballots are turned into phantoms
         createBoulderElection(
-            input= Boulder24Input(),
+            input= Boulder24Cvrs(),
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
@@ -63,7 +63,7 @@ class BoulderElections {
         // the ballots for each redacted group are placed in a seperate physical bins, and the ballots
         // are referenced by an index number into the bin
         createBoulderElection(
-            input= Boulder24Input(),
+            input= Boulder24Cvrs(),
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
@@ -78,7 +78,7 @@ class BoulderElections {
         // the ballots for each redacted group are placed in a seperate physical bins, and the ballots
         // are referenced by an index number into the bin
         createBoulderElection(
-            input= Boulder24Input(),
+            input= Boulder24Cvrs(),
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
@@ -92,7 +92,7 @@ class BoulderElections {
 
         // redacted ballots are turned into phantoms
         createBoulderElection(
-            input= Boulder23Input(),
+            input= Boulder23Cvrs(),
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
@@ -109,7 +109,7 @@ class BoulderElections {
     @Test
     fun createBoulder() {
         val toptopdir = "$cases/boulder/boulder2023r"
-        val input= Boulder23Input()
+        val input= Boulder23Cvrs()
 
         // redacted ballots are simulated
         createBoulderElection(
@@ -124,7 +124,7 @@ class BoulderElections {
     @Test
     fun createBoulderVariants() {
         val toptopdir = "$cases/boulder/boulder2020r"
-        val input= Boulder26pInput()
+        val input= Boulder26PCvrs()
 
         // redacted ballots are simulated
         createBoulderElection(

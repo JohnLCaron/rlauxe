@@ -159,11 +159,11 @@ class Garfield20Cvrs(val filename: String, showHeaders: Boolean = false): CorlaC
         }
     }
 
-    override fun redactedGroups() = emptyList<RedactedGroup>()
-    override fun groupWithLines() = null
+    override fun redaction() = EmptyRedaction()
+    //override fun groupWithLines() = null
     override fun cardStyles() = ballotStyles.cardStyles()
     override fun cvrs() = cvrs
     override fun nrows() = lineno
-    override fun redactedCvrs() = emptyList<CvrRow>()
-    override fun ngroups() = 0
+    //override fun redactedCvrs() = emptyList<CvrRow>()
+    // override fun ngroups() = 0
 }

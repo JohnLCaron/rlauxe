@@ -109,6 +109,11 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCvrsIF, val info
         print("")
     }
 
+    fun convertContestId(schemaContestId: Int): Int {
+        return exportToCanonLookup[schemaContestId]?.canonContestId ?: -1
+    }
+
+
     // return corresponding contest Ids in canonical
     fun convertExportCardStyleToCanonical(exportCardStyle: CvrCardStyle): Set<Int> {
         val convert = mutableSetOf<Int>()
@@ -172,27 +177,16 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCvrsIF, val info
         return canonTabs
     }
 
+    // CountyTabAllContests is the auditcenter reported vote tab. But we are back to the problem of not knowing ncard(county, contest)
     fun convertToContestTabulation(countyTab: CountyTabAllContests): Map<Int, ContestTabulation> {
         val canonTabs = mutableMapOf<Int, ContestTabulation>()
         countyTab.contests.forEach{ (contestName, contestVotes: CountyContestVotes  ) ->
             val canonicalContest = coloradoInput.matchCanonicalContest(county, contestName)!!
             val info = infosByName[canonicalContest.contestName]!!
 
+            // TODO where to get ncards ?????
             val contestTabulation = contestVotes.makeContestTabulationCorla(info, canonicalContest, 0)
             canonTabs[info.id] = contestTabulation
-
-
-            /* change vote map of export candidate names to candidate index
-            val exportCandMap: Map<Int, Int> =
-                contestVotes.choices.mapKeys { corlaCvrs.schema.choiceIdx(it.key) }
-            // change vote map of export candidate id to canonical candidate id
-            exportCandMap.forEach { (id, vote) ->
-                if (id >= lookup.candLookup.size)
-                    print("")
-            }
-            val cannonCands: Map<Int, Int> = lookup.convertCands(exportCandMap)
-            val contestTabulation = ContestTabulation(infos[lookup.canonContestId]!!, cannonCands) // dont know ncards
-            canonTabs[lookup.canonContestId] = contestTabulation */
         }
         return canonTabs
     }

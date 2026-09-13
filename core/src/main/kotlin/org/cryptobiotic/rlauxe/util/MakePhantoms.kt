@@ -22,6 +22,25 @@ fun makePhantomCvrs(
     return results
 }
 
+fun makePhantomCards(
+    contestNphantoms: Map<Int, Int>,
+    county: String,
+    prefix: String = "phantom-",
+): List<AuditableCard> {
+    val phantoms = mutableListOf<AuditableCard>()
+    var idx = 0
+    contestNphantoms.forEach { (contestId, nphantoms) ->
+        val votes = mapOf( contestId to intArrayOf() )
+        repeat(nphantoms) {
+            val card = AuditableCard.fromVotes(id = "$county:${prefix}${idx}", location = county, index = idx, prn = 0L, phantom = true,
+                styleId=CardStyle.phantomStyle.id, poolId = null, votes=votes).setStyle(CardStyle.phantomStyle)
+            phantoms.add(card)
+            idx++
+        }
+    }
+    return phantoms
+}
+
 //// cvrs for multiple contests
 fun makePhantomCvrs(
     contests: List<ContestIF>,
@@ -47,9 +66,7 @@ fun makePhantomCards(
         val votes = mapOf( contest.id to intArrayOf() )
         repeat(contest.Nphantoms()) {
             val card = AuditableCard.fromVotes(id = "${prefix}${idx}", location = null, index = idx, prn = 0L, phantom = true,
-                    styleId=CardStyle.phantomStyle.id, poolId = null, votes=votes)
-                .setStyle(CardStyle.phantomStyle)
-
+                    styleId=CardStyle.phantomStyle.id, poolId = null, votes=votes).setStyle(CardStyle.phantomStyle)
             phantoms.add(card)
             idx++
         }

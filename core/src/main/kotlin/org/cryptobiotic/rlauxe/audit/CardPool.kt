@@ -95,37 +95,6 @@ class CardPoolBuilder(
     fun possibleContests() = contestTabs.map { it.key }.toSortedSet().toIntArray()
     fun contestTab(contestId: Int) = contestTabs[contestId]
 
-    /* adjustCards becomes the maximum value of adjust. TODO seems lame
-    fun adjustCards(adjust: Int, contestId : Int) {
-        if (!hasContest(contestId)) throw RuntimeException("NO CONTEST")
-        adjustCards = max( adjust, adjustCards)
-    }
-
-    // TODO obsolete - used by CreateBoulderElectionClcaOld; functionality now in CardPool
-    //   have to change the contestTabs, see build()
-    // otherwise, CardPool has contestTabs with incorrect undervotes
-    // this recalculates the undervotes based on votes from contestTab and ncards()
-    // that is, it ignores the contestTab undervotes and nvotes
-    // thats why we dont just use contestTab.votesAndUndervotes()
-    fun votesAndUndervotesBoulder(contestId: Int): Vunder {
-        val poolUndervotes = undervoteForContest(contestId)
-        val contestTab = contestTabs[contestId]!!
-
-        val voteCounts = contestTab.votes.map { Pair(intArrayOf(it.key), it.value) }
-        val voteSum = contestTab.votes.values.sum()
-
-        return if (hasExactContests) {
-            // if hasExactContests, then missing has to be zero
-            // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
-            // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
-            val undervotes = ncards() * contestTab.voteForN - voteSum
-            Vunder(contestId, poolId, voteCounts, undervotes, 0, contestTab.voteForN)
-        } else {
-            val missing = ncards() - (poolUndervotes + voteSum) / contestTab.voteForN
-            Vunder(contestId, poolId, voteCounts, poolUndervotes, missing, contestTab.voteForN)
-        }
-    } */
-
     // TODO how to distinguish between undervotes and missing ?? You need independent setting for pool ncards
     // if you know ncards, then just use CardPool
     // this assumes missing = 0; but then should set SingleBallotStyle = true ?

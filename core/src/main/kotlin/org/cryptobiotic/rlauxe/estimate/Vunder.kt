@@ -15,6 +15,8 @@ import kotlin.collections.component2
 import kotlin.collections.iterator
 import kotlin.random.Random
 
+private val logger = KotlinLogging.logger("Vunder")
+
 // This is a way to create test Cvrs that match known vote totals and undervotes and novotes for one population or pool
 // ok for voteForN > 1, ok for IRV
 
@@ -22,7 +24,7 @@ import kotlin.random.Random
 // vunder = "votes and undervotes and missing votes"
 // missing votes = the cards in the population that dont contain the contest
 // voteCounts: Pair(candsVoteFor, count); candsVoteFor is immutable
-// TODO what is poolId for ??
+// poolId is apparently for debugging.
 data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
     val nvotes = voteCounts.sumOf { it.second } // candVotes.values.sum()
     val ncards = missing + (undervotes + nvotes) / voteForN
@@ -35,8 +37,9 @@ data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pai
     val nvunder = vunder.size  // ncandidates + 2
 
     init {
-         if (nvotes > ncards && voteForN == 1)
-             println("contest $contestId $nvotes > $ncards undervotes=$undervotes voteForN=$voteForN")
+         if (nvotes > ncards * voteForN) {
+             logger.warn { "contest $contestId has nvotes $nvotes > $ncards; simulated ballots tabulation will be short of the reported vote" }
+         }
     }
 
     // only for non-IRV
@@ -51,7 +54,7 @@ data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pai
     fun show() = buildString {
         append("Vunder")
         if (poolId != null) append("poolId=$poolId, ")
-        append(" contestId=$contestId, nvotes=$nvotes ncards=$ncards, undervotes=$undervotes, missing=$missing, voteForN=$voteForN")
+        append("pool=$poolId contestId=$contestId, nvotes=$nvotes ncards=$ncards, undervotes=$undervotes, missing=$missing, voteForN=$voteForN")
     }
 
     companion object {

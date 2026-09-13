@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CountyElectionSimCvrs
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.cvr.RedactedGroup
+import org.cryptobiotic.rlauxe.cvr.RedactionIF
 import org.cryptobiotic.rlauxe.cvr.cleanCsvString
 import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.estimate.makeCardsForOnePoolV
@@ -63,8 +64,8 @@ class CreateBoulderElection(
     init {
         val cvrTabs = countCvrVotes()
         val redactedTabs = countRedactedVotes()  // wrong
-        val cardPoolBuilders = if (variant.onePool) convertRedactedToOneCardPool(corlaCvrs.redactedGroups())
-            else convertRedactedToCardPool(corlaCvrs.redactedGroups())
+        val cardPoolBuilders = if (variant.onePool) convertRedactedToOneCardPool(corlaCvrs.redaction())
+            else convertRedactedToCardPool(corlaCvrs.redaction())
 
         contestBuilders = makeBoulderContestBuilders(cvrTabs, redactedTabs, cardPoolBuilders)
                             .associate { it.contestId to it}
@@ -149,9 +150,9 @@ class CreateBoulderElection(
         return result
     }
 
-    private fun convertRedactedToCardPool(redacteds: List<RedactedGroup>): List<CardPoolBuilder> {
+    private fun convertRedactedToCardPool(redaction: RedactionIF): List<CardPoolBuilder> {
         var id = 1
-        return redacteds.map { redacted: RedactedGroup ->
+        return redaction.groups().map { redacted: RedactedGroup ->
             //// the redacted groups dont have undervotes, so we should try to generate reasonable undervote counts
             // but... now we are just setting the vote totals, ignoring ncards and undervotes.
             val contestTabs = redacted.contestVotes.mapValues{ ContestTabulation(infos[it.key]!!, it.value, ncards=0) }
@@ -163,10 +164,10 @@ class CreateBoulderElection(
         }
     }
 
-    private fun convertRedactedToOneCardPool(redacteds: List<RedactedGroup>): List<CardPoolBuilder> {
+    private fun convertRedactedToOneCardPool(redaction: RedactionIF): List<CardPoolBuilder> {
         var ncards = 0
         val sumTabs = mutableMapOf<Int, ContestTabulation>()
-        redacteds.forEach { redacted: RedactedGroup ->
+        redaction.groups().forEach { redacted: RedactedGroup ->
             val groupTab = redacted.contestVotes.mapValues{ ContestTabulation(infos[it.key]!!, it.value, ncards=0) }
             sumTabs.sumContestTabulations(groupTab)
             ncards += redacted.ncards()
@@ -265,7 +266,7 @@ class CreateBoulderElection(
     fun countRedactedVotes() : Map<Int, ContestTabulation> { // contestId -> candidateId -> nvotes
         val votes = mutableMapOf<Int, ContestTabulation>()
 
-        corlaCvrs.redactedGroups().forEach { redacted ->
+        corlaCvrs.redaction().groups().forEach { redacted ->
             redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
                 val tab = votes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                 contestVote.forEach { (cand, vote) -> tab.addVote(cand, vote) }
@@ -451,7 +452,7 @@ class BoulderContestBuilder(val auditType: AuditType,
 // OA: Create a OneAudit where pools are from the redacted cvrs.
 
 fun createBoulderElection(
-    input: BoulderInput,
+    input: BoulderCvrs,
     topdir: String,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,

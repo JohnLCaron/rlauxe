@@ -1,9 +1,8 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.auditcenter
 
-class Boulder25Input: BoulderInput  {
+class Boulder25Cvrs: BoulderCvrs  {
     override val electionName= "Boulder2025"
     override val manifestSource = "$auditcenter/2025/files/BoulderManifest.csv"
     override val cvrsSource = "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv"

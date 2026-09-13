@@ -6,8 +6,7 @@ import kotlin.text.startsWith
 
 private val logger = KotlinLogging.logger("RedactionBoulder")
 
-// make this pluggable
-class RedactionBoulder(show: Boolean = false) : Redaction(show) {
+class RedactionBoulder(show: Boolean = false) : Redaction(show=show) {
 
     // "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
     // "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv"

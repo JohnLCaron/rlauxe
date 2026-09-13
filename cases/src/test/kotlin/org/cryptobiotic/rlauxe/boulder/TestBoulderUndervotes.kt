@@ -9,7 +9,7 @@ import kotlin.collections.set
 import kotlin.test.Test
 
 class TestBoulderUndervotes {
-    val input = Boulder23Input()
+    val input = Boulder23Cvrs()
     val sovo = input.sovo()
     val corlaCvrs = input.readCorlaCvrs()
 
@@ -112,7 +112,7 @@ class TestBoulderUndervotes {
         println()
 
         println("\nlook for redactedGroups with no match in cardStyles:")
-        corlaCvrs.redactedGroups().forEach { rgroup ->
+        corlaCvrs.redaction.groups().forEach { rgroup ->
             // test if theres a cardStyle that matches
             //val gcardStyle = extractBallotType(rgroup.ballotType) + "-" + if (isA) "A" else "B"
             val cardStyle = cardStyles[rgroup.groupName]
@@ -139,8 +139,8 @@ class TestBoulderUndervotes {
         //
         // still, we will assume that all ballots in a group have the same CardStyle, which makes it easier to generate accurate simulated CVRs.
         // this wrongly includes contest 12,
-        // This is now done in Boulder24Input
-        //         if (input.electionName == "Boulder2024") { Boulder24Input.removeContest12FromPool6(corlaCvrs.redactedGroups()) }
+        // This is now done in Boulder24Cvrs
+        //         if (input.electionName == "Boulder2024") { Boulder24Cvrs.removeContest12FromPool6(corlaCvrs.redactedGroups()) }
     }
 }
 

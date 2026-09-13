@@ -19,7 +19,7 @@ class TestCorlaSchemaConverter {
     fun testBuildCorlaContests() {
         val coloradoInput = Colorado2026PwithCvrs()
         val countyName = "La Plata"
-        val countyInput = coloradoInput.corlaCountyInput(countyName)!!
+        val countyInput = coloradoInput.corlaCountyCvrs(countyName)!!
         val corlaCvrs = countyInput.readCorlaCvrs()
         val contestBuilder = BuildCorlaContests(coloradoInput) // to get the infos by name
         println("infosByName")

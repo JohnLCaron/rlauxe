@@ -90,12 +90,13 @@ interface CorlaCvrsIF {
     val versionName: String
     val schema: CvrSchema
     fun cvrs(): List<CvrRow>
-    fun redactedGroups(): List<RedactedGroup>
-    fun groupWithLines() : RedactedGroup?
+    fun redaction(): RedactionIF
+    // fun redactedGroups(): List<RedactedGroup>
+    // fun groupWithLines() : RedactedGroup?
     fun cardStyles() : List<CvrCardStyle>
     fun nrows() : Int
-    fun redactedCvrs() : List<CvrRow>
-    fun ngroups(): Int
+    // fun redactedCvrs() : List<CvrRow>
+    // fun ngroups(): Int
 }
 
 class CorlaCvrs(val inputSource: String,
@@ -235,8 +236,8 @@ class CorlaCvrs(val inputSource: String,
 
         if (showRedactedGroups) {
             logger.info{"  read ${redaction.nRedactedRows} Redacted lines from ${inputSource}"}
-            println("number of Redacted Groups = ${redaction.redactedGroups().size}")
-            redaction.redactedGroups().sortedBy{it.groupName}.forEach { println("  $it") }
+            println("number of Redacted Groups = ${redaction.groups().size}")
+            redaction.groups().sortedBy{it.groupName}.forEach { println("  $it") }
         }
     }
 
@@ -287,16 +288,17 @@ class CorlaCvrs(val inputSource: String,
         }
     }
 
-    override fun redactedGroups() = redaction.redactedGroups()
-    override fun groupWithLines() = redaction.groupWithLines
+    override fun redaction() = redaction
+    //override fun redactedGroups() = redaction.redactedGroups()
+    //override fun groupWithLines() = redaction.columnRedactions
     override fun cardStyles() = ballotStyles.cardStyles()
     override fun cvrs() = cvrs
 
     override fun nrows() = rowCount
-    override fun redactedCvrs() = redaction.groupWithLines?.redactedRows ?: emptyList()
-    override fun ngroups(): Int {
-        return redaction.redactedGroups().size + if (redaction.groupWithLines == null) 0 else 1
-    }
+    //override fun redactedCvrs() = redaction.columnRedactions?.redactedRows ?: emptyList()
+    //override fun ngroups(): Int {
+    //    return redaction.groups().size + if (redaction.columnRedactions == null) 0 else 1
+    //}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

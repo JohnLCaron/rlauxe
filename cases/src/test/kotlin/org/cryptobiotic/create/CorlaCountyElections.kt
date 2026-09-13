@@ -7,15 +7,14 @@ import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
-import org.cryptobiotic.rlauxe.boulder.Boulder24Input
-import org.cryptobiotic.rlauxe.boulder.Boulder26pInput
-import org.cryptobiotic.rlauxe.boulder.boulderRoundSettings
+import org.cryptobiotic.rlauxe.boulder.Boulder24Cvrs
+import org.cryptobiotic.rlauxe.boulder.Boulder26PCvrs
 import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
+import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyCvrs
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corlaInput.LaPlata26pInput
-import org.cryptobiotic.rlauxe.corlaInput.Morgan26pInput
-import org.cryptobiotic.rlauxe.corlaInput.Weld26pInput
+import org.cryptobiotic.rlauxe.corlaInput.LaPlata26PCvrs
+import org.cryptobiotic.rlauxe.corlaInput.Morgan26PCvrs
+import org.cryptobiotic.rlauxe.corlaInput.Weld26PCvrs
 import org.cryptobiotic.rlauxe.corlaCounty.createCorlaCountyElection
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
 import org.cryptobiotic.rlauxe.persist.AuditRecord
@@ -26,11 +25,11 @@ class CorlaCountyElections {
     @Test
     fun createOne() {
         val toptopdir = "$cases/corlaCounty/morgan26p"
-        val input = Morgan26pInput()
+        val input = Morgan26PCvrs()
         val stateInput = Colorado2026PwithCvrs()
 
         // fun createCorlaCountyElection(
-        //    countyInput: CorlaCountyInput,
+        //    countyInput: CorlaCountyCvrs,
         //    stateInput: ColoradoInput,
         //    topdir: String,
         //    creation: AuditCreationConfig,
@@ -43,7 +42,7 @@ class CorlaCountyElections {
             stateInput,
             topdir = "$toptopdir/styles",
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
-            roundConfig = boulderRoundSettings(),
+            roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.Styles,
         )
     }
@@ -51,7 +50,7 @@ class CorlaCountyElections {
     @Test
     fun createBoulder26p() {
         createCorlaCountyVariants("$cases/corlaCounty/boulder26p",
-            Boulder26pInput(),
+            Boulder26PCvrs(),
         Colorado2026PwithCvrs()
         )
     }
@@ -59,7 +58,7 @@ class CorlaCountyElections {
     @Test
     fun createBoulder24() {
         createCorlaCountyVariants("$cases/corlaCounty/boulder24",
-            Boulder24Input(),
+            Boulder24Cvrs(),
             Colorado2024General()
         )
     }
@@ -68,7 +67,7 @@ class CorlaCountyElections {
     fun createBoulder20() {
         val stateInput = Colorado2020General()
         createCorlaCountyVariants("$cases/corlaCounty/boulder20",
-            stateInput.corlaCountyInput("Boulder")!!,
+            stateInput.corlaCountyCvrs("Boulder")!!,
             stateInput,
         )
     }
@@ -77,7 +76,7 @@ class CorlaCountyElections {
     fun createPitkin20() {
         val stateInput = Colorado2020General()
         createCorlaCountyVariants("$cases/corlaCounty/pitkin20",
-            stateInput.corlaCountyInput("Pitkin")!!,
+            stateInput.corlaCountyCvrs("Pitkin")!!,
             stateInput,
         )
     }
@@ -86,7 +85,7 @@ class CorlaCountyElections {
     fun createSummit20() {
         val stateInput = Colorado2020General()
         createCorlaCountyVariants("$cases/corlaCounty/summit20",
-            stateInput.corlaCountyInput("Summit")!!,
+            stateInput.corlaCountyCvrs("Summit")!!,
             stateInput,
         )
     }
@@ -95,7 +94,7 @@ class CorlaCountyElections {
     fun createDouglas20() {
         val stateInput = Colorado2020General()
         createCorlaCountyVariants("$cases/corlaCounty/douglas20",
-            stateInput.corlaCountyInput("Douglas")!!,
+            stateInput.corlaCountyCvrs("Douglas")!!,
             stateInput,
         )
     }
@@ -103,7 +102,7 @@ class CorlaCountyElections {
     @Test
     fun createLaPlata26p() {
         createCorlaCountyVariants("$cases/corlaCounty/laplata26p",
-            LaPlata26pInput(),
+            LaPlata26PCvrs(),
             Colorado2026PwithCvrs()
         )
     }
@@ -111,7 +110,7 @@ class CorlaCountyElections {
     @Test
     fun createMorgan26p() {
         createCorlaCountyVariants("$cases/corlaCounty/morgan26p",
-            Morgan26pInput(),
+            Morgan26PCvrs(),
             Colorado2026PwithCvrs()
         )
     }
@@ -119,19 +118,19 @@ class CorlaCountyElections {
     @Test
     fun createWeld26p() {
         createCorlaCountyVariants("$cases/corlaCounty/weld26p",
-            Weld26pInput(),
+            Weld26PCvrs(),
             Colorado2026PwithCvrs()
         )
     }
 
-    fun createCorlaCountyVariants(toptopdir: String, countyInput: CorlaCountyInput, stateInput: ColoradoInput) {
+    fun createCorlaCountyVariants(toptopdir: String, countyInput: CorlaCountyCvrs, stateInput: ColoradoInput) {
         // redacted ballots are simulated
         createCorlaCountyElection(
             countyInput,
             stateInput,
             topdir = "$toptopdir/sim",
             creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
-            roundConfig = boulderRoundSettings(),
+            roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.Sim,
         )
 
@@ -141,7 +140,7 @@ class CorlaCountyElections {
             stateInput,
             topdir = "$toptopdir/phantoms",
             creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
-            roundConfig = boulderRoundSettings(),
+            roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.Phantoms,
         )
 
@@ -151,7 +150,7 @@ class CorlaCountyElections {
             stateInput,
             topdir = "$toptopdir/onepool",
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
-            roundConfig = boulderRoundSettings(),
+            roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.OnePool,
         )
 
@@ -162,7 +161,7 @@ class CorlaCountyElections {
             stateInput,
             topdir = "$toptopdir/styles",
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
-            roundConfig = boulderRoundSettings(),
+            roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.Styles,
         )
     }
@@ -180,27 +179,36 @@ class CorlaCountyElections {
         createBoulder24()
         compareVariants(toptopdir, "sim", listOf("phantoms", "onepool", "styles"))
     }
+}
 
-    // we want to get the audited contests from one variant, and run that with the other variants
-    fun compareVariants(toptopdir: String, from: String, compareOthers: List<String>) {
-        val fromtopdir = "$toptopdir/$from"
-        startFirstRound(fromtopdir)
-        runAllRoundsAndVerify(fromtopdir, 5, false)
+// we want to get the audited contests from one variant, and run that with the other variants
+fun compareVariants(toptopdir: String, from: String, compareOthers: List<String>) {
+    val results = mutableListOf<String>()
 
-        val fromAuditRecord = AuditRecord.read(fromtopdir)!! as AuditRecord
-        val (successfulContests, nmvrs) = fromAuditRecord.contestRounds(successOnly = true)
-        println(">>>>>>>>>>>>>>>>>>>>>>>> $from has ${successfulContests.size} contests, nmvrs = $nmvrs")
-        val onlyContests = successfulContests.keys.toList()
-        compareOthers.forEach { other ->
-            val othertopdir = "$toptopdir/$other"
+    val fromtopdir = "$toptopdir/$from"
+    startFirstRound(fromtopdir) // does this work if first round already ran ?
+    runAllRoundsAndVerify(fromtopdir, 5, false)
 
-            startFirstRound(othertopdir, onlyContests = onlyContests)
-            runAllRoundsAndVerify(othertopdir, 5, false)
+    // fetch list of successful contests
+    val fromAuditRecord = AuditRecord.read(fromtopdir)!! as AuditRecord
+    val (successfulContests, nmvrs) = fromAuditRecord.contestRounds(successOnly = true)
+    val result = "$from has ${successfulContests.size} contests, nmvrs = $nmvrs"
+    results.add(result)
+    println(">>>>>>>>>>>>>>>>>>>>>>> $result")
 
-            val fromAuditRecord = AuditRecord.read(othertopdir)!! as AuditRecord
-            val (otherContests, nmvrs)  = fromAuditRecord.contestRounds(successOnly = true)
-            println(">>>>>>>>>>>>>>>>>>>>>>> $other has ${otherContests.size} contests, nmvrs=$nmvrs")
-        }
+    // run the other variants with those contests
+    val onlyContests = successfulContests.keys.toList()
+    compareOthers.forEach { other ->
+        val othertopdir = "$toptopdir/$other"
 
+        startFirstRound(othertopdir, onlyContests = onlyContests)
+        runAllRoundsAndVerify(othertopdir, 5, false)
+
+        val fromAuditRecord = AuditRecord.read(othertopdir)!! as AuditRecord
+        val (otherContests, nmvrs)  = fromAuditRecord.contestRounds(successOnly = true)
+        val result = "$other has ${otherContests.size} contests, nmvrs=$nmvrs"
+        results.add(result)
+        println(">>>>>>>>>>>>>>>>>>>>>>> $result")
     }
+    results.forEach { println(it)}
 }

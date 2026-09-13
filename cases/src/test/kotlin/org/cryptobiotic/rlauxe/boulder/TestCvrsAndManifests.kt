@@ -10,32 +10,32 @@ class TestCvrsAndManifests {
 
     @Test
     fun testBoulder23match() {
-        testCvrsAndManifests(Boulder23Input())
+        testCvrsAndManifests(Boulder23Cvrs())
     }
 
     @Test
     fun testBoulder24match() {
-        testCvrsAndManifests(Boulder24Input())
+        testCvrsAndManifests(Boulder24Cvrs())
     }
 
     @Test
     fun testBoulder25match() {
-        testCvrsAndManifests(Boulder25Input())
+        testCvrsAndManifests(Boulder25Cvrs())
     }
 
     @Test
     fun testBoulder26match() {
-        testCvrsAndManifests(Boulder26pInput())
+        testCvrsAndManifests(Boulder26PCvrs())
     }
 
-    fun testCvrsAndManifests(input: BoulderInput) {
+    fun testCvrsAndManifests(input: BoulderCvrs) {
         val corlaCvrs = readCorlaCvrs(input.cvrsSource, redaction = RedactionBoulder())
 
         println("${input.cvrsSource}: nrows = ${corlaCvrs.nrows()} cvrs size = ${corlaCvrs.cvrs().size}")
 
-        val redactedCards = corlaCvrs.redactedGroups().sumOf {  it.ncards() }
-        println("   redacted groups ${corlaCvrs.redactedGroups().size}")
-        corlaCvrs.redactedGroups().forEach { println(it)}
+        val redactedCards = corlaCvrs.redaction.groups().sumOf {  it.ncards() }
+        println("   redacted groups ${corlaCvrs.redaction.groups().size}")
+        corlaCvrs.redaction.groups().forEach { println(it)}
 
         println("   redacted ncards = ${redactedCards}")
         println("   cvrs + redacted ncards = ${redactedCards + corlaCvrs.cvrs().size}")

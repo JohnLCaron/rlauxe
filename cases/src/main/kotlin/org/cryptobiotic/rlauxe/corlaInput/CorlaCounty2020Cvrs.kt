@@ -1,39 +1,10 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
-import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
-import org.cryptobiotic.rlauxe.cvr.Garfield20Cvrs
-import org.cryptobiotic.rlauxe.cvr.Redaction
-import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
-import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
-import kotlin.text.replace
 
-interface CorlaCountyInput {
-    val electionName: String
-    val countyName: String
-    val manifestSource: String
-    val cvrsSource: String
-
-    fun readCorlaCvrs(): CorlaCvrsIF {
-        return if (countyName == "Garfield") Garfield20Cvrs(cvrsSource)
-            else if (countyName == "Boulder") readCorlaCvrs(cvrsSource, redaction = RedactionBoulder())
-            else readCorlaCvrs(cvrsSource, redaction = Redaction())
-    }
-
-    fun hasABgroups() = false
-
-    fun readCountyManifest(): CountyManifest {
-        return CountyManifest(manifestSource)
-    }
-
-    fun countyPopulation(): Int
-}
-
-class CorlaCounty2020Input(override val countyName: String): CorlaCountyInput {
+class CorlaCounty2020Cvrs(override val countyName: String): CorlaCountyCvrs {
     val countyNameZ = countyName.replace(" ", "")
     override val electionName = "${countyName}2020"
     // TODO Gunnison has Manifest-Gunnison.csv; but Gunnison is an excluded county
@@ -62,6 +33,7 @@ class CorlaCounty2020Input(override val countyName: String): CorlaCountyInput {
         val stateInput = Colorado2020General()
     }
 }
+
 
 fun votedatabase2020Counties(votedatabase: String): Map<String, String> {
     val path = Path(votedatabase) // or does votedatabase include

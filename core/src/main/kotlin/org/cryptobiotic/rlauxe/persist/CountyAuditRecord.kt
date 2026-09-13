@@ -5,7 +5,6 @@ import com.github.michaelbull.result.unwrapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.audit.poolName
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.strata.Strata
@@ -39,12 +38,12 @@ class CountyAuditRecord(
         val lastRound = rounds.last() // TODO last round that has results
 
         val mvrCount = mutableMapOf<String, Int>()
-        // styles must be added
         val mvrs = publisher.sampleMvrsFile(lastRound.roundIdx)
         val mvrCardIter = readCardsCsvIterator(mvrs, styles=styles)
         var count = 0
         mvrCardIter.forEach { mvr ->
-            val countyName = mvr.style()!!.poolName()
+            val location = mvr.location()
+            val countyName = if (location.indexOf(":") > 0) location.substring(0, location.indexOf(":")) else location
             val accum = mvrCount.getOrPut(countyName) { 0 }
             mvrCount[countyName] = accum + 1
             count++

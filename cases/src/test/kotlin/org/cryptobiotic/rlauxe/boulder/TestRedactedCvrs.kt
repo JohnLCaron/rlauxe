@@ -55,7 +55,7 @@ class TestRedactedCvrs {
         val redactedCvrVotes: Map<Int, ContestTabulation> = tabulateCards(cards.iterator(), election.infos)
 
         val redactedDirect = mutableMapOf<Int, MutableMap<Int, Int>>()
-        export.redactedGroups().forEach { redacted ->
+        export.redaction.groups().forEach { redacted ->
             redacted.contestVotes.forEach { (contestId, conVotes) ->
                 val accumVotes = redactedDirect.getOrPut(contestId) { mutableMapOf() }
                 conVotes.forEach { (cand, nvotes) ->

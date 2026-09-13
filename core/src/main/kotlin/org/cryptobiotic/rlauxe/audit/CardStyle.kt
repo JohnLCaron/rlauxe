@@ -25,12 +25,6 @@ interface StyleIF {
     //   fun votesAndUndervotes(contestId: Int): Vunder
 }
 
-// the pool name is the first token of the style name
-fun StyleIF.poolName(): String {
-    val split = this.name().split("-",".")
-    return split[0]
-}
-
 data class CardStyle(
     val name: String,
     val id: Int,

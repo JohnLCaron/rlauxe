@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
+import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyCvrs
 import org.cryptobiotic.rlauxe.corlaInput.ManifestEntry
 import org.cryptobiotic.rlauxe.corlaInput.ManifestCounts
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
@@ -29,7 +29,7 @@ private val logger = KotlinLogging.logger("CvrsFromManifest")
 
 class CvrsFromManifest(
     val variant: ElectionVariant,
-    val countyInput: CorlaCountyInput,
+    val countyInput: CorlaCountyCvrs,
     val stateInput: ColoradoInput,
     val infos: Map<Int, ContestInfo>,
     startingPoolId: Int,
@@ -50,8 +50,8 @@ class CvrsFromManifest(
     val convertedCvrTabs : Map<Int, ContestTabulation>
 
     // val redactedGroups: List<RedactedGroup>
-    val redactedPools: List<CardPool>
-    val redactedTabs : Map<Int, ContestTabulation>
+    val redactedPools = emptyList<CardPool>()
+    val redactedTabs = emptyMap<Int, ContestTabulation>()
 
     init {
         val corlaCvrs = countyInput.readCorlaCvrs()
@@ -98,7 +98,7 @@ class CvrsFromManifest(
 
         ////////////////////////////////////////////////
 
-        val redactedPoolBuilders = makeRedactedPools(variant, corlaCvrs)
+        /* val redactedPoolBuilders = makeRedactedPools(variant, corlaCvrs)
 
         // set ncards for each pool; when CardPool is built, the contestTabs are reset accordingly
         if (redactedPoolBuilders.size == 1) {
@@ -117,7 +117,7 @@ class CvrsFromManifest(
                 }
             }
         }
-        redactedTabs = tabulateRedactedPools(redactedPools)
+        redactedTabs = tabulateRedactedPools(redactedPools) */
     }
 
     /* id matches the imprintedId, location is the manifest location field
@@ -270,7 +270,7 @@ class CvrsFromManifest(
 
     /////////////////////////////////////////////////////////////////////////////
 
-    fun makeRedactedPools(variant: ElectionVariant, corlaCvrs: CorlaCvrsIF): List<CardPoolBuilder> {
+    /* fun makeRedactedPools(variant: ElectionVariant, corlaCvrs: CorlaCvrsIF): List<CardPoolBuilder> {
         val result = mutableListOf<CardPoolBuilder>()
         val g = makeGroupWithLines(corlaCvrs)
         if (g != null) result.add(g)
@@ -303,7 +303,7 @@ class CvrsFromManifest(
             infos,
             missingVoteTab
         ).setNcards(groupWithLines.redactedRows.size)
-    }
+    } */
 
     private fun convertRedactedToCardPool(redactedGroups: List<RedactedGroup>): List<CardPoolBuilder> {
         return redactedGroups.map { redacted: RedactedGroup ->

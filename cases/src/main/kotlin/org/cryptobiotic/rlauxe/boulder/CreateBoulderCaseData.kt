@@ -19,7 +19,7 @@ fun makeBoulderElectionOA(toptopdir: String) {
     val topdir = "$toptopdir"
 
     createBoulderElection(
-        input=Boulder24Input(),
+        input=Boulder24Cvrs(),
         topdir = topdir,
         creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
         roundConfig = boulderRoundSettings(),
@@ -31,7 +31,7 @@ fun makeBoulderElectionClca(toptopdir: String) {
     val topdir = "$toptopdir"
 
     createBoulderElection(
-        input=Boulder24Input(),
+        input=Boulder24Cvrs(),
         topdir = topdir,
         creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
         roundConfig = boulderRoundSettings(),

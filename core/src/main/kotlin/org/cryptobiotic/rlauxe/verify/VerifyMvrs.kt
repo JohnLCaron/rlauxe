@@ -15,17 +15,20 @@ fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCard, AuditableCard>>, e
             countErrs++
         }
 
-        mvr.votes()!!.keys.forEach { mvrContestId ->
-            if (!card.possibleContests().contains(mvrContestId)) {
-                hasError = true
-                nested.add("*** Mvr contains contest ${mvrContestId} not contained in card $card")
-            }
-        }
-        if (card.hasExactContests()) {
-            card.possibleContests().forEach { batchContestId ->
-                if (!mvr.votes()!!.contains(batchContestId)) {
+        val votes = mvr.votes()
+        if (votes != null) {
+            votes.keys.forEach { mvrContestId ->
+                if (!card.possibleContests().contains(mvrContestId)) {
                     hasError = true
-                    nested.add("*** batch contains contest ${batchContestId} not contained in Mvr")
+                    nested.add("*** Mvr contains contest ${mvrContestId} not contained in card $card")
+                }
+            }
+            if (card.hasExactContests()) {
+                card.possibleContests().forEach { batchContestId ->
+                    if (!votes.contains(batchContestId)) {
+                        hasError = true
+                        nested.add("*** batch contains contest ${batchContestId} not contained in Mvr")
+                    }
                 }
             }
         }

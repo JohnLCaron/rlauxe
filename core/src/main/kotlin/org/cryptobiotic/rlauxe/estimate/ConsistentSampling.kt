@@ -265,7 +265,7 @@ fun uniformSampling(
     ) {
         // get the next card in sorted order
         val card = samplingCardIter.next()
-        val countyName = card.poolName()
+        val countyName = "" // card.poolName() TODO tri
 
         // do we want it ?
         val haveFromPool = haveFromPools.getOrDefault(countyName, 0)

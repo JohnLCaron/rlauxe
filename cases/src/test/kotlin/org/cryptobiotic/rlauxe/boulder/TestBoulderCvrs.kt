@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
 import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
@@ -19,12 +18,12 @@ class TestBoulderCvrs {
 
     @Test
     fun testBoulder23() {
-        test(Boulder23Input(), 119_643)
+        test(Boulder23Cvrs(), 119_643)
     }
 
     @Test
     fun testBoulder24() {
-        test(Boulder24Input(), 396_012)
+        test(Boulder24Cvrs(), 396_012)
     }
 
     @Test
@@ -33,15 +32,15 @@ class TestBoulderCvrs {
         // Box Tracking System which provides estimates of the number of
         // ballots based on weight of returned ballots. (!)
 
-        test(Boulder25Input(), 121_584)
+        test(Boulder25Cvrs(), 121_584)
     }
 
     @Test
     fun testBoulder26() {
-        test(Boulder26pInput(), 100_423)
+        test(Boulder26PCvrs(), 100_423)
     }
 
-    fun test(input: BoulderInput, sumManifest: Int) {
+    fun test(input: BoulderCvrs, sumManifest: Int) {
         val corlaCvrs: CorlaCvrs = readCorlaCvrs(input.cvrsSource, redaction = RedactionBoulder())
         println("\n${input.cvrsSource}\nCVR schema contests ${corlaCvrs.schema.contests.size}")
 
@@ -122,8 +121,8 @@ class TestBoulderCvrs {
         println("Total cvrs=${exportCvrs.size}")
 
         println("\nRedacted Groups")
-        corlaCvrs.redactedGroups().forEach { println("  ${it}") }
-        val redactedNcards = corlaCvrs.redactedGroups().sumOf { it.ncards() }
+        corlaCvrs.redaction.groups().forEach { println("  ${it}") }
+        val redactedNcards = corlaCvrs.redaction.groups().sumOf { it.ncards() }
         println("Total redacted cards=${redactedNcards}")
         println()
         println("Total cvrs + redacted cards=${exportCvrs.size + redactedNcards}")

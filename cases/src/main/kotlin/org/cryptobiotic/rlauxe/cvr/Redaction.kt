@@ -4,35 +4,59 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.cvr.Redaction.Companion.GroupWithLines
 import org.cryptobiotic.rlauxe.util.roundUp
+import kotlin.collections.emptyList
 import kotlin.math.max
 import kotlin.text.lowercase
 import kotlin.text.startsWith
 
 private val logger = KotlinLogging.logger("Redaction")
 
-open class Redaction(val show: Boolean = false) {
+interface RedactionIF {
+    fun groups(): List<RedactedGroup>  // Aggregated redactions: make into pools
+    fun redactedRows(): List<CvrRow>  // row redactions given in the CVR file
+    fun nredactedCvrs(): Int // number of redacted cvrs given in CVR file
+}
+
+class EmptyRedaction: RedactionIF {
+    override fun groups() = emptyList<RedactedGroup>()
+    override fun redactedRows() = emptyList<CvrRow>()
+    override fun nredactedCvrs() = 0
+}
+
+data class RedactionStrategy(val redactedRowsAlsoAggregated: Boolean = false,)
+
+// just gather the raw info
+open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val show: Boolean = false): RedactionIF {
     var nRedactedRows = 0
     val redactedGroups = mutableMapOf<String, RedactedGroup>()
     val redactedGroupsSet = mutableMapOf<Set<Int>, RedactedGroup>()
-    var groupWithLines: RedactedGroup? = null
+    var columnRedactions: RedactedGroup? = null  // holds column redactions
 
     private var redactionExtensions = 1
     private val showDontMatch = true
 
-    fun redactedGroups(): List<RedactedGroup> {
+    override fun groups(): List<RedactedGroup> {
         val result = mutableListOf<RedactedGroup>()
         result.addAll(redactedGroups.values)
         result.addAll(redactedGroupsSet.values)
-        // if (groupWithLines != null) result.add(groupWithLines!!)
         return result
     }
 
+    override fun redactedRows() = columnRedactions?.redactedRows ?: emptyList()
+
+    // number of redacted cvrs given in CVR file
+    // here you have to know if the redactedRows are also in an aggregation
+    override fun nredactedCvrs(): Int {
+        if (strategy.redactedRowsAlsoAggregated) return redactedRows().size
+        return redactedRows().size + groups().sumOf{ it.ncards()}
+    }
+
     fun addRedactedLine(line: CSVRecord, corlaCvrs: CorlaCvrs) {
-        if (groupWithLines == null)
-            groupWithLines = RedactedGroup(GroupWithLines, line, corlaCvrs.schema)
+        if (columnRedactions == null)
+            columnRedactions = RedactedGroup(GroupWithLines, line, corlaCvrs.schema)
         val row = corlaCvrs.parseHeader(line)
         // TODO you could look at which fields are non-null
-        groupWithLines!!.redactedRows.add(row)
+        columnRedactions!!.redactedRows.add(row)
     }
 
     fun addGroup(redacted:RedactedGroup) {
@@ -135,10 +159,10 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
     val redactedRows = mutableListOf<CvrRow>()
 
     var nlines = 0  // used by the accumulating group
-    var fixedNcards: Int? = null  // when we are told what ncards is in the cvr file
+    var fixedNcards: Int? = null  // when we are told how many cards are in the group
     // var style : CvrCardStyle? = null TODO
     var singleCards = true
-    var setNcards: Int? = null
+    // var setNcards: Int? = null
 
     init {
         if (groupName.isEmpty())
@@ -147,11 +171,11 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
             addVotes(firstCsv)
     }
 
-    // used externally to override
+    /* used externally to override
     fun setNcards(ncards: Int) {
         if (fixedNcards != null) { throw RuntimeException("Cant change ncards of a fixed group") }
         setNcards = ncards
-    }
+    } */
 
     fun contests() = contestVotes.keys.toSet()
 
@@ -220,14 +244,15 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
 
     fun totalVotes() = contestVotes.values.map{ it.values }.flatten().sum()
 
+    // TODO
     fun ncards():Int {
         if (redactedRows.isNotEmpty()) return redactedRows.size
-        return fixedNcards?: setNcards ?:max(nlines, minCards())
+        return fixedNcards?: max(nlines, minCards())
     }
 
     override fun toString() = buildString {
         val contests = contestVotes.map { it.key }.sorted()
-        append("RedactedGroup('$groupName', ncards=${ncards()}, nlines=$nlines, minCards= ${minCards()} totalVotes=${totalVotes()} singleCards = $singleCards, contests=${contests} )")
+        append("RedactedGroup('$groupName', nlines=$nlines, minCards= ${minCards()} totalVotes=${totalVotes()} singleCards = $singleCards, contests=${contests} )")
         // appendLine(csvRecord.toString())
     }
 
@@ -244,6 +269,7 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
 
     companion object {
         // method #2: specific to Boulder25,26; "Redacted and Consolidated 10 Ballots"
+        // TODO move to RedactionBoulder?
         fun parseNCards(line:String): Int? {
             if (!line.contains("Redacted and Consolidated")) return null
 

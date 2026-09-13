@@ -1,25 +1,24 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
-import org.cryptobiotic.rlauxe.boulder.Boulder26pInput
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCounty2020Input
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
 import kotlin.test.Test
 
-class TestCorlaCountyInput {
+class TestCorlaCountyCvrs {
 
     @Test
     fun testOneCorlaCountyInput() {
-        val stateInput = Colorado2020General()
-        val input = stateInput.corlaCountyInput("Garfield")!!
+        val stateInput = Colorado2026PwithCvrs()
+        val input = stateInput.corlaCountyCvrs("Boulder")!!
 
-        CheckCvrsAndManifest(stateInput, input)
+        CheckCvrsAndManifest(stateInput, input, compareMissingVotes=true)
     }
 
     @Test
     fun testAllCorlaCountyInput() {
         val stateInput = Colorado2020General()
         stateInput.counties().forEach { county ->
-            val input = stateInput.corlaCountyInput(county)!!
+            val input = stateInput.corlaCountyCvrs(county)!!
             CheckCvrsAndManifest(stateInput, input)
         }
     }

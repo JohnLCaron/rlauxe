@@ -171,9 +171,7 @@ Redacted,,,,,,05,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,1,0,0,0,1,0,0,1,1,1,0,1,,,,
 - The individual redacted CVRS have identifiers removed and votes left in (instead of the opposite)
 - Redacted number of cards are not given
 
-### Compare redaction methods
-
-Using CorlaCountyElection
+### Compare redaction variants
 
 |              | ncontests | nredactions | ncards | ngroups | phantoms  | onePool   | styles | unredacted |
 |--------------|-----------|-------------|--------|---------|-----------|-----------|--------|------------|

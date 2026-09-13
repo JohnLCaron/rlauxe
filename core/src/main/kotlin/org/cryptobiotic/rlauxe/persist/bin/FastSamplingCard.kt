@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.persist.bin
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.audit.poolName
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import java.io.BufferedInputStream
 import java.io.DataInputStream
@@ -15,7 +14,6 @@ import java.io.OutputStream
 data class FastSamplingCard(val prn : Long, val style: StyleIF) : SamplingCardIF {
     override fun prn() = prn
     override fun hasContest(contestId: Int) = style.hasContest( contestId)
-    override fun poolName() = style.poolName()
 }
 
 class FastSamplingCardIterator(inputFile: String, styles: List<StyleIF>, bufferSize: Int): CloseableIterator<SamplingCardIF> {
@@ -31,11 +29,11 @@ class FastSamplingCardIterator(inputFile: String, styles: List<StyleIF>, bufferS
     override fun hasNext(): Boolean {
         val prn = dos.readLong()
         val styleId = dos.readInt()
-        if (styleId == -1) {
+        if (styleId == Int.MIN_VALUE) {
             nextCard = null
             return false
         }
-        val style = styleMap[styleId]
+        val style = if (styleId < 0) PhantomStyle(-styleId) else styleMap[styleId]
         if (style == null)
             throw RuntimeException()
         nextCard = FastSamplingCard(prn, style)
@@ -48,6 +46,16 @@ class FastSamplingCardIterator(inputFile: String, styles: List<StyleIF>, bufferS
     }
 }
 
+data class PhantomStyle(val contestId: Int): StyleIF {
+    override fun name() = "PhantomForContest$contestId"
+    override fun id() = -contestId
+    override fun possibleContests() = intArrayOf(contestId)
+    override fun hasExactContests() = true
+    override fun hasContest(contestId: Int) = (contestId == this.contestId)
+    override fun ncards() = -1
+}
+
+// could use varint encoding
 fun writeFastSamplingCards(cards: CloseableIterator<AuditableCard>, filenameOut: String, limit: Int? = null): Int {
     val outputStream: OutputStream = FileOutputStream(filenameOut)
     var count = 0
@@ -55,13 +63,17 @@ fun writeFastSamplingCards(cards: CloseableIterator<AuditableCard>, filenameOut:
     DataOutputStream(outputStream).use { dos ->
         while (cards.hasNext() && (limit == null || count < limit)) {
             val card = cards.next()
-            dos.writeLong(card.prn())
-            dos.writeInt(card.styleId)
+            dos.writeLong(card.prn()) // 8 bytes; might switch to bytearray
+            if (card.phantom && (card.styleId < 0)) {
+                dos.writeInt(-card.contestIds[0]) // phantom has a single contest
+            } else {
+                dos.writeInt(card.styleId)  // 4 bytes
+            }
             count++
         }
         // EOF
         dos.writeLong(0L)
-        dos.writeInt(-1)
+        dos.writeInt(Int.MIN_VALUE)
     }
     outputStream.close() // probably dos closes it
     cards.close()

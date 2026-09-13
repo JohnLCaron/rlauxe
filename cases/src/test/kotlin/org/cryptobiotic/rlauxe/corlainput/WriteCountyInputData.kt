@@ -1,7 +1,10 @@
 package org.cryptobiotic.rlauxe.corlainput
 
+import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.corlaCounty.CheckCvrsAndManifest
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
+import org.cryptobiotic.rlauxe.corlaInput.ColoradoInputWithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.CountyInputData
 import org.cryptobiotic.rlauxe.corlaInput.readCountyInputData
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyInputData
@@ -12,20 +15,36 @@ import kotlin.test.assertEquals
 class WriteCountyInputData {
 
     @Test
-    fun writeCountyData() {
-        val filename = "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/corla20/contestData.csv"
+    fun write2026p() {
+        writeCountyData("$cases/corlaState/2026p", Colorado2026PwithCvrs())
+    }
+
+    @Test
+    fun write2020() {
+        writeCountyData("$cases/corlaState/2020", Colorado2020General())
+    }
+
+    fun writeCountyData(topdir: String, stateInput: ColoradoInputWithCvrs) {
+        val filename = "$topdir/countyInputData.csv"
+
         val data = mutableListOf<CountyInputData>()
-        val stateInput = Colorado2020General()
         stateInput.counties().forEach { county ->
-            val countyInput = stateInput.corlaCountyInput(county)!!
-            val ccc = CheckCvrsAndManifest(stateInput, countyInput, showMatch = true, showMissingVotes = true)
+            val countyInput = stateInput.corlaCountyCvrs(county)!!
+            val ccc = CheckCvrsAndManifest(stateInput, countyInput, showMatch = true, showMissingVotes = true, showRedactedCvrs = true)
             val corlaCvrs = ccc.corlaCvrs
-            val manifestCount = ccc.manifestCount
-            val ncvrs = ccc.ncvrsInManifest
-            val ngroups = corlaCvrs.ngroups()
-            val nredactedCvrs = corlaCvrs.redactedCvrs().size + corlaCvrs.redactedGroups().sumOf{ it.ncards()}
-            // data class CountyInputData(val county: String, val cvrRows: Int, val ncvrs: Int, val nredactedCvrs: Int, val ngroups: Int,)
-            data.add(CountyInputData(county, manifestCount, ncvrs, nredactedCvrs, ngroups, ccc.minCards))
+            val manifestCounts = ccc.manifestCounts
+            val ngroups = corlaCvrs.redaction().groups().size
+            // TODO nredactedCvrs:  number of redacted cvrs given in CVR file
+            val nredactedCvrs = corlaCvrs.redaction().nredactedCvrs()
+
+            // data class CountyInputData(val county: String, val manifestCount: Int, val ncvrs: Int, val cvrNoManifest: Int, val nredactedCvrs: Int, val ngroups: Int, val minCards: Int)
+            data.add(CountyInputData(county,
+                manifestCounts.totalEntries,
+                manifestCounts.countCvrsInManifest,
+                manifestCounts.cvrNoManifest,
+                nredactedCvrs,
+                ngroups,
+                ccc.minCards))
             println("wrote $county  ${data.last()}")
         }
         writeCountyInputData(filename, data)

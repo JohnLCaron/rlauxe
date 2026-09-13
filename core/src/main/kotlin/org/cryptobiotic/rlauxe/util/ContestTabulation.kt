@@ -228,6 +228,11 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
         contestSum.sum(otherTab)
     }
 }
+fun MutableMap<Int, ContestTabulation>.sumContestTabulations(info: ContestInfo, votes: Map<Int, Int>) {
+    val contestSum = this.getOrPut(info.id) { ContestTabulation(info) }
+    votes.forEach { (cand, vote) -> contestSum.addVote(cand, vote)}
+}
+
 
 // this - other, cant go below 0
 fun MutableMap<Int, ContestTabulation>.subtractContestTabulationZ(other: Map<Int, ContestTabulationIF>) {
@@ -280,12 +285,6 @@ fun tabulateOneAuditPools(cardPools: List<CardPoolIF>, infos: Map<Int, ContestIn
     }
     return poolSums
 }
-
-/* return contestId -> contest population size
-fun tabulateNpops(cvrs: List<Cvr>, infos: List<ContestInfo>): Map<Int, Int> {
-    val tabs = tabulateCloseableCvrs(Closer(cvrs.iterator()), infos.associateBy { it.id })
-    return tabs.mapValues { it.value.ncards() }
-} */
 
 // return contestId -> ContestTabulation
 fun tabulateCvrs(cvrs: Iterator<Cvr>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {

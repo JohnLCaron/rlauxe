@@ -49,7 +49,6 @@ class GarfieldManifest(manifestSource: String): CountyManifest(manifestSource), 
 
 }
 
-
 data class ManifestId(val tab: Int, val batch: String, val record: Int, val location: String): ManifestEntry {
     private var matched = false // did we find a match yet?
     private val id = "$tab-$batch-$record"
@@ -154,16 +153,15 @@ open class CountyManifest(val manifestBatches: List<ManifestBatch>): Iterable<Ma
         // check redacted rows are in manifest (and missing)
         var countUnknownRedaction = 0
         var countRedactionDup = 0
-        corlaCvrs.redactedCvrs().forEach { cvrrow ->
+        corlaCvrs.redaction().redactedRows().forEach { cvrrow ->
             val manifestMatch = manifestIdMap[cvrrow.imprintedId]
             if (manifestMatch != null) {
                 if (manifestMatch.matched()) countRedactionDup++
             } else {
                 countUnknownRedaction++
-                throw RuntimeException("redaction ${cvrrow.imprintedId} not in manifest")
+                throw RuntimeException("redaction ${cvrrow.imprintedId} not in manifest") // temp ??
             }
         }
-
 
         var unmatched = 0
         val redactedIDs = mutableListOf<ManifestEntry>()
@@ -201,20 +199,23 @@ open class CountyManifest(val manifestBatches: List<ManifestBatch>): Iterable<Ma
             report.add("")
             report.add("cvrs not found in manifest= $countMiss")
             report.add("cvrs found in Manifest=${manifestIdMap.size - countMiss}")
+            report.add("manifest entries without matching unredacted cvr= $unmatched")
+            report.add("")
             report.add("redactedCvrs not found in manifest= $countUnknownRedaction")
-
-            val countUnmatched = manifestIdMap.values.count { !it.matched() }
-            report.add("countMiss=$countMiss countUnmatched=$countUnmatched countDup=${countDup + countRedactionDup}")
+            report.add("count duplicate cvr id=$countDup count duplicate redacted cvr id=$countRedactionDup}")
             report.add("-------------------------------------------------------------------------------")
         }
         val countCvrsInManifest = totalCards - unmatched
-        return ManifestCounts(unmatched, countCvrsInManifest, manifestIdMap, redactedIDs)
+        return ManifestCounts(this.totalCards, unmatched, countCvrsInManifest, countMiss, unmatched, manifestIdMap, redactedIDs)
     }
 }
 
 data class ManifestCounts(
+    val totalEntries: Int,                    // total entries in the manifest
     val unmatched: Int,                       // count of Manifest entries not in the Cvrs; presumed to be == redacted CVRs
-    val countCvrsInManifest: Int,             // count of Cvrs that are in the Manifest
+    val countCvrsInManifest: Int,             // count of Cvrs that match entries in the Manifest
+    val cvrNoManifest: Int,                 // cvrs not found in manifest= 50
+    val manifestNoCvr: Int,                 //manifest entries without matching unredacted cvr= 9
     val match: Map<String, ManifestEntry>,    // imprintedId -> ManifestEntry
     val redactedIds: List<ManifestEntry>      // didnt match a cvr, assume to be in the redactions
 )

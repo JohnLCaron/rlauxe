@@ -10,7 +10,6 @@ import kotlin.collections.iterator
 interface SamplingCardIF {
     fun hasContest(contestId: Int): Boolean
     fun prn(): Long
-    fun poolName(): String
 }
 
 // AuditableCard are used for the CardManifest, and also for the Mvrs when being audited.
@@ -88,7 +87,6 @@ data class AuditableCard (
 
     // SamplingCardIF
     override fun prn() = prn
-    override fun poolName() = style?.poolName() ?: "unknown"
 
     fun location() = location ?: id()
     fun index() = index

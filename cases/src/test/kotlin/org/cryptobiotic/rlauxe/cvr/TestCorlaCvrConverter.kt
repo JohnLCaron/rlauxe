@@ -91,10 +91,10 @@ fun testCorlaConverterCvrs(county: String, export: CorlaCvrsIF, coloradoInput: C
             val canonicalContest = coloradoInput.matchCanonicalContest(county, sinfo.name)!!
             val contest = contestMap[canonicalContest.contestName]
             val cvrVotes = card.votes(contest!!.id)
-            if (contestVote.candVotes != cvrVotes!!.toList()) {
+            if (contestVote.votedFor != cvrVotes!!.toList()) {
                 val info = contest.info()
                 val candNames = cvrVotes.map { info.candidateIdToName[it]!! }
-                val scandNames = contestVote.candVotes.map {
+                val scandNames = contestVote.votedFor.map {
                     // coloradoInput.candidateNameCleanup(sinfo.candidateIdToName[it]!!)
                     coloradoInput.matchCanonicalCandidate(county, canonicalContest, sinfo.candidateIdToName[it]!!)
                 }

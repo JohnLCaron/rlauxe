@@ -110,6 +110,7 @@ class CorlaCvrs(val inputSource: String,
     override val schema: CvrSchema
     override val versionName: String
 
+    val headers = mutableListOf<String>()
     val records: Iterator<CSVRecord>  = parser.iterator()
     val ballotStyles = BallotStyles()
     val cvrs = mutableListOf<CvrRow>()
@@ -159,12 +160,14 @@ class CorlaCvrs(val inputSource: String,
         try {
             // we expect the first line to be the election name
             val electionLine = records.next()
+            headers.add(electionLine.values().joinToString(","))
             if (showHeaders) showLine("electionName", electionLine)
             electionName = electionLine.get(0).replace("[^ -~]".toRegex(), "")
             versionName = electionLine.get(1).trim()
 
             // the contest names
             val contestLine = records.next()
+            headers.add(contestLine.values().joinToString(","))
             if (showHeaders) {
                 println("contestLine has ${contestLine.toList().size} columns")
                 println("contestLine = ${contestLine.toList().joinToString(", ")}")
@@ -172,9 +175,11 @@ class CorlaCvrs(val inputSource: String,
 
             // the choice/candidate names
             val choiceLine = records.next()
+            headers.add(choiceLine.values().joinToString(","))
 
             // the header for the first columns, then (sometimes) the party affiliation of the candidates
             val headerRecord = records.next()
+            headers.add(headerRecord.values().joinToString(","))
             if (showHeaders) {
                 println("column headerRecord) has ${headerRecord.toList().size} columns")
                 println(headerRecord.toList().joinToString(", "))
@@ -214,7 +219,7 @@ class CorlaCvrs(val inputSource: String,
 
             if (!redaction.isRedaction(line, this)) {
                 try {
-                     val cvr = parseHeader(line, rowCount)
+                    val cvr = parseHeader(line, rowCount)
                     cvr.addVotes(schema, line, rowCount)
 
                     // dont discard a cvr that doesnt have any votes
@@ -303,21 +308,30 @@ class CorlaCvrs(val inputSource: String,
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// votedFor - list of candidate ids voted for, means candidate got 1 vote
 // note that these contestIds and candIds are internal to this file, and must be cross referenced
 // with canonical contest/candidate name
-// note that they will match the Styles and Redacted Groups
-data class ContestVotes(val contestId: Int, val candVotes: List<Int>)
+// they will match the internal CardStyles and Redacted Groups
+data class ContestVotes(val contestId: Int, val votedFor: List<Int>) {
+    // we want map of candidate ids to votes;  cant use for IRV
+    fun candVotes(): Map<Int, Int> =
+        votedFor.map { Pair(it, 1) }.toMap()
+}
 data class CvrCardStyle(val name: String, val contestIds: Set<Int>, var countCards: Int = 0)
 
 class BallotStyles {
     // keep track of all the card styles in the file
     val cardStyleMap = mutableMapOf<Set<Int>, CvrCardStyle>()
+    var anonStyleCount = 0
 
     fun add(cvr:CvrRow) {
         val contestSet = cvr.contestVotes.map { it.contestId }.toSet()
         if (contestSet.isEmpty())
-            print("") // redacted ??
-        val ballotType = cardStyleMap.getOrPut(contestSet) { CvrCardStyle(cvr.ballotType, contestSet) }
+            println("redacted ??")
+        val ballotType = cardStyleMap.getOrPut(contestSet) {
+            val styleName = if (cvr.ballotType.isNotEmpty()) cvr.ballotType else "Style #${anonStyleCount++}"
+            CvrCardStyle(styleName, contestSet)
+        }
         ballotType.countCards++
     }
 
@@ -337,6 +351,7 @@ data class CvrRow(
     val ballotType: String, // might have to generate this ourselves?
     val precinctPortion: String?, // optional
 ) {
+    // equivilent to Map<contestId, IntArray>, where candId =
     var contestVotes = mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
 
     /* init {
@@ -424,8 +439,18 @@ data class CvrRow(
         append("$precinctPortion, ")
         append("$ballotType, ")
         contestVotes.forEach {
-            append("${it.contestId}: ${it.candVotes.joinToString(",")}, ")
+            append("${it.contestId}: ${it.votedFor.joinToString(",")}, ")
         }
+    }
+
+    fun csvHeader() = buildString {
+        append("$cvrNumber,")
+        append("$tabulatorNum,")
+        append("$batchId,")
+        append("$recordId,")
+        append("$imprintedId,")
+        append("$precinctPortion,")
+        append("$ballotType,")
     }
 
     fun testImprintedIdFormat(): Boolean {
@@ -434,7 +459,7 @@ data class CvrRow(
 
     //// use CorlaCvrConverter when mapping to corla canonical contests
     fun convertToCard(): AuditableCard {
-        val votes = this.contestVotes.map { cv -> Pair(cv.contestId, cv.candVotes.toIntArray()) }.toMap()
+        val votes = this.contestVotes.map { cv -> Pair(cv.contestId, cv.votedFor.toIntArray()) }.toMap()
 
         // TODO location
         return AuditableCard.fromVotes(this.imprintedId, null, 0, 0L, false, styleId = CardStyle.fromCvrStyle.id(),

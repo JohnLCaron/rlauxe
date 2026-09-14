@@ -2,9 +2,7 @@ package org.cryptobiotic.rlauxe.cvr
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
@@ -149,7 +147,7 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCvrsIF, val info
         dcvr.contestVotes.forEach { contestVote ->
             val lookup = exportToCanonLookup[contestVote.contestId]
             if (lookup != null) {
-                val cannonCandidateIds = contestVote.candVotes.map { lookup.candLookup[it] }.filter { it >= 0 }
+                val cannonCandidateIds = contestVote.votedFor.map { lookup.candLookup[it] }.filter { it >= 0 }
                 cvrb.replaceContestVotes(lookup.canonContestId, cannonCandidateIds.toIntArray() )
             } else {
                 logger.error{"cant find exportToCanonLookup[${contestVote.contestId}] in county '$county'"}
@@ -208,7 +206,7 @@ class ExportToCanonLookup(val canonContestId: Int, val candLookup: IntArray ) {
     // val cannonCandidateIds = contestVote.candVotes.map { lookup.candLookup[it] }.filter { it >= 0 }
     fun convertCands(contestVotes: ContestVotes): List<Int> {
         val result = mutableListOf<Int>()
-        contestVotes.candVotes.forEach {
+        contestVotes.votedFor.forEach {
             val newCandId = candLookup[it]
             if (newCandId >= 0 ) result.add(newCandId)
         }
@@ -218,6 +216,7 @@ class ExportToCanonLookup(val canonContestId: Int, val candLookup: IntArray ) {
 
 /////////////////////////////////////////////////////////////////////////
 // make schema specific ContestInfo from export.schema.contests; uses local contestId and candidateId
+// keep seperate from ContestInfo to avoid confusion
 data class CorlaContestInfo(
     val name: String,
     val id: Int,
@@ -226,6 +225,16 @@ data class CorlaContestInfo(
     val nwinners: Int) {
         val candidateIdToName: Map<Int, String> = candidateNames.entries.associate {(k,v) -> v to k }
 }
+
+// data class ContestInfo(
+//    val name: String,
+//    val id: Int,
+//    val candidateNames: Map<String, Int>, // candidate name -> candidate id
+//    val choiceFunction: SocialChoiceFunction,
+//    val nwinners: Int = 1,              // max number of winners; for Dhondt == nseats; for RUNOFF, may be 1 or 2
+//    val voteForN: Int = nwinners,       // how many votes can a user cast in this contest?
+//    val minFraction: Double? = null,    // used in threshold, dhondt, runoff
+//)
 
 fun CorlaCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
     val columns = this.schema.columns

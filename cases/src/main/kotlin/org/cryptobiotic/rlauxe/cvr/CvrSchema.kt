@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.corlaInput.munge
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
 import java.lang.StrictMath.sqrt
-import kotlin.text.get
 
 class CvrSchema(val inputSource: String,
                 val headerMap: Map<String, Int>, // column name -> column index
@@ -13,6 +12,7 @@ class CvrSchema(val inputSource: String,
                 val nheaders: Int,
                 val contests: List<SchemaContestInfo>,
                 val voteForNs: Map<Int, Int>) {
+    val nchoices = columns.size - nheaders
     val writeIns : Set<Int> = columns.filter{ it.choice.lowercase().contains("write-in") }.map { it.colno }.toSet()
 
     fun choices(contestId: Int): List<String> {
@@ -43,7 +43,7 @@ class CvrSchema(val inputSource: String,
         val choices = choices(contestId)
         val contestVotes = cvr.voteFor(contestId)
         val result = mutableListOf<String>()
-        contestVotes?.candVotes?.forEach { result.add( choices[it]) } // could barf if malformed
+        contestVotes?.votedFor?.forEach { result.add( choices[it]) } // could barf if malformed
         return result
     }
 

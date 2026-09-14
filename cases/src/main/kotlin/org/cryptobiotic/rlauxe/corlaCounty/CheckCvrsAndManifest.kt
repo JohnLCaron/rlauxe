@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.subtractContestTabulations
 import org.cryptobiotic.rlauxe.util.subtractContestTabulationsZ
-import org.cryptobiotic.rlauxe.util.sumContestTabulations
+import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromVotes
 import org.cryptobiotic.rlauxe.util.tabulateCards
 
 class CheckCvrsAndManifest(
@@ -95,7 +95,7 @@ class CheckCvrsAndManifest(
                 redaction.groups().forEach { group ->
                     group.contestVotes.forEach { (scontestId, votes) ->
                         val contestId = converter.convertContestId(scontestId)
-                        sumAccum.sumContestTabulations(infos[contestId]!!, votes)
+                        sumAccum.sumContestTabulationsFromVotes(infos[contestId]!!, votes)
                     }
                 }
                 val diff2 = subtractContestTabulations(diff, sumAccum)

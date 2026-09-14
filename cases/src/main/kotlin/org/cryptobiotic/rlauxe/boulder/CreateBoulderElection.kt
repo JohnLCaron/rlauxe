@@ -255,7 +255,7 @@ class CreateBoulderElection(
                     println("cant find ${contestVote.contestId}")
                 else {
                     val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation(info) }
-                    tab.addVotes(contestVote.candVotes.toIntArray(), phantom = false)
+                    tab.addVotes(contestVote.votedFor.toIntArray(), phantom = false)
                 }
             }
         }

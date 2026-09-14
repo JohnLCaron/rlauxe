@@ -228,11 +228,12 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
         contestSum.sum(otherTab)
     }
 }
-fun MutableMap<Int, ContestTabulation>.sumContestTabulations(info: ContestInfo, votes: Map<Int, Int>) {
+
+// votes is a map of candidate Id to how many votes
+fun MutableMap<Int, ContestTabulation>.sumContestTabulationsFromVotes(info: ContestInfo, votes: Map<Int, Int>) {
     val contestSum = this.getOrPut(info.id) { ContestTabulation(info) }
     votes.forEach { (cand, vote) -> contestSum.addVote(cand, vote)}
 }
-
 
 // this - other, cant go below 0
 fun MutableMap<Int, ContestTabulation>.subtractContestTabulationZ(other: Map<Int, ContestTabulationIF>) {

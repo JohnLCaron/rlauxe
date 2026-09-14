@@ -11,15 +11,12 @@ import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyCvrs
 import org.cryptobiotic.rlauxe.corlaInput.ManifestEntry
 import org.cryptobiotic.rlauxe.corlaInput.ManifestCounts
 import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
-import org.cryptobiotic.rlauxe.cvr.CvrRow
 import org.cryptobiotic.rlauxe.cvr.RedactedGroup
 import org.cryptobiotic.rlauxe.cvr.cleanCsvString
 import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.roundToClosest
-import org.cryptobiotic.rlauxe.util.subtractContestTabulations
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateCards
 import kotlin.math.max

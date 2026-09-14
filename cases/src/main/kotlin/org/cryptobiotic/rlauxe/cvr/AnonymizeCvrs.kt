@@ -37,15 +37,42 @@ Terminology used throughout this module:
   ballot_type   — the value in the BallotType column, if present.
 */
 
+/*
+ * Accumulates ballots into the anonymized aggregate pool, tracking
+ * counts needed to verify the redaction rules.
+ *
+ * All four anonymization rules pertain to building the aggregate:
+ *
+ * Rule a: The aggregate must contain at least min_ballots ballots in total.
+ *
+ * Rule b: For each rare contest (one that appears on at least one rare
+ *         ballot), the aggregate must contain at least min_ballots ballots
+ *         that include that contest.
+ *
+ * Rule c: No contest in the aggregate may be near-unanimous.  "Near-
+ *         unanimous" means all but NEAR_UNANIMOUS_THRESHOLD (default
+ *         value = 2) votes go to a single choice.  If a contest is
+ *         near-unanimous, contrasting ballots are borrowed from the
+ *         common pool until at least MIN_CONTRASTING_VOTES (default
+ *         value = 3) ballots vote for a non-leading choice. Only contests
+ *         on rare ballots are checked; near-unanimity in contests that
+ *         belong only to common styles is not a concern.
+ *
+ * Rule d: A ballot may only be borrowed from a common style if that style
+ *         will still have at least min_ballots ballots remaining after the
+ *         borrow.  Enforced by CommonPool, which removes a style from the
+ *         pool entirely once it would drop below the minimum.
+ */
+
 private val logger = KotlinLogging.logger("AnonymizeCvr")
 
-const val VERSION = "0.2"
+private const val VERSION = "0.2"
 
-const val MIN_BALLOTS_DEFAULT = 10
-const val NEAR_UNANIMOUS_THRESHOLD = 2  // "all but N votes" triggers balancing (Rule c)
-const val MIN_CONTRASTING_VOTES = 3  // contrasting votes needed per contest after balancing
-const val COVERAGE_WEIGHT = 10.0  // weight for contest coverage vs. vote-balance score
-const val DONOR_SURPLUS_THRESHOLD = 3  // minimum surplus above min_ballots for a style/precinct to donate freely
+private const val MIN_BALLOTS_DEFAULT = 10
+private const val NEAR_UNANIMOUS_THRESHOLD = 2  // "all but N votes" triggers balancing (Rule c)
+private const val MIN_CONTRASTING_VOTES = 3  // contrasting votes needed per contest after balancing
+private const val COVERAGE_WEIGHT = 10.0  // weight for contest coverage vs. vote-balance score
+private const val DONOR_SURPLUS_THRESHOLD = 3  // minimum surplus above min_ballots for a style/precinct to donate freely
 
 class CvrDatabase(
     val inputFile: String,

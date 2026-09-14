@@ -354,6 +354,7 @@ data class CvrRow(
     // equivilent to Map<contestId, IntArray>, where candId =
     var contestVotes = mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
 
+    fun contests() = contestVotes.map { it.contestId }.toSet()
     /* init {
     // Boulder2020:  9/1/1986 != 9-1-86; went through Excel spreadsheet and got munged
         if (imprintedId != "${tabulatorNum}-${batchId}-${recordId}")

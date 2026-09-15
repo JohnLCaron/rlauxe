@@ -1,6 +1,57 @@
 # CORLA Auditing
+_last changed 09/14/2026_
 
-_last changed 06/02/2026_
+## 8 CCR 1505-1 25.2
+
+25.2.2
+* (d)(1) The Department of State will use the election night CVRs to create sample size estimates
+* (d)(2) Counties are not required to upload a CVR export multiple times during the same election to the RLA tool unless
+  requested to do so by the Department to facilitate an updated sample size estimate.
+* (d) and (e) are duplicates
+* (f) Ballot manifest. The county must maintain an accurate ballot manifest in a form approved by the Secretary of State and independent of the voting system.
+  The ballot manifest must uniquely identify for each tabulated ballot the scanner on which the ballot is scanned, the ballot batch of
+  which the ballot is a part, the number of ballot cards in the batch, and the storage container in which the ballot batch is stored after tabulation
+* (g) Immediately after completing the RLA tabulation, and to the extent permitted by its voting system, the county must also generate and preserve:
+  -  (1) **A summary results report, showing overvotes, undervotes, blank-voted contests, and valid write-in votes**
+  -  (2) A results file export suitable for uploading to the Secretary of State’s election night reporting system; and
+  -  (3) A CVR export.
+* (l) Selection of target contests. In a general or coordinated election, the Secretary of State will select at least one statewide contest, 
+  and for each county at least one other contest. The Secretary of State will select other
+  ballot contests for audit if in any particular election there is no statewide contest. In a primary election, the Secretary of State will
+  select at least one contest of each major political party in each county. The Secretary of State will publish a complete list of all
+  target contests on the Audit Center. The Secretary of State will consider at least the following factors in selecting the target contests:
+  - (1) The closeness of the reported tabulation outcome of the contests
+  - (2) The geographical scope of the contests;
+  - (3) The number of ballots counted in the contests;
+  - (4) Any cause for concern regarding the accuracy of the reported tabulation outcome of the contests;
+  - (5) Any benefits that may result from auditing certain contests;
+  - (6) The ability of the county clerks to complete the audit before the canvass deadline; and
+  - (7) Any recommendations provided by county clerks or the public regarding which contest should be targeted.
+* (m) Number of ballot cards to audit. The Secretary of State will determine the number of ballot cards to audit to satisfy the risk limit
+  for the target contests based on the ballot manifests submitted by the counties. The number of ballot cards to audit will be determined
+  **according to the formulas and protocols published by Mark Lindeman and Philip B. Stark in A Gentle Introduction to Risklimiting Audits, 
+  as applied in Philip Stark’s Tools for Comparison Risk-Limiting Election Audits, and Tools for Ballot-Polling RiskLimiting Election Audits.** 
+  **The publications cited in this Rule are incorporated by reference in the election rules and do not include
+  later amendments or editions of the incorporated material**. 
+  The following materials incorporated by reference are posted on the Secretary of State website and available for review by the public
+  during regular business hours at the Colorado Secretary of State’s office:
+  - (1) Mark Lindeman and Philip B. Stark, A Gentle Introduction to Risk-limiting Audits, IEEE Security and Privacy, Special Issue on Electronic Voting, (Mar. 16, 2012), at
+  https://www.sos.state.co.us/pubs/elections/VotingSystems/riskAuditResources.html
+  - (2) Philip B. Stark, Tools for Comparison Risk-Limiting Election Audits, (Feb. 26, 2017), at
+  https://www.sos.state.co.us/pubs/elections/VotingSystems/riskAuditResources.html
+  
+* 8 CCR 1505-1 25.2.4: a county that conducted a comparison audit must review its CVR file and redact voter choices 
+corresponding to any ballot card susceptible to being personally identified with an individual voter, as required by section 24-72-205.5(4)(b)(iii), C.R.S.
+
+Probably means this, which may have changed in 2025: 24-72-205.4(III) C.R.S.:
+
+````
+no ballot, or any portion thereof, may be made available for inspection where the ballot, or any requested portion thereof,
+is identical in printed form, considering a combination of the election contests at issue and precinct coding, to only
+nine or fewer ballots, or comparable portions thereof, among all ballots used in the same election. However, any such ballot,
+or any requested portion thereof, that is identical in printed form to ten or more ballots, or comparable portions thereof,
+used in the same election may be inspected.
+````
 
 <!-- TOC -->
 * [CORLA Auditing](#corla-auditing)

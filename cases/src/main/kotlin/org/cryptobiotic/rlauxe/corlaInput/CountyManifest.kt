@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
-import org.cryptobiotic.rlauxe.cvr.CvrRow
+import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.util.nfz
 import kotlin.collections.forEach
 
@@ -126,7 +126,7 @@ open class CountyManifest(val manifestBatches: List<ManifestBatch>): Iterable<Ma
         }
     }
 
-    fun manifestCounts(corlaCvrs: CorlaCvrsIF, report: MutableList<String>? = null, showUnmatched:Boolean = false): ManifestCounts {
+    fun manifestCounts(corlaCvrs: CorlaRawCvrsIF, report: MutableList<String>? = null, showUnmatched:Boolean = false): ManifestCounts {
         val cvrs = corlaCvrs.cvrs()
 
         val manifestIdMap = mutableMapOf<String, ManifestEntry>()

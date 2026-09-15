@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.cvr
+package org.cryptobiotic.rlauxe.corlacvr
 
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
 import kotlin.io.path.Path
@@ -133,15 +133,15 @@ fun lookForRedactions(filename: String,show: Boolean = false) {
     val redaction = if (filename.lowercase().contains("boulder")) RedactionBoulder(show) else Redaction(show=show)
 
     try {
-        val corlaCvrs: CorlaCvrs = if (filename.startsWith("/resources/"))
+        val corlaRawCvrs: CorlaRawCvrs = if (filename.startsWith("/resources/"))
             readCorlaCvrsFromResource(filename, redaction = redaction)
         else readCorlaCvrsFromFile(filename, redaction = redaction)
 
-        println("  nrows = ${corlaCvrs.nrows()} redacted cvrs = ${corlaCvrs.redaction().redactedRows().size} redacted groups = ${corlaCvrs.redaction().groups().size} ")
+        println("  nrows = ${corlaRawCvrs.nrows()} redacted cvrs = ${corlaRawCvrs.redaction().redactedRows().size} redacted groups = ${corlaRawCvrs.redaction().groups().size} ")
 
-        if (corlaCvrs.redaction().groups().size > 0) {
+        if (corlaRawCvrs.redaction().groups().size > 0) {
             var sumInGroups = 0
-            corlaCvrs.redaction().groups().forEach { group ->
+            corlaRawCvrs.redaction().groups().forEach { group ->
                 println("  $group")
                 sumInGroups += group.ncards()
             }

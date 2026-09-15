@@ -3,9 +3,9 @@ package org.cryptobiotic.rlauxe.auditcenter
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2022Primary
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
-import org.cryptobiotic.rlauxe.cvr.makeContestInfo
-import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.corlacvr.makeContestInfo
+import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrs
 import kotlin.test.Test
 
 // compare cardStyles from coloradoInput.countyStyles (taken from mvr files)
@@ -28,7 +28,7 @@ class TestCardStyles {
         // these contest id's are internal to the export.
         println("export.CardStyles")
         // BallotType(val name: String, val contests: Set<Int>, var count: Int = 0)
-        export.cardStyles().forEach { type ->
+        export.cardStyleMap().values.forEach { type ->
             println("  $type")
         }
         println()

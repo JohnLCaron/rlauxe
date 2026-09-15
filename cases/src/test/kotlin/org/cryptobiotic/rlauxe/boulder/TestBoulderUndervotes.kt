@@ -1,22 +1,22 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.cvr.CvrCardStyle
-import org.cryptobiotic.rlauxe.cvr.CvrRow
+import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
+import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
 import kotlin.test.Test
 
 class TestBoulderUndervotes {
-    val input = Boulder23Cvrs()
+    val input = Boulder23Input()
     val sovo = input.sovo()
     val corlaCvrs = input.readCorlaCvrs()
 
     @Test
     fun testBoulderBallotType() {
         println("${input.electionName}")
-        println("\nraw corlaCvrs.cardStyles() ${corlaCvrs.cardStyles().size}")
+        println("\nraw corlaRawCvrs.cardStyles() ${corlaCvrs.cardStyles().size}")
         corlaCvrs.cardStyles().sortedBy { it.name }.forEach {
             println("  $it")
         }
@@ -117,7 +117,7 @@ class TestBoulderUndervotes {
             //val gcardStyle = extractBallotType(rgroup.ballotType) + "-" + if (isA) "A" else "B"
             val cardStyle = cardStyles[rgroup.groupName]
             if (cardStyle != null) {
-                val gids = rgroup.contestVotes.map { it.key }.sorted().toIntArray()
+                val gids = rgroup.candVotes.map { it.key }.sorted().toIntArray()
                 if (!cardStyle.possibleContests().contentEquals(gids)) {
                     println("  *** redacted group '${rgroup.groupName}' contests dont match corresponding card style")
                     println("  $rgroup")
@@ -139,15 +139,15 @@ class TestBoulderUndervotes {
         //
         // still, we will assume that all ballots in a group have the same CardStyle, which makes it easier to generate accurate simulated CVRs.
         // this wrongly includes contest 12,
-        // This is now done in Boulder24Cvrs
-        //         if (input.electionName == "Boulder2024") { Boulder24Cvrs.removeContest12FromPool6(corlaCvrs.redactedGroups()) }
+        // This is now done in Boulder24Input
+        //         if (input.electionName == "Boulder2024") { Boulder24Input.removeContest12FromPool6(corlaRawCvrs.redactedGroups()) }
     }
 }
 
     // class CreateBoulderElection(
     //    val electionName: String,
     //    val auditType: AuditType,
-    //    val corlaCvrs: CorlaCvrsIF,
+    //    val corlaRawCvrs: CorlaRawCvrsIF,
     //    val sovo: BoulderStatementOfVotes,
     //    val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     //    val hasStyle: Boolean, // TODO
@@ -157,7 +157,7 @@ class TestBoulderUndervotes {
     /*
     @Test
     fun showRedactedUndervotes2() {
-        val election2 = CreateBoulderElectionOld("test", AuditType.ONEAUDIT, corlaCvrs, sovo, )
+        val election2 = CreateBoulderElectionOld("test", AuditType.ONEAUDIT, corlaRawCvrs, sovo, )
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -220,7 +220,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showRedactedNcards() {
-        val election2 = CreateBoulderElectionOld("test", AuditType.ONEAUDIT, corlaCvrs, sovo)
+        val election2 = CreateBoulderElectionOld("test", AuditType.ONEAUDIT, corlaRawCvrs, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -288,7 +288,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showNcards() {
-        val election2 = CreateBoulderElectionOld("test", AuditType.ONEAUDIT, corlaCvrs, sovo)
+        val election2 = CreateBoulderElectionOld("test", AuditType.ONEAUDIT, corlaRawCvrs, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 

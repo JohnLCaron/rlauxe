@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.corlaInput.MergedContestInfo
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyCvrs
+import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
 import org.cryptobiotic.rlauxe.irv.IrvContest
 import org.cryptobiotic.rlauxe.irv.makeRaireContest
 import org.cryptobiotic.rlauxe.irv.makeRaireOneAuditContest
@@ -34,7 +34,7 @@ class ElectionVariant(variantEnum: ElectionVariantEnum) {
 }
 
 class CorlaCountyElection(
-    val countyInput: CorlaCountyCvrs,
+    val countyInput: CorlaCountyInput,
     val stateInput: ColoradoInput,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean, // TODO
@@ -300,7 +300,7 @@ class CCContestBuilder(
 // variant.Phantoms: OneAudit with redacted cards set to isPhantom
 
 fun createCorlaCountyElection(
-    countyInput: CorlaCountyCvrs,
+    countyInput: CorlaCountyInput,
     stateInput: ColoradoInput,
     topdir: String,
     creation: AuditCreationConfig,

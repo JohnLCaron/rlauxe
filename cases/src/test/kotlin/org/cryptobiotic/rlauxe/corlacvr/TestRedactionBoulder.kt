@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.cvr
+package org.cryptobiotic.rlauxe.corlacvr
 
 import kotlin.test.Test
 

@@ -76,7 +76,7 @@ class RunRemoveBoulderTask(
         val round = AuditRoundConfig(SimulationControl(nsimTrials = 22), ContestSampleControl.NONE, ClcaConfig(), null)
 
         createBoulderElection(
-            Boulder24Cvrs(),
+            Boulder24Input(),
             topdir = topdir,
             creation,
             round,

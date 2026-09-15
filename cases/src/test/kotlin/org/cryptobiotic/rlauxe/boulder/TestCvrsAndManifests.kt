@@ -1,34 +1,34 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.cvr.CvrRow
-import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
-import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
+import org.cryptobiotic.rlauxe.corlacvr.CvrRow
+import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
+import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrs
 import kotlin.test.Test
 
 class TestCvrsAndManifests {
 
     @Test
     fun testBoulder23match() {
-        testCvrsAndManifests(Boulder23Cvrs())
+        testCvrsAndManifests(Boulder23Input())
     }
 
     @Test
     fun testBoulder24match() {
-        testCvrsAndManifests(Boulder24Cvrs())
+        testCvrsAndManifests(Boulder24Input())
     }
 
     @Test
     fun testBoulder25match() {
-        testCvrsAndManifests(Boulder25Cvrs())
+        testCvrsAndManifests(Boulder25Input())
     }
 
     @Test
     fun testBoulder26match() {
-        testCvrsAndManifests(Boulder26PCvrs())
+        testCvrsAndManifests(Boulder26PInput())
     }
 
-    fun testCvrsAndManifests(input: BoulderCvrs) {
+    fun testCvrsAndManifests(input: BoulderInput) {
         val corlaCvrs = readCorlaCvrs(input.cvrsSource, redaction = RedactionBoulder())
 
         println("${input.cvrsSource}: nrows = ${corlaCvrs.nrows()} cvrs size = ${corlaCvrs.cvrs().size}")

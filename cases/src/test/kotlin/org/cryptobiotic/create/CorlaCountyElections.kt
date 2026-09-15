@@ -7,14 +7,14 @@ import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
-import org.cryptobiotic.rlauxe.boulder.Boulder24Cvrs
-import org.cryptobiotic.rlauxe.boulder.Boulder26PCvrs
+import org.cryptobiotic.rlauxe.boulder.Boulder24Input
+import org.cryptobiotic.rlauxe.boulder.Boulder26PInput
 import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyCvrs
+import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corlaInput.LaPlata26PCvrs
-import org.cryptobiotic.rlauxe.corlaInput.Morgan26PCvrs
-import org.cryptobiotic.rlauxe.corlaInput.Weld26PCvrs
+import org.cryptobiotic.rlauxe.corlaInput.LaPlata26PInput
+import org.cryptobiotic.rlauxe.corlaInput.Morgan26PInput
+import org.cryptobiotic.rlauxe.corlaInput.Weld26PInput
 import org.cryptobiotic.rlauxe.corlaCounty.createCorlaCountyElection
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
 import org.cryptobiotic.rlauxe.persist.AuditRecord
@@ -25,11 +25,11 @@ class CorlaCountyElections {
     @Test
     fun createOne() {
         val toptopdir = "$cases/corlaCounty/morgan26p"
-        val input = Morgan26PCvrs()
+        val input = Morgan26PInput()
         val stateInput = Colorado2026PwithCvrs()
 
         // fun createCorlaCountyElection(
-        //    countyInput: CorlaCountyCvrs,
+        //    countyInput: CorlaCountyInput,
         //    stateInput: ColoradoInput,
         //    topdir: String,
         //    creation: AuditCreationConfig,
@@ -50,7 +50,7 @@ class CorlaCountyElections {
     @Test
     fun createBoulder26p() {
         createCorlaCountyVariants("$cases/corlaCounty/boulder26p",
-            Boulder26PCvrs(),
+            Boulder26PInput(),
         Colorado2026PwithCvrs()
         )
     }
@@ -58,7 +58,7 @@ class CorlaCountyElections {
     @Test
     fun createBoulder24() {
         createCorlaCountyVariants("$cases/corlaCounty/boulder24",
-            Boulder24Cvrs(),
+            Boulder24Input(),
             Colorado2024General()
         )
     }
@@ -102,7 +102,7 @@ class CorlaCountyElections {
     @Test
     fun createLaPlata26p() {
         createCorlaCountyVariants("$cases/corlaCounty/laplata26p",
-            LaPlata26PCvrs(),
+            LaPlata26PInput(),
             Colorado2026PwithCvrs()
         )
     }
@@ -110,7 +110,7 @@ class CorlaCountyElections {
     @Test
     fun createMorgan26p() {
         createCorlaCountyVariants("$cases/corlaCounty/morgan26p",
-            Morgan26PCvrs(),
+            Morgan26PInput(),
             Colorado2026PwithCvrs()
         )
     }
@@ -118,12 +118,12 @@ class CorlaCountyElections {
     @Test
     fun createWeld26p() {
         createCorlaCountyVariants("$cases/corlaCounty/weld26p",
-            Weld26PCvrs(),
+            Weld26PInput(),
             Colorado2026PwithCvrs()
         )
     }
 
-    fun createCorlaCountyVariants(toptopdir: String, countyInput: CorlaCountyCvrs, stateInput: ColoradoInput) {
+    fun createCorlaCountyVariants(toptopdir: String, countyInput: CorlaCountyInput, stateInput: ColoradoInput) {
         // redacted ballots are simulated
         createCorlaCountyElection(
             countyInput,

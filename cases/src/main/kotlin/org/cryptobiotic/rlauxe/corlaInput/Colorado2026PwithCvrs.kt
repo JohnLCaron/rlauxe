@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
-import org.cryptobiotic.rlauxe.boulder.Boulder26PCvrs
+import org.cryptobiotic.rlauxe.boulder.Boulder26PInput
 import kotlin.collections.forEach
 
 // we have Boulder, La Plata, Morgan, and Weld CVR_export files
@@ -28,12 +28,12 @@ class Colorado2026PwithCvrs(ac:String?=auditcenter): ColoradoInputWithCvrs(
     // should not be needed TODO get from contestRoundFile
     val countyPopulations = mapOf( "Boulder" to 100423, "La Plata" to 16146, "Morgan" to 5220,"Weld" to 69640)
 
-    override fun corlaCountyCvrs(countyName: String): CorlaCountyCvrs? {
+    override fun corlaCountyCvrs(countyName: String): CorlaCountyInput? {
         return when (countyName) {
-            "Boulder" -> Boulder26PCvrs()
-            "La Plata" -> LaPlata26PCvrs()
-            "Morgan" -> Morgan26PCvrs()
-            "Weld" -> Weld26PCvrs()
+            "Boulder" -> Boulder26PInput()
+            "La Plata" -> LaPlata26PInput()
+            "Morgan" -> Morgan26PInput()
+            "Weld" -> Weld26PInput()
             else -> null
         }
     }

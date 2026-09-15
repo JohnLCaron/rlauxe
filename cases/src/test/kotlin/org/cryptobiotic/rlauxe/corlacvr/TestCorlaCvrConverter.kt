@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.cvr
+package org.cryptobiotic.rlauxe.corlacvr
 
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
@@ -70,7 +70,7 @@ fun testCorlaConverterCvrs(county: String, filename: String, coloradoInput: Colo
     testCorlaConverterCvrs(county, export, coloradoInput)
 }
 
-fun testCorlaConverterCvrs(county: String, export: CorlaCvrsIF, coloradoInput: ColoradoInput) {
+fun testCorlaConverterCvrs(county: String, export: CorlaRawCvrsIF, coloradoInput: ColoradoInput) {
 
     val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
 

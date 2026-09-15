@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
-class Weld26PCvrs: CorlaCountyCvrs {
+class Weld26PInput: CorlaCountyInput {
     override val electionName= "Weld2026p"
     override val countyName= "Weld"
     override val cvrsSource = "$auditcenter/2026/primary/observerfiles/Weld_CVR_Export_20260709140755.csv"

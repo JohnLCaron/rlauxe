@@ -5,10 +5,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.auditcenter.CountyElectionSimCvrs
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
-import org.cryptobiotic.rlauxe.cvr.RedactedGroup
-import org.cryptobiotic.rlauxe.cvr.RedactionIF
-import org.cryptobiotic.rlauxe.cvr.cleanCsvString
+import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
+import org.cryptobiotic.rlauxe.corlacvr.RedactionIF
+import org.cryptobiotic.rlauxe.corlacvr.cleanCsvString
 import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.estimate.makeCardsForOnePoolV
 import org.cryptobiotic.rlauxe.irv.IrvContest
@@ -41,7 +41,7 @@ class BoulderVariant(variantEnum: BoulderVariantEnum) {
 class CreateBoulderElection(
     val electionName: String,
     val auditType: AuditType,
-    val corlaCvrs: CorlaCvrsIF,
+    val corlaCvrs: CorlaRawCvrsIF,
     val sovo: BoulderStatementOfVotes,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean = true, // TODO
@@ -118,9 +118,9 @@ class CreateBoulderElection(
                     val candidateMap1 = mutableMapOf<String, Int>()
                     var candIdx = 0
                     for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
-                        if (columns[col].choice != "Write-in") { // remove write-ins
-                            candidateMap1[columns[col].choice] = candIdx
-                            candidateMap1[columns[col].choice] = candIdx
+                        if (columns[col].choiceName != "Write-in") { // remove write-ins
+                            candidateMap1[columns[col].choiceName] = candIdx
+                            candidateMap1[columns[col].choiceName] = candIdx
                         }
                         candIdx++
                     }
@@ -129,7 +129,7 @@ class CreateBoulderElection(
                 } else { // there are ncand x ncand columns, so need something different here
                     val candidates = mutableListOf<String>()
                     for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
-                        candidates.add(columns[col].choice)
+                        candidates.add(columns[col].choiceName)
                     }
                     val pairs = mutableListOf<Pair<String, Int>>()
                     repeat(exportContest.nchoices) { idx ->
@@ -155,7 +155,7 @@ class CreateBoulderElection(
         return redaction.groups().map { redacted: RedactedGroup ->
             //// the redacted groups dont have undervotes, so we should try to generate reasonable undervote counts
             // but... now we are just setting the vote totals, ignoring ncards and undervotes.
-            val contestTabs = redacted.contestVotes.mapValues{ ContestTabulation(infos[it.key]!!, it.value, ncards=0) }
+            val contestTabs = redacted.candVotes.mapValues{ ContestTabulation(infos[it.key]!!, it.value, ncards=0) }
 
             val name = "redacted " + cleanCsvString(redacted.groupName)
             // in this case, nlines == ncards
@@ -168,7 +168,7 @@ class CreateBoulderElection(
         var ncards = 0
         val sumTabs = mutableMapOf<Int, ContestTabulation>()
         redaction.groups().forEach { redacted: RedactedGroup ->
-            val groupTab = redacted.contestVotes.mapValues{ ContestTabulation(infos[it.key]!!, it.value, ncards=0) }
+            val groupTab = redacted.candVotes.mapValues{ ContestTabulation(infos[it.key]!!, it.value, ncards=0) }
             sumTabs.sumContestTabulations(groupTab)
             ncards += redacted.ncards()
         }
@@ -267,7 +267,7 @@ class CreateBoulderElection(
         val votes = mutableMapOf<Int, ContestTabulation>()
 
         corlaCvrs.redaction().groups().forEach { redacted ->
-            redacted.contestVotes.entries.forEach { (contestId, contestVote) ->
+            redacted.candVotes.entries.forEach { (contestId, contestVote) ->
                 val tab = votes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                 contestVote.forEach { (cand, vote) -> tab.addVote(cand, vote) }
                 // in this case, nlines == ncards
@@ -452,7 +452,7 @@ class BoulderContestBuilder(val auditType: AuditType,
 // OA: Create a OneAudit where pools are from the redacted cvrs.
 
 fun createBoulderElection(
-    input: BoulderCvrs,
+    input: BoulderInput,
     topdir: String,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
@@ -471,7 +471,7 @@ fun createBoulderElection(
 
 fun createBoulderElectionWithSovo(
     electionName: String,
-    corlaCvrs: CorlaCvrsIF,
+    corlaCvrs: CorlaRawCvrsIF,
     sovo: BoulderStatementOfVotes,
     topdir: String,
     creation: AuditCreationConfig,
@@ -491,7 +491,7 @@ fun createBoulderElectionWithSovo(
     }
 
     //val election = if (electionName.contains("2024clca"))
-    //    CreateBoulderElectionClcaOld(electionName, creation.auditType, corlaCvrs, sovo, emptyList(), mvrSource = mvrSource,
+    //    CreateBoulderElectionClcaOld(electionName, creation.auditType, corlaRawCvrs, sovo, emptyList(), mvrSource = mvrSource,
     //        hasStyle = hasStyle)
     //else
 

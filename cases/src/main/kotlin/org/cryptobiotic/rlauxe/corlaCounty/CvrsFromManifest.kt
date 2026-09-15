@@ -7,12 +7,12 @@ import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyCvrs
+import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
 import org.cryptobiotic.rlauxe.corlaInput.ManifestEntry
 import org.cryptobiotic.rlauxe.corlaInput.ManifestCounts
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
-import org.cryptobiotic.rlauxe.cvr.RedactedGroup
-import org.cryptobiotic.rlauxe.cvr.cleanCsvString
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
+import org.cryptobiotic.rlauxe.corlacvr.cleanCsvString
 import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -26,7 +26,7 @@ private val logger = KotlinLogging.logger("CvrsFromManifest")
 
 class CvrsFromManifest(
     val variant: ElectionVariant,
-    val countyInput: CorlaCountyCvrs,
+    val countyInput: CorlaCountyInput,
     val stateInput: ColoradoInput,
     val infos: Map<Int, ContestInfo>,
     startingPoolId: Int,
@@ -52,7 +52,7 @@ class CvrsFromManifest(
 
     init {
         val corlaCvrs = countyInput.readCorlaCvrs()
-        // corlaCvrs.redactedGroups()
+        // corlaRawCvrs.redactedGroups()
 
         val manifest = countyInput.readCountyManifest()
         manifestIds = manifest.manifestCounts(corlaCvrs)
@@ -95,7 +95,7 @@ class CvrsFromManifest(
 
         ////////////////////////////////////////////////
 
-        /* val redactedPoolBuilders = makeRedactedPools(variant, corlaCvrs)
+        /* val redactedPoolBuilders = makeRedactedPools(variant, corlaRawCvrs)
 
         // set ncards for each pool; when CardPool is built, the contestTabs are reset accordingly
         if (redactedPoolBuilders.size == 1) {
@@ -267,24 +267,24 @@ class CvrsFromManifest(
 
     /////////////////////////////////////////////////////////////////////////////
 
-    /* fun makeRedactedPools(variant: ElectionVariant, corlaCvrs: CorlaCvrsIF): List<CardPoolBuilder> {
+    /* fun makeRedactedPools(variant: ElectionVariant, corlaRawCvrs: CorlaRawCvrsIF): List<CardPoolBuilder> {
         val result = mutableListOf<CardPoolBuilder>()
-        val g = makeGroupWithLines(corlaCvrs)
+        val g = makeGroupWithLines(corlaRawCvrs)
         if (g != null) result.add(g)
-        if (corlaCvrs.redactedGroups().isNotEmpty()) {
-            if (variant.onePool) result.add(convertRedactedToOneCardPool(corlaCvrs.redactedGroups()))
-            else result.addAll(convertRedactedToCardPool(corlaCvrs.redactedGroups()))
+        if (corlaRawCvrs.redactedGroups().isNotEmpty()) {
+            if (variant.onePool) result.add(convertRedactedToOneCardPool(corlaRawCvrs.redactedGroups()))
+            else result.addAll(convertRedactedToCardPool(corlaRawCvrs.redactedGroups()))
         }
         return result
     }
 
-    fun makeGroupWithLines(corlaCvrs: CorlaCvrsIF): CardPoolBuilder? {
+    fun makeGroupWithLines(corlaRawCvrs: CorlaRawCvrsIF): CardPoolBuilder? {
         // do the simple thing - all rows into one group, use vote diff as the subtotal
-        val groupWithLines = corlaCvrs.groupWithLines() ?: return null
+        val groupWithLines = corlaRawCvrs.groupWithLines() ?: return null
         if (showLines) {
             groupWithLines.redactedRows.forEach { row: CvrRow ->
                 print("ballotType = ${row.ballotType}")
-                val style = corlaCvrs.cardStyles().find { it.name == row.ballotType }
+                val style = corlaRawCvrs.cardStyles().find { it.name == row.ballotType }
                 if (style != null) println(" has $style") else println()
             }
             println()

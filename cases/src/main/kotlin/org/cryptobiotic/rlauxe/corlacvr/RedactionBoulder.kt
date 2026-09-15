@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.cvr
+package org.cryptobiotic.rlauxe.corlacvr
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVRecord
@@ -10,8 +10,8 @@ class RedactionBoulder(show: Boolean = false) : Redaction(show=show) {
 
     // "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
     // "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv"
-    override fun isRedaction(line: CSVRecord, corlaCvrs: CorlaCvrs): Boolean {
-        val ballotType = corlaCvrs.getBallotType(line)
+    override fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaRawCvrs): Boolean {
+        val ballotType = corlaRawCvrs.getBallotType(line)
 
         if (line.get(0).startsWith("Redacted")) {
             // ballot style but no id; merge into groups by style
@@ -27,7 +27,7 @@ class RedactionBoulder(show: Boolean = false) : Redaction(show=show) {
             val isA = line.get(0).contains("A cards")
             val isB = line.get(0).contains("B cards")
             val ballotStylePlus = ballotType + if (isA) "-A" else if (isB) "-B" else ""
-            val redactedGroup = RedactedGroup(ballotStylePlus, line, corlaCvrs.schema)
+            val redactedGroup = RedactedGroup(ballotStylePlus, line, corlaRawCvrs.schema)
             addGroup(redactedGroup)
             nRedactedRows++
             if (show) println("  ** redact: $line")
@@ -45,8 +45,8 @@ class RedactionBoulder(show: Boolean = false) : Redaction(show=show) {
             // (2020) Boulder
             // ,,,,,,DS-27,6,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,3,0,0,1,0,0,0,0,6,2,2,0,0,0,0,0,5,2,2,0,0,0,0,6,3,5,4,0,0,0,0,0,0,0,0,0,6,7,0,5,2,5,2,6,1,6,1,4,3,5,2,5,2,5,2,4,3,4,6,7,3,0,0,0,0,0,0,0,4,5,6,3,5,5,5,5,6,4,6,3,8,2,3,7,6,3,3,6,6,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,3
             if (show) println("  ** redact: isEmpty $line")
-            val ballotType = corlaCvrs.getBallotType(line)
-            val redactedGroup = RedactedGroup(ballotType, line, corlaCvrs.schema)
+            val ballotType = corlaRawCvrs.getBallotType(line)
+            val redactedGroup = RedactedGroup(ballotType, line, corlaRawCvrs.schema)
             addGroup(redactedGroup)
             nRedactedRows++
             return true

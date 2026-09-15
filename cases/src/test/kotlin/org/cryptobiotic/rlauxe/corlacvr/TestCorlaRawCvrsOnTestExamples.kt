@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.cvr
+package org.cryptobiotic.rlauxe.corlacvr
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
@@ -7,7 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class TestCorlaCvrsOnTestExamples {
+class TestCorlaRawCvrsOnTestExamples {
 
     @Test
     fun testRemoveLeadingChar() {
@@ -139,11 +139,11 @@ class TestCorlaCvrsOnTestExamples {
         var idx = 0
         assertEquals(
             listOf(265, 104, 0, 0, 2, 1, 1, 5, 2, 0, 0, 0, 0, 0, 0),
-            redactedGroup.contestVotes[idx++]!!.toMap().values.toList()
+            redactedGroup.candVotes[idx++]!!.toMap().values.toList()
         )
-        assertEquals(listOf(228, 74, 6, 2, 5, 0, 0), redactedGroup.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(233, 12, 0), redactedGroup.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(89, 209, 2, 5), redactedGroup.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(228, 74, 6, 2, 5, 0, 0), redactedGroup.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(233, 12, 0), redactedGroup.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(89, 209, 2, 5), redactedGroup.candVotes[idx++]!!.toMap().values.toList())
     }
 
 

@@ -5,20 +5,21 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyCvrs
+import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
 import org.cryptobiotic.rlauxe.corlaInput.ManifestCounts
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.showTabDiffs
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.subtractContestTabulations
 import org.cryptobiotic.rlauxe.util.subtractContestTabulationsZ
-import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromVotes
+import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
 import org.cryptobiotic.rlauxe.util.tabulateCards
 
 class CheckCvrsAndManifest(
     val stateInput: ColoradoInput,
-    val countyInput: CorlaCountyCvrs,
+    val countyInput: CorlaCountyInput,
     val showMatch: Boolean = false,
     val showMissingVotes: Boolean = false,
     val showRedactedCvrs: Boolean = false,
@@ -37,7 +38,7 @@ class CheckCvrsAndManifest(
     val manifestCounts: ManifestCounts
     val convertedCvrTabs : Map<Int, ContestTabulation>
 
-    val corlaCvrs: CorlaCvrsIF
+    val corlaCvrs: CorlaRawCvrsIF
     val minCards: Int
 
     init {
@@ -93,9 +94,9 @@ class CheckCvrsAndManifest(
             if (compareMissingVotes) {
                 val sumAccum = mutableMapOf<Int, ContestTabulation>()
                 redaction.groups().forEach { group ->
-                    group.contestVotes.forEach { (scontestId, votes) ->
+                    group.candVotes.forEach { (scontestId, votes) ->
                         val contestId = converter.convertContestId(scontestId)
-                        sumAccum.sumContestTabulationsFromVotes(infos[contestId]!!, votes)
+                        sumAccum.sumContestTabulationsFromCandVotes(infos[contestId]!!, votes)
                     }
                 }
                 val diff2 = subtractContestTabulations(diff, sumAccum)
@@ -119,7 +120,7 @@ class CheckCvrsAndManifest(
             val report = mutableListOf<String>()
             manifest.manifestCounts(corlaCvrs, report)
             report.forEach { println(it) }
-            // compareCvrsAndManifests(countyInput, corlaCvrs)
+            // compareCvrsAndManifests(countyInput, corlaRawCvrs)
         }
     }
 }
@@ -138,16 +139,16 @@ fun showTabDiffs(diff: Map<Int, ContestTabulation>) {
 
 /*
 ///////////////////////////////////////////////////////////////
-fun compareCvrsAndManifests(input: CorlaCountyCvrs, corlaCvrs: CorlaCvrsIF, showMissed: Boolean = true, showUnmatched: Boolean = false) {
-    val allCvrs = corlaCvrs.cvrs() + corlaCvrs.redactedCvrs()
+fun compareCvrsAndManifests(input: CorlaCountyInput, corlaRawCvrs: CorlaRawCvrsIF, showMissed: Boolean = true, showUnmatched: Boolean = false) {
+    val allCvrs = corlaRawCvrs.cvrs() + corlaRawCvrs.redactedCvrs()
 
     val nCvrs = allCvrs.size
-    println("${input.cvrsSource}: cvrs = ${corlaCvrs.cvrs().size} redactedCvrs= ${corlaCvrs.redactedCvrs().size}")
+    println("${input.cvrsSource}: cvrs = ${corlaRawCvrs.cvrs().size} redactedCvrs= ${corlaRawCvrs.redactedCvrs().size}")
 
-    val redactedGroupSize = corlaCvrs.redactedGroups().size
-    val redactedNCards = corlaCvrs.redactedGroups().sumOf { it.ncards() }
+    val redactedGroupSize = corlaRawCvrs.redactedGroups().size
+    val redactedNCards = corlaRawCvrs.redactedGroups().sumOf { it.ncards() }
     println("\nRedacted groups (${redactedGroupSize})")
-    corlaCvrs.redactedGroups().forEach { println("  $it") }
+    corlaRawCvrs.redactedGroups().forEach { println("  $it") }
 
     println("redacted group ncards = ${redactedNCards}")
     val totalCvrs = nCvrs + redactedNCards
@@ -158,7 +159,7 @@ fun compareCvrsAndManifests(input: CorlaCountyCvrs, corlaCvrs: CorlaCvrsIF, show
     println("\n${input.manifestSource}")
     println("  manifestNCards = $manifestNCards")
 
-    val estRedactedNcards = manifestNCards - corlaCvrs.cvrs().size
+    val estRedactedNcards = manifestNCards - corlaRawCvrs.cvrs().size
     println("  est redacted ncards= ${estRedactedNcards}")
     val missingNcards = manifestNCards - totalCvrs
     print("  sumManifest - totalCvrs = ${missingNcards}; ")
@@ -171,7 +172,7 @@ fun compareCvrsAndManifests(input: CorlaCountyCvrs, corlaCvrs: CorlaCvrsIF, show
     /////////////////////////////////////////////////////////////////
     val manifest = input.readCountyManifest()
     val report = mutableListOf<String>()
-    manifest.manifestCounts(corlaCvrs, report)
+    manifest.manifestCounts(corlaRawCvrs, report)
     report.forEach { println(it) }
 } */
 

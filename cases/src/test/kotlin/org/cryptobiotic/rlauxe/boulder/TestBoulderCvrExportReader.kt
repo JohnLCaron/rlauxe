@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
-import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
+import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
+import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import kotlin.test.assertTrue
 import kotlin.test.Test
@@ -130,58 +130,58 @@ class TestBoulderCvrExportCsv {
         // Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
         val group7 = export.redaction.groups().find { it.groupName == "7"}!!
         var idx = 0
-        assertEquals(listOf(265, 104, 0, 0, 2, 1, 1, 5, 2, 0, 0, 0, 0, 0, 0), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(228, 74, 6, 2, 5, 0, 0,), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(233, 12, 0), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(89, 209, 2, 5), group7.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(265, 104, 0, 0, 2, 1, 1, 5, 2, 0, 0, 0, 0, 0, 0), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(228, 74, 6, 2, 5, 0, 0,), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(233, 12, 0), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(89, 209, 2, 5), group7.candVotes[idx++]!!.toMap().values.toList())
 
         // ,,,227,38,,,,,212,83,,,,,228,,223,4,0,207,79,216,,,,,,,,,,,,,
-        assertNull(group7.contestVotes[idx++])
-        assertEquals(listOf(227, 38), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertNull(group7.contestVotes[idx++])
-        assertNull(group7.contestVotes[idx++])
-        assertEquals(listOf(212, 83), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertNull(group7.contestVotes[idx++])
-        assertNull(group7.contestVotes[idx++])
-        assertEquals(listOf(228), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertNull(group7.contestVotes[idx++])
-        assertEquals(listOf(223, 4, 0), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(207, 79), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(216), group7.contestVotes[idx++]!!.toMap().values.toList())
+        assertNull(group7.candVotes[idx++])
+        assertEquals(listOf(227, 38), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertNull(group7.candVotes[idx++])
+        assertNull(group7.candVotes[idx++])
+        assertEquals(listOf(212, 83), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertNull(group7.candVotes[idx++])
+        assertNull(group7.candVotes[idx++])
+        assertEquals(listOf(228), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertNull(group7.candVotes[idx++])
+        assertEquals(listOf(223, 4, 0), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(207, 79), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(216), group7.candVotes[idx++]!!.toMap().values.toList())
 
         for (i in idx until 20) {
-            assertNull(group7.contestVotes[i])
+            assertNull(group7.candVotes[i])
         }
         // 130,87,111,50,25,36,101,175,74,147,91,163,75,167,70,145,89,162,63,150,69,
         idx = 20
-        assertEquals(listOf(130, 87, 111, 50, 25, 36, 101), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(175, 74), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(147, 91), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(163, 75), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(167, 70), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(145, 89), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(162, 63), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(150, 69), group7.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(130, 87, 111, 50, 25, 36, 101), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(175, 74), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(147, 91), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(163, 75), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(167, 70), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(145, 89), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(162, 63), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(150, 69), group7.candVotes[idx++]!!.toMap().values.toList())
         // 152,67,147,55,148,55,150,54,141,58,149,60,223,73,
-        assertEquals(listOf(152, 67), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(147, 55), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(148, 55), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(150, 54), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(141, 58), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(149, 60), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(223, 73), group7.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(152, 67), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(147, 55), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(148, 55), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(150, 54), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(141, 58), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(149, 60), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(223, 73), group7.candVotes[idx++]!!.toMap().values.toList())
         // 212,58,195,93,261,53,133,135,255,68,170,137,263,40,204,104,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-        assertEquals(listOf(212, 58), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(195, 93), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(261, 53), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(133, 135), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(255, 68), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(170, 137), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(263, 40), group7.contestVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(204, 104), group7.contestVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(212, 58), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(195, 93), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(261, 53), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(133, 135), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(255, 68), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(170, 137), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(263, 40), group7.candVotes[idx++]!!.toMap().values.toList())
+        assertEquals(listOf(204, 104), group7.candVotes[idx++]!!.toMap().values.toList())
 
-        for (i in idx until group7.contestVotes.size) {
-            assertNull(group7.contestVotes[i])
+        for (i in idx until group7.candVotes.size) {
+            assertNull(group7.candVotes[i])
         }
 
         /*

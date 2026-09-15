@@ -1,8 +1,8 @@
-package org.cryptobiotic.rlauxe.cvr
+package org.cryptobiotic.rlauxe.corlacvr
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.cvr.Redaction.Companion.GroupWithLines
+import org.cryptobiotic.rlauxe.corlacvr.Redaction.Companion.GroupWithLines
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.collections.emptyList
 import kotlin.math.max
@@ -30,7 +30,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
     var nRedactedRows = 0
     val redactedGroups = mutableMapOf<String, RedactedGroup>()
     val redactedGroupsSet = mutableMapOf<Set<Int>, RedactedGroup>()
-    var columnRedactions: RedactedGroup? = null  // holds column redactions
+    val redactedRows = mutableListOf<CvrRow>()
 
     private var redactionExtensions = 1
     private val showDontMatch = true
@@ -42,7 +42,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
         return result
     }
 
-    override fun redactedRows() = columnRedactions?.redactedRows ?: emptyList()
+    override fun redactedRows() = redactedRows
 
     // number of redacted cvrs given in CVR file
     // here you have to know if the redactedRows are also in an aggregation
@@ -51,12 +51,10 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
         return redactedRows().size + groups().sumOf{ it.ncards()}
     }
 
-    fun addRedactedLine(line: CSVRecord, corlaCvrs: CorlaCvrs) {
-        if (columnRedactions == null)
-            columnRedactions = RedactedGroup(GroupWithLines, line, corlaCvrs.schema)
-        val row = corlaCvrs.parseHeader(line)
+    fun addRedactedLine(line: CSVRecord, corlaRawCvrs: CorlaRawCvrs) {
+        val row = corlaRawCvrs.parseHeader(line)
         // TODO you could look at which fields are non-null
-        columnRedactions!!.redactedRows.add(row)
+       redactedRows.add(row)
     }
 
     fun addGroup(redacted:RedactedGroup) {
@@ -80,12 +78,12 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
         }
     }
 
-    open fun isRedaction(line: CSVRecord, corlaCvrs: CorlaCvrs): Boolean {
-        val ballotType = corlaCvrs.getBallotType(line)
+    open fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaRawCvrs): Boolean {
+        val ballotType = corlaRawCvrs.getBallotType(line)
 
         if (line.get(0).startsWith("AGGREGATED")) {
             if (show) println("  ** redact: $line")
-            val redactedGroup = RedactedGroup(ballotType, line, corlaCvrs.schema)
+            val redactedGroup = RedactedGroup(ballotType, line, corlaRawCvrs.schema)
             addGroup(redactedGroup)
             nRedactedRows++
             return true
@@ -98,17 +96,17 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
             //   ** discard: isEmpty CSVRecord [comment='null', recordNumber=2566, values=[, , , , , , , 486, 1958, 3, 1, 7, 0, 24, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 463, 1980, 6, 0, 22, 0, 0, 0, 0, 402, 1965, 46, 12, 2006, 1964, 2056, 2039, 340, 312, 369, 247, 203, 558, 791, 383, 492, 1343, 644, 1279, 676, 1310, 641, 1300, 649, 1575, 425, 2002, 312, 1051, 1292, 1212, 1113, 2096, 322, 1103, 1233, 1166, 1247, 537, 1873, 541, 1853, 1665, 742, 1759, 635, 1398, 888, 764, 1608, 428, 135, 800, 206, 794, 746, 1032, 1190]]
             return true
 
-        } else if (line.get(corlaCvrs.schema.nheaders).startsWith("*")) { // El Paso
+        } else if (line.get(corlaRawCvrs.schema.nheaders).startsWith("*")) { // El Paso
             if (show) println("  ** redact *: $line")
             // ballot ids and ballot style, no vote info
             // El Paso
             //  [42220, 30, 69, 90, 30-69-90, 5091421250 - 45 (5091421250 - 45), 45, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *]]
-            addRedactedLine(line, corlaCvrs)
+            addRedactedLine(line, corlaRawCvrs)
             nRedactedRows++
             return true
         }
 
-        val values = line.toList().subList(corlaCvrs.schema.nheaders, line.size())
+        val values = line.toList().subList(corlaRawCvrs.schema.nheaders, line.size())
         val hasRedacted = values.any { it.lowercase().startsWith("redacted") || it.lowercase().startsWith("redaction") }
         if (hasRedacted) {
             if (show) println("  ** hasRedacted: $line")
@@ -119,7 +117,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
             //   [5415, 5, 23, 52, 5/23/1952, , 1222230030 - 35 (1222230030 - 35), 35, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, , , , , , , , , , , Redacted, Redacted, Redacted, Redacted, , , , , , , , , , , Redacted, Redacted, Redacted, , , , , , , , , , , , , , , , , Redacted, Redacted, , , Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, , , , , , , , , , , , , , , , , , ]]
             // Larimer
             //   [8470, 6, 9, 79, 6/9/1979, 2234935805 - 21 (2234935805 - 21), 21, REDACTED, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ]]
-            addRedactedLine(line, corlaCvrs)
+            addRedactedLine(line, corlaRawCvrs)
             nRedactedRows++
             return true
         }
@@ -132,7 +130,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
             //   [11377, 1, GEN-0130, 10, 1-GEN-0130-10, 74, 359 [05], X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , X, X, X, , , , , , , , , X, X, X, X, X, , , , , , X, X, X, X, X, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , ]]
             // Pitkin
             //   [3, 201, 1, 13, 201-1-13, 3056149010 - CFPD (3056149010 - CFPD), CFPD, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , , X, X, X, X]]
-            addRedactedLine(line, corlaCvrs)
+            addRedactedLine(line, corlaRawCvrs)
             nRedactedRows++
             return true
         }
@@ -141,7 +139,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
         if (novotes) { // Logan, Morgan, Pueblo, Rio Blanco, Summit, Weld
             if (show) println("  ** redact novotes: $line")
             // ballot ids and ballot style, no vote info
-            addRedactedLine(line, corlaCvrs)
+            addRedactedLine(line, corlaRawCvrs)
             nRedactedRows++
             return true
         }
@@ -155,8 +153,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
 
 // these are using local contest ids, candidate ids
 data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val schema: CvrSchema) {
-    val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
-    val redactedRows = mutableListOf<CvrRow>()
+    val candVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
 
     var nlines = 0  // used by the accumulating group
     var fixedNcards: Int? = null  // when we are told how many cards are in the group
@@ -177,7 +174,7 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
         setNcards = ncards
     } */
 
-    fun contests() = contestVotes.keys.toSet()
+    fun contests() = candVotes.keys.toSet()
 
     fun addVotes(line: CSVRecord): RedactedGroup {
         var colidx = schema.nheaders // start where the votes begin
@@ -191,7 +188,7 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
                     // "RCV Redacted & Randomly Sorted",,,,,"DS-01",0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
                     logger.warn{"*** IRV RedactedVotes shouldnt get here!"}
                 } else {
-                    val candidateVotes = contestVotes.getOrPut(useContestIdx, { mutableMapOf() })
+                    val candidateVotes = candVotes.getOrPut(useContestIdx, { mutableMapOf() })
                     for (candIdx in 0 until useContest.ncols) {
                         val nvotes = line.get(useContest.startCol + candIdx).toInt()
                         val prev = candidateVotes[candIdx] ?: 0
@@ -218,8 +215,8 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
         if (fixedNcards != null || other.fixedNcards != null) { throw RuntimeException("Cant merge fixed group") }
 
         // require (this.ballotType == other.ballotType)
-        other.contestVotes.forEach { (contestId, otherCands) ->
-            val mycands = contestVotes.getOrPut(contestId, { mutableMapOf() })
+        other.candVotes.forEach { (contestId, otherCands) ->
+            val mycands = candVotes.getOrPut(contestId, { mutableMapOf() })
             otherCands.forEach { (cand, otherVote) ->
                 val myvotes = mycands[cand] ?: 0
                 mycands[cand] = myvotes + otherVote
@@ -234,7 +231,7 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
 
     fun minCards(): Int {
         var minCards = 0
-        contestVotes.forEach { (contestId, cands) ->
+        candVotes.forEach { (contestId, cands) ->
             val voteForN = schema.voteForNs[contestId]!!
             val minCardsForContest = roundUp(cands.values.sum() / voteForN.toDouble())
             minCards = max(minCards, minCardsForContest)
@@ -242,23 +239,22 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
         return minCards
     }
 
-    fun totalVotes() = contestVotes.values.map{ it.values }.flatten().sum()
+    fun totalVotes() = candVotes.values.map{ it.values }.flatten().sum()
 
     // TODO
     fun ncards():Int {
-        if (redactedRows.isNotEmpty()) return redactedRows.size
         return fixedNcards?: max(nlines, minCards())
     }
 
     override fun toString() = buildString {
-        val contests = contestVotes.map { it.key }.sorted()
+        val contests = candVotes.map { it.key }.sorted()
         append("RedactedGroup('$groupName', nlines=$nlines, minCards= ${minCards()} totalVotes=${totalVotes()} singleCards = $singleCards, contests=${contests} )")
         // appendLine(csvRecord.toString())
     }
 
     fun rename(rename: String): RedactedGroup {
         val renamed = RedactedGroup(rename, this.firstCsv, this.schema)
-        renamed.contestVotes.putAll(this.contestVotes)
+        renamed.candVotes.putAll(this.candVotes)
 
         renamed.nlines = this.nlines // other.minCards(voteForNmap)
         renamed.singleCards = this.singleCards

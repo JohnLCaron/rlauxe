@@ -7,11 +7,11 @@ import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.corlaInput.makeContestTabs
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyContestData
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyData
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrsIF
-import org.cryptobiotic.rlauxe.cvr.Garfield20Cvrs
-import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
-import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.Garfield2020RawCvrs
+import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
+import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -63,7 +63,7 @@ open class CountyElectionWithCvrs (
             //// the cvrs
             // println("CountyElectionWithCvrs county $county")
 
-            val export: CorlaCvrsIF = if (county == "Garfield") Garfield20Cvrs(exportFile)
+            val export: CorlaRawCvrsIF = if (county == "Garfield") Garfield2020RawCvrs(exportFile)
                 else if (county == "Boulder") readCorlaCvrsFromFile(exportFile, redaction = RedactionBoulder())
                 else readCorlaCvrsFromFile(exportFile)
 

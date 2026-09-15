@@ -6,10 +6,10 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyCvrs
+import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
 import org.cryptobiotic.rlauxe.corlaInput.ManifestCounts
 import org.cryptobiotic.rlauxe.corlaInput.ManifestEntry
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrConverter
 import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -23,7 +23,7 @@ private val logger = KotlinLogging.logger("CvrsFromManifest")
 
 class CvrsFromManifest2(
     val variant: ElectionVariant,
-    val countyInput: CorlaCountyCvrs,
+    val countyInput: CorlaCountyInput,
     val stateInput: ColoradoInput,
     val infos: Map<Int, ContestInfo>,
     startingStyleId: Int,

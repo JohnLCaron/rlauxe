@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.cvr
+package org.cryptobiotic.rlauxe.corlacvr
 
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.corlaInput.munge
@@ -13,14 +13,14 @@ class CvrSchema(val inputSource: String,
                 val contests: List<SchemaContestInfo>,
                 val voteForNs: Map<Int, Int>) {
     val nchoices = columns.size - nheaders
-    val writeIns : Set<Int> = columns.filter{ it.choice.lowercase().contains("write-in") }.map { it.colno }.toSet()
+    val writeIns : Set<Int> = columns.filter{ it.choiceName.lowercase().contains("write-in") }.map { it.colno }.toSet()
 
     fun choices(contestId: Int): List<String> {
         val contest = contests.find{ it.contestIdx == contestId }
         val result = mutableListOf<String>()
         if (contest != null) {
             for (colIdx in contest.startCol until contest.startCol + contest.nchoices) {
-                result.add( columns[colIdx].choice )
+                result.add( columns[colIdx].choiceName )
             }
         }
         return result
@@ -28,7 +28,7 @@ class CvrSchema(val inputSource: String,
 
     // given a choice name, what is its index in the contest, aka id ?
     fun choiceIdx(choiceName: String): Int {
-        val column = columns.find { it.choice == choiceName }
+        val column = columns.find { it.choiceName == choiceName }
         if (column == null)
             throw RuntimeException("cant find choice $choiceName")
         // find contest it belongs to
@@ -68,14 +68,14 @@ class CvrSchema(val inputSource: String,
 
 private val contestWidth = 60
 private val choiceWidth = 40
-data class SchemaColumnInfo(val colno:Int, val contest: String, val choice: String, val headerName: String) {
+data class SchemaColumnInfo(val colno:Int, val contest: String, val choiceName: String, val headerName: String) {
     var contestIdx: Int = -1
     fun showHeader(): String {
         return "${nfn(colno, 3)}, ${trunc(headerName, 20)}"
     }
     fun showColumn(): String {
         return "${nfn(colno, 3)}, ${trunc(contest, contestWidth)}, ${nfn(contestIdx, 3)}, " +
-                "${trunc(choice, choiceWidth)}, ${trunc(headerName, 5)}"
+                "${trunc(choiceName, choiceWidth)}, ${trunc(headerName, 5)}"
     }
     companion object {
         val header = "colno,          header name"

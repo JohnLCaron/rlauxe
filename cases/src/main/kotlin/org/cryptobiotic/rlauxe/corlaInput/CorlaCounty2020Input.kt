@@ -4,7 +4,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 
-class CorlaCounty2020Cvrs(override val countyName: String): CorlaCountyCvrs {
+class CorlaCounty2020Input(override val countyName: String): CorlaCountyInput {
     val countyNameZ = countyName.replace(" ", "")
     override val electionName = "${countyName}2020"
     // TODO Gunnison has Manifest-Gunnison.csv; but Gunnison is an excluded county

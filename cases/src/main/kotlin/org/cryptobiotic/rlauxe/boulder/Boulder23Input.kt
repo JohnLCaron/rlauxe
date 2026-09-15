@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
-class Boulder23Cvrs: BoulderCvrs {
+class Boulder23Input: BoulderInput {
     override val electionName= "Boulder2023"
     override val manifestSource = "src/test/data/Boulder2023/Boulder-IRV-Manifest.csv" // TODO seems wrong
     override val cvrsSource = "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv"

@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.cvr
+package org.cryptobiotic.rlauxe.corlacvr
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVFormat
@@ -18,17 +18,18 @@ import java.util.zip.ZipInputStream
 import kotlin.text.isEmpty
 
 // this reads CVRs from "Dominion CVR export files", a standard Dominion csv format.
+// It stays low-level and triesnot to muck with the data
 
-private val logger = KotlinLogging.logger("CorlaCvrs")
+private val logger = KotlinLogging.logger("CorlaRawCvrs")
 
-fun readCorlaCvrs(source: String, redaction: Redaction = Redaction()): CorlaCvrs {
+fun readCorlaCvrs(source: String, redaction: Redaction = Redaction()): CorlaRawCvrs {
     return if (source.startsWith("/resources/"))
         readCorlaCvrsFromResource(source, redaction = redaction)
     else readCorlaCvrsFromFile(source, redaction = redaction)
 }
 
 fun readCorlaCvrsFromFile(filename: String, showHeaders: Boolean = false, showSchema: Boolean = false,
-                          redaction: Redaction = Redaction()): CorlaCvrs {
+                          redaction: Redaction = Redaction()): CorlaRawCvrs {
     val parser = if (filename.endsWith(".zip")) {
         val zipReader = ZipReader(filename)
         // by convention, the file inside is the filename with zip replaced by csv
@@ -43,19 +44,19 @@ fun readCorlaCvrsFromFile(filename: String, showHeaders: Boolean = false, showSc
         CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
     }
 
-    val corlaCvrs = CorlaCvrs(filename, parser, showHeaders, showSchema, redaction = redaction)
-    corlaCvrs.readRows()
-    return corlaCvrs
+    val corlaRawCvrs = CorlaRawCvrs(filename, parser, showHeaders, showSchema, redaction = redaction)
+    corlaRawCvrs.readRows()
+    return corlaRawCvrs
 }
 
 fun readCorlaCvrsFromResource(resourcePath: String, showHeaders: Boolean = false, showSchema: Boolean = false,
-                              redaction: Redaction = Redaction()): CorlaCvrs {
+                              redaction: Redaction = Redaction()): CorlaRawCvrs {
     val resourceStream = getCsvStreamFromResource(resourcePath)
     val reader: Reader = InputStreamReader(resourceStream, "UTF-8")
     val parser =  CSVParser.parse(reader, CSVFormat.DEFAULT)
-    val corlaCvrs = CorlaCvrs(resourcePath, parser, showHeaders, showSchema, redaction = redaction)
-    corlaCvrs.readRows()
-    return corlaCvrs
+    val corlaRawCvrs = CorlaRawCvrs(resourcePath, parser, showHeaders, showSchema, redaction = redaction)
+    corlaRawCvrs.readRows()
+    return corlaRawCvrs
 }
 
 fun getCsvStreamFromResource(resourcePath: String): InputStream {
@@ -85,26 +86,23 @@ fun getZippedCsvResourceStream(resourcePath: String, resourceStream: InputStream
     return null
 }
 
-interface CorlaCvrsIF {
+interface CorlaRawCvrsIF {
     val electionName: String
     val versionName: String
     val schema: CvrSchema
     fun cvrs(): List<CvrRow>
     fun redaction(): RedactionIF
-    // fun redactedGroups(): List<RedactedGroup>
-    // fun groupWithLines() : RedactedGroup?
-    fun cardStyles() : List<CvrCardStyle>
+    fun cardStyleMap() : Map<Set<Int>, CvrCardStyle>
+    fun cardStyles(): List<CvrCardStyle>
     fun nrows() : Int
-    // fun redactedCvrs() : List<CvrRow>
-    // fun ngroups(): Int
 }
 
-class CorlaCvrs(val inputSource: String,
-                val parser: CSVParser,
-                showHeaders: Boolean = false,
-                showSchema: Boolean = false,
-                val redaction: Redaction = Redaction(),
-): CorlaCvrsIF {
+class CorlaRawCvrs(val inputSource: String,
+                   val parser: CSVParser,
+                   showHeaders: Boolean = false,
+                   showSchema: Boolean = false,
+                   val redaction: Redaction = Redaction(),
+): CorlaRawCvrsIF {
 
     override val electionName: String
     override val schema: CvrSchema
@@ -294,16 +292,10 @@ class CorlaCvrs(val inputSource: String,
     }
 
     override fun redaction() = redaction
-    //override fun redactedGroups() = redaction.redactedGroups()
-    //override fun groupWithLines() = redaction.columnRedactions
+    override fun cardStyleMap() = ballotStyles.cardStyleMap
     override fun cardStyles() = ballotStyles.cardStyles()
     override fun cvrs() = cvrs
-
     override fun nrows() = rowCount
-    //override fun redactedCvrs() = redaction.columnRedactions?.redactedRows ?: emptyList()
-    //override fun ngroups(): Int {
-    //    return redaction.groups().size + if (redaction.columnRedactions == null) 0 else 1
-    //}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -317,7 +309,9 @@ data class ContestVotes(val contestId: Int, val votedFor: List<Int>) {
     fun candVotes(): Map<Int, Int> =
         votedFor.map { Pair(it, 1) }.toMap()
 }
-data class CvrCardStyle(val name: String, val contestIds: Set<Int>, var countCards: Int = 0)
+data class CvrCardStyle(val name: String, val contestIds: Set<Int>, var countCards: Int = 0) {
+    fun contains(contestId: Int) = contestIds.contains(contestId)
+}
 
 class BallotStyles {
     // keep track of all the card styles in the file
@@ -355,6 +349,13 @@ data class CvrRow(
     var contestVotes = mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
 
     fun contests() = contestVotes.map { it.contestId }.toSet()
+
+    fun candVote(contestId: Int, candId: Int): Int? {
+        val contestVote = contestVotes.find{ it.contestId == contestId}
+        if (contestVote == null) return null
+        return if (contestVote.candVotes().contains(candId)) 1 else 0
+    }
+
     /* init {
     // Boulder2020:  9/1/1986 != 9-1-86; went through Excel spreadsheet and got munged
         if (imprintedId != "${tabulatorNum}-${batchId}-${recordId}")

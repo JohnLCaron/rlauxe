@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.cvr
+package org.cryptobiotic.rlauxe.corlacvr
 
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard

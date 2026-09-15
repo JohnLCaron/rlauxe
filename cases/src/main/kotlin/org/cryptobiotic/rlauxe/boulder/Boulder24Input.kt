@@ -2,18 +2,18 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
 import org.cryptobiotic.rlauxe.corlaInput.auditcenter
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
-import org.cryptobiotic.rlauxe.cvr.RedactedGroup
-import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
-import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
+import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrs
+import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
+import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
+import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrs
 
-class Boulder24Cvrs: BoulderCvrs {
+class Boulder24Input: BoulderInput {
     override val electionName= "Boulder2024"
     override val manifestSource = "$auditcenter/2024/general/ballotManifests/BoulderBallotManifest.csv"
     override val cvrsSource = "/resources/data/cases/boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
     override val sovoSource = "/resources/data/cases/boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv"
 
-    override fun readCorlaCvrs(): CorlaCvrs {
+    override fun readCorlaCvrs(): CorlaRawCvrs {
        val org = readCorlaCvrs(cvrsSource, redaction = RedactionBoulder())
         removeContest12FromPool6(org.redaction().groups())
         return org
@@ -38,7 +38,7 @@ class Boulder24Cvrs: BoulderCvrs {
             redacteds.forEach { redacted: RedactedGroup ->
                 // correct bug adding contest 12 to pool 06:
                 if (redacted.groupName.startsWith("06")) {
-                    redacted.contestVotes.remove(12)
+                    redacted.candVotes.remove(12)
                 }
             }
         }

@@ -1,10 +1,6 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.cvr.CorlaCvrs
-import org.cryptobiotic.rlauxe.cvr.Redaction
-import org.cryptobiotic.rlauxe.cvr.readCorlaCvrs
-
-class Morgan26PCvrs: CorlaCountyCvrs {
+class Morgan26PInput: CorlaCountyInput {
     override val electionName= "Morgan2026p"
     override val countyName= "Morgan"
     override val cvrsSource = "$auditcenter/2026/primary/observerfiles/Morgan_CVR_Export_20260709092315_Redacted.csv"
@@ -12,7 +8,7 @@ class Morgan26PCvrs: CorlaCountyCvrs {
     val otherManifest = "$auditcenter/2026/primary/files/Morgan.csv"
 
     /* TODO automate this ??
-    override fun readCorlaCvrs(): CorlaCvrs {
+    override fun readCorlaCvrs(): CorlaRawCvrs {
         val org = readCorlaCvrs(cvrsSource, redaction = Redaction())
         val orgGroups = org.redactedGroups()
         require(orgGroups.size == 1)

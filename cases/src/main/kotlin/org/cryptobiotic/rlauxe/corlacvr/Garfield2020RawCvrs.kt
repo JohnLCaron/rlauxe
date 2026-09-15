@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.cvr
+package org.cryptobiotic.rlauxe.corlacvr
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVFormat
@@ -40,7 +40,7 @@ private val showLines = false
 
 // modified cvr2 and renamed as cvr
 
-class Garfield20Cvrs(val filename: String, showHeaders: Boolean = false): CorlaCvrsIF {
+class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): CorlaRawCvrsIF {
 
     override val electionName = "Garfield2020"
     override val versionName = "unknown"
@@ -160,10 +160,8 @@ class Garfield20Cvrs(val filename: String, showHeaders: Boolean = false): CorlaC
     }
 
     override fun redaction() = EmptyRedaction()
-    //override fun groupWithLines() = null
+    override fun cardStyleMap() = ballotStyles.cardStyleMap
     override fun cardStyles() = ballotStyles.cardStyles()
     override fun cvrs() = cvrs
     override fun nrows() = lineno
-    //override fun redactedCvrs() = emptyList<CvrRow>()
-    // override fun ngroups() = 0
 }

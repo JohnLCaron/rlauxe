@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.cvr.RedactionBoulder
-import org.cryptobiotic.rlauxe.cvr.readCorlaCvrsFromFile
+import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
+import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.testdataDir

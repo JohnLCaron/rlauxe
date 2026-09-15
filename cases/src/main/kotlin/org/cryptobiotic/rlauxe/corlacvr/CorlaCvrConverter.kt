@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.cvr
+package org.cryptobiotic.rlauxe.corlacvr
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
@@ -14,10 +14,10 @@ import kotlin.collections.set
 
 private val logger = KotlinLogging.logger("CorlaCvrConverter")
 
-// convert CorlaCvrsIF from CVRs ids to canonical ids in coloradoInput
-// each CorlaCvrsIF is specific to a County.
+// convert CorlaRawCvrsIF from CVRs ids to canonical ids in coloradoInput
+// each CorlaRawCvrsIF is specific to a County.
 // infosByName is from canonical contests
-class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCvrsIF, val infosByName: Map<String, ContestInfo>,
+class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaRawCvrsIF, val infosByName: Map<String, ContestInfo>,
                         val coloradoInput: ColoradoInput, startingStyleId: Int = 1) {
 
     // map export contest to canon contest, then an array mapping export cand id to canonical candidate id
@@ -90,16 +90,16 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCvrsIF, val info
         // which is what we just built !!
         // turn those into CardStyle
 
-        cardStyles = corlaCvrs.cardStyles().map { it ->
-            val canonicalContestIdSet = convertExportCardStyleToCanonical(it)
-            val cleanupName = truncateCommas(it.name)
+        cardStyles = corlaCvrs.cardStyleMap().map { (_, cvrCardStyle) ->
+            val canonicalContestIdSet = convertExportCardStyleToCanonical(cvrCardStyle)
+            val cleanupName = truncateCommas(cvrCardStyle.name)
             val cardStyle = CardStyle("$county-${cleanupName}", cardStyleId++, canonicalContestIdSet.toIntArray(), true)
-            cardStyle.ncards = it.countCards
+            cardStyle.ncards = cvrCardStyle.countCards
             Pair(canonicalContestIdSet, cardStyle)
         }.toMap()
 
         /* one for each redacted group // obsolete
-        redactedPools = corlaCvrs.redactedGroups().map { group ->
+        redactedPools = corlaRawCvrs.redactedGroups().map { group ->
             val contestTabs = convertToContestTabulation(group)
             val cleanupName = truncateCommas(group.groupName)
             CardPool("$county-${cleanupName}.Redacted", cardStyleId++, true, infos, contestTabs, group.minCards())
@@ -163,7 +163,7 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCvrsIF, val info
         // have to map both contestId and candVotes
         // contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>
         val canonTabs = mutableMapOf<Int, ContestTabulation>()
-        rgroup.contestVotes.forEach{ (contestId, rcands) ->
+        rgroup.candVotes.forEach{ (contestId, rcands) ->
             val nz = rcands.values.sum()  // skip contests with no votes
             val lookup = exportToCanonLookup[contestId]
             if (nz > 0 && lookup != null) {
@@ -236,7 +236,7 @@ data class CorlaContestInfo(
 //    val minFraction: Double? = null,    // used in threshold, dhondt, runoff
 //)
 
-fun CorlaCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
+fun CorlaRawCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
     val columns = this.schema.columns
 
     return this.schema.contests.map { exportContest ->
@@ -245,8 +245,8 @@ fun CorlaCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
             val candidateMap1 = mutableMapOf<String, Int>()
             var candIdx = 0
             for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
-                if (!isWriteIn(columns[col].choice)) { // remove write-ins
-                    candidateMap1[columns[col].choice] = candIdx
+                if (!isWriteIn(columns[col].choiceName)) { // remove write-ins
+                    candidateMap1[columns[col].choiceName] = candIdx
                 }
                 candIdx++
             }
@@ -255,7 +255,7 @@ fun CorlaCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
         } else { // isIRV: there are ncand x ncand columns,
             val candidates = mutableListOf<String>()
             for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
-                candidates.add(columns[col].choice)
+                candidates.add(columns[col].choiceName)
             }
             val pairs = mutableListOf<Pair<String, Int>>()
             repeat(exportContest.nchoices) { idx ->

@@ -1,5 +1,5 @@
 # Redaction notes for Corla 2020 election
-last changed 9/13/2026
+last changed 9/16/2026
 
 See [Corla2020notes](Corla2020notes.md) for description of the cvr files.
 
@@ -65,6 +65,19 @@ The reported population agrees with the manifest, but the reported votes are inc
 One thing to do is to increase the population and the redacted pool by 115. This leaves the reported vote intact.
 In a real election, we could resolve the discrepency.
 In our simulation, it means that the simulated ballots will be short of the reported votes.
+
+## Run Redaction program on 2020 County CVR files, some needed redaction:
+
+**needs redaction**
+
+* Arapahoe (68, 92 sec)
+* Denver (18, 10 sec)
+* La Plata(10, 640 ms)
+* Larimer (31, 2 sec)
+* Mesa (31, 2 sec)
+* Routt (13, 409 ms)
+* Saguache (25, 161 ms)
+* Sedgwick(17, 54 ms)
 
 ### Summary
 

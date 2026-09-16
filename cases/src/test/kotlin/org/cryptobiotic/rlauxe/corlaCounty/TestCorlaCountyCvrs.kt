@@ -9,7 +9,7 @@ class TestCorlaCountyCvrs {
     @Test
     fun testOneCorlaCountyInput() {
         val stateInput = Colorado2026PwithCvrs()
-        val input = stateInput.corlaCountyCvrs("Boulder")!!
+        val input = stateInput.corlaCountyInput("Boulder")!!
 
         CheckCvrsAndManifest(stateInput, input, compareMissingVotes=true)
     }
@@ -18,7 +18,7 @@ class TestCorlaCountyCvrs {
     fun testAllCorlaCountyInput() {
         val stateInput = Colorado2020General()
         stateInput.counties().forEach { county ->
-            val input = stateInput.corlaCountyCvrs(county)!!
+            val input = stateInput.corlaCountyInput(county)!!
             CheckCvrsAndManifest(stateInput, input)
         }
     }

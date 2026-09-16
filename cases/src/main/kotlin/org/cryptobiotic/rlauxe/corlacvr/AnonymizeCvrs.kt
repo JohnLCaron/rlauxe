@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
 import java.io.File
 import kotlin.collections.set
@@ -41,15 +42,23 @@ private const val COVERAGE_WEIGHT = 10.0  // weight for contest coverage vs. vot
 private const val DONOR_SURPLUS_THRESHOLD = 3  // minimum surplus above min_ballots for a style/precinct to donate freely
 
 class Anonymize(
-    val input: String,
+    val corlaCvrs: CorlaRawCvrsIF,
     val minBallots: Int,
     val outputFile: String?,
-    val redactOnPrecinct: Boolean,
-    val styleCol: Int?, // = null,
-    val noContestBalancing: Boolean,
-    val redactedListFile: String?,
+    val redactOnPrecinct: Boolean = false,
+    val styleCol: Int? = null,
+    val noContestBalancing: Boolean = false,
+    val redactedListFile: String? = null,
 ) {
-    val corlaCvrs = readCorlaCvrs(input)
+    constructor(input:String,
+                minBallots: Int,
+                outputFile: String?,
+                redactOnPrecinct: Boolean,
+                styleCol: Int?,
+                noContestBalancing: Boolean,
+                redactedListFile: String?):
+            this(readCorlaCvrs(input), minBallots, outputFile, redactOnPrecinct, styleCol, noContestBalancing, redactedListFile)
+
     val schema = corlaCvrs.schema
     val infos: Map<Int, ContestInfo>
     val styleMap: Map<Set<Int>, CvrCardStyle> = corlaCvrs.cardStyleMap()
@@ -66,8 +75,6 @@ class Anonymize(
     val tabsByRareStyle: Map<CvrCardStyle, Map<Int, ContestTabulation>>
 
     init {
-        styleMap.forEach { println(it)}
-
         infos = corlaCvrs.makeContestInfo().map { it ->
             ContestInfo(
                 it.name, it.id, it.candidateNames,
@@ -174,6 +181,7 @@ class Anonymize(
         println("*** Pass 2: Building the aggregate row.")
         println()
 
+        var ndonors = 0
         var rowIdx = -1
         for (row in corlaCvrs.cvrs()) {
             val rowStyle = styleMap[row.contests()]!!
@@ -238,9 +246,12 @@ class Anonymize(
                         donorCountByRareBallotContest.getOrDefault(contestId, 0) < perContestPoolTarget
                     }
 
+                    // TODO logic is messed up here; too many rows in donorByPrivacyUnit
                     if (!poolNeedsMore) {
-                        val needsContrast = rowRareContests.any { contestId ->
-                            val tally = donorVotedTally[contestId] ?: return@any false
+                        var needsContrast = false
+                        for (contestId in rowRareContests) {
+                        // val needsContrast = rowRareContests.any { contestId ->
+                            val tally: MutableMap<String, Int> = donorVotedTally[contestId] ?: continue
 
                             // For this contest, find the choice with the most votes.
                             var maxChoiceName: String = "none"
@@ -252,8 +263,14 @@ class Anonymize(
                                 }
                             }
 
-                            val contestVote = row.contestVotes.find { it.contestId == contestId}
-                            val candNameMap: Map<Int, String>? = db.contestChoiceIds[contestId] // candId -> candName
+                            //          row_voted = None
+                            //                            for col_idx, choice_name in db.contest_choice_meta.get(
+                            //                                contest_name, {}
+                            //                            ).items():
+                            //                                if row[col_idx].strip() == "1":
+                            //                                    row_voted = choice_name
+                            //                                    break
+                            // var row_voted: Int? = null
 
                             //       row_voted = None
                             //                            for col_idx, choice_name in db.contest_choice_meta.get(
@@ -262,68 +279,56 @@ class Anonymize(
                             //                                if row[col_idx].strip() == "1":
                             //                                    row_voted = choice_name
                             //                                    break
-                            // TODO looks like "find which choice they votes for
+                            // TODO looks like "find which choice the row voted for"
+                            val contestChoiceIds: Map<Int, String> = db.contestChoiceIds.getOrDefault(contestId, emptyMap()) // contest name -> {choiceId, choice_name}
 
-                            //val rowVoted = db.contestChoiceIds[contestId]?.entries?.firstOrNull { (colId, _) ->
-                            //    row.split(",")[colIdx].trim() == "1"
-                            //}?.value
-                            val maxChoiceId = db.contestId(maxChoiceName)
-                            if (contestVote == null || contestVote.votedFor.isEmpty() || contestVote.votedFor.contains(maxChoiceId)) {
-                                return@any false
-                            }
+                            val votedForList = row.contestVotesFor(contestId)?.votedFor
+                            val choiceName = if (votedForList != null && votedForList.isNotEmpty()) {
+                                val votedFor = votedForList.first()
+                                contestChoiceIds[votedFor]
+                            } else null
+                            if (choiceName == null || choiceName == maxChoiceName)
+                                continue
+
                             val contrastingSoFar = tally.filter { it.key != maxChoiceName }.values.sum()
-                            contrastingSoFar < MIN_CONTRASTING_VOTES
+                            if (contrastingSoFar < MIN_CONTRASTING_VOTES) {
+                                needsContrast = true
+                                break
+                            }
                         }
                         if (!needsContrast) {
                             continue
                         }
-                    }
-                }
+                    } // !poolNeedsMore
 
-                //                 donor_by_privacy_unit[privacy_unit].append(row)
-                //                row_to_idx[id(row)] = row_idx
-                //                for contest_name in row_rare_contests:
-                //                    donor_count_by_rare_ballot_contest[contest_name] += 1
-                //                    tally = donor_voted_tally.setdefault(contest_name, {})
-                //                    for col_idx, choice_name in db.contest_choice_meta.get(
-                //                        contest_name, {}
-                //                    ).items():
-                //                        if row[col_idx].strip() == "1":
-                //                            tally[choice_name] = tally.get(choice_name, 0) + 1
-                //                            break
+                } // privacy_unit_count > min_ballots
 
+                ndonors++
                 donorByPrivacyUnit.computeIfAbsent(privacyUnit) { mutableListOf() }.add(row)
                 addToRowIdx(row, rowIdx, rowToIdx)
 
+                // TODO review
                 for (contestId in rowRareContests) {
-                    // TODO well thats compact
+                    val contestName = db.contestNames.get(contestId)
                     donorCountByRareBallotContest[contestId] = donorCountByRareBallotContest.getOrDefault(contestId, 0) + 1
 
-                    val tally = donorVotedTally.computeIfAbsent(contestId) { mutableMapOf() }
-                    // TODO is colidx == contestId ??
-                    val contestName = db.contestNames.get(contestId)
-                    for ((colIdx, choiceName) in db.contestChoicesColIdx.getOrDefault(contestName, emptyMap())) {
-                        // if (row.split(",")[colIdx].trim() == "1") {
-                        if (rowStyle.contains(colIdx)) {
-                            tally[choiceName] = tally.getOrDefault(choiceName, 0) + 1
-                            break
-                        }
-                    }
+                    // TODO change donorVotedTally to use dandId to avoid extra lookup
+                    val tally = donorVotedTally.computeIfAbsent(contestId) { mutableMapOf() } // contestId -> candName -> count
+                    val contestChoiceIds: Map<Int, String> = db.contestChoiceIds.getOrDefault(contestId, emptyMap()) // contest name -> {choiceId, choice_name}
 
-                    /*val contestTab = donorVotedTab.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-                    // TODO is colidx == contestId ??
-                    for ((colIdx, choiceName) in db.contestChoicesColIdx.getOrDefault(contestId, emptyMap())) {
-                        // if (row.split(",")[colIdx].trim() == "1") {
-                        if (rowStyle.contains(colIdx)) {
-                            tally[choiceName] = tally.getOrDefault(choiceName, 0) + 1
-                            break
-                        }
-                    } */
+                    val votedForList = row.contestVotesFor(contestId)?.votedFor
+                    if (votedForList != null && votedForList.isNotEmpty()) {
+                        val votedFor = votedForList.first()
+                        val choiceName = contestChoiceIds[votedFor]
+                        tally[choiceName!!] = tally.getOrDefault(choiceName, 0) + 1
+                    }
                 } // loop over rowRareContests
 
-            } // privacyUnit in rarePrivacyUnitSet
+            } //  privacyUnit !in rarePrivacyUnitSet
+
         } // loop over rows
 
+        println("ndonors = $ndonors")
         val pool = CommonPool(
             donorByPrivacyUnit.mapValues { it.value.toList() },
             minBallots,
@@ -393,130 +398,13 @@ class Anonymize(
         rowToIdx[row.hashCode()] = rowIdx
     }
 
-    /*
-    fun _build_aggregate_row(
-        ballots: List<CvrRow>, db: CvrDatabase, aggregateId: String
-    ): CvrRow {
-        /*
-        Build the AGGREGATED CSV row by summing vote columns and blanking identifiers.
-
-        Fixed header columns (TabulatorNum through ImprintedId) are blanked.
-        CountingGroup, PrecinctPortion, and named_style are blanked.
-        BallotType is set to "AGGREGATED".
-        Vote columns are summed across all ballots in the aggregate.
-        */
-        if (ballots.isEmpty()) {
-            return emptyList()
-        }
-
-        val result = ballots[0].subList(0, db.headerlen).toMutableList()
-        result[0] = aggregateId
-        if (result.size > 1) {
-            result[1] = "" // TabulatorNum
-        }
-        if (result.size > 2) {
-            result[2] = "" // BatchId
-        }
-        if (result.size > 3) {
-            result[3] = "" // RecordId
-        }
-        if (result.size > 4) {
-            result[4] = "" // ImprintedId
-        }
-        db.namedStyleCol?.let { result[it] = "" }
-        // db.countingGroupIdx?.let { result[it] = "" }
-        // db.precinctPortionIdx?.let { result[it] = "" }
-        db.ballotTypeIdx?.let { result[it] = "AGGREGATED" }
-
-        // Sum vote columns across all ballots.
-        val numCols = ballots[0].size
-        for (colIdx in db.headerlen until numCols) {
-            var total = 0.0
-            for (ballot in ballots) {
-                val value = ballot[colIdx].trim()
-                if (value.isNotEmpty() && value.replace(".", "").replace("-", "").all { it.isDigit() }) {
-                    try {
-                        total += value.toDouble()
-                    } catch (e: NumberFormatException) {
-                        // Ignore invalid values
-                    }
-                }
-            }
-            if (total == total.toInt().toDouble()) {
-                result.add(total.toInt().toString())
-            } else {
-                result.add(total.toString())
-            }
-        }
-
-        return result
-    } */
-
-    /*
- Pass 2 (no contest balancing): stream the file and collect only the rare rows.
- Builds the aggregate from those rows alone — no borrowing from common styles.
- Returns (redacted_row_indices, aggregate_row).
- */
-    /* fun collectRareRows(
-        csvPath: String,
-        index: RowIndex,
-        needs: RedactionNeeds,
-        db: CvrDatabase,
-        redactOnPrecinct: Boolean
-    ): Pair<Set<Int>, List<String>> {
-        val rarePrivacyUnitSet: MutableSet<String> = needs.rarePrivacyUnitPairs.keys.toMutableSet() // wtf ??
-
-        val rareRows: MutableList<List<String>> = mutableListOf()
-        val redactedRowIndices: MutableSet<Int> = mutableSetOf()
-
-        println("*** Pass 2: Collecting rare ballots (no contest balancing).")
-        println()
-
-        File(csvPath).bufferedReader(Charsets.UTF_8).use { reader ->
-            val csvReader = reader.lineSequence().iterator()
-            repeat(4) { if (csvReader.hasNext()) csvReader.next() }
-
-            var rowIdx = 0
-            while (csvReader.hasNext()) {
-                val row = csvReader.next().split(",").map { it.trim() }
-                if (row.none { it.isNotEmpty() }) continue
-
-                if (rowIdx > 0 && rowIdx % 100000 == 0) {
-                    println("  ${rowIdx.toString().replace(Regex("(\\d)(?=(\\d{3})+(?!\\d))"), "$1,")} rows scanned...")
-                }
-
-                val rowStyle = index.styleForRow(rowIdx) ?: run {
-                    rowIdx++
-                    continue
-                }
-
-                val precinct = if (redactOnPrecinct && db.precinctPortionIdx != null) {
-                    row[db.precinctPortionIdx].trim()
-                } else {
-                    ""
-                }
-                val privacyUnit = Pair(rowStyle, precinct)
-
-                if (privacyUnit in rarePrivacyUnitSet) {
-                    rareRows.add(row)
-                    redactedRowIndices.add(rowIdx)
-                }
-                rowIdx++
-            }
-        }
-
-        val aggregateRow = _build_aggregate_row(rareRows, db, "AGGREGATED")
-        return Pair(redactedRowIndices, aggregateRow)
-    } */
-
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     fun printBorrowingNeeds(aggregate: Aggregate, minBallots: Int) {
         // Print a one-time summary of why ballot borrowing is needed.
         if (aggregate.needsMoreTotalBallots()) {
             val needed = minBallots - aggregate.totalCount()
-            println(
-                "  Aggregate has ${aggregate.totalCount()} ballot(s); " +
+            println("  Aggregate has ${aggregate.totalCount()} ballot(s); " +
                         "need $needed more to reach minimum of $minBallots."
             )
         }
@@ -549,18 +437,11 @@ class Anonymize(
         if (!aggregate.satisfiesMinimums()) {
             println("  Rare ballots: ${aggregate.totalCount()}.")
             println("  Borrowing from common styles to satisfy these requirements:")
-            println(
-                "  - the ballot aggregation must contain at least $minBallots ballots."
-            )
-            println(
-                "  - every contest in the rare styles must appear on at least" +
-                        " $minBallots ballots in the aggregation."
-            )
+            println("  - the ballot aggregation must contain at least $minBallots ballots.")
+            println("  - every contest in the rare styles must appear on at least $minBallots ballots in the aggregation.")
             println()
             printBorrowingNeeds(aggregate, minBallots)
-            println(
-                "\n  Selecting ballots to borrow from common styles (this can take a few minutes)..."
-            )
+            println("\n  Selecting ballots to borrow from common styles (this can take a few minutes)...")
         }
 
         var borrowedCount = 0
@@ -612,6 +493,8 @@ class Anonymize(
         val result = mutableListOf<FindContest>()
         for ((contestId, contestTab) in aggregate.contestTabs) {
             val contestName = db.contestNames.get(contestId)
+            if (contestId == 19)
+                print("")
             if (contestId !in aggregate.rareContests) {
                 continue
             }
@@ -875,11 +758,9 @@ class Anonymize(
                 //    byNamedStyle.getOrPut(namedStyle) { mutableListOf() }.add(rowIdx)
                 //}
 
-                db.ballotTypeIdx.let {
-                    val ballotType = row.ballotType
-                    if (ballotType.isNotEmpty()) {
-                        byBallotType.getOrPut(ballotType) { mutableListOf() }.add(rowIdx)
-                    }
+                val ballotType = row.ballotType
+                if (ballotType != null && ballotType.isNotEmpty()) {
+                    byBallotType.getOrPut(ballotType) { mutableListOf() }.add(rowIdx)
                 }
                 rowIdx++
             }
@@ -924,8 +805,8 @@ class Anonymize(
     }
 
     // TODO go away
-    inner class CvrDatabase(val corlaRawCvrs: CorlaRawCvrs) {
-        val ballotTypeIdx = corlaRawCvrs.batchIdIdx
+    inner class CvrDatabase(val corlaRawCvrs: CorlaRawCvrsIF) {
+        val hasBallotType: Boolean = corlaRawCvrs.hasBallotType()
         val namedStyleCol = null
 
         /**
@@ -1009,7 +890,6 @@ class Anonymize(
         init {
             initialBallots.forEach {
                 add(it)
-                println("  add agg ballot ${it.cvrNumber} from initialBallots")
             }
         }
 
@@ -1022,10 +902,11 @@ class Anonymize(
             ballots.add(ballot)
             ballotIds.add(System.identityHashCode(ballot))
             ballot.contestVotes.forEach {
+                if (it.contestId == 19) {
+                    println("*** ${ballot.cvrNumber} contestVotes = $it")
+                }
                 contestTabs.sumContestTabulationsFromCandVotes(infos[it.contestId]!!, it.candVotes())
             }
-            if (ballot.cvrNumber == 6)
-                print("")
 
             /* Add a ballot to the aggregate, updating all tracked counts.
             ballots.add(ballot)
@@ -1427,7 +1308,7 @@ class Anonymize(
 
         File(outputFile).bufferedWriter(Charsets.UTF_8).use { bwriter ->
             // write headers
-            corlaCvrs.headers.forEach {
+            corlaCvrs.headers().forEach {
                 bwriter.write(it)
                 bwriter.newLine()
             }
@@ -1465,6 +1346,29 @@ class Anonymize(
                     appendLine()
                 }
                 bwriter.write(aggrow)
+
+                val ncardrow = buildString {
+                    append("AGGREGATED")
+                    repeat(schema.nheaders - 1) { append(",") }
+                    append("NCARDS,")
+                    var count = 0
+                    schema.contests.forEach { scontest ->
+                        val tab = agg[scontest.contestIdx]
+                        repeat(scontest.ncols) {
+                            count++
+                            if (tab == null) {
+                                append("0")
+                                if (count != last) append(",")
+                            } else {
+                                val ncards = tab.ncards()
+                                append("$ncards")
+                                if (count != last) append(",")
+                            }
+                        }
+                    }
+                    appendLine()
+                }
+                bwriter.write(ncardrow)
             }
         }
     }
@@ -1508,6 +1412,8 @@ class Anonymize(
         redactedListFile: String?,
         noContestBalancing: Boolean = false
     ) {
+        val stopwatch = Stopwatch()
+
         var redactedRowIndices = emptySet<Int>()
         var redactedAggregations = emptyList<Map<Int, ContestTabulation>>()
 
@@ -1552,6 +1458,7 @@ class Anonymize(
             println("  Redacted ballot list written to $redactedListFile.")
         }
 
+        println("That took $stopwatch")
     }
 
     fun execute_redact() {
@@ -1637,7 +1544,7 @@ class Anonymize(
                     )
                 }
             }
-        } else if (db.ballotTypeIdx != null) {
+        } else if (db.hasBallotType) {
             val ballotTypesByStyle = mutableMapOf<String, MutableSet<String>>()
             for ((ballotType, rowIndices) in index.rowsByBallotType) {
                 for (rowIdx in rowIndices) {

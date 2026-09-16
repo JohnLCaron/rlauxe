@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -68,7 +69,7 @@ class TestAnonymizeCvrs {
     }
 
     @Test
-    fun testAllScenarios() {
+    fun compareAllScenarios() {
         scenarios.forEach { scenario ->
             println("===========================================================================================")
             AnonymizeCvrsCli.main(
@@ -91,15 +92,48 @@ class TestAnonymizeCvrs {
     }
 
     @Test
-    fun testAnonymizeDenver() {
-        val cvrs = "/home/stormy/datadrive/votedatabase/cvr/Colorado/Denver/cvr.csv"
-        val output = "$baseOut/denver.csv"
-        AnonymizeCvrsCli.main(
-            arrayOf(
-                "-input", cvrs,
-                "-output", output,
-                "--mode", "redact"
+    fun testAnonymizeOne() {
+        val input = Colorado2020General()
+        val county = "Routt"
+        val countyInput = input.corlaCountyInput(county)!!
+        val output = "$baseOut/2020/$county.csv"
+
+        val anon = Anonymize(countyInput.readCorlaCvrs(), 10, output)
+        anon.execute_redact()
+
+        val actual = File(output).readLines()
+        actual.forEach { line ->
+            if (line.startsWith("AGGREGATED")) println(line)
+        }
+
+        val expect = File("/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testCases/converted/$county.csv").readLines()
+        expect.forEachIndexed { idx, line ->
+            if (idx > 4) assertEquals(line, actual[idx])
+        }
+        println("success")
+    }
+
+    // needs redaction: Arapahoe (301 s), Denver (517 s), La Plata(640 ms), Larimer (2 sec), Mesa (32 s), Routt (6), Saguache (2), Sedgwick(214 ms)
+    @Test
+    fun testAnonymize2020Cvrs() {
+        val input = Colorado2020General()
+        input.counties().forEach { county ->
+            val countyInput = input.corlaCountyInput(county)!!
+            println("===========================================================================================")
+            println("County $county from ${countyInput.cvrsSource}")
+            AnonymizeCvrsCli.main(
+                arrayOf(
+                    "-input", countyInput.cvrsSource,
+                    "-output", "$baseOut/2020/$county.csv",
+                    "--mode", "redact"
+                )
             )
-        )
+
+            val actual = File("$baseOut/2020/$county.csv").readLines()
+            actual.forEach { line ->
+                if (line.startsWith("AGGREGATED")) println(line)
+            }
+            println("success")
+        }
     }
 }

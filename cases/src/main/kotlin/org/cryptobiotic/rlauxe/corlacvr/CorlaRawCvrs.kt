@@ -95,6 +95,9 @@ interface CorlaRawCvrsIF {
     fun cardStyleMap() : Map<Set<Int>, CvrCardStyle>
     fun cardStyles(): List<CvrCardStyle>
     fun nrows() : Int
+
+    fun headers() : List<String>
+    fun hasBallotType() : Boolean
 }
 
 class CorlaRawCvrs(val inputSource: String,
@@ -210,32 +213,35 @@ class CorlaRawCvrs(val inputSource: String,
     fun readRows(showFirst: Int? = null, showAfter: Int? = null,
                  showRedactedGroups: Boolean = false) {
 
-        while (records.hasNext()) {
-            val line = records.next()
-            if (line.isEmpty()) break
-            rowCount++
+        try {
+            while (records.hasNext()) {
+                val line = records.next()
+                if (line.isEmpty()) break
+                rowCount++
 
-            if (!redaction.isRedaction(line, this)) {
-                try {
-                    val cvr = parseHeader(line, rowCount)
-                    cvr.addVotes(schema, line, rowCount)
+                if (!redaction.isRedaction(line, this)) {
+                    try {
+                        val cvr = parseHeader(line, rowCount)
+                        cvr.addVotes(schema, line, rowCount)
 
-                    // dont discard a cvr that doesnt have any votes
-                    //if (cvr.contestVotes.isNotEmpty()) {
-                    cvrs.add(cvr)
-                    ballotStyles.add(cvr)
-                    //}
+                        // dont discard a cvr that doesnt have any votes
+                        //if (cvr.contestVotes.isNotEmpty()) {
+                        cvrs.add(cvr)
+                        ballotStyles.add(cvr)
+                        //}
 
-                    if (showFirst != null && rowCount < showFirst) println(cvr.show())
-                    if (showAfter != null && rowCount >= showAfter) println(cvr.show())
+                        if (showFirst != null && rowCount < showFirst) println(cvr.show())
+                        if (showAfter != null && rowCount >= showAfter) println(cvr.show())
 
-                } catch (e: Throwable) {
-                    logger.error(e) { "rowCount=$rowCount $line" }
-                    throw e
+                    } catch (e: Throwable) {
+                        logger.error(e) { "rowCount=$rowCount $line" }
+                        throw e
+                    }
                 }
             }
+        } finally {
+            parser.close()
         }
-        parser.close()
 
         if (showRedactedGroups) {
             logger.info{"  read ${redaction.nRedactedRows} Redacted lines from ${inputSource}"}
@@ -296,6 +302,8 @@ class CorlaRawCvrs(val inputSource: String,
     override fun cardStyles() = ballotStyles.cardStyles()
     override fun cvrs() = cvrs
     override fun nrows() = rowCount
+    override fun headers() = headers
+    override fun hasBallotType() = ballotTypeIdx != null
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -365,6 +373,10 @@ data class CvrRow(
     var contestVotes = mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
 
     fun contests() = contestVotes.map { it.contestId }.toSet()
+
+    fun contestVotesFor(contestId: Int): ContestVotes? {
+        return contestVotes.find{ it.contestId == contestId}
+    }
 
     fun candVote(contestId: Int, candId: Int): Int? {
         val contestVote = contestVotes.find{ it.contestId == contestId}

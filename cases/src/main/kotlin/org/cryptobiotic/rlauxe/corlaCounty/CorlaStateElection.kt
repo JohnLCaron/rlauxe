@@ -50,7 +50,7 @@ class CorlaStateElection(
         var countyPoolId = 1
 
         stateInput.counties().forEach { countyName ->
-            val countyInput = stateInput.corlaCountyCvrs(countyName)!!
+            val countyInput = stateInput.corlaCountyInput(countyName)!!
             val countyPopulation = countyInput.countyPopulation()
 
             val cvrsFromManifest = CvrsFromManifest2(variant, countyInput, stateInput, infos, nextStyleId)

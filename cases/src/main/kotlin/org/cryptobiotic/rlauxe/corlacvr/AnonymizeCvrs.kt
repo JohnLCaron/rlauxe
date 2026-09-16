@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
 import java.io.File
+import kotlin.collections.set
 import kotlin.math.max
 
 /*
@@ -65,6 +66,8 @@ class Anonymize(
     val tabsByRareStyle: Map<CvrCardStyle, Map<Int, ContestTabulation>>
 
     init {
+        styleMap.forEach { println(it)}
+
         infos = corlaCvrs.makeContestInfo().map { it ->
             ContestInfo(
                 it.name, it.id, it.candidateNames,
@@ -171,10 +174,11 @@ class Anonymize(
         println("*** Pass 2: Building the aggregate row.")
         println()
 
-        var rowIdx = 0
+        var rowIdx = -1
         for (row in corlaCvrs.cvrs()) {
             val rowStyle = styleMap[row.contests()]!!
             val privacyUnit = rowStyle.name
+            rowIdx++
 
         /* File(csvPath).bufferedReader(Charsets.UTF_8).use { reader ->
             val csvReader = reader.lineSequence().iterator()
@@ -186,7 +190,7 @@ class Anonymize(
 
             if (privacyUnit in rarePrivacyUnitSet) {
                 rareRows.add(row)
-                rowToIdx[row.hashCode()] = rowIdx
+                addToRowIdx(row, rowIdx, rowToIdx)
             } else {
                 val privacyUnitCount = rowcountByPrivacyUnit.getOrDefault(privacyUnit, 0)
                 if (privacyUnitCount <= minBallots) {
@@ -204,7 +208,7 @@ class Anonymize(
                         }
                         if (styleHasRareContest) {
                             blockedByPrivacyUnit.computeIfAbsent(privacyUnit) { mutableListOf() }.add(row)
-                            rowToIdx[row.hashCode()] = rowIdx
+                            addToRowIdx(row, rowIdx, rowToIdx)
                         }
                     }
                     continue
@@ -289,7 +293,7 @@ class Anonymize(
                 //                            break
 
                 donorByPrivacyUnit.computeIfAbsent(privacyUnit) { mutableListOf() }.add(row)
-                rowToIdx[row.hashCode()] = rowIdx
+                addToRowIdx(row, rowIdx, rowToIdx)
 
                 for (contestId in rowRareContests) {
                     // TODO well thats compact
@@ -318,7 +322,6 @@ class Anonymize(
                 } // loop over rowRareContests
 
             } // privacyUnit in rarePrivacyUnitSet
-            rowIdx++
         } // loop over rows
 
         val pool = CommonPool(
@@ -373,10 +376,21 @@ class Anonymize(
         // Identify which row indices are in the aggregate by object identity.
         val redactedRowIndices = mutableSetOf<Int>()
         for (ballot in aggregate.ballots) {
-            rowToIdx[ballot.hashCode()]?.let { redactedRowIndices.add(it) }
+            val idx = rowToIdx[ballot.hashCode()]
+            if (idx != null) {
+                if (!redactedRowIndices.add(idx)) {
+                    logger.warn{"duplicate ${ballot.hashCode()}"}
+                }
+            }
         }
 
         return Pair(redactedRowIndices, aggregate)
+    }
+
+    fun addToRowIdx(row: CvrRow, rowIdx: Int, rowToIdx: MutableMap<Int, Int>) {
+        //if (rowToIdx.values.find{ it == rowIdx} != null)
+        //    print("")
+        rowToIdx[row.hashCode()] = rowIdx
     }
 
     /*
@@ -993,7 +1007,10 @@ class Anonymize(
         //    .toMutableMap()
 
         init {
-            initialBallots.forEach { add(it) }
+            initialBallots.forEach {
+                add(it)
+                println("  add agg ballot ${it.cvrNumber} from initialBallots")
+            }
         }
 
         fun contestBallotCounts(contestId: Int): Int {
@@ -1007,7 +1024,8 @@ class Anonymize(
             ballot.contestVotes.forEach {
                 contestTabs.sumContestTabulationsFromCandVotes(infos[it.contestId]!!, it.candVotes())
             }
-            print("")
+            if (ballot.cvrNumber == 6)
+                print("")
 
             /* Add a ballot to the aggregate, updating all tracked counts.
             ballots.add(ballot)
@@ -1314,6 +1332,7 @@ class Anonymize(
             does not participate in the contest or makes imbalance worse.
             */
 
+            // python
             // "current" maps choices to votes for that contest.
             // "total" is the sum of all votes for all choices
             // current_max is the vote total for the choice with the highest number of votes.
@@ -1326,46 +1345,48 @@ class Anonymize(
             val currentMax = currentMaxVote.value
             val sumOfOtherVotes = (currentTotal - currentMax)
             val currentGap = currentMax - (currentTotal - currentMax) // = 2*currentMax - currentTotal
-            val imbalancePair = calcImbalance(currentTab.votes)
-
-            // well if theres only one choice...
-            val contestVote = ballot.contestVotes.find { it.contestId == contestId }
-            if (contestVote == null) return 0.0
-            val voteForAny = contestVote.votedFor.count()
-            val voteForMax = if (contestVote.votedFor.contains(currentMaxVote.key)) 1 else 0
-            val imbalanceDiff = 2 * voteForMax - voteForAny
 
             // record the votes on this ballot for each of the choices available for this contest
-            val ballotVotes = mutableMapOf<Int, Int>()
+            val contributions = mutableMapOf<Int, Int>()
             val cands = contestChoicesColId[contestId]
             if (cands != null) {
                 for ((candId, choiceName) in cands) {
                     val value = ballot.candVote(contestId, candId)
-                    if (value != null && value == 1) ballotVotes[candId] = 1
+                    if (value != null && value == 1) contributions[candId] = 1
                 }
             }
-
-            if (ballotVotes.isEmpty()) {
+            if (contributions.isEmpty()) {
                 return 0.0
             }
 
-            // see if that agrees with python algo
-            val newCounts = currentTab.votes.toMutableMap() // copy
+            val newCounts = currentTab.votes.toMutableMap() // make a copy
+            for ((candId, inc) in contributions) {
+                newCounts[candId] = newCounts.getOrDefault(candId, 0) + inc
+            }
+            val newTotal = currentTotal + contributions.values.sum()
+            val newMax = newCounts.values.maxOrNull() ?: 0
+            val newGap = newMax - (newTotal - newMax)
+
+            val python_result = max(0.0, (currentGap - newGap).toDouble())
+            // println("   $contestId imbalanceReduction = $python_result")
+
+            // a different way
+            val orgImbalance = calcImbalance(currentTab.votes)
+
+            val contestVote = ballot.contestVotes.find { it.contestId == contestId }
+            if (contestVote == null) return 0.0
+
             contestVote.candVotes().forEach { (cand, vote) ->
                 val candCount = newCounts[cand] ?: 0
                 newCounts[cand] = candCount + vote
             }
+            val voteForAny = contestVote.votedFor.count()
+            val voteForMax = if (contestVote.votedFor.contains(currentMaxVote.key)) 1 else 0
+            val imbalanceDiff = 2 * voteForMax - voteForAny
 
+            // println("   my imbalanceDiff = $imbalanceDiff")
 
-            for ((candId, inc) in ballotVotes) {
-                newCounts[candId] = newCounts.getOrDefault(candId, 0) + inc
-            }
-            val newTotal = currentTotal + ballotVotes.values.sum()
-            val newMax = newCounts.values.maxOrNull() ?: 0
-            val newGap = newMax - (newTotal - newMax)
-
-            val result = max(0.0, (currentGap - newGap).toDouble())
-            return result
+            return python_result
         }
 
         // votes: cand -> vote total, return (candid, imbalance)
@@ -1422,16 +1443,22 @@ class Anonymize(
 
             // might want to use the style at some point
             redactedAggregations.forEach { agg ->
+                val last = schema.nchoices
                 val aggrow = buildString {
                     append("AGGREGATED")
                     repeat(schema.nheaders - 1) { append(",") }
                     append("AGGREGATED,")
+                    var count = 0
                     schema.contests.forEach { scontest ->
                         val tab = agg[scontest.contestIdx]
                         repeat(scontest.ncols) {
-                            if (tab == null) append(",") else {
+                            count++
+                            if (tab == null) {
+                                if (count != last) append(",")
+                            } else {
                                 val vote = tab.votes[it] ?: 0
-                                append("$vote,")
+                                append("$vote")
+                                if (count != last) append(",")
                             }
                         }
                     }
@@ -1443,17 +1470,26 @@ class Anonymize(
     }
 
     fun writeRow(row: CvrRow, redacted: Boolean) = buildString {
-        append(row.csvHeader())
+        append(row.csvHeader(redactPrecint = false))
+        val last = schema.nchoices
         if (redacted) {
-            repeat(schema.nchoices) { append("*,") }
+            repeat(schema.nchoices) {
+                append("*")
+                if (it != last-1) append(",")
+            }
         } else {
             val rowMap: Map<Int, List<Int>> = row.contestVotes.map { Pair(it.contestId, it.votedFor) }.toMap()
+            var count = 0
             schema.contests.forEach { scontest ->
                 val candVotes = rowMap[scontest.contestIdx]
                 repeat(scontest.ncols) {
-                    if (candVotes == null) append(",") else {
+                    count++
+                    if (candVotes == null) {
+                        if (count != last) append(",")
+                    } else {
                         val vote = if (candVotes.contains(it)) 1 else 0
-                        append("$vote,")
+                        append("$vote")
+                        if (count != last) append(",")
                     }
                 }
             }

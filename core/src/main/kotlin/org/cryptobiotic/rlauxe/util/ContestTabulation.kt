@@ -236,6 +236,14 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulationsFromCandVotes(info: 
     contestSum.ncardsTabulated++
 }
 
+fun sumContestTabulations(others: List<Map<Int, ContestTabulationIF>>):Map<Int, ContestTabulationIF>  {
+    val result = mutableMapOf<Int, ContestTabulation>()
+    others.forEach { other ->
+        result.sumContestTabulations(other)
+    }
+    return result
+}
+
 // this - other, cant go below 0
 fun MutableMap<Int, ContestTabulation>.subtractContestTabulationZ(other: Map<Int, ContestTabulationIF>) {
     other.forEach { (contestId, otherTab) ->

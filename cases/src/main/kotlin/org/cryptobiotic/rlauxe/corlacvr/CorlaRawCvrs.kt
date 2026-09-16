@@ -313,17 +313,33 @@ data class CvrCardStyle(val name: String, val contestIds: Set<Int>, var countCar
     fun contains(contestId: Int) = contestIds.contains(contestId)
 }
 
+// scenario_ballot_type_present
+// has two ballot styles with same contest set [0,1], these generate a single CardStyle
+// and ballot style [1] has rows with different set [0], [0,1]
+// row 19 could create a second CardStyle with name "1+1" meaning  balot type 1, variant1, with different contest set
+//                    type votes
+// 9,1,1,9,1-1-9,P1,    1, 1,0,1,0
+// 12,1,1,12,1-1-12,P1, 2, 0,1,0,1
+// 19,1,1,19,1-1-19,P1, 1, 1,0,,
+
+
 class BallotStyles {
     // keep track of all the card styles in the file
     val cardStyleMap = mutableMapOf<Set<Int>, CvrCardStyle>()
+    val cardStyleNames = mutableSetOf<String>()
     var anonStyleCount = 0
 
     fun add(cvr:CvrRow) {
-        val contestSet = cvr.contestVotes.map { it.contestId }.toSet()
+        val contestSet = cvr.contests()
         if (contestSet.isEmpty())
             println("redacted ??")
         val ballotType = cardStyleMap.getOrPut(contestSet) {
-            val styleName = if (cvr.ballotType.isNotEmpty()) cvr.ballotType else "Style #${anonStyleCount++}"
+            var styleName = if (cvr.ballotType.isNotEmpty()) cvr.ballotType else "Style #${anonStyleCount++}"
+            if (!cardStyleNames.add(styleName)) {
+                // already has a style with that name
+                styleName = "${cvr.ballotType}#${anonStyleCount++}"
+                cardStyleNames.add(styleName)
+            }
             CvrCardStyle(styleName, contestSet)
         }
         ballotType.countCards++
@@ -445,13 +461,13 @@ data class CvrRow(
         }
     }
 
-    fun csvHeader() = buildString {
+    fun csvHeader(redactPrecint: Boolean = false) = buildString {
         append("$cvrNumber,")
         append("$tabulatorNum,")
         append("$batchId,")
         append("$recordId,")
         append("$imprintedId,")
-        append("$precinctPortion,")
+        if (!redactPrecint) append("$precinctPortion,")
         append("$ballotType,")
     }
 

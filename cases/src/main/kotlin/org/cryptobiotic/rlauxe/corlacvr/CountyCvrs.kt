@@ -6,18 +6,21 @@ import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
 import org.cryptobiotic.rlauxe.corlaInput.CountyManifest
 import org.cryptobiotic.rlauxe.corlaInput.ManifestCounts
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.sfn
+import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
+import org.cryptobiotic.rlauxe.util.trunc
 
 // Check manifest and Cvrs without reference to the state files
-class CountyCvrs(val corlaCvrs: CorlaRawCvrsIF) {
+class CountyCvrs(val countyInput: CorlaCountyInput) {
     val show = false
-    // val county = countyInput.countyName
+    val corlaCvrs = countyInput.readCorlaCvrs()
+    val county = countyInput.countyName
 
     val infos: Map<Int, ContestInfo>
     val cvrTabs : Map<Int, ContestTabulation>
     val redactTabs : Map<Int, ContestTabulation>
-
-    constructor(countyInput: CorlaCountyInput): this(countyInput.readCorlaCvrs())
 
     init {
         infos = corlaCvrs.makeContestInfo().map { it ->
@@ -37,7 +40,7 @@ class CountyCvrs(val corlaCvrs: CorlaRawCvrsIF) {
                 sumAccum.sumContestTabulationsFromCandVotes(infos[scontestId]!!, candVotes)
             }
         }
-        redactTabs = cvrTabs
+        redactTabs = sumAccum
 
         ////////////////////////////////////////////////////
         /* can we use county cvr vote totals to calculate oneaudit subtotals?
@@ -81,7 +84,8 @@ class CountyCvrs(val corlaCvrs: CorlaRawCvrsIF) {
          */
     }
 
-    fun manifestCounts(manifest: CountyManifest, show: Boolean): ManifestCounts {
+    fun manifestCounts(show: Boolean): ManifestCounts {
+        val manifest = countyInput.readCountyManifest()
         return if (show) {
             val report = mutableListOf<String>()
             val mc = manifest.manifestCounts(corlaCvrs, report)
@@ -98,6 +102,20 @@ class CountyCvrs(val corlaCvrs: CorlaRawCvrsIF) {
         redaction.redactedRows().forEach { println("  $it")}
         redaction.groups().forEach { println("  ${it.firstCsv}")}
         println()
+    }
+
+    fun showTabulations() {
+        val allContests = (cvrTabs.keys.toSet() + redactTabs.keys.toSet()).toSortedSet()
+        val totalTabs = sumContestTabulations(listOf(cvrTabs, redactTabs))
+        val nameWidth = 70
+        println("${sfn("contest", -(nameWidth-2))} voteForN,     cvr,   redact,   total")
+        allContests.forEach { contestId ->
+            val cvrNvotes = cvrTabs[contestId]?.nvotes() ?: -1
+            val redactNvotes = redactTabs[contestId]?.nvotes() ?: -1
+            val totalNvotes = totalTabs[contestId]?.nvotes() ?: -1
+            val info = infos[contestId]!!
+            println("${nfn(contestId, 3)} ${trunc(info.name, -nameWidth)} ${info.voteForN},  ${nfn(cvrNvotes, 7)},  ${nfn(redactNvotes, 7)}, ${nfn(totalNvotes, 7)}")
+        }
     }
 }
 

@@ -8,7 +8,7 @@ class Test2020Cvrs {
     @Test
     fun testGarfield20Cvrs() {
         val input = Colorado2020General()
-        val garfield = input.corlaCountyCvrs("Garfield")!!
+        val garfield = input.corlaCountyInput("Garfield")!!
         val cvrs = garfield.readCorlaCvrs()
         testCorlaConverterCvrs("Garfield", cvrs, input)
     }
@@ -16,7 +16,7 @@ class Test2020Cvrs {
     @Test
     fun testMesa20Cvrs() {
         val input = Colorado2020General()
-        val countyInput = input.corlaCountyCvrs("Mesa")!!
+        val countyInput = input.corlaCountyInput("Mesa")!!
         testCorlaConverterCvrs("Mesa", countyInput.readCorlaCvrs(), input)
     }
 

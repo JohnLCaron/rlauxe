@@ -11,7 +11,7 @@ class Colorado2020General(ac:String?=auditcenter): ColoradoInputWithCvrs(
     mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
 ) {
 
-    override fun corlaCountyCvrs(countyName: String): CorlaCountyInput? {
+    override fun corlaCountyInput(countyName: String): CorlaCountyInput? {
         return if (counties().contains(countyName)) CorlaCounty2020Input(countyName) else null
     }
 

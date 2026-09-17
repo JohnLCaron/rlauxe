@@ -29,7 +29,7 @@ class WriteCountyInputData {
 
         val data = mutableListOf<CountyInputData>()
         stateInput.counties().forEach { county ->
-            val countyInput = stateInput.corlaCountyCvrs(county)!!
+            val countyInput = stateInput.corlaCountyInput(county)!!
             val ccc = CheckCvrsAndManifest(stateInput, countyInput, showMatch = true, showMissingVotes = true, showRedactedCvrs = true)
             val corlaCvrs = ccc.corlaCvrs
             val manifestCounts = ccc.manifestCounts

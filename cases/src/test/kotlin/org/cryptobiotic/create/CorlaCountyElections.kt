@@ -67,7 +67,7 @@ class CorlaCountyElections {
     fun createBoulder20() {
         val stateInput = Colorado2020General()
         createCorlaCountyVariants("$cases/corlaCounty/boulder20",
-            stateInput.corlaCountyCvrs("Boulder")!!,
+            stateInput.corlaCountyInput("Boulder")!!,
             stateInput,
         )
     }
@@ -76,7 +76,7 @@ class CorlaCountyElections {
     fun createPitkin20() {
         val stateInput = Colorado2020General()
         createCorlaCountyVariants("$cases/corlaCounty/pitkin20",
-            stateInput.corlaCountyCvrs("Pitkin")!!,
+            stateInput.corlaCountyInput("Pitkin")!!,
             stateInput,
         )
     }
@@ -85,7 +85,7 @@ class CorlaCountyElections {
     fun createSummit20() {
         val stateInput = Colorado2020General()
         createCorlaCountyVariants("$cases/corlaCounty/summit20",
-            stateInput.corlaCountyCvrs("Summit")!!,
+            stateInput.corlaCountyInput("Summit")!!,
             stateInput,
         )
     }
@@ -94,7 +94,7 @@ class CorlaCountyElections {
     fun createDouglas20() {
         val stateInput = Colorado2020General()
         createCorlaCountyVariants("$cases/corlaCounty/douglas20",
-            stateInput.corlaCountyCvrs("Douglas")!!,
+            stateInput.corlaCountyInput("Douglas")!!,
             stateInput,
         )
     }

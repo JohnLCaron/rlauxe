@@ -58,6 +58,7 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
     val records: Iterator<CSVRecord>
     var lineno = 0
     val cvrs = mutableListOf<CvrRow>()
+    val headers = mutableListOf<String>()
 
     init {
         val parser = if (filename.endsWith(".zip")) {
@@ -83,15 +84,17 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
 
         try {
             val contestLine = records.next()
+            headers.add(contestLine.values().joinToString(","))
             if (showLines) showLine("contestLine", contestLine)
             lineno++
 
             // 2) the header for the first n columns, then the choice/candidate name for that column
-            val headerChoiceLine = records.next()
-            if (showLines) showLine("choice/candidate", headerChoiceLine)
+            val choiceLine = records.next()
+            headers.add(choiceLine.values().joinToString(","))
+            if (showLines) showLine("choice/candidate", choiceLine)
             lineno++
 
-            schema = makeCvrSchema(filename, contestLine, headerChoiceLine, headerChoiceLine)
+            schema = makeCvrSchema(filename, contestLine, choiceLine, choiceLine)
             // println(CvrSchema.showColumns())
             // println()
             // println(CvrSchema.showContests())
@@ -164,4 +167,7 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
     override fun cardStyles() = ballotStyles.cardStyles()
     override fun cvrs() = cvrs
     override fun nrows() = lineno
+    override fun headers() = headers
+    override fun hasBallotType() = ballotTypeIdx != null
+
 }

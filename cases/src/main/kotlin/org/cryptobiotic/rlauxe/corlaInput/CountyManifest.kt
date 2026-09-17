@@ -198,11 +198,11 @@ open class CountyManifest(val manifestBatches: List<ManifestBatch>): Iterable<Ma
 
             report.add("")
             report.add("cvrs not found in manifest= $countMiss")
-            report.add("cvrs found in Manifest=${manifestIdMap.size - countMiss}")
+            report.add("cvrs found in manifest=${manifestIdMap.size - countMiss}")
             report.add("manifest entries without matching unredacted cvr= $unmatched")
             report.add("")
-            report.add("redactedCvrs not found in manifest= $countUnknownRedaction")
-            report.add("count duplicate cvr id=$countDup count duplicate redacted cvr id=$countRedactionDup}")
+            report.add("redactedCvrs= ${corlaCvrs.redaction().redactedRows().size}; not found in manifest= $countUnknownRedaction")
+            report.add("count duplicate cvr id=$countDup count duplicate redacted cvr id=$countRedactionDup")
             report.add("-------------------------------------------------------------------------------")
         }
         val countCvrsInManifest = totalCards - unmatched

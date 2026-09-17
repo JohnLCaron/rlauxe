@@ -66,7 +66,7 @@ abstract class ColoradoInputWithCvrs(
 ): ColoradoInput(
     generalCanonicalFile, contestRoundFile, tabulateCountyFile, mvrComparisonFile)
 {
-    abstract fun corlaCountyCvrs(countyName: String): CorlaCountyInput?
+    abstract fun corlaCountyInput(countyName: String): CorlaCountyInput?
 }
 
 abstract class ColoradoInput(

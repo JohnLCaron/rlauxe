@@ -95,6 +95,9 @@ interface CorlaRawCvrsIF {
     fun cardStyleMap() : Map<Set<Int>, CvrCardStyle>
     fun cardStyles(): List<CvrCardStyle>
     fun nrows() : Int
+
+    fun headers() : List<String>
+    fun hasBallotType() : Boolean
 }
 
 class CorlaRawCvrs(val inputSource: String,
@@ -210,32 +213,35 @@ class CorlaRawCvrs(val inputSource: String,
     fun readRows(showFirst: Int? = null, showAfter: Int? = null,
                  showRedactedGroups: Boolean = false) {
 
-        while (records.hasNext()) {
-            val line = records.next()
-            if (line.isEmpty()) break
-            rowCount++
+        try {
+            while (records.hasNext()) {
+                val line = records.next()
+                if (line.isEmpty()) break
+                rowCount++
 
-            if (!redaction.isRedaction(line, this)) {
-                try {
-                    val cvr = parseHeader(line, rowCount)
-                    cvr.addVotes(schema, line, rowCount)
+                if (!redaction.isRedaction(line, this)) {
+                    try {
+                        val cvr = parseHeader(line, rowCount)
+                        cvr.addVotes(schema, line, rowCount)
 
-                    // dont discard a cvr that doesnt have any votes
-                    //if (cvr.contestVotes.isNotEmpty()) {
-                    cvrs.add(cvr)
-                    ballotStyles.add(cvr)
-                    //}
+                        // dont discard a cvr that doesnt have any votes
+                        //if (cvr.contestVotes.isNotEmpty()) {
+                        cvrs.add(cvr)
+                        ballotStyles.add(cvr)
+                        //}
 
-                    if (showFirst != null && rowCount < showFirst) println(cvr.show())
-                    if (showAfter != null && rowCount >= showAfter) println(cvr.show())
+                        if (showFirst != null && rowCount < showFirst) println(cvr.show())
+                        if (showAfter != null && rowCount >= showAfter) println(cvr.show())
 
-                } catch (e: Throwable) {
-                    logger.error(e) { "rowCount=$rowCount $line" }
-                    throw e
+                    } catch (e: Throwable) {
+                        logger.error(e) { "rowCount=$rowCount $line" }
+                        throw e
+                    }
                 }
             }
+        } finally {
+            parser.close()
         }
-        parser.close()
 
         if (showRedactedGroups) {
             logger.info{"  read ${redaction.nRedactedRows} Redacted lines from ${inputSource}"}
@@ -296,6 +302,8 @@ class CorlaRawCvrs(val inputSource: String,
     override fun cardStyles() = ballotStyles.cardStyles()
     override fun cvrs() = cvrs
     override fun nrows() = rowCount
+    override fun headers() = headers
+    override fun hasBallotType() = ballotTypeIdx != null
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -313,17 +321,33 @@ data class CvrCardStyle(val name: String, val contestIds: Set<Int>, var countCar
     fun contains(contestId: Int) = contestIds.contains(contestId)
 }
 
+// scenario_ballot_type_present
+// has two ballot styles with same contest set [0,1], these generate a single CardStyle
+// and ballot style [1] has rows with different set [0], [0,1]
+// row 19 could create a second CardStyle with name "1+1" meaning  balot type 1, variant1, with different contest set
+//                    type votes
+// 9,1,1,9,1-1-9,P1,    1, 1,0,1,0
+// 12,1,1,12,1-1-12,P1, 2, 0,1,0,1
+// 19,1,1,19,1-1-19,P1, 1, 1,0,,
+
+
 class BallotStyles {
     // keep track of all the card styles in the file
     val cardStyleMap = mutableMapOf<Set<Int>, CvrCardStyle>()
+    val cardStyleNames = mutableSetOf<String>()
     var anonStyleCount = 0
 
     fun add(cvr:CvrRow) {
-        val contestSet = cvr.contestVotes.map { it.contestId }.toSet()
+        val contestSet = cvr.contests()
         if (contestSet.isEmpty())
             println("redacted ??")
         val ballotType = cardStyleMap.getOrPut(contestSet) {
-            val styleName = if (cvr.ballotType.isNotEmpty()) cvr.ballotType else "Style #${anonStyleCount++}"
+            var styleName = if (cvr.ballotType.isNotEmpty()) cvr.ballotType else "Style #${anonStyleCount++}"
+            if (!cardStyleNames.add(styleName)) {
+                // already has a style with that name
+                styleName = "${cvr.ballotType}#${anonStyleCount++}"
+                cardStyleNames.add(styleName)
+            }
             CvrCardStyle(styleName, contestSet)
         }
         ballotType.countCards++
@@ -349,6 +373,10 @@ data class CvrRow(
     var contestVotes = mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
 
     fun contests() = contestVotes.map { it.contestId }.toSet()
+
+    fun contestVotesFor(contestId: Int): ContestVotes? {
+        return contestVotes.find{ it.contestId == contestId}
+    }
 
     fun candVote(contestId: Int, candId: Int): Int? {
         val contestVote = contestVotes.find{ it.contestId == contestId}
@@ -445,13 +473,13 @@ data class CvrRow(
         }
     }
 
-    fun csvHeader() = buildString {
+    fun csvHeader(redactPrecint: Boolean = false) = buildString {
         append("$cvrNumber,")
         append("$tabulatorNum,")
         append("$batchId,")
         append("$recordId,")
         append("$imprintedId,")
-        append("$precinctPortion,")
+        if (!redactPrecint) append("$precinctPortion,")
         append("$ballotType,")
     }
 

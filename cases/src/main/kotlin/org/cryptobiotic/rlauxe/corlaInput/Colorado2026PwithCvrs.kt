@@ -28,7 +28,7 @@ class Colorado2026PwithCvrs(ac:String?=auditcenter): ColoradoInputWithCvrs(
     // should not be needed TODO get from contestRoundFile
     val countyPopulations = mapOf( "Boulder" to 100423, "La Plata" to 16146, "Morgan" to 5220,"Weld" to 69640)
 
-    override fun corlaCountyCvrs(countyName: String): CorlaCountyInput? {
+    override fun corlaCountyInput(countyName: String): CorlaCountyInput? {
         return when (countyName) {
             "Boulder" -> Boulder26PInput()
             "La Plata" -> LaPlata26PInput()

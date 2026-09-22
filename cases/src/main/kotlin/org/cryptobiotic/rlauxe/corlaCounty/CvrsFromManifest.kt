@@ -24,6 +24,7 @@ import kotlin.random.Random
 
 private val logger = KotlinLogging.logger("CvrsFromManifest")
 
+// used in CorlaCountyElection
 class CvrsFromManifest(
     val variant: ElectionVariant,
     val countyInput: CorlaCountyInput,

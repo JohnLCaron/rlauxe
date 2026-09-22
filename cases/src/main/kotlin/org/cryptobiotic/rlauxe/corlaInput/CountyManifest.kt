@@ -214,8 +214,8 @@ data class ManifestCounts(
     val totalEntries: Int,                    // total entries in the manifest
     val unmatched: Int,                       // count of Manifest entries not in the Cvrs; presumed to be == redacted CVRs
     val countCvrsInManifest: Int,             // count of Cvrs that match entries in the Manifest
-    val cvrNoManifest: Int,                 // cvrs not found in manifest= 50
-    val manifestNoCvr: Int,                 //manifest entries without matching unredacted cvr= 9
+    val cvrNoManifest: Int,                 // cvrs without matching manifest entry
+    val manifestNoCvr: Int,                 // manifest entries without matching cvr
     val match: Map<String, ManifestEntry>,    // imprintedId -> ManifestEntry
     val redactedIds: List<ManifestEntry>      // didnt match a cvr, assume to be in the redactions
 )

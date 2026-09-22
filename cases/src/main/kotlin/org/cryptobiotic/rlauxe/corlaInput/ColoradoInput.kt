@@ -458,16 +458,26 @@ fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAs
 //////////////////////////////////////////////////////////////////////////////
 // see WriteCountyInputData
 
-data class CountyInputData(val county: String, val manifestCount: Int, val ncvrs: Int, val cvrNoManifest:Int, val nredactedCvrs: Int, val ngroups: Int, val minCards: Int)
+// data class CountyInputData(val county: String, val manifestCount: Int, val ncvrs, val cvrInManifest: Int, val cvrNoManifest:Int,
+//    val manifestNoCvr: Int, val ngroups: Int, val minCards: Int)
+data class CountyInputData(val county: String,
+                           val manifestCount: Int,
+                           val unredactedCvrs: Int,
+                           val redactedCvrs: Int,
+                           val cvrInManifest:Int,
+                           val cvrNoManifest:Int,
+                           val manifestNoCvr: Int,
+                           val ngroups: Int,
+                           val minCards: Int)
 
 fun writeCountyInputData(outputFilename: String, data: List<CountyInputData>) {
     // misc data by county
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
-    writer.write("            county,   manifestCount,   ncvrs, cvrNoManifest, nredactedCvrs, ngroups, minCards\n")
+    writer.write("            county,   manifestCount, unredactedCvrs, redactedCvrs, cvrInManifest, cvrNoManifest, manifestNoCvr, ngroups, minCards\n")
     data.sortedBy { it.county }.forEach {
         writer.write(
-            "${sfn(it.county, 20)}, ${nfn(it.manifestCount, 7)}, ${nfn(it.ncvrs, 7)}, ${nfn(it.cvrNoManifest, 7)}, " +
-                "${nfn(it.nredactedCvrs, 5)}, ${nfn(it.ngroups, 5)}, ${nfn(it.minCards, 5)}\n"
+            "${sfn(it.county, 20)}, ${nfn(it.manifestCount, 7)}, ${nfn(it.unredactedCvrs, 7)}, ${nfn(it.redactedCvrs, 7)}, ${nfn(it.cvrInManifest, 7)}, " +
+                    "${nfn(it.cvrNoManifest, 7)}, ${nfn(it.manifestNoCvr, 5)}, ${nfn(it.ngroups, 5)}, ${nfn(it.minCards, 5)}\n"
         )
     }
     writer.close()
@@ -486,11 +496,13 @@ fun readCountyInputData(filename: String): List<CountyInputData> {
         val countyName = tokens[idx++].trim()
         val manifestCount = tokens[idx++].trim().toInt()
         val ncvrs = tokens[idx++].trim().toInt()
+        val redactedCvrs = tokens[idx++].trim().toInt()
+        val cvrInManifest = tokens[idx++].trim().toInt()
         val cvrNoManifest = tokens[idx++].trim().toInt()
         val nredactedRows = tokens[idx++].trim().toInt()
         val ngroups = tokens[idx++].trim().toInt()
         val minCards = tokens[idx].trim().toInt()
-        countyData.add( CountyInputData(countyName, manifestCount, ncvrs, cvrNoManifest, nredactedRows, ngroups, minCards))
+        countyData.add( CountyInputData(countyName, manifestCount, ncvrs, redactedCvrs, cvrInManifest, cvrNoManifest, nredactedRows, ngroups, minCards))
     }
     reader.close()
 

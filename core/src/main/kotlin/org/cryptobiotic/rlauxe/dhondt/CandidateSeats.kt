@@ -199,7 +199,9 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
             lose.maxSeats++
         }
 
-        return ContestSeats(dc.id, partySeats.values.toList())
+        // TODO do we have to descend into the grandchildren ?
+        val failedAssorters = failureNodes.children.map { it.value }.map { it.failure.assorter }
+        return ContestSeats(dc.id, partySeats.values.toList(), failedAssorters)
     }
 
     // or just always make it ??
@@ -425,7 +427,7 @@ data class CandidateSeats(val candId: Int, val candName: String) {
 }
 
 // all candidates min/max/reported for this contest
-data class ContestSeats(val contestId:Int, val candidates: List<CandidateSeats>) {
+data class ContestSeats(val contestId:Int, val candidates: List<CandidateSeats>, val failedAssertions: List<AssorterIF>) {
 
     fun showSeatRanges() = buildString {
         appendLine("ContestId=$contestId")

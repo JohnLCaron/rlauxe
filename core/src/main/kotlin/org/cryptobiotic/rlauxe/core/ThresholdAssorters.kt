@@ -109,7 +109,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     }
 
     fun difficulty(votesForWinner: Int, nvotes: Int): Double {
-        return t * nvotes - votesForWinner
+        return 1.0 / reportedMargin() // t * nvotes - votesForWinner
     }
 
     // TODO how to test this ??
@@ -359,7 +359,7 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     }
 
     fun difficulty(votesForWinner: Int, nvotes: Int): Double {
-        return votesForWinner - t * nvotes
+        return 1.0 / reportedMargin()  // votesForWinner - t * nvotes
     }
 
     /* Olivier has:

@@ -20,7 +20,7 @@ val toptopdir = "$cases/belgium/belgium2024"
 class MakeBelgiumElections {
 
     @Test
-    fun createBelgiumElection() {
+    fun createOneBelgiumElection() {
         val name = "Bruxelles"
         createAndRunOneBelgiumElection(
             name,

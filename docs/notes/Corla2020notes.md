@@ -1,5 +1,5 @@
 # Corla2020 Using votedatabase for Cvrs
-9/11/26
+9/22/26
 
 We obtained the cvr data from https://votedatabase.com for the Colorado 2020 General elections, and used it to run
 a real audit. This is for testing purposes only: the data is not official, some of the data is missing, in particular
@@ -84,14 +84,37 @@ need 15 more redacted cards
 from manifest:
 Douglas,1,Gen-2026,30,295 should be capitalized
 
-**Garfield
+**Garfield**
 
 * has a different cvr file format than usual. see Garfield20cvrs.kt
 * has a different imprintedId than usual see GarfieldManifest.kt.
 
-### Compare El Paso votedatabase CVRS to auditcenter Manifest
+**El Paso**
 
-El Paso shows 577 more cvrs than are in the manifest.
+from https://ballotverifier.clerkandrecorder.elpasoco.com/search?e[0]=8
+
+383,204 Cast Vote Records
+
+|           field |   value |                                           description |
+| --------------- | ------- | ----------------------------------------------------- |
+|          county | El Paso |                                           county name |
+|      population |  382583 |          county population from round.ballotCardCount |
+|   manifestCount |  382583 |                     number of entries in the manifest |
+|   cvrUnredacted |  383160 |                              count of unredacted Cvrs |
+|     cvrRedacted |      44 |                                count of redacted Cvrs |
+|         missing |    -621 |         manifestCount - (cvrUnredacted + cvrRedacted) |
+|   cvrInManifest |  382424 |      count of Cvrs that match entries in the Manifest |
+|   cvrNoManifest |     736 | count of Cvrs that dont match entries in the Manifest |
+|   manifestNoCvr |     159 |        count of Manifest entries that dont match cvrs |
+| minCardsForVote |       8 |                minimum cards needed for missing votes |
+|         ngroups |       0 |                             number of redacted groups |
+
+
+found 383204 - 382583 = 621 manifest entries. 
+
+So votedatabase and new cvrs probably agree, and auditcenter manifest must have been updated.
+
+**old (auditcenter) manifest:**
 
 1. tabulator 10
 * Manifest tabulator 10 has entries up to batch 888
@@ -107,7 +130,7 @@ El Paso shows 577 more cvrs than are in the manifest.
 
 So 608 + 128 - 115 = 621 more CVRS than manifest
 
-## redactions
+## Redactions
 
 * Now catching redactions. See [Redaction2020](Redaction2020.md).
 

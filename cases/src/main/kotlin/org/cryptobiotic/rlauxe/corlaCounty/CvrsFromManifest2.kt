@@ -21,6 +21,7 @@ import kotlin.math.min
 
 private val logger = KotlinLogging.logger("CvrsFromManifest")
 
+// use in CorlaStateElection
 class CvrsFromManifest2(
     val variant: ElectionVariant,
     val countyInput: CorlaCountyInput,

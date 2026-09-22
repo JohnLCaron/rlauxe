@@ -99,11 +99,13 @@ class CorlaPRNG(
         my_count++
         assert(with_replacement || my_count <= my_maximum_index)
 
+        // CORLA's own SHA-256 PRNG draw sequence from the public random seed and the county ballot manifest(s) (SHA256(seed + "," + i) mod domain_size,
         val hash_input = seed + "," + my_count
 
         val hash_output = sha256_digest.digest(hash_input.toByteArray(StandardCharsets.UTF_8))
         val int_output = BigInteger(1, hash_output)
 
+        // domain size = my_maximum - my_minimum + 1
         val in_range = int_output.mod(BigInteger.valueOf((my_maximum - my_minimum + 1).toLong()))
         val pick = my_minimum + in_range.intValueExact()
 

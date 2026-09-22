@@ -1,5 +1,7 @@
+@file:OptIn(ExperimentalSerializationApi::class)
 package org.cryptobiotic.rlauxe.persist.json
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.*
 

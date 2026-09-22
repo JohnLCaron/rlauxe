@@ -9,10 +9,12 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
+import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
+import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("BelgiumClca")
 
@@ -61,6 +63,10 @@ fun createBelgiumElection(
     roundConfig: AuditRoundConfig,
     clear: Boolean = false): Result<AuditRoundIF, ErrorMessages>
 {
+    clearDirectory(Path(topdir))
+    Logging.addFileAppender("cases", "$topdir/logs.log")
+    logger.info {"-------------- createBelgiumElection ${contestd.name} in $topdir"}
+
     val stopwatch = Stopwatch()
     val election = BelgiumClca(contestd, MvrSource.testPrivateMvrs)
 

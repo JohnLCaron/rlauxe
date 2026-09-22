@@ -137,10 +137,12 @@ class DHondtContest(
         }
     }
 
+    // TODO should be the factor from KISS paper
     fun difficulty(assorter: AssorterIF): Double {
         return when (assorter) {
             is DHondtAssorter -> {
-                assorter.voteDiff(votes[assorter.winner()]!!, votes[assorter.loser()]!!)
+                1.0 / assorter.reportedMargin()
+                // assorter.voteDiff(votes[assorter.winner()]!!, votes[assorter.loser()]!!)
             }
             is BelowThreshold -> {
                 // val nvotes = votes.values.sum() does not include undervotes

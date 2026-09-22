@@ -3,6 +3,12 @@ package org.cryptobiotic.rlauxe.dhondt
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
+import org.cryptobiotic.rlauxe.persist.json.readDHondtAssertionContestsJsonUnwrapped
+import org.cryptobiotic.rlauxe.persist.json.readDHondtAssertionsJsonUnwrapped
+import org.cryptobiotic.rlauxe.persist.json.writeDHondtAssertionContestsJson
+import org.cryptobiotic.rlauxe.persist.json.writeDHondtAssertionsJson
+import org.cryptobiotic.rlauxe.persist.json.writeDHondtAssertionsJsonFile
+import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -30,6 +36,33 @@ class TestCandidateSeats {
         val builder = CandSeatRangeBuilder(contestRound)
         // builder.mergedRanges.candidates.forEach { println(it) }
         println(builder.partyRanges.showSeatRanges())
+    }
+
+    @Test
+    fun testWriteOneFailureAssertions() {
+        val contestRound = lastRound.contestRounds.find { it.id == 6 }!!
+        val sampleLimit = sampleLimitMap[contestRound.id]
+        if (sampleLimit != null) {
+            contestRound.haveSampleSize = sampleLimit.limit
+        }
+        // interesting: the dcontest assorters didnt make it through the serialization (inside contestRound.contestUA).....
+        val dcontest = contestRound.contestUA.contest as DHondtContest
+        assertTrue(dcontest.assorters.isEmpty()) // wtf ??
+        val builder = CandSeatRangeBuilder(contestRound)
+        // builder.mergedRanges.candidates.forEach { println(it) }
+        println(builder.partyRanges.showSeatRanges())
+
+        val failedAssorters = builder.failureNodes.children.map { it.value as CandSeatRangeBuilder.AltFailure }.map { it.failure.assorter }
+        val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
+
+        writeDHondtAssertionsJson(dcontest, assorters, builder.partyRanges.candidates)
+
+        val scratchFile = createTempFile().toString()
+        val org =  writeDHondtAssertionsJsonFile(contestRound, builder, scratchFile, true)
+        val roundtrip = readDHondtAssertionsJsonUnwrapped(scratchFile)
+        println("--------------------------------------------------------------------------")
+        println(roundtrip)
+        assertEquals(org, roundtrip)
     }
 
     @Test
@@ -88,6 +121,19 @@ class TestCandidateSeats {
         println()
         println("candidateSums")
         all.candidateSums.forEach { println(it) }
+    }
+
+    @Test
+    fun testAllWrite() {
+        val allSeats = makeAllSeats(lastRound, sampleLimits)
+
+        val scratchFile = createTempFile().toString()
+        val org = writeDHondtAssertionContestsJson(lastRound.contestRounds, allSeats, filename = scratchFile)
+
+        val roundtrip = readDHondtAssertionContestsJsonUnwrapped(scratchFile)
+        println("--------------------------------------------------------------------------")
+        println(roundtrip)
+        assertEquals(org, roundtrip)
     }
 
     @Test

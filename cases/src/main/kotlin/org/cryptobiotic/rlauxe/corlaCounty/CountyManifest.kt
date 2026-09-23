@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.corlaInput
+package org.cryptobiotic.rlauxe.corlaCounty
 
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv

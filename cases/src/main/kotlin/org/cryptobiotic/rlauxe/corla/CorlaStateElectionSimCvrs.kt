@@ -1,7 +1,8 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyContestData
@@ -17,10 +18,10 @@ import kotlin.Int
 import kotlin.String
 import kotlin.io.path.Path
 
-// obsolete use CorlaCountyElection
+// TODO modify CorlaStateElection to work without CVRS ??? or maybe this is it ????
 
 // port CountyElectionSansCvrs using CountyPoolsSimCvrs
-
+// A Corla state election with simulated CVRS
 // We want to synthesis cvrs and use them as the cvrPools
 // generate countyPools from auditcenter
 open class CountyElectionSimCvrs (

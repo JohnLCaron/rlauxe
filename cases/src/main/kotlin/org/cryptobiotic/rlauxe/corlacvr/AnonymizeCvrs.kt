@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -26,6 +27,7 @@ Terminology used throughout this module:
                   '1' means the contest is present on the ballot, '0' means
                   it is absent.  This is the only style definition that
                   drives redaction decisions.
+                  drives redaction decisions.
 
   named_style   — the value in the column identified by --stylecol, if any.
                   Assigned by the voting machine; almost certainly obsolete
@@ -35,6 +37,7 @@ Terminology used throughout this module:
 */
 
 private val logger = KotlinLogging.logger("AnonymizeCvr2")
+private val warnLeakage = false
 
 private const val NEAR_UNANIMOUS_THRESHOLD = 2  // "all but N votes" triggers balancing (Rule c)
 private const val MIN_CONTRASTING_VOTES = 3  // contrasting votes needed per contest after balancing
@@ -1327,7 +1330,7 @@ class Anonymize(
                 val last = schema.nchoices
                 val aggrow = buildString {
                     append("AGGREGATED")
-                    repeat(schema.nheaders - 1) { append(",") }
+                    repeat(schema.nheaders - 2) { append(",") }
                     append("AGGREGATED,")
                     var count = 0
                     schema.contests.forEach { scontest ->
@@ -1349,7 +1352,8 @@ class Anonymize(
 
                 val ncardrow = buildString {
                     append("AGGREGATED")
-                    repeat(schema.nheaders - 1) { append(",") }
+                    repeat(schema.nheaders - 2) { append(",") }
+                    append("${redactedRows.size},")
                     append("NCARDS,")
                     var count = 0
                     schema.contests.forEach { scontest ->
@@ -1470,8 +1474,10 @@ class Anonymize(
 
         val needs = checkRedactionNeeds(index, db, minBallots, redactOnPrecinct)
 
-        for (warning in needs.leakageWarnings) {
-            System.err.println("WARNING: $warning")
+        if (warnLeakage) {
+            for (warning in needs.leakageWarnings) {
+                System.err.println("WARNING: $warning")
+            }
         }
 
         reportCheckResults(index, db, needs, redactOnPrecinct)

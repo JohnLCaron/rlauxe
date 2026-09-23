@@ -66,7 +66,7 @@ abstract class ColoradoInputWithCvrs(
 ): ColoradoInput(
     generalCanonicalFile, contestRoundFile, tabulateCountyFile, mvrComparisonFile)
 {
-    abstract fun corlaCountyInput(countyName: String): CorlaCountyInput?
+    abstract fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>? = null): CorlaCountyInput?
 }
 
 abstract class ColoradoInput(
@@ -467,17 +467,17 @@ data class CountyInputData(val county: String,
                            val cvrInManifest:Int,
                            val cvrNoManifest:Int,
                            val manifestNoCvr: Int,
-                           val ngroups: Int,
+                           val countNredacted: Int,
                            val minCards: Int)
 
 fun writeCountyInputData(outputFilename: String, data: List<CountyInputData>) {
     // misc data by county
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
-    writer.write("            county,   manifestCount, unredactedCvrs, redactedCvrs, cvrInManifest, cvrNoManifest, manifestNoCvr, ngroups, minCards\n")
+    writer.write("            county,   manifestCount, unredactedCvrs, redactedCvrs, cvrInManifest, cvrNoManifest, manifestNoCvr, countNredacted, minCards\n")
     data.sortedBy { it.county }.forEach {
         writer.write(
             "${sfn(it.county, 20)}, ${nfn(it.manifestCount, 7)}, ${nfn(it.unredactedCvrs, 7)}, ${nfn(it.redactedCvrs, 7)}, ${nfn(it.cvrInManifest, 7)}, " +
-                    "${nfn(it.cvrNoManifest, 7)}, ${nfn(it.manifestNoCvr, 5)}, ${nfn(it.ngroups, 5)}, ${nfn(it.minCards, 5)}\n"
+                    "${nfn(it.cvrNoManifest, 7)}, ${nfn(it.manifestNoCvr, 5)}, ${nfn(it.countNredacted, 5)}, ${nfn(it.minCards, 5)}\n"
         )
     }
     writer.close()
@@ -500,9 +500,9 @@ fun readCountyInputData(filename: String): List<CountyInputData> {
         val cvrInManifest = tokens[idx++].trim().toInt()
         val cvrNoManifest = tokens[idx++].trim().toInt()
         val nredactedRows = tokens[idx++].trim().toInt()
-        val ngroups = tokens[idx++].trim().toInt()
+        val countNredacted = tokens[idx++].trim().toInt()
         val minCards = tokens[idx].trim().toInt()
-        countyData.add( CountyInputData(countyName, manifestCount, ncvrs, redactedCvrs, cvrInManifest, cvrNoManifest, nredactedRows, ngroups, minCards))
+        countyData.add( CountyInputData(countyName, manifestCount, ncvrs, redactedCvrs, cvrInManifest, cvrNoManifest, nredactedRows, countNredacted, minCards))
     }
     reader.close()
 

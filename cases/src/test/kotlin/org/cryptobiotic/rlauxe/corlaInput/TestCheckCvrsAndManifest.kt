@@ -1,17 +1,15 @@
-package org.cryptobiotic.rlauxe.corlaCounty
+package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
 import kotlin.test.Test
 
-class TestCorlaCountyCvrs {
+class TestCheckCvrsAndManifest {
 
     @Test
     fun testOneCorlaCountyInput() {
         val stateInput = Colorado2026PwithCvrs()
         val input = stateInput.corlaCountyInput("Boulder")!!
 
-        CheckCvrsAndManifest(stateInput, input, compareMissingVotes=true)
+        CheckCvrsAndManifest(stateInput, input, compareMissingVotes = true)
     }
 
     @Test

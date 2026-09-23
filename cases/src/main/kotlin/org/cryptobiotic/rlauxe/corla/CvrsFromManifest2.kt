@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.corlaCounty
+package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
@@ -7,9 +7,10 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
-import org.cryptobiotic.rlauxe.corlaInput.ManifestCounts
-import org.cryptobiotic.rlauxe.corlaInput.ManifestEntry
-import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
+import org.cryptobiotic.rlauxe.corlaCounty.ManifestCounts
+import org.cryptobiotic.rlauxe.corlaCounty.ManifestEntry
 import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -45,7 +46,6 @@ class CvrsFromManifest2(
 
     val redactedPools: List<CardPool>
     val redactedTabs : Map<Int, ContestTabulation>
-    // val redactedCards = mutableListOf<AuditableCard>()
 
     init {
         val corlaCvrs = countyInput.readCorlaCvrs()

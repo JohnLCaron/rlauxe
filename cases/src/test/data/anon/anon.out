@@ -1,0 +1,1961 @@
+/usr/lib/jvm/jdk-21-oracle-x64/bin/java -javaagent:/home/stormy/.local/share/JetBrains/Toolbox/apps/intellij-idea-ultimate/plugins/java/lib/rt/debugger-agent.jar=file:///tmp/capture11395896496615825199.props -ea -Didea.test.cyclic.buffer.size=1048576 -javaagent:/home/stormy/.local/share/JetBrains/Toolbox/apps/intellij-idea-ultimate/lib/idea_rt.jar=34789 -Dkotlinx.coroutines.debug.enable.creation.stack.trace=false -Ddebugger.agent.enable.coroutines=true -Dkotlinx.coroutines.debug.enable.flows.stack.trace=true -Dkotlinx.coroutines.debug.enable.mutable.state.flows.stack.trace=true -Ddebugger.async.stack.trace.for.all.threads=true -Ddebugger.agent.enable.log.capture=true -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 @/tmp/idea_arg_file327783501 com.intellij.rt.junit.JUnitStarter -ideVersion5 -junit5 org.cryptobiotic.rlauxe.corlacvr.TestAnonymizeCvrs,testAnonymize2020Cvrs
+kotlin-logging: initializing... active logger factory: Slf4jLoggerFactory
+===========================================================================================
+County Adams from /home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Adams/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Adams.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Adams.csv.
+That took 2.504 s
+success
+===========================================================================================
+County Alamosa from /home/stormy/datadrive/votedatabase/cvr/Colorado/Alamosa/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Alamosa/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Alamosa.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Alamosa.csv.
+That took 53.37 ms
+success
+===========================================================================================
+County Arapahoe from /home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Arapahoe/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Arapahoe.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+  Rare ballot styles (14 of 80 total):
+    2 ballot(s)  [ballot type: "11", style #73]
+    2 ballot(s)  [ballot type: "18", style #11]
+    8 ballot(s)  [ballot type: "16", "19", "21", "5", "67", "69", style #9]
+    2 ballot(s)  [ballot type: "2", style #26]
+    1 ballot(s)  [ballot type: "49", style #6]
+    1 ballot(s)  [ballot type: "49", style #71]
+    3 ballot(s)  [ballot type: "58", "9", style #68]
+    2 ballot(s)  [ballot type: "12", "6", style #1]
+    1 ballot(s)  [ballot type: "63", style #61]
+    2 ballot(s)  [ballot type: "55", "68", style #52]
+    2 ballot(s)  [ballot type: "9", style #19]
+    2 ballot(s)  [ballot type: "9", style #75]
+    2 ballot(s)  [ballot type: "9", style #32]
+    1 ballot(s)  [ballot type: "PROP", style #79]
+
+Redaction is needed.
+*** Pass 2: Building the aggregate row.
+
+ndonors = 1500
+*** 146388 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 146821 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+  Rare ballots: 31.
+  Borrowing from common styles to satisfy these requirements:
+  - the ballot aggregation must contain at least 10 ballots.
+  - every contest in the rare styles must appear on at least 10 ballots in the aggregation.
+
+  Contests below minimum:
+    'State Senator - District 26': needs 7 more ballot(s)
+    'State Senator - District 27': needs 2 more ballot(s)
+    'State Senator - District 29': needs 4 more ballot(s)
+    'State Representative - District 3': needs 8 more ballot(s)
+    'State Representative - District 37': needs 5 more ballot(s)
+    'State Representative - District 38': needs 6 more ballot(s)
+    'State Representative - District 40': needs 9 more ballot(s)
+    'State Representative - District 42': needs 8 more ballot(s)
+    'State Representative - District 56': needs 6 more ballot(s)
+    'Regional Transportation District Director - District D': needs 9 more ballot(s)
+    'Regional Transportation District Director - District E': needs 8 more ballot(s)
+    'Regional Transportation District Director - District G': needs 4 more ballot(s)
+    'Regional Transportation District Director - District H': needs 4 more ballot(s)
+    'Arapahoe County Commissioner - District 1': needs 7 more ballot(s)
+    'Arapahoe County Commissioner - District 5': needs 8 more ballot(s)
+    'Referred Ballot Question No. 3A': needs 7 more ballot(s)
+    'Initiated Ballot Question No. 300': needs 7 more ballot(s)
+    'Ballot Issue 4C': needs 7 more ballot(s)
+    'Ballot Issue 6A': needs 9 more ballot(s)
+    'Ballot Issue 6B': needs 9 more ballot(s)
+
+  Selecting ballots to borrow from common styles (this can take a few minutes)...
+*** 93097 contestVotes = ContestVotes(contestId=19, votedFor=[])
+*** 93115 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 93120 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 93126 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 93098 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 93099 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 93121 contestVotes = ContestVotes(contestId=19, votedFor=[])
+*** 93132 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+  Ballots borrowed for minimum counts: 53
+
+*** Balancing near-unanimous contests.
+
+  Make sure that the following constraint is met:
+  - No contest in the aggregate may be near-unanimous. 'Near-unanimous'
+    means all but 2 votes go to a single choice.
+
+  There are no near-unanimous contests.
+
+*** Pass 2 complete.
+  Ballots from rare styles/precincts: 31
+  Ballots borrowed from common styles: 53
+  Total ballots in aggregate: 84
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Arapahoe.csv.
+That took 8.188 s
+AGGREGATED,,,,,,,AGGREGATED,50,17,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,43,20,0,0,2,0,0,0,0,5,3,0,0,0,6,5,1,0,25,31,0,4,6,1,0,1,28,26,3,13,13,1,7,6,10,9,9,11,,,11,7,1,,,,6,5,5,5,5,6,3,3,3,,,8,4,4,2,36,42,,,,5,8,21,5,4,5,2,4,11,6,0,13,11,3,3,3,50,23,47,24,43,28,49,22,55,16,46,25,52,19,51,20,57,13,49,21,53,17,50,20,49,21,49,21,41,35,31,47,52,29,42,36,52,30,43,39,35,45,35,45,49,30,40,37,48,34,,,,,5,5,5,5,5,5,,,29,8,30,7,0,2,5,5,5,5
+AGGREGATED,,,,,,,NCARDS,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,68,9,9,9,9,9,12,12,12,12,62,62,62,62,9,9,9,9,62,62,62,28,28,28,13,13,22,22,20,20,0,0,20,20,20,0,0,0,12,12,10,10,11,11,10,10,10,0,0,10,10,10,10,83,83,0,0,0,10,11,28,10,10,18,18,18,19,19,19,25,25,10,10,10,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,0,0,0,0,10,10,10,10,10,10,0,0,38,38,38,38,2,2,10,10,10,10
+success
+===========================================================================================
+County Archuleta from /home/stormy/datadrive/votedatabase/cvr/Colorado/Archuleta/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Archuleta/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Archuleta.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Archuleta.csv.
+That took 108.8 ms
+success
+===========================================================================================
+County Bent from /home/stormy/datadrive/votedatabase/cvr/Colorado/Bent/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Bent/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Bent.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Bent.csv.
+That took 28.28 ms
+success
+===========================================================================================
+County Boulder from /home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Boulder.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Boulder.csv.
+That took 1.267 s
+success
+===========================================================================================
+County Broomfield from /home/stormy/datadrive/votedatabase/cvr/Colorado/Broomfield/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Broomfield/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Broomfield.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Broomfield.csv.
+That took 245.6 ms
+success
+===========================================================================================
+County Chaffee from /home/stormy/datadrive/votedatabase/cvr/Colorado/Chaffee/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Chaffee/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Chaffee.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Chaffee.csv.
+That took 63.37 ms
+success
+===========================================================================================
+County Cheyenne from /home/stormy/datadrive/votedatabase/cvr/Colorado/Cheyenne/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Cheyenne/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Cheyenne.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Cheyenne.csv.
+That took 4.702 ms
+success
+===========================================================================================
+County Clear Creek from /home/stormy/datadrive/votedatabase/cvr/Colorado/Clear Creek/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Clear Creek/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Clear Creek.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Clear Creek.csv.
+That took 27.30 ms
+success
+===========================================================================================
+County Conejos from /home/stormy/datadrive/votedatabase/cvr/Colorado/Conejos/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Conejos/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Conejos.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Conejos.csv.
+That took 17.66 ms
+success
+===========================================================================================
+County Costilla from /home/stormy/datadrive/votedatabase/cvr/Colorado/Costilla/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Costilla/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Costilla.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Costilla.csv.
+That took 7.726 ms
+success
+===========================================================================================
+County Crowley from /home/stormy/datadrive/votedatabase/cvr/Colorado/Crowley/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Crowley/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Crowley.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Crowley.csv.
+That took 6.221 ms
+success
+===========================================================================================
+County Custer from /home/stormy/datadrive/votedatabase/cvr/Colorado/Custer/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Custer/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Custer.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Custer.csv.
+That took 13.46 ms
+success
+===========================================================================================
+County Delta from /home/stormy/datadrive/votedatabase/cvr/Colorado/Delta/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Delta/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Delta.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Delta.csv.
+That took 94.95 ms
+success
+===========================================================================================
+County Denver from /home/stormy/datadrive/votedatabase/cvr/Colorado/Denver/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Denver/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Denver.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+  Rare ballot styles (1 of 50 total):
+    2 ballot(s)  [ballot type: "5 (5)", style #49]
+
+Redaction is needed.
+*** Pass 2: Building the aggregate row.
+
+ndonors = 491
+*** 1167680 contestVotes = ContestVotes(contestId=19, votedFor=[])
+*** 1167767 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+  Rare ballots: 2.
+  Borrowing from common styles to satisfy these requirements:
+  - the ballot aggregation must contain at least 10 ballots.
+  - every contest in the rare styles must appear on at least 10 ballots in the aggregation.
+
+  Aggregate has 2 ballot(s); need 8 more to reach minimum of 10.
+  Contests below minimum:
+    'Presidential Electors': needs 8 more ballot(s)
+    'United States Senator': needs 8 more ballot(s)
+    'Representative to the 117th United States Congress - District 1': needs 8 more ballot(s)
+    'State Board of Education Member - Congressional District 1': needs 8 more ballot(s)
+    'State Senator - District 31': needs 8 more ballot(s)
+    'State Representative - District 5': needs 8 more ballot(s)
+    'District Attorney - 2nd Judicial District': needs 8 more ballot(s)
+    'Regional Transportation District Director - District A': needs 8 more ballot(s)
+    'Supreme Court Hart': needs 8 more ballot(s)
+    'Supreme Court Samour': needs 8 more ballot(s)
+    'Court of Appeals Tow': needs 8 more ballot(s)
+    'Court of Appeals Welling': needs 8 more ballot(s)
+    'District Judge - 2nd Judicial District Baumann': needs 8 more ballot(s)
+    'District Judge - 2nd Judicial District Egelhoff': needs 8 more ballot(s)
+    'District Judge - 2nd Judicial District Elliff': needs 8 more ballot(s)
+    'District Judge - 2nd Judicial District Jones': needs 8 more ballot(s)
+    'District Judge - 2nd Judicial District Vallejos': needs 8 more ballot(s)
+    'District Judge - 2nd Judicial District Leith': needs 8 more ballot(s)
+    'County Judge - Denver Faragher': needs 8 more ballot(s)
+    'County Judge - Denver Pallares': needs 8 more ballot(s)
+    'County Judge - Denver Rodarte': needs 8 more ballot(s)
+    'County Judge - Denver Rudolph': needs 8 more ballot(s)
+    'County Judge - Denver Schwartz': needs 8 more ballot(s)
+    'County Judge - Denver Simonet': needs 8 more ballot(s)
+    'County Judge - Denver Spahn': needs 8 more ballot(s)
+    'Amendment B': needs 8 more ballot(s)
+    'Amendment C': needs 8 more ballot(s)
+    'Amendment 76': needs 8 more ballot(s)
+    'Amendment 77': needs 8 more ballot(s)
+    'Proposition EE': needs 8 more ballot(s)
+    'Proposition 113': needs 8 more ballot(s)
+    'Proposition 114': needs 8 more ballot(s)
+    'Proposition 115': needs 8 more ballot(s)
+    'Proposition 116': needs 8 more ballot(s)
+    'Proposition 117': needs 8 more ballot(s)
+    'Proposition 118': needs 8 more ballot(s)
+    'Ballot Measure 2A': needs 8 more ballot(s)
+    'Ballot Measure 2B': needs 8 more ballot(s)
+    'Ballot Measure 2C': needs 8 more ballot(s)
+    'Ballot Measure 2D': needs 8 more ballot(s)
+    'Ballot Measure 2E': needs 8 more ballot(s)
+    'Ballot Measure 2F': needs 8 more ballot(s)
+    'Ballot Measure 2G': needs 8 more ballot(s)
+    'Ballot Measure 2H': needs 8 more ballot(s)
+    'Ballot Measure 2I': needs 8 more ballot(s)
+    'Ballot Measure 2J': needs 8 more ballot(s)
+    'Ballot Measure 4A': needs 8 more ballot(s)
+    'Ballot Measure 4B': needs 8 more ballot(s)
+
+  Selecting ballots to borrow from common styles (this can take a few minutes)...
+*** 925 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 933 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 252 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 586 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 674 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 741 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 473 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 88 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 12 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 33 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 651 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 77 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 1687 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 109 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 2517 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 117 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+  Ballots borrowed for minimum counts: 32
+
+*** Balancing near-unanimous contests.
+
+  Make sure that the following constraint is met:
+  - No contest in the aggregate may be near-unanimous. 'Near-unanimous'
+    means all but 2 votes go to a single choice.
+
+  There are no near-unanimous contests.
+
+*** Pass 2 complete.
+  Ballots from rare styles/precincts: 2
+  Ballots borrowed from common styles: 32
+  Total ballots in aggregate: 34
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Denver.csv.
+That took 9.943 s
+AGGREGATED,,,,,,AGGREGATED,12,5,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,6,0,0,0,0,0,0,0,7,11,0,0,0,7,9,0,0,5,4,,,,,,,,,4,5,0,3,2,0,,2,0,1,0,11,4,3,4,2,,,11,6,11,6,11,5,11,5,13,3,11,5,11,5,12,4,10,6,9,7,11,5,9,7,10,6,11,5,9,7,9,7,10,6,10,7,7,10,8,9,10,7,12,5,10,7,4,5,4,5,4,4,4,5,4,4,4,5,4,5,4,4,4,4,4,4,5,3,4,4,5,3,4,4,4,4,4,5,5,4
+AGGREGATED,,,,,,NCARDS,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,10,10,0,0,0,0,0,0,0,0,10,10,10,5,5,5,0,2,1,1,1,18,18,11,11,11,0,0,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10
+success
+===========================================================================================
+County Dolores from /home/stormy/datadrive/votedatabase/cvr/Colorado/Dolores/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Dolores/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Dolores.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Dolores.csv.
+That took 6.133 ms
+success
+===========================================================================================
+County Douglas from /home/stormy/datadrive/votedatabase/cvr/Colorado/Douglas/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Douglas/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Douglas.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Douglas.csv.
+That took 1.308 s
+success
+===========================================================================================
+County Eagle from /home/stormy/datadrive/votedatabase/cvr/Colorado/Eagle/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Eagle/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Eagle.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Eagle.csv.
+That took 220.8 ms
+success
+===========================================================================================
+County El Paso from /home/stormy/datadrive/votedatabase/cvr/Colorado/El Paso/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/El Paso/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/El Paso.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/El Paso.csv.
+That took 2.443 s
+success
+===========================================================================================
+County Elbert from /home/stormy/datadrive/votedatabase/cvr/Colorado/Elbert/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Elbert/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Elbert.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Elbert.csv.
+That took 96.53 ms
+success
+===========================================================================================
+County Fremont from /home/stormy/datadrive/votedatabase/cvr/Colorado/Fremont/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Fremont/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Fremont.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Fremont.csv.
+That took 109.0 ms
+success
+===========================================================================================
+County Garfield from /home/stormy/datadrive/votedatabase/cvr/Colorado/Garfield/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Garfield/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Garfield.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+java.lang.NullPointerException
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrs.<init>(CorlaRawCvrs.kt:199)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsKt.readCorlaCvrsFromFile(CorlaRawCvrs.kt:47)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsKt.readCorlaCvrsFromFile$default(CorlaRawCvrs.kt:31)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsKt.readCorlaCvrs(CorlaRawCvrs.kt:28)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsKt.readCorlaCvrs$default(CorlaRawCvrs.kt:25)
+	at org.cryptobiotic.rlauxe.corlacvr.Anonymize.<init>(AnonymizeCvrs.kt:62)
+	at org.cryptobiotic.rlauxe.corlacvr.AnonymizeCvrsCli.execute(AnonymizeCvrsCli.kt:141)
+	at org.cryptobiotic.rlauxe.corlacvr.AnonymizeCvrsCli.main(AnonymizeCvrsCli.kt:130)
+	at org.cryptobiotic.rlauxe.corlacvr.TestAnonymizeCvrs.testAnonymize2020Cvrs(TestAnonymizeCvrs.kt:126)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:63)
+	at com.intellij.junit5.JUnit5TestRunnerHelper.execute(JUnit5TestRunnerHelper.java:134)
+	at com.intellij.junit5.JUnit5IdeaTestRunner.startRunnerWithArgs(JUnit5IdeaTestRunner.java:70)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
+	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
+	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:226)
+	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:62)
+2026-09-22T15:21:12 ERROR CorlaRawCvrs: Error on /home/stormy/datadrive/votedatabase/cvr/Colorado/Garfield/cvr.csv
+java.lang.NullPointerException
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrs.<init>(CorlaRawCvrs.kt:199)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsKt.readCorlaCvrsFromFile(CorlaRawCvrs.kt:47)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsKt.readCorlaCvrsFromFile$default(CorlaRawCvrs.kt:31)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsKt.readCorlaCvrs(CorlaRawCvrs.kt:28)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsKt.readCorlaCvrs$default(CorlaRawCvrs.kt:25)
+	at org.cryptobiotic.rlauxe.corlacvr.Anonymize.<init>(AnonymizeCvrs.kt:62)
+	at org.cryptobiotic.rlauxe.corlacvr.AnonymizeCvrsCli.execute(AnonymizeCvrsCli.kt:141)
+	at org.cryptobiotic.rlauxe.corlacvr.AnonymizeCvrsCli.main(AnonymizeCvrsCli.kt:130)
+	at org.cryptobiotic.rlauxe.corlacvr.TestAnonymizeCvrs.testAnonymize2020Cvrs(TestAnonymizeCvrs.kt:126)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+java.lang.NullPointerException
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrs.<init>(CorlaRawCvrs.kt:199)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsKt.readCorlaCvrsFromFile(CorlaRawCvrs.kt:47)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsKt.readCorlaCvrsFromFile$default(CorlaRawCvrs.kt:31)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsKt.readCorlaCvrs(CorlaRawCvrs.kt:28)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsKt.readCorlaCvrs$default(CorlaRawCvrs.kt:25)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.cryptobiotic.rlauxe.corlacvr.Anonymize.<init>(AnonymizeCvrs.kt:62)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.cryptobiotic.rlauxe.corlacvr.AnonymizeCvrsCli.execute(AnonymizeCvrsCli.kt:141)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.cryptobiotic.rlauxe.corlacvr.AnonymizeCvrsCli.main(AnonymizeCvrsCli.kt:130)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.cryptobiotic.rlauxe.corlacvr.TestAnonymizeCvrs.testAnonymize2020Cvrs(TestAnonymizeCvrs.kt:126)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:63)
+	at com.intellij.junit5.JUnit5TestRunnerHelper.execute(JUnit5TestRunnerHelper.java:134)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at com.intellij.junit5.JUnit5IdeaTestRunner.startRunnerWithArgs(JUnit5IdeaTestRunner.java:70)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
+	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:226)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:62)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47)
+	at org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:63)
+	at com.intellij.junit5.JUnit5TestRunnerHelper.execute(JUnit5TestRunnerHelper.java:134)
+	at com.intellij.junit5.JUnit5IdeaTestRunner.startRunnerWithArgs(JUnit5IdeaTestRunner.java:70)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
+	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
+	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
+	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:226)
+	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:62)
+success
+===========================================================================================
+County Gilpin from /home/stormy/datadrive/votedatabase/cvr/Colorado/Gilpin/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Gilpin/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Gilpin.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Gilpin.csv.
+That took 22.25 ms
+success
+===========================================================================================
+County Grand from /home/stormy/datadrive/votedatabase/cvr/Colorado/Grand/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Grand/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Grand.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Grand.csv.
+That took 55.60 ms
+success
+===========================================================================================
+County Hinsdale from /home/stormy/datadrive/votedatabase/cvr/Colorado/Hinsdale/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Hinsdale/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Hinsdale.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Hinsdale.csv.
+That took 2.627 ms
+success
+===========================================================================================
+County Huerfano from /home/stormy/datadrive/votedatabase/cvr/Colorado/Huerfano/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Huerfano/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Huerfano.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Huerfano.csv.
+That took 17.43 ms
+success
+===========================================================================================
+County Jackson from /home/stormy/datadrive/votedatabase/cvr/Colorado/Jackson/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Jackson/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Jackson.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Jackson.csv.
+That took 3.430 ms
+success
+===========================================================================================
+County Jefferson from /home/stormy/datadrive/votedatabase/cvr/Colorado/Jefferson/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Jefferson/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Jefferson.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Jefferson.csv.
+That took 2.408 s
+success
+===========================================================================================
+County Kiowa from /home/stormy/datadrive/votedatabase/cvr/Colorado/Kiowa/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Kiowa/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Kiowa.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Kiowa.csv.
+That took 3.835 ms
+success
+===========================================================================================
+County Kit Carson from /home/stormy/datadrive/votedatabase/cvr/Colorado/Kit Carson/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Kit Carson/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Kit Carson.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Kit Carson.csv.
+That took 29.53 ms
+success
+===========================================================================================
+County La Plata from /home/stormy/datadrive/votedatabase/cvr/Colorado/La Plata/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/La Plata/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/La Plata.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+  Rare ballot styles (2 of 7 total):
+    4 ballot(s)  [ballot type: "6", style #6]
+    6 ballot(s)  [ballot type: "7", style #5]
+
+Redaction is needed.
+*** Pass 2: Building the aggregate row.
+
+ndonors = 200
+  Rare ballots: 10.
+  Borrowing from common styles to satisfy these requirements:
+  - the ballot aggregation must contain at least 10 ballots.
+  - every contest in the rare styles must appear on at least 10 ballots in the aggregation.
+
+  Contests below minimum:
+    'Forest Lakes Metropolitan District Ballot Issue 6A': needs 6 more ballot(s)
+    'Los Pinos Fire Protection District Ballot Issue 7A': needs 4 more ballot(s)
+
+  Selecting ballots to borrow from common styles (this can take a few minutes)...
+*** 46 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 87 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 177 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 191 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 5 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 33 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 45 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 296 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 52 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 411 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+  Ballots borrowed for minimum counts: 10
+
+*** Balancing near-unanimous contests.
+
+  Make sure that the following constraint is met:
+  - No contest in the aggregate may be near-unanimous. 'Near-unanimous'
+    means all but 2 votes go to a single choice.
+
+  There are no near-unanimous contests.
+
+*** Pass 2 complete.
+  Ballots from rare styles/precincts: 10
+  Ballots borrowed from common styles: 10
+  Total ballots in aggregate: 20
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/La Plata.csv.
+That took 254.2 ms
+AGGREGATED,,,,,,,AGGREGATED,7,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,3,0,0,0,0,0,0,0,2,7,1,0,7,3,3,7,9,7,3,7,2,6,1,6,1,6,1,5,2,6,1,6,1,6,4,6,4,6,4,5,5,8,2,8,2,8,2,5,5,3,7,4,6,6,4,,,5,5,4,6
+AGGREGATED,,,,,,,NCARDS,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,0,0,10,10,10,10
+success
+===========================================================================================
+County Lake from /home/stormy/datadrive/votedatabase/cvr/Colorado/Lake/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Lake/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Lake.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Lake.csv.
+That took 17.31 ms
+success
+===========================================================================================
+County Larimer from /home/stormy/datadrive/votedatabase/cvr/Colorado/Larimer/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Larimer/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Larimer.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+  Rare ballot styles (4 of 30 total):
+    3 ballot(s)  [ballot type: "802", style #28]
+    2 ballot(s)  [ballot type: "804", style #27]
+    1 ballot(s)  [ballot type: "806", style #29]
+    3 ballot(s)  [ballot type: "807", style #25]
+
+Redaction is needed.
+*** Pass 2: Building the aggregate row.
+
+ndonors = 272
+  Rare ballots: 9.
+  Borrowing from common styles to satisfy these requirements:
+  - the ballot aggregation must contain at least 10 ballots.
+  - every contest in the rare styles must appear on at least 10 ballots in the aggregation.
+
+  Aggregate has 9 ballot(s); need 1 more to reach minimum of 10.
+  Contests below minimum:
+    'Larimer County Rockview Wildflower Ridge Public Improvement District No. 71 Ballot Issue 6F': needs 8 more ballot(s)
+    'Larimer County Vine Drive Public Improvement District No. 29 Ballot Issue 6G': needs 7 more ballot(s)
+    'Larimer County Meadows at Rolling Hills Public Improvement District No. 73 Ballot Issue 6H': needs 9 more ballot(s)
+    'Larimer County Crystal View Public Improvement District No. 69 Ballot Issue 6I': needs 7 more ballot(s)
+
+  Selecting ballots to borrow from common styles (this can take a few minutes)...
+*** 2084 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 13466 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 14654 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 10390 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 16687 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 19983 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 2092 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 5275 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 4685 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 37724 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 18091 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 39175 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 6510 contestVotes = ContestVotes(contestId=19, votedFor=[])
+*** 32912 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 9163 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 32932 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 11238 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 47693 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 9648 contestVotes = ContestVotes(contestId=19, votedFor=[])
+*** 38395 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 10484 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 42373 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 15334 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 15351 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 17423 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 29227 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 37912 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 38531 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 46934 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 65589 contestVotes = ContestVotes(contestId=19, votedFor=[])
+*** 66647 contestVotes = ContestVotes(contestId=19, votedFor=[])
+  Ballots borrowed for minimum counts: 31
+
+*** Balancing near-unanimous contests.
+
+  Make sure that the following constraint is met:
+  - No contest in the aggregate may be near-unanimous. 'Near-unanimous'
+    means all but 2 votes go to a single choice.
+
+    'Larimer County Meadows at Rolling Hills Public Improvement District No. 73 Ballot Issue 6H': 'Yes/For' has 10 out of 10 votes
+
+  WARNING: the following contests remain near-unanimous after balancing.
+  No contrasting ballots were available in the donor pool.
+    'Larimer County Meadows at Rolling Hills Public Improvement District No. 73 Ballot Issue 6H': 'Yes/For' has 10 out of 10 votes
+
+*** Pass 2 complete.
+  Ballots from rare styles/precincts: 9
+  Ballots borrowed from common styles: 31
+  Total ballots in aggregate: 40
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Larimer.csv.
+That took 2.331 s
+AGGREGATED,,,,,,AGGREGATED,24,6,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22,9,0,0,0,0,0,0,0,21,9,1,0,22,6,1,2,5,,,12,5,2,0,0,,,5,1,24,7,22,9,21,10,24,5,23,6,21,8,22,6,21,6,23,6,21,6,11,18,21,6,18,8,20,8,20,11,15,14,13,18,15,16,25,6,21,10,21,10,9,22,13,18,15,16,16,13,,,,,,,,,,,6,1,5,2,,,,,,,5,5,5,5,10,0,5,5,,
+AGGREGATED,,,,,,NCARDS,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,7,7,0,0,17,17,7,7,7,0,0,7,7,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,0,0,0,0,0,0,0,0,0,0,7,7,7,7,0,0,0,0,0,0,10,10,10,10,10,10,10,10,0,0
+success
+===========================================================================================
+County Lincoln from /home/stormy/datadrive/votedatabase/cvr/Colorado/Lincoln/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Lincoln/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Lincoln.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Lincoln.csv.
+That took 11.46 ms
+success
+===========================================================================================
+County Logan from /home/stormy/datadrive/votedatabase/cvr/Colorado/Logan/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Logan/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Logan.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Logan.csv.
+That took 69.85 ms
+success
+===========================================================================================
+County Mesa from /home/stormy/datadrive/votedatabase/cvr/Colorado/Mesa/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Mesa/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Mesa.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+  Rare ballot styles (9 of 18 total):
+    5 ballot(s)  [ballot type: "Redlands No. 1", style #14]
+    5 ballot(s)  [ballot type: "Redlands No. 1", style #15]
+    5 ballot(s)  [ballot type: "Redlands No. 9", style #12]
+    5 ballot(s)  [ballot type: "Redlands No. 9", style #13]
+    7 ballot(s)  [style #7]
+    9 ballot(s)  [style #10]
+    6 ballot(s)  [style #11]
+    3 ballot(s)  [style #16]
+    2 ballot(s)  [style #17]
+
+Redaction is needed.
+*** Pass 2: Building the aggregate row.
+
+ndonors = 320
+*** 1263 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 3176 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 8266 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 8306 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 18369 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 21423 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 41691 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 42245 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 42317 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 45130 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 49905 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 58829 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 74101 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 81774 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 82408 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 83350 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 83736 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 83981 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 83989 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 89508 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 89643 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 89694 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+  Rare ballots: 47.
+  Borrowing from common styles to satisfy these requirements:
+  - the ballot aggregation must contain at least 10 ballots.
+  - every contest in the rare styles must appear on at least 10 ballots in the aggregation.
+
+  Contests below minimum:
+    'Ballot Question 6AA Formation of District Redlands 360 Metropolitan District No. 1': needs 5 more ballot(s)
+    'Directors of Redlands 360 Metropolitan District No. 1 (2 Year)': needs 5 more ballot(s)
+    'Directors of Redlands 360 Metropolitan District No. 1 (3 Year)': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AB': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AC': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AD': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AE': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AF': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AG': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AH': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AI': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AJ': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AK': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AL': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AM': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AN': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AO': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AP': needs 5 more ballot(s)
+    'BALLOT ISSUE 6AQ': needs 5 more ballot(s)
+    'BALLOT QUESTION 6BA': needs 5 more ballot(s)
+    'Directors of Redlands 360 Metropolitan District No. 9 (2 Year)': needs 5 more ballot(s)
+    'Directors of Redlands 360 Metropolitan District No. 9 (3 Year)': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BB': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BC': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BD': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BE': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BF': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BG': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BH': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BI': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BJ': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BK': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BL': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BM': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BN': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BO': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BP': needs 5 more ballot(s)
+    'BALLOT ISSUE 6BQ': needs 5 more ballot(s)
+
+  Selecting ballots to borrow from common styles (this can take a few minutes)...
+WARNING: could not find enough ballots for contest '62' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '63' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '64' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '65' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '66' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '67' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '68' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '69' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '51' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '52' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '53' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '54' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '55' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '56' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '57' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '58' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '59' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '60' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '61' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '32' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '33' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '34' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '35' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '36' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '37' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '38' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '39' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '40' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '41' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '42' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '43' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '44' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '45' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '46' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '47' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '48' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '49' (still need 5 more). This contest only appears on rare ballot styles.
+WARNING: could not find enough ballots for contest '50' (still need 5 more). This contest only appears on rare ballot styles.
+
+*** Balancing near-unanimous contests.
+
+  Make sure that the following constraint is met:
+  - No contest in the aggregate may be near-unanimous. 'Near-unanimous'
+    means all but 2 votes go to a single choice.
+
+    'Colorado Court of Appeals Judge - Tow': 'YES' has 11 out of 13 votes
+    'District Court Judge - 21st Judicial District - Larson': 'YES' has 11 out of 13 votes
+    'BALLOT ISSUE 6BJ': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BK': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BL': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BM': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BN': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BO': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BP': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BQ': 'YES' has 5 out of 5 votes
+    'BALLOT QUESTION 6BA': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BB': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BC': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BD': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BE': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BF': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BG': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BH': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BI': 'YES' has 5 out of 5 votes
+    'Ballot Question 6AA Formation of District Redlands 360 Metropolitan District No. 1': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AB': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AC': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AD': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AE': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AF': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AG': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AH': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AI': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AJ': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AK': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AL': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AM': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AN': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AO': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AP': 'YES' has 4 out of 4 votes
+    'BALLOT ISSUE 6AQ': 'YES' has 5 out of 5 votes
+*** 1 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 6 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 20 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+
+  Borrowed 3 contrasting ballot(s).
+    'Colorado Court of Appeals Judge - Tow': 'YES' has 11 out of 13 votes
+    'District Court Judge - 21st Judicial District - Larson': 'YES' has 11 out of 13 votes
+    'BALLOT ISSUE 6BJ': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BK': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BL': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BM': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BN': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BO': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BP': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BQ': 'YES' has 5 out of 5 votes
+    'BALLOT QUESTION 6BA': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BB': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BC': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BD': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BE': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BF': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BG': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BH': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BI': 'YES' has 5 out of 5 votes
+    'Ballot Question 6AA Formation of District Redlands 360 Metropolitan District No. 1': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AB': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AC': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AD': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AE': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AF': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AG': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AH': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AI': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AJ': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AK': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AL': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AM': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AN': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AO': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AP': 'YES' has 4 out of 4 votes
+    'BALLOT ISSUE 6AQ': 'YES' has 5 out of 5 votes
+*** 46 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 51 contestVotes = ContestVotes(contestId=19, votedFor=[])
+*** 62 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+
+  Borrowed 3 contrasting ballot(s).
+    'Colorado Court of Appeals Judge - Tow': 'YES' has 11 out of 13 votes
+    'District Court Judge - 21st Judicial District - Larson': 'YES' has 11 out of 13 votes
+    'BALLOT ISSUE 6BJ': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BK': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BL': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BM': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BN': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BO': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BP': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BQ': 'YES' has 5 out of 5 votes
+    'BALLOT QUESTION 6BA': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BB': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BC': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BD': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BE': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BF': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BG': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BH': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BI': 'YES' has 5 out of 5 votes
+    'Ballot Question 6AA Formation of District Redlands 360 Metropolitan District No. 1': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AB': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AC': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AD': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AE': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AF': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AG': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AH': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AI': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AJ': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AK': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AL': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AM': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AN': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AO': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AP': 'YES' has 4 out of 4 votes
+    'BALLOT ISSUE 6AQ': 'YES' has 5 out of 5 votes
+*** 67 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 69 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 82 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+
+  Borrowed 3 contrasting ballot(s).
+    'BALLOT ISSUE 6BJ': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BK': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BL': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BM': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BN': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BO': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BP': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BQ': 'YES' has 5 out of 5 votes
+    'BALLOT QUESTION 6BA': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BB': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BC': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BD': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BE': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BF': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BG': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BH': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BI': 'YES' has 5 out of 5 votes
+    'Ballot Question 6AA Formation of District Redlands 360 Metropolitan District No. 1': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AB': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AC': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AD': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AE': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AF': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AG': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AH': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AI': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AJ': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AK': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AL': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AM': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AN': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AO': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AP': 'YES' has 4 out of 4 votes
+    'BALLOT ISSUE 6AQ': 'YES' has 5 out of 5 votes
+  Total ballots borrowed for unanimity balancing: 9
+
+  WARNING: the following contests remain near-unanimous after balancing.
+  No contrasting ballots were available in the donor pool.
+    'BALLOT ISSUE 6BJ': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BK': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BL': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BM': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BN': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BO': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BP': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BQ': 'YES' has 5 out of 5 votes
+    'BALLOT QUESTION 6BA': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BB': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BC': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BD': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BE': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BF': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BG': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BH': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6BI': 'YES' has 5 out of 5 votes
+    'Ballot Question 6AA Formation of District Redlands 360 Metropolitan District No. 1': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AB': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AC': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AD': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AE': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AF': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AG': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AH': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AI': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AJ': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AK': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AL': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AM': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AN': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AO': 'YES' has 5 out of 5 votes
+    'BALLOT ISSUE 6AP': 'YES' has 4 out of 4 votes
+    'BALLOT ISSUE 6AQ': 'YES' has 5 out of 5 votes
+
+*** Pass 2 complete.
+  Ballots from rare styles/precincts: 47
+  Ballots borrowed from common styles: 9
+  Total ballots in aggregate: 56
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Mesa.csv.
+That took 1.492 s
+AGGREGATED,,,,,,,AGGREGATED,13,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,15,0,0,0,0,0,0,0,17,13,0,0,12,17,,,17,12,0,18,18,10,10,19,0,0,0,10,5,7,8,11,4,7,8,7,8,11,4,10,5,9,6,17,12,10,19,20,10,16,13,22,8,15,15,14,15,14,15,19,10,14,13,17,12,18,4,8,10,10,7,20,10,5,0,5,5,5,5,5,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,4,0,5,0,5,0,5,5,5,5,5,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0,5,0
+AGGREGATED,,,,,,,NCARDS,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,0,0,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,31,24,24,18,18,18,18,31,31,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5
+success
+===========================================================================================
+County Mineral from /home/stormy/datadrive/votedatabase/cvr/Colorado/Mineral/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Mineral/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Mineral.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Mineral.csv.
+That took 4.152 ms
+success
+===========================================================================================
+County Moffat from /home/stormy/datadrive/votedatabase/cvr/Colorado/Moffat/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Moffat/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Moffat.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Moffat.csv.
+That took 44.82 ms
+success
+===========================================================================================
+County Montezuma from /home/stormy/datadrive/votedatabase/cvr/Colorado/Montezuma/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Montezuma/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Montezuma.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Montezuma.csv.
+That took 116.4 ms
+success
+===========================================================================================
+County Montrose from /home/stormy/datadrive/votedatabase/cvr/Colorado/Montrose/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Montrose/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Montrose.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Montrose.csv.
+That took 148.8 ms
+success
+===========================================================================================
+County Morgan from /home/stormy/datadrive/votedatabase/cvr/Colorado/Morgan/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Morgan/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Morgan.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Morgan.csv.
+That took 56.28 ms
+success
+===========================================================================================
+County Otero from /home/stormy/datadrive/votedatabase/cvr/Colorado/Otero/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Otero/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Otero.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Otero.csv.
+That took 39.83 ms
+success
+===========================================================================================
+County Ouray from /home/stormy/datadrive/votedatabase/cvr/Colorado/Ouray/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Ouray/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Ouray.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Ouray.csv.
+That took 21.50 ms
+success
+===========================================================================================
+County Park from /home/stormy/datadrive/votedatabase/cvr/Colorado/Park/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Park/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Park.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Park.csv.
+That took 54.11 ms
+success
+===========================================================================================
+County Phillips from /home/stormy/datadrive/votedatabase/cvr/Colorado/Phillips/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Phillips/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Phillips.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Phillips.csv.
+That took 13.94 ms
+success
+===========================================================================================
+County Pitkin from /home/stormy/datadrive/votedatabase/cvr/Colorado/Pitkin/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Pitkin/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Pitkin.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Pitkin.csv.
+That took 61.10 ms
+success
+===========================================================================================
+County Prowers from /home/stormy/datadrive/votedatabase/cvr/Colorado/Prowers/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Prowers/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Prowers.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Prowers.csv.
+That took 22.17 ms
+success
+===========================================================================================
+County Pueblo from /home/stormy/datadrive/votedatabase/cvr/Colorado/Pueblo/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Pueblo/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Pueblo.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Pueblo.csv.
+That took 464.5 ms
+success
+===========================================================================================
+County Rio Blanco from /home/stormy/datadrive/votedatabase/cvr/Colorado/Rio Blanco/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Rio Blanco/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Rio Blanco.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Rio Blanco.csv.
+That took 27.81 ms
+success
+===========================================================================================
+County Rio Grande from /home/stormy/datadrive/votedatabase/cvr/Colorado/Rio Grande/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Rio Grande/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Rio Grande.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Rio Grande.csv.
+That took 43.76 ms
+success
+===========================================================================================
+County Routt from /home/stormy/datadrive/votedatabase/cvr/Colorado/Routt/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Routt/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Routt.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+  Rare ballot styles (1 of 10 total):
+    5 ballot(s)  [ballot type: "S5RE50J", style #9]
+
+Redaction is needed.
+*** Pass 2: Building the aggregate row.
+
+ndonors = 246
+*** 16611 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 29611 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 31594 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 31613 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 31753 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+  Rare ballots: 5.
+  Borrowing from common styles to satisfy these requirements:
+  - the ballot aggregation must contain at least 10 ballots.
+  - every contest in the rare styles must appear on at least 10 ballots in the aggregation.
+
+  Aggregate has 5 ballot(s); need 5 more to reach minimum of 10.
+  Contests below minimum:
+    'Presidential Electors': needs 5 more ballot(s)
+    'United States Senator': needs 5 more ballot(s)
+    'Representative to the 117th United States Congress-District 3': needs 5 more ballot(s)
+    'State Board of Education Member - Congressional District 3': needs 5 more ballot(s)
+    'State Senator - District 8': needs 5 more ballot(s)
+    'State Representative - District 26': needs 5 more ballot(s)
+    'District Attorney--14th Judicial District': needs 5 more ballot(s)
+    'Routt County Commissioner - District 1': needs 5 more ballot(s)
+    'Routt County Commissioner - District 2': needs 5 more ballot(s)
+    'Justice of the Colorado Supreme Court - Hart': needs 5 more ballot(s)
+    'Justice of the Colorado Supreme Court - Samour': needs 5 more ballot(s)
+    'Colorado Court of Appeals Judge - Tow': needs 5 more ballot(s)
+    'Colorado Court of Appeals Judge - Welling': needs 5 more ballot(s)
+    'Amendment B (Constitutional)': needs 5 more ballot(s)
+    'Amendment C (Constitutional)': needs 5 more ballot(s)
+    'Amendment 76 (Constitutional)': needs 5 more ballot(s)
+    'Amendment 77 (Constitutional)': needs 5 more ballot(s)
+    'Proposition EE (Statutory)': needs 5 more ballot(s)
+    'Proposition 113 (Statutory)': needs 5 more ballot(s)
+    'Proposition 114 (Statutory)': needs 5 more ballot(s)
+    'Proposition 115 (Statutory)': needs 5 more ballot(s)
+    'Proposition 116 (Statutory)': needs 5 more ballot(s)
+    'Proposition 117 (Statutory)': needs 5 more ballot(s)
+    'Proposition 118 (Statutory)': needs 5 more ballot(s)
+    'Eagle County School District Ballot Issue 5B': needs 5 more ballot(s)
+    'Colorado River Water Conservation District Ballot Issue 7A:': needs 5 more ballot(s)
+
+  Selecting ballots to borrow from common styles (this can take a few minutes)...
+*** 19 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 41 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 27 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 52 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 44 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+  Ballots borrowed for minimum counts: 10
+
+*** Balancing near-unanimous contests.
+
+  Make sure that the following constraint is met:
+  - No contest in the aggregate may be near-unanimous. 'Near-unanimous'
+    means all but 2 votes go to a single choice.
+
+    'Proposition EE (Statutory)': 'Yes/For' has 9 out of 10 votes
+*** 4 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 32 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 38 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+
+  Borrowed 3 contrasting ballot(s).
+  Total ballots borrowed for unanimity balancing: 3
+
+*** Pass 2 complete.
+  Ballots from rare styles/precincts: 5
+  Ballots borrowed from common styles: 13
+  Total ballots in aggregate: 18
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Routt.csv.
+That took 399.5 ms
+AGGREGATED,,,,,,AGGREGATED,5,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,8,0,0,0,0,0,0,0,8,5,0,0,5,8,5,8,9,7,9,6,5,,,,,,,,,8,4,8,4,8,4,7,5,7,6,6,7,8,5,7,6,9,4,5,8,4,9,5,8,9,4,6,7,5,5,,,,,4,4,,,6,4
+AGGREGATED,,,,,,NCARDS,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,0,0,0,0,0,0,0,0,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,10,10,0,0,0,0,10,10,0,0,10,10
+success
+===========================================================================================
+County Saguache from /home/stormy/datadrive/votedatabase/cvr/Colorado/Saguache/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Saguache/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Saguache.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+  Rare ballot styles (1 of 5 total):
+    4 ballot(s)  [ballot type: "2", style #4]
+
+Redaction is needed.
+*** Pass 2: Building the aggregate row.
+
+ndonors = 294
+*** 6789 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 6790 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 6798 contestVotes = ContestVotes(contestId=19, votedFor=[])
+*** 6806 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+  Rare ballots: 4.
+  Borrowing from common styles to satisfy these requirements:
+  - the ballot aggregation must contain at least 10 ballots.
+  - every contest in the rare styles must appear on at least 10 ballots in the aggregation.
+
+  Aggregate has 4 ballot(s); need 6 more to reach minimum of 10.
+  Contests below minimum:
+    'Presidential Electors': needs 6 more ballot(s)
+    'United States Senator': needs 6 more ballot(s)
+    'Representative to the 117th United States Congress-District 3': needs 6 more ballot(s)
+    'State Board of Education Member - Congressional District 3': needs 6 more ballot(s)
+    'State Senator - District 35': needs 6 more ballot(s)
+    'State Representative - District 62': needs 6 more ballot(s)
+    'District Attorney--12th Judicial District': needs 6 more ballot(s)
+    'Saguache County Commissioner District 1': needs 6 more ballot(s)
+    'Saguache County Commissioner District 2': needs 6 more ballot(s)
+    'Colorado Supreme Court Justice - Hart': needs 6 more ballot(s)
+    'Colorado Supreme Court Justice - Samour': needs 6 more ballot(s)
+    'Colorado Court of Appeals Judge - Tow': needs 6 more ballot(s)
+    'Colorado Court of Appeals Judge - Welling': needs 6 more ballot(s)
+    'District Court Judge - 12th Judicial District - Gonzales': needs 6 more ballot(s)
+    'District Court Judge - 12th Judicial District - Hopkins': needs 6 more ballot(s)
+    'Amendment B (Constitutional)': needs 6 more ballot(s)
+    'Amendment C (Constitutional)': needs 6 more ballot(s)
+    'Amendment 76 (Constitutional)': needs 6 more ballot(s)
+    'Amendment 77 (Constitutional)': needs 6 more ballot(s)
+    'Proposition EE (Statutory)': needs 6 more ballot(s)
+    'Proposition 113 (Statutory)': needs 6 more ballot(s)
+    'Proposition 114 (Statutory)': needs 6 more ballot(s)
+    'Proposition 115 (Statutory)': needs 6 more ballot(s)
+    'Proposition 116 (Statutory)': needs 6 more ballot(s)
+    'Proposition 117 (Statutory)': needs 6 more ballot(s)
+    'Proposition 118 (Statutory)': needs 6 more ballot(s)
+    'Colorado River Water Conservation District Ballot Issue 7A:': needs 6 more ballot(s)
+
+  Selecting ballots to borrow from common styles (this can take a few minutes)...
+*** 2622 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 4077 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 2602 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 2603 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 5150 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 2760 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+  Ballots borrowed for minimum counts: 12
+
+*** Balancing near-unanimous contests.
+
+  Make sure that the following constraint is met:
+  - No contest in the aggregate may be near-unanimous. 'Near-unanimous'
+    means all but 2 votes go to a single choice.
+
+    'Colorado Court of Appeals Judge - Welling': 'NO' has 4 out of 6 votes
+    'District Court Judge - 12th Judicial District - Gonzales': 'YES' has 4 out of 6 votes
+
+  Borrowed 3 contrasting ballot(s).
+    'Colorado Court of Appeals Judge - Welling': 'NO' has 4 out of 6 votes
+    'District Court Judge - 12th Judicial District - Gonzales': 'YES' has 4 out of 6 votes
+
+  Borrowed 3 contrasting ballot(s).
+    'Colorado Court of Appeals Judge - Welling': 'NO' has 4 out of 6 votes
+    'District Court Judge - 12th Judicial District - Gonzales': 'YES' has 4 out of 6 votes
+
+  Borrowed 3 contrasting ballot(s).
+    'Colorado Court of Appeals Judge - Welling': 'NO' has 4 out of 6 votes
+    'District Court Judge - 12th Judicial District - Gonzales': 'YES' has 4 out of 6 votes
+
+  Borrowed 3 contrasting ballot(s).
+    'Colorado Court of Appeals Judge - Welling': 'NO' has 4 out of 6 votes
+    'District Court Judge - 12th Judicial District - Gonzales': 'YES' has 4 out of 6 votes
+
+  Borrowed 3 contrasting ballot(s).
+  Total ballots borrowed for unanimity balancing: 15
+
+*** Pass 2 complete.
+  Ballots from rare styles/precincts: 4
+  Ballots borrowed from common styles: 27
+  Total ballots in aggregate: 31
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Saguache.csv.
+That took 154.5 ms
+AGGREGATED,,,,,,,AGGREGATED,16,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,4,0,0,1,0,0,0,0,4,14,1,0,16,4,4,16,16,4,15,4,16,15,6,3,4,4,5,3,3,4,4,4,6,4,5,5,4,6,6,4,7,3,4,5,5,5,4,6,4,6,5,5,5,5,5,5,5,5
+AGGREGATED,,,,,,,NCARDS,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10
+success
+===========================================================================================
+County San Miguel from /home/stormy/datadrive/votedatabase/cvr/Colorado/San Miguel/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/San Miguel/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/San Miguel.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/San Miguel.csv.
+That took 23.23 ms
+success
+===========================================================================================
+County Sedgwick from /home/stormy/datadrive/votedatabase/cvr/Colorado/Sedgwick/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Sedgwick/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Sedgwick.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+  Rare ballot styles (1 of 6 total):
+    9 ballot(s)  [ballot type: "5", style #4]
+
+Redaction is needed.
+*** Pass 2: Building the aggregate row.
+
+ndonors = 192
+*** 53 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 266 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 283 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 306 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 323 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 337 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 701 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 704 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 706 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+  Rare ballots: 9.
+  Borrowing from common styles to satisfy these requirements:
+  - the ballot aggregation must contain at least 10 ballots.
+  - every contest in the rare styles must appear on at least 10 ballots in the aggregation.
+
+  Aggregate has 9 ballot(s); need 1 more to reach minimum of 10.
+  Contests below minimum:
+    'Presidential Electors': needs 1 more ballot(s)
+    'United States Senator': needs 1 more ballot(s)
+    'Representative to the 117th United States Congress-District 4': needs 1 more ballot(s)
+    'State Representative - District 65': needs 1 more ballot(s)
+    'District Attorney--13th Judicial District': needs 1 more ballot(s)
+    'Sedgwick County Commissioner - District 2': needs 1 more ballot(s)
+    'Sedgwick County Commissioner - District 3': needs 1 more ballot(s)
+    'Colorado Supreme Court Justice - Hart': needs 1 more ballot(s)
+    'Colorado Supreme Court Justice - Samour': needs 1 more ballot(s)
+    'Colorado Court of Appeals Judge - Tow': needs 1 more ballot(s)
+    'Colorado Court of Appeals Judge - Welling': needs 1 more ballot(s)
+    'District Court Judge - 13th Judicial District - Hoyer': needs 1 more ballot(s)
+    'Sedgwick County Court': needs 1 more ballot(s)
+    'Amendment B': needs 1 more ballot(s)
+    'Amendment C': needs 1 more ballot(s)
+    'Amendment 76': needs 1 more ballot(s)
+    'Amendment 77': needs 1 more ballot(s)
+    'Proposition EE': needs 1 more ballot(s)
+    'Proposition 113': needs 1 more ballot(s)
+    'Proposition 114': needs 1 more ballot(s)
+    'Proposition 115': needs 1 more ballot(s)
+    'Proposition 116': needs 1 more ballot(s)
+    'Proposition 117': needs 1 more ballot(s)
+    'Proposition 118': needs 1 more ballot(s)
+    'Holyoke School District RE-1J Ballot Issue 5A': needs 1 more ballot(s)
+    'Marks Butte Groundwater Management District Ballot Issue 6A': needs 1 more ballot(s)
+
+  Selecting ballots to borrow from common styles (this can take a few minutes)...
+*** 559 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+WARNING: could not find enough ballots for contest '24' (still need 1 more). This contest only appears on rare ballot styles.
+  Ballots borrowed for minimum counts: 1
+
+*** Balancing near-unanimous contests.
+
+  Make sure that the following constraint is met:
+  - No contest in the aggregate may be near-unanimous. 'Near-unanimous'
+    means all but 2 votes go to a single choice.
+
+    'Presidential Electors': 'Donald J. Trump / Michael R. Pence' has 9 out of 10 votes
+    'United States Senator': 'Cory Gardner' has 9 out of 10 votes
+    'Representative to the 117th United States Congress-District 4': 'Ken Buck' has 9 out of 10 votes
+    'Colorado Supreme Court Justice - Hart': 'Yes/For' has 6 out of 8 votes
+    'Colorado Supreme Court Justice - Samour': 'Yes/For' has 6 out of 8 votes
+    'Colorado Court of Appeals Judge - Tow': 'Yes/For' has 6 out of 8 votes
+    'Colorado Court of Appeals Judge - Welling': 'Yes/For' has 6 out of 8 votes
+    'District Court Judge - 13th Judicial District - Hoyer': 'Yes/For' has 6 out of 8 votes
+    'Sedgwick County Court': 'Yes/For' has 5 out of 7 votes
+    'Amendment B': 'Yes/For' has 8 out of 10 votes
+    'Amendment 76': 'Yes/For' has 8 out of 10 votes
+    'Proposition 113': 'No/Against' has 8 out of 10 votes
+    'Proposition 114': 'No/Against' has 8 out of 10 votes
+    'Proposition 116': 'Yes/For' has 9 out of 10 votes
+    'Proposition 117': 'Yes/For' has 9 out of 10 votes
+    'Proposition 118': 'No/Against' has 8 out of 10 votes
+    'Holyoke School District RE-1J Ballot Issue 5A': 'No/Against' has 6 out of 8 votes
+*** 6 contestVotes = ContestVotes(contestId=19, votedFor=[])
+*** 16 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 74 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 668 contestVotes = ContestVotes(contestId=19, votedFor=[])
+
+  Borrowed 4 contrasting ballot(s).
+    'Colorado Supreme Court Justice - Hart': 'Yes/For' has 6 out of 8 votes
+    'Colorado Supreme Court Justice - Samour': 'Yes/For' has 6 out of 8 votes
+    'Colorado Court of Appeals Judge - Tow': 'Yes/For' has 6 out of 8 votes
+    'Colorado Court of Appeals Judge - Welling': 'Yes/For' has 6 out of 8 votes
+    'District Court Judge - 13th Judicial District - Hoyer': 'Yes/For' has 6 out of 8 votes
+    'Amendment B': 'Yes/For' has 9 out of 11 votes
+    'Proposition 116': 'Yes/For' has 10 out of 12 votes
+    'Holyoke School District RE-1J Ballot Issue 5A': 'No/Against' has 6 out of 8 votes
+*** 61 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+*** 13 contestVotes = ContestVotes(contestId=19, votedFor=[0])
+*** 34 contestVotes = ContestVotes(contestId=19, votedFor=[1])
+
+  Borrowed 3 contrasting ballot(s).
+    'Holyoke School District RE-1J Ballot Issue 5A': 'No/Against' has 6 out of 8 votes
+  Total ballots borrowed for unanimity balancing: 7
+
+  WARNING: the following contests remain near-unanimous after balancing.
+  No contrasting ballots were available in the donor pool.
+    'Holyoke School District RE-1J Ballot Issue 5A': 'No/Against' has 6 out of 8 votes
+
+*** Pass 2 complete.
+  Ballots from rare styles/precincts: 9
+  Ballots borrowed from common styles: 8
+  Total ballots in aggregate: 17
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Sedgwick.csv.
+That took 53.67 ms
+AGGREGATED,,,,,,,AGGREGATED,5,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,12,0,0,0,0,0,0,0,3,12,0,0,10,10,10,10,6,3,6,3,6,3,6,3,6,3,7,5,9,5,5,10,12,3,8,7,8,7,5,10,4,11,7,10,10,5,10,5,6,9,2,6,3,3,5,4
+AGGREGATED,,,,,,,NCARDS,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,9,9,6,6,11,11
+success
+===========================================================================================
+County Summit from /home/stormy/datadrive/votedatabase/cvr/Colorado/Summit/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Summit/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Summit.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Summit.csv.
+That took 92.94 ms
+success
+===========================================================================================
+County Teller from /home/stormy/datadrive/votedatabase/cvr/Colorado/Teller/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Teller/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Teller.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Teller.csv.
+That took 86.15 ms
+success
+===========================================================================================
+County Washington from /home/stormy/datadrive/votedatabase/cvr/Colorado/Washington/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Washington/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Washington.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Washington.csv.
+That took 10.34 ms
+success
+===========================================================================================
+County Weld from /home/stormy/datadrive/votedatabase/cvr/Colorado/Weld/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Weld/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Weld.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Weld.csv.
+That took 1.281 s
+success
+===========================================================================================
+County Yuma from /home/stormy/datadrive/votedatabase/cvr/Colorado/Yuma/cvr.csv
+AnonymizeCvr redact for /home/stormy/datadrive/votedatabase/cvr/Colorado/Yuma/cvr.csv
+ output to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Yuma.csv
+ min_ballots=10, no_contest_balancing=false, redact_on_precinct=false, version=0.2
+
+*** Pass 1: Looking for rare ballot styles.
+
+No redaction needed.
+
+*** Pass 3: Writing output.
+  Output written to /home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Yuma.csv.
+That took 32.19 ms
+success
+that took 144.0 s
+
+Process finished with exit code 0

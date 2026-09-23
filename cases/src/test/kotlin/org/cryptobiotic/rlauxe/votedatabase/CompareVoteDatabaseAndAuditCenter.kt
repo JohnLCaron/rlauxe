@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.Garfield2020RawCvrs
-import org.cryptobiotic.rlauxe.corlacvr.makeContestInfo
+import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
 import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory

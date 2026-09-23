@@ -1,13 +1,14 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.corlaInput.makeContestTabs
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyContestData
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyData
-import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrConverter
 import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.Garfield2020RawCvrs
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
@@ -161,53 +162,6 @@ open class CountyElectionWithCvrs (
     // TODO do we need to munge the mvrs for the card manifest? Add the card styles ??
     override fun cards() = CardIteratorfromCountyMvrs(publisher, styles = cvrCardStyles)
     override fun ncards() = ncards
-}
-
-fun writeUnsortedMvrs(
-    county: String,
-    publisher: Publisher,
-    countyMvrs: CloseableIterator<AuditableCard>,
-    // phantoms: List<AuditableCard>,
-): Int {
-    val dir = publisher.unsortedMvrsDirectory()
-    validateOutputDir(Path(dir))
-    val outfile = "$dir/${county}.csv"
-
-    // TODO makePhantomCvrs(contests)
-    val cardsWritten = writeCardCsvFile(countyMvrs, outfile)
-    logger.info { "write $cardsWritten UnsortedMvrs for $county to ${outfile}" }
-
-    return cardsWritten
-}
-
-class CardIteratorfromCountyMvrs(
-    publisher: Publisher,
-    val styles: List<StyleIF>
-) : CloseableIterator<AuditableCard> {
-
-    val dir = publisher.unsortedMvrsDirectory()
-    val path = Path(dir)
-    val countyPaths: List<Path> = path.listDirectoryEntries().filter { !it.isDirectory() && it.fileName.toString().endsWith(".csv")}
-
-    val counties = countyPaths.iterator()
-    var innerIter = readCardsCsvIterator(counties.next().toString(), styles = styles)  // TODO do we need styles ??
-
-    override fun next(): AuditableCard {
-        return innerIter.next()
-    }
-
-    override fun hasNext(): Boolean {
-        if (innerIter.hasNext()) return true
-        if (counties.hasNext()) {
-            innerIter = readCardsCsvIterator(counties.next().toString(), styles = styles)
-            return hasNext()
-        }
-        return false
-    }
-
-    override fun close() {
-        // NOOP
-    }
 }
 
 ////////////////////////////////////////////////////////////////////

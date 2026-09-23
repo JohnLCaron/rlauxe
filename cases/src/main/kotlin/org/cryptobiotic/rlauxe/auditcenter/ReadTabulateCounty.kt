@@ -1,14 +1,13 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
 import org.cryptobiotic.rlauxe.corlaInput.matchCandidateName
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
 import java.io.File
 import java.nio.charset.Charset
@@ -17,6 +16,57 @@ import kotlin.String
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.text.appendLine
+
+private val logger = KotlinLogging.logger("ReadTabulateCounty")
+
+//////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////
+// maybe should be interfaces ?
+// TODO get rid of ??
+//   trying to remove corla stuff i think
+
+interface ContestTabAllCountiesIF {
+    val contestName: String
+    val choices:  Map<String, Int>// original choice name -> votes
+    val counties: Set<String>    // countyNames
+    val countyVotes: Map<String, Int>     // countyName -> total votes for this contest in this county
+
+    fun sumVotes(): Int
+}
+
+// for one county, all contests
+interface CountyTabAllContestsIF {
+    val countyName: String
+    val contests:  Map<String, CountyContestVotesIF>// contestName (canonical I think) -> CountyContestVotes
+}
+
+// we only know votes, not ncards or undervotes.
+// for one county, one contest
+interface CountyContestVotesIF {
+    val countyName: String
+    val contestName: String
+    val choices: Map<String, Int> // choice name  -> contest choice vote in this county
+
+    fun contestVotes() = choices.values.sumOf { it }
+
+    // convert to canonical choice names TODO get rid of
+    fun canonicalChoices(choiceMapper: (String, String, String) -> String): Map<String, Int> {
+        return choices.filter { !isWriteIn(it.key) }.mapKeys {
+            choiceMapper(countyName, contestName, it.key )
+        }
+    }
+
+    fun makeContestTabulation(info: ContestInfo, ncards: Int, choiceMapper: (String, String, String) -> String): ContestTabulation {
+        val candidateVotes = canonicalChoices(choiceMapper).map { (canonicalChoiceName, vote) ->
+            if (info.candidateNames[canonicalChoiceName] == null)
+                logger.error{"contestTab candidate name $canonicalChoiceName not found in info"}
+            Pair( info.candidateNames[canonicalChoiceName]!!, vote)
+        }.toMap()
+
+        return ContestTabulation(info, candidateVotes, ncards)
+    }
+}
 
 //////////////////////////////////////////////////////////
 // corla/src/test/data/2024audit/tabulateCounty.csv

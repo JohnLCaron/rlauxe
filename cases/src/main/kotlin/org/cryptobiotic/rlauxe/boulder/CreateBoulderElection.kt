@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.boulder
 import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.auditcenter.CountyElectionSimCvrs
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
@@ -487,7 +486,7 @@ fun createBoulderElectionWithSovo(
     if (clear) {
         clearDirectory(Path(topdir))
         Logging.addFileAppender("cases", "$topdir/logs.log")
-        CountyElectionSimCvrs.logger.info {"-------------- createBoulderElection $electionName in $topdir"}
+        logger.info {"-------------- createBoulderElection $electionName in $topdir"}
     }
 
     //val election = if (electionName.contains("2024clca"))

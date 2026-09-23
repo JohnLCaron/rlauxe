@@ -1,13 +1,7 @@
-package org.cryptobiotic.rlauxe.corlainput
+package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.corlaCounty.CheckCvrsAndManifest
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInputWithCvrs
-import org.cryptobiotic.rlauxe.corlaInput.CountyInputData
-import org.cryptobiotic.rlauxe.corlaInput.readCountyInputData
-import org.cryptobiotic.rlauxe.corlaInput.writeCountyInputData
+import org.cryptobiotic.rlauxe.corlacvr.readRedactionCount
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,6 +20,8 @@ class WriteCountyInputData {
 
     fun writeCountyData(topdir: String, stateInput: ColoradoInputWithCvrs) {
         val filename = "$topdir/countyInputData.csv"
+
+        val countNredacted: Map<String, Int> = readRedactionCount("/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/redacted.csv")
 
         val data = mutableListOf<CountyInputData>()
         stateInput.counties().forEach { county ->
@@ -56,7 +52,7 @@ class WriteCountyInputData {
                 cvrInManifest =  manifestCounts.countCvrsInManifest,
                 cvrNoManifest = manifestCounts.cvrNoManifest,
                 manifestNoCvr = manifestCounts.manifestNoCvr,
-                ngroups = ngroups,
+                countNredacted = countNredacted[county] ?: 0,
                 minCards = ccc.minCards))
             println("wrote $county  ${data.last()}")
         }

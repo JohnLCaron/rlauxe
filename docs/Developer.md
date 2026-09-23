@@ -1,5 +1,5 @@
 # Developer Notes
-_09/04/2026_
+_09/22/2026_
 
 <!-- TOC -->
 * [Developer Notes](#developer-notes)
@@ -149,16 +149,19 @@ build the uberjars:
 $ cd <devhome>/rlauxe
 $ ./gradlew assemble uberjar
 
+look in _cases/build/libs_ to see what the latest library build version is, for example _rlauxe-cases-0.10.4.2-uber.jar_= CASES_UBER_LIBRARY.
+
+The "uber jar" contains the cases and core codes, as well as all of their dependencies.
+
 ### For the Belgium 2024 test case
 
 The repo contains the needed input for belgium2024. To create the data:
 
 ````
-java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case belgium -topdir "/home/you/wherever/cases/belgium2024"
 ````
 
-* check _cases/build/libs/_ for the latest version of rlauxe-cases-uber.jar and use that
 * substitute your own output "topdir" directory
 
 Use `java -jar viewer/build/libs/viewer-uber.jar -belgiumAudit` to view this case.
@@ -170,7 +173,7 @@ See [here](https://github.com/JohnLCaron/rlauxe-viewer#special-features-for-belg
 The repo contains the needed input for boulder024. To create the data:
 
 ````
-java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case boulder2024 -topdir "/home/you/wherever/cases/boulder2024" -type oa
 ````
 
@@ -183,46 +186,53 @@ The repo does not contain the test data input for Colorado. Clone the following 
 
 git clone https://github.com/nealmcb/auditcenter
 
+
 #### For Colorado 2020 General elections
 
 ````
-java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case corla2020 -toptopdir "/home/you/wherever/cases/corla2020" \
-    -auditcenter "/home/you/wherever/github/auditcenter/directory" 
+    -auditcenter "/local/github/nealmcb/auditcenter" 
 ````
 
-* check _cases/build/libs/_ for the latest version of rlauxe-cases-uber.jar
-* substitute your own "auditcenter" directory
+* clone [auditcenter](https://github.com/nealmcb/auditcenter) and place in your local directory.
 * substitute your own "toptopdir" directory where the data will be written.
-* this creates an election using style based sampling (CSD). To use uniform sampling, use the flag "-sampling uniform".
 
-To use the viewer for Corla elections, see [here](https://github.com/JohnLCaron/rlauxe-viewer/docs/CorlaViewer.md)
+To see the data in the viewer, see [here](https://github.com/JohnLCaron/rlauxe-viewer/docs/CorlaViewer.md)
 
 To run the Colorado 2020 election with cvrs from https://votedatabase.com, see [here](../notes/Corla2020notes.md). 
 Then use
 
 ````
-java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case corla2020withCvrs -toptopdir "/home/you/wherever/cases/corla2020withCvrs" \
-    -auditcenter "/home/you/wherever/github/auditcenter/directory" \
+    -auditcenter "/local/github/nealmcb/auditcenter" \
     -input "/home/you/wherever/votedatabase/cvr/Colorado"
 ````
 
 #### Other Colorado elections in auditcenter
 
 ````
-java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case casename -toptopdir "/home/you/wherever/cases/casename" \
-    -auditcenter "/home/you/wherever/github/auditcenter/directory" 
+    -auditcenter "/local/github/nealmcb/auditcenter" 
 ````
 
-where casename = corla2022p | corla2024 | corla2026p | corla2026pm
+where casename can be
+* **corla2020** = 2020 General; cvrs are simulated
+* **corla2020withCvrs** = 2020 General using votedatabase for the CVRs
+* **corla2022p** = 2022 Primary; cvrs are simulated
+* **corla2024** = 2024 General; cvrs are simulated
+* **corla2026p** = 2026 Primary; cvrs are simulated
+* **corla2026pm** =  2026 Primary with multicounty contests merged back together where needed; cvrs are simulated
+* **corla2026Pcvrs** = 2026 Primary with 4 counties that we have the CVRS for
 
+corla2020 | corla2020withCvrs | corla2022p | corla2024 | corla2026p | corla2026pm | corla2026Pcvrs
 
 ### For the Georgia 2026 primary test case
 
 ````
-java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case ga26p -topdir "/home/you/wherever/cases/ga2026Primary" \
     -input "/home/you/wherever/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted"
 ````
@@ -241,7 +251,7 @@ Create the _top directory_ for this case (eg _$testdataDir/cases/sf2024/_), and 
 Then run:
 
 ````
-java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case sf2024 -toptopdir "/home/you/wherever/cases/sf2024" --cvrExport
 ````
 to build the cvrExport.csv file, which will be written to topdir. This only needs to be done one time.
@@ -249,7 +259,7 @@ to build the cvrExport.csv file, which will be written to topdir. This only need
 To generate the sf2024 election data: 
 
 ````
-java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case sf2024 -toptopdir "/home/you/wherever/cases/sf2024"
 ````
 
@@ -259,7 +269,7 @@ which will create a Clca election in "/home/you/wherever/cases/sf2024/clca"
 If you want to control where the election is placed, use
 
 ````
-java -classpath cases/build/libs/rlauxe-cases-0.10.2.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case sf2024 -toptopdir "/home/you/wherever/cases/sf2024" \
     -output "/home/you/wherever/" -type [clca | oa]
 ````
@@ -275,7 +285,7 @@ Download the [rlauxe-viewer repo](https://github.com/JohnLCaron/rlauxe-viewer) a
 if you download a new version of the library, you may have to regenerate any audit records (including tests case data), 
 before viewing them.
 
-**Quaeso ignosce mihi peccatum meum**: We are now using semantic versioning (with a leading 0 to indicate a prerelease): eg "0.10.2.0" = 0.MAJOR.MINOR.PATCH.
+**Quaeso ignosce mihi peccatum meum**: We are now using semantic versioning (with a leading 0 to indicate a prerelease): eg "0.10.4.2" = 0.MAJOR.MINOR.PATCH.
 The data format is rapidly changing in incompatible ways; when it does, the major version will increment.
 You will have to regenerate any data you have. The case study data can now be regenerated from the command line,
 see [Getting Started](docs/Developer.md#getting-started).

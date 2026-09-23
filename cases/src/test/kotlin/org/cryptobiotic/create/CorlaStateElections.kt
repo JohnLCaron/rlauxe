@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corlaCounty.createCorlaStateElection
+import org.cryptobiotic.rlauxe.corla.createCorlaStateElection
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInputWithCvrs
 import kotlin.test.Test

@@ -1,15 +1,22 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
+import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
+import org.cryptobiotic.rlauxe.corlaCounty.GarfieldManifest
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 
-class CorlaCounty2020Input(override val countyName: String): CorlaCountyInput {
+class CorlaCounty2020Input(
+    override val countyName: String,
+    votedatabaseIn: Map<String, String>? = null,
+): CorlaCountyInput {
     val countyNameZ = countyName.replace(" ", "")
+    val votedatabase: Map<String, String> = votedatabaseIn ?: votedatabase2020Counties("/home/stormy/datadrive/votedatabase/cvr/Colorado/")
+
     override val electionName = "${countyName}2020"
     // TODO Gunnison has Manifest-Gunnison.csv; but Gunnison is an excluded county
     override val manifestSource = "$manifestDir/manifest-${countyNameZ}.csv"
-    override val cvrsSource: String = countyCvrs[countyName]!!
+    override val cvrsSource: String = votedatabase[countyName]!!
 
     override fun readCountyManifest(): CountyManifest {
         if (countyName == "Garfield") {
@@ -29,11 +36,9 @@ class CorlaCounty2020Input(override val countyName: String): CorlaCountyInput {
 
     companion object {
         val manifestDir = "$auditcenter/2020/general/round_1"
-        val countyCvrs: Map<String, String> = votedatabase2020Counties("/home/stormy/datadrive/votedatabase/cvr/Colorado/")
         val stateInput = Colorado2020General()
     }
 }
-
 
 fun votedatabase2020Counties(votedatabase: String): Map<String, String> {
     val path = Path(votedatabase) // or does votedatabase include

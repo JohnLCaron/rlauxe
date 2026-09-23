@@ -1,29 +1,38 @@
-package org.cryptobiotic.rlauxe.corlaCounty
+package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.auditcenter.CardIteratorfromCountyMvrs
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyContestData
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyData
-import org.cryptobiotic.rlauxe.auditcenter.writeUnsortedMvrs
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
+import org.cryptobiotic.rlauxe.corlaCounty.makeContestWAs
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInputWithCvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.*
+import java.nio.file.Path
 import kotlin.collections.forEach
 import kotlin.collections.map
 import kotlin.collections.plus
 import kotlin.io.path.Path
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
 
 private val logger = KotlinLogging.logger("CorlaStateElection")
 
+// A Corla state election with CVRS
 class CorlaStateElection(
     val topdir: String,
     val stateInput: ColoradoInputWithCvrs,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean, // TODO
     variantEnum: ElectionVariantEnum,
+    votedatabase: Map<String, String>? = null,
 ): ElectionBuilder {
     val variant = ElectionVariant(variantEnum)
     val publisher = Publisher(topdir)
@@ -50,7 +59,7 @@ class CorlaStateElection(
         var countyPoolId = 1
 
         stateInput.counties().forEach { countyName ->
-            val countyInput = stateInput.corlaCountyInput(countyName)!!
+            val countyInput = stateInput.corlaCountyInput(countyName, votedatabase)!!
             val countyPopulation = countyInput.countyPopulation()
 
             val cvrsFromManifest = CvrsFromManifest2(variant, countyInput, stateInput, infos, nextStyleId)
@@ -167,96 +176,53 @@ class CorlaStateElection(
         }
         return transformer
     }
+}
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-//// contest building
+fun writeUnsortedMvrs(
+    county: String,
+    publisher: Publisher,
+    countyMvrs: CloseableIterator<AuditableCard>,
+    // phantoms: List<AuditableCard>,
+): Int {
+    val dir = publisher.unsortedMvrsDirectory()
+    validateOutputDir(Path(dir))
+    val outfile = "$dir/${county}.csv"
 
-    /*
-    private fun makeContestInfo(): List<ContestInfo> {
-        val mergedContestMap = stateInput.mergedContestMap
-        val infos = mutableListOf<ContestInfo>()
+    // TODO makePhantomCvrs(contests)
+    val cardsWritten = writeCardCsvFile(countyMvrs, outfile)
+    logger.info { "write $cardsWritten UnsortedMvrs for $county to ${outfile}" }
 
-        // use canonical contests for the contest and candidate names
-        mergedContestMap.values.forEach { mcontest ->
-            if (mcontest.counties.contains(countyInput.countyName)) {
-                val contestTabAllCounties = stateInput.contestTabsAllCounties()[mcontest.contestName] // needed ?
-                if (contestTabAllCounties == null) {
-                    logger.warn{"*** Cant find contestTab for '${mcontest.contestName}': remove from audit" }
-                } else {
-                    val candidateNames = mcontest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
+    return cardsWritten
+}
 
-                    val info = ContestInfo(
-                        mcontest.contestName,
-                        infos.size + 1, // TODO here we are changing the Ids
-                        candidateNames,     // canonical
-                        SocialChoiceFunction.PLURALITY, // TODO
-                        mcontest.voteForN
-                    )
-                    info.metadata["CORLAcontestCardCount"] = mcontest.nc.toString()
-                    infos.add(info)
-                }
-            }
-        }
-        return infos
+class CardIteratorfromCountyMvrs(
+    publisher: Publisher,
+    val styles: List<StyleIF>
+) : CloseableIterator<AuditableCard> {
+
+    val dir = publisher.unsortedMvrsDirectory()
+    val path = Path(dir)
+    val countyPaths: List<Path> = path.listDirectoryEntries().filter { !it.isDirectory() && it.fileName.toString().endsWith(".csv")}
+
+    val counties = countyPaths.iterator()
+    var innerIter = readCardsCsvIterator(counties.next().toString(), styles = styles)  // TODO do we need styles ??
+
+    override fun next(): AuditableCard {
+        return innerIter.next()
     }
 
-    fun makeContestBuilders(cvrTabs: Map<Int, ContestTabulation>,
-                            redactedTabs: Map<Int, ContestTabulation>,
-    ): List<CCContestBuilder> {
-        val mergedContestMap = stateInput.mergedContestMap
-
-        val ccContests = mutableListOf<CCContestBuilder>()
-        infoList.forEach { info ->
-            val mcontest = mergedContestMap[info.name]
-            if (mcontest != null) {
-                // its possible that all cvrs for a contest are redacted
-                if ((cvrTabs[info.id] != null || redactedTabs[info.id] != null)) {
-                    val cb = CCContestBuilder(
-                        variant.auditType,
-                        mcontest,
-                        info,
-                        cvrTabs[info.id],
-                        redactedTabs[info.id],
-                        variant)
-                    ccContests.add(cb)
-                }
-            }
-            else logger.warn{"*** cant find contest '${info.name}' in stateInput.mergedContestMap"}
+    override fun hasNext(): Boolean {
+        if (innerIter.hasNext()) return true
+        if (counties.hasNext()) {
+            innerIter = readCardsCsvIterator(counties.next().toString(), styles = styles)
+            return hasNext()
         }
-
-        return ccContests
+        return false
     }
 
-    fun makeContests(contestBuilders: Map<Int, CCContestBuilder>): List<ContestIF> {
-        return infoList.filter { contestBuilders[it.id] != null }.map { info ->
-            val contestBuilder = contestBuilders[info.id]!!
-            contestBuilder.build(info)
-        }
+    override fun close() {
+        // NOOP
     }
-
-    fun makeContestWAs(
-        contests: List<ContestIF>,
-        npopMap: Map<Int, Int>,
-        allCvrTabs: Map<Int, ContestTabulation>,
-        oneAuditPools: List<CardPool>,
-    ): List<ContestWithAssertions> {
-        val contestsUAs = mutableListOf<ContestWithAssertions>()
-
-        val regular = ContestWithAssertions.make(contests.filter { !it.isIrv() }, npopMap, true, hasStyle)
-        if (variant.isOA()) setPoolAssorterAverages(regular, oneAuditPools)
-        contestsUAs.addAll(regular)
-
-        contests.filter { it.isIrv() }.forEach {
-            // assumes contestTab.irvVotes are present
-            val irvContest = if (!variant.isOA())
-                makeRaireContest(it.info(), allCvrTabs[it.id]!!, it.Nc(), Nbin=npopMap[it.id]!!)
-            else
-                makeRaireOneAuditContest(it.info(), allCvrTabs[it.id]!!, it.Nc(), Nbin=npopMap[it.id]!!, oneAuditPools)
-            contestsUAs.add(irvContest)
-        }
-
-        return contestsUAs
-    } */
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -273,6 +239,7 @@ fun createCorlaStateElection(
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     hasStyle: Boolean = true, // TODO wtf ??
     variant: ElectionVariantEnum,
+    votedatabase: Map<String, String>? = null
  ) {
     val stopwatch = Stopwatch()
 
@@ -280,7 +247,7 @@ fun createCorlaStateElection(
     Logging.addFileAppender("cases", "$topdir/logs.log")
     logger.info {"-------------- createCorlaStateElection ${stateInput.javaClass.name} in $topdir"}
 
-    val election = CorlaStateElection(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
+    val election = CorlaStateElection(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant, votedatabase)
 
     createElectionRecord(election, topdir = topdir)
 

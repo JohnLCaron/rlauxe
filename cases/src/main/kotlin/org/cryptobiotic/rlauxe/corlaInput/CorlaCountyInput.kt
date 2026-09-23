@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
+import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.Garfield2020RawCvrs
 import org.cryptobiotic.rlauxe.corlacvr.Redaction

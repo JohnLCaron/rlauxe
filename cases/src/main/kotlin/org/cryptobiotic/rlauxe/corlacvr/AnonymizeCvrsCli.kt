@@ -18,7 +18,7 @@ Kotter: An excellent choice if you want to build a fully interactive, dynamic te
  */
 enum class Mode { check, redact }
 const val MIN_BALLOTS_DEFAULT = 10
-const val VERSION = "0.2"
+const val VERSION = "0.3"
 
 object AnonymizeCvrsCli {
 

@@ -1,10 +1,9 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2022Primary
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
-import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrConverter
-import org.cryptobiotic.rlauxe.corlacvr.makeContestInfo
 import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrs
 import kotlin.test.Test
 

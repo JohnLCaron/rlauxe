@@ -2,7 +2,9 @@ package org.cryptobiotic.rlauxe.corlacvr
 
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.auditcenter.BuildCorlaContests
+import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
+import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile

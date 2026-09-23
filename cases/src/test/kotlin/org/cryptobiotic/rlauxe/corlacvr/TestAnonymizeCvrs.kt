@@ -1,7 +1,14 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
+import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.sfn
 import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
+import kotlin.io.path.Path
+import kotlin.io.path.exists
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -116,7 +123,9 @@ class TestAnonymizeCvrs {
     // needs redaction: Arapahoe (301 s), Denver (517 s), La Plata(640 ms), Larimer (2 sec), Mesa (32 s), Routt (6), Saguache (2), Sedgwick(214 ms)
     @Test
     fun testAnonymize2020Cvrs() {
+        val stopwatch = Stopwatch()
         val input = Colorado2020General()
+        val countNredacted = mutableMapOf<String, Int>()
         input.counties().forEach { county ->
             val countyInput = input.corlaCountyInput(county)!!
             println("===========================================================================================")
@@ -129,11 +138,45 @@ class TestAnonymizeCvrs {
                 )
             )
 
+            var countNcards = 0
             val actual = File("$baseOut/2020/$county.csv").readLines()
             actual.forEach { line ->
+                if (line.contains("*,*")) countNcards++
                 if (line.startsWith("AGGREGATED")) println(line)
             }
+            if (countNcards > 0) print("countNcards = $countNcards ")
             println("success")
+            countNredacted[county] = countNcards
+        }
+        writeRedactionCount("$baseOut/2020/redacted.csv", countNredacted)
+        println("that took $stopwatch")
+    }
+}
+
+fun writeRedactionCount(outputFilename: String, countNredacted: Map<String, Int>) {
+    // misc data by county
+    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
+    writer.write("    county, addRedactedCards\n")
+    countNredacted.toSortedMap().forEach {
+        writer.write("${sfn(it.key, 10)}, ${nfn(it.value, 7)}\n")
+    }
+    writer.close()
+    println("wrote ${countNredacted.size} redactionCount to $outputFilename")
+}
+
+fun readRedactionCount(filename: String): Map<String, Int> {
+    // misc data by county
+    val countNredacted = mutableMapOf<String, Int>()
+    if (!Path(filename).exists()) return countNredacted
+
+    val lines = File(filename).readLines()
+    lines.forEachIndexed { idx, line ->
+        if (idx > 0) {
+            val tokens = line.split(",")
+            val county = tokens[0].trim()
+            val nredact = tokens[1].trim().toInt()
+            countNredacted[county] = nredact
         }
     }
+    return countNredacted
 }

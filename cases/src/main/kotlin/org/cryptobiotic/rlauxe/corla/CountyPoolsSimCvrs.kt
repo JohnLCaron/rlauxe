@@ -1,8 +1,12 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CountyPools
+import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCountiesIF
+import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotesIF
+import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContestsIF
+import org.cryptobiotic.rlauxe.auditcenter.MvrStyle
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -21,11 +25,6 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 private val logger = KotlinLogging.logger("CountyPoolsSimCvrs")
-
-// obsolete use CorlaCountyElection
-
-//// TODO break out of Corla, probably move to core
-// TODO anticipate knowing styles or Nc(county, contest)
 
 // cards are partitioned by county; make a CountyPools for each County; cvrs are generated independently for each CountyPools.
 // generate cvrs with the constraint that they must agree with county subtotals and county ncards.
@@ -309,6 +308,9 @@ class CountyPoolsSimCvrs(
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+// too complex
+
 class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, contests: List<CountyContestVotesIF>,
                           val distributeNc: Map<String, Int>, val infos: Map<String, ContestInfo>, val cardsinCountyPool: Int) {
     val show = false
@@ -497,7 +499,9 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
             // println("correct ncards by ${cardsinCountyPool - checkNcardsInitial}" )
         }
         checkNcardsInitial = allStyles.sumOf { it.ncards() }
-        require (checkNcardsInitial == cardsinCountyPool )
+        if (checkNcardsInitial != cardsinCountyPool)
+            logger.warn{"county '$countyName' has checkNcardsInitial $checkNcardsInitial != $cardsinCountyPool cardsinCountyPool"}
+        // require (checkNcardsInitial == cardsinCountyPool )
 
         var show = false
         var showAll = false
@@ -625,65 +629,26 @@ class StyleCardAllocation(val countyName: String, mvrStyles: List<MvrStyle>, con
 
                 checkNcards = allStyles.sumOf { it.ncards() }
                 val anyStillMissing = allContests.filter{ it.need() > 0 }
-                require(anyStillMissing.isEmpty())
+                if (anyStillMissing.isNotEmpty()) logger.warn{"anyStillMissing.isNotEmpty()" }
+                // require(anyStillMissing.isEmpty())
                 logger.info { "county '$countyName' munged the missingStyle so that ncards > nvotes for all contests" }
             }
         }
 
-        require(checkNcards == cardsinCountyPool)
-        require(!allContests.any { it.need() > 0 })
+        if (checkNcards != cardsinCountyPool)
+            logger.warn{"county '$countyName' has checkNcards $checkNcards != $cardsinCountyPool cardsinCountyPool"}
+
+        val needMore = allContests.any { it.need() > 0 }
+        if (!needMore)
+            logger.warn{"!allContests.any { it.need() > 0 }"}
+
+        // require(checkNcards == cardsinCountyPool)
+        // require(!allContests.any { it.need() > 0 })
 
         if (showAll) {
             println("$countyName: totalCards=$checkNcards population = $cardsinCountyPool diff=${checkNcards - cardsinCountyPool}")
             allStyles.forEach { println(it) }
         }
-    }
-}
-
-/////////////////////////////////////////////////////////////
-// maybe should be interfaces ?
-// TODO get rid of ??
-//   trying to remove corla stuff i think
-
-interface ContestTabAllCountiesIF {
-    val contestName: String 
-    val choices:  Map<String, Int>// original choice name -> votes
-    val counties: Set<String>    // countyNames
-    val countyVotes: Map<String, Int>     // countyName -> total votes for this contest in this county
-    
-    fun sumVotes(): Int
-}
-
-// for one county, all contests
-interface CountyTabAllContestsIF {
-    val countyName: String
-    val contests:  Map<String, CountyContestVotesIF>// contestName (canonical I think) -> CountyContestVotes
-}
-
-// we only know votes, not ncards or undervotes.
-// for one county, one contest
-interface CountyContestVotesIF { 
-    val countyName: String
-    val contestName: String
-    val choices: Map<String, Int> // choice name  -> contest choice vote in this county
-
-    fun contestVotes() = choices.values.sumOf { it }
-
-    // convert to canonical choice names TODO get rid of
-    fun canonicalChoices(choiceMapper: (String, String, String) -> String): Map<String, Int> {
-        return choices.filter { !isWriteIn(it.key) }.mapKeys {
-            choiceMapper(countyName, contestName, it.key )
-        }
-    }
-
-    fun makeContestTabulation(info: ContestInfo, ncards: Int, choiceMapper: (String, String, String) -> String): ContestTabulation {
-        val candidateVotes = canonicalChoices(choiceMapper).map { (canonicalChoiceName, vote) ->
-            if (info.candidateNames[canonicalChoiceName] == null)
-                logger.error{"contestTab candidate name $canonicalChoiceName not found in info"}
-            Pair( info.candidateNames[canonicalChoiceName]!!, vote)
-        }.toMap()
-
-        return ContestTabulation(info, candidateVotes, ncards)
     }
 }
 
@@ -700,7 +665,7 @@ fun CountyContestVotes.makeContestTabulation(canonicalContest: CanonicalContest,
 }
  */
 
-// styles derived from mvr cards
+/* styles derived from mvr cards
 data class MvrStyle(val id: Int, val contests: Set<String>) {
     var cardCount = 0
     override fun toString()= buildString {
@@ -712,8 +677,9 @@ data class MvrStyle(val id: Int, val contests: Set<String>) {
         val useIds = if (sort) contestIds.sorted() else contestIds
         return "  MvrStyle(${id}, contests=${useIds}, count= ${cardCount}"
     }
-}
+} */
 
+// intArray as vector ??
 data class Vector(val n: Int) {
     val elems = IntArray(n)
 

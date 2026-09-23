@@ -43,7 +43,9 @@ class CountyAuditRecord(
         var count = 0
         mvrCardIter.forEach { mvr ->
             val location = mvr.location()
-            val countyName = if (location.indexOf(":") > 0) location.substring(0, location.indexOf(":")) else location
+            var countyName = location
+            if (location.indexOf(":") > 0) countyName = location.substring(0, location.indexOf(":"))
+                else if (location.indexOf("-") > 0) countyName = location.substring(0, location.indexOf("-"))
             val accum = mvrCount.getOrPut(countyName) { 0 }
             mvrCount[countyName] = accum + 1
             count++

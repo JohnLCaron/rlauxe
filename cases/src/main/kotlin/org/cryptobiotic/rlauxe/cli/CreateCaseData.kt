@@ -4,15 +4,14 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
-import org.cryptobiotic.rlauxe.auditcenter.makeCorla2020ClcaWithCvrs
-import org.cryptobiotic.rlauxe.auditcenter.makeCorla2020Clca
-import org.cryptobiotic.rlauxe.auditcenter.makeCorla2020Uniform
-import org.cryptobiotic.rlauxe.auditcenter.makeCorla2020UniformWithCvrs
-import org.cryptobiotic.rlauxe.auditcenter.makeCorla2022Primary
-import org.cryptobiotic.rlauxe.auditcenter.makeCorla2024
-import org.cryptobiotic.rlauxe.auditcenter.makeCorla2026Pcvrs
-import org.cryptobiotic.rlauxe.auditcenter.makeCorla2026p
-import org.cryptobiotic.rlauxe.auditcenter.makeCorla2026pm
+import org.cryptobiotic.rlauxe.corla.makeCorla2020ClcaWithCvrs
+import org.cryptobiotic.rlauxe.corla.makeCorla2020Clca
+import org.cryptobiotic.rlauxe.corla.makeCorla2020Uniform
+import org.cryptobiotic.rlauxe.corla.makeCorla2022Primary
+import org.cryptobiotic.rlauxe.corla.makeCorla2024
+import org.cryptobiotic.rlauxe.corla.makeCorla2026Pcvrs
+import org.cryptobiotic.rlauxe.corla.makeCorla2026p
+import org.cryptobiotic.rlauxe.corla.makeCorla2026pm
 import org.cryptobiotic.rlauxe.belgium.makeBelgium2024Data
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionClca
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionOA
@@ -66,7 +65,7 @@ object CreateCaseData {
         val sampleType by parser.option(
             ArgType.String, // enum ??
             shortName = "sampling",
-            description = "style | uniform"
+            description = "style | uniform" // TODO reimplement uniform
         )
 
         try {
@@ -88,14 +87,14 @@ object CreateCaseData {
                 print("\n  using auditcenter local git repo at $auditcenter")
                 print(" sampling type = ${sampleType ?: "style"}")
             }
-            if (case == "corla2020withCvrs") {
+            /* if (case == "corla2020withCvrs") {
                 if (input == null) {
                     println("\nYou must set input to 'votedatabase/cvr/Colorado'")
                     return
                 }
                 print("\n  using votedatabase/ at $input")
                 print(" sampling type = ${sampleType ?: "style"}")
-            }
+            } */
             if (case == "ga26p") {
                 if (input == null) {
                     println("\nYou must set input directory to github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted")
@@ -116,6 +115,13 @@ object CreateCaseData {
                     makeBelgium2024Data(toptopdir)
                 }
 
+                "boulder2024" -> {
+                    when (auditType) {
+                        "clca" -> makeBoulderElectionClca(toptopdir = toptopdir)
+                        else -> makeBoulderElectionOA(toptopdir = toptopdir)
+                    }
+                }
+
                 "corla2026p" -> {
                     makeCorla2026p(toptopdir = toptopdir, auditcenter = auditcenter!!)
                 }
@@ -128,19 +134,14 @@ object CreateCaseData {
                     makeCorla2026Pcvrs(toptopdir = toptopdir, auditcenter = auditcenter!!)
                 }
 
-                "boulder2024" -> {
-                    when (auditType) {
-                        "clca" -> makeBoulderElectionClca(toptopdir = toptopdir)
-                        else -> makeBoulderElectionOA(toptopdir = toptopdir)
-                    }
-                }
 
-                "corla2020" -> {
+                "corla2020" -> makeCorla2020Clca(toptopdir = toptopdir, auditcenter = auditcenter!!)
+                /* {
                     when (sampleType) {
                         "uniform" -> makeCorla2020Uniform(toptopdir = toptopdir, auditcenter = auditcenter!!)
                         else -> makeCorla2020Clca(toptopdir = toptopdir, auditcenter = auditcenter!!)
                     }
-                }
+                } */
 
                 "corla2022p" -> {
                     makeCorla2022Primary(toptopdir = toptopdir, auditcenter = auditcenter!!)
@@ -150,14 +151,15 @@ object CreateCaseData {
                     makeCorla2024(toptopdir = toptopdir, auditcenter = auditcenter!!)
                 }
 
-                "corla2020withCvrs" -> {
+                "corla2020withCvrs" -> makeCorla2020ClcaWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!, votedatabase = input)
+                /* {
                     when (sampleType) {
                         "uniform" -> makeCorla2020UniformWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!,
                             votedatabase = input!!)
                         else -> makeCorla2020ClcaWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!,
                             votedatabase = input!!)
                     }
-                }
+                } */
 
                 "ga26p" -> {
                     makeGa2026(toptopdir, input!!, auditType)
@@ -188,6 +190,6 @@ object CreateCaseData {
 }
 
 /*
-java -classpath cases/build/libs/cases-0.10.0.0-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
+java -classpath cases/build/libs/cases-0.10.4.2-uber.jar org.cryptobiotic.rlauxe.cli.CreateCaseData \
     -case belgium -topdir "/home/stormy/datadrive/rla/cases/belgium/belgium2024"
  */

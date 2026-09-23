@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.corlaCounty
+package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
@@ -11,26 +11,25 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
 import kotlin.String
 
-private val logger = KotlinLogging.logger("CorlaStateContestInfoBuilder")
+private val logger = KotlinLogging.logger("CountyContestBuilder")
 
 // Build Corla Contests from ColoradoInput. used by CorlaStateElection
 // TODO should add up the county votes, not use the statewide total since some counties are missing
-open class CorlaStateContestInfoBuilder(val coloradoInput: ColoradoInput) {
-    // val corlaContestBuilders: List<CorlaContestBuilder> = makeContestBuilders() // 181
-    val infos: Map<Int, ContestInfo> = makeContestInfos().associateBy { it.id }
+open class BuildCorlaContests(val coloradoInput: ColoradoInput) {
+    val corlaContestBuilders: List<CorlaContestBuilder> = makeContestBuilders() // 181
+    val infos: Map<Int, ContestInfo> = corlaContestBuilders.map { it.info }.associateBy{ it.id }
     val infosByName = infos.mapKeys { it.value.name }
 
-    /* TODO set Ncast ??
+    // TODO set Ncast ??
     fun contests(ncast: Map<Int, Int>): List<Contest> {
         return corlaContestBuilders.map { it.build( ncast[it.contestId] ?: it.Nc) }
-    } */
+    }
 
-    // all contests
-    fun makeContestInfos(): List<ContestInfo> {
+    private fun makeContestBuilders(): List<CorlaContestBuilder> {
         val mergedContestMap = coloradoInput.mergedContestMap
         val strataMap = coloradoInput.strataMap
 
-        val contestInfos = mutableListOf<ContestInfo>()
+        val contestBuilders = mutableListOf<CorlaContestBuilder>()
 
         // canonical drives the boat
         mergedContestMap.values.forEach{ mcontest ->
@@ -43,7 +42,7 @@ open class CorlaStateContestInfoBuilder(val coloradoInput: ColoradoInput) {
 
                 val info = ContestInfo(
                     mcontest.contestName,
-                    contestInfos.size + 1,
+                    contestBuilders.size + 1,
                     candidateNames,
                     SocialChoiceFunction.PLURALITY, // TODO
                     mcontest.voteForN
@@ -57,6 +56,10 @@ open class CorlaStateContestInfoBuilder(val coloradoInput: ColoradoInput) {
                             strataMap.values.first()
                         } else strata1
                     }
+                    /* (mcontest.counties.size > 60) -> {
+                    val contestsPlus = mcontest.counties // + listOf("Statewide")
+                    computeStrataMinRate(mcontest.contestName, contestsPlus, strataMap)
+                } */
                     else -> computeStrataMinRate(mcontest.contestName, mcontest.counties, strataMap)
                 }
                 info.metadata["CORLAhaveMvrs"] = strata.nmvrs.toString()
@@ -68,12 +71,18 @@ open class CorlaStateContestInfoBuilder(val coloradoInput: ColoradoInput) {
                 info.metadata["CORLAcountyMvrs"] = mcontest.countyMvrs.toString()
                 info.metadata["CORLAstatewideNmvrs"] = mcontest.statewideMvrs.toString()
 
-                contestInfos.add(info)
+                val contest = CorlaContestBuilder(
+                    info,
+                    mcontest,
+                    strata,
+                    contestTabAllCounties,
+                )
+                contestBuilders.add(contest)
             }
         }
 
         // println("number of contestBuilders = ${contestBuilders.size}")
-        return contestInfos
+        return contestBuilders
     }
 
     // Neals algorithm: use the minimum rate across strata
@@ -102,7 +111,6 @@ open class CorlaStateContestInfoBuilder(val coloradoInput: ColoradoInput) {
     }
 }
 
-// not used
 /////////////////////////////////////////////////////////////////////////////
 // one contest
 

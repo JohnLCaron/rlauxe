@@ -132,6 +132,9 @@ fun chooseSamples(
 //    contestRound.haveNewSampleSize = new contest cards in sample
 // does no disk writing
 
+// reads contestRound.done, included, estMvrs; auditRound.auditorMaxNewMvrs
+// writes contestRound.haveSampleSize, haveNewSampleSize, maxSampleAllowed
+// writes auditRound.nmvrs, newmvrs, samplePrns
 fun consistentSampling(
     auditRound: AuditRoundIF,
     samplingCards: CloseableIterable<SamplingCardIF>,
@@ -226,6 +229,10 @@ fun consistentSampling(
     return sampledPrns
 }
 
+// TODO this is not CORLA algorithm, just an approximation
+// reads auditRound.countyStrata.nmvrs
+// does not use contestRound.done, included, estMvrs, .haveSampleSize, haveNewSampleSize, maxSampleAllowed
+// writes auditRound.nmvrs, newmvrs, samplePrn
 fun uniformSampling(
     auditRound: AuditRoundIF,
     samplingCards: CloseableIterable<SamplingCardIF>,
@@ -307,6 +314,7 @@ fun uniformSampling(
     return sampledPrns
 }
 
+// not used
 fun counties(contestUA: ContestWithAssertions): List<String> {
     val CORLAcounties = contestUA.contest.info().metadata.get("CORLAcounties")
     if (CORLAcounties == null) return emptyList()

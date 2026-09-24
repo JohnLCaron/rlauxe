@@ -20,12 +20,13 @@ import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import kotlin.test.Test
 
+// create election out of a single county. Creates AuditRecord not CountyAuditRecord.
 class CorlaCountyElections {
 
     @Test
     fun createOne() {
         val toptopdir = "$cases/corlaCounty/morgan26p"
-        val input = Morgan26PInput()
+        val countyInput = Morgan26PInput()
         val stateInput = Colorado2026PwithCvrs()
 
         // fun createCorlaCountyElection(
@@ -38,7 +39,7 @@ class CorlaCountyElections {
         //    hasStyle: Boolean = true, // TODO wtf ??
         //    variant: ElectionVariantEnum,
         createCorlaCountyElection(
-            input,
+            countyInput,
             stateInput,
             topdir = "$toptopdir/styles",
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),

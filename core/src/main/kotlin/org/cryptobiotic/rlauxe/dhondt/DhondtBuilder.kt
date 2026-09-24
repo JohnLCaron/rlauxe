@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.dhondt
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -9,7 +10,7 @@ import org.cryptobiotic.rlauxe.util.nfn
 import kotlin.collections.forEach
 import kotlin.math.max
 
-
+private val logger = KotlinLogging.logger("DHondtBuilder")
 private val showDetails = false
 
 // f_e,s = Te /d(s)
@@ -110,7 +111,7 @@ data class DhondtBuilder(
         )
 
         // TODO why do we add the assorters after the constructor? probably not needed anymore
-        //      or for serialization perhapes?
+        //      or for serialization perhaps?
 
         contest.assorters.addAll(DHondtAssorter.makeDhondtAssorters(info, Nc, parties))
         val lastWinningScore = winnerScores.last()
@@ -129,10 +130,12 @@ data class DhondtBuilder(
 
                 val useAssorter = if (party.votes > fw) bt else {
                     val dh = DHondtAssorter.makeFrom(info, winner = lastWinner, loser = partyCopy, Nc)
-                    if (bt.noerror(true) > dh.noerror(true))
-                        bt
-                    else
+                    if (bt.noerror(true) > dh.noerror(true)) bt
+                    else {
+                        logger.info {"${info.name} Using ${dh.shortName()} (noerror = ${dh.noerror(true)}) instead of "+
+                                "${bt.shortName()} (noerror = ${bt.noerror(true)})"}
                         dh
+                    }
                 }
                 contest.assorters.add(useAssorter)
 

@@ -18,7 +18,7 @@ class TestUtils {
     @Test
     fun problem() {
         val Npop = 1_000_000
-        val margin = .164003
+        val margin = 0.012
         val alpha = .03
 
         println("margin=$margin samples=${estSampleSizeStandardBet(Npop, noerror(margin, 1.0), alpha)}")
@@ -26,6 +26,15 @@ class TestUtils {
 
         val estRisk = estRiskStandardBet(Npop, margin, 42)
         println("dmargin=$margin risk=$estRisk")
+    }
+
+    @Test
+    fun problem2() {
+        val Npop = 1_000_000
+        val noerror = .511
+        val alpha = .03
+
+        println("noerror=$noerror samples=${estSampleSizeStandardBet(Npop, noerror, alpha)}")
     }
 
     @Test

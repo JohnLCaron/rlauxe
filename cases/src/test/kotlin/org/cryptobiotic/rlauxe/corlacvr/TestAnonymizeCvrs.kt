@@ -101,7 +101,7 @@ class TestAnonymizeCvrs {
     @Test
     fun testAnonymizeOne() {
         val input = Colorado2020General()
-        val county = "Routt"
+        val county = "Mesa"
         val countyInput = input.corlaCountyInput(county)!!
         val output = "$baseOut/2020/$county.csv"
 

@@ -61,16 +61,12 @@ fun createBelgiumElection(
     contestd: DHondtContest,
     creationConfig: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
-    clear: Boolean = false): Result<AuditRoundIF, ErrorMessages>
+    ): Result<AuditRoundIF, ErrorMessages>
 {
-    clearDirectory(Path(topdir))
-    Logging.addFileAppender("cases", "$topdir/logs.log")
-    logger.info {"-------------- createBelgiumElection ${contestd.name} in $topdir"}
-
     val stopwatch = Stopwatch()
     val election = BelgiumClca(contestd, MvrSource.testPrivateMvrs)
 
-    createElectionRecord(election, topdir = topdir, clear = clear)
+    createElectionRecord(election, topdir = topdir, clear = false)
     println("createBelgiumElection took $stopwatch")
 
     val config = Config(election.electionInfo(), creationConfig, roundConfig)
@@ -92,12 +88,15 @@ fun createBelgiumAndRunAllRounds(electionName: String,
                                  runRounds:Boolean = true,
                                  stopRound:Int=0,
                                  showVerify:Boolean = false,
+                                 clear: Boolean = true,
 ): Pair<Int, Int> {
     println("\n======================================================")
     println("electionName $electionName")
 
     val topdir = "$toptopdir/$electionName"
+    if (clear) clearDirectory(Path(topdir))
     Logging.addFileAppender("cases", "$topdir/logs.log")
+    logger.info {"-------------- createBelgiumElection ${electionName} in $topdir"}
 
     val partyIds = readPartyTxtResource("$belgiumData/parties.txt")
     validateOutputDir(Path.of(toptopdir))

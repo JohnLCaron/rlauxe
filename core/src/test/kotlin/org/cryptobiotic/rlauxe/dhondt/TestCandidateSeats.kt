@@ -127,7 +127,7 @@ class TestCandidateSeats {
     fun testAllWrite() {
         val allSeats = makeAllSeats(lastRound, sampleLimits)
 
-        val scratchFile = createTempFile().toString()
+        val scratchFile = "/home/stormy/rla/temp/assertions.json" // createTempFile().toString()
         val org = writeDHondtAssertionContestsJson(lastRound.contestRounds, allSeats, filename = scratchFile)
 
         val roundtrip = readDHondtAssertionContestsJsonUnwrapped(scratchFile)

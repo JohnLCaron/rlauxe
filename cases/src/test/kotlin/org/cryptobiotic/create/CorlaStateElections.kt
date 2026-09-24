@@ -22,14 +22,14 @@ class CorlaStateElections {
 
     @Test
     fun createOne() {
-        val stateInput = Colorado2026PwithCvrs()
+        val stateInput = Colorado2020General()
 
         createCorlaStateElection(
-            topdir = "$top2026pdir/phantoms",
+            topdir = "$top2020dir/onepool",
             stateInput=stateInput,
-            creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
+            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .04),
             roundConfig = corlaRoundSettings(),
-            variant = ElectionVariantEnum.Phantoms,
+            variant = ElectionVariantEnum.OnePool,
         )
     }
 

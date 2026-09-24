@@ -34,8 +34,8 @@ class CvrsFromManifest2(
     val county = countyInput.countyName
 
     val converter: CorlaCvrConverter
-    val convertedCvrs = mutableListOf<AuditableCard>()
-    val convertedCvrTabs : Map<Int, ContestTabulation>
+    val unredactedCvrs = mutableListOf<AuditableCard>()
+    val unredactedCvrTabs : Map<Int, ContestTabulation>
 
     val cvrStyles: List<StyleIF>
     var nextStyleId: Int
@@ -48,6 +48,7 @@ class CvrsFromManifest2(
     val redactedTabs : Map<Int, ContestTabulation>
 
     init {
+        // in order of the CVR file. redacted cvrs are skipped.
         val corlaCvrs = countyInput.readCorlaCvrs()
 
         val manifest = countyInput.readCountyManifest()
@@ -64,31 +65,29 @@ class CvrsFromManifest2(
                 val convertedCvr = converter.convertToCard(it) { cvrb: AuditableCardBuilder ->
                     cvrb.location = "$county:${manifestEntry.location()}"
                 }
-                convertedCvrs.add(convertedCvr)
+                unredactedCvrs.add(convertedCvr)
             }
         }
-        convertedCvrTabs = tabulateCards(convertedCvrs.iterator(), infos)
+        unredactedCvrTabs = tabulateCards(unredactedCvrs.iterator(), infos)
 
+        // TODO add this calculation to CorlaInput.Counties
         val countyTab = stateInput.countyTabsAllContests()[county]!!
         val convertedCountyTabs: Map<Int, ContestTabulation> = converter.convertToContestTabulation(countyTab)
-        val voteDifference = subtractContestTabulationsZ(convertedCountyTabs, convertedCvrTabs)
-        estNcardsByContest = estNcardsByContest(convertedCvrTabs, voteDifference)
+        val voteDifference: Map<Int, ContestTabulation> = subtractContestTabulationsZ(convertedCountyTabs, unredactedCvrTabs).filter { it.value.nvotes() > 0 }
+        estNcardsByContest = estNcardsByContest(unredactedCvrTabs, voteDifference)
+
+        // only use this for phantom variant
         phantomsByContest = voteDifference.mapValues { it.value.ncards() }
 
+        // TODO redacted pools, with possible styles ...
+        // put the unmatched manifest entries into a pool, with voteDifference as the pool subtotal
         if (!variant.phantoms && manifestCounts.unmatched > 0) {
             redactedTabs = voteDifference
 
             val poolId = nextStyleId++
-            val onepool = CardPool("$county:RedactedPool", poolId, false, infos, voteDifference, manifestCounts.unmatched)
+            val onepool = CardPool("$county:UnmatchedManifest", poolId, hasExactContests = false, infos, voteDifference, manifestCounts.unmatched)
             redactedPools = listOf(onepool)
 
-            /* problem is that we need simulated mvr, then remove the votes in the card
-            manifestCounts.redactedIds.forEach { manifestEntry ->
-                val card = AuditableCard(manifestEntry.imprintedId(), "$county:${manifestEntry.location()}",
-                    0, 0L, phantom=true, styleId = poolId,
-                    IntArray(0), IntArray(0),IntArray(0), poolId)
-                redactedCards.add(card)
-            } */
         } else {
             redactedPools = emptyList()
             redactedTabs = emptyMap()
@@ -96,20 +95,21 @@ class CvrsFromManifest2(
     }
 
     // make simulated MVRs for the redacted pools, using entries in the manifest that dont have cvrs
+    // all cards have the same style, namely all contests with voteDifference > 0; this will make population > Nc
     fun makeSimulatedMvrs() : List<AuditableCard> { // contestId -> candidateId -> nvotes
         if (variant.phantoms) return emptyList()
 
         val redactedIter = manifestCounts.redactedIds.iterator()
         val rcvrs = mutableListOf<AuditableCard>()
         redactedPools.forEach { cardPool ->
-            rcvrs.addAll(makeCardsForOnePool(cardPool, redactedIter))
+            rcvrs.addAll(makeMvrsForOnePool(cardPool, redactedIter))
         }
         logger.info {"wanted=${manifestCounts.unmatched} got=${rcvrs.size} redactedManifestIds is finished = ${!redactedIter.hasNext()}"}
         return rcvrs
     }
 
-    // make simulated CVRs for one pool, all contests, using the unmatched manifestIds
-    private fun makeCardsForOnePool(cardPool: CardPool, redactedIter: Iterator<ManifestEntry>) : List<AuditableCard> { // contestId -> candidateId -> nvotes
+    // make simulated MVRs for one pool, all contests, using the unmatched manifestIds; set styleId, poolId if not sim.
+    private fun makeMvrsForOnePool(cardPool: CardPool, redactedIter: Iterator<ManifestEntry>) : List<AuditableCard> { // contestId -> candidateId -> nvotes
         val vunders = cardPool.possibleContests().associate { Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
         val vunderPool = VunderPool(vunders, cardPool.poolName, cardPool.poolId, cardPool.hasExactContests)
         val cardsForPool = mutableListOf<AuditableCard>()
@@ -117,10 +117,14 @@ class CvrsFromManifest2(
         var count = 0
         while (redactedIter.hasNext() && count < cardPool.ncards()) {
             val manifestEntry = redactedIter.next()
-            val cvb2 = AuditableCardBuilder(manifestEntry.imprintedId(), "$county:${manifestEntry.location()}", count, 0L, false,
-                cardPool.poolId,
-                if (variant.sim) null else cardPool.poolId,
-                null, null)
+            val cvb2 = AuditableCardBuilder(
+                id = manifestEntry.imprintedId(),
+                location = "$county:${manifestEntry.location()}",
+                index = count, prn = 0L,
+                phantom = false,
+                styleId = cardPool.poolId,
+                poolId = if (variant.sim) null else cardPool.poolId,
+                votesIn = null, style = null)
             vunderPool.simulatePooledCard(cvb2) // fill in the vote
             cardsForPool.add(cvb2.build())
             count++
@@ -136,15 +140,18 @@ class CvrsFromManifest2(
 
     // meanwhile, down the rabbit hole again
     // estimate ncards(county, contest), return contestId -> ncards
-    fun estNcardsByContest(cvrTabs: Map<Int, ContestTabulation>, redactedTab: Map<Int, ContestTabulation>): Map<Int, Int> {
-        val undervotePct: Map<Int, Double> = cvrTabs.mapValues {
+    // are we adding in the unredactedCvrTabs ? cause we have an exact count there
+    fun estNcardsByContest(unredactedCvrTabs: Map<Int, ContestTabulation>, voteDifference: Map<Int, ContestTabulation>): Map<Int, Int> {
+        val ncardsByContest = mutableMapOf<Int, Int>() // contestId, adjust
+        unredactedCvrTabs.forEach { ncardsByContest[it.key] = it.value.ncards() }
+
+        // estimate redacted cards by assuming that the undervote Pct in the redacted Groups is the same as in the unredacted CVRs
+        val undervotePct: Map<Int, Double> = unredactedCvrTabs.mapValues {
             // assume that the undervote Pct in the redacted Groups is the same as in the unredacted CVRs
             if (it.value.nvotes() == 0) 0.0 else it.value.undervotes() / it.value.nvotes().toDouble()
         }
 
-        val ncardsByContest = mutableMapOf<Int, Int>() // contestId, adjust
-
-        redactedTab.forEach { (id, tab) ->
+        voteDifference.forEach { (id, tab) ->
             val pct = undervotePct[id] ?: 0.1  // what if there are no cvrs for this contest ?
             // but it cant use more cards then there are
             // (tab.nvotes + tab.undervotes) / tab.voteForN < totalCvrs
@@ -155,7 +162,8 @@ class CvrsFromManifest2(
             // we are munging redactedTab directly
             tab.undervotes = roundToClosest(tab.nvotes() * usePct)
             tab.ncardsTabulated = roundToClosest((tab.nvotes() + tab.undervotes) / tab.voteForN.toDouble())
-            ncardsByContest[id] = tab.ncardsTabulated + (cvrTabs[id]?.ncards() ?: 0)
+            val accum = ncardsByContest.getOrDefault(id, 0)
+            ncardsByContest[id] = tab.ncardsTabulated + accum
         }
         return ncardsByContest
     }

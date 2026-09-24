@@ -7,6 +7,7 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator
 
+// this allows us to sample with FastSamplingCard
 interface SamplingCardIF {
     fun hasContest(contestId: Int): Boolean
     fun prn(): Long

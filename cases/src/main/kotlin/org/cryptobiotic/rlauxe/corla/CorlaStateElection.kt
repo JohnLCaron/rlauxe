@@ -25,7 +25,7 @@ import kotlin.io.path.listDirectoryEntries
 
 private val logger = KotlinLogging.logger("CorlaStateElection")
 
-// A Corla state election with CVRS
+// A Corla state election with CVRS. Creates a CountyAuditRecord.
 class CorlaStateElection(
     val topdir: String,
     val stateInput: ColoradoInputWithCvrs,
@@ -64,15 +64,16 @@ class CorlaStateElection(
 
             val cvrsFromManifest = CvrsFromManifest2(variant, countyInput, stateInput, infos, nextStyleId)
 
+            // only needed for (variant.phantoms)
             val phantomCards = if (variant.phantoms) makePhantomCards(cvrsFromManifest.phantomsByContest, countyName)
                 else emptyList()
-            if (variant.phantoms) println("phantomsByContest for $countyName\n  ${cvrsFromManifest.phantomsByContest}")
+            if (variant.phantoms) logger.info { "phantomsByContest for $countyName\n  ${cvrsFromManifest.phantomsByContest}" }
             cvrsFromManifest.phantomsByContest.forEach { (id, value) ->
                 statePhantoms.merge(id, value, Int::plus)
             }
 
             val totalCountyTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
-            totalCountyTabs.sumContestTabulations(cvrsFromManifest.convertedCvrTabs)
+            totalCountyTabs.sumContestTabulations(cvrsFromManifest.unredactedCvrTabs)
             totalCountyTabs.sumContestTabulations(cvrsFromManifest.redactedTabs)
             stateCvrTabs.sumContestTabulations(totalCountyTabs)
 
@@ -80,18 +81,21 @@ class CorlaStateElection(
                 stateNCardsByContest.merge(id, value, Int::plus)
             }
 
-            // TODO how do the style ids on the phantoms work?
-            //    is a phantom just for a single contest ??
-            //    should the phantom know which county caused it ?? (needed for uniform sampling)
+            // TODO make the mvrs/cvrs seperate so can skip that if possible.
+            // TODO do we need to match the corla canonical ordering ??
 
-            // these are mvrs
-            // for phantom variant, there are no redacted cards, just phantom cards. is that correct ??
-            val allCountyCards = cvrsFromManifest.convertedCvrs + cvrsFromManifest.makeSimulatedMvrs() + phantomCards // in memory
+            // these are mvrs; for all but phantoms, use simulated mvrs that match the pool totals.
+            // for phantom variant, makeSimulatedMvrs is empty; add phantom cards
+            val allCountyMvrs = cvrsFromManifest.unredactedCvrs + cvrsFromManifest.makeSimulatedMvrs() + phantomCards // in memory
+
             // write them out while we have them in memory
-            writeUnsortedMvrs(countyName, publisher, Closer(allCountyCards.iterator()))
-            totalCvrCardCount += allCountyCards.size
+            writeUnsortedMvrs(countyName, publisher, Closer(allCountyMvrs.iterator()))
+            totalCvrCardCount += allCountyMvrs.size
 
-            val countyPops = tabulateNpops(allCountyCards, infos.values.toList())
+            // how do the cvrs relate to the mvrs ?? Remove simulated votes in pools
+            writeUnsortedCountyCvrs(countyName, publisher, Closer(allCountyMvrs.iterator()), variant)
+
+            val countyPops = tabulateNpops(allCountyMvrs, infos.values.toList())
             countyPops.forEach { (id, value) ->
                 statePops.merge(id, value, Int::plus)
             }
@@ -104,7 +108,7 @@ class CorlaStateElection(
 
             // TODO I dont think this is needed ??
             cvrPools.add(
-                CountyPools(countyName, countyPoolId, cvrsFromManifest.convertedCvrTabs, cvrsFromManifest.convertedCvrs.size, countyCardStyles)
+                CountyPools(countyName, countyPoolId, cvrsFromManifest.unredactedCvrTabs, cvrsFromManifest.unredactedCvrs.size, countyCardStyles)
             )
             countyPools.add(
                 CountyPools(countyName, countyPoolId++, totalCountyTabs, countyPopulation, countyCardStyles)
@@ -155,7 +159,7 @@ class CorlaStateElection(
     override fun unsortedMvrsExternal() = CardIteratorfromCountyMvrs(publisher, styles = allStyles)
 
     // TODO do we need to munge the mvrs for the card manifest? Add the card styles ??
-    override fun cards() = createCardsFromMvrs(unsortedMvrsExternal())
+    override fun cards() = removeVotesFromMvrs(unsortedMvrsExternal(), variant)
     override fun ncards() = ncards
 
     fun addIndexToMvrs(mvrs: List<AuditableCard>): List<AuditableCard> {
@@ -167,34 +171,50 @@ class CorlaStateElection(
         }
         return result
     }
-
-    fun createCardsFromMvrs(mvrs: CloseableIterator<AuditableCard>): CloseableIterator<AuditableCard> {
-        // remove cvrs for cards in the pools
-        val mvrIter = Closer(mvrs)
-        val transformer = TransformingIterator<AuditableCard, AuditableCard>(mvrIter) { org ->
-            if (org.poolId != null && variant.isOA()) AuditableCard.removeVotes(org) else org
-        }
-        return transformer
-    }
 }
 
+// all cards, including phantoms are already in the iterator
 fun writeUnsortedMvrs(
     county: String,
     publisher: Publisher,
     countyMvrs: CloseableIterator<AuditableCard>,
-    // phantoms: List<AuditableCard>,
 ): Int {
     val dir = publisher.unsortedMvrsDirectory()
     validateOutputDir(Path(dir))
     val outfile = "$dir/${county}.csv"
 
-    // TODO makePhantomCvrs(contests)
     val cardsWritten = writeCardCsvFile(countyMvrs, outfile)
     logger.info { "write $cardsWritten UnsortedMvrs for $county to ${outfile}" }
 
     return cardsWritten
 }
 
+// remove votes for cards in the pools
+fun removeVotesFromMvrs(mvrs: CloseableIterator<AuditableCard>, variant: ElectionVariant): CloseableIterator<AuditableCard> {
+    val transformer = TransformingIterator<AuditableCard, AuditableCard>(mvrs) { org ->
+        if (org.poolId != null && variant.isOA()) AuditableCard.removeVotes(org) else org
+    }
+    return transformer
+}
+
+fun writeUnsortedCountyCvrs(
+    county: String,
+    publisher: Publisher,
+    countyMvrs: CloseableIterator<AuditableCard>,
+    variant: ElectionVariant,
+): Int {
+    val dir = publisher.unsortedCountyCvrDirectory()
+    validateOutputDir(Path(dir))
+    val outfile = "$dir/${county}.csv"
+
+    val cvrIter = removeVotesFromMvrs(countyMvrs, variant)
+    val cardsWritten = writeCardCsvFile(cvrIter, outfile)
+    logger.info { "write $cardsWritten UnsortedCountyCvrs for $county to ${outfile}" }
+
+    return cardsWritten
+}
+
+// create an iterator over all the cards unsortedMvrsDirectory
 class CardIteratorfromCountyMvrs(
     publisher: Publisher,
     val styles: List<StyleIF>

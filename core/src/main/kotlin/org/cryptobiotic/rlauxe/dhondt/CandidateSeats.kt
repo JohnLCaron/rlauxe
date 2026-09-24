@@ -192,7 +192,7 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
         }
         winners.forEach {
             val win = partySeats[it]!!
-            win.minSeats--
+            win.minSeats = max(0, win.minSeats-1)
         }
         losers.forEach {
             val lose = partySeats[it]!!
@@ -400,7 +400,7 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
             if (threshRanges.candidates.isEmpty()) return orgRanges
             orgRanges.candidates.forEach { mergeRange -> // do we know that this has all candidates ??
                 val threshRange = threshRanges.candidates.find { it.candId == mergeRange.candId }!! // ??
-                mergeRange.minSeats = min(mergeRange.minSeats, threshRange.minSeats)
+                mergeRange.minSeats = max(min(mergeRange.minSeats, threshRange.minSeats), 0)
                 mergeRange.maxSeats = max(mergeRange.maxSeats, threshRange.maxSeats)
                 mergeRange.failures.addAll(threshRange.failures)
             }

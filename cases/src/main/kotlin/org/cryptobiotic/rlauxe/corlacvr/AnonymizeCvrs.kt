@@ -1380,6 +1380,29 @@ class Anonymize(
     fun writeRow(row: CvrRow, redacted: Boolean) = buildString {
         append(row.csvHeader(redactPrecint = false))
         val last = schema.nchoices
+        val rowMap: Map<Int, List<Int>> = row.contestVotes.map { Pair(it.contestId, it.votedFor) }.toMap()
+        var count = 0
+        schema.contests.forEach { scontest ->
+            val candVotes = rowMap[scontest.contestIdx]
+            repeat(scontest.ncols) {
+                count++
+                if (candVotes == null) {
+                    if (count != last) append(",")
+                } else {
+                    val vote = if (candVotes.contains(it)) 1 else 0
+                    if (redacted) append("*") else append("$vote")
+                    if (count != last) append(",")
+                }
+            }
+        }
+        // TODO remove last ??
+        appendLine()
+    }
+
+
+    fun writeRowOld(row: CvrRow, redacted: Boolean) = buildString {
+        append(row.csvHeader(redactPrecint = false))
+        val last = schema.nchoices
         if (redacted) {
             repeat(schema.nchoices) {
                 append("*")

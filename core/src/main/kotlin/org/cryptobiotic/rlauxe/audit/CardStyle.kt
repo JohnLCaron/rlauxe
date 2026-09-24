@@ -51,7 +51,7 @@ data class CardStyle(
     override fun name() = name
     override fun id() = id
     override fun hasExactContests() = hasExactContests
-    override fun hasContest(contestId: Int) = bitset.get(contestId)
+    override fun hasContest(contestId: Int) = bitset.get(contestId) // optimize bottleneck
     override fun possibleContests() = possibleContests
 
     override fun equals(other: Any?): Boolean {

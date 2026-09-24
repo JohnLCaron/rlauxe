@@ -25,6 +25,7 @@ import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.Double
@@ -38,6 +39,11 @@ import kotlin.use
 private val logger = KotlinLogging.logger("EstimateAudit")
 private val showWork = false
 private val showBet = false
+
+// estimator of samples needed. CLosely mimic a real audit with betting strategy.
+// puts estimation results into the contestRound.
+// this just runs until risk limit is satisfied, doesnt look at "samples wanted"
+
 
 // TODO  round > 1 we want to incorporate the measured errors from previous rounds
 //   cant use vunderPool to do so, that only uses fuzz
@@ -65,7 +71,7 @@ class EstimateAudit(
 ) {
     val auditType = config.auditType
 
-    // fun run(nthreads: Int? = null, contestOnly: Int? = null): Map<Int, List<Int>> {
+    // return contestId -> List<nmvrs>, ie distibution of estimated nmvrs. dist size controlled by config.round.simulation.nsimTrials
     fun run(): Map<Int, List<Int>> {
         val contestsToAudit = if (contestOnly == null) contests.filter { !it.done && it.included } else
             listOf( contests.find { it.id == contestOnly}!! )
@@ -82,7 +88,8 @@ class EstimateAudit(
         // for OneAudit, cvr == mvr and the variation comes from which pool it comes from ??
         val ntrials = if (auditType.isClca()) 1 else config.round.simulation.nsimTrials
         repeat(ntrials) { run ->
-            tasks.add(AuditTrialTask(topdir, roundIdx, run+1, config, contestsToAudit, pools, styles, sortedManifest))
+            // each trial gets their own iterator
+            tasks.add(AuditTrialTask(topdir, roundIdx, run+1, config, contestsToAudit, pools, styles, sortedManifest.cardIterable.iterator()))
         }
 
         val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunner<List<AssertionTrialIF>>().run(tasks, nthreads)
@@ -187,7 +194,7 @@ class AuditTrialTask(
     val contestsToAudit: List<ContestRound>,
     val pools: List<CardPool>?,
     val styles: List<StyleIF>?,
-    val sortedManifest: SortedManifest
+    val cardIterator: CloseableIterator<AuditableCard> // can we just give the iterator ??
 ) : ConcurrentTask<List<AssertionTrialIF>> {
 
     override fun name() = "roundIdx $roundIdx Run $run"
@@ -220,7 +227,7 @@ class AuditTrialTask(
         var cardSortedIndex = 1 // 1 based
         var countEstimatedCards = 0
         var countPoolCards = 0
-        sortedManifest.cardIterable.iterator().use { sortedCardIter ->
+        cardIterator.use { sortedCardIter ->
             while (sortedCardIter.hasNext()) {
                 // does any contest need more cards ?
                 if (!contestTrials.any { it.wantsMore() })
@@ -228,11 +235,12 @@ class AuditTrialTask(
 
                 // get the next card in sorted order
                 val card = sortedCardIter.next()
+                // on-the-fly simulation of mvrs: pretty cool
                 val mvr = when  {
                     (card.poolId() != null && vunderPools != null) -> vunderPools.simulatePooledCard(card)
                     (vunderBatches != null) -> vunderBatches.simulatePooledCard(card)
                     (onePool != null) -> onePool.simulatePooledCard(card)
-                    else -> card // TODO was null; wtf ??
+                    else -> card
                 }
                 // feeding all the contests at once
                 var include = false
@@ -386,8 +394,9 @@ class ContestClcaTrial(val run: Int,
         if (testStatistic > endingTestStatistic) {
             status = TestH0Status.StatRejectNull
             maxIndex = cardSortedIndex
-        } // once we set maxUsed then wantsMore == false
+        } // once we set maxIndex then wantsMore == false
 
+        // debugging
         val wantId = -1
         if (run == 1 && contest.id == wantId) {
             val locWidth = 32

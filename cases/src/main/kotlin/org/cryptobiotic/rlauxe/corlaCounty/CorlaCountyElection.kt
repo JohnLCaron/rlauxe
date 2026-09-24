@@ -20,6 +20,7 @@ import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("CorlaCountyElection")
 
+
 enum class ElectionVariantEnum { Phantoms, OnePool, Styles, Sim }
 
 class ElectionVariant(variantEnum: ElectionVariantEnum) {
@@ -33,6 +34,7 @@ class ElectionVariant(variantEnum: ElectionVariantEnum) {
     fun isOA() = auditType.isOA()
 }
 
+// create election out of a single county. Creates AuditRecord not CountyAuditRecord.
 class CorlaCountyElection(
     val countyInput: CorlaCountyInput,
     val stateInput: ColoradoInput,

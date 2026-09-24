@@ -20,10 +20,9 @@ import kotlin.io.path.Path
 
 // TODO modify CorlaStateElection to work without CVRS ??? or maybe this is it ????
 
-// port CountyElectionSansCvrs using CountyPoolsSimCvrs
+// A Corla state election with simulated CVRS. Creates a CountyAuditRecord.
 // A Corla state election with simulated CVRS
-// We want to synthesis cvrs and use them as the cvrPools
-// generate countyPools from auditcenter
+// We want to synthesis cvrs and use them as the cvrPools, using CountyPoolsSimCvrs.
 open class CountyElectionSimCvrs (
     val coloradoInput: ColoradoInput,
     val topdir: String,

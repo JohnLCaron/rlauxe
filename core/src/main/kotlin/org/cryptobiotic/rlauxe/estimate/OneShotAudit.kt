@@ -11,6 +11,7 @@ import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import kotlin.math.max
 
+// lightweight estimation of samples when you have provate mvrs and no errors.
 // AuditRecord must have privateMvrs; run actual audit to compare to estimation
 class OneShotAudit(
     val topdir: String,
@@ -50,13 +51,6 @@ class OneShotAudit(
                 assertionAudits.add( aa)
             }
         }
-
-        /* val assertionAuditsOld = mutableListOf<AssertionAudit>()
-        contestsUAs.forEach { contestUA ->
-            contestUA.clcaAssertions.forEach {
-                assertionAuditsOld.add( AssertionAudit(contestUA, it, show))
-            }
-        } */
 
         val naudits = assertionAudits.size
 

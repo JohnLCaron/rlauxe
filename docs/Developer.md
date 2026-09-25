@@ -12,7 +12,7 @@ _09/25/2026_
     * [Run the core tests using gradle](#run-the-core-tests-using-gradle)
   * [Using IntelliJ](#using-intellij)
   * [Modules](#modules)
-  * [Generate Test Cases](#generate-test-cases-)
+  * [Generate Test Cases](#generate-test-cases)
     * [For the Belgium 2024 test case](#for-the-belgium-2024-test-case)
     * [For the Boulder 2024 test case](#for-the-boulder-2024-test-case)
     * [For Colorado elections using auditcenter](#for-colorado-elections-using-auditcenter)
@@ -142,7 +142,7 @@ There's lots of online help for using IntelliJ.
 * **plots**: code to generate plots used in the documentation
 
 
-## Generate Test Cases 
+## Generate Test Cases
 
 build the uberjars:
 

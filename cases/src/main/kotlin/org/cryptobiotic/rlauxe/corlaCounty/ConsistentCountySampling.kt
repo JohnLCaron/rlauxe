@@ -1,10 +1,15 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
+import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.random.Random
 
+// Used by CountyAudit UI. Sample within one county's CVRS, to estimate how many samples would be needed within that county.
 
 fun sampleCountyCvrs(countyAudit: CountyAuditRecord, county: String, wantNmvrs: Map<Int, Int>, maxSamples: Int, ntrials: Int): List<Int> {
     val cvrs = countyAudit.readCountyCvrs(county) // , limit = 100_000)
@@ -66,4 +71,51 @@ fun consistentSampling(
     }
 
     return countCards
+}
+
+// simplified example for consistent sampling with styles
+// return list of Pair(index, prn) that is the canonical sequence
+fun consistentSamplingByStyle(
+    wantNmvrs: Map<Int, Int>, // contest id -> number of samples wanted. contests not in this are ignored
+    maxSamples: Int,
+    sortedCards: Iterator<SamplingCardIF>, // sorted by prn
+): List<Pair<Int, Long>> {
+    val canonSequence = mutableListOf<Pair<Int,Long>>()
+
+    // how many we still need
+    val needNmvrs = wantNmvrs.toMutableMap().withDefault{ 0 }
+    var cardIndex = 0
+    val samplingCardIter = sortedCards.iterator()
+    while (
+        samplingCardIter.hasNext() &&
+        canonSequence.size < maxSamples &&
+        needNmvrs.any { it.value > 0 }
+    ) {
+        // get the next card in sorted order
+        val card = samplingCardIter.next()
+
+        // do we want it?
+        var include = false
+        for (contestId in needNmvrs.keys) {
+            if (card.hasContest(contestId) && (needNmvrs[contestId]!! > 0)) {
+                include = true
+                break
+            }
+        }
+
+        if (include) {
+            canonSequence.add(Pair(cardIndex, card.prn()))
+
+            // decrement needNmvrs for any contests on the card
+            for (contestId in needNmvrs.keys) {
+                if (card.hasContest(contestId)) {
+                    needNmvrs[contestId] = needNmvrs[contestId]!! - 1
+                }
+            }
+        }
+
+        cardIndex++
+    }
+
+    return canonSequence
 }

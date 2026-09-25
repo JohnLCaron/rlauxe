@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrs
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
@@ -24,7 +25,7 @@ class TestRedactedCvrs {
         val export = readCorlaCvrsFromFile(cvrFilename, redaction = RedactionBoulder())
 
         val electionSimCvrs = CreateBoulderElection("boulder2025", AuditType.CLCA, export, sovo, hasStyle = true,
-            variantEnum = BoulderVariantEnum.Styles
+            variantEnum = ElectionVariantEnum.Styles
         )
         testRedactedCvrTabulation(export, electionSimCvrs)
     }
@@ -40,7 +41,7 @@ class TestRedactedCvrs {
             "Boulder2024")
 
         val electionSimCvrs = CreateBoulderElection("boulder2024", AuditType.CLCA,  export, sovo, hasStyle = true,
-            variantEnum = BoulderVariantEnum.Styles
+            variantEnum = ElectionVariantEnum.Styles
         )
         val infos = electionSimCvrs.makeContestInfo()
         println("ncontests with info = ${infos.size}")

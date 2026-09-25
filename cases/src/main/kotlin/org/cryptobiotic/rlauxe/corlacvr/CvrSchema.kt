@@ -6,14 +6,28 @@ import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
 import java.lang.StrictMath.sqrt
 
+enum class CvrHeader { cvrnumber, tabulatornum, batchid, recordid, imprintedid, precinctportion, ballottype }
+
 class CvrSchema(val inputSource: String,
-                val headerMap: Map<String, Int>, // column name -> column index
+                val headers: List<String>, // header names, lowercase
                 val columns: List<SchemaColumnInfo>,
-                val nheaders: Int,
                 val contests: List<SchemaContestInfo>,
                 val voteForNs: Map<Int, Int>) {
+
+    val nheaders = headers.size
     val nchoices = columns.size - nheaders
     val writeIns : Set<Int> = columns.filter{ it.choiceName.lowercase().contains("write-in") }.map { it.colno }.toSet()
+
+    val headerAt = mutableMapOf<Int, CvrHeader>() // idx -> header
+    val headerIdx = mutableMapOf<CvrHeader, Int>()  // header -> idx
+
+    init {
+        CvrHeader.entries.forEach { fld ->
+            val idx = headers.indexOf(fld.name)
+            if (idx >= 0) headerAt[idx] = fld
+            if (idx >= 0) headerIdx[fld] = idx
+        }
+    }
 
     fun choices(contestId: Int): List<String> {
         val contest = contests.find{ it.contestIdx == contestId }
@@ -112,23 +126,18 @@ data class SchemaContestInfo(val contestIdx: Int, val orgName: String, val start
 }
 
 // firstRow for debugging
-fun makeCvrSchema(inputSource: String,  contests: CSVRecord, choices: CSVRecord, headers: CSVRecord): CvrSchema {
+fun makeCvrSchema(inputSource: String, contests: CSVRecord, choices: CSVRecord, headerLine: CSVRecord): CvrSchema {
     require(contests.size() <= choices.size())
-    require(headers.size() == choices.size())
+    require(headerLine.size() == choices.size())
 
     val columns = mutableListOf<SchemaColumnInfo>()
     for (idx in 0 until contests.size()) {
         val choiceName = cleanChoiceName(choices.get(idx))
-        val partyName = if (idx < headers.size()) headers.get(idx).trim() else ""
+        val partyName = if (idx < headerLine.size()) headerLine.get(idx).trim() else ""
         columns.add( SchemaColumnInfo(idx, contests.get(idx).trim(), choiceName, partyName))
     }
     val nheaders = columns.first { it.contest.isNotEmpty() }.colno
-
-    // the header for the first columns, then (sometimes) the party affiliation of the candidates
-    val headerMap = mutableMapOf<String, Int>()
-    repeat(nheaders) { idx ->
-        headerMap[headers.get(idx).trim().lowercase()] = idx
-    }
+    val headers = headerLine.values().take(nheaders).map { it.lowercase() }
 
     val skipIdx = nheaders
     var startIdx = nheaders
@@ -149,7 +158,7 @@ fun makeCvrSchema(inputSource: String,  contests: CSVRecord, choices: CSVRecord,
     ccontests.add( SchemaContestInfo(currContestIdx, currContestName, startIdx, columns.size-startIdx) )
 
     val voteForNs = ccontests.associate { it.contestIdx to it.voteForN }
-    return CvrSchema(inputSource, headerMap, columns, nheaders, ccontests, voteForNs)
+    return CvrSchema(inputSource, headers, columns, ccontests, voteForNs)
 }
 
 // TODO maybe have to pass this function in ??

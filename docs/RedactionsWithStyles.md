@@ -1,11 +1,11 @@
 # Auditing with Redactions and Style-based sampling
-09/17/2026
+09/24/2026
 
 AFAIU, there are 3 ways to rigorously do a card-comparison audit when there are redacted ballots in the public CVR file. Note that the official audit would use the unredacted CVRs, so doesn't have this problem.
 
-Ill use the term "cards" instead of ballots, but when the cards are kept together, or there is only one card on the ballot, then I really mean "ballot".
+I'll use the term "cards" instead of ballots, but when the cards are kept together, or there is only one card on the ballot, then I really mean "ballot".
 
-The "county manifest" is a list of all the cards that were cast. Expand the list of "tabulator/batch/number of records" form of the manifest into a list of "tabulator/batch/recordId" = "imprinted ids". You also keep the location field which presumably helps locate the physical card. The ordering of the county manifest is the "canonical ordering". Once you commit to it, it cannot be changed. You have to commit to it before the seed is chosen, to prevent cheating. The ordering doesnt matter until you commit to it, then it really matters, and becomes the canonical ordering.
+The "county manifest" is a list of all the cards that were cast. Expand the list of "tabulator/batch/number of records" form of the manifest into a list of "tabulator/batch/recordId" = "imprinted ids". You also keep the location field which presumably helps locate the physical card. The ordering of the county manifest is the "canonical ordering". Once you commit to it, it cannot be changed. You have to commit to it before the seed is chosen, to prevent cheating. The ordering doesn't matter until you commit to it, then it really matters, and becomes the canonical ordering.
 
 The seed is used to create a "psuedo random number generator" (PRNG). This is a cryptographic algorithm that generates a sequence of "psuedo random numbers" (PRN). No one without the seed can predict what the next number in the sequence is (so they are random), but anyone with the seed can recreate the sequence (so they are deterministic or "psuedo random").
 
@@ -29,9 +29,58 @@ This creates an ordered list of samples that, for each contest, contains the fir
 
 The advantage of consistent sampling is that if a sampled card contains more than one audited contest, then the audit uses the card to audit all those contests at once.
 
-The number of cards needed for each contest is an estimate, and may be too high or too low, depending on the result of comparing the physical cards with the CVRs. If an audit needs more samples than estimated, and there are further samples that contain that contest, the audit can use those samples for the contest until the canonical contest sequence is broken. If a card is not chosen for the audit, that breaks the canonical sequence for all the contests in the card's style. This detail only affects the audit, not the validation of samples.
+The number of cards needed for each contest is an estimate, and may be too high or too low, depending on the result of comparing the physical cards with the CVRs. If an audit needs more samples than estimated, and there are further samples that contain that contest, the audit can use those samples for the contest until the canonical contest sequence is broken. If a card is not chosen for the audit, that breaks the canonical sequence for all the contests in the card's style. This ensures that each contest's sample is statistically independent. This detail only affects the audit, not the validation of samples.
 
-TODO add psuedocode
+````
+// simplified example for consistent sampling with styles
+// return list of Pair(index, prn) that is the canonical sequence
+
+fun consistentSamplingByStyle(
+    wantNmvrs: Map<Int, Int>, // contest id -> number of samples wanted. contests not in this are ignored
+    maxSamples: Int,
+    sortedCards: Iterator<SamplingCardIF>, // sorted by prn
+): List<Pair<Int, Long>> {
+    val canonSequence = mutableListOf<Pair<Int,Long>>()
+
+    // how many we still need
+    val needNmvrs = wantNmvrs.toMutableMap().withDefault{ 0 }
+    
+    var cardIndex = 0 
+    val samplingCardIter = sortedCards.iterator()
+    while (
+        samplingCardIter.hasNext() &&
+        canonSequence.size < maxSamples &&
+        needNmvrs.any { it.value > 0 }
+    ) {
+        // get the next card in sorted order
+        val card = samplingCardIter.next()
+
+        // do we want it?
+        var include = false
+        for (contestId in needNmvrs.keys) {
+            if (card.hasContest(contestId) && (needNmvrs[contestId]!! > 0)) {
+                include = true
+                break
+            }
+        }
+
+        if (include) {
+            canonSequence.add(Pair(cardIndex, card.prn()))
+            
+            // decrement needNmvrs for any contests on the card
+            for (contestId in needNmvrs.keys) {
+                if (card.hasContest(contestId)) {
+                    needNmvrs[contestId] = needNmvrs[contestId]!! - 1
+                }
+            }
+        }
+
+        cardIndex++
+    }
+    
+    return canonSequence
+}
+````
 
 ## Redaction strategies
 

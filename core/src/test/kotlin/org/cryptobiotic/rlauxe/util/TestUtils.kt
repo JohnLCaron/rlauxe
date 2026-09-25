@@ -29,9 +29,20 @@ class TestUtils {
     }
 
     @Test
+    fun problem1() {
+        val Npop = 1083369
+        val noerror = .50044
+        val have = 800
+        val alpha = .05
+
+        println("estRiskStandardBet=${estRiskStandardBet(Npop, noerror, have)}")
+        println("estSampleSizeStandardBet=${estSampleSizeStandardBet(Npop, noerror, alpha)}")
+    }
+
+    @Test
     fun problem2() {
-        val Npop = 1_000_000
-        val noerror = .511
+        val Npop = 1083369
+        val noerror = .50044
         val alpha = .03
 
         println("noerror=$noerror samples=${estSampleSizeStandardBet(Npop, noerror, alpha)}")

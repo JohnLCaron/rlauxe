@@ -110,12 +110,12 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
             //    6,           PrecinctID, 17
             //    7,        BallotStyleID, 3
 
-            cvrNumberIdx = schema.headerMap["RowNumber".lowercase()]!!
-            batchIdIdx = schema.headerMap["BoxID".lowercase()]!!
-            recordIdIdx = schema.headerMap["BoxPosition".lowercase()]!!
-            imprintedIdIdx = schema.headerMap["BallotID".lowercase()]!!
-            ballotTypeIdx = schema.headerMap["BallotStyleID".lowercase()]!!
-            precinctIdx = schema.headerMap["PrecinctID".lowercase()]!!
+            cvrNumberIdx = schema.headers.indexOf("RowNumber".lowercase())
+            batchIdIdx = schema.headers.indexOf("BoxID".lowercase())
+            recordIdIdx = schema.headers.indexOf("BoxPosition".lowercase())
+            imprintedIdIdx = schema.headers.indexOf("BallotID".lowercase())
+            ballotTypeIdx = schema.headers.indexOf("BallotStyleID".lowercase())
+            precinctIdx = schema.headers.indexOf("PrecinctID".lowercase())
 
             nvotesMap = schema.contests.associate { it.contestIdx to it.voteForN }
 
@@ -126,6 +126,30 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
         }
     }
 
+    // //RowNumber,Tabulator,BoxID,BoxPosition,BallotID,CG,PrecinctID,BallotStyleID,Donald J. Trump / Michael R. Pence:Republican,Joseph R. Biden / Kamala D. Harris:Democratic,Bill Hammons / Eric Bodenstab:Unity,Blake Huber / Frank Atwood:Approval Voting,"Jo Jorgensen / Jeremy """"Spike"""" Cohen:Libertarian""",Brian Carroll / Amar Patel:American Solidarity,Mark Charles / Adrian Wallace:Unaffiliated,Phil Collins / Billy Joe Parker:Prohibition,"Roque """"Rocky"""" De La Fuente / Darcy G. Richardson:Alliance""",Dario Hunter / Dawn Neptune Adams:Progressive,Princess Khadijah Maryam Jacob-Fambro/Khadijah Maryam Jacob :Unaffiliated,Alyson Kennedy / Malcolm Jarrett:Socialist Workers,Joseph Kishore / Norissa Santa Cruz:Socialist Equality,Kyle Kenley Kopitke / Nathan Re Vo Sorenson:Independent American,Gloria La Riva / Sunil Freeman:Socialism and Liberation,Joe McHugh / Elizabeth Storm:Unaffiliated,Brock Pierce / Karla Ballard:Unaffiliated,"Jordan """"Cancer"""" Scott / Jennifer Tepool:Unaffiliated""",Kanye West / Michelle Tidball:Unaffiliated,Don Blankenship / William Mohr:American Constitution,Howie Hawkins / Angela Nicole Walker:Green,Write-in,John W. Hickenlooper:Democratic,Cory Gardner:Republican,Daniel Doyle:Approval Voting,"Stephan """"Seku"""" Evans:Unity""",Raymon Anthony Doane:Libertarian,Lauren Boebert:Republican,Diane E. Mitsch Bush:Democratic,John Ryan Keil:Libertarian,Critter Milton:Unity,Mayling Simpson:Democratic,Joyce Rankin:Republican,Karl Hanlon:Democratic,Bob Rankin:Republican,Perry Will:Republican,Colin Wilhelm:Democratic,Jefferson J. Cheney:Republican,John Martin:Republican,Beatriz Soto:Democratic,Brian Bark:Unaffiliated,Leslie Robinson:Democratic,Mike Samson:Republican,Yes,No,Yes,No,Yes,No,Yes,No,Yes,No,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against
+    override fun csvHeader(row: CvrRow, redactPrecinct: Boolean) = buildString {
+        var idx = 0
+        append("${row.headerValues[idx++]},") // RowNumber
+        append("${row.headerValues[idx++]},") // Tabulator
+        append("${row.headerValues[idx++]},") // BoxID
+        append("${row.headerValues[idx++]},") // BoxPosition
+        append("${row.headerValues[idx++]},") // BallotID
+        append("${row.headerValues[idx++]},") // CG
+        if (!redactPrecinct) append("${row.headerValues[idx++]},") else { // PrecinctID
+            append(",")
+            idx++
+        }
+        append("${row.headerValues[idx++]},") // BallotStyleID
+    }
+
+    override fun redaction() = EmptyRedaction()
+    override fun cardStyleMap() = ballotStyles.cardStyleMap
+    override fun cardStyles() = ballotStyles.cardStyles()
+    override fun cvrs() = cvrs
+    override fun nrows() = lineno
+    override fun headers() = headers
+    override fun hasBallotType() = ballotTypeIdx != null
+
     fun read(showFirst: Int? = null, showAfter: Int? = null) {
 
         while (records.hasNext()) {
@@ -135,6 +159,7 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
 
             // 3) use header name matching
             val cvr = CvrRow(
+                line.values().take(schema.nheaders),
                 cvrNumber = line.get(cvrNumberIdx).toInt(),
                 tabulatorNum = 1,
                 batchId = line.get(batchIdIdx),
@@ -162,12 +187,7 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
         }
     }
 
-    override fun redaction() = EmptyRedaction()
-    override fun cardStyleMap() = ballotStyles.cardStyleMap
-    override fun cardStyles() = ballotStyles.cardStyles()
-    override fun cvrs() = cvrs
-    override fun nrows() = lineno
-    override fun headers() = headers
-    override fun hasBallotType() = ballotTypeIdx != null
+
+
 
 }

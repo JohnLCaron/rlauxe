@@ -15,6 +15,7 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.estimateOld.makeDeciles
 import org.cryptobiotic.rlauxe.audit.runAllRoundsAndVerify
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 
 class MakeBoulderRemoveN {
     ///////////////////////////////////////////////
@@ -80,7 +81,7 @@ class RunRemoveBoulderTask(
             topdir = topdir,
             creation,
             round,
-            variant = BoulderVariantEnum.Styles
+            variant = ElectionVariantEnum.Styles
         )
 
         val publisher = Publisher(topdir)

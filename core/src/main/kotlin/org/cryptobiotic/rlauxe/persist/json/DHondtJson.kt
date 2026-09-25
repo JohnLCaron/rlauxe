@@ -27,8 +27,8 @@ import java.nio.file.StandardOpenOption
 import kotlin.io.path.Path
 
 // [
-//  {"assertion": {"type": "AT", "winner": 0}, "difficulty": 3.4, "margin": 4000},
-//  {"assertion": {"type": "AT", "winner": 1}, "difficulty": 3.0, "margin": 4500},
+//  {"assertion": {"type": "AT", "party": 0}, "difficulty": 3.4, "margin": 4000},
+//  {"assertion": {"type": "BT", "party": 1}, "difficulty": 3.0, "margin": 4500},
 //  {"assertion": {"type": "DH", "winner": 0, "loser": 1, "winnerLowestWinner": 2, "loserHighestLoser": 2}, "difficulty": 5.1, "margin": 2100},
 //  {"assertion": {"type": "DH", "winner": 0, "loser": 2, "winnerLowestWinner": 2, "loserHighestLoser": 1}, "difficulty": 2.2, "margin": 9000},
 //  {"assertion": {"type": "DH", "winner": 1, "loser": 0, "winnerLowestWinner": 1, "loserHighestLoser": 4}, "difficulty": 2.5, "margin": 8000},
@@ -38,111 +38,6 @@ import kotlin.io.path.Path
 //  {"assertion": {"type": "DH", "winner": 0, "loser": 2, "winnerLowestWinner": 3, "loserHighestLoser": 2}, "difficulty": 2.8, "margin": 7000},
 //  {"assertion": {"type": "DH", "winner": 1, "loser": 2, "winnerLowestWinner": 2, "loserHighestLoser": 2}, "difficulty": 3.1, "margin": 6000}
 //]
-
-/* https://jsonlint.com/json-schema-generator
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Generated Schema",
-  "type": "object",
-  "properties": {
-    "contests": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "contest": {
-            "type": "string"
-          },
-          "assertions": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "assertion": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string"
-                    },
-                    "winner": {
-                      "type": "integer"
-                    },
-                    "loser": {
-                      "type": "integer"
-                    },
-                    "winnerLowestWinner": {
-                      "type": "integer"
-                    },
-                    "loserHighestLoser": {
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "winner",
-                    "loser",
-                    "winnerLowestWinner",
-                    "loserHighestLoser"
-                  ]
-                },
-                "difficulty": {
-                  "type": "number"
-                },
-                "margin": {
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "assertion",
-                "difficulty",
-                "margin"
-              ]
-            }
-          },
-          "seats": {
-            "type": "integer"
-          },
-          "bounds": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "party": {
-                  "type": "integer"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "minSeats": {
-                  "type": "integer"
-                },
-                "maxSeats": {
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "party",
-                "name",
-                "minSeats",
-                "maxSeats"
-              ]
-            }
-          }
-        },
-        "required": [
-          "contest",
-          "assertions",
-          "seats",
-          "bounds"
-        ]
-      }
-    }
-  },
-  "required": [
-    "contests"
-  ]
-}
- */
 
 @Serializable
 data class RelaxedAssertionContestsJson(
@@ -200,8 +95,6 @@ fun RelaxedAssertions.publishJson(): RelaxedAssertionsJson {
 
     val bounds = candidates.map {
         val name = dcontest.info().candidateIdToName[it.candId]
-        if (name == null)
-            print("")
         Bound(it.candId, name!!, it.minSeats, it.maxSeats)
     }
     return RelaxedAssertionsJson(dcontest.name, dasm.publishJson(), dcontest.nseats, bounds)
@@ -239,6 +132,8 @@ fun DAssertionWithMarginJson.import() = DAssertionWithMargin(
     this.margin,
 )
 
+///////////////////////////////////////
+
 data class DAssorter(
     val type: String,
     val winner: Int,
@@ -250,27 +145,51 @@ data class DAssorter(
 @Serializable
 data class DAssorterJson(
     val type: String,
-    val winner: Int,
-    val loser: Int? = null,
-    val winnerLowestWinner: Int?  = null,
-    val loserHighestLoser: Int?  = null,
+    val party: Int?,
+    val winner: Int?,
+    val loser: Int?,
+    val winnerLowestWinner: Int?,
+    val loserHighestLoser: Int?,
 )
 
-fun DAssorter.publishJson() = DAssorterJson(
-        this.type,
-        this.winner,
-        this.loser,
-        this.winnerLowestWinner,
-        this.loserHighestLoser,
-    )
+fun DAssorter.publishJson(): DAssorterJson {
+    return if (type == "DH")
+        DAssorterJson(
+            type = this.type,
+            party = null,
+            winner = this.winner,
+            loser = this.loser!!,
+            winnerLowestWinner = this.winnerLowestWinner!!,
+            loserHighestLoser = this.loserHighestLoser!!)
+    else
+        DAssorterJson(
+            type = this.type,
+            party = this.winner,
+            winner = null,
+            loser = null,
+            winnerLowestWinner = null,
+            loserHighestLoser = null)
+}
 
-fun DAssorterJson.import() = DAssorter(
-        this.type,
-        this.winner,
-        this.loser,
-        this.winnerLowestWinner,
-        this.loserHighestLoser,
-    )
+
+fun DAssorterJson.import(): DAssorter {
+    return if (type == "DH")
+        DAssorter(
+            type = this.type,
+            winner = this.winner!!,
+            loser = this.loser!!,
+            winnerLowestWinner = this.winnerLowestWinner!!,
+            loserHighestLoser = this.loserHighestLoser!!
+        )
+    else
+        DAssorter(
+            type = this.type,
+            winner = this.party!!,
+            loser = null,
+            winnerLowestWinner = null,
+            loserHighestLoser = null
+        )
+}
 
 ////////////////////////////////////////////
 

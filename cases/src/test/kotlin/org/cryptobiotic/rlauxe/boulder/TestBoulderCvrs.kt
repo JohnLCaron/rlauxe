@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrs
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.SchemaContestInfo
@@ -48,7 +49,7 @@ class TestBoulderCvrs {
         println("\n${input.sovoSource}\nSOVO contests ${sovo.contests.size}")
 
         val election = CreateBoulderElection(input.electionName, AuditType.ONEAUDIT, corlaRawCvrs, sovo, hasStyle = true,
-            variantEnum = BoulderVariantEnum.Styles
+            variantEnum = ElectionVariantEnum.Styles
         )
         val contestIds = election.contests.map { Pair(it.name, it.id) }
         println("\nCreateBoulderElection contests ${contestIds.size}")

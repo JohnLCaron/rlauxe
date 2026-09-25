@@ -21,13 +21,7 @@ protect voter privacy.
 
 Terminology used throughout this module:
 
-  style         — the contest pattern for a ballot, represented as a string
-                  of '1' and '0' characters.  Each position corresponds to
-                  one contest (in the order contests appear in the CVR file);
-                  '1' means the contest is present on the ballot, '0' means
-                  it is absent.  This is the only style definition that
-                  drives redaction decisions.
-                  drives redaction decisions.
+  style         — the set of contests for a ballot
 
   named_style   — the value in the column identified by --stylecol, if any.
                   Assigned by the voting machine; almost certainly obsolete
@@ -38,11 +32,18 @@ Terminology used throughout this module:
 
 private val logger = KotlinLogging.logger("AnonymizeCvr2")
 private val warnLeakage = false
+private val addNrows = false
 
 private const val NEAR_UNANIMOUS_THRESHOLD = 2  // "all but N votes" triggers balancing (Rule c)
 private const val MIN_CONTRASTING_VOTES = 3  // contrasting votes needed per contest after balancing
 private const val COVERAGE_WEIGHT = 10.0  // weight for contest coverage vs. vote-balance score
 private const val DONOR_SURPLUS_THRESHOLD = 3  // minimum surplus above min_ballots for a style/precinct to donate freely
+
+// redactPrecinct = true as default ??
+// leave in other header fields; retainHeaders = false?
+// ints or strings ?
+// format strings with ="value" ?
+// 222134,1,GEN-2322,1,1-GEN-2322-1,169,"Property Owner [27, 27, 16, 27, 16, 27, ...]",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
 class Anonymize(
     val corlaCvrs: CorlaRawCvrsIF,
@@ -52,6 +53,7 @@ class Anonymize(
     val styleCol: Int? = null,
     val noContestBalancing: Boolean = false,
     val redactedListFile: String? = null,
+    val redactPrecinct: Boolean = true,
 ) {
     constructor(input:String,
                 minBallots: Int,
@@ -496,8 +498,7 @@ class Anonymize(
         val result = mutableListOf<FindContest>()
         for ((contestId, contestTab) in aggregate.contestTabs) {
             val contestName = db.contestNames.get(contestId)
-            if (contestId == 19)
-                print("")
+
             if (contestId !in aggregate.rareContests) {
                 continue
             }
@@ -905,9 +906,6 @@ class Anonymize(
             ballots.add(ballot)
             ballotIds.add(System.identityHashCode(ballot))
             ballot.contestVotes.forEach {
-                if (it.contestId == 19) {
-                    println("*** ${ballot.cvrNumber} contestVotes = $it")
-                }
                 contestTabs.sumContestTabulationsFromCandVotes(infos[it.contestId]!!, it.candVotes())
             }
 
@@ -1191,7 +1189,6 @@ class Anonymize(
             return key to rows
         }
 
-
         /* fun _ballot_has_contest(
             ballot: CvrRow,
             contest: String,
@@ -1350,39 +1347,43 @@ class Anonymize(
                 }
                 bwriter.write(aggrow)
 
-                val ncardrow = buildString {
-                    append("AGGREGATED")
-                    repeat(schema.nheaders - 2) { append(",") }
-                    append("${redactedRows.size},")
-                    append("NCARDS,")
-                    var count = 0
-                    schema.contests.forEach { scontest ->
-                        val tab = agg[scontest.contestIdx]
-                        repeat(scontest.ncols) {
-                            count++
-                            if (tab == null) {
-                                append("0")
-                                if (count != last) append(",")
-                            } else {
-                                val ncards = tab.ncards()
-                                append("$ncards")
-                                if (count != last) append(",")
+                if (addNrows) {
+                    val ncardrow = buildString {
+                        append("AGGREGATED")
+                        repeat(schema.nheaders - 2) { append(",") }
+                        append("${redactedRows.size},")
+                        append("NCARDS,")
+                        var count = 0
+                        schema.contests.forEach { scontest ->
+                            val tab = agg[scontest.contestIdx]
+                            repeat(scontest.ncols) {
+                                count++
+                                if (tab == null) {
+                                    append("0")
+                                    if (count != last) append(",")
+                                } else {
+                                    val ncards = tab.ncards()
+                                    append("$ncards")
+                                    if (count != last) append(",")
+                                }
                             }
                         }
+                        appendLine()
                     }
-                    appendLine()
+                    bwriter.write(ncardrow)
                 }
-                bwriter.write(ncardrow)
             }
         }
     }
 
     fun writeRow(row: CvrRow, redacted: Boolean) = buildString {
-        append(row.csvHeader(redactPrecint = false))
+        append(corlaCvrs.csvHeader(row, redactPrecinct = redactPrecinct))
         val last = schema.nchoices
         val rowMap: Map<Int, List<Int>> = row.contestVotes.map { Pair(it.contestId, it.votedFor) }.toMap()
         var count = 0
         schema.contests.forEach { scontest ->
+            if (scontest.contestIdx == 20)
+                print("")
             val candVotes = rowMap[scontest.contestIdx]
             repeat(scontest.ncols) {
                 count++
@@ -1395,37 +1396,6 @@ class Anonymize(
                 }
             }
         }
-        // TODO remove last ??
-        appendLine()
-    }
-
-
-    fun writeRowOld(row: CvrRow, redacted: Boolean) = buildString {
-        append(row.csvHeader(redactPrecint = false))
-        val last = schema.nchoices
-        if (redacted) {
-            repeat(schema.nchoices) {
-                append("*")
-                if (it != last-1) append(",")
-            }
-        } else {
-            val rowMap: Map<Int, List<Int>> = row.contestVotes.map { Pair(it.contestId, it.votedFor) }.toMap()
-            var count = 0
-            schema.contests.forEach { scontest ->
-                val candVotes = rowMap[scontest.contestIdx]
-                repeat(scontest.ncols) {
-                    count++
-                    if (candVotes == null) {
-                        if (count != last) append(",")
-                    } else {
-                        val vote = if (candVotes.contains(it)) 1 else 0
-                        append("$vote")
-                        if (count != last) append(",")
-                    }
-                }
-            }
-        }
-        // TODO remove last ??
         appendLine()
     }
 

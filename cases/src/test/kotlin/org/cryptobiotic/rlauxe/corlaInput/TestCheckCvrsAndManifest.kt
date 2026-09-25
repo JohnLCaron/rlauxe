@@ -7,9 +7,9 @@ class TestCheckCvrsAndManifest {
     @Test
     fun testOneCorlaCountyInput() {
         val stateInput = Colorado2026PwithCvrs()
-        val input = stateInput.corlaCountyInput("Boulder")!!
+        val input = stateInput.corlaCountyInput("Weld")!!
 
-        CheckCvrsAndManifest(stateInput, input, compareMissingVotes = true)
+        CheckCvrsAndManifest(stateInput, input, compareMissingVotes = true, showMatch = true)
     }
 
     @Test

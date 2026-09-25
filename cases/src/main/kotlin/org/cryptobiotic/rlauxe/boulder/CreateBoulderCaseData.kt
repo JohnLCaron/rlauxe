@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 
 
 fun boulderRoundSettings() = AuditRoundConfig(
@@ -23,7 +24,7 @@ fun makeBoulderElectionOA(toptopdir: String) {
         topdir = topdir,
         creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
         roundConfig = boulderRoundSettings(),
-        variant = BoulderVariantEnum.Styles
+        variant = ElectionVariantEnum.Styles
     )
 }
 
@@ -35,7 +36,7 @@ fun makeBoulderElectionClca(toptopdir: String) {
         topdir = topdir,
         creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
         roundConfig = boulderRoundSettings(),
-        variant = BoulderVariantEnum.Phantoms
+        variant = ElectionVariantEnum.Phantoms
     )
 }
 

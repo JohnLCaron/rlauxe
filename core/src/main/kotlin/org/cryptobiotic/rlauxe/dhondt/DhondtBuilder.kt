@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.dhondt
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.AboveThreshold
+import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
@@ -120,24 +121,10 @@ data class DhondtBuilder(
         // each party gets a Below or Above assertion
         parties.forEach { party ->
             if (party.isBelowMin) {
-                // decide which is cheaper
+                // decide if its cheaper to use DH assertions
                 val bt = BelowThreshold.makeFromVotes(info, candId = party.id, votes, this.Nc,)
-
-                // is this parties round1 vote larger than the lastwinner ?
-                val partyCopy = party.copy()
-                partyCopy.firstSeatLost = 1
-                val fw = lastWinner.votes / lastWinner.lastSeatWon!!.toDouble()
-
-                val useAssorter = if (party.votes > fw) bt else {
-                    val dh = DHondtAssorter.makeFrom(info, winner = lastWinner, loser = partyCopy, Nc)
-                    if (bt.noerror(true) > dh.noerror(true)) bt
-                    else {
-                        logger.info {"${info.name} Using ${dh.shortName()} (noerror = ${dh.noerror(true)}) instead of "+
-                                "${bt.shortName()} (noerror = ${bt.noerror(true)})"}
-                        dh
-                    }
-                }
-                contest.assorters.add(useAssorter)
+                val useAssorters = chooseBtOrDhs(bt, party, contest.winningCandidates(), lastWinner)
+                contest.assorters.addAll(useAssorters)
 
             } else {
                 contest.assorters.add(AboveThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, this.Nc))
@@ -145,6 +132,57 @@ data class DhondtBuilder(
         }
 
         return contest
+    }
+
+    fun chooseBtOrDh(bt: BelowThreshold, party: DhondtCandidate, lastWinner: DhondtCandidate): AssorterIF {
+        // is this party's total vote larger than the lastwinner ?
+        val fw = lastWinner.votes / lastWinner.lastSeatWon!!.toDouble()
+
+        return if (party.votes > fw) bt else {
+
+            val partyCopy = party.copy()
+            partyCopy.firstSeatLost = 1
+            val dh = DHondtAssorter.makeFrom(info, winner = lastWinner, loser = partyCopy, Nc)
+            if (bt.noerror(true) > dh.noerror(true)) bt
+            else {
+                logger.info {"${info.name} Using ${dh.shortName()} (noerror = ${dh.noerror(true)}) instead of "+
+                        "${bt.shortName()} (noerror = ${bt.noerror(true)})"}
+                dh
+            }
+        }
+    }
+
+    fun chooseBtOrDhs(bt: BelowThreshold, partyBelowMin: DhondtCandidate, winners: List<DhondtCandidate>, lastWinner: DhondtCandidate): List<AssorterIF> {
+        // is this party's total vote larger than the lastwinner ?
+        val fw = lastWinner.votes / lastWinner.lastSeatWon!!.toDouble()
+        if (partyBelowMin.votes > fw) return listOf(bt)
+
+        val partyCopy = partyBelowMin.copy()
+        partyCopy.firstSeatLost = 1
+
+        // make assert for each winer
+        val dhs = winners.map { winner ->
+            DHondtAssorter.makeFrom(info, winner = winner, loser = partyCopy, Nc)
+        }
+
+        val minAssert = dhs.minByOrNull { it.noerror(true) }!!
+        if (bt.noerror(true) > minAssert.noerror(true) ) {
+            val lastWinnerAssert = dhs.find { it.winner == lastWinner.id }!!
+            if (bt.noerror(true) < lastWinnerAssert.noerror(true)) {
+                logger.info {
+                    "${info.name} Not replacing ${bt.shortName()} (noerror = ${bt.noerror(true)}) with " +
+                            "DH assertions (minNoerror = ${minAssert.noerror(true)} for ${minAssert.shortName()})" +
+                            " lastWinner = ${lastWinnerAssert.desc()}"
+                }
+            }
+            return listOf(bt)
+        }
+
+        logger.info {
+            "${info.name} Replacing ${bt.shortName()} (noerror = ${bt.noerror(true)}) with " +
+                    "DH assertions (minNoerror = ${minAssert.noerror(true)} for ${minAssert.shortName()})"
+        }
+        return dhs
     }
 }
 

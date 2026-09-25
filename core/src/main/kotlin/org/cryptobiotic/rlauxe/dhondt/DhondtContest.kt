@@ -100,6 +100,10 @@ class DHondtContest(
         winnerNames = winners.map { info.candidateIdToName[it]!! }
     }
 
+    fun winningCandidates(): List<DhondtCandidate> {
+        return parties.filter { winnerSeats[it.id] != null }
+    }
+
     override fun recountMargin(assorter: AssorterIF): Double {
         return when (assorter) {
             is DHondtAssorter -> {

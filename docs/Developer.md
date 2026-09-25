@@ -1,5 +1,5 @@
 # Developer Notes
-_09/22/2026_
+_09/25/2026_
 
 <!-- TOC -->
 * [Developer Notes](#developer-notes)
@@ -149,9 +149,14 @@ build the uberjars:
 $ cd <devhome>/rlauxe
 $ ./gradlew assemble uberjar
 
-look in _cases/build/libs_ to see what the latest library build version is, for example _rlauxe-cases-0.10.4.2-uber.jar_= CASES_UBER_LIBRARY.
+look in _cases/build/libs_ to see what the latest library build version is, for example _rlauxe-cases-0.10.4.3-uber.jar_ and set an env variable:
+
+$ export CASES_UBER_LIBRARY=rlauxe-cases-0.10.4.3-uber.jar
+$ echo $CASES_UBER_LIBRARY
 
 The "uber jar" contains the cases and core codes, as well as all of their dependencies.
+
+Dont use "~" in you file paths.
 
 ### For the Belgium 2024 test case
 
@@ -159,7 +164,7 @@ The repo contains the input needed for belgium2024. To create the data:
 
 ````
 java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli.CreateCaseData \
-    -case belgium -topdir "/home/you/wherever/cases/belgium2024"
+    -case belgium -toptopdir "/home/you/wherever/cases/belgium2024"
 ````
 
 * substitute your own output "topdir" directory
@@ -174,7 +179,7 @@ The repo contains the needed input for boulder024. To create the data:
 
 ````
 java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli.CreateCaseData \
-    -case boulder2024 -topdir "/home/you/wherever/cases/boulder2024" -type oa
+    -case boulder2024 -toptopdir "/home/you/wherever/cases/boulder2024" -type oa
 ````
 
 will create a OneAudit election. To create a CLCA election, use the flag "-type clca"

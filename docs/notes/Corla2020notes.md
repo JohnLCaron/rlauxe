@@ -1,9 +1,8 @@
 # Corla2020 Using votedatabase for Cvrs
-9/22/26
+9/24/26
 
 We obtained the cvr data from https://votedatabase.com for the Colorado 2020 General elections, and used it to run
-a real audit. This is for testing purposes only: the data is not official, some of the data is missing, in particular
-the redacted data is largely unaccounted for.
+a real audit. This is for testing purposes only: the data is not official.
 
 ## votedatabase
 
@@ -14,18 +13,38 @@ the redacted data is largely unaccounted for.
 * Las Animas only has 106 cards out of ~8000
 * Las Platas was missing the last 5 contest headers (fixed in our copy of votedatabase)
 
-* The CVR imprintedId field has sometimes been munged into a date format, eg "2-2-86" has been converted
-  somewhere to "02/02/1986". We are catching that and demunging. Since this would foul up all manner of
-  presumable checks (eg against the manifest), I would guess that it may have been changed
-  in the votedatabase processing.
+### imprintedId mistakenly converted to date  
 
+* The CVR imprintedId field has sometimes been munged into a date format, eg "2-2-86" has been converted
+  (presumably by a spreadsheet like Excel) to "02/02/1986". We are catching that and demunging. Perhaps was changed
+  in the votedatabase processing?
+* Does not happen in the 2026 primary cvr data (4 counties)
+* Does not happen in any of the Boulder data 
+
+````
+2026-09-24T05:27:31 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Boulder/cvr.csv has 27429 munged imprintedIds out of 205845
+2026-09-24T05:27:44 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Cheyenne/cvr.csv has 750 munged imprintedIds out of 1146
+2026-09-24T05:27:45 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Clear Creek/cvr.csv has 1456 munged imprintedIds out of 6608
+2026-09-24T05:27:45 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Conejos/cvr.csv has 503 munged imprintedIds out of 4404
+2026-09-24T05:27:45 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Crowley/cvr.csv has 1327 munged imprintedIds out of 1769
+2026-09-24T05:27:45 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Custer/cvr.csv has 706 munged imprintedIds out of 3670
+2026-09-24T05:28:39 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Dolores/cvr.csv has 706 munged imprintedIds out of 1501
+2026-09-24T05:29:29 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Jackson/cvr.csv has 706 munged imprintedIds out of 886
+2026-09-24T05:29:37 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Jefferson/cvr.csv has 23686 munged imprintedIds out of 381840
+2026-09-24T05:29:57 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Lake/cvr.csv has 282 munged imprintedIds out of 4010
+2026-09-24T05:30:01 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Larimer/cvr.csv has 25772 munged imprintedIds out of 226901
+2026-09-24T05:30:22 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Phillips/cvr.csv has 775 munged imprintedIds out of 2562
+2026-09-24T05:30:28 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Rio Grande/cvr.csv has 706 munged imprintedIds out of 6451
+2026-09-24T05:30:31 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Summit/cvr.csv has 2909 munged imprintedIds out of 18957
+2026-09-24T05:30:44 WARN  CorlaRawCvrs: /home/stormy/datadrive/votedatabase/cvr/Colorado/Yuma/cvr.csv has 620 munged imprintedIds out of 5029
+````
 
 ## auditcenter
 
 * Gunnison, San Juan are missing from tabulate.cvs and tabulate_county.csv
 * Perhaps can use CVR data to substitute for Gunnison (TODO)?. Note github/nealmcb/auditcenter/2020/general/gunnison/GunnisonAuditReport.pdf
 * Grand,Town of Granby Board of Trustees, "Chris Michalowski, Natascha O'Flaherty, Kristie DeLay, Mary (Cathy) Tindle, Rebecca Quesada"
-  but Natascha O'Flaherty is not listed in tabulate_county.csv. On purpose or accidental ? According to CVRs she has 496 votes
+  but Natascha O'Flaherty is not listed in tabulate_county.csv. On purpose or accidental ? According to CVRs she has 496 votes.
 * countyTabs.csv has inconsistent candidate naming
 
 ### Final Report (from auditcenter)
@@ -61,8 +80,6 @@ Total Ballot Cards In Manifest == Total CVRs in CVR Export File
 Total Ballot Cards In Manifest == county population (total cards) from round.ballotCardCount
 
 TODO most of this data is also in github/nealmcb/auditcenter/2020/general/**round_last**/stateReport.xlsx
-
-ElPaso has 382583
 
 ## Compare votedatabase CVRS to auditcenter Manifest
 
@@ -281,9 +298,6 @@ contests under maxRisk (corla) = 364 / 526 = 69%
 * in separate election, generate synthetic cvrs for all counties in 2020 and compare to real ones DONE
 * improve algorithm for generating synthetic cvrs DONE
 * generate 2024 general election with synthetic cvrs DONE
-
-## TODO
-
 * show plot of incremental cost of adding the low margin contests: what do the lowest n contests cost ? DONE
 
 ## Appendix A Votes differences between auditcenter and votedatabase

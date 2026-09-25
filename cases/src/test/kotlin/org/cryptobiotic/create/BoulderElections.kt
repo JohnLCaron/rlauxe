@@ -3,17 +3,18 @@ package org.cryptobiotic.create
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.boulder.Boulder23Input
+import org.cryptobiotic.rlauxe.boulder.Boulder24Input
+import org.cryptobiotic.rlauxe.boulder.Boulder25Input
 import org.cryptobiotic.rlauxe.boulder.Boulder26PInput
-import org.cryptobiotic.rlauxe.boulder.BoulderVariantEnum
 import org.cryptobiotic.rlauxe.boulder.boulderRoundSettings
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import kotlin.test.Test
 
 class BoulderElections {
 
-    /*
     @Test
     fun createBoulder26p() {
         val topdir = "$cases/boulder/boulder2026p"
@@ -23,6 +24,7 @@ class BoulderElections {
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
+            variant = ElectionVariantEnum.OnePool,
         )
     }
 
@@ -35,6 +37,7 @@ class BoulderElections {
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
+            variant = ElectionVariantEnum.OnePool,
         )
 
     }
@@ -42,7 +45,7 @@ class BoulderElections {
     // looks like the 2024-Boulder-County-General-Redacted-Cast-Vote-Record.xlsx got saved with incorrect character encoding (?).
     // hand corrected "Claudia De la Cruz / Karina García"
 
-
+/*
     @Test
     fun createBoulder24phantoms() {
         val topdir = "$cases/boulder/boulder2024/phantoms"
@@ -54,26 +57,12 @@ class BoulderElections {
             creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
         )
-    }
+    } */
 
-    @Test
-    fun createBoulder24onePool() {
-        val topdir = "$cases/boulder/boulder2024/onePool"
-
-        // the ballots for each redacted group are placed in a seperate physical bins, and the ballots
-        // are referenced by an index number into the bin
-        createBoulderElection(
-            input= Boulder24Input(),
-            topdir = topdir,
-            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
-            roundConfig = boulderRoundSettings(),
-            onePool = true
-        )
-    }
 
     @Test
     fun createBoulder24oa() {
-        val topdir = "$cases/boulder/boulder2024/oa"
+        val topdir = "$cases/boulder/boulder2024/onepool"
 
         // the ballots for each redacted group are placed in a seperate physical bins, and the ballots
         // are referenced by an index number into the bin
@@ -82,21 +71,20 @@ class BoulderElections {
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
-            variant = BoulderVariantEnum.OnePool,
+            variant = ElectionVariantEnum.OnePool,
         )
-    } */
+    }
 
     @Test
     fun createBoulder23() {
         val topdir = "$cases/boulder/boulder2023"
 
-        // redacted ballots are turned into phantoms
         createBoulderElection(
             input= Boulder23Input(),
             topdir = topdir,
-            creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
+            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
-            variant = BoulderVariantEnum.Sim,
+            variant = ElectionVariantEnum.OnePool,
        )
     }
 
@@ -117,7 +105,7 @@ class BoulderElections {
             topdir = "$toptopdir/sim",
             creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
-            variant = BoulderVariantEnum.Sim,
+            variant = ElectionVariantEnum.Sim,
         )
     }
 
@@ -132,7 +120,7 @@ class BoulderElections {
             topdir = "$toptopdir/sim",
             creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
-            variant = BoulderVariantEnum.Sim,
+            variant = ElectionVariantEnum.Sim,
         )
 
         // redacted ballots are turned into phantoms
@@ -141,7 +129,7 @@ class BoulderElections {
             topdir = "$toptopdir/phantoms",
             creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
-            variant = BoulderVariantEnum.Phantoms,
+            variant = ElectionVariantEnum.Phantoms,
         )
 
         // the ballots for each redacted group are placed in one pool
@@ -150,7 +138,7 @@ class BoulderElections {
             topdir = "$toptopdir/onePool",
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
-            variant = BoulderVariantEnum.OnePool,
+            variant = ElectionVariantEnum.OnePool,
         )
 
         // the ballots for each redacted group are placed in seperate pools.
@@ -160,7 +148,7 @@ class BoulderElections {
             topdir = "$toptopdir/styles",
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
-            variant = BoulderVariantEnum.Styles,
+            variant = ElectionVariantEnum.Styles,
         )
     }
 }

@@ -155,7 +155,7 @@ The "uber jar" contains the cases and core codes, as well as all of their depend
 
 ### For the Belgium 2024 test case
 
-The repo contains the needed input for belgium2024. To create the data:
+The repo contains the input needed for belgium2024. To create the data:
 
 ````
 java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli.CreateCaseData \

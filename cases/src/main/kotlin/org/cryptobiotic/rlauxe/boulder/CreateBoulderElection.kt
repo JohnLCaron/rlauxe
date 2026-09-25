@@ -4,6 +4,8 @@ import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
 import org.cryptobiotic.rlauxe.corlacvr.RedactionIF
@@ -28,14 +30,6 @@ import kotlin.math.max
 
 private val logger = KotlinLogging.logger("CreateBoulderElection")
 
-enum class BoulderVariantEnum { Phantoms, OnePool, Styles, Sim }
-class BoulderVariant(variantEnum: BoulderVariantEnum) {
-    val phantoms = (variantEnum == BoulderVariantEnum.Phantoms)
-    val onePool = (variantEnum == BoulderVariantEnum.OnePool)
-    val styles = (variantEnum == BoulderVariantEnum.Styles)
-    val sim = (variantEnum == BoulderVariantEnum.Sim)   // created simulated cvrs from redacted pools
-}
-
 // probably obsoleted by CorlaCountyElection
 class CreateBoulderElection(
     val electionName: String,
@@ -44,7 +38,7 @@ class CreateBoulderElection(
     val sovo: BoulderStatementOfVotes,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean = true, // TODO
-    variantEnum: BoulderVariantEnum = BoulderVariantEnum.Sim,
+    variantEnum: ElectionVariantEnum = ElectionVariantEnum.Sim,
 ): ElectionBuilder {
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infos = infoList.associateBy { it.id }
@@ -58,7 +52,7 @@ class CreateBoulderElection(
     val redactedPools: List<CardPool>
     val mvrs: List<AuditableCard>
     val ncards: Int
-    val variant = BoulderVariant(variantEnum)
+    val variant = ElectionVariant(variantEnum)
 
     init {
         val cvrTabs = countCvrVotes()
@@ -387,7 +381,7 @@ class BoulderContestBuilder(val auditType: AuditType,
                               val sovoContest: SovoContestVotes,
                               cvrTab: ContestTabulation?,
                               redactedTab: ContestTabulation?,
-                              val variant: BoulderVariant
+                              val variant: ElectionVariant
 ): BoulderContestBuilderIF {
 
     override val contestId = info.id
@@ -457,7 +451,7 @@ fun createBoulderElection(
     roundConfig: AuditRoundConfig,
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     hasStyle: Boolean = true, // TODO wtf ??
-    variant: BoulderVariantEnum,
+    variant: ElectionVariantEnum,
  ) {
 
     clearDirectory(Path(topdir))
@@ -478,7 +472,7 @@ fun createBoulderElectionWithSovo(
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     hasStyle: Boolean = true,
     clear: Boolean = true, // TODO
-    variant: BoulderVariantEnum,
+    variant: ElectionVariantEnum,
     ): Result<AuditRoundIF, ErrorMessages> {
 
     val stopwatch = Stopwatch()

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
+import org.cryptobiotic.rlauxe.corlacvr.Redaction
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
@@ -127,15 +128,13 @@ class TestRedactionVotedatabase {
     }
 }
 
-fun lookForRedactions(filename: String,show: Boolean = false) {
+fun lookForRedactions(filename: String, showRedaction: Boolean = false, showHeaders: Boolean = false) {
     println("## Reading cvrs from $filename")
 
-    val redaction = if (filename.lowercase().contains("boulder")) RedactionBoulder(show) else Redaction(show=show)
+    val redaction = if (filename.lowercase().contains("boulder")) RedactionBoulder(show=showRedaction) else Redaction(show=showRedaction)
 
     try {
-        val corlaRawCvrs: CorlaRawCvrs = if (filename.startsWith("/resources/"))
-            readCorlaCvrsFromResource(filename, redaction = redaction)
-        else readCorlaCvrsFromFile(filename, redaction = redaction)
+        val corlaRawCvrs: CorlaRawCvrs = readCorlaCvrs(filename, redaction = redaction, showHeaders = showHeaders)
 
         println("  nrows = ${corlaRawCvrs.nrows()} redacted cvrs = ${corlaRawCvrs.redaction().redactedRows().size} redacted groups = ${corlaRawCvrs.redaction().groups().size} ")
 

@@ -135,6 +135,19 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
             return true
         }
 
+        val hasanAsterisk = values.any { it.startsWith("*") }
+        if (hasanAsterisk) { // anonymize_cvr
+            if (show) println("  ** redact *: $line")
+            // ballot ids and ballot style, no vote info
+            // Douglas
+            //   [11377, 1, GEN-0130, 10, 1-GEN-0130-10, 74, 359 [05], X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , X, X, X, , , , , , , , , X, X, X, X, X, , , , , , X, X, X, X, X, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , ]]
+            // Pitkin
+            //   [3, 201, 1, 13, 201-1-13, 3056149010 - CFPD (3056149010 - CFPD), CFPD, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , , X, X, X, X]]
+            addRedactedLine(line, corlaRawCvrs)
+            nRedactedRows++
+            return true
+        }
+
         val novotes = values.all { it.isEmpty() }
         if (novotes) { // Logan, Morgan, Pueblo, Rio Blanco, Summit, Weld
             if (show) println("  ** redact novotes: $line")

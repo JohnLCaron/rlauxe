@@ -20,7 +20,6 @@ import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("CorlaCountyElection")
 
-
 enum class ElectionVariantEnum { Phantoms, OnePool, Styles, Sim }
 
 class ElectionVariant(variantEnum: ElectionVariantEnum) {

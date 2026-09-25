@@ -31,7 +31,7 @@ class MakeBelgiumElections {
 
     @Test
     fun runBelgiumElection() {
-        runBelgiumElection("Hainaut")
+        runBelgiumElection("Namur")
     }
 
     @Test

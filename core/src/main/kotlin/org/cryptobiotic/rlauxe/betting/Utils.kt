@@ -106,8 +106,20 @@ fun estRiskStandardBet(voteDiff: Int, Npop: Int, upper: Double, nsamples: Int, )
 fun estRisk(Npop: Int, bet:Double, noerror: Double, nsamples: Int): Double {
     val tracker = TrackerImpl()
     var Twor = 1.0
-    for (idx in 0..nsamples) {
-        val n = idx + 1
+    repeat (nsamples) {
+        tracker.update(noerror)
+        val mj = populationMeanIfH0(N = Npop, withoutReplacement = true, tracker)
+        val payoff = 1.0 + bet * (noerror - mj)
+        Twor *= payoff
+    }
+    return 1.0/Twor
+}
+
+fun estRiskOld(Npop: Int, bet:Double, noerror: Double, nsamples: Int): Double {
+    val tracker = TrackerImpl()
+    var Twor = 1.0
+    for (idx in 0..nsamples) { // this does nsamples+1 samples
+        val n = idx + 1 // not used
         tracker.update(noerror)
         val mj = populationMeanIfH0(N = Npop, withoutReplacement = true, tracker)
         val payoff = 1.0 + bet * (noerror - mj)

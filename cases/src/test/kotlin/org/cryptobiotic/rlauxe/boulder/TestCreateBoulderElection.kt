@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -44,7 +45,7 @@ class TestCreateBoulderElection {
 
         // TODO fails on CLCA
         val maker = CreateBoulderElection( "parseBoulder24cvrs", AuditType.ONEAUDIT, corlaCvrs,  sovo, hasStyle = true,
-            variantEnum = BoulderVariantEnum.Styles
+            variantEnum = ElectionVariantEnum.Styles
         )
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")

@@ -146,17 +146,21 @@ There's lots of online help for using IntelliJ.
 
 build the uberjars:
 
-$ cd <devhome>/rlauxe
-$ ./gradlew assemble uberjar
+````
+cd <devhome>/rlauxe
+./gradlew assemble uberjar
+````
 
-look in _cases/build/libs_ to see what the latest library build version is, for example _rlauxe-cases-0.10.4.3-uber.jar_ and set an env variable:
+look in _cases/build/libs_ to see what the latest library build version is, for example _rlauxe-cases-0.10.4.3-uber.jar_ and set an env variable, eg for bash:
 
-$ export CASES_UBER_LIBRARY=rlauxe-cases-0.10.4.3-uber.jar
-$ echo $CASES_UBER_LIBRARY
+````
+export CASES_UBER_LIBRARY=rlauxe-cases-0.10.4.3-uber.jar
+echo $CASES_UBER_LIBRARY
+````
 
 The "uber jar" contains the cases and core codes, as well as all of their dependencies.
 
-Dont use "~" in you file paths.
+Dont use "~" in quoted file paths.
 
 ### For the Belgium 2024 test case
 
@@ -182,7 +186,7 @@ java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli
     -case boulder2024 -toptopdir "/home/you/wherever/cases/boulder2024" -type oa
 ````
 
-will create a OneAudit election. To create a CLCA election, use the flag "-type clca"
+which will create a OneAudit election. To create a CLCA election, use the flag "-type clca"
 
 
 ### For Colorado elections using auditcenter

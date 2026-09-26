@@ -18,6 +18,7 @@ val candNameWidth = 20
 val alpha = .05
 val alphaFudge = .05
 
+// assorters that dont satisfy risk because nsamples <= needed
 data class DhondtRiskFailure(
     val Npop: Int,
     val assorter: DHondtAssorter,
@@ -29,6 +30,11 @@ data class DhondtRiskFailure(
 ) {
     val noerror = assorter.noerror(true)
 
+    init {
+        if (noerror < 0.5)
+            print("")
+    }
+
     fun estMvrs(): Int  {
         return estSampleSizeStandardBet(Npop, noerror, alpha)
     }
@@ -39,11 +45,12 @@ data class DhondtRiskFailure(
         append("                                           ")
         append(" ${dfn(noerror, 6)}, ")
         append(" ${nfn(estMvrs(), 8)}, ${nfn(samplesUsed, 8)},    ${dfn(risk, 4)},")
-        append(" winner ${assorter.winnerNameRound()} loser ${assorter.loserNameRound()}, $alreadyExists" )
+        append(" ${assorter.shortName()}, $alreadyExists" )
         appendLine()
     }
 }
 
+// assorters with total votes below threshold ??
 class ThresholdRiskFailure(
     val dcontest: DHondtContest,
     val Npop: Int,
@@ -66,6 +73,7 @@ class ThresholdRiskFailure(
 }
 
 ///////////////////////////////////////////////////////////////////
+// figure out candidate seat ranges
 // this is for one contest
 
 class CandSeatRangeBuilder(val contestRound: ContestRound) {
@@ -75,7 +83,7 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
     val belowMinPct = dcontest.partiesBelowThreshold
     val votes = dcontest.votes
     val Npop = contestRound.contestUA.Npop
-    val nsamples = contestRound.haveSampleSize // if this changes, need to redo
+    val nsamples = contestRound.haveSampleSize // if this changes, need to recalculate
 
     val failureNodes: Tree<AltFailure>
     val thrashers: List<AltThrasher>
@@ -99,7 +107,7 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
             check(thrasher.altContest.alt)
 
             childFailures.forEach {
-                val tfailureNode = TreeNode(thrasher.name, it)
+                val tfailureNode = TreeNode(it)
                 failureNodes.add(tfailureNode)
             }
         }
@@ -110,7 +118,7 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
         while (childrenAtDepth.isNotEmpty()) {
             childrenAtDepth.forEach { childNode ->
                 val childFailures = childNode.value.addChildren(assertionsDone)
-                childFailures.forEach { childNode.addChild(TreeNode(it.name, it)) }
+                childFailures.forEach { childNode.addChild(TreeNode(it)) }
             }
             targetDepth++
             childrenAtDepth = failureNodes.nodesAtDepth(targetDepth)
@@ -144,9 +152,9 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
 
         val resultTree = Tree<AltFailure>()
         failures.forEachIndexed { idx, failure ->
-            val altContest = makeAltContestFromFlippedAssertion(dcontest, failure)
+            val altContest = AltContest(dcontest, failure = failure) // TODO makeAltContestFromFlippedAssertion(dcontest, failure)
             val child = AltFailure("root.node${idx+1}", failure, altContest)
-            resultTree.add(TreeNode("root.node${idx+1}", child))
+            resultTree.add(TreeNode(child))
         }
         return resultTree
     }
@@ -214,20 +222,21 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
                 it.loserNameRound() == loserName} as DHondtAssorter?
         if (alreadyHave != null) return alreadyHave
 
-        val winningCandidate: DhondtCandidate = partyMap[winnerScore.candidate]!!.copy()
-        val losingCandidate: DhondtCandidate = partyMap[loserScore.candidate]!!.copy()
+        val winningCandidate: DhondtCandidateBuilder = DhondtCandidateBuilder(partyMap[winnerScore.candidate]!!)
+        val losingCandidate: DhondtCandidateBuilder = DhondtCandidateBuilder(partyMap[loserScore.candidate]!!)
         winningCandidate.lastSeatWon = winnerScore.divisor
         losingCandidate.firstSeatLost = loserScore.divisor
 
-        return DHondtAssorter.makeFrom(dcontest.info, winningCandidate, losingCandidate, dcontest.Nc)
+        return DHondtAssorter.makeFrom(dcontest.info, winningCandidate.build(), losingCandidate.build(), dcontest.Nc)
     }
 
     inner class AltThrasher(val name: String, fromContest: DHondtContest, val thrasher: ThresholdRiskFailure) {
         val altContest: AltContest
 
         init {
-            // make altContest by removing the threshold failure
-            val parties = fromContest.parties.toList()
+            // TODO
+            /* make altContest by removing the threshold failure
+            val partiesb = fromContest.parties.map {DhondtContestBuilder(it) }
             val party = parties.find { it.id == thrasher.assorter.winner() }!!
             party.isBelowMin = false
             val thresholdOverride = parties.filter { it.isBelowMin }.map{ it.id} .toSet()
@@ -238,16 +247,16 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
 
             val dalt = DHondtContest(
                 fromContest.info, fromContest.votes, fromContest.Nc, fromContest.Ncast,
-                parties,
+                fromContest.parties,
                 sortedScoresCalc,
                 thresholdOverride
             )
             check(dalt.partiesBelowThreshold)
 
             val assorters = DHondtAssorter.makeDhondtAssorters(fromContest.info, dalt.Nc, dalt.parties)
-            dalt.assorters.addAll(assorters)
+            dalt.assorters.addAll(assorters) */
 
-            altContest = AltContest(dalt, thrasher = thrasher)
+            altContest = AltContest(fromContest, thrasher = thrasher)
         }
 
         // add all the failures from altContest. Note these are DHondt failures, not more Threshold failures
@@ -261,7 +270,7 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
                 val skip = alreadyDone.contains(failure.assorter.shortName())
 
                 if (!skip) {
-                    val altContest = makeAltContestFromFlippedAssertion(altContest.alt, failure)
+                    val altContest = AltContest(altContest.alt, failure) // TODO makeAltContestFromFlippedAssertion(altContest.alt, failure)
                     val child = AltFailure("${this.name}-$idx", failure, altContest)
                     alreadyDone.add(failure.assorter.shortName())
                     alreadyDone.add(failure.assorter.reverseName())
@@ -286,7 +295,7 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
                 val skip = alreadyDone.contains(failure.assorter.shortName())
 
                 if (!skip) {
-                    val altContest = makeAltContestFromFlippedAssertion(altContest.alt, failure)
+                    val altContest = AltContest(altContest.alt, failure) // TODO makeAltContestFromFlippedAssertion(altContest.alt, failure)
                     val child = AltFailure("${this.name}-$idx", failure, altContest)
                     alreadyDone.add(failure.assorter.shortName())
                     alreadyDone.add(failure.assorter.reverseName())
@@ -298,6 +307,7 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
         }
     }
 
+    /*
     fun makeAltContestFromFlippedAssertion(fromContest: DHondtContest, failure: DhondtRiskFailure): AltContest {
         // in order to flip the winner/loser assertion, youd have to change the reported votes / margin
         // and all the changed assertions would depend on what the score gap is.
@@ -328,9 +338,10 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
             fromContest.info, fromContest.votes, fromContest.Nc, fromContest.Ncast,
             parties,
             sortedScoresCalc,
-            fromContest.partiesBelowThreshold
+            fromContest.partiesBelowThreshold // not dealing with this yet
         )
 
+        // seems ok except for this
         val assorters = DHondtAssorter.makeDhondtAssorters(fromContest.info, dalt.Nc, dalt.parties)
         dalt.assorters.addAll(assorters)
 
@@ -338,7 +349,7 @@ class CandSeatRangeBuilder(val contestRound: ContestRound) {
         //println(altContest.alt)
         //println("*** end makeAltContestFromFlippedAssertion for ${failure.assorter}")
         //return altContest
-    }
+    } */
 
     fun check(dh: DHondtContest) {
         val parties = dh.parties.toList()

@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
-import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
+import org.cryptobiotic.rlauxe.dhondt.DhondtCandidateBuilder
 import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
@@ -79,7 +79,8 @@ fun createBelgiumElection(
     return result
 }
 
-// create election, run all rounds
+// create election from the Json files
+// taken from https://resultatselection.belgium.be/fr/search/chambre-des-repr%C3%A9sentants/2024/circonscription-%C3%A9lectorale
 // return ntotalVotes from Json and finalRound.nmvrs
 fun createBelgiumAndRunAllRounds(electionName: String,
                                  belgiumElectionJson: BelgiumElectionJson,
@@ -100,10 +101,16 @@ fun createBelgiumAndRunAllRounds(electionName: String,
 
     val partyIds = readPartyTxtResource("$belgiumData/parties.txt")
     validateOutputDir(Path.of(toptopdir))
-    // TODO why not read from resource ??
     copyResourceFile("$belgiumData/canonicalParties.txt", "$toptopdir/canonicalParties.txt")
+    copyResourceFile("$belgiumData/parties.txt", "$toptopdir/parties.txt")
 
-    val dhondtParties = belgiumElectionJson.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, partyIds[it.PartyLabel]!!, it.NrOfVotes) }
+    val dhondtParties = belgiumElectionJson.ElectionLists.mapIndexed { idx, it ->
+        DhondtCandidateBuilder(
+            it.PartyLabel,
+            partyIds[it.PartyLabel]!!,
+            it.NrOfVotes
+        )
+    }
     val nwinners = belgiumElectionJson.ElectionLists.sumOf { it.NrOfSeats }
     val totalVotes = belgiumElectionJson.NrOfValidVotes + belgiumElectionJson.NrOfBlankVotes // TODO undervotes = belgiumElection.NrOfBlankVotes
 
@@ -124,15 +131,18 @@ fun createBelgiumAndRunAllRounds(electionName: String,
         if (results.hasErrors) throw RuntimeException("createBelgiumElection failed to verify")
     }
     println()
-    if (runRounds == false) return Pair(0, 0)
 
-    var done = false
     var finalRound: AuditRoundIF? = null
-    while (!done) {
-        val lastRound = runRound(inputDir = topdir)
-        if (lastRound != null) finalRound = lastRound
-        done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
+    if (runRounds) {
+        var done = false
+        while (!done) {
+            val lastRound = runRound(inputDir = topdir)
+            if (lastRound != null) finalRound = lastRound
+            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
+        }
     }
+
+    Logging.removeFileAppender("cases")
 
     return if (finalRound != null) {
         println("$electionName: ${finalRound.show()}")

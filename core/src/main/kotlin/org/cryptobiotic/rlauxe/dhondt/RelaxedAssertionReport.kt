@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.dhondt
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.dhondt.RelaxedAssertionReport.KeepScore
+import org.cryptobiotic.rlauxe.dhondt.RelaxedAssertionReport.Score
 import org.cryptobiotic.rlauxe.util.Indent
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
@@ -8,9 +10,11 @@ import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.math.min
 
+// uses CandSeatRangeBuilder to make reports.
+// TODO useful but also dated.
 class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
     val dcontest: DHondtContest = builder.dcontest
-    val sortedLoserGroups: List<DhondtLoserGroup>
+    /* val sortedLoserGroups: List<DhondtLoserGroup>
 
     init {
         val dhondtLoserGroups = mutableMapOf<Int, DhondtLoserGroup>() // loser candidate -> DhondtLoserGroup
@@ -24,7 +28,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
             group.failures.add(DhondtRiskFailure(builder.Npop, assorter, winnerScore, loserScore, altNode.failure.risk, builder.nsamples, true))
         } */
         sortedLoserGroups = dhondtLoserGroups.values.toList().sortedByDescending { it.highScore() }
-    }
+    } */
 
     private val show = false
     private val showLosers = 6
@@ -66,7 +70,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
         }
     }
 
-    fun showRelaxedAssertions(): String = buildString {
+    fun showRelaxedAssertions(showFailures:Boolean = false): String = buildString {
         //// reported winners
         appendLine("${dcontest}")
         appendLine("reported winners")
@@ -126,8 +130,10 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
 
         appendLine()
 
-        append( showDhondtRiskFailures() )
-        appendLine()
+        if (showFailures) {
+            append(showDhondtRiskFailures())
+            appendLine()
+        }
     }
 
     fun showRowScore(score : Score, keepScore: KeepScore, sb: StringBuffer) {
@@ -374,3 +380,5 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
         private val logger = KotlinLogging.logger("RelaxedAssertion2")
     }
 }
+
+private val showLosers = 6

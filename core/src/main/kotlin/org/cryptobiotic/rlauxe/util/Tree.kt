@@ -1,11 +1,31 @@
 package org.cryptobiotic.rlauxe.util
 
-open class TreeNode<T>(val name: String, val value: T) {
+import org.cryptobiotic.rlauxe.dhondt.RelaxedAssertions
+
+// TODO depth first ?
+// shouldnt a treeNode know its depth in the tree ??
+
+// could just use a TreeNode as the root
+open class TreeNode<T>(val value: T, val parent: TreeNode<T>? = null, ) {
     private val _children = mutableListOf<TreeNode<T>>()
     val children: List<TreeNode<T>> get() = _children
+    var order = mutableListOf<Int>()
+
+    fun name() = buildString {
+        if (order.isEmpty()) append("root")
+        order.forEach{ append(char[it]) }
+    }
 
     fun addChild(child: TreeNode<T>) {
+        child.order.addAll(this.order)
+        child.order.add(this._children.size)
         _children.add(child)
+    }
+
+    fun add(child: T): TreeNode<T> {
+        val ct = TreeNode(child, this)
+        addChild(ct)
+        return ct
     }
 
     fun youngest(): List<TreeNode<T>> {
@@ -19,7 +39,46 @@ open class TreeNode<T>(val name: String, val value: T) {
         }
         return result
     }
+
+    companion object {
+        val char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    }
 }
+
+// Depth-First Traversal
+class DepthNodeIterator<T>(root: TreeNode<T>) : Iterator<TreeNode<T>> {
+
+    // ArrayDeque is used as a LIFO stack in Kotlin
+    private val stack = ArrayDeque<TreeNode<T>>()
+
+    init {
+        stack.addLast(root)
+        for (i in root.children.indices.reversed()) {
+            stack.addLast(root.children[i])
+        }
+    }
+
+    override fun hasNext(): Boolean {
+        return stack.size > 1
+    }
+
+    override fun next(): TreeNode<T> {
+        if (!hasNext()) throw NoSuchElementException("No more elements in the tree.")
+
+        // Pop the top node off the stack
+        val current = stack.removeLast()
+
+        // Push children onto the stack in reverse order
+        // This ensures the leftmost child is processed first (standard DFS behavior)
+        for (i in current.children.indices.reversed()) {
+            stack.addLast(current.children[i])
+        }
+
+        return current
+    }
+}
+
+/////////////////////////////////////////////////////////
 
 class Tree<T>: Iterable<T> {
     private val _children = mutableListOf<TreeNode<T>>()
@@ -29,9 +88,15 @@ class Tree<T>: Iterable<T> {
         _children.add(child)
     }
 
+    fun add(name: String, child: T): TreeNode<T> {
+        val childNode = TreeNode(child, null)
+        _children.add(childNode)
+        return childNode
+    }
+
     // Breadth-First Traversal
     override fun iterator(): Iterator<T> {
-        return BftIterator(this)
+        return BreadthIterator(this)
     }
 
     // get the nodes at targetDepth; root = 0
@@ -60,10 +125,14 @@ class Tree<T>: Iterable<T> {
         return result
     }
 
+    fun count(): Int {
+        return BreadthIterator(this).asSequence().count()
+    }
+
 }
 
 // Breadth-First Traversal
-class BftIterator<T>(root: Tree<T>) : Iterator<T> {
+class BreadthIterator<T>(root: Tree<T>) : Iterator<T> {
     val queue = ArrayDeque<TreeNode<T>>()
 
     init {

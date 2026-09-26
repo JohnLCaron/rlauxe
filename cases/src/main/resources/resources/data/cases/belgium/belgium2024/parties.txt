@@ -1,4 +1,4 @@
-Belgium 2024         // these map all the name variations used in the JSON to a unique id
+Belgique 2024 – Chambre des représentants
 1, Agora
 2, BELG.UNIE-BUB
 21, BLANCO

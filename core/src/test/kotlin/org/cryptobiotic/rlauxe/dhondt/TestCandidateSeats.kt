@@ -48,8 +48,11 @@ class TestCandidateSeats {
         // interesting: the dcontest assorters didnt make it through the serialization (inside contestRound.contestUA).....
         val dcontest = contestRound.contestUA.contest as DHondtContest
         assertTrue(dcontest.assorters.isEmpty()) // wtf ??
-        val builder = CandSeatRangeBuilder(contestRound)
+        // this seems to be the workaround
+        val workaround = contestRound.contestUA.clcaAssertions.map { it.assorter }
+
         // builder.mergedRanges.candidates.forEach { println(it) }
+        val builder = CandSeatRangeBuilder(contestRound)
         println(builder.partyRanges.showSeatRanges())
 
         val failedAssorters = builder.failureNodes.children.map { it.value as CandSeatRangeBuilder.AltFailure }.map { it.failure.assorter }

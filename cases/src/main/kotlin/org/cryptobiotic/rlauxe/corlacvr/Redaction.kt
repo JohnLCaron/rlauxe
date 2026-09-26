@@ -209,8 +209,8 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
                         if (nvotes > 1)
                             singleCards = false
                     }
-                    if (useContestIdx == 31 && candidateVotes.values.sum() == 1)
-                        logger.debug{"*** contestIdx == 31 votes = ${candidateVotes.values.sum()}"}
+                    //if (useContestIdx == 31 && candidateVotes.values.sum() == 1)
+                    //    logger.debug{"*** contestIdx == 31 votes = ${candidateVotes.values.sum()}"}
                 }
                 colidx += useContest.ncols
             } else {

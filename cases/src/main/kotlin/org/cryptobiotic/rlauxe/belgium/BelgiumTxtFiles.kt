@@ -6,23 +6,6 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
 
-fun readPartyTxtFile(filename: String): Map<String, Int> {
-    val reader: BufferedReader = File(filename).bufferedReader()
-    reader.readLine() // get rid of header line
-
-    val parties = mutableListOf<Pair<String, Int>>()
-    while (true) {
-        val line = reader.readLine() ?: break
-        val tokens = line.split(",")
-        val ttokens = tokens.map { it.trim() }
-        val id = ttokens[0].toInt()
-        val name = ttokens[1]
-        parties.add(Pair(name, id))
-    }
-    reader.close()
-    return parties.toMap()
-}
-
 fun readPartyTxtResource(resourcePath: String): Map<String, Int> {
     val parties = mutableListOf<Pair<String, Int>>()
 

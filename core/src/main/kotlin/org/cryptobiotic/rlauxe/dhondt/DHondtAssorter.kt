@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.PoolRates
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.ContestTabulationIF
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
@@ -71,8 +70,8 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     }
 
     override fun desc() = "${shortName()}: noerror=${df(noerror(true))}"
-    override fun shortName() = "DHondt w-l=${winnerNameRound()}-${loserNameRound()}"
-    fun reverseName() = "DHondt w-l=${loserNameRound()}-${winnerNameRound()}"
+    override fun shortName() = "${winnerNameRound()}-${loserNameRound()}"
+    fun reverseName() = "${loserNameRound()}-${winnerNameRound()}"
 
     // Youd like to be able to add new assorters as needed, but the factoring out into contests.json makes that harder
     // we could add new assertionRound, but dont have the new assorters in contests.json
@@ -186,7 +185,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
                 if (winner.lastSeatWon != null) {
                     parties.filter { it.id != winner.id }.forEach { loser ->
                         if (loser.firstSeatLost != null) {
-                            val passorter = makeFrom(info, winner, loser, Nc) // TODO use Npop
+                            val passorter = makeFrom(info, winner, loser, Nc)
                             assorters.add(passorter)
                         }
                     }
@@ -199,8 +198,8 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
             // Let f_e,s = Te/d(s) for entity e and seat s
             // f_A,WA > f_B,LB, so e = A and s = Wa
 
-            val fw = winner.votes / winner.lastSeatWon!!.toDouble()
-            val fl = loser.votes / loser.firstSeatLost!!.toDouble()
+            val fw = winner.totalVotes / winner.lastSeatWon!!.toDouble()
+            val fl = loser.totalVotes / loser.firstSeatLost!!.toDouble()
             val voteDiff = (fw - fl)
 
             val lower = -1.0 / loser.firstSeatLost!!  // lower bound of g
@@ -223,8 +222,8 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
             // Let f_e,s = Te/d(s) for entity e and seat s
             // f_A,WA > f_B,LB, so e = A and s = Wa
 
-            val fw = winner.votes / winner.lastSeatWon!!.toDouble()
-            val fl = loser.votes / loser.firstSeatLost!!.toDouble()
+            val fw = winner.totalVotes / winner.lastSeatWon!!.toDouble()
+            val fl = loser.totalVotes / loser.firstSeatLost!!.toDouble()
             val voteDiff = (fw - fl)
 
             val lower = -1.0 / loser.firstSeatLost!!  // lower bound of g

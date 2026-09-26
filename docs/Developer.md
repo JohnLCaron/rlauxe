@@ -173,7 +173,7 @@ java -classpath cases/build/libs/$CASES_UBER_LIBRARY org.cryptobiotic.rlauxe.cli
 
 * substitute your own output "topdir" directory
 
-Use `java -jar viewer/build/libs/viewer-uber.jar -belgiumAudit` to view this case.
+Use `java -jar viewer/build/libs/viewer-uber.jar -BelgiumContests` to view this case.
 See [here](https://github.com/JohnLCaron/rlauxe-viewer#special-features-for-belgium-audits).
 
 

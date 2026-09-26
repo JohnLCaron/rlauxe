@@ -13,8 +13,8 @@ class TestDHondtJson {
 
     @Test
     fun testContestRoundtrip() {
-        val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
-        val Nc = parties.sumOf { it.votes }
+        val parties = listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500))
+        val Nc = parties.sumOf { it.totalVotes }
         val dcontest = makeDhondtContest("contest1", 1, parties, 8, Nc, 0, 0.01)
         val info = dcontest.info
 
@@ -27,8 +27,8 @@ class TestDHondtJson {
 
     @Test
     fun testContestUARoundtrip() {
-        val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
-        val Nc = parties.sumOf { it.votes }
+        val parties = listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500))
+        val Nc = parties.sumOf { it.totalVotes }
 
         val contest = makeDhondtContest("contest1", 1, parties, 8, Nc, 0, 0.01)
         val contestUA = ContestWithAssertions(contest, isClca=true).addAssertionsFromAssorters(contest.assorters)
@@ -42,8 +42,8 @@ class TestDHondtJson {
 
     @Test
     fun testAssortorRoundtrip() {
-        val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
-        val Nc = parties.sumOf { it.votes }
+        val parties = listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500))
+        val Nc = parties.sumOf { it.totalVotes }
 
         val contest = makeDhondtContest("contest1", 1, parties, 8, Nc, 0, 0.01)
         val contestUA = ContestWithAssertions(contest, isClca=true).addAssertionsFromAssorters(contest.assorters)

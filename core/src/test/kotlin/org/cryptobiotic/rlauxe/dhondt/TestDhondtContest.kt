@@ -14,8 +14,8 @@ class TestDhondtContest {
 
     @Test
     fun testMakeDhondtContest2() {
-        val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
-        val nvotes = parties.sumOf { it.votes }
+        val parties = listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500))
+        val nvotes = parties.sumOf { it.totalVotes }
         val contestd = makeDhondtContest("contest1", 1,
             parties,
             8, nvotes, 0, minPct)
@@ -28,8 +28,8 @@ class TestDhondtContest {
         assertEquals(mapOf(1 to 5, 2 to 3), contestd.winnerSeats)
         assertEquals(8, contestd.winnerSeats.map { it.value }.sum())
 
-        val parties2 = listOf(DhondtCandidate(1, 11000), DhondtCandidate(2, 7000), DhondtCandidate(3, 2500))
-        val nvotes2 = parties2.sumOf { it.votes }
+        val parties2 = listOf(DhondtCandidateBuilder(1, 11000), DhondtCandidateBuilder(2, 7000), DhondtCandidateBuilder(3, 2500))
+        val nvotes2 = parties2.sumOf { it.totalVotes }
         val contestd2 = makeDhondtContest("contest2", 2,
             parties2,
             11, nvotes2, 0, minPct)
@@ -46,7 +46,7 @@ class TestDhondtContest {
         val undervotes = 200
         val Ncast = 17500
         val Nc = Ncast + undervotes
-        val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
+        val parties = listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500))
         val contestd: DHondtContest = makeDhondtContest("contest1", 1, parties, 8, Nc, undervotes, minPct)
 
         println("\nContestDHondt.cvrs, AssorterIF")
@@ -68,12 +68,12 @@ class TestDhondtContest {
 
     @Test
     fun testAssorters() {
-        testAssorters(listOf(DhondtCandidate(1, 10), DhondtCandidate(2, 20), DhondtCandidate(3, 30)), 2, minPct)
-        testAssorters(listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500)), 8, minPct)
+        testAssorters(listOf(DhondtCandidateBuilder(1, 10), DhondtCandidateBuilder(2, 20), DhondtCandidateBuilder(3, 30)), 2, minPct)
+        testAssorters(listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500)), 8, minPct)
     }
 
-    fun testAssorters(parties: List<DhondtCandidate>, nseats: Int, minPct: Double) {
-        val Nc = parties.sumOf { it.votes }
+    fun testAssorters(parties: List<DhondtCandidateBuilder>, nseats: Int, minPct: Double) {
+        val Nc = parties.sumOf { it.totalVotes }
         val contestd = makeDhondtContest("contest1", 1, parties, nseats, Nc, 0, minPct)
 
         contestd.assorters.forEach {

@@ -37,6 +37,10 @@ data class CompositeAuditRecord(
     override val rounds: List<AuditRoundIF>,
     override val componentRecords: List<AuditRecord>,
 ): CompositeRecordIF  {
+    val electionName : String by lazy {
+        val (name, _) = readPartyTxtFile("$topdir/parties.txt")
+        name
+    }
 
     // used by viewer TODO read from resource
     fun readPartyNames(): Map<Int, String> {
@@ -46,6 +50,8 @@ data class CompositeAuditRecord(
     fun readSampleLimits(): List<SampleLimit> {
         return readLimitsTxtFile("$topdir/$limitsFilename")
     }
+
+    override fun name() = electionName
 
     override fun readSortedManifest(styles: List<StyleIF>?): SortedManifest {
         return componentRecords.first().readSortedManifest(styles)
@@ -62,10 +68,6 @@ data class CompositeAuditRecord(
             if (cbatches != null) allBatches.addAll(cbatches)
         }
         return allBatches
-    }
-
-    override fun name(): String {
-        return "what"
     }
 
     override fun findComponentWithName(name: String): AuditRecord? {
@@ -275,9 +277,10 @@ fun readLimitsTxtFile(filename: String): List<SampleLimit> {
     return limits
 }
 
+// return id -> name
 fun readCanonicalPartyTxtFile(filename: String): Map<Int, String> {
     val reader: BufferedReader = File(filename).bufferedReader()
-    reader.readLine() // get rid of header line
+    reader.readLine() // header line
 
     val parties = mutableListOf<Pair<Int, String>>()
     while (true) {
@@ -292,6 +295,23 @@ fun readCanonicalPartyTxtFile(filename: String): Map<Int, String> {
     return parties.toMap()
 }
 
+// return Pair(electionName, nameToID) = party name variant -> party id
+fun readPartyTxtFile(filename: String): Pair<String, Map<String, Int>> {
+    val reader: BufferedReader = File(filename).bufferedReader()
+    val electionName = reader.readLine().trim()
+
+    val parties = mutableListOf<Pair<String, Int>>()
+    while (true) {
+        val line = reader.readLine() ?: break
+        val tokens = line.split(",")
+        val ttokens = tokens.map { it.trim() }
+        val id = ttokens[0].toInt()
+        val name = ttokens[1]
+        parties.add(Pair(name, id))
+    }
+    reader.close()
+    return Pair(electionName, parties.toMap())
+}
 
 ///////////////////////////////////////////////////////////////////
 // not currently used

@@ -5,6 +5,7 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
+import org.cryptobiotic.rlauxe.dhondt.DhondtCandidateBuilder
 import org.cryptobiotic.rlauxe.dhondt.DhondtScore
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Welford
@@ -38,7 +39,7 @@ class TestBelgiumElection {
         println(belgiumElection)
 
         // use infoA parties, because they are complete
-        val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, idx+1, it.NrOfVotes) }
+        val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidateBuilder(it.PartyLabel, idx+1, it.NrOfVotes) }
         val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
         val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes
 

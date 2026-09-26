@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 object Logging {
     val pattern = "%d{yyyy-MM-dd'T'HH:mm:ss} %-5level %logger{36}: %msg%n"
 
-    fun addFileAppender(loggerName: String, filePath: String) {
+    fun addFileAppender(appenderName: String, filePath: String) {
         val lc = LoggerFactory.getILoggerFactory() as LoggerContext?
 
         val ple = PatternLayoutEncoder()
@@ -21,13 +21,31 @@ object Logging {
 
         val fileAppender: FileAppender<ILoggingEvent?> = FileAppender()
         fileAppender.setContext(lc)
-        fileAppender.setName(loggerName)
+        fileAppender.setName(appenderName)
         fileAppender.setFile(filePath)
         fileAppender.setEncoder(ple)
         fileAppender.start()
 
         // Attach to root logger
         (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger).addAppender(fileAppender)
+    }
+
+    fun removeFileAppender(appenderName: String) {
+        // 1. Get the Logback LoggerContext
+        val context = LoggerFactory.getILoggerFactory() as LoggerContext
+
+        // 2. Get the target logger (usually ROOT contains the file appender)
+        val rootLogger = context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME)
+
+        // 3. Find the appender by name
+        val appender = rootLogger.getAppender(appenderName)
+
+        if (appender != null) {
+            // 4. Detach it from the logger
+            rootLogger.detachAppender(appender)
+            // 5. Stop the appender to release file locks properly
+            appender.stop()
+        }
     }
 
 }

@@ -13,6 +13,7 @@ import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
+import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder
 import org.cryptobiotic.rlauxe.dhondt.DhondtScore
 import org.cryptobiotic.rlauxe.irv.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
@@ -93,7 +94,7 @@ data class ContestIFJson(
     val winners: List<Int>?,
     val Nc: Int,
     val Ncast: Int,
-    val undervotes: Int? = null,
+    val undervotes: Int,
     val irvRoundsPaths: List<IrvRoundsPathJson>? = null,
 )
 
@@ -106,7 +107,8 @@ fun ContestIF.publishJson() : ContestIFJson {
                 this.winners,
                 this.Nc,
                 this.Ncast,
-            )
+                undervotes = this.Nundervotes(),
+                )
         is Contest ->
             ContestIFJson(
                 "Contest",
@@ -114,6 +116,7 @@ fun ContestIF.publishJson() : ContestIFJson {
                 null,
                 this.Nc,
                 this.Ncast,
+                undervotes = this.Nundervotes(),
             )
         is IrvContest ->
             ContestIFJson(
@@ -154,12 +157,7 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
         }
         "DHondtContest",
         "ContestDHondt" -> {
-            DHondtContest.fromVotes(
-                info,
-                this.votes!!,
-                this.Nc,
-                this.Ncast,
-            )
+            DhondtBuilder.fromVotes(info, this.votes!!, this.Nc, this.Ncast, this.undervotes).build()
         }
         else -> throw RuntimeException("unknown class name ${this.className}")
     }

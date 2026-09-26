@@ -54,7 +54,7 @@ class DHondtContest(
     voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
     Nc: Int,                    // trusted maximum ballots/cards that contain this contest
     Ncast: Int,                 // number of cast ballots containing this Contest, including undervotes
-    partiesIn: List<DhondtCandidate>,     // the candidate parties
+    val parties: List<DhondtCandidate>, // the candidate parties; now immutable
     val sortedScores: List<DhondtScore>,
     thresholdOverride: Set<Int>? = null,
 ): Contest(info, voteInput, Nc, Ncast) {
@@ -64,7 +64,6 @@ class DHondtContest(
     override fun winners() = winners
     override fun losers() = losers
 
-    val parties = partiesIn.toList()
     val nseats: Int
     val partiesBelowThreshold: Set<Int> // candidateIds under minFraction
     val winnerSeats: Map<Int, Int>
@@ -78,15 +77,16 @@ class DHondtContest(
         val nvotes = votes.values.sum()
 
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
-        partiesBelowThreshold = thresholdOverride ?: parties.filter { it.votes / nvotes.toDouble() < info.minFraction }.map { it.id }.toSet()
+        partiesBelowThreshold = thresholdOverride ?: parties.filter { it.totalVotes / nvotes.toDouble() < info.minFraction }.map { it.id }.toSet()
 
         // last / first
         val winnerScores = sortedScores.subList(0, nseats)
         val loserScores = sortedScores.subList(nseats, sortedScores.size)
-        parties.forEach { party ->
+        // must already be assigned
+        /* parties.forEach { party ->
             party.lastSeatWon = winnerScores.filter { it.candidate == party.id }.maxOfOrNull { it.divisor }
             party.firstSeatLost = loserScores.filter { it.candidate == party.id }.minOfOrNull { it.divisor }
-        }
+        } */
 
         val winnerSeatsM= mutableMapOf<Int, Int>()
         sortedScores.filter { it.winningSeat != null }.forEach {
@@ -221,10 +221,16 @@ class DHondtContest(
 
     data class Dround(val candId: Int, val score: Double, val round: Int, val winningSeat: Int?)
 
-    fun showRelaxedAssertions(contestRound: ContestRound): String {
+    // for viewer
+    fun showRelaxedAssertion(contestRound: ContestRound) = buildString {
+        val relax = RelaxedAssertions(contestRound)
+        append(relax.showRelaxedAssertions())
+        append(relax.show())
+    }
+    fun showRelaxedAssertionReport(contestRound: ContestRound): String {
         val cands = CandSeatRangeBuilder(contestRound)
-        val relax = RelaxedAssertionReport(cands)
-        return relax.showRelaxedAssertions()
+        val report = RelaxedAssertionReport(cands)
+        return report.showRelaxedAssertions()
     }
 
     // show altContests tree with this assertion as the root
@@ -248,8 +254,8 @@ class DHondtContest(
     }
 
     fun countContestedSeats(contestRound: ContestRound): Int {
-        val cands = CandSeatRangeBuilder(contestRound)
-        return cands.countContestedSeats() // + cands.thrashers.size
+        // val cands = CandSeatRangeBuilder(contestRound)
+        return 0 // cands.countContestedSeats() // + cands.thrashers.size
     }
 
     //// create a cvr for each vote
@@ -292,19 +298,5 @@ class DHondtContest(
         result = 31 * result + partiesBelowThreshold.hashCode()
         result = 31 * result + winnerSeats.hashCode()
         return result
-    }
-
-    companion object {
-
-        fun fromVotes(info: ContestInfo, votes: Map<Int, Int>, Nc: Int, Ncast: Int): DHondtContest {
-            // recreate the parties from the votes
-            val parties = info.candidateIds.map { id ->
-                DhondtCandidate(info.candidateIdToName[id]!!, id, votes[id]!!)
-            }
-            val sortedScoresCalc = assignWinners(parties, info.nwinners, Nc, info.minFraction!!, thresholdOverride = null)
-
-            return DHondtContest(info, votes, Nc, Ncast, parties, sortedScoresCalc)
-        }
-
     }
 }

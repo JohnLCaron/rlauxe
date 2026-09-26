@@ -253,4 +253,23 @@ alternative AAC
 
              AAA
 R - A - AA - AAB
-             AAC
+             AAC    
+
+
+//////////////////////////
+
+(23)             Vooruit/3 ,  127973,  42657,       2528,
+(24)                CD&V/3 ,  125894,  41964,        693,
+                    PVDA/3 ,  125257,  41752,        212,   1360*
+           VLAAMS BELANG/6 ,  249826,  41637,        327,   1020*       PVDA/3-VLAAMS BELANG/6: 115, 1020*;
+                    N-VA/10 ,  368877,  36887,       5077,    884                PVDA/3-N-VA/10: 4865, 884 ;      VLAAMS BELANG/6-N-VA/10: 
+
+
+(A) : AltContest fromFailure=failed 'DHondt w-l=Vooruit/3-PVDA/3: noerror=0.5006' has 1884/2828 samples : risk = 0.1359 cumul=0.1359
+
+
+     skipAssertions=[DHondt w-l=Vooruit/3-PVDA/3, DHondt w-l=PVDA/3-Vooruit/3, DHondt w-l=PVDA/3-VLAAMS BELANG/6, DHondt w-l=VLAAMS BELANG/6-PVDA/3, DHondt w-l=PVDA/3-N-VA/9, DHondt w-l=N-VA/9-PVDA/3, DHondt w-l=PVDA/3-CD&V/3, DHondt w-l=CD&V/3-PVDA/3, DHondt w-l=Vooruit/3-CD&V/3, DHondt w-l=CD&V/3-Vooruit/3]
+        failed 'DHondt w-l=PVDA/3-VLAAMS BELANG/6: noerror=0.5001' has 1884/16656 samples : risk = 0.7140
+        failed 'DHondt w-l=PVDA/3-N-VA/9: noerror=0.5007' has 1884/2228 samples : risk = 0.0794
+        failed 'DHondt w-l=PVDA/3-CD&V/3: noerror=0.4999' has 1884/0 samples : risk = 1.5963
+        failed 'DHondt w-l=Vooruit/3-CD&V/3: noerror=0.5004' has 1884/3693 samples : risk = 0.2171

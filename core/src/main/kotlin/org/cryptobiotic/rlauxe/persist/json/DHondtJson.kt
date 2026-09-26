@@ -49,7 +49,7 @@ data class RelaxedAssertionContestsJson(
     }
 }
 
-fun List<RelaxedAssertions>.publishJson() = RelaxedAssertionContestsJson(
+private fun List<RelaxedAssertions>.publishJson() = RelaxedAssertionContestsJson(
         this.map { it.publishJson() }
     )
 
@@ -61,7 +61,7 @@ data class Bound(
     val maxSeats: Int,
 )
 
-data class RelaxedAssertions(
+private data class RelaxedAssertions(
     val dcontest: DHondtContest,
     val assorters: List<AssorterIF>,
     val candidates: List<CandidateSeats>,
@@ -81,13 +81,13 @@ data class RelaxedAssertionsJson(
     }
 }
 
-fun RelaxedAssertions.publishJson(): RelaxedAssertionsJson {
+private fun RelaxedAssertions.publishJson(): RelaxedAssertionsJson {
 
     val dasm = assorters.map {
-        val da = when {
-            it is AboveThreshold -> DAssorter("AT", it.winner())
-            it is BelowThreshold -> DAssorter("BT", it.winner())
-            it is DHondtAssorter -> DAssorter("DH", it.winner(), it.loser(), it.lastSeatWon, it.firstSeatLost)
+        val da = when (it) {
+            is AboveThreshold -> DAssorter("AT", it.winner())
+            is BelowThreshold -> DAssorter("BT", it.winner())
+            is DHondtAssorter -> DAssorter("DH", it.winner(), it.loser(), it.lastSeatWon, it.firstSeatLost)
             else -> throw RuntimeException("unknown assorter $it")
         }
         DAssertionWithMargin(da, dcontest.difficulty(it), dcontest.marginInVotes(it))

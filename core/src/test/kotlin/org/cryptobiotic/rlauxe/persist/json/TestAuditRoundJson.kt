@@ -5,13 +5,17 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
+import org.cryptobiotic.rlauxe.dhondt.CandSeatRangeBuilder
+import org.cryptobiotic.rlauxe.dhondt.DHondtContest
+import org.cryptobiotic.rlauxe.dhondt.DhondtCandidateBuilder
+import org.cryptobiotic.rlauxe.dhondt.assignWinners
 import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.irv.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.irv.simulateRaireTestContest
+import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.strata.Strata
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.io.path.createTempFile
@@ -22,6 +26,34 @@ import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 
 class TestAuditRoundJson {
+
+    @Test
+    fun testDhondtContestWorkaround() {
+        val topdir = "$cases/belgium/belgium2024/"
+        val auditRecord = AuditRecord.read(topdir)!! as CompositeAuditRecord
+        val lastRound = auditRecord.rounds.last()
+        val contestRound = lastRound.contestRounds.find { it.id == 6 }!!
+
+        // interesting: the dcontest assorters didnt make it through the serialization (inside contestRound.contestUA).....
+        val dcontest = contestRound.contestUA.contest as DHondtContest
+        assertTrue(dcontest.assorters.isEmpty()) // wtf ??
+
+        // this seems to be the workaround; can we add it to the deserializer ?
+        val useAssorters = contestRound.contestUA.clcaAssertions.map { it.assorter }
+
+        // the deserializer uses
+        // DHondtContest.fromVotes(info, this.votes!!, this.Nc, this.Ncast)
+        // recreate the parties from the votes
+        // val parties = info.candidateIds.map { id ->
+        //     DhondtCandidateBuilder(info.candidateIdToName[id]!!, id, votes[id]!!)
+        // }
+        // val sortedScoresCalc = assignWinners(parties, info.nwinners, Nc, info.minFraction!!, thresholdOverride = null)
+        // return DHondtContest(info, votes, Nc, Ncast, parties, sortedScoresCalc)
+
+        // sortedScoresCalc correct, then the parties get munged ??
+
+        // DHondtBuilder now use chooseBtOrDhs to munge the assertions...
+    }
 
     @Test
     fun testSf24oa() {
@@ -259,8 +291,8 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripWithDHondt() {
-        val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
-        val nvotes = parties.sumOf{ it.votes }
+        val parties = listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500))
+        val nvotes = parties.sumOf{ it.totalVotes }
         val contestd = makeDhondtContest("contest1", 1, parties, 8, nvotes, 0, 0.01)
         val contests = listOf(contestd)
 

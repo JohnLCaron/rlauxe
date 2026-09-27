@@ -13,7 +13,7 @@ class TestThresholdValues {
     // from belgium Hainaut
     @Test
     fun testBelowThresholdValues() {
-        // DHondtContest 'Bruxelles' (2) DHONDT voteForN=1 votes={2=120155, 3=96516, 7=86927, 10=58645, 5=49425, 9=34143, 12=24826, 8=14472, 1=12754, 13=6579, 14=3287,
+        // DhondtContest 'Bruxelles' (2) DHONDT voteForN=1 votes={2=120155, 3=96516, 7=86927, 10=58645, 5=49425, 9=34143, 12=24826, 8=14472, 1=12754, 13=6579, 14=3287,
         val votes = mapOf(1 to 12754, 2 to 120155, 3 to 96516, 4 to 3032, 5 to 49425, 6 to 1688, 7 to 86927, 8 to 14472, 9 to 34143, 10 to 58645, 11 to 1534, 12 to 24826, 13 to 6579, 14 to 3287, 15 to 1604, 16 to 1467, 17 to 1872)
         val candidates = votes.map { "cand${it.key}" to it.key }.toMap()
 
@@ -39,7 +39,7 @@ class TestThresholdValues {
 
     @Test
     fun testAboveThresholdValues() {
-        // DHondtContest 'Bruxelles' (5) DHONDT voteForN=1 votes={2=120155, 3=96516, 7=86927, 10=58645, 5=49425, 9=34143, 12=24826, 8=14472, 1=12754, 13=6579, 14=3287, 4=3032, 17=1872, 6=1688, 15=1604, 11=1534, 16=1467}
+        // DhondtContest 'Bruxelles' (5) DHONDT voteForN=1 votes={2=120155, 3=96516, 7=86927, 10=58645, 5=49425, 9=34143, 12=24826, 8=14472, 1=12754, 13=6579, 14=3287, 4=3032, 17=1872, 6=1688, 15=1604, 11=1534, 16=1467}
         val votes = mapOf(1 to 12754, 2 to 120155, 3 to 96516, 4 to 3032, 5 to 49425, 6 to 1688, 7 to 86927, 8 to 14472, 9 to 34143, 10 to 58645, 11 to 1534, 12 to 24826, 13 to 6579, 14 to 3287, 15 to 1604, 16 to 1467, 17 to 1872)
         val candidates = votes.map { "cand${it.key}" to it.key }.toMap()
 

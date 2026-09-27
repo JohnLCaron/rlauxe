@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
+import org.cryptobiotic.rlauxe.dhondt.DhondtAssorter
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.math.min
@@ -228,7 +228,7 @@ open class Contest(
 
     override fun marginInVotes(assorter: AssorterIF): Int {
         return when (assorter) {
-            is DHondtAssorter -> {
+            is DhondtAssorter -> {
                 roundToClosest(assorter.voteDiff(votes[assorter.winner()]!!, votes[assorter.loser()]!!))
             }
 

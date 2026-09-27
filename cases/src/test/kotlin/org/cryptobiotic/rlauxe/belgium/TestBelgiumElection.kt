@@ -2,10 +2,9 @@ package org.cryptobiotic.rlauxe.belgium
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
+import org.cryptobiotic.rlauxe.dhondt.DhondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder
-import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
-import org.cryptobiotic.rlauxe.dhondt.DhondtCandidateBuilder
+import org.cryptobiotic.rlauxe.dhondt.DhondtPartyBuilder
 import org.cryptobiotic.rlauxe.dhondt.DhondtScore
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Welford
@@ -39,7 +38,7 @@ class TestBelgiumElection {
         println(belgiumElection)
 
         // use infoA parties, because they are complete
-        val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidateBuilder(it.PartyLabel, idx+1, it.NrOfVotes) }
+        val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtPartyBuilder(it.PartyLabel, idx+1, it.NrOfVotes) }
         val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
         val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes
 
@@ -58,7 +57,7 @@ class TestBelgiumElection {
     }
 }
 
-fun testCvrs(contestd: DHondtContest) {
+fun testCvrs(contestd: DhondtContest) {
 
     println("testCvrs2 ----------------------------------------")
     val cvrs = contestd.createSimulatedCvrs()
@@ -75,7 +74,7 @@ fun testCvrs(contestd: DHondtContest) {
 }
 
 fun testEquals(score1: DhondtScore, score2: DhondtScore): Boolean {
-    return (score1.candidate == score2.candidate) &&
+    return (score1.partyId == score2.partyId) &&
             (score1.divisor == score2.divisor) &&
             (score1.winningSeat == score2.winningSeat) &&
             (abs(score1.score - score2.score) <= 1.0)

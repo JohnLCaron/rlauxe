@@ -16,9 +16,10 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.dhondt.AllSeats
 import org.cryptobiotic.rlauxe.dhondt.CandSeatRangeBuilder
-import org.cryptobiotic.rlauxe.dhondt.CandidateSeats
-import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
+import org.cryptobiotic.rlauxe.dhondt.CandidateSeatsOld
+import org.cryptobiotic.rlauxe.dhondt.DhondtAssorter
+import org.cryptobiotic.rlauxe.dhondt.DhondtContest
+import org.cryptobiotic.rlauxe.dhondt.RelaxedAssertions
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
@@ -50,7 +51,7 @@ data class RelaxedAssertionContestsJson(
 }
 
 private fun List<RelaxedAssertions>.publishJson() = RelaxedAssertionContestsJson(
-        this.map { it.publishJson() }
+        this.map { publishRAJson(it) }
     )
 
 @Serializable
@@ -61,10 +62,10 @@ data class Bound(
     val maxSeats: Int,
 )
 
-private data class RelaxedAssertions(
-    val dcontest: DHondtContest,
+data class RelaxedAssertionData(
+    val dcontest: DhondtContest,
     val assorters: List<AssorterIF>,
-    val candidates: List<CandidateSeats>,
+    val candidates: List<CandidateSeatsOld>,
 )
 
 @Serializable
@@ -81,23 +82,42 @@ data class RelaxedAssertionsJson(
     }
 }
 
-private fun RelaxedAssertions.publishJson(): RelaxedAssertionsJson {
+fun RelaxedAssertionData.publishJson(): RelaxedAssertionsJson {
 
-    val dasm = assorters.map {
+    val dasm = this.assorters.map {
         val da = when (it) {
             is AboveThreshold -> DAssorter("AT", it.winner())
             is BelowThreshold -> DAssorter("BT", it.winner())
-            is DHondtAssorter -> DAssorter("DH", it.winner(), it.loser(), it.lastSeatWon, it.firstSeatLost)
+            is DhondtAssorter -> DAssorter("DH", it.winner(), it.loser(), it.winnerDivisor, it.loserDivisor)
             else -> throw RuntimeException("unknown assorter $it")
         }
-        DAssertionWithMargin(da, dcontest.difficulty(it), dcontest.marginInVotes(it))
+        DAssertionWithMargin(da, this.dcontest.difficulty(it), this.dcontest.marginInVotes(it))
     }
 
-    val bounds = candidates.map {
-        val name = dcontest.info().candidateIdToName[it.candId]
+    val bounds = this.candidates.map {
+        val name = this.dcontest.info().candidateIdToName[it.candId]
         Bound(it.candId, name!!, it.minSeats, it.maxSeats)
     }
-    return RelaxedAssertionsJson(dcontest.name, dasm.publishJson(), dcontest.nseats, bounds)
+    return RelaxedAssertionsJson(this.dcontest.name, dasm.publishJson(), this.dcontest.nseats, bounds)
+}
+
+fun publishRAJson(ra: RelaxedAssertions): RelaxedAssertionsJson {
+
+    val dasm = ra.orgAssorters.map {
+        val da = when (it) {
+            is AboveThreshold -> DAssorter("AT", it.winner())
+            is BelowThreshold -> DAssorter("BT", it.winner())
+            is DhondtAssorter -> DAssorter("DH", it.winner(), it.loser(), it.winnerDivisor, it.loserDivisor)
+            else -> throw RuntimeException("unknown assorter $it")
+        }
+        DAssertionWithMargin(da, ra.dcontest.difficulty(it), ra.dcontest.marginInVotes(it))
+    }
+
+    val bounds = ra.candidateRanges.partyRanges.candidates.map {
+        val name = ra.dcontest.info().candidateIdToName[it.candId]
+        Bound(it.candId, name!!, it.minSeats, it.maxSeats)
+    }
+    return RelaxedAssertionsJson(ra.dcontest.name, dasm.publishJson(), ra.dcontest.nseats, bounds)
 }
 
 fun List<DAssertionWithMargin>.publishJson(): List<DAssertionWithMarginJson> =
@@ -230,9 +250,9 @@ object TestOne {
 
 /////////////////////////////////////////////////////////////////////////////////
 
-fun writeDHondtAssertionsJson(dcontest: DHondtContest, assorters: List<AssorterIF>, candidates: List<CandidateSeats>) {
-    val relax = RelaxedAssertions(dcontest, assorters, candidates)
-    val json = relax.publishJson()
+fun writeDHondtAssertionsJson(dcontest: DhondtContest, assorters: List<AssorterIF>, candidates: List<CandidateSeatsOld>) {
+    val relaxData = RelaxedAssertionData(dcontest, assorters, candidates)
+    val json = relaxData.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
     val bos = ByteArrayOutputStream()
     jsonReader.encodeToStream(json, bos)
@@ -257,10 +277,10 @@ fun writeDHondtAssertionsJsonFile(contestRound: ContestRound, builder: CandSeatR
     val failedAssorters = builder.failureNodes.children.map { it.value }.map { it.failure.assorter }
     val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
 
-    val dcontest = contestRound.contestUA.contest as DHondtContest
-    val relax = RelaxedAssertions(dcontest, assorters, builder.partyRanges.candidates)
+    val dcontest = contestRound.contestUA.contest as DhondtContest
+    val relaxData = RelaxedAssertionData(dcontest, assorters, builder.partyRanges.candidates)
 
-    val json = relax.publishJson()
+    val json = relaxData.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = pretty }
     FileOutputStream(filename).use { out ->
         jsonReader.encodeToStream(json, out)
@@ -295,20 +315,20 @@ fun readDHondtAssertionsJsonUnwrapped(filename: String): RelaxedAssertionsJson? 
 //////////////////////////////////////////////////////////////////////////////
 
 fun writeDHondtAssertionContestsJson(contestRounds: List<ContestRound>, allSeats: AllSeats, filename: String,
-                                     pretty: Boolean = false): RelaxedAssertionContestsJson {
+                                     alpha: Double, pretty: Boolean = false): RelaxedAssertionContestsJson {
 
     val relaxed = mutableListOf<RelaxedAssertions>()
     contestRounds.forEach { contestRound ->
-        val dcontest = contestRound.contestUA.contest as DHondtContest
+        val dcontest = contestRound.contestUA.contest as DhondtContest
         val candSeats = allSeats.contestSeats.find { it.contestId == dcontest.id }!!
 
         val failedAssorters = candSeats.failedAssertions
         val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
 
-        //     val dcontest: DHondtContest,
+        //     val dcontest: DhondtContest,
         //    val assorters: List<AssorterIF>,
-        //    val candidates: List<CandidateSeats>,
-        relaxed.add(RelaxedAssertions(dcontest, assorters, candSeats.candidates))
+        //    val candidates: List<CandidateSeatsOld>,
+        relaxed.add(RelaxedAssertions(contestRound, alpha))
     }
 
     val json = relaxed.publishJson()

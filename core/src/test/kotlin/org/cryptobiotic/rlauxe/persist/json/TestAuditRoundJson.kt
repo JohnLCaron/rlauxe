@@ -5,10 +5,8 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dhondt.CandSeatRangeBuilder
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
-import org.cryptobiotic.rlauxe.dhondt.DhondtCandidateBuilder
-import org.cryptobiotic.rlauxe.dhondt.assignWinners
+import org.cryptobiotic.rlauxe.dhondt.DhondtContest
+import org.cryptobiotic.rlauxe.dhondt.DhondtPartyBuilder
 import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
@@ -35,20 +33,20 @@ class TestAuditRoundJson {
         val contestRound = lastRound.contestRounds.find { it.id == 6 }!!
 
         // interesting: the dcontest assorters didnt make it through the serialization (inside contestRound.contestUA).....
-        val dcontest = contestRound.contestUA.contest as DHondtContest
+        val dcontest = contestRound.contestUA.contest as DhondtContest
         assertTrue(dcontest.assorters.isEmpty()) // wtf ??
 
         // this seems to be the workaround; can we add it to the deserializer ?
         val useAssorters = contestRound.contestUA.clcaAssertions.map { it.assorter }
 
         // the deserializer uses
-        // DHondtContest.fromVotes(info, this.votes!!, this.Nc, this.Ncast)
+        // DhondtContest.fromVotes(info, this.votes!!, this.Nc, this.Ncast)
         // recreate the parties from the votes
         // val parties = info.candidateIds.map { id ->
-        //     DhondtCandidateBuilder(info.candidateIdToName[id]!!, id, votes[id]!!)
+        //     DhondtPartyBuilder(info.candidateIdToName[id]!!, id, votes[id]!!)
         // }
         // val sortedScoresCalc = assignWinners(parties, info.nwinners, Nc, info.minFraction!!, thresholdOverride = null)
-        // return DHondtContest(info, votes, Nc, Ncast, parties, sortedScoresCalc)
+        // return DhondtContest(info, votes, Nc, Ncast, parties, sortedScoresCalc)
 
         // sortedScoresCalc correct, then the parties get munged ??
 
@@ -291,7 +289,7 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripWithDHondt() {
-        val parties = listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500))
+        val parties = listOf(DhondtPartyBuilder(1, 10000), DhondtPartyBuilder(2, 6000), DhondtPartyBuilder(3, 1500))
         val nvotes = parties.sumOf{ it.totalVotes }
         val contestd = makeDhondtContest("contest1", 1, parties, 8, nvotes, 0, 0.01)
         val contests = listOf(contestd)

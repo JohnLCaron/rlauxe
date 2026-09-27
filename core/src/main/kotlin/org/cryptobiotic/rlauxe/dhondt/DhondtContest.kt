@@ -47,16 +47,21 @@ import org.cryptobiotic.rlauxe.util.*
 //    min upper is (1/nseats + 1)/2 which is between 1/2 and 1
 //    max upper is (nseats + 1)/2 which is >= 1
 
+data class DhondtParty(val partyName: String, val id: Int, val totalVotes: Int,
+                       val lastSeatWon: Int?, val firstSeatLost: Int?, val isBelowMin: Boolean) {
+
+    override fun toString() = "DhondtParty('$partyName' ($id) votes=$totalVotes below=$isBelowMin last/first=$lastSeatWon/$firstSeatLost)"
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class DHondtContest(
+class DhondtContest(
     info: ContestInfo,
-    voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
+    voteInput: Map<Int, Int>,   // partyId -> nvotes;  sum is nvotes or V_c
     Nc: Int,                    // trusted maximum ballots/cards that contain this contest
     Ncast: Int,                 // number of cast ballots containing this Contest, including undervotes
-    val parties: List<DhondtCandidate>, // the candidate parties; now immutable
+    val parties: List<DhondtParty>, // the parties
     val sortedScores: List<DhondtScore>,
-    thresholdOverride: Set<Int>? = null,
+    thresholdOverride: Set<Int>? = null, // TODO needed?
 ): Contest(info, voteInput, Nc, Ncast) {
     val nvotes = votes.values.sum()
 
@@ -65,8 +70,8 @@ class DHondtContest(
     override fun losers() = losers
 
     val nseats: Int
-    val partiesBelowThreshold: Set<Int> // candidateIds under minFraction
-    val winnerSeats: Map<Int, Int>
+    val partiesBelowThreshold: Set<Int> // partyId under minFraction
+    val winnerSeats: Map<Int, Int> // party id -> nseats won
     // dhondts and threshold assorters; these are set at creation, but not serialized, so cant assume they exist
     // can we put the generation of these inside? problem is ContestUA is serialized seperately, would have to rejigger that
     val assorters = mutableListOf<AssorterIF>()
@@ -76,39 +81,33 @@ class DHondtContest(
         nseats = info.nwinners
         val nvotes = votes.values.sum()
 
-        // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
+        // "A winning party must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         partiesBelowThreshold = thresholdOverride ?: parties.filter { it.totalVotes / nvotes.toDouble() < info.minFraction }.map { it.id }.toSet()
-
-        // last / first
-        val winnerScores = sortedScores.subList(0, nseats)
-        val loserScores = sortedScores.subList(nseats, sortedScores.size)
-        // must already be assigned
-        /* parties.forEach { party ->
-            party.lastSeatWon = winnerScores.filter { it.candidate == party.id }.maxOfOrNull { it.divisor }
-            party.firstSeatLost = loserScores.filter { it.candidate == party.id }.minOfOrNull { it.divisor }
-        } */
 
         val winnerSeatsM= mutableMapOf<Int, Int>()
         sortedScores.filter { it.winningSeat != null }.forEach {
-            val count = winnerSeatsM.getOrPut(it.candidate) { 0 }
-            winnerSeatsM[it.candidate] = count + 1
+            val count = winnerSeatsM.getOrPut(it.partyId) { 0 }
+            winnerSeatsM[it.partyId] = count + 1
         }
         winnerSeats = winnerSeatsM.toMap()
+
         // fields in superclass
         winners = winnerSeats.keys.toList()
         losers = info.candidateIds.filter { !winners.contains(it) }
         winnerNames = winners.map { info.candidateIdToName[it]!! }
     }
 
-    fun winningCandidates(): List<DhondtCandidate> {
+    fun candidateName(partyId: Int, divisor: Int) = "${info.candidateIdToName[partyId]}/$divisor"
+
+    fun winningParties(): List<DhondtParty> {
         return parties.filter { winnerSeats[it.id] != null }
     }
 
     override fun recountMargin(assorter: AssorterIF): Double {
         return when (assorter) {
-            is DHondtAssorter -> {
-                val winnerScore = votes[assorter.winner()]!! / assorter.lastSeatWon.toDouble()
-                val loserScore = votes[assorter.loser()]!! / assorter.firstSeatLost.toDouble()
+            is DhondtAssorter -> {
+                val winnerScore = votes[assorter.winner()]!! / assorter.winnerDivisor.toDouble()
+                val loserScore = votes[assorter.loser()]!! / assorter.loserDivisor.toDouble()
                 (winnerScore - loserScore) / winnerScore
             }
             is BelowThreshold -> {
@@ -126,7 +125,7 @@ class DHondtContest(
 
     override fun showAssertionDifficulty(assorter: AssorterIF): String {
         return when (assorter) {
-            is DHondtAssorter -> {
+            is DhondtAssorter -> {
                 assorter.showAssertionDifficulty(votes[assorter.winner()]!!, votes[assorter.loser()]!!)
             }
             is BelowThreshold -> {
@@ -144,7 +143,7 @@ class DHondtContest(
     // TODO should be the factor from KISS paper
     fun difficulty(assorter: AssorterIF): Double {
         return when (assorter) {
-            is DHondtAssorter -> {
+            is DhondtAssorter -> {
                 1.0 / assorter.reportedMargin()
                 // assorter.voteDiff(votes[assorter.winner()]!!, votes[assorter.loser()]!!)
             }
@@ -163,7 +162,7 @@ class DHondtContest(
     // TODO not needed
     override fun marginInVotes(assorter: AssorterIF): Int {
         return when (assorter) {
-            is DHondtAssorter -> {
+            is DhondtAssorter -> {
                 roundToClosest(assorter.voteDiff(votes[assorter.winner()]!!, votes[assorter.loser()]!!))
             }
             is BelowThreshold -> {
@@ -187,22 +186,22 @@ class DHondtContest(
         val maxRound = sortedScores.filter{ it.winningSeat != null }.maxOfOrNull { it.divisor }!! + 1
 
         appendLine()
-        append("candidate ${trunc("Round", width0 - "candidate".length + 3)}:")
+        append("party     ${trunc("Round", width0 - "party".length + 3)}:")
         for (round in 1 .. maxRound) {
             append("${nfn(round, width)} |")
         }
         appendLine()
 
         info.candidateNames.toSortedMap().forEach { (name, id) ->
-            val rounds = sortedScores.filter { it.candidate == id }.map { Dround(id, it.score, it.divisor, it.winningSeat) }
+            val rounds = sortedScores.filter { it.partyId == id }.map { Dround(id, it.score, it.divisor, it.winningSeat) }
             val below = if (partiesBelowThreshold.contains(id)) "*" else " "
             val candName = "${nfn(id, 2)} ${trunc(info.candidateIdToName[id]!!, width0)}$below"
-            append(showCandidate(candName, votes[id]!!, maxRound, rounds, width))
+            append(showParty(candName, votes[id]!!, maxRound, rounds, width))
         }
         appendLine("\n* failed threshold")
     }
 
-    fun showCandidate(candName: String, candTotal: Int, maxRound: Int, rounds: List<Dround>, width:Int) = buildString {
+    fun showParty(candName: String, candTotal: Int, maxRound: Int, rounds: List<Dround>, width:Int) = buildString {
         append("${candName}:")
         for (round in 1 .. maxRound) {
             val candRound = rounds.find { it.round == round }
@@ -222,10 +221,10 @@ class DHondtContest(
     data class Dround(val candId: Int, val score: Double, val round: Int, val winningSeat: Int?)
 
     // for viewer
-    fun showRelaxedAssertion(contestRound: ContestRound) = buildString {
-        val relax = RelaxedAssertions(contestRound)
-        append(relax.showRelaxedAssertions())
-        append(relax.show())
+    fun showRelaxedAssertion(contestRound: ContestRound, maxRisk: Double) = buildString {
+        val relax2 = RelaxedAssertions(contestRound, maxRisk)
+        append(relax2.showRelaxedAssertions())
+        // append(relax.show())
     }
     fun showRelaxedAssertionReport(contestRound: ContestRound): String {
         val cands = CandSeatRangeBuilder(contestRound)
@@ -237,7 +236,7 @@ class DHondtContest(
     fun showRelaxedAssertion(contestRound: ContestRound, cassertion: ClcaAssertion): String {
         val candseats = CandSeatRangeBuilder(contestRound)
         val relax = RelaxedAssertionReport(candseats)
-        if (cassertion.assorter !is DHondtAssorter) {
+        if (cassertion.assorter !is DhondtAssorter) {
             val thrasher = candseats.thrashers.find { it.thrasher.assorter.hashcodeDesc() == cassertion.assorter.hashcodeDesc() }
             if (thrasher != null) return relax.showAltThrasherAssertions(thrasher.altContest)
         }
@@ -282,7 +281,7 @@ class DHondtContest(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is DHondtContest) return false
+        if (other !is DhondtContest) return false
         if (!super.equals(other)) return false
 
         if (sortedScores != other.sortedScores) return false

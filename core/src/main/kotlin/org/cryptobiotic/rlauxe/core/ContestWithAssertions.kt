@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.core
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.betting.TestH0Status
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
+import org.cryptobiotic.rlauxe.dhondt.DhondtContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
@@ -263,7 +263,7 @@ open class ContestWithAssertions(
         fun make(contests: List<ContestIF>, npopMap: Map<Int,Int>, isClca: Boolean, hasStyle: Boolean): List<ContestWithAssertions> {
             return contests.map {
                 val cua = ContestWithAssertions(it, isClca, NpopIn=npopMap[it.id], hasStyle=hasStyle) // .addStandardAssertions()
-                if (it is DHondtContest) {
+                if (it is DhondtContest) {
                     cua.addAssertionsFromAssorters(it.assorters)
                 } else {
                     cua.addStandardAssertions()

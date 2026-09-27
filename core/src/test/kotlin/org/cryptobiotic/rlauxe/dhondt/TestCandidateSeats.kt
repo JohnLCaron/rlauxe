@@ -31,7 +31,7 @@ class TestCandidateSeats {
             contestRound.haveSampleSize = sampleLimit.limit
         }
         // interesting: the dcontest assorters didnt make it through the serialization (inside contestRound.contestUA).....
-        val dcontest = contestRound.contestUA.contest as DHondtContest
+        val dcontest = contestRound.contestUA.contest as DhondtContest
         assertTrue(dcontest.assorters.isEmpty()) // wtf ??
         val builder = CandSeatRangeBuilder(contestRound)
         // builder.mergedRanges.candidates.forEach { println(it) }
@@ -46,7 +46,7 @@ class TestCandidateSeats {
             contestRound.haveSampleSize = sampleLimit.limit
         }
         // interesting: the dcontest assorters didnt make it through the serialization (inside contestRound.contestUA).....
-        val dcontest = contestRound.contestUA.contest as DHondtContest
+        val dcontest = contestRound.contestUA.contest as DhondtContest
         assertTrue(dcontest.assorters.isEmpty()) // wtf ??
         // this seems to be the workaround
         val workaround = contestRound.contestUA.clcaAssertions.map { it.assorter }
@@ -76,7 +76,7 @@ class TestCandidateSeats {
             contestRound.haveSampleSize = sampleLimit.limit
         }
         // interesting: the dcontest assorters didnt make it through the serialization..... TODO ??
-        val dcontest = contestRound.contestUA.contest as DHondtContest
+        val dcontest = contestRound.contestUA.contest as DhondtContest
         assertTrue(dcontest.assorters.isEmpty())
 
         // works anyway because it gets assorters from AssertionRound
@@ -93,7 +93,7 @@ class TestCandidateSeats {
             contestRound.haveSampleSize = sampleLimit.limit
         }
         // interesting: the dcontest assorters didnt make it through the serialization..... TODO ??
-        val dcontest = contestRound.contestUA.contest as DHondtContest
+        val dcontest = contestRound.contestUA.contest as DhondtContest
         assertTrue(dcontest.assorters.isEmpty())
         val builder = CandSeatRangeBuilder(contestRound)
         builder.partyRanges.candidates.forEach { println(it) }
@@ -108,7 +108,7 @@ class TestCandidateSeats {
             if (sampleLimit != null) {
                 contestRound.haveSampleSize = sampleLimit.limit
             }
-            val dcontest = contestRound.contestUA.contest as DHondtContest
+            val dcontest = contestRound.contestUA.contest as DhondtContest
             val n = dcontest.countContestedSeats(contestRound)
             println("contest ${dcontest.id} has $n contested seats")
             totalContests += n
@@ -118,7 +118,7 @@ class TestCandidateSeats {
 
     @Test
     fun testAll() {
-        val all = makeAllSeats(lastRound, sampleLimits)
+        val all = makeAllSeats(lastRound, sampleLimits, .05)
         println("contestSeats")
         all.contestSeats.forEach { println(it.showSeatRanges()) }
         println()
@@ -128,10 +128,10 @@ class TestCandidateSeats {
 
     @Test
     fun testAllWrite() {
-        val allSeats = makeAllSeats(lastRound, sampleLimits)
+        val allSeats = makeAllSeats(lastRound, sampleLimits, .05)
 
         val scratchFile = "/home/stormy/rla/temp/assertions.json" // createTempFile().toString()
-        val org = writeDHondtAssertionContestsJson(lastRound.contestRounds, allSeats, filename = scratchFile)
+        val org = writeDHondtAssertionContestsJson(lastRound.contestRounds, allSeats, filename = scratchFile, alpha = .05)
 
         val roundtrip = readDHondtAssertionContestsJsonUnwrapped(scratchFile)
         println("--------------------------------------------------------------------------")
@@ -141,13 +141,13 @@ class TestCandidateSeats {
 
     @Test
     fun testShowAllPartySeats() {
-        val all = makeAllSeats(lastRound, sampleLimits)
+        val all = makeAllSeats(lastRound, sampleLimits, alpha = .05)
         println(all.showAllPartySeats())
     }
 
     @Test
     fun testCoalitionAll() {
-        val all = makeAllSeats(lastRound, sampleLimits)
+        val all = makeAllSeats(lastRound, sampleLimits, alpha = .05)
         val sumFail = all.candidateSums.sumOf{ it.failures.size }
         val allCands = all.contestSeats.map { it.candidates }.flatten()
         val allCandsFail = allCands.sumOf{ it.failures.size }
@@ -161,7 +161,7 @@ class TestCandidateSeats {
 
     @Test
     fun testOneCoalition() {
-        val all = makeAllSeats(lastRound, sampleLimits)
+        val all = makeAllSeats(lastRound, sampleLimits, .05)
         val coal = all.calcCoalition(setOf(15,24,14,28), partyNames)
 
         val sumFail = all.candidateSums.sumOf{ it.failures.size }

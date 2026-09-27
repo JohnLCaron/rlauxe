@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
+import org.cryptobiotic.rlauxe.dhondt.DhondtContest
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.irv.RaireContestWithAssertions
 
@@ -31,7 +31,7 @@ class WorkflowTesterClca(
 
         val regularContests = contestsToAudit.map {
             val cua = ContestWithAssertions(it, true, NpopIn=Npops[it.id], hasStyle=true)
-            if (it is DHondtContest) {
+            if (it is DhondtContest) {
                 cua.addAssertionsFromAssorters(it.assorters)
             } else {
                 cua.addStandardAssertions()

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.BelowThreshold
-import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
+import org.cryptobiotic.rlauxe.dhondt.DhondtAssorter
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
@@ -72,7 +72,7 @@ fun readSampleAndCat(belgiumData : CompositeAuditRecord): List<SampleAndCat> {
                 val noerror = assorter.noerror(true)
                 val sampleSize = if (assertionRound.auditResult != null) assertionRound.auditResult!!.samplesUsed else 0
                 val cat = when (assorter) {
-                    is DHondtAssorter -> "DHondt"
+                    is DhondtAssorter -> "DHondt"
                     is BelowThreshold -> "Below"
                     is AboveThreshold -> "Above"
                     else -> "unknown"

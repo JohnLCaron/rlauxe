@@ -4,7 +4,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
+import org.cryptobiotic.rlauxe.dhondt.DhondtAssorter
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.irv.RaireAssorter
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -127,15 +127,15 @@ fun AssorterIF.publishJson() : AssorterIFJson {
                 this.rassertion.loserId,
                 rassertion = this.rassertion.publishJson(),
             )
-        is DHondtAssorter ->
+        is DhondtAssorter ->
             AssorterIFJson(
-                "DHondtAssorter",
+                "DhondtAssorter",
                 reportedMargin = this.reportedMargin(),
                 dilutedMargin = this.dilutedMargin(),
                 this.winner,
                 this.loser,
-                lastSeatWon = this.lastSeatWon,
-                firstSeatLost = this.firstSeatLost,
+                lastSeatWon = this.winnerDivisor,
+                firstSeatLost = this.loserDivisor,
             )
         is AboveThreshold ->
             AssorterIFJson(
@@ -174,13 +174,14 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
             .setMeans(margin2mean(this.reportedMargin), margin2mean(this.dilutedMargin))
 
         "DHondtAssorterIF",
-        "DHondtAssorter" ->
-            DHondtAssorter(
+        "DHondtAssorter",
+        "DhondtAssorter" ->
+            DhondtAssorter(
                 info,
                 this.winner,
                 this.loser!!,
-                lastSeatWon = this.lastSeatWon!!,
-                firstSeatLost = this.firstSeatLost!!)
+                winnerDivisor = this.lastSeatWon!!,
+                loserDivisor = this.firstSeatLost!!)
            .setMeans(margin2mean(this.reportedMargin), margin2mean(this.dilutedMargin))
 
         "AboveThreshold" ->

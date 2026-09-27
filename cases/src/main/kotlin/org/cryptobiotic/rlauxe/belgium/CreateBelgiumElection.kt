@@ -6,8 +6,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
-import org.cryptobiotic.rlauxe.dhondt.DhondtCandidateBuilder
+import org.cryptobiotic.rlauxe.dhondt.DhondtContest
+import org.cryptobiotic.rlauxe.dhondt.DhondtPartyBuilder
 import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
@@ -19,7 +19,7 @@ import kotlin.io.path.Path
 private val logger = KotlinLogging.logger("BelgiumClca")
 
 class BelgiumClca (
-    val contestd: DHondtContest,
+    val contestd: DhondtContest,
     val mvrSource: MvrSource,
 ): ElectionBuilder {
 
@@ -58,7 +58,7 @@ class BelgiumClca (
 ////////////////////////////////////////////////////////////////////
 fun createBelgiumElection(
     topdir: String,
-    contestd: DHondtContest,
+    contestd: DhondtContest,
     creationConfig: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     ): Result<AuditRoundIF, ErrorMessages>
@@ -105,7 +105,7 @@ fun createBelgiumAndRunAllRounds(electionName: String,
     copyResourceFile("$belgiumData/parties.txt", "$toptopdir/parties.txt")
 
     val dhondtParties = belgiumElectionJson.ElectionLists.mapIndexed { idx, it ->
-        DhondtCandidateBuilder(
+        DhondtPartyBuilder(
             it.PartyLabel,
             partyIds[it.PartyLabel]!!,
             it.NrOfVotes

@@ -13,7 +13,7 @@ class TestDHondtJson {
 
     @Test
     fun testContestRoundtrip() {
-        val parties = listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500))
+        val parties = listOf(DhondtPartyBuilder(1, 10000), DhondtPartyBuilder(2, 6000), DhondtPartyBuilder(3, 1500))
         val Nc = parties.sumOf { it.totalVotes }
         val dcontest = makeDhondtContest("contest1", 1, parties, 8, Nc, 0, 0.01)
         val info = dcontest.info
@@ -27,7 +27,7 @@ class TestDHondtJson {
 
     @Test
     fun testContestUARoundtrip() {
-        val parties = listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500))
+        val parties = listOf(DhondtPartyBuilder(1, 10000), DhondtPartyBuilder(2, 6000), DhondtPartyBuilder(3, 1500))
         val Nc = parties.sumOf { it.totalVotes }
 
         val contest = makeDhondtContest("contest1", 1, parties, 8, Nc, 0, 0.01)
@@ -42,7 +42,7 @@ class TestDHondtJson {
 
     @Test
     fun testAssortorRoundtrip() {
-        val parties = listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500))
+        val parties = listOf(DhondtPartyBuilder(1, 10000), DhondtPartyBuilder(2, 6000), DhondtPartyBuilder(3, 1500))
         val Nc = parties.sumOf { it.totalVotes }
 
         val contest = makeDhondtContest("contest1", 1, parties, 8, Nc, 0, 0.01)

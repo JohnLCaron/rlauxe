@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.betting.Taus
-import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
+import org.cryptobiotic.rlauxe.dhondt.DhondtAssorter
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.sfn
@@ -19,8 +19,8 @@ class TestClcaAssortValues {
             minFraction = .05,
         )
         // val votes = mapOf(0 to 1010, 1 to 990) // Map<Int, Int>
-        // data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int): AssorterIF  {
-        val assorter = DHondtAssorter(info, winner = 0, loser = 1, lastSeatWon=2, firstSeatLost=5).setMeans(.55)
+        // data class DhondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int): AssorterIF  {
+        val assorter = DhondtAssorter(info, winner = 0, loser = 1, winnerDivisor=2, loserDivisor=5).setMeans(.55)
         assertEquals(assorter, assorter)
         assertEquals(assorter.hashCode(), assorter.hashCode())
 
@@ -36,7 +36,7 @@ class TestClcaAssortValues {
         val other = Cvr("other", mapOf(0 to intArrayOf(2)))
         val phantom = Cvr("phantom", mapOf(0 to IntArray(0)), phantom = true)
 
-        println("DHondtAssorter")
+        println("DhondtAssorter")
         val taus = Taus(cassorter.assorter().upperBound())
         println("${taus.values()} * noerror=${cassorter.noerror}")
         println("${taus.names()}")
@@ -47,7 +47,7 @@ class TestClcaAssortValues {
 //  assorter=DHondt w/l='A'/'B': dilutedMean=55.0000% upperBound=1.7500
 //  dilutedMargin=0.10000000 dilutedMean=0.55000000 assortUpper=1.75000000 noerror=0.51470588
 //[0.0, 0.14705882352941177, 0.36764705882352944, 0.6617647058823529, 0.8823529411764708, 1.0294117647058825]
-//DHondtAssorter
+//DhondtAssorter
 //[0.0, 0.2857142857142857, 0.7142857142857143, 1.0, 1.2857142857142856, 1.7142857142857144, 2.0] * noerror=0.5147058823529412
 //[win-los, win-oth, oth-los, noerror, oth-win, los-oth, los-win] * noerror
 //     winner-loser tau= 0.0000 '      0' (win-los)

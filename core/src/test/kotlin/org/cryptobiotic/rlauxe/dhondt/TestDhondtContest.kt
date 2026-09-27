@@ -14,7 +14,7 @@ class TestDhondtContest {
 
     @Test
     fun testMakeDhondtContest2() {
-        val parties = listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500))
+        val parties = listOf(DhondtPartyBuilder(1, 10000), DhondtPartyBuilder(2, 6000), DhondtPartyBuilder(3, 1500))
         val nvotes = parties.sumOf { it.totalVotes }
         val contestd = makeDhondtContest("contest1", 1,
             parties,
@@ -28,7 +28,7 @@ class TestDhondtContest {
         assertEquals(mapOf(1 to 5, 2 to 3), contestd.winnerSeats)
         assertEquals(8, contestd.winnerSeats.map { it.value }.sum())
 
-        val parties2 = listOf(DhondtCandidateBuilder(1, 11000), DhondtCandidateBuilder(2, 7000), DhondtCandidateBuilder(3, 2500))
+        val parties2 = listOf(DhondtPartyBuilder(1, 11000), DhondtPartyBuilder(2, 7000), DhondtPartyBuilder(3, 2500))
         val nvotes2 = parties2.sumOf { it.totalVotes }
         val contestd2 = makeDhondtContest("contest2", 2,
             parties2,
@@ -46,8 +46,8 @@ class TestDhondtContest {
         val undervotes = 200
         val Ncast = 17500
         val Nc = Ncast + undervotes
-        val parties = listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500))
-        val contestd: DHondtContest = makeDhondtContest("contest1", 1, parties, 8, Nc, undervotes, minPct)
+        val parties = listOf(DhondtPartyBuilder(1, 10000), DhondtPartyBuilder(2, 6000), DhondtPartyBuilder(3, 1500))
+        val contestd: DhondtContest = makeDhondtContest("contest1", 1, parties, 8, Nc, undervotes, minPct)
 
         println("\nContestDHondt.cvrs, AssorterIF")
         val cvrsIF = contestd.createSimulatedCvrs() // TODO failing on undervotes != 0
@@ -68,11 +68,11 @@ class TestDhondtContest {
 
     @Test
     fun testAssorters() {
-        testAssorters(listOf(DhondtCandidateBuilder(1, 10), DhondtCandidateBuilder(2, 20), DhondtCandidateBuilder(3, 30)), 2, minPct)
-        testAssorters(listOf(DhondtCandidateBuilder(1, 10000), DhondtCandidateBuilder(2, 6000), DhondtCandidateBuilder(3, 1500)), 8, minPct)
+        testAssorters(listOf(DhondtPartyBuilder(1, 10), DhondtPartyBuilder(2, 20), DhondtPartyBuilder(3, 30)), 2, minPct)
+        testAssorters(listOf(DhondtPartyBuilder(1, 10000), DhondtPartyBuilder(2, 6000), DhondtPartyBuilder(3, 1500)), 8, minPct)
     }
 
-    fun testAssorters(parties: List<DhondtCandidateBuilder>, nseats: Int, minPct: Double) {
+    fun testAssorters(parties: List<DhondtPartyBuilder>, nseats: Int, minPct: Double) {
         val Nc = parties.sumOf { it.totalVotes }
         val contestd = makeDhondtContest("contest1", 1, parties, nseats, Nc, 0, minPct)
 
@@ -81,7 +81,7 @@ class TestDhondtContest {
             assertEquals(it, it)
             assertEquals(it.hashCode(), it.hashCode())
 
-            if (it is DHondtAssorter) {
+            if (it is DhondtAssorter) {
                 println(" setDilutedMean = ${setDilutedMean(it, contestd)}")
                 println(" dilutedMean= ${it.dilutedMean()}")
                 assertEquals(it.dilutedMean(), setDilutedMean(it, contestd), doublePrecision)
@@ -134,19 +134,19 @@ class TestDhondtContest {
 }
 
 // from AssorterBuilder
-fun setDilutedMean(assorter: DHondtAssorter, contest: DHondtContest): Double {
+fun setDilutedMean(assorter: DhondtAssorter, contest: DhondtContest): Double {
     // Let f_e,s = Te/d(s) for entity e and seat s
     // f_A,WA > f_B,LB, so e = A and s = Wa
 
     val winnerVotes = contest.votes[assorter.winner()]!!
     val loserVotes = contest.votes[assorter.loser()]!!
 
-    val fw = winnerVotes / assorter.lastSeatWon.toDouble()
-    val fl = loserVotes / assorter.firstSeatLost.toDouble()
+    val fw = winnerVotes / assorter.winnerDivisor.toDouble()
+    val fl = loserVotes / assorter.loserDivisor.toDouble()
     val gmean = (fw - fl) / contest.Nc
 
-    val lower = -1.0 / assorter.firstSeatLost  // lower bound of g
-    val upper = 1.0 / assorter.lastSeatWon  // upper bound of g
+    val lower = -1.0 / assorter.loserDivisor  // lower bound of g
+    val upper = 1.0 / assorter.winnerDivisor  // upper bound of g
     val c = -1.0 / (2 * lower)  // affine transform h = c * g + 1/2
 
     val hmean = assorter.h2(gmean)
@@ -154,7 +154,7 @@ fun setDilutedMean(assorter: DHondtAssorter, contest: DHondtContest): Double {
     assertEquals(hmean, hmean2)
 
     return hmean
-   /* fun makeAssorter() = DHondtAssorter(
+   /* fun makeAssorter() = DhondtAssorter(
         contest.createInfo(),
         winner.id,
         loser.id,

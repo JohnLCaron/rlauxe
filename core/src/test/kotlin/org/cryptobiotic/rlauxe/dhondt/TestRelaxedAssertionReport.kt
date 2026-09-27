@@ -25,7 +25,7 @@ class TestRelaxedAssertionReport {
             contestRound.haveSampleSize = sampleLimit.limit
         }
         // interesting: the dcontest assorters didnt make it through the serialization..... TODO ??
-        val dcontest = contestRound.contestUA.contest as DHondtContest
+        val dcontest = contestRound.contestUA.contest as DhondtContest
         assertTrue(dcontest.assorters.isEmpty())
         val builder = CandSeatRangeBuilder(contestRound)
 
@@ -57,7 +57,7 @@ class TestRelaxedAssertionReport {
             contestRound.haveSampleSize = sampleLimit.limit
         }
         // interesting: the dcontest assorters didnt make it through the serialization..... TODO ??
-        val dcontest = contestRound.contestUA.contest as DHondtContest
+        val dcontest = contestRound.contestUA.contest as DhondtContest
         assertTrue(dcontest.assorters.isEmpty())
 
         // works anyway because ??
@@ -79,7 +79,7 @@ class TestRelaxedAssertionReport {
             contestRound.haveSampleSize = sampleLimit.limit
         }
         // interesting: the dcontest assorters didnt make it through the serialization..... TODO ??
-        val dcontest = contestRound.contestUA.contest as DHondtContest
+        val dcontest = contestRound.contestUA.contest as DhondtContest
 
         val cassertionOld = contestRound.contestUA.clcaAssertions.find { it.assorter.shortName().contains("BelowThreshold for 'ECOLO'") } // TODO
         val cassertion = contestRound.contestUA.clcaAssertions.find { it.assorter.shortName().contains("AboveThreshold for 'ECOLO'") }!!
@@ -97,7 +97,7 @@ class TestRelaxedAssertionReport {
         val cassertion = contestRound.contestUA.clcaAssertions.find { it.assorter is BelowThreshold && it.assorter.candId == 9}!!
 
         // interesting: the dcontest assorters didnt make it through the serialization..... TODO ??
-        val dcontest = contestRound.contestUA.contest as DHondtContest
+        val dcontest = contestRound.contestUA.contest as DhondtContest
         assertTrue(dcontest.assorters.isEmpty())
         println( dcontest.showRelaxedAssertion(contestRound, cassertion) )
     }

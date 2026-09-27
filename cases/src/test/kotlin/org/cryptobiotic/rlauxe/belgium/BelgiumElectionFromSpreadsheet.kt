@@ -133,7 +133,7 @@ data class Binfo(val electionName: String, val parties: List<BParty>, val rounds
                     val winningContest = parties[widx]
                     val seatno = ridx+1
                     val count = round.counts[widx]
-                    val fes = DhondtScore(candidate = winningContest.num, score = count.toDouble(), divisor = seatno)
+                    val fes = DhondtScore(partyId = winningContest.num, score = count.toDouble(), divisor = seatno)
                     fes.winningSeat = winningSeat
                     winners.add(fes)
                 }

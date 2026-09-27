@@ -116,13 +116,197 @@ See core/main org.cryptobiotic.rlauxe.betting.Utils:
     val margin = marginUpper * upperBound()  // this would be the difference in scores except for the affine transform
     val mean = (margin + 1.0) / 2.0
 
-    // see org.cryptobiotic.rlauxe.dhondt.DHondtAssorter.scoreRange(Npop: Int, nsamples: Int, alpha: Double)
+    // see org.cryptobiotic.rlauxe.dhondt.DhondtAssorter.scoreRange(Npop: Int, nsamples: Int, alpha: Double)
     // the affine transform to create the assorter value is
     val mean = c * scoreDiff/Nc + 0.5
     val (mean - 0.5) * Npop / c = voteDiff
 
     scoreDiffMin = (mean - 0.5) * Nc / c
 }
+
+9/27
+///////////////////////////////////////////////////////////////////////////////////////////
+
+## one BH assertion fails. Example Bruxelles:
+
+````
+winning seats
+ seat         winner-round     nvotes,   score, scoreDiff, maxRisk, maxAssertion
+ ( 1)                  MR/1 ,  120155, 120155,           , 0.000, 
+ ( 2)                  PS/1 ,   96516,  96516,      23639, 0.000, 
+ ( 3)            PTB-PVDA/1 ,   86927,  86927,       9589, 0.000, 
+ ( 4)                  MR/2 ,  120155,  60077,      26850, 0.000, 
+ ( 5)               ECOLO/1 ,   58645,  58645,       1432, 0.000, 
+ ( 6)         LES ENGAGÉS/1 ,   49425,  49425,       9220, 0.000, 
+ ( 7)                  PS/2 ,   96516,  48258,       1167, 0.000, 
+ ( 8)            PTB-PVDA/2 ,   86927,  43463,       4795, 0.000, 
+ ( 9)                  MR/3 ,  120155,  40051,       3412, 0.000, 
+ (10)                DéFI/1 ,   34143,  34143,       5908, 0.000, 
+ (11)                  PS/3 ,   96516,  32172,       1971, 0.000, 
+ (12)                  MR/4 ,  120155,  30038,       2134, 0.000, 
+ (13)               ECOLO/2 ,   58645,  29322,        716, 0.000, 
+ (14)            PTB-PVDA/3 ,   86927,  28975,        347, 0.000, 
+ (15)         LES ENGAGÉS/2 ,   49425,  24712,       4263, 0.050, 
+ (16)                  PS/4 ,   96516,  24129,        583, 0.511, PS/4-MR/5
+                       MR/5 ,  120155,  24031,         98, 0.511, PS/4-MR/5
+                 PTB-PVDA/4 ,   86927,  21731,       2300, 0.000, 
+                       MR/6 ,  120155,  20025,       1706, 0.000, 
+                    ECOLO/3 ,   58645,  19548,        477, 0.000, 
+                       PS/5 ,   96516,  19303,        245, 0.000, 
+                 PTB-PVDA/5 ,   86927,  17385,       1918, 0.000, 
+````
+
+maxRisk = max(BH assertions with w=winner) for winning candidates, or max(BH assertions with l=loser) for losing candidates
+
+We know that the last seat is either PS/4 or MR/5.
+All the seats below are still statistically eliminated from the BH assertions w=PS/4, which did not fail.
+
+We know that an audit with more samples would either confirm the assertion PS/4 > MR/5 or continue to a hand audit.
+If a hand audit showed that indeed PS/4 < MR/5, this audit does not tell us what the actual votes would end up. There could be a different configuration of ballots awarded. 
+
+But within this risk limit I think we can say that the only variation is "the last seat is either PS/4 or MR/5".
+
+## multiple BH assertions fail. Example Anvers:
+
+````
+winning seats
+seat         winner-round     nvotes,   score, scoreDiff, maxRisk, maxAssertion
+ ( 1)                N-VA/1 ,  368877, 368877,           , 0.000, 
+ ( 2)       VLAAMS BELANG/1 ,  249826, 249826,     119051, 0.000, 
+ ( 3)                N-VA/2 ,  368877, 184438,      65388, 0.000, 
+ ( 4)             Vooruit/1 ,  127973, 127973,      56465, 0.000, 
+ ( 5)                CD&V/1 ,  125894, 125894,       2079, 0.000, 
+ ( 6)                PVDA/1 ,  125257, 125257,        637, 0.000, 
+ ( 7)       VLAAMS BELANG/2 ,  249826, 124913,        344, 0.000, 
+ ( 8)                N-VA/3 ,  368877, 122959,       1954, 0.000, 
+ ( 9)                N-VA/4 ,  368877,  92219,      30740, 0.000, 
+ (10)               GROEN/1 ,   90370,  90370,       1849, 0.000, 
+ (11)       VLAAMS BELANG/3 ,  249826,  83275,       7095, 0.000, 
+ (12)                N-VA/5 ,  368877,  73775,       9500, 0.000, 
+ (13)            open vld/1 ,   70890,  70890,       2885, 0.000, 
+ (14)             Vooruit/2 ,  127973,  63986,       6904, 0.000, 
+ (15)                CD&V/2 ,  125894,  62947,       1039, 0.000, 
+ (16)                PVDA/2 ,  125257,  62628,        319, 0.000, 
+ (17)       VLAAMS BELANG/4 ,  249826,  62456,        172, 0.000, 
+ (18)                N-VA/6 ,  368877,  61479,        977, 0.000, 
+ (19)                N-VA/7 ,  368877,  52696,       8783, 0.000, 
+ (20)       VLAAMS BELANG/5 ,  249826,  49965,       2731, 0.000, 
+ (21)                N-VA/8 ,  368877,  46109,       3856, 0.000, 
+ (22)               GROEN/2 ,   90370,  45185,        924, 0.002, 
+ (23)             Vooruit/3 ,  127973,  42657,       2528, 0.136, Vooruit/3-PVDA/3
+ (24)                CD&V/3 ,  125894,  41964,        693, 0.626, CD&V/3-PVDA/3
+                     PVDA/3 ,  125257,  41752,        212, 0.626, CD&V/3-PVDA/3
+            VLAAMS BELANG/6 ,  249826,  41637,        115, 0.383, CD&V/3-VLAAMS BELANG/6
+                     N-VA/9 ,  368877,  40986,        651, 0.039, 
+                    N-VA/10 ,  368877,  36887,       4099, 0.000, 
+            VLAAMS BELANG/7 ,  249826,  35689,       1198, 0.000, 
+                 open vld/2 ,   70890,  35445,        244, 0.000, 
+````
+
+There are 3 failing assertions.
+
+We know that seat 24 is either CD&V/3, PVDA/3, or VLAAMS BELANG/6
+We know that seat 23 is either Vooruit/3 or PVDA/3.
+
+Do we need to add an assertion for Vooruit/3-CD&V/3 ? We dont care if they flip, but:
+
+PDV/3 is in range of both CD&V/3 and Vooruit/3. If it displaces Vooruit/3, Vooruit/3 moves down but doesnt lose, unless the 
+assertion Vooruit/3-CD&V/3 fails, then it might lose a seat. 
+
+Perhaps this is where we need to to do all combinations, because we might be able to eliminate the possibility that Vooruit/3 loses a seat. Then the rule would be: if more than 1 seat is involved, add DH assertions between those winning seats.
+
+So if Vooruit/3-CD&V/3 fails:
+
+We know that Vooruit has 2 or 3 seats.
+We know that CD&V has 2 or 3 seats.
+We know that PVDA has 2 or 3 seats.
+We know that VLAAMS BELANG has 5 or 6 seats.
+
+If Vooruit/3-CD&V/3 succeeds:
+
+We know that CD&V has 2 or 3 seats.
+We know that PVDA has 2 or 3 seats.
+We know that VLAAMS BELANG has 5 or 6 seats.
+
+So when multiple seats are contested, go to a "second round", adding DH assertions between the contested winning candidates.
+
+Perhaps also could add DH assertions between the candidates that may win seats. Because the scores depend on the divisor of the candidates, one might get some extra information.
+
+Each party/divisor is a candidate, and the candidates are vying for seats. 
+First decide what candidates might win. Then calculate party ranges.
+
+
+
+Candidate A "blocks" Candidate B if A loses => B loses.
+For example, for candidates in the same party, P/d1 blocks P/d2 if d1 < d2.
+
+
+
+
+///////////////////////////////////////////////////////////////
+from me
+
+Imagine you take all possible pairs of candidates, where a candidate is a party and a divisor, and generates an assertion.
+
+Now for each pair calculate the estimated ballots needed to satisfy the assertion, and discard the ones that are smaller than the sample size.
+
+Whatever is left are the seats that are in play.
+
+
+from Vanessa:
+
+Right. Great. A few more details, which you've probably thought of already, but which I'll add because I've been dealing with a computer for too long.
+
+- A. Discard anything that's not even expected to be true (e.g. if it seems that party P got n seats, we don't want DH(winner : P, loser : Q, winner_lowest_winner : n+1, anything)) - maybe this already shows up as an infinite sample size in your code.
+
+- B. Discard anything that's logically implied by something else (e.g. if we have DH(winner : P, loser : Q, winner_lowest_winner : w, loser_highest_loser : l), we don't also need DH(winner : P, loser : Q, winner_lowest_winner : w-1, loser_highest_loser : l) because that's implied by arithmetic.
+
+But (B) interacts in a complicated way with:
+````
+    changed how BT is compared to DH alternatives: DH assertions are generated for all winning candidates, 
+    if BT < minimum of all the assertions, than all those assertions are substituted.
+````
+I think this is good, and I think it should probably come first, so the whole algorithm would be:
+
+````
+- Imagine you take all possible pairs of candidates, where a candidate is a party and a divisor, and generate a DH assertion. 
+- Generate AT/BT assertions matching the apparent threshold-passing for each party.
+- Now for each assertion calculate the estimated ballots needed to satisfy the assertion, and 
+- (Step 1) discard the ones that have higher expected sample size than the user's target. 
+- (A) Discard anything that's not even expected to be true (e.g. if it seems that party P got n seats, we don't want DH(winner : P, loser : Q, winner_lowest_winner : n+1, anything)) - maybe this already shows up as an infinite sample size in your code.
+- (2, VT rewrite) For all parties P for which BT is apparently true, consider the DH assertions for all winning candidates vs P's 1st quotient. 
+-- if sample_size( BT(P)) < sample_size(minimum of all the DH assertions vs P's 1st quotient), discard all the DH assertions;
+-- if sample_size( BT(P)) > sample_size(minimum of all the DH assertions vs P's 1st quotient), discard BT(P).
+- (B) Discard anything that's logically implied by something else (e.g. if we have DH(winner : P, loser : Q, winner_lowest_winner : w, loser_highest_loser : l), we don't also need DH(winner : P, loser : Q, winner_lowest_winner : w-1, loser_highest_loser : l) because that's implied by arithmetic.
+
+Does that look right to you?
+
+A few more thoughts about Step 2:
+- it might be the case that one or the other side (either BT(P) or all the DH assertions against P's 1st quotient) have already been discarded, in which case obviously we can't discard the other. But I think that's OK because we're not going to try to discard the higher sample size one anyway.
+- it might be that both have already been discarded, which is fine - we're just not going to prove that P got no seats.
+- I've been advocating the RAIRE-style approximation in which we consider only the expected sample size of the *worst* assertion, and that's what you've written here (and I've copied). But now that it's written this way, it's clear we don't need to make that approximation. Instead of comparing  the sample size of BT(P) against the worst individual DH assertion, you could estimate the sample size of the whole set, which might sometimes be a bit larger.  (I don't think it's likely to matter a lot, and it makes the code a fair bit more complicated, but I'm just mentioning it in case it happens to be easier than I think.)
+````
+
+1. Imagine you take all possible pairs of candidates, where a candidate is a party and a divisor, and generate a DH assertion.
+
+2. Generate AT/BT assertions matching the apparent threshold-passing for each party.
+
+3. Now for each assertion calculate the estimated ballots needed to satisfy the assertion, and
+- (Step 1) discard the ones that have higher expected sample size than the user's target.
+- (A) Discard anything that's not even expected to be true (e.g. if it seems that party P got n seats, we don't want DH(winner : P, loser : Q, winner_lowest_winner : n+1, anything)) - maybe this already shows up as an infinite sample size in your code.
+
+- (Step 2) For all parties P for which BT is apparently true, consider the DH assertions for all winning candidates vs P's 1st quotient.
+  -- if sample_size( BT(P)) < sample_size(minimum of all the DH assertions vs P's 1st quotient), discard all the DH assertions;
+  -- if sample_size( BT(P)) > sample_size(minimum of all the DH assertions vs P's 1st quotient), discard BT(P).
+
+- (B) Discard anything that's logically implied by something else (e.g. if we have DH(winner : P, loser : Q, winner_lowest_winner : w, loser_highest_loser : l), we don't also need DH(winner : P, loser : Q, winner_lowest_winner : w-1, loser_highest_loser : l) because that's implied by arithmetic.
+
+
+A few more thoughts about Step 2:
+- it might be the case that one or the other side (either BT(P) or all the DH assertions against P's 1st quotient) have already been discarded, in which case obviously we can't discard the other. But I think that's OK because we're not going to try to discard the higher sample size one anyway.
+- it might be that both have already been discarded, which is fine - we're just not going to prove that P got no seats.
+- I've been advocating the RAIRE-style approximation in which we consider only the expected sample size of the *worst* assertion, and that's what you've written here (and I've copied). But now that it's written this way, it's clear we don't need to make that approximation. Instead of comparing  the sample size of BT(P) against the worst individual DH assertion, you could estimate the sample size of the whole set, which might sometimes be a bit larger.  (I don't think it's likely to matter a lot, and it makes the code a fair bit more complicated, but I'm just mentioning it in case it happens to be easier than I think.)
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 9/25

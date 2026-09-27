@@ -38,14 +38,14 @@ class TestBelgiumContest {
     }
 
     fun testAssorters(contestUA: ContestWithAssertions) {
-        val contestd = contestUA.contest as DHondtContest
+        val contestd = contestUA.contest as DhondtContest
         // contestd.assorters is empty when deserialized
 
         contestUA.assertions().forEach { assertion ->
             val assorter = assertion.assorter
             println(assorter)
 
-            if (assorter is DHondtAssorter) {
+            if (assorter is DhondtAssorter) {
                 println(" setDilutedMean = ${setDilutedMean(assorter, contestd)}")
                 println(" dilutedMean= ${assorter.dilutedMean()}")
                 assertEquals(assorter.dilutedMean(), setDilutedMean(assorter, contestd), doublePrecision)

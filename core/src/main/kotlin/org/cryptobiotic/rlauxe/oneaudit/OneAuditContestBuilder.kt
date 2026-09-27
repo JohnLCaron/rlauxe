@@ -1,10 +1,9 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import au.org.democracydevelopers.raire.irv.Votes
-import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
+import org.cryptobiotic.rlauxe.dhondt.DhondtContest
 import org.cryptobiotic.rlauxe.irv.RaireAssorter
 import org.cryptobiotic.rlauxe.util.margin2mean
 
@@ -22,7 +21,7 @@ fun makeOneAuditContests(
 
     val contestsUA = wantContests.filter{ !it.isIrv() }.map { contest ->
         val cua = ContestWithAssertions(contest, true, NpopIn=npopMap[contest.id], hasStyle = hasStyle).addStandardAssertions()
-        if (contest is DHondtContest) {
+        if (contest is DhondtContest) {
             cua.addAssertionsFromAssorters(contest.assorters)
         } else {
             cua.addStandardAssertions()

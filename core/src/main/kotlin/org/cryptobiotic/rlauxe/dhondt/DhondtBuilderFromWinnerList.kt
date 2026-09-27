@@ -28,7 +28,7 @@ data class DhondtWinner(val candidate: Int, val divisor: Int) {
 class DhondtBuilderFromWinnerList(
     val name: String,
     val id: Int,
-    val parties: List<DhondtCandidate>,
+    val parties: List<DhondtParty>,
     val nseats: Int,
     val Nc: Int, // trusted upper limit; // TODO need phantoms also
     val undervotes: Int,
@@ -62,10 +62,10 @@ class DhondtBuilderFromWinnerList(
         }
     }
 
-    fun build(): DHondtContest {
+    fun build(): DhondtContest {
         val votes = parties.associate { Pair(it.id, it.totalVotes) }
 
-        val contest = DHondtContest.fromVotes(
+        val contest = DhondtContest.fromVotes(
             info,
             votes,
             this.Nc,
@@ -75,7 +75,7 @@ class DhondtBuilderFromWinnerList(
         // TODO why do we add the assorters after the constructor? probably not needed anymore
         //      or for serialization perhaps?
 
-        contest.assorters.addAll(DHondtAssorter.makeDhondtAssorters(info, Nc, parties))
+        contest.assorters.addAll(DhondtAssorter.makeDhondtAssorters(info, Nc, parties))
         val lastWinningScore = winnerList[nseats-1]
         val lastWinner = parties.find { it.id == lastWinningScore.candidate }!!
 
@@ -95,18 +95,18 @@ class DhondtBuilderFromWinnerList(
         return contest
     }
 
-    fun chooseBtOrDhs(bt: BelowThreshold, partyBelowMin: DhondtCandidate, winners: List<DhondtCandidate>, lastWinner: DhondtCandidate): List<AssorterIF> {
+    fun chooseBtOrDhs(bt: BelowThreshold, partyBelowMin: DhondtParty, winners: List<DhondtParty>, lastWinner: DhondtParty): List<AssorterIF> {
 
         // is this party's total vote larger than the lastwinner ?
         //val fw = lastWinner.totalVotes / lastWinner.lastSeatWon!!.toDouble() // TODO check
         //if (partyBelowMin.totalVotes > fw) return listOf(bt)
 
-        val partyCopy = DhondtCandidate(partyBelowMin)
+        val partyCopy = DhondtParty(partyBelowMin)
         partyCopy.firstSeatLost = 1 // why ?
 
         // make assert for each winner
         val dhs = winners.map { winner ->
-            DHondtAssorter.makeFrom(info, winner = winner, loser = partyCopy, Nc)
+            DhondtAssorter.makeFrom(info, winner = winner, loser = partyCopy, Nc)
         }
 
         val minAssert = dhs.minByOrNull { it.noerror(true) }!!

@@ -12,7 +12,7 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
+import org.cryptobiotic.rlauxe.dhondt.DhondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder
 import org.cryptobiotic.rlauxe.dhondt.DhondtScore
 import org.cryptobiotic.rlauxe.irv.*
@@ -100,9 +100,9 @@ data class ContestIFJson(
 
 fun ContestIF.publishJson() : ContestIFJson {
     return when (this) {
-        is DHondtContest ->
+        is DhondtContest ->
             ContestIFJson(
-                "DHondtContest",
+                "DhondtContest",
                 votes = this.votes,
                 this.winners,
                 this.Nc,
@@ -155,6 +155,7 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
             }
             rcontest
         }
+        "DhondtContest",
         "DHondtContest",
         "ContestDHondt" -> {
             DhondtBuilder.fromVotes(info, this.votes!!, this.Nc, this.Ncast, this.undervotes?: 0).build()
@@ -194,7 +195,7 @@ data class DhondtScoreJson(
     val winningSeat: Int?,
 )
 
-fun DhondtScore.publishJson() = DhondtScoreJson(candidate, score, divisor, winningSeat)
+fun DhondtScore.publishJson() = DhondtScoreJson(partyId, score, divisor, winningSeat)
 
 fun DhondtScoreJson.import() = DhondtScore(candidate, score, divisor).setWinningSeat(this.winningSeat)
 

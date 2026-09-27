@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.dhondt
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.dhondt.RelaxedAssertionReport.KeepScore
-import org.cryptobiotic.rlauxe.dhondt.RelaxedAssertionReport.Score
 import org.cryptobiotic.rlauxe.util.Indent
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
@@ -13,7 +11,7 @@ import kotlin.math.min
 // uses CandSeatRangeBuilder to make reports.
 // TODO useful but also dated.
 class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
-    val dcontest: DHondtContest = builder.dcontest
+    val dcontest: DhondtContest = builder.dcontest
     /* val sortedLoserGroups: List<DhondtLoserGroup>
 
     init {
@@ -34,7 +32,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
     private val showLosers = 6
 
     data class Score(val winner: DhondtScore, val loser: DhondtScore, val startLoser: Int, val nlosers: Int) {
-        var assorter: DHondtAssorter? = null
+        var assorter: DhondtAssorter? = null
         var diff: Int = 0
         var minDiff: Int = 0
         var fails: Boolean = false
@@ -43,10 +41,10 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
             return if (assorter != null)
                 "${assorter!!.winnerNameRound()}-${assorter!!.loserNameRound()}"
             else
-                "${winner.candidate}/${winner.divisor}-${loser.candidate}/${loser.divisor}"
+                "${winner.partyId}/${winner.divisor}-${loser.partyId}/${loser.divisor}"
         }
 
-        override fun toString() = "${if (fails) "**" else ""}(winner=${winner.candidate}/${winner.divisor}, loser=${loser.candidate}/${loser.divisor}, " +
+        override fun toString() = "${if (fails) "**" else ""}(winner=${winner.partyId}/${winner.divisor}, loser=${loser.partyId}/${loser.divisor}, " +
                 "startLoser=$startLoser)"
     }
 
@@ -84,7 +82,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
         repeat(dcontest.nseats) { idx ->
             val score = dcontest.sortedScores[idx]
             // sortedRawScores.filter{ it.divisor <= maxRound }.forEachIndexed { idx, score ->
-            val candId = score.candidate
+            val candId = score.partyId
             append(" (${nfn(idx + 1, 2)}) ")
             val nameRound = "${builder.orgInfo.candidateIdToName[candId]!!}/${score.divisor}"
             val below = if (builder.belowMinPct.contains(candId)) "*" else " "
@@ -114,7 +112,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
             val scoreRank = dcontest.nseats + idx
             val loser = dcontest.sortedScores[scoreRank]
             // sortedRawScores.filter{ it.divisor <= maxRound }.forEachIndexed { idx, score ->
-            val candId = loser.candidate
+            val candId = loser.partyId
             append("      ")
             val nameRound = "${builder.orgInfo.candidateIdToName[candId]}/${loser.divisor}"
             val below = if (builder.belowMinPct.contains(candId)) "*" else " "
@@ -175,7 +173,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
     fun testScore(score: Score) {
         score.diff = score.winner.score.toInt() - score.loser.score.toInt()
         val assorter = builder.findAssorter(score.winner, score.loser)
-        score.minDiff = assorter.scoreRange(dcontest.Nc, builder.nsamples, alpha)
+        score.minDiff = assorter.scoreRange(dcontest.Nc, builder.nsamples, .05)
         score.fails = (score.diff < score.minDiff)
         score.assorter = assorter
     }
@@ -307,7 +305,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
         var prev: Int? = null
         repeat(nseats + 3) { idx ->
             val score = sortedScores[idx]
-            val candId = score.candidate
+            val candId = score.partyId
             if (idx < nseats) append(" (${nfn(idx + 1, 2)}) ") else append("      ")
             append(" ${trunc(info.candidateIdToName[candId]!!, candNameWidth)}")
             append("-${nfn(score.divisor, 2)}, ")
@@ -329,8 +327,8 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
             val assorter = failure.assorter
             val winner = assorter.winner()
             val loser = assorter.loser()
-            val winnerScore = dhondt.sortedScores.find { it.divisor == assorter.lastSeatWon && it.candidate == winner }!!
-            val loserScore = dhondt.sortedScores.find { it.divisor == assorter.firstSeatLost && it.candidate == loser }!!
+            val winnerScore = dhondt.sortedScores.find { it.divisor == assorter.winnerDivisor && it.partyId == winner }!!
+            val loserScore = dhondt.sortedScores.find { it.divisor == assorter.loserDivisor && it.partyId == loser }!!
             val group = dhondtLoserGroups.getOrPut(loser) { DhondtLoserGroup(loser) }
             group.failures.add(DhondtRiskFailure(builder.Npop, assorter, winnerScore, loserScore, failure.risk, builder.nsamples, true))
         }

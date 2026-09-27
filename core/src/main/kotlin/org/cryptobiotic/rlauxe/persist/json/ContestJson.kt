@@ -94,7 +94,7 @@ data class ContestIFJson(
     val winners: List<Int>?,
     val Nc: Int,
     val Ncast: Int,
-    val undervotes: Int,
+    val undervotes: Int? = null,
     val irvRoundsPaths: List<IrvRoundsPathJson>? = null,
 )
 
@@ -157,7 +157,7 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
         }
         "DHondtContest",
         "ContestDHondt" -> {
-            DhondtBuilder.fromVotes(info, this.votes!!, this.Nc, this.Ncast, this.undervotes).build()
+            DhondtBuilder.fromVotes(info, this.votes!!, this.Nc, this.Ncast, this.undervotes?: 0).build()
         }
         else -> throw RuntimeException("unknown class name ${this.className}")
     }

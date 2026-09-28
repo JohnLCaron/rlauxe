@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.betting.estRiskStandardBet
 import org.cryptobiotic.rlauxe.core.AssorterIF
+import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
@@ -15,36 +16,107 @@ import kotlin.math.min
 private val logger = KotlinLogging.logger("RelaxedAssertions")
 private val debug = false
 
-class RelaxedAssertions(val contestRound: ContestRound, alpha: Double) {
+fun makeRelaxedAssertions(contestRound: ContestRound, alpha: Double): RelaxedAssertionsIF {
     val useAlpha = contestRound.auditorWantRisk ?: alpha
     val dcontest = contestRound.contestUA.contest as DhondtContest
-
     // must get from contestRound.contestUA, not auditRecord.contests
-    val orgAssorters = contestRound.contestUA.clcaAssertions.map { it.assorter }
-
-    val orgInfo = dcontest.info
-    val votes = dcontest.votes
+    val fromAssorters = contestRound.contestUA.clcaAssertions.map { it.assorter }
     val Npop = contestRound.contestUA.Npop
     val nsamples = contestRound.haveSampleSize
 
+    val tfailures = findThresholdFailures(dcontest, fromAssorters, Npop, nsamples, useAlpha)
+    val failures = findDhondtFailures(dcontest, fromAssorters, Npop, nsamples, useAlpha)
+
+    if (tfailures.isEmpty() && failures.isEmpty()) return NoFailures(dcontest)
+    if (tfailures.isEmpty()) return RelaxedDhondtAssertions(dcontest, fromAssorters, Npop, nsamples, useAlpha, failures)
+    return RelaxedThresholdAssertions(dcontest, fromAssorters, Npop, nsamples, useAlpha, failures, tfailures)
+}
+
+fun findThresholdFailures(dcontest: DhondtContest, fromAssorters: List<AssorterIF>, Npop: Int, nsamples: Int,
+                          useAlpha: Double): MutableList<ThresholdFailure> {
+    val failures = mutableListOf<ThresholdFailure>()
+    fromAssorters.filter { it is BelowThreshold }.forEach {
+        val assorter = it as BelowThreshold
+        val risk = estRiskStandardBet(Npop, assorter.noerror(true), nsamples)
+        if (risk > useAlpha) {
+            failures.add(ThresholdFailure(dcontest, dcontest.Nc, assorter, risk, nsamples, useAlpha))
+        }
+    }
+    return failures
+}
+
+fun findDhondtFailures(fromContest: DhondtContest, fromAssorters: List<AssorterIF>, Npop: Int, nsamples: Int,
+                       useAlpha: Double): MutableList<DhondtFailure> {
+    val failures = mutableListOf<DhondtFailure>()
+    fromAssorters.filter { it is DhondtAssorter }.forEach { assorter ->
+        val dassorter = assorter as DhondtAssorter
+        val risk = estRiskStandardBet(Npop, dassorter.noerror(true), nsamples)
+        if (risk > useAlpha) {
+            val winnerId = dassorter.winner()
+            val loserId = dassorter.loser()
+            val winnerScore =
+                fromContest.sortedScores.find { it.divisor == dassorter.winnerDivisor && it.partyId == winnerId }!!
+            val loserScore =
+                fromContest.sortedScores.find { it.divisor == dassorter.loserDivisor && it.partyId == loserId }!!
+
+            failures.add(DhondtFailure(Npop, dassorter, winnerScore, loserScore, risk, nsamples, useAlpha))
+        }
+    }
+    return failures
+}
+
+interface RelaxedAssertionsIF {
+    val dcontest: DhondtContest
+    val fromAssorters: List<AssorterIF>
+    val Npop: Int
+    val nsamples: Int
+    val alpha: Double
+
+    fun contestRanges(): ContestRanges
+    fun failures(): List<DhondtFailure>
+    fun show(): String
+}
+
+class NoFailures(override val dcontest: DhondtContest) : RelaxedAssertionsIF {
+    override val fromAssorters = emptyList<AssorterIF>()
+    override val Npop = 0
+    override val nsamples = 0
+    override val alpha = .05
+
+    override fun contestRanges() = ContestRanges(dcontest, emptyList())
+    override fun failures() = emptyList<DhondtFailure>()
+    override fun show() = "No Failures"
+}
+
+class RelaxedDhondtAssertions(override val dcontest: DhondtContest,
+                        override val fromAssorters: List<AssorterIF>,
+                        override val Npop: Int,
+                        override val nsamples: Int,
+                        override val alpha: Double,
+                        failuresIn: List<DhondtFailure>,
+): RelaxedAssertionsIF {
+    val orgInfo = dcontest.info
+    val votes = dcontest.votes
+
     val failures: MutableList<DhondtFailure>
+
     val singleFailure: Boolean
     var nSeatsInPlay: Int
-    val candidateRanges: CandidateRanges
+    val candidateRanges: ContestRanges
 
     init {
-        logger.debug { "Contest ${orgInfo.name} haveSampleSize=${contestRound.haveSampleSize}" }
-        failures = makeFailures(dcontest, orgAssorters)
+        logger.debug { "Contest ${orgInfo.name} haveSampleSize=${nsamples}" }
+        failures = failuresIn.toMutableList()
 
         // single DH failure
-        singleFailure = (failures.size == 1) // We know that the last seat is either PS/4 or MR/5.
+        singleFailure = (failures.size == 1)
         if (singleFailure) {
             nSeatsInPlay = 1
-            candidateRanges = CandidateRanges(dcontest, failures)
+            candidateRanges = ContestRanges(dcontest, failures)
         } else {
-            // count the seats in play
+            // multiple DH failure
             val contestedWinningSeats = mutableSetOf<Int>()
-            val contestedWinningCandidates = mutableListOf<DhondtScore>()
+            val contestedWinningCandidates = mutableListOf<DhondtCandidateScore>()
             failures.forEach { failure ->
                 val added = contestedWinningSeats.add(failure.winnerScore.winningSeat!!)
                 if (added) contestedWinningCandidates.add(failure.winnerScore)
@@ -52,46 +124,30 @@ class RelaxedAssertions(val contestRound: ContestRound, alpha: Double) {
             nSeatsInPlay = contestedWinningSeats.size
             if (nSeatsInPlay > 1) {
                 round2(contestedWinningSeats, contestedWinningCandidates)
-                candidateRanges = CandidateRanges(dcontest, failures)
+                candidateRanges = ContestRanges(dcontest, failures)
 
             } else {
-                candidateRanges = CandidateRanges(dcontest, failures)
+                candidateRanges = ContestRanges(dcontest, failures)
             }
         }
 
-        println()
-        println(candidateRanges.show())
+        // println()
+        // println(candidateRanges.show())
     }
 
-    fun showRelaxedAssertions() = buildString {
+    override fun contestRanges() = candidateRanges
+    override fun failures() = failures
+
+    override fun show() = buildString {
         appendLine("Failures")
         appendLine(DhondtFailure.header())
         failures.forEach { appendLine(it) }
         appendLine()
-        append(showRelaxedAssertions2(dcontest, orgAssorters, nsamples, useAlpha))
-    }
-
-    fun makeFailures(fromContest: DhondtContest, fromAssorters: List<AssorterIF>): MutableList<DhondtFailure> {
-        val failures = mutableListOf<DhondtFailure>()
-        fromAssorters.filter { it is DhondtAssorter }.forEach { assorter ->
-            val dassorter = assorter as DhondtAssorter
-            val risk = estRiskStandardBet(Npop, dassorter.noerror(true), nsamples)
-            if (risk > useAlpha) {
-                val winnerId = dassorter.winner()
-                val loserId = dassorter.loser()
-                val winnerScore =
-                    fromContest.sortedScores.find { it.divisor == dassorter.winnerDivisor && it.partyId == winnerId }!!
-                val loserScore =
-                    fromContest.sortedScores.find { it.divisor == dassorter.loserDivisor && it.partyId == loserId }!!
-
-                failures.add(DhondtFailure(Npop, dassorter, winnerScore, loserScore, risk, nsamples, useAlpha))
-            }
-        }
-        return failures
+        append(showRelaxedAssertions(dcontest, fromAssorters, nsamples, alpha))
     }
 
     // So when multiple seats are contested, go to a "second round", adding DH assertions between the contested winning candidates.
-    fun round2(contestedWinningSeats: Set<Int>, contestedWinningCandidates: List<DhondtScore>) {
+    fun round2(contestedWinningSeats: Set<Int>, contestedWinningCandidates: List<DhondtCandidateScore>) {
         val candidateMap = dcontest.parties.associateBy { it.id }
 
         // add DH between contestedWinningCandidates
@@ -116,14 +172,14 @@ class RelaxedAssertions(val contestRound: ContestRound, alpha: Double) {
 
         assorters.forEach { dassorter ->
             val risk = estRiskStandardBet(Npop, dassorter.noerror(true), nsamples)
-            if (risk > useAlpha) {
+            if (risk > alpha) {
                 val winnerId = dassorter.winner()
                 val loserId = dassorter.loser()
                 val winnerScore =
                     dcontest.sortedScores.find { it.divisor == dassorter.winnerDivisor && it.partyId == winnerId }!!
                 val loserScore =
                     dcontest.sortedScores.find { it.divisor == dassorter.loserDivisor && it.partyId == loserId }!!
-                val failure = DhondtFailure(Npop, dassorter, winnerScore, loserScore, risk, nsamples, useAlpha, round2=true)
+                val failure = DhondtFailure(Npop, dassorter, winnerScore, loserScore, risk, nsamples, alpha, round2=true)
                 failures.add(failure)
             }
         }
@@ -187,7 +243,7 @@ fun maxRiskForLoserSeat(loserNameRound: String, assorters: List<AssorterIF>, hav
 
 // would be convenient if dcontest.assorters was correct2
 // do we include added asssertions ??
-fun showRelaxedAssertions2(dcontest: DhondtContest, assorters: List<AssorterIF>, haveMvrs: Int?, alpha: Double): String = buildString {
+fun showRelaxedAssertions(dcontest: DhondtContest, assorters: List<AssorterIF>, haveMvrs: Int?, alpha: Double): String = buildString {
     val orgInfo = dcontest.info
     appendLine("winning seats")
     append(" seat ${sfn("winner-round", candNameWidth)}     ${sfn("nvotes", 6)}, ")
@@ -195,7 +251,7 @@ fun showRelaxedAssertions2(dcontest: DhondtContest, assorters: List<AssorterIF>,
     appendLine()
 
     // sorted scores
-    var prevScore: DhondtScore? = null
+    var prevScore: DhondtCandidateScore? = null
     // the winners
     repeat(dcontest.nseats) { idx ->
         val score = dcontest.sortedScores[idx]

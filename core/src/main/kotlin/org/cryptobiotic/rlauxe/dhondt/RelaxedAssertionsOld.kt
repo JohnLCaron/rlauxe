@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.math.min
 
+/*
 private val logger = KotlinLogging.logger("RelaxedAssertions")
 private val debug = false
 
@@ -34,7 +35,7 @@ class RelaxedAssertionsOld(val contestRound: ContestRound, alpha: Double) {
         recurseForFailures(rootNode, failures, Indent(0, nspaces = 4))
     }
 
-    fun showRelaxedAssertions() = showRelaxedAssertions(orgContest, orgAssorters, nsamples, useAlpha)
+    fun showRelaxedAssertions() = showRelaxedAssertionsOld(orgContest, orgAssorters, nsamples, useAlpha)
 
     fun show() = buildString {
         appendLine("Contest ${orgInfo.name} DH failure branches")
@@ -251,7 +252,7 @@ fun DhondtRiskFailure.show() = buildString {
 }
 
 // would be convenient if dcontest.assorters was correct2
-fun showRelaxedAssertions(dcontest: DhondtContest, assorters: List<AssorterIF>, haveMvrs: Int?, alpha: Double): String = buildString {
+fun showRelaxedAssertionsOld(dcontest: DhondtContest, assorters: List<AssorterIF>, haveMvrs: Int?, alpha: Double): String = buildString {
     /* appendLine("parties")
     dcontest.parties.forEach { appendLine("  $it")}
     appendLine() */
@@ -263,7 +264,7 @@ fun showRelaxedAssertions(dcontest: DhondtContest, assorters: List<AssorterIF>, 
     appendLine()
 
     // sorted scores
-    var prevScore: DhondtScore? = null
+    var prevScore: DhondtCandidateScore? = null
     // the winners
     repeat(dcontest.nseats) { idx ->
         val score = dcontest.sortedScores[idx]
@@ -309,3 +310,5 @@ fun showRelaxedAssertions(dcontest: DhondtContest, assorters: List<AssorterIF>, 
     }
     appendLine()
 }
+
+ */

@@ -54,13 +54,14 @@ data class DhondtParty(val partyName: String, val id: Int, val totalVotes: Int,
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// TODO make constructor private, always use Builder
 class DhondtContest(
     info: ContestInfo,
     voteInput: Map<Int, Int>,   // partyId -> nvotes;  sum is nvotes or V_c
     Nc: Int,                    // trusted maximum ballots/cards that contain this contest
     Ncast: Int,                 // number of cast ballots containing this Contest, including undervotes
     val parties: List<DhondtParty>, // the parties
-    val sortedScores: List<DhondtScore>,
+    val sortedScores: List<DhondtCandidateScore>,
     thresholdOverride: Set<Int>? = null, // TODO needed?
 ): Contest(info, voteInput, Nc, Ncast) {
     val nvotes = votes.values.sum()
@@ -186,7 +187,7 @@ class DhondtContest(
         val maxRound = sortedScores.filter{ it.winningSeat != null }.maxOfOrNull { it.divisor }!! + 1
 
         appendLine()
-        append("party     ${trunc("Round", width0 - "party".length + 3)}:")
+        append("party${trunc("Round", width0 - "party".length + 3)}:")
         for (round in 1 .. maxRound) {
             append("${nfn(round, width)} |")
         }
@@ -222,11 +223,10 @@ class DhondtContest(
 
     // for viewer
     fun showRelaxedAssertion(contestRound: ContestRound, maxRisk: Double) = buildString {
-        val relax2 = RelaxedAssertions(contestRound, maxRisk)
-        append(relax2.showRelaxedAssertions())
-        // append(relax.show())
+        val relax = makeRelaxedAssertions(contestRound, maxRisk)
+        append(relax.show())
     }
-    fun showRelaxedAssertionReport(contestRound: ContestRound): String {
+    /* fun showRelaxedAssertionReport(contestRound: ContestRound): String {
         val cands = CandSeatRangeBuilder(contestRound)
         val report = RelaxedAssertionReport(cands)
         return report.showRelaxedAssertions()
@@ -250,11 +250,11 @@ class DhondtContest(
         println("assertions done:")
         done.forEach{ println("   $it") }
         return result
-    }
+    } */
 
     fun countContestedSeats(contestRound: ContestRound): Int {
-        // val cands = CandSeatRangeBuilder(contestRound)
-        return 0 // cands.countContestedSeats() // + cands.thrashers.size
+        val relax = makeRelaxedAssertions(contestRound, .05)
+        return relax.failures().size
     }
 
     //// create a cvr for each vote

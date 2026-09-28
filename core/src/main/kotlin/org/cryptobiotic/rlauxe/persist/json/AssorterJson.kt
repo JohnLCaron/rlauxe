@@ -150,7 +150,7 @@ fun AssorterIF.publishJson() : AssorterIFJson {
                 "UnderThreshold",
                 reportedMargin = this.reportedMargin(),
                 dilutedMargin = this.dilutedMargin(),
-                winner = this.candId,
+                winner = this.partyId,
                 minFraction = this.t,
             )
         else -> throw RuntimeException("unknown assorter type ${this.javaClass.simpleName} = $this")

@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.dhondt.RelaxedAssertions
-
 // TODO depth first ?
 // shouldnt a treeNode know its depth in the tree ??
 

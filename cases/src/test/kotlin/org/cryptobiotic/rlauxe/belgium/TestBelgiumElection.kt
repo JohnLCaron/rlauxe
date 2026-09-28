@@ -5,7 +5,7 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.dhondt.DhondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder
 import org.cryptobiotic.rlauxe.dhondt.DhondtPartyBuilder
-import org.cryptobiotic.rlauxe.dhondt.DhondtScore
+import org.cryptobiotic.rlauxe.dhondt.DhondtCandidateScore
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.abs
@@ -73,7 +73,7 @@ fun testCvrs(contestd: DhondtContest) {
     }
 }
 
-fun testEquals(score1: DhondtScore, score2: DhondtScore): Boolean {
+fun testEquals(score1: DhondtCandidateScore, score2: DhondtCandidateScore): Boolean {
     return (score1.partyId == score2.partyId) &&
             (score1.divisor == score2.divisor) &&
             (score1.winningSeat == score2.winningSeat) &&

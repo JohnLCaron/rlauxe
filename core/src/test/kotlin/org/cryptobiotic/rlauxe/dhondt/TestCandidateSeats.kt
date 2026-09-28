@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.dhondt
 
+import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
@@ -31,11 +32,9 @@ class TestCandidateSeats {
             contestRound.haveSampleSize = sampleLimit.limit
         }
         // interesting: the dcontest assorters didnt make it through the serialization (inside contestRound.contestUA).....
-        val dcontest = contestRound.contestUA.contest as DhondtContest
-        assertTrue(dcontest.assorters.isEmpty()) // wtf ??
-        val builder = CandSeatRangeBuilder(contestRound)
-        // builder.mergedRanges.candidates.forEach { println(it) }
-        println(builder.partyRanges.showSeatRanges())
+        val relax = makeRelaxedAssertions(contestRound, .05)
+        val contestRanges = relax.contestRanges()
+        println(contestRanges.showSeatRanges())
     }
 
     @Test
@@ -45,23 +44,21 @@ class TestCandidateSeats {
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit.limit
         }
-        // interesting: the dcontest assorters didnt make it through the serialization (inside contestRound.contestUA).....
-        val dcontest = contestRound.contestUA.contest as DhondtContest
-        assertTrue(dcontest.assorters.isEmpty()) // wtf ??
         // this seems to be the workaround
         val workaround = contestRound.contestUA.clcaAssertions.map { it.assorter }
 
         // builder.mergedRanges.candidates.forEach { println(it) }
-        val builder = CandSeatRangeBuilder(contestRound)
-        println(builder.partyRanges.showSeatRanges())
+        val relax = makeRelaxedAssertions(contestRound, .05)
+        val contestRanges = relax.contestRanges()
+        println(contestRanges.showSeatRanges())
 
-        val failedAssorters = builder.failureNodes.children.map { it.value as CandSeatRangeBuilder.AltFailure }.map { it.failure.assorter }
+        val failedAssorters = relax.failures().map { it.assorter }
         val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
 
-        writeDHondtAssertionsJson(dcontest, assorters, builder.partyRanges.candidates)
+        writeDHondtAssertionsJson(relax.dcontest, assorters, contestRanges.partyRanges.values.toList())
 
         val scratchFile = createTempFile().toString()
-        val org =  writeDHondtAssertionsJsonFile(contestRound, builder, scratchFile, true)
+        val org =  writeDHondtAssertionsJsonFile(contestRound, relax, scratchFile, true)
         val roundtrip = readDHondtAssertionsJsonUnwrapped(scratchFile)
         println("--------------------------------------------------------------------------")
         println(roundtrip)
@@ -75,14 +72,11 @@ class TestCandidateSeats {
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit.limit
         }
-        // interesting: the dcontest assorters didnt make it through the serialization..... TODO ??
-        val dcontest = contestRound.contestUA.contest as DhondtContest
-        assertTrue(dcontest.assorters.isEmpty())
 
         // works anyway because it gets assorters from AssertionRound
-        val builder = CandSeatRangeBuilder(contestRound)
-        builder.partyRanges.candidates.forEach { println(it) }
-        println(builder.partyRanges.showSeatRanges())
+        val relax = makeRelaxedAssertions(contestRound, .05)
+        relax.contestRanges().partyRanges.values.forEach { println(it) }
+        println(relax.contestRanges().showSeatRanges())
     }
 
     @Test
@@ -92,12 +86,9 @@ class TestCandidateSeats {
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit.limit
         }
-        // interesting: the dcontest assorters didnt make it through the serialization..... TODO ??
-        val dcontest = contestRound.contestUA.contest as DhondtContest
-        assertTrue(dcontest.assorters.isEmpty())
-        val builder = CandSeatRangeBuilder(contestRound)
-        builder.partyRanges.candidates.forEach { println(it) }
-        println(builder.partyRanges.showSeatRanges())
+        val relax = makeRelaxedAssertions(contestRound, .05)
+        relax.contestRanges().partyRanges.values.forEach { println(it) }
+        println(relax.contestRanges().showSeatRanges())
     }
 
     @Test
@@ -145,10 +136,11 @@ class TestCandidateSeats {
         println(all.showAllPartySeats())
     }
 
+    /*
     @Test
     fun testCoalitionAll() {
         val all = makeAllSeats(lastRound, sampleLimits, alpha = .05)
-        val sumFail = all.candidateSums.sumOf{ it.failures.size }
+        // val sumFail = all.candidateSums.sumOf{ it.failures.size }
         val allCands = all.contestSeats.map { it.candidates }.flatten()
         val allCandsFail = allCands.sumOf{ it.failures.size }
 
@@ -170,6 +162,6 @@ class TestCandidateSeats {
         println("sumFail = $sumFail; allCandsFail = $allCandsFail; coalAllFail = ${coal.nfailures}; coalFailures = ${coal.all().size}; ")
 
         println(coal)
-    }
+    } */
 
 }

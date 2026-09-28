@@ -96,7 +96,7 @@ fun estRiskStandardBet(Npop: Int, noerror: Double, nsamples: Int): Double {
     return estRisk(Npop, 2.0 / 1.03905, noerror, nsamples)
 }
 
-// for viewer
+// for viewer; note that Dhondt gives a floating voteDiff. cant use this for Dhondt? margin wrong ??
 fun estRiskStandardBet(voteDiff: Int, Npop: Int, upper: Double, nsamples: Int, ): Double {
     val margin = voteDiff / Npop.toDouble()
     val noerror = noerror(margin, upper)

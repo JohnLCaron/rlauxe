@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.math.min
 
+/*
 // uses CandSeatRangeBuilder to make reports.
 // TODO useful but also dated.
 class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
@@ -31,7 +32,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
     private val show = false
     private val showLosers = 6
 
-    data class Score(val winner: DhondtScore, val loser: DhondtScore, val startLoser: Int, val nlosers: Int) {
+    data class Score(val winner: DhondtCandidateScore, val loser: DhondtCandidateScore, val startLoser: Int, val nlosers: Int) {
         var assorter: DhondtAssorter? = null
         var diff: Int = 0
         var minDiff: Int = 0
@@ -77,7 +78,7 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
         appendLine()
 
         // sorted scores
-        var prevScore: DhondtScore? = null
+        var prevScore: DhondtCandidateScore? = null
         // the winners
         repeat(dcontest.nseats) { idx ->
             val score = dcontest.sortedScores[idx]
@@ -380,3 +381,5 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
 }
 
 private val showLosers = 6
+
+ */

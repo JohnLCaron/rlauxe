@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.ContestTabulationIF
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -47,7 +46,7 @@ import org.cryptobiotic.rlauxe.util.roundToClosest
     #           = (.05 * T_L - T_A) / T_L * 2*.95 + .5
  */
 
-data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double): AssorterIF  {
+data class BelowThreshold(val info: ContestInfo, val partyId: Int, val t: Double): AssorterIF  {
     val id = info.id
     val lowerg = (t-1) // aka 'a'
     val upperg = t
@@ -63,7 +62,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     }
 
     fun g(vote: Int): Double {
-        return if (vote == candId) lowerg else upperg
+        return if (vote == partyId) lowerg else upperg
     }
 
     // h(b) = c · g(b) + 1/2
@@ -93,11 +92,11 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         append("g=[$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
     }
 
-    override fun shortName() = "BelowThreshold for '${info.candidateIdToName[winner()]}' (${candId})"
+    override fun shortName() = "BelowThreshold for '${info.candidateIdToName[winner()]}' (${partyId})"
 
-    override fun hashcodeDesc() = "BelowThreshold ${candId} ${info.name}" // must be unique for serialization
+    override fun hashcodeDesc() = "BelowThreshold ${partyId} ${info.name}" // must be unique for serialization
 
-    override fun winner() = candId
+    override fun winner() = partyId
     override fun loser() = -1
 
     override fun reportedMargin() = reportedMargin
@@ -129,8 +128,8 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     }
 
     override fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulationIF, Npop: Int): PoolRates {
-        val candVotes = poolTab.votes[candId] ?: 0
-        val nonCandVotes = poolTab.votes.filter { it.key != candId }.values.sum() // votes for other candidates
+        val candVotes = poolTab.votes[partyId] ?: 0
+        val nonCandVotes = poolTab.votes.filter { it.key != partyId }.values.sum() // votes for other candidates
         val nuetralCounts = poolTab.ncards() - candVotes - nonCandVotes // undervotes
 
         //  voting for the candidate argues against the assertion;
@@ -182,7 +181,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         if (this === other) return true
         if (other !is BelowThreshold) return false
 
-        if (candId != other.candId) return false
+        if (partyId != other.partyId) return false
         if (t != other.t) return false
         if (id != other.id) return false
         if (lowerg != other.lowerg) return false
@@ -196,7 +195,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     }
 
     override fun hashCode(): Int {
-        var result = candId
+        var result = partyId
         result = 31 * result + t.hashCode()
         result = 31 * result + id
         result = 31 * result + lowerg.hashCode()

@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DhondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder
-import org.cryptobiotic.rlauxe.dhondt.DhondtScore
+import org.cryptobiotic.rlauxe.dhondt.DhondtCandidateScore
 import org.cryptobiotic.rlauxe.irv.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.FileOutputStream
@@ -186,18 +186,18 @@ fun IrvRoundsPathJson.import() = IrvRoundsPath(
     IrvWinners(this.done, this.winners),
 )
 
-// data class DhondtScore(val candidate: Int, val score: Double, val divisor: Int) {
+// data class DhondtCandidateScore(val candidate: Int, val score: Double, val divisor: Int) {
 @Serializable
 data class DhondtScoreJson(
     val candidate: Int,
-    val score: Double,
+    val totalVotes: Int,
     val divisor: Int,
     val winningSeat: Int?,
 )
 
-fun DhondtScore.publishJson() = DhondtScoreJson(partyId, score, divisor, winningSeat)
+fun DhondtCandidateScore.publishJson() = DhondtScoreJson(partyId, totalVotes, divisor, winningSeat)
 
-fun DhondtScoreJson.import() = DhondtScore(candidate, score, divisor).setWinningSeat(this.winningSeat)
+fun DhondtScoreJson.import() = DhondtCandidateScore(candidate, totalVotes, divisor).setWinningSeat(this.winningSeat)
 
 
 // open class ContestUnderAudit(

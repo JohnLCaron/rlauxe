@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.util
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
-import org.cryptobiotic.rlauxe.estimateOld.makeFuzzedCvrsForPolling
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -36,9 +35,9 @@ class TestCvrBuilders {
         }
     }
 
-    // @Test fails *** PLURALITY contest14 (14)  Plurality winner=0 loser=1 dilutedMargin=0.0000% dilutedMean=50.0000%: cvrAssortAvg (0.5) must be > .5
+    @Test // fails *** PLURALITY contest14 (14)  Plurality winner=0 loser=1 dilutedMargin=0.0000% dilutedMean=50.0000%: cvrAssortAvg (0.5) must be > .5
     fun testRepeatTest() {
-        repeat(100) { testFuzzedCvrs() }
+        repeat(1) { testFuzzedCvrs() }
     }
 
     @Test
@@ -52,7 +51,7 @@ class TestCvrBuilders {
         val ntrials = 1
         val fuzzPcts = listOf(0.001, .002, .003)
         fuzzPcts.forEach { fuzzPct ->
-            val fcvrs = makeFuzzedCvrsForPolling(contests.map { it.info() }, cvrs, fuzzPct)
+            val fcvrs = makeFuzzedCvrsForClca(contests.map { it.info() }, cvrs, fuzzPct)
             println("fuzzPct = $fuzzPct")
             val allErrorRates = mutableListOf<PluralityErrorRates>()
             contests.forEach { contest ->

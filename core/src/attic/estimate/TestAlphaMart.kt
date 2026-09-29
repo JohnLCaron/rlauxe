@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.PollingMode
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimateOld.runRepeatedAlphaMart
+import org.cryptobiotic.rlauxe.util.runRepeatedAlphaMart
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

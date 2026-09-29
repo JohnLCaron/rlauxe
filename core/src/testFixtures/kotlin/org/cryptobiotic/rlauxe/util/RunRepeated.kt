@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.estimateOld
+package org.cryptobiotic.rlauxe.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.RiskMeasuringFn

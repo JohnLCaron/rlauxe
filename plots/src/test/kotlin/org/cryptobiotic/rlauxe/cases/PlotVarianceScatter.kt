@@ -1,14 +1,10 @@
 package org.cryptobiotic.rlauxe.cases
 
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
-import org.cryptobiotic.rlauxe.estimateOld.makeDeciles
-import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
 import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol

@@ -35,7 +35,6 @@ interface AuditRecordIF {
     val contests: List<ContestWithAssertions>
     val rounds: List<AuditRoundIF>
 
-    // fun readSortedManifest(): CardManifest
     fun readSortedManifest(styles: List<StyleIF>?): SortedManifest
     fun readSamplingCards(styles: List<StyleIF>?): CloseableIterable<SamplingCardIF>?
 

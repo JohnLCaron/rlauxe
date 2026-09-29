@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
 import org.cryptobiotic.rlauxe.betting.TestH0Status
-import org.cryptobiotic.rlauxe.estimateOld.RunRepeatedResult
+import org.cryptobiotic.rlauxe.util.RunRepeatedResult
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

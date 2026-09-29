@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.estimateOld.RunRepeatedResult
-import org.cryptobiotic.rlauxe.estimateOld.runRepeated
+import org.cryptobiotic.rlauxe.util.RunRepeatedResult
+import org.cryptobiotic.rlauxe.util.runRepeated
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 // run AlphaMart with TrunkShrinkage in repeated trials

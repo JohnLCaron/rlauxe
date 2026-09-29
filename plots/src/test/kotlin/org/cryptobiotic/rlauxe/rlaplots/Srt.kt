@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
-import org.cryptobiotic.rlauxe.estimateOld.RunRepeatedResult
+import org.cryptobiotic.rlauxe.util.RunRepeatedResult
 import org.cryptobiotic.rlauxe.util.*
 import java.io.BufferedReader
 import java.io.File

@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.estimateOld.makeDeciles
+import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.audit.runAllRoundsAndVerify
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 

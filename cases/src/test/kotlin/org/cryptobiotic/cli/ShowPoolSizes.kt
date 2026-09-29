@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
-import org.cryptobiotic.rlauxe.estimateOld.makeDeciles
+import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.workflow.readCardPools
 import kotlin.test.Test
 

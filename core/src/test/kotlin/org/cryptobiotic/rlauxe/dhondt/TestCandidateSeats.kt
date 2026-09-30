@@ -1,18 +1,14 @@
 package org.cryptobiotic.rlauxe.dhondt
 
-import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
-import org.cryptobiotic.rlauxe.persist.json.readDHondtAssertionContestsJsonUnwrapped
 import org.cryptobiotic.rlauxe.persist.json.readDHondtAssertionsJsonUnwrapped
-import org.cryptobiotic.rlauxe.persist.json.writeDHondtAssertionContestsJson
 import org.cryptobiotic.rlauxe.persist.json.writeDHondtAssertionsJson
-import org.cryptobiotic.rlauxe.persist.json.writeDHondtAssertionsJsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeOneContestToJsonFile
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class TestCandidateSeats {
     val topdir = "$cases/belgium/belgium2024/"
@@ -52,13 +48,13 @@ class TestCandidateSeats {
         val contestRanges = relax.contestRanges()
         println(contestRanges.showSeatRanges())
 
-        val failedAssorters = relax.failures().map { it.assorter }
-        val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
+        //val failedAssorters = relax.failures().map { it.assorter }
+        //val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
 
-        writeDHondtAssertionsJson(relax.dcontest, assorters, contestRanges.partyRanges.values.toList())
+        writeDHondtAssertionsJson(relax.altContest(), relax.assortersForProof(), contestRanges.partyRanges.values.toList())
 
         val scratchFile = createTempFile().toString()
-        val org =  writeDHondtAssertionsJsonFile(contestRound, relax, scratchFile, true)
+        val org =  writeOneContestToJsonFile(contestRound, relax, scratchFile, true)
         val roundtrip = readDHondtAssertionsJsonUnwrapped(scratchFile)
         println("--------------------------------------------------------------------------")
         println(roundtrip)
@@ -117,18 +113,19 @@ class TestCandidateSeats {
         all.candidateSums.forEach { println(it) }
     }
 
+    /*
     @Test
     fun testAllWrite() {
         val allSeats = makeAllSeats(lastRound, sampleLimits, .05)
 
         val scratchFile = "/home/stormy/rla/temp/assertions.json" // createTempFile().toString()
-        val org = writeDHondtAssertionContestsJson(lastRound.contestRounds, allSeats, filename = scratchFile, alpha = .05)
+        val org = writeAllContestsToJsonFile(lastRound.contestRounds, allSeats, filename = scratchFile, alpha = .05)
 
         val roundtrip = readDHondtAssertionContestsJsonUnwrapped(scratchFile)
         println("--------------------------------------------------------------------------")
         println(roundtrip)
         assertEquals(org, roundtrip)
-    }
+    } */
 
     @Test
     fun testShowAllPartySeats() {

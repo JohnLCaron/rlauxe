@@ -14,12 +14,12 @@ import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.BelowThreshold
-import org.cryptobiotic.rlauxe.dhondt.AllSeats
 import org.cryptobiotic.rlauxe.dhondt.DhondtAssorter
 import org.cryptobiotic.rlauxe.dhondt.DhondtContest
 import org.cryptobiotic.rlauxe.dhondt.PartyRange
 import org.cryptobiotic.rlauxe.dhondt.RelaxedAssertionsIF
 import org.cryptobiotic.rlauxe.dhondt.makeRelaxedAssertions
+import org.cryptobiotic.rlauxe.persist.SampleLimit
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
@@ -102,22 +102,23 @@ fun RelaxedAssertionData.publishJson(): RelaxedAssertionsJson {
 }
 
 fun publishRAJson(ra: RelaxedAssertionsIF): RelaxedAssertionsJson {
+    val dcontest = ra.altContest()
 
-    val dasm = ra.fromAssorters.map {
+    val dasm = ra.assortersForProof().map {
         val da = when (it) {
             is AboveThreshold -> DAssorter("AT", it.winner())
             is BelowThreshold -> DAssorter("BT", it.winner())
             is DhondtAssorter -> DAssorter("DH", it.winner(), it.loser(), it.winnerDivisor, it.loserDivisor)
             else -> throw RuntimeException("unknown assorter $it")
         }
-        DAssertionWithMargin(da, ra.dcontest.difficulty(it), ra.dcontest.marginInVotes(it))
+        DAssertionWithMargin(da, dcontest.difficulty(it), dcontest.marginInVotes(it))
     }
 
     val bounds = ra.contestRanges().partyRanges.values.map { party ->
-        val name = ra.dcontest.info().candidateIdToName[party.partyId]
+        val name = dcontest.info().candidateIdToName[party.partyId]
         Bound(party.partyId, name!!, party.minSeats, party.maxSeats)
     }
-    return RelaxedAssertionsJson(ra.dcontest.name, dasm.publishJson(), ra.dcontest.nseats, bounds)
+    return RelaxedAssertionsJson(dcontest.name, dasm.publishJson(), dcontest.nseats, bounds)
 }
 
 fun List<DAssertionWithMargin>.publishJson(): List<DAssertionWithMarginJson> =
@@ -138,7 +139,12 @@ data class DAssertionWithMarginJson(
     val assertion: DAssorterJson,
     val difficulty: Double,
     val margin: Int,
-)
+) {
+    init {
+        if (difficulty.isInfinite())
+            println("difficulty - $difficulty")
+    }
+}
 
 fun DAssertionWithMargin.publishJson() = DAssertionWithMarginJson(
     this.assertion.publishJson(),
@@ -258,23 +264,10 @@ fun writeDHondtAssertionsJson(dcontest: DhondtContest, assorters: List<AssorterI
     val bos = ByteArrayOutputStream()
     jsonReader.encodeToStream(json, bos)
     println(bos)
-
-    /*
-    val jsonString = buildString {
-        appendLine("[")
-        json.forEach {
-            val bos = ByteArrayOutputStream()
-            jsonReader.encodeToStream(it, bos)
-            appendLine(" $bos,")
-        }
-        appendLine("]")
-    }
-    println()
-    println(jsonString) */
 }
 
-fun writeDHondtAssertionsJsonFile(contestRound: ContestRound, relax: RelaxedAssertionsIF, filename: String,
-                                  pretty: Boolean = false): RelaxedAssertionsJson {
+fun writeOneContestToJsonFile(contestRound: ContestRound, relax: RelaxedAssertionsIF, filename: String,
+                              pretty: Boolean = false): RelaxedAssertionsJson {
     val failedAssorters = relax.failures().map { it.assorter }
     val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
 
@@ -315,12 +308,12 @@ fun readDHondtAssertionsJsonUnwrapped(filename: String): RelaxedAssertionsJson? 
 
 //////////////////////////////////////////////////////////////////////////////
 
-fun writeDHondtAssertionContestsJson(contestRounds: List<ContestRound>, allSeats: AllSeats, filename: String,
-                                     alpha: Double, pretty: Boolean = false): RelaxedAssertionContestsJson {
+fun writeAllContestsToJsonFile(contestRounds: List<ContestRound>, filename: String, alpha: Double, pretty: Boolean = false,
+                               mvrLimit: Map<Int, SampleLimit>, useV: Boolean = false): RelaxedAssertionContestsJson {
 
     val relaxed = mutableListOf<RelaxedAssertionsIF>()
     contestRounds.forEach { contestRound ->
-        relaxed.add(makeRelaxedAssertions(contestRound, .05))
+        relaxed.add(makeRelaxedAssertions(contestRound, alpha, mvrLimit[contestRound.id]?.limit, useV))
     }
 
     val json = relaxed.publishJson()

@@ -20,7 +20,7 @@ class TestClcaAssortValues {
         )
         // val votes = mapOf(0 to 1010, 1 to 990) // Map<Int, Int>
         // data class DhondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int): AssorterIF  {
-        val assorter = DhondtAssorter(info, winner = 0, loser = 1, winnerDivisor=2, loserDivisor=5).setMeans(.55)
+        val assorter = DhondtAssorter(info, winnerId = 0, loserId = 1, winnerDivisor=2, loserDivisor=5).setMeans(.55)
         assertEquals(assorter, assorter)
         assertEquals(assorter.hashCode(), assorter.hashCode())
 

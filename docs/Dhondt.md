@@ -186,26 +186,25 @@ winning seats
 
 The two scores demarked by ** are "in play"; the one above are green, and the ones below are red, which we can visualize as:
 
-````
 FlandreWest winning seats: 24=5, 15=5, 28=3, 4=2, 30=2, 10=2, 19=1
 
-|   | P24 | P15 | P28 | P4 | P30 | P10 | P19 |     
-|---|-----|-----|-----|----|-----|-----|-----|
-| 1 | G   | G   | G   | G  | G   | G   | G   |  
-| 2 | G   | G   | G   | G  | G   | G   |     |   
-| 3 | G   | G   | Y   |    |     |     |     |  
-| 4 | G   | G   |     |    |     |     |     |   
-| 5 | G   | G   |     |    |     |     |     |  
-|   |     |     |     |    |     |     |     |  
-|   |     |     |     |    |     |     |     |  
-| 1 |     |     |     |    |     |     |     |  
-| 2 |     |     |     |    |     |     | R   |   
-| 3 |     |     |     | R  | R   | R   | R   | 
-| 4 |     |     | R   | R  | R   | R   | R   | 
-| 5 |     |     | R   | R  | R   | R   | R   | 
-| 6 | R   | R   | R   | R  | R   | R   | R   | 
-| 7 | R   | R   | R   | R  | R   | R   | R   | 
-````
+|   | Vlaams | N-VA | Vooruit | CD&V | openVld | Groen | PVDA |     
+|---|--------|------|---------|------|---------|-------|------|
+| 1 | G      | G    | G       | G    | G       | G     | G    |  
+| 2 | G      | G    | G       | G    | G       | G     |      |   
+| 3 | G      | G    | Y       |      |         |       |      |  
+| 4 | G      | G    |         |      |         |       |      |   
+| 5 | G      | G    |         |      |         |       |      |  
+|   |        |      |         |      |         |       |      |  
+|   |        |      |         |      |         |       |      |  
+| 1 |        |      |         |      |         |       |      |  
+| 2 |        |      |         |      |         |       | R    |   
+| 3 |        |      |         | Y    | R       | R     | R    | 
+| 4 |        |      | R       | R    | R       | R     | R    | 
+| 5 |        |      | R       | R    | R       | R     | R    | 
+| 6 | R      | R    | R       | R    | R       | R     | R    | 
+| 7 | R      | R    | R       | R    | R       | R     | R    | 
+
 
 ### Relaxed DH Assertions and Party Seat Ranges
 
@@ -215,9 +214,9 @@ For the seats that are in play, form the "reported yellow set" as the set of win
 
 The number of seats that a party might lose is bounded by the number of candidates it has in the reported yellow set.
 
-For each failed assertion, add the losing candidate to the "failed assertion candidate" set. This set has k unique candidates when there are k failed assertions.
+For each failed assertion, add the losing candidate to the "hopeful candidate" set. This set has k unique candidates when there are k failed assertions.
 
-The number of seats that a party might gain is bounded by the number of candidates it has in the failed assertion candidate set.
+The number of seats that a party might gain is bounded by the number of candidates it has in the hopeful candidate set.
 
 These are conservative estimates, further work may be able to tighten these bounds. For example, it may be possible to prove that a winning candidate in the yellow seats must still win a seat at a lower rank.
 
@@ -237,4 +236,4 @@ TODO. same as BT?
 
 ## DH Assertion failures and Threshold Assertion failures
 
-WHen there are both DH and Threshold failures, simply combine all the seat ranges.
+When there are both DH and Threshold failures, simply merge the seat ranges.

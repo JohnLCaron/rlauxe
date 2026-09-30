@@ -37,6 +37,13 @@ data class CompositeAuditRecord(
     override val rounds: List<AuditRoundIF>,
     override val componentRecords: List<AuditRecord>,
 ): CompositeRecordIF  {
+
+    // for viewer
+    fun configFor(component: String): Config {
+        val record = findComponentWithName(component)
+        return record?.config ?: config
+    }
+
     val electionName : String by lazy {
         val (name, _) = readPartyTxtFile("$topdir/parties.txt")
         name

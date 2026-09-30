@@ -25,8 +25,8 @@ class TestDhondtContest {
         assertEquals(listOf(1,2), contestd.winners)
         assertEquals(listOf("party-1", "party-2"), contestd.winnerNames)
         assertEquals(listOf(3), contestd.losers)
-        assertEquals(mapOf(1 to 5, 2 to 3), contestd.winnerSeats)
-        assertEquals(8, contestd.winnerSeats.map { it.value }.sum())
+        assertEquals(mapOf(1 to 5, 2 to 3), contestd.winnerSeatCount)
+        assertEquals(8, contestd.winnerSeatCount.map { it.value }.sum())
 
         val parties2 = listOf(DhondtPartyBuilder(1, 11000), DhondtPartyBuilder(2, 7000), DhondtPartyBuilder(3, 2500))
         val nvotes2 = parties2.sumOf { it.totalVotes }

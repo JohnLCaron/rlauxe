@@ -47,6 +47,7 @@ import org.cryptobiotic.rlauxe.util.*
 //    min upper is (1/nseats + 1)/2 which is between 1/2 and 1
 //    max upper is (nseats + 1)/2 which is >= 1
 
+// immutable
 data class DhondtParty(val partyName: String, val id: Int, val totalVotes: Int,
                        val lastSeatWon: Int?, val firstSeatLost: Int?, val isBelowMin: Boolean) {
 
@@ -55,6 +56,9 @@ data class DhondtParty(val partyName: String, val id: Int, val totalVotes: Int,
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO make constructor private, always use Builder
+// TODO note we are not assuming a finite number of party candidates. should we ??
+
+// immutable
 class DhondtContest(
     info: ContestInfo,
     voteInput: Map<Int, Int>,   // partyId -> nvotes;  sum is nvotes or V_c
@@ -62,7 +66,9 @@ class DhondtContest(
     Ncast: Int,                 // number of cast ballots containing this Contest, including undervotes
     val parties: List<DhondtParty>, // the parties
     val sortedScores: List<DhondtCandidateScore>,
+    val assorters: List<AssorterIF>,
     thresholdOverride: Set<Int>? = null, // TODO needed?
+
 ): Contest(info, voteInput, Nc, Ncast) {
     val nvotes = votes.values.sum()
 
@@ -72,10 +78,14 @@ class DhondtContest(
 
     val nseats: Int
     val partiesBelowThreshold: Set<Int> // partyId under minFraction
-    val winnerSeats: Map<Int, Int> // party id -> nseats won
+
+    // val winnerSeatCount: Map<Int, Int> // party id -> nseats won
+    // this is s(P) -> N+ in vanessa's paper section 2.3
+    val winnerSeatCount: Map<Int, Int> // party id -> nseats won, including 0?
+
     // dhondts and threshold assorters; these are set at creation, but not serialized, so cant assume they exist
     // can we put the generation of these inside? problem is ContestUA is serialized seperately, would have to rejigger that
-    val assorters = mutableListOf<AssorterIF>()
+    // val assorters = mutableListOf<AssorterIF>()
 
     init {
         require(info.minFraction != null)
@@ -85,24 +95,27 @@ class DhondtContest(
         // "A winning party must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         partiesBelowThreshold = thresholdOverride ?: parties.filter { it.totalVotes / nvotes.toDouble() < info.minFraction }.map { it.id }.toSet()
 
+        /* could factor out
         val winnerSeatsM= mutableMapOf<Int, Int>()
         sortedScores.filter { it.winningSeat != null }.forEach {
             val count = winnerSeatsM.getOrPut(it.partyId) { 0 }
             winnerSeatsM[it.partyId] = count + 1
         }
-        winnerSeats = winnerSeatsM.toMap()
+        winnerSeatCount = winnerSeatsM.toMap() */
+
+        winnerSeatCount = winnerSeatCount(sortedScores, parties.map { it.id })
 
         // fields in superclass
-        winners = winnerSeats.keys.toList()
+        winners = winnerSeatCount.keys.toList()
         losers = info.candidateIds.filter { !winners.contains(it) }
         winnerNames = winners.map { info.candidateIdToName[it]!! }
     }
 
     fun candidateName(partyId: Int, divisor: Int) = "${info.candidateIdToName[partyId]}/$divisor"
 
-    fun winningParties(): List<DhondtParty> {
-        return parties.filter { winnerSeats[it.id] != null }
-    }
+    //fun winningParties(): List<DhondtParty> {
+    //    return parties.filter { winnerSeats[it.id] != null }
+    //}
 
     override fun recountMargin(assorter: AssorterIF): Double {
         return when (assorter) {
@@ -178,7 +191,7 @@ class DhondtContest(
 
     override fun show() = buildString {
         appendLine(super.show())
-        append("   nseats=$nseats winnerSeats=${winnerSeats} belowMin=${partiesBelowThreshold} threshold=${info.minFraction} minVotes=${roundUp(info.minFraction!! * nvotes)}")
+        append("   nseats=$nseats winnerSeats=${winnerSeatCount} belowMin=${partiesBelowThreshold} threshold=${info.minFraction} minVotes=${roundUp(info.minFraction!! * nvotes)}")
     }
 
     override fun showCandidates() = buildString {
@@ -226,31 +239,6 @@ class DhondtContest(
         val relax = makeRelaxedAssertions(contestRound, maxRisk)
         append(relax.show())
     }
-    /* fun showRelaxedAssertionReport(contestRound: ContestRound): String {
-        val cands = CandSeatRangeBuilder(contestRound)
-        val report = RelaxedAssertionReport(cands)
-        return report.showRelaxedAssertions()
-    }
-
-    // show altContests tree with this assertion as the root
-    fun showRelaxedAssertion(contestRound: ContestRound, cassertion: ClcaAssertion): String {
-        val candseats = CandSeatRangeBuilder(contestRound)
-        val relax = RelaxedAssertionReport(candseats)
-        if (cassertion.assorter !is DhondtAssorter) {
-            val thrasher = candseats.thrashers.find { it.thrasher.assorter.hashcodeDesc() == cassertion.assorter.hashcodeDesc() }
-            if (thrasher != null) return relax.showAltThrasherAssertions(thrasher.altContest)
-        }
-
-        val failure = candseats.failureNodes.find { it.failure.assorter == cassertion.assorter }
-        if (failure == null)
-            return "Not a failure: $cassertion"
-
-        val done = mutableSetOf<String>()
-        val result = relax.showAltFailureContestRecurse(failure.altContest, done)
-        println("assertions done:")
-        done.forEach{ println("   $it") }
-        return result
-    } */
 
     fun countContestedSeats(contestRound: ContestRound): Int {
         val relax = makeRelaxedAssertions(contestRound, .05)
@@ -286,7 +274,7 @@ class DhondtContest(
 
         if (sortedScores != other.sortedScores) return false
         if (partiesBelowThreshold != other.partiesBelowThreshold) return false
-        if (winnerSeats != other.winnerSeats) return false
+        if (winnerSeatCount != other.winnerSeatCount) return false
 
         return true
     }
@@ -295,7 +283,7 @@ class DhondtContest(
         var result = super.hashCode()
         result = 31 * result + sortedScores.hashCode()
         result = 31 * result + partiesBelowThreshold.hashCode()
-        result = 31 * result + winnerSeats.hashCode()
+        result = 31 * result + winnerSeatCount.hashCode()
         return result
     }
 }

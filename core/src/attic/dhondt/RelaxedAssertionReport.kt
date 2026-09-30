@@ -8,9 +8,8 @@ import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.math.min
 
-/*
 // uses CandSeatRangeBuilder to make reports.
-// TODO useful but also dated.
+// TODO still useful but also dated.
 class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
     val dcontest: DhondtContest = builder.dcontest
     /* val sortedLoserGroups: List<DhondtLoserGroup>
@@ -381,5 +380,3 @@ class RelaxedAssertionReport(val builder: CandSeatRangeBuilder) {
 }
 
 private val showLosers = 6
-
- */

@@ -14,7 +14,6 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.text.appendLine
 
-/*
 val alpha = .05
 val alphaFudge = .05
 
@@ -564,4 +563,4 @@ data class Coalition(val candidates: Set<Int>, val candNames: Map<Int, String>) 
             appendLine(",     0")
         }
     }
-}*/
+}

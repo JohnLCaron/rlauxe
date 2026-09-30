@@ -132,8 +132,8 @@ fun AssorterIF.publishJson() : AssorterIFJson {
                 "DhondtAssorter",
                 reportedMargin = this.reportedMargin(),
                 dilutedMargin = this.dilutedMargin(),
-                this.winner,
-                this.loser,
+                this.winnerId,
+                this.loserId,
                 lastSeatWon = this.winnerDivisor,
                 firstSeatLost = this.loserDivisor,
             )

@@ -13,7 +13,6 @@ import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.math.min
 
-/*
 private val logger = KotlinLogging.logger("RelaxedAssertions")
 private val debug = false
 
@@ -310,5 +309,3 @@ fun showRelaxedAssertionsOld(dcontest: DhondtContest, assorters: List<AssorterIF
     }
     appendLine()
 }
-
- */

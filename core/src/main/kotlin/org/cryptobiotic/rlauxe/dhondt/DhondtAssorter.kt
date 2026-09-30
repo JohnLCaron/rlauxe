@@ -15,8 +15,6 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.roundUp
-import kotlin.div
-import kotlin.times
 
 /* You can transform to Plurality contest with voteForN=nwinners and the candidates are the $candName/$round */
 
@@ -24,7 +22,7 @@ import kotlin.times
 // winnerDivisor: last seat won by winner (aka lastSeatWon)
 // loserDivisor: first seat lost by loser (aka firstSeatLost)
 // why do different DHondts have different upper limits ?? = (first/last+1)/2; because of the dividors
-data class DhondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val winnerDivisor: Int, val loserDivisor: Int):
+data class DhondtAssorter(val info: ContestInfo, val winnerId: Int, val loserId: Int, val winnerDivisor: Int, val loserDivisor: Int):
     AssorterIF {
     val upperg = 1.0 / winnerDivisor  // upper bound of g = 1/d(WA)  = 1/lastSeatWon   (highest loser)
     val lowerg = -1.0 / loserDivisor  // lower bound of g = -1/d(WB) = -1/firstSeatLost (lowest winner)
@@ -141,8 +139,8 @@ data class DhondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     // where bA (resp. bB ) is 1 if there is a vote for party A (resp. B), 0 otherwise.
 
     fun g(partyVote: Int): Double {
-        return if (partyVote == winner) upperg
-            else if (partyVote == loser) lowerg
+        return if (partyVote == winnerId) upperg
+            else if (partyVote == loserId) lowerg
             else 0.0
     }
 
@@ -159,8 +157,8 @@ data class DhondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
 
     // (first/last+1)/2
     override fun upperBound() = h2(upperg) // 0.5 + loserDivisor / 2 * winnerDivisor
-    override fun winner() = winner
-    override fun loser() = loser
+    override fun winner() = winnerId
+    override fun loser() = loserId
     override fun dilutedMargin() = dilutedMargin
     override fun reportedMargin() = reportedMargin
 
@@ -172,7 +170,7 @@ data class DhondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 
-    override fun desc() = "${shortName()}: noerror=${df(noerror(true))}"
+    override fun desc() = "${shortName()}: noerror=${dfn(noerror(true), 6)}"
     override fun shortName() = "${winnerNameRound()}-${loserNameRound()}"
     fun reverseName() = "${loserNameRound()}-${winnerNameRound()}"
 
@@ -240,8 +238,8 @@ data class DhondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         if (this === other) return true
         if (other !is DhondtAssorter) return false
 
-        if (winner != other.winner) return false
-        if (loser != other.loser) return false
+        if (winnerId != other.winnerId) return false
+        if (loserId != other.loserId) return false
         if (winnerDivisor != other.winnerDivisor) return false
         if (loserDivisor != other.loserDivisor) return false
         if (reportedMargin != other.reportedMargin) return false
@@ -255,8 +253,8 @@ data class DhondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     }
 
     override fun hashCode(): Int {
-        var result = winner
-        result = 31 * result + loser
+        var result = winnerId
+        result = 31 * result + loserId
         result = 31 * result + winnerDivisor
         result = 31 * result + loserDivisor
         result = 31 * result + reportedMargin.hashCode()
@@ -270,8 +268,12 @@ data class DhondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
 
     override fun toString() = desc()
 
+    /*
     companion object {
 
+        // for each winner A and loser B, DH_AB(s(A), s(B) + 1)
+
+        //     // BT(B) OR ( AND(DH_AB) for all A in Winners) for all B in Losers (2.5 prop 1 (2))
         // parties that passed threshold
         fun makeDhondtAssorters(info: ContestInfo, Nc: Int, parties: List<DhondtParty>): List<DhondtAssorter> {
             // Let f_e,s = Te /d(s) for entity e and seat s
@@ -296,6 +298,8 @@ data class DhondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
             }
             return assorters
         }
+
+        // for each winner A and loser B, DH_AB(s(A), s(B) + 1)
 
         // use winner.lastSeatWon / loser.firstSeatLost
         fun makeFrom(info: ContestInfo, winner: DhondtParty, loser: DhondtParty, Nc: Int, Npop: Int?=null): DhondtAssorter {
@@ -338,6 +342,6 @@ data class DhondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
             return hmeanReported
         }
 
-    }
+    } */
 
 }

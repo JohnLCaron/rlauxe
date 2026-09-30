@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.dhondt
 
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
-import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.persist.SampleLimit
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
@@ -10,37 +9,6 @@ import kotlin.math.min
 import kotlin.text.appendLine
 
 val candNameWidth = 20
-
-// assorters that dont satisfy risk because nsamples <= needed
-data class DhondtFailure(
-    val Npop: Int,
-    val assorter: DhondtAssorter,
-    val winnerScore: DhondtCandidateScore,
-    val loserScore: DhondtCandidateScore,
-    val risk: Double,
-    val samplesUsed: Int,
-    val alpha: Double,
-    val round2: Boolean = false
-) {
-    val noerror = assorter.noerror(true)
-
-    fun estMvrs(): Int  {
-        return estSampleSizeStandardBet(Npop, noerror, alpha)
-    }
-
-    override fun toString() = buildString {
-        val assorter = assorter
-        append("${sfn(assorter.shortName(), 25)}," )
-        append(" ${nfn(winnerScore.winningSeat!!, 11)},")
-        append("  ${dfn(noerror, 4)},")
-        append(" ${nfn(estMvrs(), 8)}, ${nfn(samplesUsed, 11)}, ${dfn(risk, 4)},")
-        if (round2) append(" round2")
-    }
-
-    companion object {
-        fun header() = "${sfn("name", 25)}, winningSeat, noerror,  estMvrs, samplesUsed,   risk"
-    }
-}
 
 ///////////////////////////////////////////////////////////////////
 // this is for one contest
@@ -51,9 +19,9 @@ class ContestRanges(val dcontest: DhondtContest, val failures: List<DhondtFailur
 
     init {
         dcontest.parties.forEach { party ->
-            partyRanges[party.id] = PartyRange(party.id)
+            partyRanges[party.id] = PartyRange(party.id, party.partyName)
         }
-        dcontest.winnerSeats.forEach { partyId, nseats ->
+        dcontest.winnerSeatCount.forEach { partyId, nseats ->
             partyRanges[partyId]!!.setReportedSeats2(nseats)
         }
         addFailingAssertion(failures)
@@ -118,11 +86,13 @@ class ContestRanges(val dcontest: DhondtContest, val failures: List<DhondtFailur
     } */
 
     fun showSeatRanges() = buildString {
+        val nameMap = dcontest.info.candidateIdToName
         appendLine("ContestId=${dcontest.id}")
-        appendLine("| party | min | reported | max | nfailures |")
-        appendLine("|-------|-----|----------|-----|-----------|")
+        appendLine("| ${trunc("party", 25)} | min | reported | max |")
+        appendLine("|-${"-".repeat(25)}-|-----|----------|-----|")
         partyRanges.values.sortedByDescending { it.maxSeats }.forEach {
-            append("|    ${nfn(it.partyId, 2)} | ${nfn(it.minSeats, 2)}")
+            val name = nameMap[it.partyId] ?: "unknown"
+            append("| ${trunc(name, 20)} (${nfn(it.partyId, 2)}) | ${nfn(it.minSeats, 2)}")
             appendLine("  |    ${nfn(it.reportedSeats, 2)}    | ${nfn(it.maxSeats, 2)}  |")
             // appendLine("  ${nfn(it.failures.size, 6)}   |")
         }
@@ -130,7 +100,7 @@ class ContestRanges(val dcontest: DhondtContest, val failures: List<DhondtFailur
 }
 
 // one party's min/max/reported
-data class PartyRange(val partyId: Int) {
+data class PartyRange(val partyId: Int, val partyName: String) {
     var minSeats = 0
     var reportedSeats = 0
     var maxSeats = 0
@@ -147,9 +117,35 @@ data class PartyRange(val partyId: Int) {
     }
 
     override fun toString() = buildString {
-        appendLine("PartyRange(candId=$partyId, partyId='$partyId', minSeats=$minSeats, reportedSeats=$reportedSeats, maxSeats=$maxSeats")
+        appendLine("PartyRange(name=$partyName, partyId='$partyId', minSeats=$minSeats, reportedSeats=$reportedSeats, maxSeats=$maxSeats")
         // failures.forEach { appendLine( "  ${it.assorter.hashcodeDesc()}") }
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as PartyRange
+
+        if (partyId != other.partyId) return false
+        if (minSeats != other.minSeats) return false
+        if (reportedSeats != other.reportedSeats) return false
+        if (maxSeats != other.maxSeats) return false
+        if (partyName != other.partyName) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = partyId
+        result = 31 * result + minSeats
+        result = 31 * result + reportedSeats
+        result = 31 * result + maxSeats
+        result = 31 * result + partyName.hashCode()
+        return result
+    }
+
+
 }
 
 // seems to be the same as ContestRanges, but used across contests ??
@@ -197,7 +193,7 @@ data class AllSeats(val contestSeats: List<ContestRanges>)  {
         val sum = mutableMapOf<Int, PartyRange>()
         contestSeats.forEach { candRange ->
             candRange.partyRanges.values.forEach { range ->
-                val sumCandidate = sum.getOrPut(range.partyId) { PartyRange(range.partyId) }
+                val sumCandidate = sum.getOrPut(range.partyId) { PartyRange(range.partyId, range.partyName) }
                 sumCandidate.minSeats += range.minSeats
                 sumCandidate.reportedSeats += range.reportedSeats
                 sumCandidate.maxSeats += range.maxSeats

@@ -32,8 +32,9 @@ class ThresholdFailure(
     }
 }
 
+/*
 class RelaxedThresholdAssertions(override val dcontest: DhondtContest,
-                              override val fromAssorters: List<AssorterIF>,
+                              val fromAssorters: List<AssorterIF>,
                               override val Npop: Int,
                               override val nsamples: Int,
                               override val alpha: Double,
@@ -43,7 +44,7 @@ class RelaxedThresholdAssertions(override val dcontest: DhondtContest,
     val info = dcontest.info()
     var contestRanges = ContestRanges(dcontest, failures) // baseline, no threshold failures, may have DH failures
     var altContest: DhondtContest
-    var altRelaxed: RelaxedDhondtAssertions? = null
+    var altRelaxed: RelaxedAssertions? = null
 
     init {
         logger.debug { "Contest ${info.name} haveSampleSize=${nsamples}" }
@@ -80,7 +81,7 @@ class RelaxedThresholdAssertions(override val dcontest: DhondtContest,
         // could have failures
         val failures = findDhondtFailures(altContest, altContest.assorters, Npop, nsamples, alpha)
         if (failures.isNotEmpty()) {
-            altRelaxed = RelaxedDhondtAssertions(
+            altRelaxed = RelaxedAssertions(
                 altContest,
                 altContest.assorters,
                 Npop, nsamples, alpha,
@@ -97,6 +98,7 @@ class RelaxedThresholdAssertions(override val dcontest: DhondtContest,
        // if (candidateRanges != null) println(candidateRanges!!.show())
     }
 
+    override fun assortersForProof() = fromAssorters // TODO
     override fun contestRanges() = contestRanges
     override fun failures() = failures
 
@@ -105,13 +107,13 @@ class RelaxedThresholdAssertions(override val dcontest: DhondtContest,
         appendLine(DhondtFailure.header())
         tfailures.forEach { appendLine(it) }
         appendLine()
-        append(showRelaxedAssertions(dcontest, fromAssorters, nsamples, alpha))
+        append(showCandidateSeatOrder(dcontest, fromAssorters, nsamples, alpha))
         appendLine("\nAltContest")
-        append(showRelaxedAssertions(altContest, altContest.assorters, nsamples, alpha))
+        append(showCandidateSeatOrder(altContest, altContest.assorters, nsamples, alpha))
         if (altRelaxed != null) {
             appendLine("\nAltRelaxedAssertions")
             altRelaxed!!.show()
         }
     }
 
-}
+} */

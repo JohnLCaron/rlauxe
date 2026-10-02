@@ -35,7 +35,7 @@ class MakeBelgiumElections {
     }
 
     @Test
-    fun createAllBelgiumElectionsFromResources() {
+    fun createAllBelgiumElections() {
         makeBelgium2024Data(toptopdir)
     }
 

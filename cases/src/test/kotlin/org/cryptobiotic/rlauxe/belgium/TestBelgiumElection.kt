@@ -43,8 +43,8 @@ class TestBelgiumElection {
         val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes
 
         val builder = DhondtBuilder(electionName, 1, dhondtParties, nwinners, totalVotes, belgiumElection.NrOfBlankVotes,.05)
-        println("Calculated Winners")
-        builder.winnerScores.sortedBy { it.winningSeat }.forEach {
+        println("Scores")
+        builder.sortedScores.forEach {
             println("  ${it}")
         }
         println()

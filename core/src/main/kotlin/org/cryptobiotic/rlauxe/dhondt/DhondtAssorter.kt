@@ -37,103 +37,6 @@ data class DhondtAssorter(val info: ContestInfo, val winnerId: Int, val loserId:
         return this
     }
 
-    fun wtf () {
-        val winnerTotalVotes = 127758
-        val loserTotalVotes = 125871
-        val Nci = 1083369
-        val Nc = Nci.toDouble()
-
-        val winnerDivisord = winnerDivisor.toDouble()
-        val loserDivisord = loserDivisor.toDouble()
-        val fw = winnerTotalVotes / winnerDivisord
-        val fl = loserTotalVotes / loserDivisord
-        val voteDiff = (fw - fl)
-
-        val c1 = -1.0 / (2 * -1.0 / loserDivisor)
-        val c2 = loserDivisor/ 2.0
-
-        val hmean = c * voteDiff/Nc + 0.5 // = loserDivisor/2 * voteDiff/Nc + 0.5 = 0.5+loserDivisor * voteDiff / 2 * N)
-        val hmean1 = (loserDivisord/ 2.0) * (voteDiff)/Nc + 0.5 // = loserDivisor/2 * voteDiff/Nc + 0.5 = 0.5+loserDivisor * voteDiff / 2 * N)
-        val margin = mean2margin(hmean)
-        println("margin diff = ${margin - reportedMargin}")
-
-        val margin1 = 2.0 * hmean - 1.0
-        val margin2 = 2.0 * ((loserDivisord/ 2.0) * (voteDiff)/Nc + 0.5) - 1.0
-        val margin3 = (loserDivisord * (voteDiff)/Nc + 1.0) - 1.0
-        val margin4 = loserDivisord * (winnerTotalVotes / winnerDivisord - loserTotalVotes / loserDivisord)/Nc
-        val margin5 = loserDivisord * (winnerTotalVotes / winnerDivisord - loserTotalVotes / loserDivisord)/Nc
-        val margin6 = (winnerTotalVotes * (loserDivisord/winnerDivisord) - loserTotalVotes)/Nc
-
-        val lw = loserDivisord/winnerDivisord
-        val margin7 = (winnerTotalVotes * lw - loserTotalVotes)/Nc
-
-        println("margin diff = ${margin - reportedMargin}")
-
-        val upper = upperBound()
-        val upperh1 = (-1.0 / (2.0 * lowerg)) * upperg + .5
-        val upperh2 = (-1.0 / (2.0 * (-1.0 / loserDivisord))) * upperg + .5
-        val upperh3 = (loserDivisord/2.0) * upperg + .5
-        val upperh4 = (loserDivisord/2.0) * (1.0 / winnerDivisord) + .5
-        val upperh5 = loserDivisord/(2.0 * winnerDivisord) + 0.5
-        val upperh6 = loserDivisord/winnerDivisord/(2.0) + 0.5
-        val upperh7 = lw/2 + 0.5
-        val upperh8 = 0.5 * (lw + 1)
-        val upperh9 = (lw + 1)/2
-
-        val upperh = lw/2 + 0.5 // = 0.5 * (1 + loserDivisor/winnerDivisor)
-        println("upper diff = ${upperh - upperBound()}")
-
-        val mu =  (margin / upperh)
-        val mu1 = (winnerTotalVotes * lw - loserTotalVotes) / Nc / 2 * (lw + 1)
-        val mu2 = (2/Nc) * (winnerTotalVotes * lw - loserTotalVotes) / (lw + 1)
-
-        val noerror = 1.0 / (2.0 - margin / upperh4)
-        val noerror1 = 1.0 / (2.0 - (2/Nc) * (winnerTotalVotes * lw - loserTotalVotes) / (lw + 1))
-        val noerror2 = 1.0 / ((2.0*(lw + 1) - (2/Nc) * (winnerTotalVotes * lw - loserTotalVotes)) / (lw + 1))
-        val noerror3 = (lw + 1) / (2.0 * ((lw + 1) - (winnerTotalVotes * lw - loserTotalVotes)/Nc))
-        val noerror4 = (lw + 1)/2.0 / ((lw + 1) - (winnerTotalVotes * lw - loserTotalVotes)/Nc)
-        val noerror5 = upper / ((lw + 1) - (winnerTotalVotes * lw - loserTotalVotes)/Nc)
-        val noerror6 = upper / ((lw + 1) - margin)
-        val lw1 = lw + 1
-
-        println("noerror diff = ${noerror - noerror6}")
-        println("noerror = $noerror")
-
-        val inoerror = ((lw + 1) - (winnerTotalVotes * lw - loserTotalVotes)/Nc) / ((lw + 1)/2.0 )
-        println("inoerror diff = ${noerror - 1/inoerror}")
-
-        val inoerror2 = (lw + 1)/((lw + 1)/2.0 ) - (winnerTotalVotes * lw - loserTotalVotes)/Nc / ((lw + 1)/2.0)
-        val inoerror3 = 2 - 2 * (winnerTotalVotes * lw - loserTotalVotes)/Nc / (lw + 1)
-
-        println("inoerror diff = ${noerror - 1/inoerror3}")
-
-
-        val Z = Nc * (1.0 + lw)
-
-        val estRisk1 = estRiskStandardBet((winnerTotalVotes * lw - loserTotalVotes).toInt(), Nci, upper, 800)
-        val estRisk2 = estRisk(Nci, stdBet, noerror, 800)
-        println("estRisk = $estRisk1 $estRisk2")
-
-        val estMvrs = estSampleSize(Nci, stdBet, noerror, .05)
-        println("estMvrs = $estMvrs")
-
-
-            //assorterMargin / upperBound = (2/N) (loserDivisor/winnerDivisor * winnerVotes - loserVotes) / (1 + loserDivisor/winnerDivisor)
-        //assorterMargin / upperBound = 2 * (lw * winnerVotes - loserVotes) / N * (1 + lw)
-
-        /*
-        val noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())
-        val noerror = 1.0 / (2 - 2 * (lw * winnerVotes - loserVotes) / N * (1 + lw))
-        val noerror = 0.5 / (1 - (lw * winnerVotes - loserVotes) / N * (1 + lw))
-        val noerror = 0.5 / (N * (1 + lw) - (lw * winnerVotes - loserVotes)) / (N * (1 + lw))
-        val noerror = 0.5 * (N * (1 + lw) / (N * (1 + lw) - (lw * winnerVotes - loserVotes)))
-        val noerror = 0.5 * Z / (Z - (lw * winnerVotes - loserVotes))
-
-         */
-
-
-    }
-
     // Proportional p.15
     // gA,B (b) := bA /d(WA ) − bB /d(LB )
     // where bA (resp. bB ) is 1 if there is a vote for party A (resp. B), 0 otherwise.
@@ -268,80 +171,101 @@ data class DhondtAssorter(val info: ContestInfo, val winnerId: Int, val loserId:
 
     override fun toString() = desc()
 
-    /*
-    companion object {
 
-        // for each winner A and loser B, DH_AB(s(A), s(B) + 1)
+    fun wtf () {
+        val winnerTotalVotes = 127758
+        val loserTotalVotes = 125871
+        val Nci = 1083369
+        val Nc = Nci.toDouble()
 
-        //     // BT(B) OR ( AND(DH_AB) for all A in Winners) for all B in Losers (2.5 prop 1 (2))
-        // parties that passed threshold
-        fun makeDhondtAssorters(info: ContestInfo, Nc: Int, parties: List<DhondtParty>): List<DhondtAssorter> {
-            // Let f_e,s = Te /d(s) for entity e and seat s
-            // f_A,WA > f_B,LB, so e = A and s = Wa
+        val winnerDivisord = winnerDivisor.toDouble()
+        val loserDivisord = loserDivisor.toDouble()
+        val fw = winnerTotalVotes / winnerDivisord
+        val fl = loserTotalVotes / loserDivisord
+        val voteDiff = (fw - fl)
 
-            // Section 5.2 eq (4)
-            // Converting this into the notation of Section 3, expressing Equation 4 as a linear
-            // assertion gives us, ∀A s.t. WA !=⊥, ∀B 6= A s.t. LB !=⊥,
-            //   TA /d(WA ) − TB /d(LB ) > 0.
+        val c1 = -1.0 / (2 * -1.0 / loserDivisor)
+        val c2 = loserDivisor/ 2.0
 
-            // This is O(n^2)
-            val assorters = mutableListOf<DhondtAssorter>()
-            parties.forEach { winner ->
-                if (winner.lastSeatWon != null) {
-                    parties.filter { it.id != winner.id }.forEach { loser ->
-                        if (loser.firstSeatLost != null) {
-                            val passorter = makeFrom(info, winner, loser, Nc)
-                            assorters.add(passorter)
-                        }
-                    }
-                }
-            }
-            return assorters
-        }
+        val hmean = c * voteDiff/Nc + 0.5 // = loserDivisor/2 * voteDiff/Nc + 0.5 = 0.5+loserDivisor * voteDiff / 2 * N)
+        val hmean1 = (loserDivisord/ 2.0) * (voteDiff)/Nc + 0.5 // = loserDivisor/2 * voteDiff/Nc + 0.5 = 0.5+loserDivisor * voteDiff / 2 * N)
+        val margin = mean2margin(hmean)
+        println("margin diff = ${margin - reportedMargin}")
 
-        // for each winner A and loser B, DH_AB(s(A), s(B) + 1)
+        val margin1 = 2.0 * hmean - 1.0
+        val margin2 = 2.0 * ((loserDivisord/ 2.0) * (voteDiff)/Nc + 0.5) - 1.0
+        val margin3 = (loserDivisord * (voteDiff)/Nc + 1.0) - 1.0
+        val margin4 = loserDivisord * (winnerTotalVotes / winnerDivisord - loserTotalVotes / loserDivisord)/Nc
+        val margin5 = loserDivisord * (winnerTotalVotes / winnerDivisord - loserTotalVotes / loserDivisord)/Nc
+        val margin6 = (winnerTotalVotes * (loserDivisord/winnerDivisord) - loserTotalVotes)/Nc
 
-        // use winner.lastSeatWon / loser.firstSeatLost
-        fun makeFrom(info: ContestInfo, winner: DhondtParty, loser: DhondtParty, Nc: Int, Npop: Int?=null): DhondtAssorter {
-            // Let f_e,s = Te/d(s) for entity e and seat s
-            // f_A,WA > f_B,LB, so e = A and s = Wa
+        val lw = loserDivisord/winnerDivisord
+        val margin7 = (winnerTotalVotes * lw - loserTotalVotes)/Nc
 
-            val fw = winner.totalVotes / winner.lastSeatWon!!.toDouble()
-            val fl = loser.totalVotes / loser.firstSeatLost!!.toDouble()
-            val voteDiff = (fw - fl)
+        println("margin diff = ${margin - reportedMargin}")
 
-            val lower = -1.0 / loser.firstSeatLost!!  // lower bound of g
-            val upper = 1.0 / winner.lastSeatWon!!  // upper bound of g
-            val c = -1.0 / (2 * lower)  // affine transform h = c * g + 1/2
-            val hmeanReported = c * voteDiff/Nc + 0.5
-            val hmeanDiluted = c * voteDiff/(Npop ?: Nc) + 0.5
+        val upper = upperBound()
+        val upperh1 = (-1.0 / (2.0 * lowerg)) * upperg + .5
+        val upperh2 = (-1.0 / (2.0 * (-1.0 / loserDivisord))) * upperg + .5
+        val upperh3 = (loserDivisord/2.0) * upperg + .5
+        val upperh4 = (loserDivisord/2.0) * (1.0 / winnerDivisord) + .5
+        val upperh5 = loserDivisord/(2.0 * winnerDivisord) + 0.5
+        val upperh6 = loserDivisord/winnerDivisord/(2.0) + 0.5
+        val upperh7 = lw/2 + 0.5
+        val upperh8 = 0.5 * (lw + 1)
+        val upperh9 = (lw + 1)/2
 
-            return DhondtAssorter(
-                info,
-                winner.id,
-                loser.id,
-                winnerDivisor = winner.lastSeatWon!!,
-                loserDivisor = loser.firstSeatLost!!
-            ).setMeans(hmeanReported, hmeanDiluted)
-        }
+        val upperh = lw/2 + 0.5 // = 0.5 * (1 + loserDivisor/winnerDivisor)
+        println("upper diff = ${upperh - upperBound()}")
 
-        fun calcReportedMargin(info: ContestInfo, winner: DhondtParty, loser: DhondtParty, Nc: Int, Npop: Int?=null): Double {
+        val mu =  (margin / upperh)
+        val mu1 = (winnerTotalVotes * lw - loserTotalVotes) / Nc / 2 * (lw + 1)
+        val mu2 = (2/Nc) * (winnerTotalVotes * lw - loserTotalVotes) / (lw + 1)
 
-            // Let f_e,s = Te/d(s) for entity e and seat s
-            // f_A,WA > f_B,LB, so e = A and s = Wa
+        val noerror = 1.0 / (2.0 - margin / upperh4)
+        val noerror1 = 1.0 / (2.0 - (2/Nc) * (winnerTotalVotes * lw - loserTotalVotes) / (lw + 1))
+        val noerror2 = 1.0 / ((2.0*(lw + 1) - (2/Nc) * (winnerTotalVotes * lw - loserTotalVotes)) / (lw + 1))
+        val noerror3 = (lw + 1) / (2.0 * ((lw + 1) - (winnerTotalVotes * lw - loserTotalVotes)/Nc))
+        val noerror4 = (lw + 1)/2.0 / ((lw + 1) - (winnerTotalVotes * lw - loserTotalVotes)/Nc)
+        val noerror5 = upper / ((lw + 1) - (winnerTotalVotes * lw - loserTotalVotes)/Nc)
+        val noerror6 = upper / ((lw + 1) - margin)
+        val lw1 = lw + 1
 
-            val fw = winner.totalVotes / winner.lastSeatWon!!.toDouble()
-            val fl = loser.totalVotes / loser.firstSeatLost!!.toDouble()
-            val voteDiff = (fw - fl)
+        println("noerror diff = ${noerror - noerror6}")
+        println("noerror = $noerror")
 
-            val lower = -1.0 / loser.firstSeatLost!!  // lower bound of g
-            val upper = 1.0 / winner.lastSeatWon!!  // upper bound of g
-            val c = -1.0 / (2 * lower)  // affine transform h = c * g + 1/2
-            val hmeanReported = c * voteDiff/Nc + 0.5
-            val hmeanDiluted = c * voteDiff/(Npop ?: Nc) + 0.5
-            return hmeanReported
-        }
+        val inoerror = ((lw + 1) - (winnerTotalVotes * lw - loserTotalVotes)/Nc) / ((lw + 1)/2.0 )
+        println("inoerror diff = ${noerror - 1/inoerror}")
 
-    } */
+        val inoerror2 = (lw + 1)/((lw + 1)/2.0 ) - (winnerTotalVotes * lw - loserTotalVotes)/Nc / ((lw + 1)/2.0)
+        val inoerror3 = 2 - 2 * (winnerTotalVotes * lw - loserTotalVotes)/Nc / (lw + 1)
 
+        println("inoerror diff = ${noerror - 1/inoerror3}")
+
+
+        val Z = Nc * (1.0 + lw)
+
+        val estRisk1 = estRiskStandardBet((winnerTotalVotes * lw - loserTotalVotes).toInt(), Nci, upper, 800)
+        val estRisk2 = estRisk(Nci, stdBet, noerror, 800)
+        println("estRisk = $estRisk1 $estRisk2")
+
+        val estMvrs = estSampleSize(Nci, stdBet, noerror, .05)
+        println("estMvrs = $estMvrs")
+
+
+        //assorterMargin / upperBound = (2/N) (loserDivisor/winnerDivisor * winnerVotes - loserVotes) / (1 + loserDivisor/winnerDivisor)
+        //assorterMargin / upperBound = 2 * (lw * winnerVotes - loserVotes) / N * (1 + lw)
+
+        /*
+        val noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())
+        val noerror = 1.0 / (2 - 2 * (lw * winnerVotes - loserVotes) / N * (1 + lw))
+        val noerror = 0.5 / (1 - (lw * winnerVotes - loserVotes) / N * (1 + lw))
+        val noerror = 0.5 / (N * (1 + lw) - (lw * winnerVotes - loserVotes)) / (N * (1 + lw))
+        val noerror = 0.5 * (N * (1 + lw) / (N * (1 + lw) - (lw * winnerVotes - loserVotes)))
+        val noerror = 0.5 * Z / (Z - (lw * winnerVotes - loserVotes))
+
+         */
+
+
+    }
 }

@@ -49,7 +49,7 @@ import org.cryptobiotic.rlauxe.util.*
 
 // immutable
 data class DhondtParty(val partyName: String, val id: Int, val totalVotes: Int,
-                       val lastSeatWon: Int?, val firstSeatLost: Int?, val isBelowMin: Boolean) {
+     val lastSeatWon: Int, val firstSeatLost: Int, val isBelowMin: Boolean, val nCandidates: Int) {
 
     override fun toString() = "DhondtParty('$partyName' ($id) votes=$totalVotes below=$isBelowMin last/first=$lastSeatWon/$firstSeatLost)"
 }
@@ -67,7 +67,7 @@ class DhondtContest(
     val parties: List<DhondtParty>, // the parties
     val sortedScores: List<DhondtCandidateScore>,
     val assorters: List<AssorterIF>,
-    thresholdOverride: Set<Int>? = null, // TODO needed?
+    thresholdOverride: Set<Int>? = null, // // set when non standard: partyIds below threshold
 
 ): Contest(info, voteInput, Nc, Ncast) {
     val nvotes = votes.values.sum()
@@ -85,7 +85,6 @@ class DhondtContest(
 
     // dhondts and threshold assorters; these are set at creation, but not serialized, so cant assume they exist
     // can we put the generation of these inside? problem is ContestUA is serialized seperately, would have to rejigger that
-    // val assorters = mutableListOf<AssorterIF>()
 
     init {
         require(info.minFraction != null)
@@ -95,27 +94,17 @@ class DhondtContest(
         // "A winning party must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         partiesBelowThreshold = thresholdOverride ?: parties.filter { it.totalVotes / nvotes.toDouble() < info.minFraction }.map { it.id }.toSet()
 
-        /* could factor out
-        val winnerSeatsM= mutableMapOf<Int, Int>()
-        sortedScores.filter { it.winningSeat != null }.forEach {
-            val count = winnerSeatsM.getOrPut(it.partyId) { 0 }
-            winnerSeatsM[it.partyId] = count + 1
-        }
-        winnerSeatCount = winnerSeatsM.toMap() */
-
         winnerSeatCount = winnerSeatCount(sortedScores, parties.map { it.id })
 
         // fields in superclass
-        winners = winnerSeatCount.keys.toList()
-        losers = info.candidateIds.filter { !winners.contains(it) }
+        winners = winnerSeatCount.filter{ it.value > 0 }.map{ it.key }.toList()
+        losers = winnerSeatCount.filter{ it.value == 0 }.map{ it.key }.toList()
         winnerNames = winners.map { info.candidateIdToName[it]!! }
     }
 
-    fun candidateName(partyId: Int, divisor: Int) = "${info.candidateIdToName[partyId]}/$divisor"
+    override fun hasNoLosers() = false
 
-    //fun winningParties(): List<DhondtParty> {
-    //    return parties.filter { winnerSeats[it.id] != null }
-    //}
+    fun candidateName(partyId: Int, divisor: Int) = "${info.candidateIdToName[partyId]}/$divisor"
 
     override fun recountMargin(assorter: AssorterIF): Double {
         return when (assorter) {
@@ -156,24 +145,9 @@ class DhondtContest(
 
     // TODO should be the factor from KISS paper
     fun difficulty(assorter: AssorterIF): Double {
-        return when (assorter) {
-            is DhondtAssorter -> {
-                1.0 / assorter.reportedMargin()
-                // assorter.voteDiff(votes[assorter.winner()]!!, votes[assorter.loser()]!!)
-            }
-            is BelowThreshold -> {
-                // val nvotes = votes.values.sum() does not include undervotes
-                assorter.difficulty(votes[assorter.winner()]!!, nvotes)
-            }
-            is AboveThreshold -> {
-                // val nvotes = votes.values.sum() does not include undervotes
-                assorter.difficulty(votes[assorter.winner()]!!, nvotes)
-            }
-            else -> throw RuntimeException("unknown assorter type= ${assorter.javaClass.simpleName}")
-        }
+        return 1.0 / assorter.reportedMargin()
     }
 
-    // TODO not needed
     override fun marginInVotes(assorter: AssorterIF): Int {
         return when (assorter) {
             is DhondtAssorter -> {
@@ -240,6 +214,12 @@ class DhondtContest(
         append(relax.show())
     }
 
+    // for viewer
+    fun getRelaxedAssertion(contestRound: ContestRound, maxRisk: Double, version: String? = null): RelaxedAssertionsIF {
+        return makeRelaxedAssertions(contestRound, maxRisk, version = version)
+    }
+
+
     fun countContestedSeats(contestRound: ContestRound): Int {
         val relax = makeRelaxedAssertions(contestRound, .05)
         return relax.failures().size
@@ -273,6 +253,7 @@ class DhondtContest(
         if (!super.equals(other)) return false
 
         if (sortedScores != other.sortedScores) return false
+        if (parties != other.parties) return false
         if (partiesBelowThreshold != other.partiesBelowThreshold) return false
         if (winnerSeatCount != other.winnerSeatCount) return false
 
@@ -281,6 +262,7 @@ class DhondtContest(
 
     override fun hashCode(): Int {
         var result = super.hashCode()
+        result = 31 * result + parties.hashCode()
         result = 31 * result + sortedScores.hashCode()
         result = 31 * result + partiesBelowThreshold.hashCode()
         result = 31 * result + winnerSeatCount.hashCode()

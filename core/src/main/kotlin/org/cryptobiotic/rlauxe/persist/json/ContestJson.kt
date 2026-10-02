@@ -15,6 +15,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DhondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidateScore
+import org.cryptobiotic.rlauxe.dhondt.DhondtPartyBuilder
 import org.cryptobiotic.rlauxe.irv.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.FileOutputStream
@@ -96,6 +97,7 @@ data class ContestIFJson(
     val Ncast: Int,
     val undervotes: Int? = null,
     val irvRoundsPaths: List<IrvRoundsPathJson>? = null,
+    val dpartyNcandidates: Map<Int, Int>? = null  // dhondt party id -> party nCandidates
 )
 
 fun ContestIF.publishJson() : ContestIFJson {
@@ -108,7 +110,9 @@ fun ContestIF.publishJson() : ContestIFJson {
                 this.Nc,
                 this.Ncast,
                 undervotes = this.Nundervotes(),
-                )
+                // make Map<Int, Int>
+                dpartyNcandidates = this.parties.associate { it.id to it.nCandidates },
+            )
         is Contest ->
             ContestIFJson(
                 "Contest",
@@ -158,10 +162,21 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
         "DhondtContest",
         "DHondtContest",
         "ContestDHondt" -> {
-            DhondtBuilder.fromVotes(info, this.votes!!, this.Nc, this.Ncast, this.undervotes?: 0).build()
+            fromVotes(info, this.votes!!, this.Nc, this.Ncast, this.undervotes?: 0, this.dpartyNcandidates ?: emptyMap()).build()
         }
         else -> throw RuntimeException("unknown class name ${this.className}")
     }
+}
+
+// called by ContestJson to deserialize
+fun fromVotes(info: ContestInfo, votes: Map<Int, Int>, Nc: Int, Ncast: Int, undervotes: Int, partyNcandidates: Map<Int, Int>): DhondtBuilder {
+    // recreate the parties from the votes. hmmmm what could go wrong ??
+    val parties = info.candidateIds.map { id ->
+        DhondtPartyBuilder(info.candidateIdToName[id]!!, id, votes[id]!!, partyNcandidates[id]!!)
+    }
+    // this will recalculate the party last/first/belowMin from the standard createCandidateScores/winnerScores
+    // but it wont recover non-standard RelaxedAssertion's altContests.
+    return DhondtBuilder(info, parties, Nc, Ncast, undervotes)
 }
 
 // TODO multiple paths

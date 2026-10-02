@@ -16,9 +16,9 @@ import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-private val logger = KotlinLogging.logger("BelgiumClca")
+private val logger = KotlinLogging.logger("BelgiumElection")
 
-class BelgiumClca (
+class BelgiumElection (
     val contestd: DhondtContest,
     val mvrSource: MvrSource,
 ): ElectionBuilder {
@@ -64,7 +64,7 @@ fun createBelgiumElection(
     ): Result<AuditRoundIF, ErrorMessages>
 {
     val stopwatch = Stopwatch()
-    val election = BelgiumClca(contestd, MvrSource.testPrivateMvrs)
+    val election = BelgiumElection(contestd, MvrSource.testPrivateMvrs)
 
     createElectionRecord(election, topdir = topdir, clear = false)
     println("createBelgiumElection took $stopwatch")
@@ -99,20 +99,22 @@ fun createBelgiumAndRunAllRounds(electionName: String,
     Logging.addFileAppender("cases", "$topdir/logs.log")
     logger.info {"-------------- createBelgiumElection ${electionName} in $topdir"}
 
-    val partyIds = readPartyTxtResource("$belgiumData/parties.txt")
+    val partyIds = readPartyTxtResource("$belgiumData/parties.txt") // includes aliases
     validateOutputDir(Path.of(toptopdir))
     copyResourceFile("$belgiumData/canonicalParties.txt", "$toptopdir/canonicalParties.txt")
     copyResourceFile("$belgiumData/parties.txt", "$toptopdir/parties.txt")
 
-    val dhondtParties = belgiumElectionJson.ElectionLists.mapIndexed { idx, it ->
+    val nwinners = belgiumElectionJson.ElectionLists.sumOf { it.NrOfSeats }
+    val totalVotes = belgiumElectionJson.NrOfValidVotes + belgiumElectionJson.NrOfBlankVotes // TODO undervotes = belgiumElection.NrOfBlankVotes
+
+    val dhondtParties = belgiumElectionJson.ElectionLists.map {
         DhondtPartyBuilder(
             it.PartyLabel,
             partyIds[it.PartyLabel]!!,
-            it.NrOfVotes
+            it.NrOfVotes,
+            it.Candidates.size
         )
     }
-    val nwinners = belgiumElectionJson.ElectionLists.sumOf { it.NrOfSeats }
-    val totalVotes = belgiumElectionJson.NrOfValidVotes + belgiumElectionJson.NrOfBlankVotes // TODO undervotes = belgiumElection.NrOfBlankVotes
 
     val dcontest = makeDhondtContest(electionName, contestId, dhondtParties, nwinners, totalVotes, belgiumElectionJson.NrOfBlankVotes,.05)
 

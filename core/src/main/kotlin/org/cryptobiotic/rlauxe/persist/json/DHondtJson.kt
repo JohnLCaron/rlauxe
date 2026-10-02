@@ -114,7 +114,7 @@ fun publishRAJson(ra: RelaxedAssertionsIF): RelaxedAssertionsJson {
         DAssertionWithMargin(da, dcontest.difficulty(it), dcontest.marginInVotes(it))
     }
 
-    val bounds = ra.contestRanges().partyRanges.values.map { party ->
+    val bounds = ra.contestRange().partyRanges().map { party ->
         val name = dcontest.info().candidateIdToName[party.partyId]
         Bound(party.partyId, name!!, party.minSeats, party.maxSeats)
     }
@@ -272,7 +272,7 @@ fun writeOneContestToJsonFile(contestRound: ContestRound, relax: RelaxedAssertio
     val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
 
     val dcontest = contestRound.contestUA.contest as DhondtContest
-    val relaxData = RelaxedAssertionData(dcontest, assorters, relax.contestRanges().partyRanges.values.toList())
+    val relaxData = RelaxedAssertionData(dcontest, assorters, relax.contestRange().partyRanges().toList())
 
     val json = relaxData.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = pretty }
@@ -309,11 +309,11 @@ fun readDHondtAssertionsJsonUnwrapped(filename: String): RelaxedAssertionsJson? 
 //////////////////////////////////////////////////////////////////////////////
 
 fun writeAllContestsToJsonFile(contestRounds: List<ContestRound>, filename: String, alpha: Double, pretty: Boolean = false,
-                               mvrLimit: Map<Int, SampleLimit>, useV: Boolean = false): RelaxedAssertionContestsJson {
+                               mvrLimit: Map<Int, SampleLimit>, version: String? = null): RelaxedAssertionContestsJson {
 
     val relaxed = mutableListOf<RelaxedAssertionsIF>()
     contestRounds.forEach { contestRound ->
-        relaxed.add(makeRelaxedAssertions(contestRound, alpha, mvrLimit[contestRound.id]?.limit, useV))
+        relaxed.add(makeRelaxedAssertions(contestRound, alpha, mvrLimit[contestRound.id]?.limit, version=version))
     }
 
     val json = relaxed.publishJson()

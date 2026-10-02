@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.dhondt
 
+import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.persist.SampleLimit
@@ -18,7 +20,7 @@ class TestRelaxedAssertions {
 
     @Test
     fun testOneDHFailures() {
-        val contestRound = lastRound.contestRounds.find { it.id == 1 }!! // Anders
+        val contestRound = lastRound.contestRounds.find { it.id == 4 }!! // FlandresEast
         val sampleLimit = sampleLimitMap[contestRound.id]
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit.limit
@@ -27,9 +29,9 @@ class TestRelaxedAssertions {
         println(relax.show())
         // println(relax.contestRanges().showSeatRanges())
 
-        //          Vooruit/3-CD&V/3,          20,  0.5004,     3567,         800, 0.5112,
+        //           Vooruit/3-CD&V/3,          20,  0.5004,     3567,         800, 0.5112, 3567,
         val expected = mapOf(28 to -1, 4 to 1)
-        checkExpectedContest(expected, relax.contestRanges())
+        checkExpectedContest(expected, relax.contestRange())
         println("-----------------------------------------------------------------------")
         //val candSeat: ContestSeatsRev = CandSeatRangeBuilderRev(contestRound).partyRanges
         //println(candSeat.showSeatRanges())
@@ -37,24 +39,54 @@ class TestRelaxedAssertions {
 
     @Test
     fun testOneFailureVsV() {
-        val oneFailures = listOf(2, 6, 4)
+        val oneFailures = listOf(1, 2, 6, 4)
         oneFailures.forEach { partyId ->
             val contestRound = lastRound.contestRounds.find { it.id == partyId }!!
             val sampleLimit = sampleLimitMap[contestRound.id]
             if (sampleLimit != null) {
                 contestRound.haveSampleSize = sampleLimit.limit
             }
-            println("==========================================================")
+            //println("==========================================================")
             val relax = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit)
             //println(relax.show())
-            println(relax.contestRanges().showSeatRanges())
-            println("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV")
-            val relaxv = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit, useV = true)
-            //println(relaxv.show())
-            println(relaxv.contestRanges().showSeatRanges())
 
-            println("match = ${relax.contestRanges().partyRanges == relaxv.contestRanges().partyRanges}")
+            println("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV")
+            val relaxv = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit, version = "tooRelaxed")
+            //println(relaxv.show())
+
+            println("${contestRound.name} match = ${relax.contestRange().partyRanges() == relaxv.contestRange().partyRanges()}")
+
+            compareAssorters(relax, relaxv, "tooRelaxed")
         }
+    }
+
+    fun compareAssorters(r: RelaxedAssertionsIF, v: RelaxedAssertionsIF, version: String) {
+        val Npop = r.altContest().Nc
+
+        val mapr = r.assortersForProof().associateBy { it.shortName() }.toSortedMap()
+        val mapv = v.assortersForProof().associateBy { it.shortName() }.toSortedMap()
+
+        r.failures().forEach { println(it) }
+        println("assertions in R:")
+        mapr.forEach { (name, dh) ->
+            if (mapv[name] == null) print("****") else print("    ")
+            println(" ${dh} ${estSampleSizeStandardBet(Npop, dh.noerror(true), 0.05)} samples")
+            //println(" ${dh}")
+        }
+        val minerror = mapr.values.minOf{ it.noerror(true) }
+        println(" minerror = ${minerror} ${estSampleSizeStandardBet(Npop, minerror, 0.05)} samples")
+
+        println()
+        v.failures().forEach { println(it) }
+
+        println("assertions in $version:")
+        mapv.forEach { (name, dh) ->
+            if (mapr[name] == null) print("****") else print("    ")
+            println(" ${dh}, ${estSampleSizeStandardBet(Npop, dh.noerror(true), 0.05)} samples")
+            //println(" ${dh}")
+        }
+        val minerrorv = mapv.values.minOf{ it.noerror(true) }
+        println(" minerror = ${minerrorv} ${estSampleSizeStandardBet(Npop, minerrorv, 0.05)} samples")
     }
 
     @Test
@@ -64,14 +96,14 @@ class TestRelaxedAssertions {
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit.limit
         }
-        val relax = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit, useV = false)
+        val relax = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit)
         println(relax.show())
 
-        var idx = 0
+        /* var idx = 0
         relax.assortersForProof().sortedBy { it.desc() }.forEach {
             println("$idx   $it")
             idx++
-        }
+        } */
 
         // I think the answer should be
         // ContestId=1
@@ -84,38 +116,40 @@ class TestRelaxedAssertions {
         //|                  CD&V  4 |  2  |     3    |  3  |       3   | could lose 1
 
         val expected = mapOf(24 to 1, 28 to -1, 19 to 1, 4 to -1)
-        checkExpectedContest(expected, relax.contestRanges())
+        checkExpectedContest(expected, relax.contestRange())
         println("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV")
-        val relaxv = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit, useV = true)
-        println(relaxv.show())
-        println("match = ${relax.contestRanges().partyRanges == relaxv.contestRanges().partyRanges}")
+        //val relaxv = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit, useV = true)
+        //println(relaxv.show())
+        //println("match = ${relax.contestRange().partyRanges() == relaxv.contestRange().partyRanges()}")
+        //compareAssorters(relax, relaxv)
+
     }
 
     @Test
     fun testWriteOneContestsJson() {
         val contestRound = lastRound.contestRounds.find { it.id == 2 }!!
 
-        val filename = "/home/stormy/rla/temp/assertionsBruxelles.json"
-        writeAllContestsToJsonFile(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap, useV = false)
+        val filename = "/home/stormy/rla/temp/assertionsBruxelles.v3.json"
+        writeAllContestsToJsonFile(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
     }
 
     @Test
     fun testWriteAllContestsJson() {
         val filename = "/home/stormy/rla/temp/assertionsv.json"
         val contestRounds = lastRound.contestRounds
-        writeAllContestsToJsonFile(contestRounds, filename, config.riskLimit, pretty = false, sampleLimitMap, useV = true)
+        writeAllContestsToJsonFile(contestRounds, filename, config.riskLimit, pretty = false, sampleLimitMap)
     }
 
     @Test
     fun testThresholdFailure() {
-        val contestRound = lastRound.contestRounds.find { it.id == 1 }!! // Hainut
+        val contestRound = lastRound.contestRounds.find { it.id == 5 }!! // Hainut
         val sampleLimit = sampleLimitMap[contestRound.id]
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit.limit
         }
         val relax = makeRelaxedAssertions(contestRound, .05)
         println(relax.show())
-        println(relax.contestRanges().showSeatRanges())
+        // println(relax.contestRange().showSeatRanges())
 
         val expected = mapOf(24 to 1, 28 to -1, 19 to 1, 4 to -1)
         //checkExpectedContest(expected, relax.contestRanges())
@@ -125,17 +159,25 @@ class TestRelaxedAssertions {
     }
 }
 
-fun checkExpectedContest(expected: Map<Int, Int>, actual: ContestRanges) {
-    actual.partyRanges.values.forEach { range ->
+fun checkExpectedContest(expected: Map<Int, Int>, actual: ContestRange) {
+    val ar = mutableMapOf<Int, Int>()
+    actual.partyRanges().forEach {
+        if ((it.maxSeats - it.reportedSeats) > 0) ar[it.partyId] = (it.maxSeats - it.reportedSeats)
+        else if ((it.minSeats - it.reportedSeats) < 0) ar[it.partyId] = (it.minSeats - it.reportedSeats)
+    }
+    println(ar)
+    assertEquals(expected, ar)
+
+    actual.partyRanges().forEach { range ->
         val expect = expected[range.partyId]
         if (expect == null) {
-            assertEquals(range.maxSeats, range.reportedSeats)
-            assertEquals(range.minSeats, range.reportedSeats)
+            assertEquals(range.maxSeats, range.reportedSeats, range.toString())
+            assertEquals(range.minSeats, range.reportedSeats, range.toString())
         } else {
             if (expect > 0)
-                assertEquals(range.maxSeats, range.reportedSeats + expect)
+                assertEquals(range.maxSeats, range.reportedSeats + expect, range.toString())
             else
-                assertEquals(range.minSeats, range.reportedSeats + expect)
+                assertEquals(range.minSeats, range.reportedSeats + expect, range.toString())
         }
     }
 }

@@ -6,10 +6,12 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder.Companion.makeDhAssorterFromDivisors
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.nfn
 import kotlin.Int
 import kotlin.collections.forEach
+import kotlin.math.min
 
 private val logger = KotlinLogging.logger("DHondtBuilder")
 private val showDetails = false
@@ -19,7 +21,7 @@ private val showDetails = false
 data class DhondtCandidateScore(val partyId: Int, val totalVotes: Int, val divisor: Int) {
     val score = totalVotes/divisor.toDouble() // so its not in the hash
 
-    var winningSeat: Int? = null  // TODO make immutable ??
+    var winningSeat: Int? = null
     fun setWinningSeat(ws: Int?): DhondtCandidateScore {
         this.winningSeat = ws
         return this
@@ -39,13 +41,13 @@ data class DhondtCandidateScore(val partyId: Int, val totalVotes: Int, val divis
 }
 
 // mutable state
-class DhondtPartyBuilder(val partyName: String, val id: Int, val totalVotes: Int) {
-    var lastSeatWon: Int? = null // We
-    var firstSeatLost: Int? = null // Le
+class DhondtPartyBuilder(val partyName: String, val id: Int, val totalVotes: Int, val nCandidates: Int) {
+    var lastSeatWon: Int = 0 // We
+    var firstSeatLost: Int = 0 // Le
     var isBelowMin = false
 
-    constructor(id: Int, votes: Int) : this("party-$id", id, votes)
-    constructor(from: DhondtParty) : this(from.partyName, from.id, from.totalVotes) {
+    constructor(id: Int, votes: Int, nCandidates: Int) : this("party-$id", id, votes, nCandidates)
+    constructor(from: DhondtParty) : this(from.partyName, from.id, from.totalVotes, from.nCandidates) {
         lastSeatWon = from.lastSeatWon
         firstSeatLost = from.firstSeatLost
         isBelowMin = from.isBelowMin
@@ -53,7 +55,7 @@ class DhondtPartyBuilder(val partyName: String, val id: Int, val totalVotes: Int
 
     override fun toString() ="DhondtPartyBuilder('$partyName' ($id) votes=$totalVotes below=$isBelowMin last/first=$lastSeatWon/$firstSeatLost)"
 
-    fun build() = DhondtParty(partyName, id, totalVotes, lastSeatWon, firstSeatLost, isBelowMin)
+    fun build() = DhondtParty(partyName, id, totalVotes, lastSeatWon, firstSeatLost, isBelowMin, nCandidates)
 }
 
 // building the inital contest in CreateBelgiumElection
@@ -80,14 +82,13 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
     val Nc: Int, // trusted upper limit; // TODO need phantoms also
     val undervotes: Int,
     val minFraction: Double,
-    val thresholdOverride: Set<Int>? = null,
+    val thresholdOverride: Set<Int>? = null, // set when non standard: partyIds below threshold
 ) {
-
     constructor(info: ContestInfo, partyBs: List<DhondtPartyBuilder>, Nc: Int, Ncast: Int, undervotes: Int)
         : this(info.name, info.id, partyBs, nseats=info.nwinners, Nc=Nc, undervotes=undervotes, minFraction = info.minFraction!!)
 
-    constructor(dcontest: DhondtContest) : this(dcontest.name, dcontest.id, dcontest.parties.map { DhondtPartyBuilder(it) },
-        dcontest.nseats, dcontest.Nc, dcontest.undervotes, dcontest.info.minFraction!!)
+    constructor(dcontest: DhondtContest, thresholds: Set<Int>? = null) : this(dcontest.name, dcontest.id, dcontest.parties.map { DhondtPartyBuilder(it) },
+        dcontest.nseats, dcontest.Nc, dcontest.undervotes, dcontest.info.minFraction!!, thresholdOverride = thresholds)
 
     val info = ContestInfo(
         name,
@@ -99,7 +100,6 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
         minFraction = minFraction,
     )
     val validVotes: Int = partyBs.sumOf { it.totalVotes } // denominator of minFraction
-    val winnerScores: List<DhondtCandidateScore>
     val winnerSeatCount: Map<Int, Int> // partyId -> nseats
     val sortedScores: List<DhondtCandidateScore>
 
@@ -107,49 +107,25 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
         val totalVotes = validVotes + undervotes
         require (Nc == totalVotes) { "DhondtBuilder2 $Nc != $totalVotes" }
 
-        // use validVotes, not Nc
+        // use validVotes, not Nc, to calculate thresholds
         sortedScores = createCandidateScores(partyBs, nseats, validVotes, minFraction, thresholdOverride)
-
-        winnerScores = sortedScores.subList(0, nseats)
-
-        /* old way
-        val loserScores = sortedScores.subList(nseats, sortedScores.size)
-        partyBs.forEach { party ->
-            party.lastSeatWon = winnerScores.filter { it.partyId == party.id }.maxOfOrNull { it.divisor } // may be null
-            party.firstSeatLost = loserScores.filter { it.partyId == party.id }.minOfOrNull { it.divisor } // may be null
-        } */
-
-        // could also do vanessa's way; 0 = no seats won
         winnerSeatCount = winnerSeatCount(sortedScores, partyBs.map { it.id })
         partyBs.forEach { partybs ->
-            partybs.lastSeatWon = winnerSeatCount[partybs.id] // last seat won = number of seats won; now 0 mean "none" instead of null
-            partybs.firstSeatLost = winnerSeatCount[partybs.id]!! + 1 // first seat lost
+            partybs.lastSeatWon = winnerSeatCount[partybs.id]!! // last seat won = number of seats won
+            // partybs.firstSeatLost = winnerSeatCount[partybs.id]!! + 1 // first seat lost = nseats + 1
+            partybs.firstSeatLost = min(partybs.lastSeatWon + 1, partybs.nCandidates ?: Int.MAX_VALUE)
         }
     }
 
-    // allow build to be overridden
-
-    open fun build(): DhondtContest {
+    // Proposition 1, p 5.
+    open fun buildStdAssorters() : List<AssorterIF> {
         val votes = partyBs.associate { Pair(it.id, it.totalVotes) }
         val parties = partyBs.map { it.build() }
 
         // define W the set of parties that have at least one reported winner
         // define L the set of parties that have at least one reported loser
-        val winningParties = parties.filter { it.lastSeatWon!! > 0 }.toSet()
-        val losingParties = parties // TODO allow setting |P|
-
-        /* old way  This is O(n^2)
-        val assortersOld = mutableListOf<DhondtAssorter>()
-        parties.forEach { winner ->
-            if (winner.lastSeatWon!! > 0) {
-                parties.filter { it.id != winner.id }.forEach { loser ->
-                    if (loser.firstSeatLost != null) {
-                        val passorter = makeFrom(info, winner, loser, Nc)
-                        assortersOld.add(passorter)
-                    }
-                }
-            }
-        } */
+        val winningParties = parties.filter { it.lastSeatWon > 0 }.toSet()
+        val losingParties = parties.filter { it.firstSeatLost > 0 }.toSet()
 
         val assorters = mutableListOf<AssorterIF>()
 
@@ -162,6 +138,13 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
         losingParties.forEach { loser ->
             assorters.addAll(btOrBhs(winningParties, loser, votes))
         }
+        return assorters
+    }
+
+    // allow build to be overridden
+    open fun build(): DhondtContest {
+        val votes = partyBs.associate { Pair(it.id, it.totalVotes) }
+        val parties = partyBs.map { it.build() }
 
         return DhondtContest(info,
             votes,
@@ -169,7 +152,7 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
             Ncast = this.validVotes + this.undervotes,
             parties,
             sortedScores,
-            assorters,
+            buildStdAssorters(),
             thresholdOverride,
         )
     }
@@ -219,10 +202,8 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
 
         // use preset winner.lastSeatWon / loser.firstSeatLost
         fun makeDhAssorterFromParty(info: ContestInfo, winner: DhondtParty, loser: DhondtParty, Nc: Int, Npop: Int?=null): DhondtAssorter {
-            // Let f_e,s = Te/d(s) for entity e and seat s
-            // f_A,WA > f_B,LB, so e = A and s = Wa
-
-            return makeDhAssorterFromDivisors(info, winner, winner.lastSeatWon!!, loser, loser.firstSeatLost!!, Nc, Npop)
+            // TODO check loser and winner > 0
+            return makeDhAssorterFromDivisors(info, winner, winner.lastSeatWon, loser, loser.firstSeatLost, Nc, Npop)
         }
 
         // uexplicitly set the divisors
@@ -238,9 +219,6 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
             val hmeanReported = c * voteDiff/Nc + 0.5
             val hmeanDiluted = c * voteDiff/(Npop ?: Nc) + 0.5
 
-            if (winner.id == loser.id)
-                print("")
-
             return DhondtAssorter(
                 info,
                 winner.id,
@@ -249,14 +227,21 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
                 loserDivisor = loserDivisor
             ).setMeans(hmeanReported, hmeanDiluted)
         }
+    }
+}
 
-        // called by ContestJson to deserialize
-        fun fromVotes(info: ContestInfo, votes: Map<Int, Int>, Nc: Int, Ncast: Int, undervotes: Int): DhondtBuilder {
-            // recreate the parties from the votes. hmmmm what could go wrong ??
-            val parties = info.candidateIds.map { id ->
-                DhondtPartyBuilder(info.candidateIdToName[id]!!, id, votes[id]!!)
-            }
-            return DhondtBuilder(info, parties, Nc, Ncast, undervotes)
+fun btOrBh(info: ContestInfo, winner: DhondtParty, winnerDivisor: Int, loser: DhondtParty, loserDivisor: Int, votes: Map<Int, Int>, Nc: Int): AssorterIF {
+    // make DH assertions for this loser and all winners
+    val dh = makeDhAssorterFromDivisors(info, winner, winnerDivisor, loser, loserDivisor, Nc)
+
+    if (!loser.isBelowMin) {
+        return dh
+    } else {
+        val bt = BelowThreshold.makeFromVotes(info, candId = loser.id, votes, Nc,)
+        if (bt.noerror(true) < dh.noerror(true) ) {
+            return dh
+        } else {
+            return bt
         }
     }
 }
@@ -269,7 +254,6 @@ fun createCandidateScores(
     validVotes: Int,        // denominator for calculation of theshold is validVotes, excluding undervotes
     minFraction: Double,
     thresholdOverride: Set<Int>? = null,
-    flip: Boolean = false, // used ??
 ): List<DhondtCandidateScore> {
 
     val sortedScores = mutableListOf<DhondtCandidateScore>()
@@ -279,21 +263,15 @@ fun createCandidateScores(
     val belowMinPct = thresholdOverride ?: parties.filter { it.totalVotes / validVotes.toDouble() < minFraction }.map { it.id }.toSet()
     parties.forEach { it.isBelowMin = belowMinPct.contains(it.id) }
 
-    // remove threshold failures before winners are assigned
-    // adding nseats for each party - could limit to first loser if needed
+    // adding min(nseats, party.nCandidates) for each party
     parties.filter { !it.isBelowMin }.forEach { party ->
-        repeat(nseats) { idx ->
+        val nscores = if (party.nCandidates == null) nseats else min(nseats, party.nCandidates)
+        repeat(nscores) { idx ->
             val divisor = idx + 1
             sortedScores.add(DhondtCandidateScore(party.id, party.totalVotes, divisor))
         }
     }
     sortedScores.sortByDescending { it.score }
-
-    if (flip) { // TODO get rid of this
-        val save1 = sortedScores[nseats - 1]
-        sortedScores[nseats - 1] = sortedScores[nseats]
-        sortedScores[nseats] = save1
-    }
 
     repeat(nseats) { idx ->
         sortedScores[idx].setWinningSeat(idx + 1)

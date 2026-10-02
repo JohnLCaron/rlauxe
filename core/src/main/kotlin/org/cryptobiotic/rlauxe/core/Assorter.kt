@@ -57,9 +57,11 @@ interface AssorterIF {
     // dilutedMargin: Npop = sample population size
     // used when you need to calculate margin from some subset of regular votes eg pools; cant be used for IRV
     fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double
+    // used by OneAuditRatesFromPools
     fun calcPoolRatesFromPoolTabulation(poolTab: ContestTabulationIF, Npop: Int): PoolRates
 }
 
+// percent rate of votes for winner, loser and other
 data class PoolRates(val winnerRate: Double, val noneRate: Double, val loserRate: Double)
 
 /** See SHANGRLA, section 2.1, p.4 */
@@ -114,7 +116,7 @@ class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int):
         val loserCounts: Int = poolTab.votes[loser()] ?: 0
         val nuetralCounts = poolTab.nvotes() - winnerCounts - loserCounts // undervotes
 
-        //  winner, nuetral, loser
+        //  winner, nuetral, loser pct of votes
         return PoolRates(winnerCounts/Npop.toDouble(),
             nuetralCounts/Npop.toDouble(),
             loserCounts/Npop.toDouble(),

@@ -237,3 +237,359 @@ TODO. same as BT?
 ## DH Assertion failures and Threshold Assertion failures
 
 When there are both DH and Threshold failures, simply merge the seat ranges.
+
+
+//////////////////
+
+Let Candidate(p, d) be the dth candidate of Party p
+An assertion DH_A,B(w, l) tests Candidate(A, w) as winner against Candidate(B, l) as loser.
+
+    Initialize 
+    uncertainWinnerSet = Set<Candidate>
+    uncertainLoserSet = Set<Candidate>
+      
+    Create orgAssertions = assertions for the apparent outcome, as in Proposition 1.
+    
+    Find unacceptable assertions and create orgFailures = findFailures(orgAssertions)
+    If there are no failures, then you are done.
+    
+    failures = orgFailures
+    assertionsIn = orgAssertions
+    assertionsOut = emptyList<Assertion>
+    done = false
+
+    // Generate relaxed assertions, put them in assertionsOut
+    while (!done) {
+        newAssertions = step4(assertionsIn, assertionsOut, failures)
+        if (newAssertions.isEmpty) 
+            done = true
+        else
+            failures = findFailures(newAssertions)
+            if (failures.isEmpty) 
+                done = true
+            else
+                assertionsIn = newAssertions}
+    }
+
+// Create Party Ranges
+
+    // Initialize PartyRange(min, reported, max) for each party in the contest
+    partyRanges = Map<Int, PartyRange>
+
+    // The number of seats that a party might lose is bounded by the number of unique candidates it has in the uncertainWinnerSet.
+    uncertainWinnerSet.forEach { candidate ->
+        val partyRange: PartyRange = partyMap[candidate.partyId]!!
+        partyRange.minSeats--
+    }
+
+    // The number of seats that a party might gain is bounded by the number of unique candidates it has in the uncertainLoserSet.
+    uncertainLoserSet.forEach { candidate ->
+        val partyRange: PartyRange = partyMap[candidate.partyId]!!
+        partyRange.maxSeats++
+    }
+
+// RETURN relaxed assertions and corresponding bounds
+return assertionsOut, partyRanges
+
+    fun step4(assertionsIn: List<Assertion>, assertionsOut: List<Assertion>, failures: List<Assertion>) {
+        
+        assertionsNew = emptyList<Assertion>
+    
+        foreach assertion in assertionsIn:
+            if (!failures.contain(assertion))
+                assertionsOut.add(assertion)
+            else
+                winner = assertion.winnerCandidate
+                loser = assertion.loserCandidate
+                // If w > 1, add DH_A,B (w − 1, l) to the assertion set
+                if (winner.divisor > 1) assertionsNew.add( DH_A,B (w − 1, l))
+                // If l < |B| add DHA,B (w, l + 1)
+                if (loser.divisor < loser.party.macCandidates) assertionsNew.add( DH_A,B (w, l + 1))
+                uncertainWinnerSet.add(winner)
+                uncertainLoserSet.add(loser)
+    
+        return assertionsNew
+   }
+
+
+
+4. For all unacceptable DH assertions failedAssertion = DHA,B (w, l) 
+   
+   a) Remove DHA,B (w, l) from the assertion set,
+   b) If w > 1, add DH_A,B (w − 1, l) to the assertion set,
+   c) If l < |B| (i.e. if B has any other losers), add DHA,B (w, l + 1) to the assertion set,
+   d) add failedAssertion.winner to uncertainWinnerSet, and failedAssertion.loser to uncertainLoserSet
+
+   If new assertions are generated, run step4
+
+//////////////////////
+
+````
+ ( 1)                  MR/1 ,  179296, 179296,           , 0.000, 
+ ( 2)                  PS/1 ,  137443, 137443,      41853, 0.000, 
+ ( 3)         LES ENGAGÉS/1 ,  103711, 103711,      33732, 0.000, 
+ ( 4)                 PTB/1 ,   91188,  91188,      12523, 0.000, 
+ ( 5)                  MR/2 ,  179296,  89648,       1540, 0.000, 
+ ( 6)                  PS/2 ,  137443,  68721,      20927, 0.000, 
+ ( 7)                  MR/3 ,  179296,  59765,       8956, 0.000, 
+ ( 8)         LES ENGAGÉS/2 ,  103711,  51855,       7910, 0.000, 
+ ( 9)               ECOLO/1 ,   49936,  49936,       1919, 0.000, 
+ (10)                  PS/3 ,  137443,  45814,       4122, 0.000, 
+ (11)                 PTB/2 ,   91188,  45594,        220, 0.000, 
+ (12)                  MR/4 ,  179296,  44824,        770, 0.000, 
+ (13)                  MR/5 ,  179296,  35859,       8965, 0.050, 
+ (14)         LES ENGAGÉS/3 ,  103711,  34570,       1289, 0.724, LES ENGAGÉS/3-PS/4
+                       PS/4 ,  137443,  34360,        210, 0.724, LES ENGAGÉS/3-PS/4
+                      PTB/3 ,   91188,  30396,       3964, 0.004, 
+                       MR/6 ,  179296,  29882,        514, 0.000, 
+                       PS/5 ,  137443,  27488,       2394, 0.000, 
+              LES ENGAGÉS/4 ,  103711,  25927,       1561, 0.000, 
+                       MR/7 ,  179296,  25613,        314, 0.000, 
+````
+
+0 MR        #14 5 seats
+1 PS        #16 3–4 seats
+2 LES ENGAGÉS #12 2–3 seats
+3 PTB       #19 2 seats
+4 N-VA      #15 0 seats
+5 DéFI      #8 0 seats
+6 ECOLO     #9 1 seat
+7 COLLECTIF CITOYEN #6 0 seats
+8 BELG.UNIE-BUB #2 0 seats
+9 BLANCO    #21 0 seats
+10 CHEZ NOUS #5 0 seats
+11 RMC #22 0 seats
+
+- lower bound 5 for party #14: its quotient 5 may rank as low as 15th
+  (own 5, #16 ≤ 4, #12 ≤ 3, #19 ≤ 2, #8 ≤ 0, #9 ≤ 1, #5 ≤ 0) 
+  but there are only 14 seats
+
+party 14 quotient 5 = MR/5
+
+may rank as low as 15th
+
+own 5 = MR/5                row 13
+#16 ≤ 4 = PS/4              row 15
+#12 ≤ 3 = LES ENGAGÉS/3 o   row 14
+#19 ≤ 2 = PTB/2             row 11
+#8 ≤ 0 = DéFI/0            ??
+#9 ≤ 1 = BLANCO            ??
+#5 ≤ 0 = CHEZ NOUS         ??
+
+
+````
+
+|seat|       MR |       PS | LES ENGA |      PTB |    ECOLO |     N-VA |     DéFI | COLLECTI | BELG.UNI |   BLANCO | CHEZ NOU |      RMC |
+|----|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
+|  1 |        G |        G |        G |        G |        G |          |          |          |          |          |          |          |
+|  2 |        G |        G |        G |        G |          |          |          |          |          |          |          |          |
+|  3 |        G |        G |     Y[1] |          |          |          |          |          |          |          |          |          |
+|  4 |        G |          |          |          |          |          |          |          |          |          |          |          |
+|  5 |        G |          |          |          |          |          |          |          |          |          |          |          |
+|  6 |          |          |          |          |          |          |          |          |          |          |          |          |
+|  1 |          |          |          |          |          |        R |        R |        R |        R |        R |        R |        R |
+|  2 |          |          |          |          |        R |        R |        R |        R |        R |        R |        R |        R |
+|  3 |          |          |          |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  4 |          |     Y[1] |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  5 |          |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  6 |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  7 |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+````
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+|      field |                value |                                         description |
+| ---------- | -------------------- | --------------------------------------------------- |
+|         id |                    6 |                                  contest identifier |
+|       name |                Liège |                                        contest name |
+|       npop |               685695 |                      Npop size (for diluted margin) |
+| voteMargin |                  210 |           (winner-loser) votes (smallest assertion) |
+|     margin | 0.001222603830177249 |   voteMargin / population size (smallest assertion) |
+|     payoff |             1.000505 | payoff factor for each mvr that agrees with the cvr |
+|    estMvrs |                 5914 |                     estimated number of mvrs needed |
+|   haveMvrs |                  640 |   number of mvrs that were sampled for this contest |
+|  mvrsExtra |                    0 |                                  (haveMvrs-estMvrs) |
+|   mvrLimit |                  640 |    limit on number of mvrs to audit; set by auditor |
+|    estRisk |    0.723989429460763 |                                      estimated risk |
+|       fail |                    1 |                      number of contested assertions |
+|      NCand |                   12 |                                number of candidates |
+|     nseats |                   14 |                                       nseats to win |
+
+DhondtContest 'Liège' (6) DHONDT voteForN=1 votes={14=179296, 16=137443, 12=103711, 19=91188, 9=49936, 5=21877, 8=13816, 15=10840, 21=10656, 6=8289, 22=3361, 2=1502} undervotes=53780, winners=[14, 16, 12, 19, 9] Nc=685695 Nphantoms=0 Nu=53780 sumVotes=631915
+nseats=14 winnerSeats={14=5, 16=3, 12=3, 19=2, 15=0, 8=0, 9=1, 6=0, 2=0, 21=0, 5=0, 22=0} belowMin=[15, 8, 6, 2, 21, 5, 22] threshold=0.05 minVotes=31596 Npop=685695 hasStyle=true
+minAssertion= fw=34570.3 fl=34360.8 fw-fl=210 dilutedMargin=0.001223 noerror=0.5003
+
+
+party             Round:           1 |           2 |           3 |           4 |           5 |           6 |
+2        BELG.UNIE-BUB*:        1502 |         751 |         500 |         375 |         300 |         250 |
+21               BLANCO*:       10656 |        5328 |        3552 |        2664 |        2131 |        1776 |
+5            CHEZ NOUS*:       21877 |       10938 |        7292 |        5469 |        4375 |        3646 |
+6    COLLECTIF CITOYEN*:        8289 |        4144 |        2763 |        2072 |        1657 |        1381 |
+8                 DéFI*:       13816 |        6908 |        4605 |        3454 |        2763 |        2302 |
+9                ECOLO :   49936 (9) |       24968 |       16645 |       12484 |        9987 |        8322 |
+12          LES ENGAGÉS :  103711 (3) |   51855 (8) |  34570 (14) |       25927 |       20742 |       17285 |
+14                   MR :  179296 (1) |   89648 (5) |   59765 (7) |  44824 (12) |  35859 (13) |       29882 |
+15                 N-VA*:       10840 |        5420 |        3613 |        2710 |        2168 |        1806 |
+16                   PS :  137443 (2) |   68721 (6) |  45814 (10) |       34360 |       27488 |       22907 |
+19                  PTB :   91188 (4) |  45594 (11) |       30396 |       22797 |       18237 |       15198 |
+22                  RMC*:        3361 |        1680 |        1120 |         840 |         672 |         560 |
+
+* failed threshold
+
+
+Relaxed Assertions (experimental)------------------------------------------
+Original Seat Ordering
+seat         winner-round     nvotes,   score, scoreDiff, maxRisk, maxAssertion
+( 1)                  MR/1 ,  179296, 179296,           , 0.000,
+( 2)                  PS/1 ,  137443, 137443,      41853, 0.000,
+( 3)         LES ENGAGÉS/1 ,  103711, 103711,      33732, 0.000,
+( 4)                 PTB/1 ,   91188,  91188,      12523, 0.000,
+( 5)                  MR/2 ,  179296,  89648,       1540, 0.000,
+( 6)                  PS/2 ,  137443,  68721,      20927, 0.000,
+( 7)                  MR/3 ,  179296,  59765,       8956, 0.000,
+( 8)         LES ENGAGÉS/2 ,  103711,  51855,       7910, 0.000,
+( 9)               ECOLO/1 ,   49936,  49936,       1919, 0.000,
+(10)                  PS/3 ,  137443,  45814,       4122, 0.000,
+(11)                 PTB/2 ,   91188,  45594,        220, 0.000,
+(12)                  MR/4 ,  179296,  44824,        770, 0.000,
+(13)                  MR/5 ,  179296,  35859,       8965, 0.050,
+(14)         LES ENGAGÉS/3 ,  103711,  34570,       1289, 0.724, LES ENGAGÉS/3-PS/4
+PS/4 ,  137443,  34360,        210, 0.724, LES ENGAGÉS/3-PS/4
+PTB/3 ,   91188,  30396,       3964, 0.004,
+MR/6 ,  179296,  29882,        514, 0.000,
+PS/5 ,  137443,  27488,       2394, 0.000,
+LES ENGAGÉS/4 ,  103711,  25927,       1561, 0.000,
+MR/7 ,  179296,  25613,        314, 0.000,
+
+Failures
+name, winningSeat, noerror,  estMvrs, samplesUsed,   risk
+LES ENGAGÉS/3-PS/4,          14,  0.5003,     5914,         640, 0.7240, 5914,
+
+
+Table 5
+yellowWinners: [(LES ENGAGÉS/3, 1)]
+yellowLosers: [(PS/4, 1)]
+Liège: {14=5, 16=3, 12=3, 19=2, 9=1, 15=0, 8=0, 6=0, 2=0, 21=0, 5=0, 22=0}
+
+|seat|       MR |       PS | LES ENGA |      PTB |    ECOLO |     N-VA |     DéFI | COLLECTI | BELG.UNI |   BLANCO | CHEZ NOU |      RMC |
+|----|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
+|  1 |        G |        G |        G |        G |        G |          |          |          |          |          |          |          |
+|  2 |        G |        G |        G |        G |          |          |          |          |          |          |          |          |
+|  3 |        G |        G |     Y[1] |          |          |          |          |          |          |          |          |          |
+|  4 |        G |          |          |          |          |          |          |          |          |          |          |          |
+|  5 |        G |          |          |          |          |          |          |          |          |          |          |          |
+|  6 |          |          |          |          |          |          |          |          |          |          |          |          |
+|  1 |          |          |          |          |          |        R |        R |        R |        R |        R |        R |        R |
+|  2 |          |          |          |          |        R |        R |        R |        R |        R |        R |        R |        R |
+|  3 |          |          |          |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  4 |          |     Y[1] |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  5 |          |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  6 |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  7 |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+
+Party Seat Ranges (Liège)
+ContestId=6
+|                     party | min | reported | max |
+|---------------------------|-----|----------|-----|
+|                   MR (14) |  5  |     5    |  5  |
+|                   PS (16) |  3  |     3    |  4  |
+|          LES ENGAGÉS (12) |  2  |     3    |  3  |
+|                  PTB (19) |  2  |     2    |  2  |
+|                ECOLO ( 9) |  1  |     1    |  1  |
+|                 N-VA (15) |  0  |     0    |  0  |
+|                 DéFI ( 8) |  0  |     0    |  0  |
+|    COLLECTIF CITOYEN ( 6) |  0  |     0    |  0  |
+|        BELG.UNIE-BUB ( 2) |  0  |     0    |  0  |
+|               BLANCO (21) |  0  |     0    |  0  |
+|            CHEZ NOUS ( 5) |  0  |     0    |  0  |
+|                  RMC (22) |  0  |     0    |  0  |
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+'Anvers' (1) DHONDT voteForN=1 votes={15=368877, 24=249826, 28=127973, 4=125894, 19=125257, 10=90370, 30=70890, 7=10341, 26=8639, 21=7221, 25=4213, 2=1686} undervotes=44400, winners=[24, 30, 19, 28, 15, 10, 4] Nc=1235587 Nphantoms=0 Nu=44400 sumVotes=1191187
+nseats=24 winnerSeats={24=5, 30=1, 25=0, 19=2, 28=3, 15=8, 10=2, 4=3, 26=0, 7=0, 21=0, 2=0} belowMin=[25, 26, 7, 21, 2] threshold=0.05 minVotes=59560
+Relaxed Assertion Report (experimental)-------------------------------------
+Original Seat Ordering
+seat         winner-round     nvotes,   score, scoreDiff, maxRisk, maxAssertion
+( 1)                N-VA/1 ,  368877, 368877,           , 0.000,
+( 2)       VLAAMS BELANG/1 ,  249826, 249826,     119051, 0.000,
+( 3)                N-VA/2 ,  368877, 184438,      65388, 0.000,
+( 4)             Vooruit/1 ,  127973, 127973,      56465, 0.000,
+( 5)                CD&V/1 ,  125894, 125894,       2079, 0.000,
+( 6)                PVDA/1 ,  125257, 125257,        637, 0.000,
+( 7)       VLAAMS BELANG/2 ,  249826, 124913,        344, 0.000,
+( 8)                N-VA/3 ,  368877, 122959,       1954, 0.000,
+( 9)                N-VA/4 ,  368877,  92219,      30740, 0.000,
+(10)               GROEN/1 ,   90370,  90370,       1849, 0.000,
+(11)       VLAAMS BELANG/3 ,  249826,  83275,       7095, 0.000,
+(12)                N-VA/5 ,  368877,  73775,       9500, 0.000,
+(13)            open vld/1 ,   70890,  70890,       2885, 0.000,
+(14)             Vooruit/2 ,  127973,  63986,       6904, 0.000,
+(15)                CD&V/2 ,  125894,  62947,       1039, 0.000,
+(16)                PVDA/2 ,  125257,  62628,        319, 0.000,
+(17)       VLAAMS BELANG/4 ,  249826,  62456,        172, 0.000,
+(18)                N-VA/6 ,  368877,  61479,        977, 0.000,
+(19)                N-VA/7 ,  368877,  52696,       8783, 0.000,
+(20)       VLAAMS BELANG/5 ,  249826,  49965,       2731, 0.000,
+(21)                N-VA/8 ,  368877,  46109,       3856, 0.000,
+(22)               GROEN/2 ,   90370,  45185,        924, 0.002,
+(23)             Vooruit/3 ,  127973,  42657,       2528, 0.136, Vooruit/3-PVDA/3
+(24)                CD&V/3 ,  125894,  41964,        693, 0.626, CD&V/3-PVDA/3
+                    PVDA/3 ,  125257,  41752,        212, 0.626, CD&V/3-PVDA/3
+           VLAAMS BELANG/6 ,  249826,  41637,        115, 0.383, CD&V/3-VLAAMS BELANG/6
+                    N-VA/9 ,  368877,  40986,        651, 0.039,
+                   N-VA/10 ,  368877,  36887,       4099, 0.000,
+           VLAAMS BELANG/7 ,  249826,  35689,       1198, 0.000,
+                open vld/2 ,   70890,  35445,        244, 0.000,
+
+Failures
+name, winningSeat, noerror,  estMvrs, samplesUsed,   risk
+CD&V/3-VLAAMS BELANG/6,          24,  0.5003,     5866,        1884, 0.3826, 5866,
+Vooruit/3-PVDA/3,          23,  0.5006,     2828,        1884, 0.1359, 2828,
+CD&V/3-PVDA/3,          24,  0.5001,    12016,        1884, 0.6264, 12016,
+
+
+Table 5
+yellowWinners: [(CD&V/3, 1), (Vooruit/3, 2), (CD&V/3, 3)]
+yellowLosers: [(VLAAMS BELANG/6, 1), (PVDA/3, 2), (PVDA/3, 3)]
+Anvers: {15=8, 24=5, 28=3, 4=3, 19=2, 10=2, 30=1, 25=0, 26=0, 7=0, 21=0, 2=0}
+
+|seat|     N-VA | VLAAMS B |  Vooruit |     CD&V |     PVDA |    GROEN | open vld | Volt Eur |   Voor U | DierAnim | Partij B | BELG.UNI |
+|----|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
+|  1 |        G |        G |        G |        G |        G |        G |        G |          |          |          |          |          |
+|  2 |        G |        G |        G |        G |        G |        G |          |          |          |          |          |          |
+|  3 |        G |        G |     Y[2] |  Y[1, 3] |          |          |          |          |          |          |          |          |
+|  4 |        G |        G |          |          |          |          |          |          |          |          |          |          |
+|  5 |        G |        G |          |          |          |          |          |          |          |          |          |          |
+|  6 |        G |          |          |          |          |          |          |          |          |          |          |          |
+|  7 |        G |          |          |          |          |          |          |          |          |          |          |          |
+|  8 |        G |          |          |          |          |          |          |          |          |          |          |          |
+|  9 |          |          |          |          |          |          |          |          |          |          |          |          |
+|  1 |          |          |          |          |          |          |          |        R |        R |        R |        R |        R |
+|  2 |          |          |          |          |          |          |        R |        R |        R |        R |        R |        R |
+|  3 |          |          |          |          |  Y[2, 3] |        R |        R |        R |        R |        R |        R |        R |
+|  4 |          |          |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  5 |          |          |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  6 |          |     Y[1] |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  7 |          |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  8 |          |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+|  9 |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+| 10 |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |        R |
+
+Party Seat Ranges (Anvers)
+ContestId=1
+|                     party | min | reported | max |
+|---------------------------|-----|----------|-----|
+|                 N-VA (15) |  8  |     8    |  8  |
+|        VLAAMS BELANG (24) |  5  |     5    |  6  |
+|                 PVDA (19) |  2  |     2    |  3  |
+|              Vooruit (28) |  2  |     3    |  3  |
+|                 CD&V ( 4) |  2  |     3    |  3  |
+|                GROEN (10) |  2  |     2    |  2  |
+|             open vld (30) |  1  |     1    |  1  |
+|          Volt Europa (25) |  0  |     0    |  0  |
+|               Voor U (26) |  0  |     0    |  0  |
+|           DierAnimal ( 7) |  0  |     0    |  0  |
+|        Partij BLANCO (21) |  0  |     0    |  0  |
+|        BELG.UNIE-BUB ( 2) |  0  |     0    |  0  |
+

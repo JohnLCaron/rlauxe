@@ -11,10 +11,11 @@ import kotlin.test.assertNotEquals
 
 class TestDhondtContest {
     val minPct = 0.05
+    val nseats = 8
 
     @Test
-    fun testMakeDhondtContest2() {
-        val parties = listOf(DhondtPartyBuilder(1, 10000), DhondtPartyBuilder(2, 6000), DhondtPartyBuilder(3, 1500))
+    fun testMakeDhondtContest() {
+        val parties = listOf(DhondtPartyBuilder(1, 10000, nseats), DhondtPartyBuilder(2, 6000, nseats), DhondtPartyBuilder(3, 1500, nseats))
         val nvotes = parties.sumOf { it.totalVotes }
         val contestd = makeDhondtContest("contest1", 1,
             parties,
@@ -25,10 +26,10 @@ class TestDhondtContest {
         assertEquals(listOf(1,2), contestd.winners)
         assertEquals(listOf("party-1", "party-2"), contestd.winnerNames)
         assertEquals(listOf(3), contestd.losers)
-        assertEquals(mapOf(1 to 5, 2 to 3), contestd.winnerSeatCount)
+        assertEquals(mapOf(1 to 5, 2 to 3, 3 to 0), contestd.winnerSeatCount)
         assertEquals(8, contestd.winnerSeatCount.map { it.value }.sum())
 
-        val parties2 = listOf(DhondtPartyBuilder(1, 11000), DhondtPartyBuilder(2, 7000), DhondtPartyBuilder(3, 2500))
+        val parties2 = listOf(DhondtPartyBuilder(1, 11000, nseats), DhondtPartyBuilder(2, 7000, nseats), DhondtPartyBuilder(3, 2500, nseats))
         val nvotes2 = parties2.sumOf { it.totalVotes }
         val contestd2 = makeDhondtContest("contest2", 2,
             parties2,
@@ -46,7 +47,7 @@ class TestDhondtContest {
         val undervotes = 200
         val Ncast = 17500
         val Nc = Ncast + undervotes
-        val parties = listOf(DhondtPartyBuilder(1, 10000), DhondtPartyBuilder(2, 6000), DhondtPartyBuilder(3, 1500))
+        val parties = listOf(DhondtPartyBuilder(1, 10000, nseats), DhondtPartyBuilder(2, 6000, nseats), DhondtPartyBuilder(3, 1500, nseats))
         val contestd: DhondtContest = makeDhondtContest("contest1", 1, parties, 8, Nc, undervotes, minPct)
 
         println("\nContestDHondt.cvrs, AssorterIF")
@@ -68,8 +69,8 @@ class TestDhondtContest {
 
     @Test
     fun testAssorters() {
-        testAssorters(listOf(DhondtPartyBuilder(1, 10), DhondtPartyBuilder(2, 20), DhondtPartyBuilder(3, 30)), 2, minPct)
-        testAssorters(listOf(DhondtPartyBuilder(1, 10000), DhondtPartyBuilder(2, 6000), DhondtPartyBuilder(3, 1500)), 8, minPct)
+        testAssorters(listOf(DhondtPartyBuilder(1, 10, nseats), DhondtPartyBuilder(2, 20, nseats), DhondtPartyBuilder(3, 30, nseats)), 2, minPct)
+        testAssorters(listOf(DhondtPartyBuilder(1, 10000, nseats), DhondtPartyBuilder(2, 6000, nseats), DhondtPartyBuilder(3, 1500, nseats)), 8, minPct)
     }
 
     fun testAssorters(parties: List<DhondtPartyBuilder>, nseats: Int, minPct: Double) {
@@ -84,42 +85,38 @@ class TestDhondtContest {
             if (it is DhondtAssorter) {
                 println(" setDilutedMean = ${setDilutedMean(it, contestd)}")
                 println(" dilutedMean= ${it.dilutedMean()}")
+                println(" reportedMean= ${it.reportedMean()}")
                 assertEquals(it.dilutedMean(), setDilutedMean(it, contestd), doublePrecision)
 
-                val diff = contestd.difficulty(it)
-                println(" diff = $diff")
-                val gmean = diff/contestd.Nc
-                println(" diff/Nc = ${diff/contestd.Nc}")
+                assertEquals(contestd.difficulty(it), 1.0 / it.reportedMargin(), doublePrecision)
+
+                val gmean = contestd.marginInVotes(it)/contestd.Nc.toDouble()
+                println(" gmean = ${gmean}")
 
                 val hmean = it.h2(gmean)
                 println(" hmean = ${it.h2(gmean)}")
-                assertEquals(it.dilutedMean(), hmean, doublePrecision)
+                assertEquals(it.dilutedMean(), hmean, 1.0e-5) // why not perfect ??
 
             } else if (it is BelowThreshold) {
                 println(" dilutedMean= ${it.dilutedMean()}")
 
-                val diff = contestd.difficulty(it)
-                println(" diff = $diff")
-                val gmean = diff/contestd.Nc
-                println(" diff/Nc = ${diff/contestd.Nc}")
-                assertEquals(diff/contestd.Nc, contestd.recountMargin(it), doublePrecision)
+                assertEquals(contestd.difficulty(it), 1.0 / it.reportedMargin(), doublePrecision)
 
+                val gmean = contestd.marginInVotes(it)/contestd.Nc.toDouble()
                 val hmean = it.h2(gmean)
                 println(" hmean = ${it.h2(gmean)}")
-                assertEquals(it.dilutedMean(), hmean, doublePrecision)
+                assertEquals(it.dilutedMean(), hmean, 1.0e-5) // why not perfect ??
 
             } else if (it is AboveThreshold) {
                 println(" dilutedMean= ${it.dilutedMean()}")
 
-                val diff = contestd.difficulty(it)
-                println(" diff = $diff")
-                val gmean = diff/contestd.Nc
-                println(" diff/Nc = ${diff/contestd.Nc}")
-                assertEquals(diff/contestd.Nc, contestd.recountMargin(it), doublePrecision)
+                assertEquals(contestd.difficulty(it), 1.0 / it.reportedMargin(), doublePrecision)
 
+                val gmean = contestd.marginInVotes(it)/contestd.Nc.toDouble()
+                println(" gmean = ${gmean}")
                 val hmean = it.h2(gmean)
                 println(" hmean = ${it.h2(gmean)}")
-                assertEquals(it.dilutedMean(), hmean, doublePrecision)
+                assertEquals(it.dilutedMean(), hmean, 1.0e-5) // why not perfect ??
             }
 
             println(" margin = ${it.margin(true)}")

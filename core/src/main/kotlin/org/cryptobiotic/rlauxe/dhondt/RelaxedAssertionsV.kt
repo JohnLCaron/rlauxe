@@ -5,13 +5,17 @@ import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder.Companion.makeDhAssorterFromDivisors
+import org.cryptobiotic.rlauxe.dhondt.DhondtContest
+import org.cryptobiotic.rlauxe.dhondt.DhondtParty
 import org.cryptobiotic.rlauxe.util.nfn
 import kotlin.collections.forEach
+import kotlin.collections.plus
 import kotlin.collections.setOf
 import kotlin.io.println
 
+private val logger = KotlinLogging.logger("RelaxedAssertionsV")
+
 class RelaxedAssertionsV(val orgContest: DhondtContest,
-                         val fromAssorters: List<AssorterIF>,
                          override val Npop: Int,
                          override val nsamples: Int,
                          override val alpha: Double,
@@ -24,31 +28,32 @@ class RelaxedAssertionsV(val orgContest: DhondtContest,
 
     val singleFailure: Boolean
     val altContest: DhondtContest
-    val candidateRanges: ContestRanges
+    val contestRange: ContestRange
     val assortersForProof: List<AssorterIF>
 
     init {
         logger.debug { "Contest ${orgInfo.name} haveSampleSize=${nsamples}" }
         failures = failuresIn.toMutableList()
 
-        // single DH failure
+        // single DH failure - Proposition 3
         singleFailure = (failures.size == 1)
         if (singleFailure) {
-            altContest = DhondtBuilderV(orgContest, failures.first()).build()
-            candidateRanges = ContestRanges(altContest, failures)
+            altContest = DhondtBuilderV3(orgContest, failures.first()).build()
+            contestRange = ContestRange(altContest)
             assortersForProof = altContest.assorters
+
         } else {
             // multiple DH failure
-            val algo  = multipleFailures()
-            altContest = orgContest // TODO
-            candidateRanges = algo.contestRanges(orgContest)
-            assortersForProof = algo.assortersForProof + orgContest.assorters.filter { it !is DhondtAssorter } // add the threshold assorters
+            val algo = DHrelaxingAlgorithm()
+            altContest = algo.buildContest()
+            contestRange = algo.contestRanges(altContest)
+            assortersForProof = altContest.assorters // is this always true ??
         }
     }
 
     override fun altContest() = altContest
     override fun assortersForProof() = assortersForProof
-    override fun contestRanges() = candidateRanges
+    override fun contestRange() = contestRange
     override fun failures() = failures
 
     override fun show() = buildString {
@@ -61,10 +66,35 @@ class RelaxedAssertionsV(val orgContest: DhondtContest,
         appendLine()
         append(showTable5(altContest, failures))
         appendLine()
-        append(candidateRanges.showSeatRanges())
+        // append(candidateRanges.showSeatRanges())
     }
 
-    class DHrelaxingAlgorithm() {
+    class PartyCount(val party: DhondtParty, val nseats: Int) {
+        val id = party.id
+        var dhw: Int = nseats
+        var dhu: Int = 0  // TODO divide into 2 groups
+        var dhuw: Int = 0
+        var dhul: Int = 0
+        var dhl: Int = party.nCandidates
+
+        fun toPartyRange(): PartyRange {
+            val pr = PartyRange(party.id, party.partyName)
+                pr.reportedSeats = nseats
+                pr.minSeats = nseats - dhuw
+                pr.maxSeats = nseats + dhul
+            return pr
+        }
+
+        override fun toString() = buildString {
+            append("PartyCount(party=${nfn(party.id, 2)}, nseats=${nfn(nseats, 2)} id=${nfn(id, 2)}, dhw=$dhw, dhu=$dhu, dhl=$dhl)")
+        }
+    }
+
+    data class PartyAndDh(val step: Int, val winnerId: Int, val loserId: Int, val dh: DhondtAssorter)
+
+    // Section 4.3.2 Relaxing multiple DH comparisons
+    // DH winner-loser pairs can be relaxed iteratively, by maintaining counts for each party:
+    inner class DHrelaxingAlgorithm() {
         val partyCounts = mutableMapOf<Int, PartyCount>()
         val uncertainWinners = mutableListOf<String>()
         val uncertainLosers = mutableListOf<String>()
@@ -72,141 +102,172 @@ class RelaxedAssertionsV(val orgContest: DhondtContest,
 
         var round = 0
 
+        init {
+            val parties = orgContest.parties
+            parties.forEach {
+                partyCounts[it.id] = PartyCount(it, orgContest.winnerSeatCount[it.id]!!)
+            }
+            println("${show()}")
+
+            var accept = false
+            while (!accept) {
+                round++
+                accept = step3(this)
+                println("${this.show()}")
+                println()
+            }
+            println("done")
+        }
+
+        fun step3(algo: DHrelaxingAlgorithm): Boolean {
+            val partyCounts = algo.partyCounts
+
+            // "Calculate sample sizes" -> calculate noerror
+            val partyDhs = mutableListOf<PartyAndDh>()
+
+
+            // a) For all A ∈ P with DHW (A) > 0, for all parties B ̸= A with DHU (B) > 0
+            //    DHA,B (DHW (A), DHW (B) + 1)
+            // (Every clear winner defeats every uncertain outcome.)
+            partyCounts.values.forEach { partyA ->
+                if (partyA.dhw > 0) {
+                    partyCounts.values.filter { it.id != partyA.id && it.dhu > 0 }.forEach { partyB ->
+                        partyDhs.add(
+                            PartyAndDh(
+                                1, partyA.id, partyB.id,
+                                makeDhAssorterFromDivisors(orgContest.info, partyA.party, partyA.dhw, partyB.party, partyB.dhw + 1, orgContest.Nc)
+                            )
+                        )
+                        if (partyDhs.last().dh.shortName() == "PVDA/3-N-VA/9")
+                            print("")
+                    }
+                }
+            }
+
+            // b) For all A ∈ P with DHU (A) > 0, for all parties B ̸= A with DHL (B) > 0,
+            //     DHA,B (DHW (A) + DHU (A), DHW (B) + DHU (B) + 1).
+            // (Every uncertain outcome defeats every clear loser.)
+            partyCounts.values.forEach { partyA ->
+                if (partyA.dhu > 0) {
+                    partyCounts.values.filter { it.id != partyA.id && it.dhl > 0 }.forEach { partyB ->
+                        partyDhs.add(
+                            PartyAndDh(
+                                2, partyA.id, partyB.id,
+                                makeDhAssorterFromDivisors(
+                                    orgContest.info,
+                                    partyA.party,
+                                    partyA.dhw + partyA.dhu,
+                                    partyB.party,
+                                    partyB.dhw + partyB.dhu + 1,
+                                    orgContest.Nc
+                                )
+                            )
+                        )
+                        if (partyDhs.last().dh.shortName() == "PVDA/3-N-VA/9")
+                            print("")
+                    }
+                }
+            }
+
+            // c) For all A ∈ P with DHW (A) > 0, and DHU (A) = 0 for all parties B ̸= A with DHL (B) > 0 and DHU (B) = 0,
+            //      DHA,B (DHW (A), DHW (B) + DHU (B) + 1).
+            // (Every clear winner defeats every clear loser for parties with no uncertain candidates.)
+            partyCounts.values.forEach { partyA ->
+                if (partyA.dhw > 0 && partyA.dhu == 0) {
+                    partyCounts.values.filter { it.id != partyA.id && it.dhl > 0 && it.dhu == 0 }.forEach { partyB ->
+                        partyDhs.add(
+                            PartyAndDh(
+                                3, partyA.id, partyB.id,
+                                makeDhAssorterFromDivisors(orgContest.info, partyA.party, partyA.dhw, partyB.party, partyB.dhw + partyB.dhu + 1, orgContest.Nc)
+                            )
+                        )
+                        if (partyDhs.last().dh.shortName() == "PVDA/3-N-VA/9")
+                            print("")
+                    }
+                }
+            }
+
+            val minPartyCount = partyDhs.minByOrNull { it.dh.noerror(true) }!!
+            val estMvrs = estSampleSizeStandardBet(Npop, minPartyCount.dh.noerror(true), alpha)
+            println("round ${algo.round} nassert=${partyDhs.size} estMvrs=$estMvrs assert='${minPartyCount.dh}'")
+
+            if (estMvrs < nsamples) {
+                algo.assortersForProof = partyDhs.map { it.dh }
+                return true
+            }
+
+            val partyA = partyCounts[minPartyCount.dh.winnerId]!!
+            val partyB = partyCounts[minPartyCount.dh.loserId]!!
+            when (minPartyCount.step) {
+                1 -> {
+                    partyA.dhw--; partyA.dhu++; algo.uncertainWinners.add(minPartyCount.dh.winnerNameRound())
+                } // move A’s lowest winner into “uncertain”
+                2 -> {
+                    partyB.dhl--; partyB.dhu++; algo.uncertainLosers.add(minPartyCount.dh.loserNameRound())
+                } // move B’s highest loser into “uncertain”
+                3 -> {
+                    partyA.dhw--; partyB.dhl++; partyA.dhu++; partyB.dhu++
+                    algo.uncertainWinners.add(minPartyCount.dh.winnerNameRound()) // move A’s lowest winner and B’s highest loser into “uncertain”
+                    algo.uncertainLosers.add(minPartyCount.dh.loserNameRound())
+                }
+
+                else -> throw RuntimeException()
+            }
+
+            return false
+        }
+
         fun show() = buildString {
-            partyCounts.values.forEach { appendLine("   ${it}")}
+            partyCounts.values.forEach { appendLine("   ${it}") }
             appendLine("uncertainWinners = $uncertainWinners")
             appendLine("uncertainLosers = $uncertainLosers")
         }
 
         // not sure of this
-        fun contestRanges(dcontest: DhondtContest) : ContestRanges {
-            val cr = ContestRanges(dcontest, emptyList())
-            cr.partyRanges.values.forEach { partyRange ->
-                val uw = uncertainWinners.filter{ it.startsWith(partyRange.partyName) }.count()
-                val ul = uncertainLosers.filter{ it.startsWith(partyRange.partyName) }.count()
+        fun contestRanges(dcontest: DhondtContest): ContestRange {
+            val cr = ContestRange(dcontest)
+            /* cr.partyRanges.values.forEach { partyRange ->
+                val uw = uncertainWinners.filter { it.startsWith(partyRange.partyName) }.count()
+                val ul = uncertainLosers.filter { it.startsWith(partyRange.partyName) }.count()
                 partyRange.minSeats -= uw
                 partyRange.maxSeats += ul
-            }
+            } */
             return cr
         }
-    }
 
-    class PartyCount(val party: DhondtParty, val nseats: Int) {
-        val id = party.id
-        var dhw: Int = nseats
-        var dhu: Int = 0
-        var dhuw: Int = 0
-        var dhul: Int = 0
-        var dhl: Int = 999
-
-        override fun toString() = buildString {
-            append("PartyCount(party=${nfn(party.id, 2)}, nseats=${nfn(nseats, 2)} id=${nfn(id, 2)}, dhw=$dhw, dhu=$dhu, dhl=$dhl)")
+        fun buildContest(): DhondtContest {
+            val assorters = assortersForProof + orgContest.assorters.filter { it !is DhondtAssorter } // add the threshold assorters
+            return DhondtBuilderV432(orgContest, assorters).build()
         }
     }
 
-    data class PartyDh(val step: Int, val winnerId: Int, val loserId: Int, val dh: DhondtAssorter)
+    // Section 4.3.2. Relaxing multiple DH comparisons
+    open class DhondtBuilderV432(
+        val from: DhondtContest,
+        val assorters: List<AssorterIF>,
+    ) : DhondtBuilder(from) {
 
-    // 4.3.1
-    fun multipleFailures(): DHrelaxingAlgorithm {
-        val algo = DHrelaxingAlgorithm()
-        val parties = orgContest.parties
-        parties.forEach {
-            algo.partyCounts[it.id] = PartyCount(it, orgContest.winnerSeatCount[it.id]!!)
+        override fun build(): DhondtContest {
+            val votes = partyBs.associate { Pair(it.id, it.totalVotes) }
+            val parties = partyBs.map { it.build() }
+
+            return DhondtContest(
+                info,
+                votes,
+                this.Nc,
+                Ncast = this.validVotes + this.undervotes,
+                parties,
+                sortedScores,
+                assorters,
+                thresholdOverride,
+            )
         }
-        println("${algo.show()}")
-
-        var accept = false
-        while(!accept) {
-            algo.round++
-            accept = step3(algo)
-            println("${algo.show()}")
-            println()
-        }
-        println("done")
-        return algo
-    }
-
-    fun step3(algo: DHrelaxingAlgorithm): Boolean {
-        val partyCounts = algo.partyCounts
-
-        // "Calculate sample sizes" -> calculate noerror
-        val partyDhs = mutableListOf<PartyDh>()
-
-        if (algo.round == 4)
-            print("")
-
-        // a) For all A ∈ P with DHW (A) > 0, for all parties B ̸= A with DHU (B) > 0
-        //    DHA,B (DHW (A), DHW (B) + 1)
-        // (Every clear winner defeats every uncertain outcome.)
-        partyCounts.values.forEach { partyA ->
-            if (partyA.dhw > 0) {
-                partyCounts.values.filter { it.id != partyA.id && it.dhu > 0 }.forEach { partyB ->
-                    partyDhs.add(PartyDh(1, partyA.id, partyB.id,
-                        makeDhAssorterFromDivisors(orgContest.info, partyA.party, partyA.dhw, partyB.party, partyB.dhw + 1, orgContest.Nc)))
-                    if (partyDhs.last().dh.shortName() == "PVDA/3-N-VA/9")
-                        print("")
-                }
-            }
-        }
-
-        // b) For all A ∈ P with DHU (A) > 0, for all parties B ̸= A with DHL (B) > 0,
-        //     DHA,B (DHW (A) + DHU (A), DHW (B) + DHU (B) + 1).
-        // (Every uncertain outcome defeats every clear loser.)
-        partyCounts.values.forEach { partyA ->
-            if (partyA.dhu > 0) {
-                partyCounts.values.filter { it.id != partyA.id && it.dhl > 0 }.forEach { partyB ->
-                    partyDhs.add(PartyDh(2, partyA.id, partyB.id,
-                        makeDhAssorterFromDivisors(orgContest.info, partyA.party, partyA.dhw + partyA.dhu, partyB.party, partyB.dhw + partyB.dhu + 1, orgContest.Nc)))
-                    if (partyDhs.last().dh.shortName() == "PVDA/3-N-VA/9")
-                        print("")
-                }
-            }
-        }
-
-        // c) For all A ∈ P with DHW (A) > 0, and DHU (A) = 0 for all parties B ̸= A with DHL (B) > 0 and DHU (B) = 0,
-        //      DHA,B (DHW (A), DHW (B) + DHU (B) + 1).
-        // (Every clear winner defeats every clear loser for parties with no uncertain candidates.)
-        partyCounts.values.forEach { partyA ->
-            if (partyA.dhw > 0 && partyA.dhu == 0) {
-                partyCounts.values.filter { it.id != partyA.id && it.dhl > 0 && it.dhu == 0 }.forEach { partyB ->
-                    partyDhs.add(PartyDh(3, partyA.id, partyB.id,
-                        makeDhAssorterFromDivisors(orgContest.info, partyA.party, partyA.dhw, partyB.party, partyB.dhw + partyB.dhu + 1, orgContest.Nc)))
-                    if (partyDhs.last().dh.shortName() == "PVDA/3-N-VA/9")
-                        print("")
-                }
-            }
-        }
-
-        val minPartyCount = partyDhs.minByOrNull { it.dh.noerror(true) }!!
-        val estMvrs = estSampleSizeStandardBet(Npop, minPartyCount.dh.noerror(true), alpha)
-        println("round ${algo.round} nassert=${partyDhs.size} estMvrs=$estMvrs assert='${minPartyCount.dh}'")
-
-        if (estMvrs < nsamples) {
-            algo.assortersForProof = partyDhs.map { it.dh }
-            return true
-        }
-
-        val partyA = partyCounts[minPartyCount.dh.winnerId]!!
-        val partyB = partyCounts[minPartyCount.dh.loserId]!!
-        when (minPartyCount.step) {
-            1 -> { partyA.dhw--; partyA.dhu++; algo.uncertainWinners.add(minPartyCount.dh.winnerNameRound()) } // move A’s lowest winner into “uncertain”
-            2 -> { partyB.dhl--; partyB.dhu++; algo.uncertainLosers.add(minPartyCount.dh.loserNameRound()) } // move B’s highest loser into “uncertain”
-            3 -> { partyA.dhw--; partyB.dhl++;  partyA.dhu++; partyB.dhu++
-                algo.uncertainWinners.add(minPartyCount.dh.winnerNameRound()) // move A’s lowest winner and B’s highest loser into “uncertain”
-                algo.uncertainLosers.add(minPartyCount.dh.loserNameRound())
-            }
-            else -> throw RuntimeException()
-        }
-
-        return false
-    }
-
-    companion object {
-        private val logger = KotlinLogging.logger("RelaxedAssertionsV")
     }
 }
 
-open class DhondtBuilderV(
+
+// Proposition 3 for single DH failure
+open class DhondtBuilderV3(
     from: DhondtContest,
     val failAssertion: DhondtFailure,
 ): DhondtBuilder(from) {
@@ -280,5 +341,89 @@ open class DhondtBuilderV(
             assorters,
             thresholdOverride,
         )
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// threshold = TODO
+
+class ThresholdAssertionsV(val orgContest: DhondtContest,
+                           override val Npop: Int,
+                           override val nsamples: Int,
+                           override val alpha: Double,
+                           val failures: List<DhondtFailure>,
+                           tfailures: List<ThresholdFailure>,
+): RelaxedAssertionsIF {
+    val tfailure = tfailures.first()
+    val from = tfailure.tcontest
+    val tpartyId = tfailure.btAssorter.partyId
+    val tparty = tfailure.tcontest.parties.find { it.id == tpartyId }!!
+
+    val assorters = mutableListOf<AssorterIF>()
+
+    override fun altContest(): DhondtContest {
+        TODO("Not yet implemented")
+    }
+
+    override fun assortersForProof() = assorters
+
+    override fun contestRange() = ContestRange(orgContest)
+
+    override fun failures() = failures
+
+    override fun show(): String {
+        TODO("Not yet implemented")
+    }
+
+    init {
+        // Let σ be the seat allocation if AT (R) is true
+        // let x : P → N be the function that gives extra seats to parties if AT (R) is false.
+        val sigma = DhondtBuilder(from, emptySet<Int>())
+        val delta = DhondtBuilder(from, setOf(tparty.id))
+
+        val sigmaParties = sigma.partyBs.map { it.build() }
+        val deltaParties = delta.partyBs.map { it.build() }
+
+        // define W1 the set of parties that have at least one reported winner according to σ
+        // define W2 the set of parties that have at least one reported winner according to σ + x; W2 = W1 \ {R}
+        val winningParties1 = sigmaParties.filter { it.lastSeatWon > 0 }.toSet()
+        val winningParties2 = deltaParties.filter { it.lastSeatWon > 0 }.toSet()
+
+        // Let L1 be the set of parties with at least one loser according to σ
+        // Let L2 be the set of parties with at least one loser according to σ + x; L2 \ {R} ⊆ L1
+        val losingParties1 = sigmaParties.filter { it.firstSeatLost > 0 }.toSet()
+        val losingParties2 = deltaParties.filter { it.firstSeatLost > 0 }.toSet()
+
+        // The following assertions imply that for all P ∈ P, P received at least σ(P ) and at most σ(P ) + x(P ) seats.
+
+        // (11) AT(A) for all A ∈ W2
+        winningParties2.forEach { winner ->
+            assorters.add(AboveThreshold.makeFromVotes(from.info, partyId = winner.id, from.votes, from.info.minFraction!!, from.Nc))
+        }
+
+        // (12) BT(B) OR ( AND(DH_AB(σ(A), σ(B) + 1)( for all A in W1) for all B ∈ L1
+        losingParties1.forEach { loser ->
+            winningParties1.filter{it.id != loser.id}.forEach { winner ->
+                assorters.add(
+                    btOrBh(
+                        from.info, winner, sigma.winnerSeatCount[winner.id]!!,
+                        loser, sigma.winnerSeatCount[loser.id]!! + 1, from.votes, from.Nc
+                    )
+                )
+            }
+        }
+
+        // (13) BT(B) OR ( AND(DH_AB((σ(A) + x(A), σ(B) + x(B) + 1))) for all A in W2, all B in L2\R )
+        val losersNotR: Set<DhondtParty> = losingParties2 - setOf(tparty)
+        losersNotR.forEach { loser ->
+            winningParties2.filter{it.id != loser.id}.forEach { winner ->
+                assorters.add(
+                    btOrBh(
+                        from.info, winner, delta.winnerSeatCount[winner.id]!!,
+                        loser, delta.winnerSeatCount[loser.id]!! + 1, from.votes, from.Nc
+                    )
+                )
+            }
+        }
     }
 }

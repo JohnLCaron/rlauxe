@@ -34,10 +34,14 @@ class TestAuditRoundJson {
 
         // interesting: the dcontest assorters didnt make it through the serialization (inside contestRound.contestUA).....
         val dcontest = contestRound.contestUA.contest as DhondtContest
-        assertTrue(dcontest.assorters.isEmpty()) // wtf ??
+        println("contestRound.contestUA.contest.assorters.size = ${dcontest.assorters.size}") // wtf ??
+        // assertTrue(dcontest.assorters.isEmpty()) // wtf ??
 
         // this seems to be the workaround; can we add it to the deserializer ?
-        val useAssorters = contestRound.contestUA.clcaAssertions.map { it.assorter }
+        val clcaAssorters = contestRound.contestUA.clcaAssertions.map { it.assorter }
+        println("contestRound.contestUA.clcaAssertions.assorters.size = ${clcaAssorters.size}") // wtf ??
+
+        assertEquals(dcontest.assorters, clcaAssorters)
 
         // the deserializer uses
         // DhondtContest.fromVotes(info, this.votes!!, this.Nc, this.Ncast)
@@ -289,7 +293,8 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripWithDHondt() {
-        val parties = listOf(DhondtPartyBuilder(1, 10000), DhondtPartyBuilder(2, 6000), DhondtPartyBuilder(3, 1500))
+        val nseats = 11
+        val parties = listOf(DhondtPartyBuilder(1, 10000, nseats), DhondtPartyBuilder(2, 6000, nseats), DhondtPartyBuilder(3, 1500, nseats))
         val nvotes = parties.sumOf{ it.totalVotes }
         val contestd = makeDhondtContest("contest1", 1, parties, 8, nvotes, 0, 0.01)
         val contests = listOf(contestd)

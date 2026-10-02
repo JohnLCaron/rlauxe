@@ -87,6 +87,7 @@ interface ContestIF {
     fun winnerNames(): List<String>
     fun winners(): List<Int>
     fun losers(): List<Int>
+    fun hasNoLosers(): Boolean { return (losers().size == 0) }
 
     fun undervotePct() = roundToClosest(100.0 * Nundervotes() / (info().voteForN * Nc())) // for viewer
     fun isIrv() = choiceFunction == SocialChoiceFunction.IRV

@@ -11,101 +11,98 @@ import kotlin.text.appendLine
 val candNameWidth = 20
 
 ///////////////////////////////////////////////////////////////////
-// this is for one contest
-
-class ContestRanges(val dcontest: DhondtContest, val failures: List<DhondtFailure>) {
-    // all party's min/max/reported
-    val partyRanges = mutableMapOf<Int, PartyRange>() // one for each candidate
+// all party's min/max/reported for one contest
+class ContestRange(val dcontest: DhondtContest) {
+    private val partyMap = mutableMapOf<Int, PartyRange>() // one for each candidate
+    private val dhFailures = mutableListOf<DhondtFailure>()
 
     init {
+        // all parties have an entry
         dcontest.parties.forEach { party ->
-            partyRanges[party.id] = PartyRange(party.id, party.partyName)
+            partyMap[party.id] = PartyRange(party.id, party.partyName)
         }
         dcontest.winnerSeatCount.forEach { partyId, nseats ->
-            partyRanges[partyId]!!.setReportedSeats2(nseats)
-        }
-        addFailingAssertion(failures)
-    }
-
-    fun mergeAltContest(alt: ContestRanges) {
-        alt.partyRanges.values.forEach { altRange ->
-            val myRange = this.partyRanges[altRange.partyId]!!
-            myRange.expandRange(altRange)
-        }
-    }
-
-    /* Failed DH assertions divide the seats into 3 groups.
-    **Yellow seats**: Seats that have a failing assertion.
-    **Green seats**: Seats above the yellow are definite winners. Each is either blocked by a seat of the same party below it,
-    or if it is the lowest winning candidate, has a non-failing assertion for every other candidate, which confirms its winning status.
-    **Red seats**: Seats below the yellow are definite losers. Each is either blocked by a seat of the same party above it, or if it
-    is the highest losing candidate, has a non-failing assertion for every other candidate, which confirms its losing status.
-
-    When some assertions fail, we can calculate for each party the possible range of seats that might be awarded.
-
-    For the seats that are in play, form the "reported yellow set" as the set of winning candidates in the yellow seats.
-    This set has n unique candidates when there are n yellow seats.
-
-    The number of seats that a party might lose is bounded by the number of candidates it has in the reported yellow set.
-
-    For each failed assertion, add the losing candidate to the "failed assertion candidate" set. This set has a maximum of
-    k unique candidates when there are k failed assertions. It may have less.
-
-    The number of seats that a party might gain is bounded by the number of candidates it has in the failed assertion candidate set.
-
-    These are conservative estimates, further work may be able to tighten these bounds. For example, it may be possible to prove that a winning candidate in the yellow seats must still win a seat at a lower rank.
-    */
-    fun addFailingAssertion(failures: List<DhondtFailure>) {
-        val reportedYellowSet = mutableSetOf<DhondtCandidateScore>()
-        val hopefulCandidates = mutableSetOf<DhondtCandidateScore>()
-
-        // For the seats that are in play, form the "reported yellow set" as the set of winning candidates in the yellow seats.
-        // For each failed assertion, add the losing candidate to the "failed assertion candidate" set.
-        failures.forEach { failure ->
-            reportedYellowSet.add(failure.winnerScore)
-            if (!failure.round2) hopefulCandidates.add(failure.loserScore) // TODO round2
-        }
-
-        // The number of seats that a party might lose is bounded by the number of candidates it has in the reported yellow set.
-        reportedYellowSet.forEach { candidate ->
-            val partyRange: PartyRange = partyRanges[candidate.partyId]!!
-            partyRange.minSeats--
-            if (partyRange.minSeats < 0) throw RuntimeException("partyRange.minSeats < 0")
-        }
-
-        // The number of seats that a party might gain is bounded by the number of candidates it has in the failed assertion candidate set.
-        hopefulCandidates.forEach { candidate ->
-            val partyRange: PartyRange = partyRanges[candidate.partyId]!!
-            partyRange.maxSeats++
+            partyMap[partyId]!!.setReportedWinners(nseats)
         }
     }
 
     /*
-    fun buildContestSeats(): ContestSeats {
-        return ContestSeats(dc.id, partySeats.values.toList(), failedAssorters)
+    fun mergeAltContest(alt: ContestRange) {
+        alt.partyMap.values.forEach { altRange ->
+            val myRange = this.partyMap[altRange.partyId]!!
+            myRange.expandRange(altRange)
+        }
     } */
+
+    fun addFailure(failure: DhondtFailure) {
+        dhFailures.add(failure)
+    }
+
+    fun addFailures(failures: List<DhondtFailure>) {
+        dhFailures.addAll(failures)
+    }
+
+    fun partyRanges() = partyMap.values.toList()
+
+    // dont compute until all failures are added
+    fun computePartyRanges(): List<PartyRange> {
+        val uncertainWinnerSet = mutableSetOf<DhondtCandidateScore>()
+        val uncertainLoserSet = mutableSetOf<DhondtCandidateScore>()
+
+        // For the seats that are in play, form the "reported yellow set" as the set of winning candidates in the yellow seats.
+        // For each failed assertion, add the losing candidate to the "failed assertion candidate" set.
+        dhFailures.forEach { failure ->
+            uncertainWinnerSet.add(failure.winnerScore)
+            uncertainLoserSet.add(failure.loserScore)
+        }
+
+        // The number of seats that a party might lose is bounded by the number of unique candidates it has in the failed winner candidates.
+        uncertainWinnerSet.forEach { candidate ->
+            val partyRange: PartyRange = partyMap[candidate.partyId]!!
+            partyRange.minSeats--
+            if (partyRange.minSeats < 0) throw RuntimeException("partyRange.minSeats < 0") // do not silently fail
+        }
+
+        // The number of seats that a party might gain is bounded by the number of unique candidates it has in the failed loser candidates.
+        uncertainLoserSet.forEach { candidate ->
+            val partyRange: PartyRange = partyMap[candidate.partyId]!!
+            partyRange.maxSeats++
+        }
+
+        return partyMap.values.toList()
+    }
 
     fun showSeatRanges() = buildString {
         val nameMap = dcontest.info.candidateIdToName
         appendLine("ContestId=${dcontest.id}")
         appendLine("| ${trunc("party", 25)} | min | reported | max |")
         appendLine("|-${"-".repeat(25)}-|-----|----------|-----|")
-        partyRanges.values.sortedByDescending { it.maxSeats }.forEach {
+        partyRanges().sortedByDescending { it.maxSeats }.forEach {
             val name = nameMap[it.partyId] ?: "unknown"
             append("| ${trunc(name, 20)} (${nfn(it.partyId, 2)}) | ${nfn(it.minSeats, 2)}")
             appendLine("  |    ${nfn(it.reportedSeats, 2)}    | ${nfn(it.maxSeats, 2)}  |")
             // appendLine("  ${nfn(it.failures.size, 6)}   |")
         }
     }
+
+    companion object {
+        fun fromFailures(dcontest: DhondtContest, failures: List<DhondtFailure>): ContestRange {
+            val cr = ContestRange(dcontest)
+            cr.addFailures(failures)
+            cr.computePartyRanges()
+            return cr
+        }
+    }
 }
 
+
 // one party's min/max/reported
-data class PartyRange(val partyId: Int, val partyName: String) {
+class PartyRange(val partyId: Int, val partyName: String) {
     var minSeats = 0
     var reportedSeats = 0
     var maxSeats = 0
 
-    fun setReportedSeats2(nseats: Int) {
+    fun setReportedWinners(nseats: Int) {
         reportedSeats = nseats
         minSeats = nseats
         maxSeats = nseats
@@ -118,7 +115,6 @@ data class PartyRange(val partyId: Int, val partyName: String) {
 
     override fun toString() = buildString {
         appendLine("PartyRange(name=$partyName, partyId='$partyId', minSeats=$minSeats, reportedSeats=$reportedSeats, maxSeats=$maxSeats")
-        // failures.forEach { appendLine( "  ${it.assorter.hashcodeDesc()}") }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -144,68 +140,46 @@ data class PartyRange(val partyId: Int, val partyName: String) {
         result = 31 * result + partyName.hashCode()
         return result
     }
-
-
 }
-
-// seems to be the same as ContestRanges, but used across contests ??
-/* all candidates min/max/reported for this contest
-data class ContestSeats(val contestId:Int, val candidates: List<PartyRange>, val failedAssertions: List<AssorterIF>) {
-
-    fun showSeatRanges() = buildString {
-        appendLine("ContestId=$contestId")
-        appendLine("|                  party     | min | reported | max | nfailures |")
-        appendLine("|----------------------------|-----|----------|-----|-----------|")
-        candidates.sortedByDescending { it.maxSeats }.forEach {
-            append("|  ${trunc("${it.partyId}", candNameWidth)} (${nfn(it.partyId, 2)}) | ${nfn(it.minSeats, 2)}")
-            appendLine("  |    ${nfn(it.reportedSeats, 2)}    | ${nfn(it.maxSeats, 2)}  |")
-            // appendLine("  ${nfn(it.failures.size, 6)}   |")
-        }
-    }
-
-    /* fun nfailures(): Int {
-        return candidates.map { it.failures.size }.sum()
-    } */
-} */
-
 
 ///////////////////////////////////////////////////////////////////
 // this is for all contests in the audit round
 
-fun makeAllSeats(auditRound: AuditRoundIF, contestLimits: List<SampleLimit>, alpha: Double): AllSeats {
+fun makeAllSeatsFromRound(auditRound: AuditRoundIF, contestLimits: List<SampleLimit>, alpha: Double): AllSeats {
     val contestLimitsMap = contestLimits.associateBy { it.id }
     val contestRanges = auditRound.contestRounds.map { contestRound ->
         val sampleLimit = contestLimitsMap[contestRound.id]
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit.limit
         }
-        makeRelaxedAssertions(contestRound, alpha).contestRanges()
+        val relax = makeRelaxedAssertions(contestRound, alpha)
+        relax.contestRange()
     }
 
     return AllSeats(contestRanges)
 }
 
-// all candidates min/max/reported for all contests
-data class AllSeats(val contestSeats: List<ContestRanges>)  {
-    val candidateSums: List<PartyRange>
+// all party's min/max/reported for all contests
+// assume contestRanges have been computed
+data class AllSeats(val contestRanges: List<ContestRange>)  {
+    val partySums: List<PartyRange>
 
     init {
         val sum = mutableMapOf<Int, PartyRange>()
-        contestSeats.forEach { candRange ->
-            candRange.partyRanges.values.forEach { range ->
+        contestRanges.forEach { candRange ->
+            candRange.partyRanges().forEach { range ->
                 val sumCandidate = sum.getOrPut(range.partyId) { PartyRange(range.partyId, range.partyName) }
                 sumCandidate.minSeats += range.minSeats
                 sumCandidate.reportedSeats += range.reportedSeats
                 sumCandidate.maxSeats += range.maxSeats
-                // sumCandidate.failures.addAll(range.failures)
             }
         }
-        candidateSums = sum.values.toList()
+        partySums = sum.values.toList()
     }
 
     fun calcCoalition(candidates: Set<Int>, candNames: Map<Int, String>): Coalition {
         val coalition = Coalition(candidates, candNames)
-        contestSeats.forEach {
+        contestRanges.forEach {
             coalition.addContestSeats(it)
         }
         return coalition
@@ -214,15 +188,16 @@ data class AllSeats(val contestSeats: List<ContestRanges>)  {
     fun showAllPartySeats() = buildString {
         appendLine("|                party      | min | reported | max |")
         appendLine("|---------------------------|-----|----------|-----|")
-        candidateSums.sortedByDescending { it.maxSeats }.forEach {
+        partySums.sortedByDescending { it.maxSeats }.forEach {
             append("|  ${trunc("${it.partyId} (${nfn(it.partyId, 2)})", candNameWidth+4)} | ${nfn(it.minSeats, 2)}")
             appendLine("  |    ${nfn(it.reportedSeats, 2)}    | ${nfn(it.maxSeats, 2)}  |")
         }
-        val nseats = candidateSums.sumOf { it.reportedSeats }
-        appendLine("\nnseats=$nseats ncands=${candidateSums.size} ")
+        val nseats = partySums.sumOf { it.reportedSeats }
+        appendLine("\nnseats=$nseats ncands=${partySums.size} ")
     }
 }
 
+// compute the party sums for some subset of all the parties
 data class Coalition(val candidates: Set<Int>, val candNames: Map<Int, String>) {
     var reportedSeats = 0
     var seatsLost = 0
@@ -237,8 +212,8 @@ data class Coalition(val candidates: Set<Int>, val candNames: Map<Int, String>) 
     fun maxSeats() = reportedSeats + seatsGained
     fun all() = losers + winners + nuetral
 
-    fun addContestSeats(contest: ContestRanges) {
-        contest.partyRanges.values.forEach { candSeats ->
+    fun addContestSeats(contest: ContestRange) {
+        contest.partyRanges().forEach { candSeats ->
             if (this.candidates.contains(candSeats.partyId)) {
                 reportedSeats += candSeats.reportedSeats
                 // HEY candSeats.failures.forEach { addLoserResult(it) }

@@ -31,7 +31,7 @@ open class ContestWithAssertions(
     var clcaAssertions: List<ClcaAssertion> = emptyList() // mutable needed for serialization
 
     init {
-        if (contest.losers().size == 0) {
+        if (contest.hasNoLosers()) {
             preAuditStatus = TestH0Status.NoLosers
         } else if (contest.winners().size == 0) {
             preAuditStatus = TestH0Status.NoWinners

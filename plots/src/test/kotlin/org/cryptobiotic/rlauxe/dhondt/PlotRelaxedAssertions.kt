@@ -34,13 +34,14 @@ class PlotRelaxedAssertions {
 
         val ctrackers = lastRound.contestRounds.map { ContestTracker(it) }
         val madeSeatsWithMvrs = mutableListOf<MadeSeats>()
+        val initialSamples: Map<Int, Int> = ctrackers.associate { it.id to it.getEstMvrs() }
 
         val startSeats = MadeSeats(ctrackers)
         if (show) println(startSeats.allSeats.showAllPartySeats(partyNames))
         println("totalMvrsNeeded=${nfn(startSeats.mvrsUsed, 6)} (all)")
         madeSeatsWithMvrs.add(startSeats)
 
-        repeat(20) {
+        repeat(6) {
             val largestDelta = ctrackers.map { it.getDelta() }.maxBy { it.delta }
             largestDelta.largest.ctracker.setFailed(largestDelta)
 
@@ -59,6 +60,13 @@ class PlotRelaxedAssertions {
             madeSeatsWithMvrs.add(makeSeats)
         }
         println("that took $stopwatch")
+
+
+        println("| contest | initialSamples | relaxedSamples | failures |")
+        println("| ------ | ------ | ------ |------ |")
+        ctrackers.sortedByDescending { it.sampleLimit }. forEach{
+            println("|${it.contestRound.name} | ${initialSamples[it.id]} | ${it.sampleLimit} | ${it.failures} |") }
+        println("| Total | ${initialSamples.values.sum() } | ${ctrackers.sumOf{it.sampleLimit} } | ${ctrackers.sumOf { it.failures }} |")
 
         val name = "RelaxedSeats"
         val dirName = "$testdataDir/plots/dhondt/$name"
@@ -87,6 +95,7 @@ class PlotRelaxedAssertions {
         val atrackers = contestRound.assertionRounds.map { AssertionTracker(this, it) }.sortedByDescending { it.estMvrs }
 
         var sampleLimit : Int = getEstMvrs()
+        var failures : Int = 0
 
         fun getEstMvrs(): Int {
             return atrackers.filter { !it.failed }.maxOf { it.estMvrs }
@@ -102,6 +111,7 @@ class PlotRelaxedAssertions {
         fun setFailed(delta: Delta) {
             delta.largest.failed = true
             sampleLimit = delta.next.estMvrs
+            failures++
         }
     }
 
@@ -147,7 +157,7 @@ class PlotRelaxedAssertions {
 
         val order: List<String> = madeSeats.first().allSeats.partySums.sortedByDescending { it.reportedSeats }.map { it.partyName }
         val catOrdering = CatOrdering(*order.toTypedArray())
-        println("order = ${order}")
+        // println("order = ${order}")
 
         genericErrorBarPlotter(
             titleS = title,

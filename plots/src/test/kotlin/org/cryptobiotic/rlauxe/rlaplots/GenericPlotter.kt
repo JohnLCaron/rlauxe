@@ -98,7 +98,7 @@ fun <T> genericErrorBarPlotter(
                     symbol = Symbol.CIRCLE
                     color(catName)
 
-                    position = Position.jitter(width = 0.1, height = 0.1)
+                    // position = Position.jitter(width = 0.1, height = 0.1)
 
                     // tooltips(variables, formats, title, anchor, minWidth, hide)
                     tooltips(catName, "seat min", yname, "seat max", xname)

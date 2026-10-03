@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.dhondt
 
 import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.persist.SampleLimit
@@ -18,6 +17,7 @@ class TestRelaxedAssertions {
     val config = auditRecord.config
     val sampleLimitMap: Map<Int, SampleLimit> = auditRecord.readSampleLimits().associateBy { it.id }
 
+
     @Test
     fun testOneDHFailures() {
         val contestRound = lastRound.contestRounds.find { it.id == 4 }!! // FlandresEast
@@ -31,7 +31,7 @@ class TestRelaxedAssertions {
 
         //           Vooruit/3-CD&V/3,          20,  0.5004,     3567,         800, 0.5112, 3567,
         val expected = mapOf(28 to -1, 4 to 1)
-        checkExpectedContest(expected, relax.contestRange())
+        checkExpectedContest(expected, relax.totalContestRange())
         println("-----------------------------------------------------------------------")
         //val candSeat: ContestSeatsRev = CandSeatRangeBuilderRev(contestRound).partyRanges
         //println(candSeat.showSeatRanges())
@@ -54,14 +54,14 @@ class TestRelaxedAssertions {
             val relaxv = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit, version = "tooRelaxed")
             //println(relaxv.show())
 
-            println("${contestRound.name} match = ${relax.contestRange().partyRanges() == relaxv.contestRange().partyRanges()}")
+            println("${contestRound.name} match = ${relax.totalContestRange().partyRanges() == relaxv.totalContestRange().partyRanges()}")
 
             compareAssorters(relax, relaxv, "tooRelaxed")
         }
     }
 
     fun compareAssorters(r: RelaxedAssertionsIF, v: RelaxedAssertionsIF, version: String) {
-        val Npop = r.altContest().Nc
+        val Npop = r.orgContest.Nc
 
         val mapr = r.assortersForProof().associateBy { it.shortName() }.toSortedMap()
         val mapv = v.assortersForProof().associateBy { it.shortName() }.toSortedMap()
@@ -116,7 +116,7 @@ class TestRelaxedAssertions {
         //|                  CD&V  4 |  2  |     3    |  3  |       3   | could lose 1
 
         val expected = mapOf(24 to 1, 28 to -1, 19 to 1, 4 to -1)
-        checkExpectedContest(expected, relax.contestRange())
+        checkExpectedContest(expected, relax.totalContestRange())
         println("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV")
         //val relaxv = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit, useV = true)
         //println(relaxv.show())
@@ -127,9 +127,9 @@ class TestRelaxedAssertions {
 
     @Test
     fun testWriteOneContestsJson() {
-        val contestRound = lastRound.contestRounds.find { it.id == 2 }!!
+        val contestRound = lastRound.contestRounds.find { it.id == 5 }!!
 
-        val filename = "/home/stormy/rla/temp/assertionsBruxelles.v3.json"
+        val filename = "/home/stormy/rla/temp/assertionsSingleBT.v3.json"
         writeAllContestsToJsonFile(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
     }
 
@@ -141,8 +141,9 @@ class TestRelaxedAssertions {
     }
 
     @Test
-    fun testThresholdFailure() {
-        val contestRound = lastRound.contestRounds.find { it.id == 5 }!! // Hainut
+    fun testBruxelleFailures() {
+        // val contestRound = lastRound.contestRounds.find { it.id == 5 }!! // Hainut
+        val contestRound = lastRound.contestRounds.find { it.id == 2 }!! // Bruxelles now has 1 tfailure and 2 dh failures.
         val sampleLimit = sampleLimitMap[contestRound.id]
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit.limit
@@ -151,11 +152,35 @@ class TestRelaxedAssertions {
         println(relax.show())
         // println(relax.contestRange().showSeatRanges())
 
-        val expected = mapOf(24 to 1, 28 to -1, 19 to 1, 4 to -1)
+        // val expected = mapOf(24 to 1, 28 to -1, 19 to 1, 4 to -1)
         //checkExpectedContest(expected, relax.contestRanges())
         println("-----------------------------------------------------------------------")
         //val candSeat: ContestSeatsRev = CandSeatRangeBuilderRev(contestRound).partyRanges
         //println(candSeat.showSeatRanges())
+
+        val filename = "/home/stormy/rla/temp/assertionsBruxelle.v4.json"
+        writeAllContestsToJsonFile(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
+    }
+
+    @Test
+    fun testHainutFailures() {
+        val contestRound = lastRound.contestRounds.find { it.id == 5 }!! // Hainut has 1 threshold failue and its alt has DH failures
+        val sampleLimit = sampleLimitMap[contestRound.id]
+        if (sampleLimit != null) {
+            contestRound.haveSampleSize = sampleLimit.limit
+        }
+        val relax = makeRelaxedAssertions(contestRound, .05)
+        println(relax.show())
+        // println(relax.contestRange().showSeatRanges())
+
+        // val expected = mapOf(24 to 1, 28 to -1, 19 to 1, 4 to -1)
+        //checkExpectedContest(expected, relax.contestRanges())
+        println("-----------------------------------------------------------------------")
+        //val candSeat: ContestSeatsRev = CandSeatRangeBuilderRev(contestRound).partyRanges
+        //println(candSeat.showSeatRanges())
+
+        val filename = "/home/stormy/rla/temp/assertionsHainut.v4.json"
+        writeAllContestsToJsonFile(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
     }
 }
 

@@ -1,0 +1,201 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;259MTE&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;259MTE&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;Belgium 2020 Relaxed Assertions&quot;,
+&quot;subtitle&quot;:&quot;Party Seat ranges vs number of samples&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;number of samples&quot;,
+&quot;ymin&quot;:&quot;seat min&quot;,
+&quot;ymax&quot;:&quot;seat max&quot;,
+&quot;color&quot;:&quot;party&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;number of samples&quot;:[4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0],
+&quot;seat min&quot;:[24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,17.0,17.0,17.0,17.0,17.0,18.0,18.0,18.0,18.0,18.0,18.0,19.0,19.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,12.0,12.0,12.0,12.0,13.0,13.0,13.0,14.0,14.0,14.0,14.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,16.0,16.0,16.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,15.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,11.0,11.0,12.0,13.0,13.0,13.0,13.0,13.0,13.0,14.0,14.0,14.0,14.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,11.0,11.0,12.0,13.0,13.0,13.0,13.0,13.0,13.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,11.0,11.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0],
+&quot;&amp;merged_groups&quot;:[&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;],
+&quot;seat max&quot;:[25.0,25.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,22.0,22.0,22.0,22.0,22.0,22.0,22.0,22.0,22.0,22.0,22.0,22.0,21.0,21.0,21.0,21.0,20.0,20.0,20.0,20.0,20.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,23.0,23.0,23.0,21.0,21.0,21.0,21.0,21.0,21.0,21.0,20.0,20.0,20.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0,17.0,17.0,17.0,17.0,17.0,17.0,16.0,16.0,16.0,16.0,18.0,17.0,17.0,17.0,17.0,17.0,17.0,17.0,17.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,15.0,15.0,16.0,16.0,16.0,16.0,16.0,15.0,15.0,15.0,15.0,15.0,15.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,11.0,11.0,11.0,11.0,11.0,11.0,8.0,8.0,8.0,8.0,8.0,8.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,3.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0],
+&quot;party&quot;:[&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;dodge&quot;,
+&quot;geom&quot;:&quot;errorbar&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;party&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;number of samples&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;seat min&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;seat max&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;nseats&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;number of samples&quot;,
+&quot;y&quot;:&quot;nseats&quot;,
+&quot;color&quot;:&quot;party&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;number of samples&quot;:[4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0,4981.0,5100.0,5824.0,5962.0,6222.0,6379.0,6558.0,6861.0,7058.0,8154.0,8384.0,8626.0,8871.0,9171.0,10116.0,12896.0,15934.0,21208.0,27263.0,33413.0,43313.0],
+&quot;&amp;merged_groups&quot;:[&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;],
+&quot;seat min&quot;:[24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,17.0,17.0,17.0,17.0,17.0,18.0,18.0,18.0,18.0,18.0,18.0,19.0,19.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,12.0,12.0,12.0,12.0,13.0,13.0,13.0,14.0,14.0,14.0,14.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,16.0,16.0,16.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,15.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,11.0,11.0,12.0,13.0,13.0,13.0,13.0,13.0,13.0,14.0,14.0,14.0,14.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,11.0,11.0,12.0,13.0,13.0,13.0,13.0,13.0,13.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,11.0,11.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0],
+&quot;nseats&quot;:[24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,20.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,15.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,11.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0],
+&quot;seat max&quot;:[25.0,25.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,22.0,22.0,22.0,22.0,22.0,22.0,22.0,22.0,22.0,22.0,22.0,22.0,21.0,21.0,21.0,21.0,20.0,20.0,20.0,20.0,20.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,24.0,23.0,23.0,23.0,21.0,21.0,21.0,21.0,21.0,21.0,21.0,20.0,20.0,20.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0,18.0,17.0,17.0,17.0,17.0,17.0,17.0,16.0,16.0,16.0,16.0,18.0,17.0,17.0,17.0,17.0,17.0,17.0,17.0,17.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,16.0,15.0,15.0,16.0,16.0,16.0,16.0,16.0,15.0,15.0,15.0,15.0,15.0,15.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,14.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,13.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,12.0,11.0,11.0,11.0,11.0,11.0,11.0,8.0,8.0,8.0,8.0,8.0,8.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,3.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0],
+&quot;party&quot;:[&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;N-VA&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;VLAAMS BELANG&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;MR&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PS&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;PVDA&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;LES ENGAGÉS&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;Vooruit&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;CD&amp;V&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;open vld&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;GROEN&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;ECOLO&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;,&quot;DéFI&quot;]
+},
+&quot;size&quot;:2.0,
+&quot;shape&quot;:16.0,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:{
+&quot;name&quot;:&quot;jitter&quot;,
+&quot;width&quot;:0.1,
+&quot;height&quot;:0.1
+},
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;party&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;number of samples&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;seat min&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;seat max&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;nseats&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;party&quot;,&quot;seat min&quot;,&quot;nseats&quot;,&quot;seat max&quot;,&quot;number of samples&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

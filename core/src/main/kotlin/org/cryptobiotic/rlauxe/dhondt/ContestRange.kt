@@ -26,13 +26,15 @@ class ContestRange(val dcontest: DhondtContest) {
         }
     }
 
-    /*
-    fun mergeAltContest(alt: ContestRange) {
-        alt.partyMap.values.forEach { altRange ->
+    fun dhFail() = dhFailures.size
+
+    // these come from failed BelowThreshold assertions
+    fun mergeAltContestRange(altRange: ContestRange) {
+        altRange.partyMap.values.forEach { altRange ->
             val myRange = this.partyMap[altRange.partyId]!!
             myRange.expandRange(altRange)
         }
-    } */
+    }
 
     fun addFailure(failure: DhondtFailure) {
         dhFailures.add(failure)
@@ -45,7 +47,7 @@ class ContestRange(val dcontest: DhondtContest) {
     fun partyRanges() = partyMap.values.toList()
 
     // dont compute until all failures are added
-    fun computePartyRanges(): List<PartyRange> {
+    fun computeRangesFromFailures(): ContestRange {
         val uncertainWinnerSet = mutableSetOf<DhondtCandidateScore>()
         val uncertainLoserSet = mutableSetOf<DhondtCandidateScore>()
 
@@ -69,7 +71,7 @@ class ContestRange(val dcontest: DhondtContest) {
             partyRange.maxSeats++
         }
 
-        return partyMap.values.toList()
+        return this
     }
 
     fun showSeatRanges() = buildString {
@@ -89,7 +91,7 @@ class ContestRange(val dcontest: DhondtContest) {
         fun fromFailures(dcontest: DhondtContest, failures: List<DhondtFailure>): ContestRange {
             val cr = ContestRange(dcontest)
             cr.addFailures(failures)
-            cr.computePartyRanges()
+            cr.computeRangesFromFailures()
             return cr
         }
     }
@@ -153,7 +155,7 @@ fun makeAllSeatsFromRound(auditRound: AuditRoundIF, contestLimits: List<SampleLi
             contestRound.haveSampleSize = sampleLimit.limit
         }
         val relax = makeRelaxedAssertions(contestRound, alpha)
-        relax.contestRange()
+        relax.totalContestRange()
     }
 
     return AllSeats(contestRanges)
@@ -185,11 +187,11 @@ data class AllSeats(val contestRanges: List<ContestRange>)  {
         return coalition
     }
 
-    fun showAllPartySeats() = buildString {
+    fun showAllPartySeats(partyName: Map<Int,String>) = buildString {
         appendLine("|                party      | min | reported | max |")
         appendLine("|---------------------------|-----|----------|-----|")
         partySums.sortedByDescending { it.maxSeats }.forEach {
-            append("|  ${trunc("${it.partyId} (${nfn(it.partyId, 2)})", candNameWidth+4)} | ${nfn(it.minSeats, 2)}")
+            append("|  ${trunc("${partyName[it.partyId]} (${nfn(it.partyId, 2)})", candNameWidth+4)} | ${nfn(it.minSeats, 2)}")
             appendLine("  |    ${nfn(it.reportedSeats, 2)}    | ${nfn(it.maxSeats, 2)}  |")
         }
         val nseats = partySums.sumOf { it.reportedSeats }

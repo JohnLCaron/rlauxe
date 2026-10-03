@@ -29,7 +29,7 @@ class TestCandidateSeats {
         }
         // interesting: the dcontest assorters didnt make it through the serialization (inside contestRound.contestUA).....
         val relax = makeRelaxedAssertions(contestRound, .05)
-        val contestRange = relax.contestRange()
+        val contestRange = relax.totalContestRange()
         println(contestRange.showSeatRanges())
     }
 
@@ -45,13 +45,13 @@ class TestCandidateSeats {
 
         // builder.mergedRanges.candidates.forEach { println(it) }
         val relax = makeRelaxedAssertions(contestRound, .05)
-        val contestRange = relax.contestRange()
+        val contestRange = relax.totalContestRange()
         println(contestRange.showSeatRanges())
 
         //val failedAssorters = relax.failures().map { it.assorter }
         //val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
 
-        writeDHondtAssertionsJson(relax.altContest(), relax.assortersForProof(), contestRange.partyRanges().toList())
+        writeDHondtAssertionsJson(relax.orgContest, relax.assortersForProof(), relax.totalContestRange().partyRanges().toList())
 
         val scratchFile = createTempFile().toString()
         val org =  writeOneContestToJsonFile(contestRound, relax, scratchFile, true)
@@ -71,8 +71,8 @@ class TestCandidateSeats {
 
         // works anyway because it gets assorters from AssertionRound
         val relax = makeRelaxedAssertions(contestRound, .05)
-        relax.contestRange().partyRanges().forEach { println(it) }
-        println(relax.contestRange().showSeatRanges())
+        relax.totalContestRange().partyRanges().forEach { println(it) }
+        println(relax.totalContestRange().showSeatRanges())
     }
 
     @Test
@@ -83,11 +83,11 @@ class TestCandidateSeats {
             contestRound.haveSampleSize = sampleLimit.limit
         }
         val relax = makeRelaxedAssertions(contestRound, .05)
-        relax.contestRange().partyRanges().forEach { println(it) }
-        println(relax.contestRange().showSeatRanges())
+        relax.totalContestRange().partyRanges().forEach { println(it) }
+        println(relax.totalContestRange().showSeatRanges())
     }
 
-    @Test
+    /* @Test
     fun testCountContestedSeats() {
         var totalContests = 0
         lastRound.contestRounds.forEach { contestRound ->
@@ -101,7 +101,7 @@ class TestCandidateSeats {
             totalContests += n
         }
         println("total = $totalContests")
-    }
+    } */
 
     /* @Test
     fun testAll() {
@@ -129,8 +129,9 @@ class TestCandidateSeats {
 
     @Test
     fun testShowAllPartySeats() {
+        val partyNames = auditRecord.readPartyNames()
         val all = makeAllSeatsFromRound(lastRound, sampleLimits, alpha = .05)
-        println(all.showAllPartySeats())
+        println(all.showAllPartySeats(partyNames))
     }
 
     /*

@@ -102,7 +102,7 @@ fun RelaxedAssertionData.publishJson(): RelaxedAssertionsJson {
 }
 
 fun publishRAJson(ra: RelaxedAssertionsIF): RelaxedAssertionsJson {
-    val dcontest = ra.altContest()
+    val dcontest = ra.orgContest
 
     val dasm = ra.assortersForProof().map {
         val da = when (it) {
@@ -114,7 +114,7 @@ fun publishRAJson(ra: RelaxedAssertionsIF): RelaxedAssertionsJson {
         DAssertionWithMargin(da, dcontest.difficulty(it), dcontest.marginInVotes(it))
     }
 
-    val bounds = ra.contestRange().partyRanges().map { party ->
+    val bounds = ra.totalContestRange().partyRanges().map { party ->
         val name = dcontest.info().candidateIdToName[party.partyId]
         Bound(party.partyId, name!!, party.minSeats, party.maxSeats)
     }
@@ -266,13 +266,14 @@ fun writeDHondtAssertionsJson(dcontest: DhondtContest, assorters: List<AssorterI
     println(bos)
 }
 
+// TODO do we needto write the BT failures ??
 fun writeOneContestToJsonFile(contestRound: ContestRound, relax: RelaxedAssertionsIF, filename: String,
                               pretty: Boolean = false): RelaxedAssertionsJson {
     val failedAssorters = relax.failures().map { it.assorter }
     val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
 
     val dcontest = contestRound.contestUA.contest as DhondtContest
-    val relaxData = RelaxedAssertionData(dcontest, assorters, relax.contestRange().partyRanges().toList())
+    val relaxData = RelaxedAssertionData(dcontest, assorters, relax.totalContestRange().partyRanges().toList())
 
     val json = relaxData.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = pretty }

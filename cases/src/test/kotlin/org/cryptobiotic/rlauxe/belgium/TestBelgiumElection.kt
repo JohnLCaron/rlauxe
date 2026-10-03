@@ -38,7 +38,9 @@ class TestBelgiumElection {
         println(belgiumElection)
 
         // use infoA parties, because they are complete
-        val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtPartyBuilder(it.PartyLabel, idx+1, it.NrOfVotes) }
+        val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->
+            DhondtPartyBuilder(it.PartyLabel, idx+1, it.NrOfVotes, it.Candidates.size)
+        }
         val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
         val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes
 

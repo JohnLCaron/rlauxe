@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.betting.estRiskStandardBet
 import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.core.AssorterIF
-import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
@@ -13,15 +12,38 @@ import kotlin.math.max
 import kotlin.math.min
 
 interface RelaxedAssertionsIF {
+    val orgContest: DhondtContest
     val Npop: Int
     val nsamples: Int
     val alpha: Double
 
-    fun altContest(): DhondtContest
+    fun altContests(): List<AltContest>
     fun assortersForProof(): List<AssorterIF>
-    fun contestRange(): ContestRange // TODO just return PartyRanges ??
+    fun totalContestRange(): ContestRange // TODO just return PartyRanges ??
     fun failures(): List<DhondtFailure>
+    fun tfailures(): List<ThresholdFailure>
     fun show(): String
+}
+
+data class AltContest(
+    val name: String,
+    val altContest: DhondtContest,
+    val contestRange: ContestRange,
+    val dhFail: Int,
+    val tFail: Int,
+    )
+
+class NoFailures(override val orgContest: DhondtContest) : RelaxedAssertionsIF {
+    override val Npop = 0
+    override val nsamples = 0
+    override val alpha = .05
+
+    override fun altContests() = emptyList<AltContest>()
+    override fun assortersForProof() = emptyList<AssorterIF>()
+    override fun totalContestRange() = ContestRange(orgContest).computeRangesFromFailures()
+    override fun failures() = emptyList<DhondtFailure>()
+    override fun tfailures() = emptyList<ThresholdFailure>()
+    override fun show() = "No Failures"
 }
 
 // assorters that dont satisfy risk because nsamples <= needed
@@ -57,15 +79,17 @@ data class DhondtFailure(
     }
 }
 
+// threshold assorters that dont satisfy risk because nsamples <= needed
+
 class ThresholdFailure(
     val tcontest: DhondtContest,
     val Npop: Int,
-    val btAssorter: BelowThreshold, // what about AboveThreshold ??
+    val assorter: AssorterIF, // BelowThreshold or AboveThreshold
     val risk: Double,
     val samplesUsed: Int,
     val alpha: Double
 ) {
-    val noerror = btAssorter.noerror(true)
+    val noerror = assorter.noerror(true)
     val nmvrs = samplesUsed
 
     fun estMvrs(): Int {
@@ -73,11 +97,56 @@ class ThresholdFailure(
     }
 
     override fun toString() = buildString {
-        append("${btAssorter.shortName()}: ")
-        append(" ${nfn(tcontest.marginInVotes(btAssorter), 7)}, ${dfn(noerror, 6)}, ")
+        val assorter = assorter
+        append("${sfn(assorter.shortName(), 25)}," )
+        append(" ${nfn(tcontest.marginInVotes(assorter), 11)},")
+        append("  ${dfn(noerror, 4)},")
+        append(" ${nfn(estMvrs(), 8)}, ${nfn(samplesUsed, 11)}, ${dfn(risk, 4)}") // , ${nfn(estSamples, 4)},")
+    }
+
+    fun toString2() = buildString {
+        append("${assorter.shortName()}: ")
+        append(" ${nfn(tcontest.marginInVotes(assorter), 7)}, ${dfn(noerror, 6)}, ")
         append(" ${nfn(estMvrs(), 8)}, ${nfn(nmvrs, 8)},    ${dfn(risk, 4)},")
     }
 }
+
+class FailureFinder(val Npop: Int, val nsamples: Int, val alpha: Double) {
+
+    fun findDhondtFailures(fromContest: DhondtContest, fromAssorters: List<AssorterIF>): MutableList<DhondtFailure> {
+        val failures = mutableListOf<DhondtFailure>()
+        fromAssorters.filter { it is DhondtAssorter }.forEach { assorter ->
+            val dassorter = assorter as DhondtAssorter
+            val risk = estRiskStandardBet(Npop, dassorter.noerror(true), nsamples)
+            if (risk > alpha) {
+                val winnerId = dassorter.winner()
+                val loserId = dassorter.loser()
+                val winnerScore =
+                    fromContest.sortedScores.find { it.divisor == dassorter.winnerDivisor && it.partyId == winnerId }!!
+                val loserScore =
+                    fromContest.sortedScores.find { it.divisor == dassorter.loserDivisor && it.partyId == loserId }
+
+                if (loserScore == null)
+                    print("")
+                failures.add(DhondtFailure(Npop, dassorter, winnerScore, loserScore!!, risk, nsamples, alpha))
+            }
+        }
+        return failures
+    }
+
+    fun findThresholdFailures(dcontest: DhondtContest, fromAssorters: List<AssorterIF>): MutableList<ThresholdFailure> {
+        val failures = mutableListOf<ThresholdFailure>()
+        fromAssorters.filter { it !is DhondtAssorter }.forEach { assorter ->
+            val risk = estRiskStandardBet(Npop, assorter.noerror(true), nsamples)
+            if (risk > alpha) {
+                failures.add(ThresholdFailure(dcontest, dcontest.Nc, assorter, risk, nsamples, alpha))
+            }
+        }
+        return failures
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 fun makeRelaxedAssertions(contestRound: ContestRound, alpha: Double, mvrLimit: Int? = null, version: String? = null): RelaxedAssertionsIF {
     val useAlpha = contestRound.auditorWantRisk ?: alpha
@@ -87,63 +156,17 @@ fun makeRelaxedAssertions(contestRound: ContestRound, alpha: Double, mvrLimit: I
     val Npop = contestRound.contestUA.Npop
     val nsamples = mvrLimit ?: contestRound.haveSampleSize
 
-    val tfailures = findThresholdFailures(orgContest, orgAssorters, Npop, nsamples, useAlpha)
-    val failures = findDhondtFailures(orgContest, orgAssorters, Npop, nsamples, useAlpha)
+    val failureFinder = FailureFinder(Npop, nsamples, useAlpha)
+    val tfailures = failureFinder.findThresholdFailures(orgContest, orgAssorters)
+    val failures = failureFinder.findDhondtFailures(orgContest, orgAssorters)
 
     return when {
         (tfailures.isEmpty() && failures.isEmpty()) -> NoFailures(orgContest)
-        (tfailures.isEmpty() && version == "useV") -> RelaxedAssertionsV(orgContest, Npop, nsamples, useAlpha, failures)
-        else -> RelaxedDhAssertions(orgContest, orgAssorters, Npop, nsamples, useAlpha, failures, version)
-       //  else -> ThresholdAssertionsV(orgContest, Npop, nsamples, useAlpha, failures, tfailures)
+        // (tfailures.isEmpty() && version == "useV") -> RelaxedAssertionsV(orgContest, Npop, nsamples, useAlpha, failures)
+        else -> RelaxedDhAssertions(orgContest, orgAssorters, Npop, nsamples, useAlpha, failureFinder, version)
+        //  else -> ThresholdAssertionsV(orgContest, Npop, nsamples, useAlpha, failures, tfailures)
     }
 }
-
-fun findThresholdFailures(dcontest: DhondtContest, fromAssorters: List<AssorterIF>, Npop: Int, nsamples: Int,
-                          useAlpha: Double): MutableList<ThresholdFailure> {
-    val failures = mutableListOf<ThresholdFailure>()
-    fromAssorters.filter { it is BelowThreshold }.forEach {
-        val assorter = it as BelowThreshold
-        val risk = estRiskStandardBet(Npop, assorter.noerror(true), nsamples)
-        if (risk > useAlpha) {
-            failures.add(ThresholdFailure(dcontest, dcontest.Nc, assorter, risk, nsamples, useAlpha))
-        }
-    }
-    return failures
-}
-
-fun findDhondtFailures(fromContest: DhondtContest, fromAssorters: List<AssorterIF>, Npop: Int, nsamples: Int, useAlpha: Double):
-        MutableList<DhondtFailure> {
-
-    val failures = mutableListOf<DhondtFailure>()
-    fromAssorters.filter { it is DhondtAssorter }.forEach { assorter ->
-        val dassorter = assorter as DhondtAssorter
-        val risk = estRiskStandardBet(Npop, dassorter.noerror(true), nsamples)
-        if (risk > useAlpha) {
-            val winnerId = dassorter.winner()
-            val loserId = dassorter.loser()
-            val winnerScore =
-                fromContest.sortedScores.find { it.divisor == dassorter.winnerDivisor && it.partyId == winnerId }!!
-            val loserScore =
-                fromContest.sortedScores.find { it.divisor == dassorter.loserDivisor && it.partyId == loserId }!!
-
-            failures.add(DhondtFailure(Npop, dassorter, winnerScore, loserScore, risk, nsamples, useAlpha))
-        }
-    }
-    return failures
-}
-
-class NoFailures(val orgContest: DhondtContest) : RelaxedAssertionsIF {
-    override val Npop = 0
-    override val nsamples = 0
-    override val alpha = .05
-
-    override fun altContest() = orgContest
-    override fun assortersForProof() = emptyList<AssorterIF>()
-    override fun contestRange() = ContestRange(orgContest)
-    override fun failures() = emptyList<DhondtFailure>()
-    override fun show() = "No Failures"
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 fun maxRiskForWinnerSeat(winnerNameRound: String, assorters: List<AssorterIF>, haveMvrs: Int?, npop: Int): Pair<String, Double> {

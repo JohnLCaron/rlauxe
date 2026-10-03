@@ -5,8 +5,6 @@ import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder.Companion.makeDhAssorterFromDivisors
-import org.cryptobiotic.rlauxe.dhondt.DhondtContest
-import org.cryptobiotic.rlauxe.dhondt.DhondtParty
 import org.cryptobiotic.rlauxe.util.nfn
 import kotlin.collections.forEach
 import kotlin.collections.plus
@@ -15,7 +13,7 @@ import kotlin.io.println
 
 private val logger = KotlinLogging.logger("RelaxedAssertionsV")
 
-class RelaxedAssertionsV(val orgContest: DhondtContest,
+class RelaxedAssertionsV(override val orgContest: DhondtContest,
                          override val Npop: Int,
                          override val nsamples: Int,
                          override val alpha: Double,
@@ -51,9 +49,9 @@ class RelaxedAssertionsV(val orgContest: DhondtContest,
         }
     }
 
-    override fun altContest() = altContest
+    override fun altContests() = emptyList<AltContest>() // listOf(altContest)
     override fun assortersForProof() = assortersForProof
-    override fun contestRange() = contestRange
+    override fun totalContestRange() = contestRange
     override fun failures() = failures
 
     override fun show() = buildString {
@@ -259,7 +257,7 @@ class RelaxedAssertionsV(val orgContest: DhondtContest,
                 parties,
                 sortedScores,
                 assorters,
-                thresholdOverride,
+                belowThreshold,
             )
         }
     }
@@ -284,7 +282,7 @@ open class DhondtBuilderV3(
 
     override fun build(): DhondtContest {
         val votes = partyBs.associate { Pair(it.id, it.totalVotes) }
-        val sortedScores = createCandidateScores(partyBs, info.nwinners, Nc, info.minFraction!!, thresholdOverride)
+        val sortedScores = createCandidateScores(partyBs, info.nwinners, Nc, info.minFraction!!, belowThreshold)
         val parties = partyBs.map { it.build() }
 
         // define W the set of parties that have at least one reported winner
@@ -339,13 +337,13 @@ open class DhondtBuilderV3(
             parties,
             sortedScores,
             assorters,
-            thresholdOverride,
+            belowThreshold,
         )
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// threshold = TODO
+/* threshold = TODO
 
 class ThresholdAssertionsV(val orgContest: DhondtContest,
                            override val Npop: Int,
@@ -426,4 +424,4 @@ class ThresholdAssertionsV(val orgContest: DhondtContest,
             }
         }
     }
-}
+} */

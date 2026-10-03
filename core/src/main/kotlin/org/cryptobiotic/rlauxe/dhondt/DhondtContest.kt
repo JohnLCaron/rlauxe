@@ -219,11 +219,10 @@ class DhondtContest(
         return makeRelaxedAssertions(contestRound, maxRisk, version = version)
     }
 
-
-    fun countContestedSeats(contestRound: ContestRound): Int {
+    /* fun countContestedSeats(contestRound: ContestRound): Int {
         val relax = makeRelaxedAssertions(contestRound, .05)
         return relax.failures().size
-    }
+    } */
 
     //// create a cvr for each vote
     fun createSimulatedCvrs(): List<Cvr> {

@@ -82,13 +82,13 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
     val Nc: Int, // trusted upper limit; // TODO need phantoms also
     val undervotes: Int,
     val minFraction: Double,
-    val thresholdOverride: Set<Int>? = null, // set when non standard: partyIds below threshold
+    val belowThreshold: Set<Int>? = null, // set when non standard: partyIds below threshold
 ) {
     constructor(info: ContestInfo, partyBs: List<DhondtPartyBuilder>, Nc: Int, Ncast: Int, undervotes: Int)
         : this(info.name, info.id, partyBs, nseats=info.nwinners, Nc=Nc, undervotes=undervotes, minFraction = info.minFraction!!)
 
-    constructor(dcontest: DhondtContest, thresholds: Set<Int>? = null) : this(dcontest.name, dcontest.id, dcontest.parties.map { DhondtPartyBuilder(it) },
-        dcontest.nseats, dcontest.Nc, dcontest.undervotes, dcontest.info.minFraction!!, thresholdOverride = thresholds)
+    constructor(dcontest: DhondtContest, belowThreshold: Set<Int>? = null) : this(dcontest.name, dcontest.id, dcontest.parties.map { DhondtPartyBuilder(it) },
+        dcontest.nseats, dcontest.Nc, dcontest.undervotes, dcontest.info.minFraction!!, belowThreshold = belowThreshold)
 
     val info = ContestInfo(
         name,
@@ -108,16 +108,23 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
         require (Nc == totalVotes) { "DhondtBuilder2 $Nc != $totalVotes" }
 
         // use validVotes, not Nc, to calculate thresholds
-        sortedScores = createCandidateScores(partyBs, nseats, validVotes, minFraction, thresholdOverride)
+        sortedScores = createCandidateScores(partyBs, nseats, validVotes, minFraction, belowThreshold)
         winnerSeatCount = winnerSeatCount(sortedScores, partyBs.map { it.id })
-        partyBs.forEach { partybs ->
+
+        partyBs.filter { !it.isBelowMin } .forEach { partybs ->
             partybs.lastSeatWon = winnerSeatCount[partybs.id]!! // last seat won = number of seats won
             // partybs.firstSeatLost = winnerSeatCount[partybs.id]!! + 1 // first seat lost = nseats + 1
-            partybs.firstSeatLost = min(partybs.lastSeatWon + 1, partybs.nCandidates ?: Int.MAX_VALUE)
+            // partybs.firstSeatLost = min(partybs.lastSeatWon + 1, partybs.nCandidates ?: Int.MAX_VALUE)
+            partybs.firstSeatLost = if (partybs.lastSeatWon + 1 < partybs.nCandidates) partybs.lastSeatWon + 1 else 0
         }
     }
 
-    // Proposition 1, p 5.
+    // allow override
+    open fun makeAssorters() : List<AssorterIF> {
+        return buildStdAssorters()
+    }
+
+        // Proposition 1, p 5.
     open fun buildStdAssorters() : List<AssorterIF> {
         val votes = partyBs.associate { Pair(it.id, it.totalVotes) }
         val parties = partyBs.map { it.build() }
@@ -152,8 +159,8 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
             Ncast = this.validVotes + this.undervotes,
             parties,
             sortedScores,
-            buildStdAssorters(),
-            thresholdOverride,
+            makeAssorters(),
+            belowThreshold,
         )
     }
 
@@ -253,14 +260,14 @@ fun createCandidateScores(
     nseats: Int,
     validVotes: Int,        // denominator for calculation of theshold is validVotes, excluding undervotes
     minFraction: Double,
-    thresholdOverride: Set<Int>? = null,
+    belowThreshold: Set<Int>? = null,
 ): List<DhondtCandidateScore> {
 
     val sortedScores = mutableListOf<DhondtCandidateScore>()
 
     // calculate below Threshold unless overridden
     parties.forEach { it.isBelowMin = false }
-    val belowMinPct = thresholdOverride ?: parties.filter { it.totalVotes / validVotes.toDouble() < minFraction }.map { it.id }.toSet()
+    val belowMinPct = belowThreshold ?: parties.filter { it.totalVotes / validVotes.toDouble() < minFraction }.map { it.id }.toSet()
     parties.forEach { it.isBelowMin = belowMinPct.contains(it.id) }
 
     // adding min(nseats, party.nCandidates) for each party

@@ -5,7 +5,10 @@ import org.jetbrains.kotlinx.kandy.dsl.continuousPos
 import org.jetbrains.kotlinx.kandy.dsl.plot
 import org.jetbrains.kotlinx.kandy.ir.scale.Scale
 import org.jetbrains.kotlinx.kandy.letsplot.export.save
+import org.jetbrains.kotlinx.kandy.letsplot.feature.Position
 import org.jetbrains.kotlinx.kandy.letsplot.feature.layout
+import org.jetbrains.kotlinx.kandy.letsplot.feature.position
+import org.jetbrains.kotlinx.kandy.letsplot.layers.errorBars
 import org.jetbrains.kotlinx.kandy.letsplot.layers.hLine
 import org.jetbrains.kotlinx.kandy.letsplot.layers.line
 import org.jetbrains.kotlinx.kandy.letsplot.layers.points
@@ -14,6 +17,129 @@ import org.jetbrains.kotlinx.kandy.letsplot.scales.Transformation
 import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
 import org.jetbrains.kotlinx.kandy.letsplot.tooltips.tooltips
 import org.jetbrains.kotlinx.kandy.util.color.Color
+
+// generic multiple line plotter; dont need WorkflowResult
+fun <T> genericErrorBarPlotter(
+    titleS: String,
+    subtitleS: String,
+    writeFile: String,
+    data: List<T>,
+    xname: String,
+    yname: String,
+    catName: String,
+    xfld: (T) -> Double,
+    yfld: (T) -> Triple<Double, Double, Double>,
+    catfld: (T) -> String,
+    addPoints: Boolean = true,
+    scaleType: ScaleType = ScaleType.Linear,
+    addHLineAt: Double? = null,
+    addVLineAt: Double? = null,
+    catOrdering: Comparator<String>? = null,  // what order should the categories be in ?
+) {
+
+    val groups = makeGGroups(data, catfld, catOrdering)
+
+    val xvalues = mutableListOf<Double>()
+    val yminValues = mutableListOf<Double>()
+    val yvalues = mutableListOf<Double>()
+    val ymaxValues = mutableListOf<Double>()
+    val category = mutableListOf<String>()
+    groups.forEach { (cat, srts) ->
+        val ssrtList = srts.sortedBy { xfld(it) }
+        val xvalue = ssrtList.map { xfld(it) }
+        xvalues.addAll(xvalue)
+
+        val ymin = ssrtList.map { yfld(it).first }
+        yminValues.addAll(ymin)
+
+        val yvalue = ssrtList.map { yfld(it).second }
+        yvalues.addAll(yvalue)
+
+        val ymax = ssrtList.map { yfld(it).third }
+        ymaxValues.addAll(ymax)
+
+        repeat(ssrtList.size) {
+            category.add(cat)
+        }
+    }
+
+    // names are used as labels
+    val multipleDataset = mapOf(
+        xname to xvalues,
+        yname to yvalues,
+        "seat min" to yminValues,
+        "seat max" to ymaxValues,
+        catName to category,
+    )
+
+    val xScale = if (scaleType == ScaleType.LogLog) Scale.continuousPos<Int>(transform = Transformation.LOG10) else Scale.continuousPos<Int>()
+    val yScale = if (scaleType == ScaleType.Linear) Scale.continuousPos<Int>() else Scale.continuousPos<Int>(transform = Transformation.LOG10)
+
+    val plot = multipleDataset.plot {
+        groupBy(catName) {
+            errorBars {
+                x(xname)
+                yMin("seat min")
+                yMax("seat max")
+                borderLine.color(catName)
+            }
+
+            //             line {
+            //                x(xname) { scale = xScale }
+            //                y(yname) { scale = yScale }
+            //                color(catName)
+            //            }
+
+            if (addPoints) {
+                points {
+                    x(xname) { scale = xScale }
+                    y(yname) { scale = yScale }
+                    size = 2.0
+                    symbol = Symbol.CIRCLE
+                    color(catName)
+
+                    position = Position.jitter(width = 0.1, height = 0.1)
+
+                    // tooltips(variables, formats, title, anchor, minWidth, hide)
+                    tooltips(catName, "seat min", yname, "seat max", xname)
+                    //    formats = mapOf("margin" to "f8.3"))
+                }
+            }
+
+            /*
+            hLine {
+                yIntercept.constant(0) // Sets the line position
+                color = Color.BLACK       // Customizes the line color
+                width = .3             // Customizes the line thickness
+            } */
+
+            /* if (addHLineAt != null) {
+                hLine {
+                    yIntercept.constant(addHLineAt) // Sets the line position
+                    color = Color.RED       // Customizes the line color
+                    width = .3           // Customizes the line thickness
+                }
+            }
+
+            if (addVLineAt != null) {
+                vLine {
+                    xIntercept.constant(addVLineAt) // Sets the line position
+                    color = Color.RED       // Customizes the line color
+                    width = .3           // Customizes the line thickness
+                }
+            } */
+
+            layout {
+                title = titleS
+                subtitle = subtitleS
+            }
+        }
+    }
+
+    plot.save("${writeFile}.png")
+    plot.save("${writeFile}.html")
+    println("saved to $writeFile")
+}
 
 // generic multiple line plotter; dont need WorkflowResult
 fun <T> genericPlotter(

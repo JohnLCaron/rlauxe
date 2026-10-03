@@ -92,7 +92,7 @@ data class BelowThreshold(val info: ContestInfo, val partyId: Int, val t: Double
         append("g=[$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
     }
 
-    override fun shortName() = "BelowThreshold for '${info.candidateIdToName[winner()]}' (${partyId})"
+    override fun shortName() = "BT '${info.candidateIdToName[winner()]}' (${partyId})"
 
     override fun hashcodeDesc() = "BelowThreshold ${partyId} ${info.name}" // must be unique for serialization
 
@@ -309,7 +309,7 @@ data class AboveThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
     override fun upperBound() = h2(upperg)
 
-    override fun shortName() = "AboveThreshold for '${info.candidateIdToName[winner()]}' (${winner()})"
+    override fun shortName() = "AT '${info.candidateIdToName[winner()]}' (${winner()})"
 
     override fun desc() = buildString {
         append("${shortName()}: reportedMargin=${pfn(reportedMargin)}  dilutedMargin=${pfn(dilutedMargin)} noerror=${pfn(noerror(true) )}")

@@ -123,6 +123,33 @@ The chosen samples from a consistent sampling can only be validated if all the r
 Deciding if there is enough information to validate samples needs more thought. For example, if a county uses a single ballot style, then you know the style for all ballots. If the redacted CVRs are retained in the CVR file, and their votes are replaced with a "\*", then you also have enough information to accurately validate the samples chosen.
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+# possible problems with unredacted cvr files
+
+1. Some spreadsheets may convert some CVR imprintedId fields like  "2-2-86" to "02/02/1986". The "Detect special numbers" option should be unchecked. 
+
+2. The file could be in different cvr format (eg Garfield 2020 file in votedatabase had a different (older?) cvr format with differnt column names). One could apply a few "well-formedness" checks. 
+    
+    - I check that rows 2 and 3 (contest and choice) have same column range of non-blank entries.
+    - I check that ImprintedId = Tabulator-Batch-Record (thats where I noticed item 1).
+
+3. There may be mistakes in the headers, for example Las Platas 2020 was missing the last 5 contest headers. This should not affect redaction, though it may affect the ability of public verifiers to read the redacted file.
+
+4. The macro makes assumptions about the layout of the cvr file:
+
+    - macro scans row 4 to find BallotType (btCol) and optionally PrecinctPortion (ppCol).
+    - All columns to the right of BallotType (voteStartCol = btCol + 1) are treated as vote choice columns. To allow for the possibility of different headers, I use the first non-blank column of the contest header (row 2) to indicate where the vote columns start. However, I havent seen anything other than the non-standard Garfield file with this problem.
+
+5. The default is to use the PrecinctPortion (if present) in the key PrecinctPortion|BallotType. I think the PrecinctPortion should be redacted for privacy. Im not sure where the idea came from to not only _not_ redact PrecinctPortion, but use it for the rare row grouping, which could make many more redactions, as well as compromising voter privacy. Lori, am I misunderstanding this?
+
+6. The macro assumes that the file is sorted by BallotStyle. By making two passes through the in-memory rows, one could eliminate the need to externally sort.
+
+7. Excel assumes that the file fits into memory. Not sure how the internal memory requirement compares to the uncompressed size on disk. Largest file size Ive noticed is 280 Mb (Denver 2020). Windows itself takes 2-4 Gb; I guess an 8 Gb machine might be useable, and 16 GB probably safe.
+
+8. It would be a simple modification to change the row redaction to only put * where the row has non-blank columns. I dont see any guidelines indicating to put * in all columns. Where did that come from?
+
+
 
 
 

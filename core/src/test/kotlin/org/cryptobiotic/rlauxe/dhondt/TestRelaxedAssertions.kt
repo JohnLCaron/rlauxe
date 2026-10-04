@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.persist.SampleLimit
-import org.cryptobiotic.rlauxe.persist.json.writeAllContestsToJsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeRelaxedAssertionProofs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -130,14 +130,14 @@ class TestRelaxedAssertions {
         val contestRound = lastRound.contestRounds.find { it.id == 5 }!!
 
         val filename = "/home/stormy/rla/temp/assertionsSingleBT.v3.json"
-        writeAllContestsToJsonFile(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
+        writeRelaxedAssertionProofs(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
     }
 
     @Test
     fun testWriteAllContestsJson() {
         val filename = "/home/stormy/rla/temp/assertionsv.json"
         val contestRounds = lastRound.contestRounds
-        writeAllContestsToJsonFile(contestRounds, filename, config.riskLimit, pretty = false, sampleLimitMap)
+        writeRelaxedAssertionProofs(contestRounds, filename, config.riskLimit, pretty = false, sampleLimitMap)
     }
 
     @Test
@@ -158,8 +158,8 @@ class TestRelaxedAssertions {
         //val candSeat: ContestSeatsRev = CandSeatRangeBuilderRev(contestRound).partyRanges
         //println(candSeat.showSeatRanges())
 
-        val filename = "/home/stormy/rla/temp/assertionsBruxelle.v4.json"
-        writeAllContestsToJsonFile(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
+        val filename = "/home/stormy/rla/temp/assertionsBruxelle.v5.json"
+        writeRelaxedAssertionProofs(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
     }
 
     @Test
@@ -179,8 +179,8 @@ class TestRelaxedAssertions {
         //val candSeat: ContestSeatsRev = CandSeatRangeBuilderRev(contestRound).partyRanges
         //println(candSeat.showSeatRanges())
 
-        val filename = "/home/stormy/rla/temp/assertionsHainut.v4.json"
-        writeAllContestsToJsonFile(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
+        val filename = "/home/stormy/rla/temp/assertionsHainut.v5.json"
+        writeRelaxedAssertionProofs(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
     }
 }
 

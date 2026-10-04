@@ -163,7 +163,7 @@ fun makeRelaxedAssertions(contestRound: ContestRound, alpha: Double, mvrLimit: I
     return when {
         (tfailures.isEmpty() && failures.isEmpty()) -> NoFailures(orgContest)
         // (tfailures.isEmpty() && version == "useV") -> RelaxedAssertionsV(orgContest, Npop, nsamples, useAlpha, failures)
-        else -> RelaxedDhAssertions(orgContest, orgAssorters, Npop, nsamples, useAlpha, failureFinder, version)
+        else -> MakeRelaxedAssertions(orgContest, orgAssorters, Npop, nsamples, useAlpha, failureFinder, version)
         //  else -> ThresholdAssertionsV(orgContest, Npop, nsamples, useAlpha, failures, tfailures)
     }
 }

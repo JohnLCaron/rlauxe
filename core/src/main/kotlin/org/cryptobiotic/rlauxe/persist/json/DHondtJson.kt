@@ -256,7 +256,7 @@ object TestOne {
 
 /////////////////////////////////////////////////////////////////////////////////
 
-// still used ??
+/* still used ??
 fun writeDHondtAssertionsJson(dcontest: DhondtContest, assorters: List<AssorterIF>, candidates: List<PartyRange>) {
     val relaxData = RelaxedAssertionData(dcontest, assorters, candidates)
     val json = relaxData.publishJson()
@@ -266,9 +266,9 @@ fun writeDHondtAssertionsJson(dcontest: DhondtContest, assorters: List<AssorterI
     println(bos)
 }
 
-// TODO do we needto write the BT failures ??
-fun writeOneContestToJsonFile(contestRound: ContestRound, relax: RelaxedAssertionsIF, filename: String,
-                              pretty: Boolean = false): RelaxedAssertionsJson {
+// TODO do we need to write the BT failures ??
+fun writeOneContestProof(contestRound: ContestRound, relax: RelaxedAssertionsIF, filename: String,
+                         pretty: Boolean = false): RelaxedAssertionsJson {
     val failedAssorters = relax.failures().map { it.assorter }
     val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
 
@@ -283,6 +283,7 @@ fun writeOneContestToJsonFile(contestRound: ContestRound, relax: RelaxedAssertio
     }
     return json
 }
+
 
 fun readDHondtAssertionsJsonFile(filename: String): Result<RelaxedAssertionsJson, ErrorMessages> {
     val errs = ErrorMessages("readDHondtAssertionsJsonFile '${filename}'")
@@ -305,12 +306,12 @@ fun readDHondtAssertionsJsonFile(filename: String): Result<RelaxedAssertionsJson
 fun readDHondtAssertionsJsonUnwrapped(filename: String): RelaxedAssertionsJson? {
     val result = readDHondtAssertionsJsonFile(filename)
     return if (result.isOk) result.unwrap() else null
-}
+} */
 
 //////////////////////////////////////////////////////////////////////////////
 
-fun writeAllContestsToJsonFile(contestRounds: List<ContestRound>, filename: String, alpha: Double, pretty: Boolean = false,
-                               mvrLimit: Map<Int, SampleLimit>, version: String? = null): RelaxedAssertionContestsJson {
+fun writeRelaxedAssertionProofs(contestRounds: List<ContestRound>, filename: String, alpha: Double, pretty: Boolean = false,
+                                mvrLimit: Map<Int, SampleLimit>, version: String? = null): RelaxedAssertionContestsJson {
 
     val relaxed = mutableListOf<RelaxedAssertionsIF>()
     contestRounds.forEach { contestRound ->
@@ -326,7 +327,7 @@ fun writeAllContestsToJsonFile(contestRounds: List<ContestRound>, filename: Stri
     return json
 }
 
-fun readDHondtAssertionContestsJson(filename: String): Result<RelaxedAssertionContestsJson, ErrorMessages> {
+fun readRelaxedAssertionProofs(filename: String): Result<RelaxedAssertionContestsJson, ErrorMessages> {
     val errs = ErrorMessages("readDHondtAssertionContestsJson '${filename}'")
     val filepath = Path(filename)
     if (!Files.exists(filepath)) {
@@ -344,7 +345,7 @@ fun readDHondtAssertionContestsJson(filename: String): Result<RelaxedAssertionCo
     }
 }
 
-fun readDHondtAssertionContestsJsonUnwrapped(filename: String): RelaxedAssertionContestsJson? {
-    val result = readDHondtAssertionContestsJson(filename)
+fun readRelaxedAssertionProofsUnwrapped(filename: String): RelaxedAssertionContestsJson? {
+    val result = readRelaxedAssertionProofs(filename)
     return if (result.isOk) result.unwrap() else null
 }

@@ -3,12 +3,13 @@ package org.cryptobiotic.rlauxe.dhondt
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
-import org.cryptobiotic.rlauxe.persist.json.readDHondtAssertionsJsonUnwrapped
-import org.cryptobiotic.rlauxe.persist.json.writeDHondtAssertionsJson
-import org.cryptobiotic.rlauxe.persist.json.writeOneContestToJsonFile
+import org.cryptobiotic.rlauxe.persist.json.RelaxedAssertionContestsJson
+import org.cryptobiotic.rlauxe.persist.json.readRelaxedAssertionProofsUnwrapped
+import org.cryptobiotic.rlauxe.persist.json.writeRelaxedAssertionProofs
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class TestCandidateSeats {
     val topdir = "$cases/belgium/belgium2024/"
@@ -34,7 +35,7 @@ class TestCandidateSeats {
     }
 
     @Test
-    fun testWriteOneFailureAssertions() {
+    fun testWriteAssertionProof() {
         val contestRound = lastRound.contestRounds.find { it.id == 6 }!!
         val sampleLimit = sampleLimitMap[contestRound.id]
         if (sampleLimit != null) {
@@ -51,13 +52,12 @@ class TestCandidateSeats {
         //val failedAssorters = relax.failures().map { it.assorter }
         //val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
 
-        writeDHondtAssertionsJson(relax.orgContest, relax.assortersForProof(), relax.totalContestRange().partyRanges().toList())
-
         val scratchFile = createTempFile().toString()
-        val org =  writeOneContestToJsonFile(contestRound, relax, scratchFile, true)
-        val roundtrip = readDHondtAssertionsJsonUnwrapped(scratchFile)
-        println("--------------------------------------------------------------------------")
-        println(roundtrip)
+
+        val org : RelaxedAssertionContestsJson = writeRelaxedAssertionProofs(listOf(contestRound), scratchFile, .05, mvrLimit = sampleLimitMap)
+
+        val roundtrip = readRelaxedAssertionProofsUnwrapped(scratchFile)
+        assertNotNull(roundtrip)
         assertEquals(org, roundtrip)
     }
 

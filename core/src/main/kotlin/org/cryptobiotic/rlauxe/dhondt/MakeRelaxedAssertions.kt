@@ -6,16 +6,16 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder.Companion.makeDhAssorterFromDivisors
 
-private val logger = KotlinLogging.logger("RelaxedDhAssertions")
+private val logger = KotlinLogging.logger("MakeRelaxedAssertions")
 
-// current version: "Ideas for bounding sample sizes for Belgian RLAs", October 1, 2026
-class RelaxedDhAssertions(override val orgContest: DhondtContest,
-                          val orgAssorters: List<AssorterIF>,
-                          override val Npop: Int,
-                          override val nsamples: Int,
-                          override val alpha: Double,
-                          failureFinder: FailureFinder,
-                          version: String? = null
+// make relaxed assertions from "Ideas for bounding sample sizes for Belgian RLAs", October 1, 2026
+class MakeRelaxedAssertions(override val orgContest: DhondtContest,
+                            val orgAssorters: List<AssorterIF>,
+                            override val Npop: Int,
+                            override val nsamples: Int,
+                            override val alpha: Double,
+                            failureFinder: FailureFinder,
+                            version: String? = null
 ): RelaxedAssertionsIF {
     val orgInfo = orgContest.info
     val votes = orgContest.votes
@@ -32,9 +32,10 @@ class RelaxedDhAssertions(override val orgContest: DhondtContest,
         if (tfailuresIn.isNotEmpty() && failuresIn.isNotEmpty()) {
             val algo = BothAlgorithm44(orgContest, failureFinder, tfailuresIn)
             totalContestRange = algo.contestRange
+
+            assortersForProof = algo.altContests.map { it.altContest.assorters }.flatten()
             altContests = listOf(AltContest("Original", orgContest, ContestRange.fromFailures(orgContest, failuresIn), failuresIn.size, tfailuresIn.size)) +
-                algo.altContests
-            assortersForProof = emptyList() // TODO maybe you need all alts, and validate all ?? doesnt affect contestRange I think
+                    algo.altContests
 
         } else if (tfailuresIn.isNotEmpty()) {
             val algo = ThresholdOnlyAlgorithm422(orgContest, tfailuresIn)
@@ -335,7 +336,7 @@ class ThresholdOnlyAlgorithm422(val from: DhondtContest, tfailures: List<Thresho
     }
 }
 
-// the threshold assertions (if any) are passed in, do not create new ones
+// the threshold assertions (if any) are passed in, do not create new ones, nor test for BT substitutions
 // just add the usual dh assertions
 class DhondtBuilderDontAddThresholds (
     from: DhondtContest,

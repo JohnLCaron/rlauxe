@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$ref": "#/definitions/Assertions",
+  "$comment": "generated from https://app.quicktype.io/",
+  "definitions": {
+    "Assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Contest"
+          }
+        },
+        "allBounds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Bound"
+          }
+        }
+      },
+      "required": [
+        "allBounds",
+        "contests"
+      ],
+      "title": "Assertions"
+    },
+    "Bound": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "party": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "minSeats": {
+          "type": "integer"
+        },
+        "maxSeats": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "maxSeats",
+        "minSeats",
+        "name",
+        "party"
+      ],
+      "title": "Bound"
+    },
+    "Contest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contest": {
+          "type": "string"
+        },
+        "assertions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AssertionElement"
+          }
+        },
+        "seats": {
+          "type": "integer"
+        },
+        "bounds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Bound"
+          }
+        }
+      },
+      "required": [
+        "assertions",
+        "bounds",
+        "contest",
+        "seats"
+      ],
+      "title": "Contest"
+    },
+    "AssertionElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "assertion": {
+          "$ref": "#/definitions/AssertionAssertion"
+        },
+        "difficulty": {
+          "type": "number"
+        },
+        "margin": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "assertion",
+        "difficulty",
+        "margin"
+      ],
+      "title": "AssertionElement"
+    },
+    "AssertionAssertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/Type"
+        },
+        "party": {
+          "type": "integer"
+        },
+        "winner": {
+          "type": "integer"
+        },
+        "loser": {
+          "type": "integer"
+        },
+        "winnerLowestWinner": {
+          "type": "integer"
+        },
+        "loserHighestLoser": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "AssertionAssertion"
+    },
+    "Type": {
+      "type": "string",
+      "enum": [
+        "AT",
+        "DH",
+        "BT"
+      ],
+      "title": "Type"
+    }
+  }
+}

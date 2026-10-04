@@ -147,12 +147,11 @@ class PartyRange(val partyId: Int, val partyName: String) {
 ///////////////////////////////////////////////////////////////////
 // this is for all contests in the audit round
 
-fun makeAllSeatsFromRound(auditRound: AuditRoundIF, contestLimits: List<SampleLimit>, alpha: Double): AllSeats {
-    val contestLimitsMap = contestLimits.associateBy { it.id }
+fun makeAllSeatsFromRound(auditRound: AuditRoundIF, contestLimits: Map<Int,Int>, alpha: Double): AllSeats {
     val contestRanges = auditRound.contestRounds.map { contestRound ->
-        val sampleLimit = contestLimitsMap[contestRound.id]
+        val sampleLimit = contestLimits[contestRound.id]
         if (sampleLimit != null) {
-            contestRound.haveSampleSize = sampleLimit.limit
+            contestRound.haveSampleSize = sampleLimit
         }
         val relax = makeRelaxedAssertions(contestRound, alpha)
         relax.totalContestRange()

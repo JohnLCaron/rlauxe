@@ -28,6 +28,7 @@ interface RelaxedAssertionsIF {
 data class AltContest(
     val name: String,
     val altContest: DhondtContest,
+    val altAssorters: List<AssorterIF>,
     val contestRange: ContestRange,
     val dhFail: Int,
     val tFail: Int,

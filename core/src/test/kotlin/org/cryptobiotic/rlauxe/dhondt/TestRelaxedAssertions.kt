@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
-import org.cryptobiotic.rlauxe.persist.SampleLimit
 import org.cryptobiotic.rlauxe.persist.json.writeRelaxedAssertionProofs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -15,15 +14,14 @@ class TestRelaxedAssertions {
     val contests = auditRecord.contests
     val lastRound = auditRecord.rounds.last()
     val config = auditRecord.config
-    val sampleLimitMap: Map<Int, SampleLimit> = auditRecord.readSampleLimits().associateBy { it.id }
-
+    val sampleLimits: Map<Int, Int> = auditRecord.readSampleLimits().associate { it.id to it.limit }
 
     @Test
     fun testOneDHFailures() {
         val contestRound = lastRound.contestRounds.find { it.id == 4 }!! // FlandresEast
-        val sampleLimit = sampleLimitMap[contestRound.id]
+        val sampleLimit = sampleLimits[contestRound.id]
         if (sampleLimit != null) {
-            contestRound.haveSampleSize = sampleLimit.limit
+            contestRound.haveSampleSize = sampleLimit
         }
         val relax = makeRelaxedAssertions(contestRound, .05)
         println(relax.show())
@@ -42,16 +40,16 @@ class TestRelaxedAssertions {
         val oneFailures = listOf(1, 2, 6, 4)
         oneFailures.forEach { partyId ->
             val contestRound = lastRound.contestRounds.find { it.id == partyId }!!
-            val sampleLimit = sampleLimitMap[contestRound.id]
+            val sampleLimit = sampleLimits[contestRound.id]
             if (sampleLimit != null) {
-                contestRound.haveSampleSize = sampleLimit.limit
+                contestRound.haveSampleSize = sampleLimit
             }
             //println("==========================================================")
-            val relax = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit)
+            val relax = makeRelaxedAssertions(contestRound, .05, sampleLimit)
             //println(relax.show())
 
             println("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV")
-            val relaxv = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit, version = "tooRelaxed")
+            val relaxv = makeRelaxedAssertions(contestRound, .05, sampleLimit, version = "tooRelaxed")
             //println(relaxv.show())
 
             println("${contestRound.name} match = ${relax.totalContestRange().partyRanges() == relaxv.totalContestRange().partyRanges()}")
@@ -92,11 +90,11 @@ class TestRelaxedAssertions {
     @Test
     fun testMultipleDHFailures() {
         val contestRound = lastRound.contestRounds.find { it.id == 1 }!! // Anvers
-        val sampleLimit = sampleLimitMap[contestRound.id]
+        val sampleLimit = sampleLimits[contestRound.id]
         if (sampleLimit != null) {
-            contestRound.haveSampleSize = sampleLimit.limit
+            contestRound.haveSampleSize = sampleLimit
         }
-        val relax = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit)
+        val relax = makeRelaxedAssertions(contestRound, .05, sampleLimit)
         println(relax.show())
 
         /* var idx = 0
@@ -128,25 +126,24 @@ class TestRelaxedAssertions {
     @Test
     fun testWriteOneContestsJson() {
         val contestRound = lastRound.contestRounds.find { it.id == 5 }!!
-
         val filename = "/home/stormy/rla/temp/assertionsSingleBT.v3.json"
-        writeRelaxedAssertionProofs(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
+        writeRelaxedAssertionProofs(filename, listOf(contestRound), config.riskLimit, sampleLimits)
     }
 
     @Test
     fun testWriteAllContestsJson() {
-        val filename = "/home/stormy/rla/temp/assertionsv.json"
+        val filename = "/home/stormy/rla/temp/assertions.v5.json"
         val contestRounds = lastRound.contestRounds
-        writeRelaxedAssertionProofs(contestRounds, filename, config.riskLimit, pretty = false, sampleLimitMap)
+        writeRelaxedAssertionProofs(filename, contestRounds, config.riskLimit, sampleLimits)
     }
 
     @Test
     fun testBruxelleFailures() {
         // val contestRound = lastRound.contestRounds.find { it.id == 5 }!! // Hainut
         val contestRound = lastRound.contestRounds.find { it.id == 2 }!! // Bruxelles now has 1 tfailure and 2 dh failures.
-        val sampleLimit = sampleLimitMap[contestRound.id]
+        val sampleLimit = sampleLimits[contestRound.id]
         if (sampleLimit != null) {
-            contestRound.haveSampleSize = sampleLimit.limit
+            contestRound.haveSampleSize = sampleLimit
         }
         val relax = makeRelaxedAssertions(contestRound, .05)
         println(relax.show())
@@ -159,15 +156,15 @@ class TestRelaxedAssertions {
         //println(candSeat.showSeatRanges())
 
         val filename = "/home/stormy/rla/temp/assertionsBruxelle.v5.json"
-        writeRelaxedAssertionProofs(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
+        writeRelaxedAssertionProofs(filename, listOf(contestRound), config.riskLimit, sampleLimits)
     }
 
     @Test
     fun testHainutFailures() {
         val contestRound = lastRound.contestRounds.find { it.id == 5 }!! // Hainut has 1 threshold failue and its alt has DH failures
-        val sampleLimit = sampleLimitMap[contestRound.id]
+        val sampleLimit = sampleLimits[contestRound.id]
         if (sampleLimit != null) {
-            contestRound.haveSampleSize = sampleLimit.limit
+            contestRound.haveSampleSize = sampleLimit
         }
         val relax = makeRelaxedAssertions(contestRound, .05)
         println(relax.show())
@@ -180,7 +177,7 @@ class TestRelaxedAssertions {
         //println(candSeat.showSeatRanges())
 
         val filename = "/home/stormy/rla/temp/assertionsHainut.v5.json"
-        writeRelaxedAssertionProofs(listOf(contestRound), filename, config.riskLimit, pretty = false, sampleLimitMap)
+        writeRelaxedAssertionProofs(filename, listOf(contestRound), config.riskLimit, sampleLimits)
     }
 }
 

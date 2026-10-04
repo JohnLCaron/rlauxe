@@ -34,16 +34,16 @@ class MakeRelaxedAssertions(override val orgContest: DhondtContest,
             totalContestRange = algo.contestRange
 
             assortersForProof = algo.altContests.map { it.altContest.assorters }.flatten()
-            altContests = listOf(AltContest("Original", orgContest, ContestRange.fromFailures(orgContest, failuresIn), failuresIn.size, tfailuresIn.size)) +
-                    algo.altContests
+            altContests = listOf(
+                AltContest("Original", orgContest, orgAssorters, ContestRange.fromFailures(orgContest, failuresIn), failuresIn.size, tfailuresIn.size)
+            ) + algo.altContests
 
         } else if (tfailuresIn.isNotEmpty()) {
             val algo = ThresholdOnlyAlgorithm422(orgContest, tfailuresIn)
             totalContestRange = algo.contestRange
             altContests = listOf(
-                AltContest("Original", orgContest, ContestRange.fromFailures(orgContest, failuresIn), 0, tfailuresIn.size),
-                AltContest("ThresholdOnly", algo.altContest, ContestRange.fromFailures(algo.altContest, failuresIn), 0, 0)
-            )
+                AltContest("Original", orgContest, orgAssorters, ContestRange.fromFailures(orgContest, failuresIn), 0, tfailuresIn.size),
+            ) + algo.altContests
             assortersForProof = algo.assorters
 
         /* } else if (version == "tooRelaxed") { // bogus
@@ -61,8 +61,8 @@ class MakeRelaxedAssertions(override val orgContest: DhondtContest,
             val altContest = DhondtBuilderFromAssorters(orgContest, algo.assortersOut).build() // TODO
             assortersForProof = algo.assortersOut
             altContests = listOf(
-                AltContest("Original", orgContest, ContestRange.fromFailures(orgContest, failuresIn), failuresIn.size, 0),
-                AltContest("DhOnly", altContest, algo.contestRange, algo.contestRange.dhFail(), 0)
+                AltContest("Original", orgContest, orgAssorters, ContestRange.fromFailures(orgContest, failuresIn), failuresIn.size, 0),
+                AltContest("DhOnly", altContest, altContest.assorters, algo.contestRange, algo.contestRange.dhFail(), 0)
             )
             totalContestRange = algo.contestRange
         }
@@ -150,7 +150,7 @@ class DhOnlyAlgorithm431(val dcontest: DhondtContest, assorters: List<AssorterIF
             //    add DH(P_w, P_l, w_lowest_winner-1, l_highest_loser) and DH(P_w, P_l, w_lowest_winner, l_highest_loser+1) instead.
             //    This moves P_w's lowest winner and P_l's highest loser into your 'yellow zone' - update the claimed bounds accordingly.
 
-            val failure = failures.find { it.assorter == assorter }
+            val failure = failures.find { it.assorter == assorter } // does this assorter fail ?
             if (failure != null) {
                 val dh = assorter as DhondtAssorter
                 val winningParty = party[dh.winner()]!!
@@ -200,7 +200,7 @@ class BothAlgorithm44(val from: DhondtContest,
                       val failureFinder: FailureFinder,
                       val tfailures: List<ThresholdFailure>,
 ) {
-    val info = from.info
+    val infos = from.info
     val contestRange = ContestRange(from)
     val altContests = mutableListOf<AltContest>()
 
@@ -212,8 +212,8 @@ class BothAlgorithm44(val from: DhondtContest,
 
         // 1. Include AT (P) assertions for all P ∈ AT and, similarly, BT (P ) for all P ∈ BT.
         val tassorters = mutableListOf<AssorterIF>()
-        AT.forEach { party -> tassorters.add(AboveThreshold.makeFromVotes(info, party.id, from.votes, info.minFraction!!, from.Nc)) }
-        BT.forEach { party -> tassorters.add(BelowThreshold.makeFromVotes(info, party.id, from.votes, from.Nc)) }
+        AT.forEach { party -> tassorters.add(AboveThreshold.makeFromVotes(infos, party.id, from.votes, infos.minFraction!!, from.Nc)) }
+        BT.forEach { party -> tassorters.add(BelowThreshold.makeFromVotes(infos, party.id, from.votes, from.Nc)) }
 
         // 2. Assume all P ∈ ET are above the threshold (but do not add AT assertions for them).
         //    a) Run the algorithm from subsubsection 4.3.1 to derive relaxed DH assertions
@@ -223,7 +223,7 @@ class BothAlgorithm44(val from: DhondtContest,
         val lowContest = lowBuilder.build()
         val subalgoLow = DhOnlyAlgorithm431(lowContest, lowContest.assorters, failureFinder)
         contestRange.mergeAltContestRange(subalgoLow.contestRange)
-        altContests.add(AltContest("Low Assertions", lowContest, subalgoLow.contestRange, subalgoLow.contestRange.dhFail(), 0))
+        altContests.add(AltContest("Low Assertions", lowContest, lowContest.assorters, subalgoLow.contestRange, subalgoLow.contestRange.dhFail(), 0))
 
         // 3. Assume all P ∈ ET are below the threshold (but do not add BT assertions for them).
         //    a) Run the algorithm from subsubsection 4.3.1 to derive relaxed DH assertions
@@ -234,7 +234,7 @@ class BothAlgorithm44(val from: DhondtContest,
         val highContest = highBuilder.build()
         val subalgoHigh = DhOnlyAlgorithm431(highContest, highContest.assorters, failureFinder)
         contestRange.mergeAltContestRange(subalgoHigh.contestRange)
-        altContests.add(AltContest("High Assertions", highContest, subalgoHigh.contestRange, subalgoHigh.contestRange.dhFail(), ET.size))
+        altContests.add(AltContest("High Assertions", highContest, highContest.assorters, subalgoHigh.contestRange, subalgoHigh.contestRange.dhFail(), ET.size))
 
 
         // 4. For each P ∈ ET, assume that P is above the threshold and all other parties in
@@ -253,7 +253,7 @@ class BothAlgorithm44(val from: DhondtContest,
                 contestRange.mergeAltContestRange(subalgoSolo.contestRange)
                 altContests.add(
                     AltContest(
-                        "${info.candidateIdToName[partyId]} Solo Assertions", soloContest, subalgoSolo.contestRange,
+                        "${infos.candidateIdToName[partyId]} Solo Assertions", soloContest, soloContest.assorters ,subalgoSolo.contestRange,
                         subalgoSolo.contestRange.dhFail(), belowThreshold.size
                     )
                 )
@@ -282,11 +282,10 @@ class BothAlgorithm44(val from: DhondtContest,
 // 4.2.2. Algorithm for threshold uncertainty, page 9.
 // For all 2^|ET| possible assignments of AT or BT to the parties in ET
 class ThresholdOnlyAlgorithm422(val from: DhondtContest, tfailures: List<ThresholdFailure>) {
-
     val info = from.info
     val contestRange = ContestRange(from)
-    val altContest: DhondtContest
-    val assorters: List<AssorterIF>
+    val altContests = mutableListOf<AltContest>()
+    val assorters = mutableListOf<AssorterIF>()
 
     init {
 
@@ -308,6 +307,7 @@ class ThresholdOnlyAlgorithm422(val from: DhondtContest, tfailures: List<Thresho
         val ET = tfailures.map { it.assorter.winner() }
         val AT = from.parties.filter { !ET.contains(it.id) && !it.isBelowMin }
         val BT = from.parties.filter { !ET.contains(it.id) && it.isBelowMin }
+        val btSet = BT.map { it.id }.toSet()
 
         // 1. Initialise the assertion set with AT (P ) assertions for all P ∈ AT and, similarly, BT (P) for all P ∈ BT.
         val tassorters = mutableListOf<AssorterIF>()
@@ -323,17 +323,41 @@ class ThresholdOnlyAlgorithm422(val from: DhondtContest, tfailures: List<Thresho
         // 2. all P ∈ ET are below the threshold,
         // 3. for each P ∈ ET, P is above the threshold and all other parties in ET are below.
 
-        // for now, just assume one threshold failure
+        val combos: List<Combination<Int>> = generateCombos(ET) // 2^n combinations
+        combos.forEach { combination ->
+            val btsForCombo = mutableListOf<Int>() // set of party ids
+            // btsForCombo.addAll(BTids) // these are always present
+            combination.combos.forEach { failOrNot: FailsOrNot<Int> -> if (failOrNot.fails) btsForCombo.add(failOrNot.item) }
+            val altBuilder = DhondtBuilderDontAddThresholds(from, btSet + btsForCombo.toSet(), tassorters)
+            val altContest = altBuilder.build()
 
-        val altBuilder = DhondtBuilderDontAddThresholds(from, emptySet(), tassorters)
-        altContest = altBuilder.build()
-        assorters = altContest.assorters
+            assorters.addAll(altContest.assorters)
+            altContests.add(AltContest("BT=${btsForCombo}", altContest, altContest.assorters, ContestRange(altContest), 0, btsForCombo.size))
 
-        // 3. For each party P , its maximum and minimum seat counts are the maximum and
-        //   minimum values encountered at any point in Step 2.
-
-        contestRange.mergeAltContestRange(ContestRange(altContest))
+            // 3. For each party P, its maximum and minimum seat counts are the maximum and
+            //   minimum values encountered at any point in Step 2.
+            contestRange.mergeAltContestRange(ContestRange(altContest))
+        }
     }
+}
+
+data class FailsOrNot<T>(val item: T, val fails: Boolean)
+data class Combination<T>(val combos: List<FailsOrNot<T>>) // each combolist assigns true/false to each item
+
+// generate 2^n ComboLists
+fun <T> generateCombos(items: List<T>): List<Combination<T>> {
+    val n = items.size
+    val totalCombinations = 1 shl n // 2^N
+
+    val result:List<Combination<T>> = (0 until totalCombinations).map { index ->
+        val comboList: List<FailsOrNot<T>> = items.mapIndexed { bitIndex, item ->
+            // Check if the bit at 'bitIndex' is set
+            val isTrue = (index and (1 shl bitIndex)) != 0
+            FailsOrNot(item, isTrue)
+        } // for each item in items, flag if set
+        Combination(comboList)
+    }
+    return result
 }
 
 // the threshold assertions (if any) are passed in, do not create new ones, nor test for BT substitutions

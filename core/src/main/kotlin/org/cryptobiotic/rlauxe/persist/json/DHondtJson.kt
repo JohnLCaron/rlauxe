@@ -12,14 +12,13 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.core.AboveThreshold
-import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.BelowThreshold
+import org.cryptobiotic.rlauxe.dhondt.AllSeats
+import org.cryptobiotic.rlauxe.dhondt.ContestRange
 import org.cryptobiotic.rlauxe.dhondt.DhondtAssorter
-import org.cryptobiotic.rlauxe.dhondt.DhondtContest
 import org.cryptobiotic.rlauxe.dhondt.PartyRange
 import org.cryptobiotic.rlauxe.dhondt.RelaxedAssertionsIF
 import org.cryptobiotic.rlauxe.dhondt.makeRelaxedAssertions
-import org.cryptobiotic.rlauxe.persist.SampleLimit
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
@@ -27,22 +26,15 @@ import java.nio.file.Files
 import java.nio.file.StandardOpenOption
 import kotlin.io.path.Path
 
-// [
-//  {"assertion": {"type": "AT", "party": 0}, "difficulty": 3.4, "margin": 4000},
-//  {"assertion": {"type": "BT", "party": 1}, "difficulty": 3.0, "margin": 4500},
-//  {"assertion": {"type": "DH", "winner": 0, "loser": 1, "winnerLowestWinner": 2, "loserHighestLoser": 2}, "difficulty": 5.1, "margin": 2100},
-//  {"assertion": {"type": "DH", "winner": 0, "loser": 2, "winnerLowestWinner": 2, "loserHighestLoser": 1}, "difficulty": 2.2, "margin": 9000},
-//  {"assertion": {"type": "DH", "winner": 1, "loser": 0, "winnerLowestWinner": 1, "loserHighestLoser": 4}, "difficulty": 2.5, "margin": 8000},
-//  {"assertion": {"type": "DH", "winner": 1, "loser": 2, "winnerLowestWinner": 1, "loserHighestLoser": 1}, "difficulty": 2.0, "margin": 9500},
-//  {"assertion": {"type": "DH", "winner": 0, "loser": 1, "winnerLowestWinner": 3, "loserHighestLoser": 3}, "difficulty": 6.0, "margin": 1500},
-//  {"assertion": {"type": "DH", "winner": 1, "loser": 0, "winnerLowestWinner": 2, "loserHighestLoser": 4}, "difficulty": 4.0, "margin": 3000},
-//  {"assertion": {"type": "DH", "winner": 0, "loser": 2, "winnerLowestWinner": 3, "loserHighestLoser": 2}, "difficulty": 2.8, "margin": 7000},
-//  {"assertion": {"type": "DH", "winner": 1, "loser": 2, "winnerLowestWinner": 2, "loserHighestLoser": 2}, "difficulty": 3.1, "margin": 6000}
-//]
+data class RelaxedAssertionsResult(
+    val relaxed: List<RelaxedAssertionsIF>,
+    val allRanges: List<Bound>,
+)
 
 @Serializable
-data class RelaxedAssertionContestsJson(
+data class RelaxedAssertionsResultJson(
     val contests: List<RelaxedAssertionsJson>,
+    val allBounds: List<Bound>,
 ) {
     override fun toString()= buildString {
         appendLine("RelaxedAssertionContestsJson")
@@ -50,9 +42,15 @@ data class RelaxedAssertionContestsJson(
     }
 }
 
-private fun List<RelaxedAssertionsIF>.publishJson() = RelaxedAssertionContestsJson(
-        this.map { publishRAJson(it) }
+fun RelaxedAssertionsResult.publishJson() = RelaxedAssertionsResultJson(
+        this.relaxed.map { it.publishJson() },
+        this.allRanges
     )
+
+/*fun RelaxedAssertionsResultJson.import() = RelaxedAssertionsResult(
+        this.contests.map { it.import() },
+        this.allBounds
+    ) */
 
 @Serializable
 data class Bound(
@@ -60,13 +58,45 @@ data class Bound(
     val name: String,
     val minSeats: Int,
     val maxSeats: Int,
-)
+) {
+    constructor(party: PartyRange): this(party.partyId, party.partyName, party.minSeats, party.maxSeats, )
+}
 
-data class RelaxedAssertionData(
-    val dcontest: DhondtContest,
-    val assorters: List<AssorterIF>,
-    val partyRanges: List<PartyRange>,
-)
+
+////////////////////////////////////////
+/* data class RelaxedAssertionsImpl(
+    override val orgContest: DhondtContest,
+    override val Npop: Int,
+    override val nsamples: Int,
+    override val alpha: Double,
+
+    val ThresholdFailure: List<AltContest>,
+    val assortersForProof: List<AssorterIF>,
+    val totalContestRange: ContestRange,
+    val failures: List<DhondtFailure>,
+    val tfailures: List<ThresholdFailure>,
+): RelaxedAssertionsIF {
+    override fun altContests() = ThresholdFailure
+    override fun assortersForProof() = assortersForProof
+    override fun totalContestRange() = totalContestRange
+    override fun failures() = failures
+    override fun tfailures() = tfailures
+    override fun show() = "no"
+}
+
+data class RelaxedAssertionsBrief(
+    val contest: String,
+    val assertions: List<DAssertionWithMargin>,
+    val seats: Int,
+    val bounds: List<Bound>,
+) {
+    constructor(from: RelaxedAssertionsIF): this(
+        from.orgContest.name,
+        from.assortersForProof(),
+        from.orgContest.nseats,
+        from.totalContestRange(),
+        )
+} */
 
 @Serializable
 data class RelaxedAssertionsJson(
@@ -82,29 +112,10 @@ data class RelaxedAssertionsJson(
     }
 }
 
-fun RelaxedAssertionData.publishJson(): RelaxedAssertionsJson {
+fun RelaxedAssertionsIF.publishJson(): RelaxedAssertionsJson {
+    val dcontest = this.orgContest
 
-    val dasm = this.assorters.map {
-        val da = when (it) {
-            is AboveThreshold -> DAssorter("AT", it.winner())
-            is BelowThreshold -> DAssorter("BT", it.winner())
-            is DhondtAssorter -> DAssorter("DH", it.winner(), it.loser(), it.winnerDivisor, it.loserDivisor)
-            else -> throw RuntimeException("unknown assorter $it")
-        }
-        DAssertionWithMargin(da, this.dcontest.difficulty(it), this.dcontest.marginInVotes(it))
-    }
-
-    val bounds = this.partyRanges.map {
-        val name = this.dcontest.info().candidateIdToName[it.partyId]
-        Bound(it.partyId, name!!, it.minSeats, it.maxSeats)
-    }
-    return RelaxedAssertionsJson(this.dcontest.name, dasm.publishJson(), this.dcontest.nseats, bounds)
-}
-
-fun publishRAJson(ra: RelaxedAssertionsIF): RelaxedAssertionsJson {
-    val dcontest = ra.orgContest
-
-    val dasm = ra.assortersForProof().map {
+    val dasm = this.assortersForProof().map {
         val da = when (it) {
             is AboveThreshold -> DAssorter("AT", it.winner())
             is BelowThreshold -> DAssorter("BT", it.winner())
@@ -114,12 +125,20 @@ fun publishRAJson(ra: RelaxedAssertionsIF): RelaxedAssertionsJson {
         DAssertionWithMargin(da, dcontest.difficulty(it), dcontest.marginInVotes(it))
     }
 
-    val bounds = ra.totalContestRange().partyRanges().map { party ->
+    val bounds = this.totalContestRange().partyRanges().map { party ->
         val name = dcontest.info().candidateIdToName[party.partyId]
         Bound(party.partyId, name!!, party.minSeats, party.maxSeats)
     }
     return RelaxedAssertionsJson(dcontest.name, dasm.publishJson(), dcontest.nseats, bounds)
 }
+
+/*
+fun RelaxedAssertionsJson.import() = RelaxedAssertionsBrief(
+    this.contest,
+    this.assertions.map { it.import() },
+    this.seats,
+    this.bounds
+) */
 
 fun List<DAssertionWithMargin>.publishJson(): List<DAssertionWithMarginJson> =
     this.map { it.publishJson() }
@@ -310,15 +329,25 @@ fun readDHondtAssertionsJsonUnwrapped(filename: String): RelaxedAssertionsJson? 
 
 //////////////////////////////////////////////////////////////////////////////
 
-fun writeRelaxedAssertionProofs(contestRounds: List<ContestRound>, filename: String, alpha: Double, pretty: Boolean = false,
-                                mvrLimit: Map<Int, SampleLimit>, version: String? = null): RelaxedAssertionContestsJson {
+// resturn json for roundtrip testing
+fun writeRelaxedAssertionProofs(filename: String,
+                                contestRounds: List<ContestRound>,
+                                alpha: Double,
+                                sampleLimits: Map<Int, Int>,
+                                pretty: Boolean = false,
+                                version: String? = null): RelaxedAssertionsResultJson {
 
+    val contestRanges = mutableListOf<ContestRange>()
     val relaxed = mutableListOf<RelaxedAssertionsIF>()
     contestRounds.forEach { contestRound ->
-        relaxed.add(makeRelaxedAssertions(contestRound, alpha, mvrLimit[contestRound.id]?.limit, version=version))
+        val relax = makeRelaxedAssertions(contestRound, alpha, sampleLimits[contestRound.id], version=version)
+        relaxed.add(relax)
+        contestRanges.add(relax.totalContestRange())
     }
+    val allSeats = AllSeats(contestRanges)
+    val relaxedResult = RelaxedAssertionsResult(relaxed, allSeats.partySums.map { Bound(it) })
 
-    val json = relaxed.publishJson()
+    val json = relaxedResult.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = pretty }
     FileOutputStream(filename).use { out ->
         jsonReader.encodeToStream(json, out)
@@ -327,7 +356,7 @@ fun writeRelaxedAssertionProofs(contestRounds: List<ContestRound>, filename: Str
     return json
 }
 
-fun readRelaxedAssertionProofs(filename: String): Result<RelaxedAssertionContestsJson, ErrorMessages> {
+fun readRelaxedAssertionProofs(filename: String): Result<RelaxedAssertionsResultJson, ErrorMessages> {
     val errs = ErrorMessages("readDHondtAssertionContestsJson '${filename}'")
     val filepath = Path(filename)
     if (!Files.exists(filepath)) {
@@ -337,7 +366,7 @@ fun readRelaxedAssertionProofs(filename: String): Result<RelaxedAssertionContest
 
     return try {
         Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
-            val json = jsonReader.decodeFromStream<RelaxedAssertionContestsJson>(inp)
+            val json = jsonReader.decodeFromStream<RelaxedAssertionsResultJson>(inp)
             if (errs.hasErrors()) Err(errs) else Ok(json)
         }
     } catch (t: Throwable) {
@@ -345,7 +374,7 @@ fun readRelaxedAssertionProofs(filename: String): Result<RelaxedAssertionContest
     }
 }
 
-fun readRelaxedAssertionProofsUnwrapped(filename: String): RelaxedAssertionContestsJson? {
+fun readRelaxedAssertionProofsUnwrapped(filename: String): RelaxedAssertionsResultJson? {
     val result = readRelaxedAssertionProofs(filename)
     return if (result.isOk) result.unwrap() else null
 }

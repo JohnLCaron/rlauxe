@@ -117,7 +117,7 @@ class TestBoulderCvrs {
 
         println("\nCvr Card Styles")
         corlaRawCvrs.cardStyleMap().values.forEach { println("  ${it}") }
-        val countCardStyleCards = corlaRawCvrs.cardStyleMap().values.sumOf { it.countCards }
+        val countCardStyleCards = corlaRawCvrs.cardStyleMap().values.sumOf { it.ncards }
         println("countCardStyleCards=${countCardStyleCards}")
         println("Total cvrs=${exportCvrs.size}")
 

@@ -220,3 +220,8 @@ read the cardManifest and tabulate npops. Alos, could add that to CorlaStateElec
 * phantoms/unredacted = 1.174 = 17% more samples needed.
 * phantoms/onePool = 1.147 = 15% more samples needed.
 * TODO sample distributions need to be generated to characterize the mean and the variance.
+
+## Precinct Portion
+10/05/2026
+
+Boulder has no precinct portion. It also has 1600 redacted ballots. I suspect they used precincts in their redaction, and then removed that column.

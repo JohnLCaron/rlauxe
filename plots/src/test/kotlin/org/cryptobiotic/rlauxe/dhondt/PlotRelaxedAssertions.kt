@@ -41,7 +41,7 @@ class PlotRelaxedAssertions {
         println("totalMvrsNeeded=${nfn(startSeats.mvrsUsed, 6)} (all)")
         madeSeatsWithMvrs.add(startSeats)
 
-        repeat(6) {
+        repeat(20) {
             val largestDelta = ctrackers.map { it.getDelta() }.maxBy { it.delta }
             largestDelta.largest.ctracker.setFailed(largestDelta)
 
@@ -49,8 +49,6 @@ class PlotRelaxedAssertions {
 
             val makeSeats = MadeSeats(ctrackers)
             println("${nfn(makeSeats.mvrsUsed, 6)} mvrsUsed")
-            println()
-
             print("  failures = ${makeSeats.failures.filter { it.value > 0 }}")
             println("; tfailures = ${makeSeats.tfailures.filter { it.value > 0 }}")
 
@@ -74,7 +72,7 @@ class PlotRelaxedAssertions {
 
         makeRelaxedSeatsPlot(
             writeFile = "$dirName/$name",
-            title="Belgium 2020 Relaxed Assertions",
+            title="Belgium 2020 Relaxed Assertions at 5% risk",
             subtitle="Party Seat ranges vs number of samples",
             madeSeats = madeSeatsWithMvrs,
             scaleType=ScaleType.Linear,

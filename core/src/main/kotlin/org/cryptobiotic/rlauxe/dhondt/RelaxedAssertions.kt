@@ -34,13 +34,16 @@ data class AltContest(
     val tFail: Int,
     )
 
-class NoFailures(override val orgContest: DhondtContest) : RelaxedAssertionsIF {
+class NoFailures(override val orgContest: DhondtContest, val orgAssorters: List<AssorterIF>) : RelaxedAssertionsIF {
     override val Npop = 0
     override val nsamples = 0
     override val alpha = .05
 
-    override fun altContests() = emptyList<AltContest>()
-    override fun assortersForProof() = emptyList<AssorterIF>()
+    override fun altContests() = listOf(AltContest("Original", orgContest, orgAssorters, totalContestRange(), 0, 0))
+    override fun assortersForProof(): List<AssorterIF> {
+        println("NO: ${orgContest.name} ${orgAssorters.size} -> ${orgAssorters.toSet().size} ")
+        return orgAssorters
+    }
     override fun totalContestRange() = ContestRange(orgContest).computeRangesFromFailures()
     override fun failures() = emptyList<DhondtFailure>()
     override fun tfailures() = emptyList<ThresholdFailure>()
@@ -162,7 +165,7 @@ fun makeRelaxedAssertions(contestRound: ContestRound, alpha: Double, mvrLimit: I
     val failures = failureFinder.findDhondtFailures(orgContest, orgAssorters)
 
     return when {
-        (tfailures.isEmpty() && failures.isEmpty()) -> NoFailures(orgContest)
+        (tfailures.isEmpty() && failures.isEmpty()) -> NoFailures(orgContest, orgAssorters)
         // (tfailures.isEmpty() && version == "useV") -> RelaxedAssertionsV(orgContest, Npop, nsamples, useAlpha, failures)
         else -> MakeRelaxedAssertions(orgContest, orgAssorters, Npop, nsamples, useAlpha, failureFinder, version)
         //  else -> ThresholdAssertionsV(orgContest, Npop, nsamples, useAlpha, failures, tfailures)

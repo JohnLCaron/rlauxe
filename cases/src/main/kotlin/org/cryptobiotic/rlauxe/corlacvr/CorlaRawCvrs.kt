@@ -100,6 +100,8 @@ interface CorlaRawCvrsIF {
 
     fun headers(): List<String>
     fun hasBallotType(): Boolean
+    fun countBlankPrecincts(): Int
+    fun ballotStyleUnique(): Boolean
     fun csvHeader(row: CvrRow, redactPrecinct: Boolean): String
 }
 
@@ -159,6 +161,7 @@ class CorlaRawCvrs(val inputSource: String,
     val ballotTypeIdx: Int?
     val precinctIdx: Int? */
 
+    var countBlankPrecincts = 0
     var mungedCount = 0
     var rowCount = 0
     init {
@@ -233,6 +236,8 @@ class CorlaRawCvrs(val inputSource: String,
     override fun nrows() = rowCount
     override fun headers() = headers
     override fun hasBallotType() = schema.headerIdx[CvrHeader.ballottype] != null
+    override fun countBlankPrecincts() = countBlankPrecincts
+    override fun ballotStyleUnique() = ballotStyles.ballotStylesUnique
 
     // enum class CvrHeader { cvrnumber, tabulatornum, batchid, recordid, imprintedid, precinctportion, ballottype }
 
@@ -286,6 +291,8 @@ class CorlaRawCvrs(val inputSource: String,
             ballotType = parseColAsString(CvrHeader.ballottype, line),
             precinctPortion = parseColAsString(CvrHeader.precinctportion, line),
         )
+
+        if (parseColAsString(CvrHeader.precinctportion, line).trim().isEmpty()) countBlankPrecincts++
 
         if (!cvr.testImprintedIdFormat()) {
             val munged = reverseMungeDate(cvr.imprintedId)
@@ -373,7 +380,7 @@ data class ContestVotes(val contestId: Int, val votedFor: List<Int>) {
     fun candVotes(): Map<Int, Int> =
         votedFor.map { Pair(it, 1) }.toMap()
 }
-data class CvrCardStyle(val name: String, val contestIds: Set<Int>, var countCards: Int = 0) {
+data class CvrCardStyle(val name: String, val contestIds: Set<Int>, var ncards: Int = 0) {
     fun contains(contestId: Int) = contestIds.contains(contestId)
 }
 
@@ -392,6 +399,7 @@ class BallotStyles {
     val cardStyleMap = mutableMapOf<Set<Int>, CvrCardStyle>()
     val cardStyleNames = mutableSetOf<String>()
     var anonStyleCount = 0
+    var ballotStylesUnique = true
 
     fun add(cvr:CvrRow) {
         val contestSet = cvr.contests()
@@ -403,14 +411,15 @@ class BallotStyles {
                 // already has a style with that name
                 styleName = "${cvr.ballotType}#${anonStyleCount++}"
                 cardStyleNames.add(styleName)
+                ballotStylesUnique = false
             }
             CvrCardStyle(styleName, contestSet)
         }
-        ballotType.countCards++
+        ballotType.ncards++
     }
 
     fun cardStyles(): List<CvrCardStyle> {
-        return cardStyleMap.values.sortedBy { it.countCards }.reversed()
+        return cardStyleMap.values.sortedBy { it.ncards }.reversed()
     }
 }
 

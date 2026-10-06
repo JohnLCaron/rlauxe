@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrs
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrs
 
+// BoulderInut also has the BoulderStatementOfVotes
 interface BoulderInput : CorlaCountyInput {
     override val countyName: String
         get() = "Boulder"

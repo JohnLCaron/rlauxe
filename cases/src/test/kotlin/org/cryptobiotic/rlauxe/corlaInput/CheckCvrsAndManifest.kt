@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaCounty.ManifestCounts
 import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
 import org.cryptobiotic.rlauxe.corlacvr.showTabDiffs
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -42,6 +43,10 @@ class CheckCvrsAndManifest(
 
     val corlaCvrs: CorlaRawCvrsIF
     val minCards: Int
+    val countBlankPrecincts: Int
+    val ballotStylesUnique: Boolean
+    val precinctStyleMin: Int
+    val ballotStyleMin: Int
 
     init {
         println("---------------------------------------------------------------------------------------")
@@ -51,6 +56,11 @@ class CheckCvrsAndManifest(
         val infosByName = infos.mapKeys { it.value.name } //  are the cvr names compatible ?
 
         corlaCvrs = countyInput.readCorlaCvrs()
+        countBlankPrecincts = corlaCvrs.countBlankPrecincts()
+        ballotStylesUnique = corlaCvrs.ballotStyleUnique()
+        precinctStyleMin = findPrecinctStyleMin(corlaCvrs)
+        ballotStyleMin = corlaCvrs.cardStyles().minOf{ it.ncards }
+
         val redaction = corlaCvrs.redaction()
 
         if (showRedactedCvrs) {
@@ -125,6 +135,32 @@ class CheckCvrsAndManifest(
             // compareCvrsAndManifests(countyInput, corlaRawCvrs)
         }
     }
+}
+
+fun findPrecinctStyleMin(corlaCvrs: CorlaRawCvrsIF): Int {
+
+    class UniqueContests() {
+        val contests = mutableMapOf<Set<Int>, Int>() // count unique contests within the precinct
+        var ncards = 0
+        var styleMap = emptyMap<String, Int>()
+
+        fun convert(cardStyleMap: Map<Set<Int>, CvrCardStyle>) {
+            styleMap = contests.mapKeys { cardStyleMap[it.key]?.name ?: "unknown" }
+        }
+    }
+
+
+    val styleCounters = mutableMapOf<Pair<String, String>, UniqueContests>()
+    corlaCvrs.cvrs().forEach { cvr ->
+        val id = Pair(cvr.ballotType, cvr.precinctPortion ?: "none")
+        val unique = styleCounters.getOrPut(id) { UniqueContests() }
+        val count = unique.contests.getOrDefault(cvr.contests(), 0)
+        unique.contests[cvr.contests()] = count + 1
+        unique.ncards++
+    }
+    styleCounters.values.forEach { it.convert(corlaCvrs.cardStyleMap()) }
+
+    return styleCounters.values.minOf { it.ncards }
 }
 
 fun showTabDiffs(diff: Map<Int, ContestTabulation>) {

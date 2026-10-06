@@ -33,7 +33,10 @@ class MakeRelaxedAssertions(override val orgContest: DhondtContest,
             val algo = BothAlgorithm44(orgContest, failureFinder, tfailuresIn)
             totalContestRange = algo.contestRange
 
-            assortersForProof = algo.altContests.map { it.altContest.assorters }.flatten()
+            val allAssorters = algo.altContests.map { it.altContest.assorters }.flatten()
+            assortersForProof = allAssorters.toSet().toList()
+            println("Both: ${orgContest.name} ${allAssorters.size} -> ${assortersForProof.size} ")
+
             altContests = listOf(
                 AltContest("Original", orgContest, orgAssorters, ContestRange.fromFailures(orgContest, failuresIn), failuresIn.size, tfailuresIn.size)
             ) + algo.altContests
@@ -44,8 +47,8 @@ class MakeRelaxedAssertions(override val orgContest: DhondtContest,
             altContests = listOf(
                 AltContest("Original", orgContest, orgAssorters, ContestRange.fromFailures(orgContest, failuresIn), 0, tfailuresIn.size),
             ) + algo.altContests
-            assortersForProof = algo.assorters
-
+            assortersForProof = algo.assorters.toSet().toList()
+            println("TH: ${orgContest.name} ${algo.assorters.size} -> ${assortersForProof.size} ")
         /* } else if (version == "tooRelaxed") { // bogus
             val builder = TooRelaxedDhondtBuilder(orgContest, failuresIn)
             val altContest = builder.build()
@@ -59,7 +62,9 @@ class MakeRelaxedAssertions(override val orgContest: DhondtContest,
         } else {
             val algo = DhOnlyAlgorithm431(orgContest, orgAssorters, failureFinder)
             val altContest = DhondtBuilderFromAssorters(orgContest, algo.assortersOut).build() // TODO
-            assortersForProof = algo.assortersOut
+            assortersForProof = algo.assortersOut.toSet().toList()
+            println("DH: ${orgContest.name} ${algo.assortersOut.size} -> ${assortersForProof.size} ")
+
             altContests = listOf(
                 AltContest("Original", orgContest, orgAssorters, ContestRange.fromFailures(orgContest, failuresIn), failuresIn.size, 0),
                 AltContest("DhOnly", altContest, altContest.assorters, algo.contestRange, algo.contestRange.dhFail(), 0)

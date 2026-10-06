@@ -19,6 +19,8 @@ class Boulder24Input: BoulderInput {
         return org
     }
 
+    // Probably should be in Redaction
+    // "the ballot types may have two cards, A and B, with disjoint contests"
     override fun hasABgroups() = true
 
     override fun countyPopulation() = stateInput.strataPopulation()[countyName]!!

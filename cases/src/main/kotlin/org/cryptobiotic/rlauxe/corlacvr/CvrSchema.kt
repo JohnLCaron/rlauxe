@@ -24,9 +24,14 @@ class CvrSchema(val inputSource: String,
     init {
         CvrHeader.entries.forEach { fld ->
             val idx = headers.indexOf(fld.name)
-            if (idx >= 0) headerAt[idx] = fld
-            if (idx >= 0) headerIdx[fld] = idx
+            if (idx >= 0) {
+                headerAt[idx] = fld
+                headerIdx[fld] = idx
+            }
         }
+
+        //if (nheaders != headerIdx[CvrHeader.ballottype]!! + 1)
+        //    println("HEY HEY different number of headers for $inputSource")
     }
 
     fun choices(contestId: Int): List<String> {

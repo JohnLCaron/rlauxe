@@ -32,3 +32,4 @@ This table shows the initial and final samples needed by each constituency after
 | BrabantFlamant | 388            | 388            | 0        |
 | Namur          | 314            | 314            | 0        |
 | Total          | 43313          | 10116          | 6        |
+

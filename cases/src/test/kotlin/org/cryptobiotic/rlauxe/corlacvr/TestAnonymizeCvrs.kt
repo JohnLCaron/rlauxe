@@ -178,7 +178,7 @@ class TestAnonymizeCvrs {
         val stopwatch = Stopwatch()
         val input = Colorado2020General()
         val countNredacted = mutableMapOf<String, Int>()
-        input.counties().filter{ it == "Garfield" }.forEach { county ->
+        input.counties().filter{ it != "Garfield" }.forEach { county ->
             val countyInput = input.corlaCountyInput(county)!!
             println("===========================================================================================")
             println("County $county from ${countyInput.cvrsSource}")

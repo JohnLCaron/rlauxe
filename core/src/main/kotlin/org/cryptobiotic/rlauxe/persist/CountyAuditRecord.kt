@@ -18,8 +18,7 @@ import kotlin.text.split
 
 private val logger = KotlinLogging.logger("CountyAuditRecord")
 
-// CountyAudit assume existence of countyDataFile and countyContestDataFile. does not use nested county directories (yet)
-// Used by Corla
+// CountyAuditRecord assumes existence of countyDataFile and countyContestDataFile. does not use nested county directories (yet)
 class CountyAuditRecord(
     topdir: String,
     config: Config,
@@ -44,9 +43,9 @@ class CountyAuditRecord(
         var count = 0
         mvrCardIter.forEach { mvr ->
             val location = mvr.location()
-            var countyName = location
-            if (location.indexOf(":") > 0) countyName = location.substring(0, location.indexOf(":"))
-                else if (location.indexOf("-") > 0) countyName = location.substring(0, location.indexOf("-"))
+            val countyName = getCountyNameFrom(location)
+            //if (location.indexOf(":") > 0) countyName = location.substring(0, location.indexOf(":"))
+            //    else if (location.indexOf("-") > 0) countyName = location.substring(0, location.indexOf("-"))
             val accum = mvrCount.getOrPut(countyName) { 0 }
             mvrCount[countyName] = accum + 1
             count++
@@ -131,6 +130,14 @@ class CountyAuditRecord(
 
             return CountyAuditRecord(auditRecord.topdir, auditRecord.config, auditRecord.contests, auditRecord.rounds,
                 auditRecord.nmvrs, countyData, countyContestData)
+        }
+
+        fun getCountyNameFrom(name: String): String {
+            return when {
+                (name.indexOf(":") > 0) -> name.substring(0, name.indexOf(":"))
+                (name.indexOf("-") > 0) -> name.substring(0, name.indexOf("-"))
+                else -> name
+            }
         }
     }
 }

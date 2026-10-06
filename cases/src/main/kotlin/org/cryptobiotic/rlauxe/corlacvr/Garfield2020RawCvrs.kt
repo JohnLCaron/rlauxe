@@ -59,6 +59,7 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
     var lineno = 0
     val cvrs = mutableListOf<CvrRow>()
     val headers = mutableListOf<String>()
+    var countBlankPrecincts = 0
 
     init {
         val parser = if (filename.endsWith(".zip")) {
@@ -116,7 +117,6 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
             imprintedIdIdx = schema.headers.indexOf("BallotID".lowercase())
             ballotTypeIdx = schema.headers.indexOf("BallotStyleID".lowercase())
             precinctIdx = schema.headers.indexOf("PrecinctID".lowercase())
-
             nvotesMap = schema.contests.associate { it.contestIdx to it.voteForN }
 
             read()
@@ -135,7 +135,9 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
         append("${row.headerValues[idx++]},") // BoxPosition
         append("${row.headerValues[idx++]},") // BallotID
         append("${row.headerValues[idx++]},") // CG
-        if (!redactPrecinct) append("${row.headerValues[idx++]},") else { // PrecinctID
+        val precinctId = row.headerValues[idx++]
+        if (precinctId.trim().isEmpty()) countBlankPrecincts++
+        if (!redactPrecinct) append("$precinctId,") else { // PrecinctID
             append(",")
             idx++
         }
@@ -149,6 +151,8 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
     override fun nrows() = lineno
     override fun headers() = headers
     override fun hasBallotType() = ballotTypeIdx != null
+    override fun countBlankPrecincts() = countBlankPrecincts
+    override fun ballotStyleUnique() = ballotStyles.ballotStylesUnique
 
     fun read(showFirst: Int? = null, showAfter: Int? = null) {
 

@@ -88,7 +88,7 @@ class Anonymize(
             )
         }.associateBy { it.id }
 
-        rareStyleMap = styleMap.filter { it.value.countCards < minBallots }
+        rareStyleMap = styleMap.filter { it.value.ncards < minBallots }
         styleNameMap = styleMap.mapKeys { it.value.name }
 
         val redacted_row_indices = mutableListOf<Int>() // needed ?

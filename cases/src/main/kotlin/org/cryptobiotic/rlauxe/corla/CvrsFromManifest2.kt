@@ -22,7 +22,7 @@ import kotlin.math.min
 
 private val logger = KotlinLogging.logger("CvrsFromManifest")
 
-// use in CorlaStateElection
+// use in CorlaStateElection; how differ from CvrsFromManifest ?
 class CvrsFromManifest2(
     val variant: ElectionVariant,
     val countyInput: CorlaCountyInput,
@@ -32,8 +32,9 @@ class CvrsFromManifest2(
 ) {
     val show = false
     val county = countyInput.countyName
-
     val converter: CorlaCvrConverter
+
+    // val converter: CorlaCvrConverter
     val unredactedCvrs = mutableListOf<AuditableCard>()
     val unredactedCvrTabs : Map<Int, ContestTabulation>
 

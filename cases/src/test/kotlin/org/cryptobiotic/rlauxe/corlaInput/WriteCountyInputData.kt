@@ -53,7 +53,12 @@ class WriteCountyInputData {
                 cvrNoManifest = manifestCounts.cvrNoManifest,
                 manifestNoCvr = manifestCounts.manifestNoCvr,
                 countNredacted = countNredacted[county] ?: 0,
-                minCards = ccc.minCards))
+                minCards = ccc.minCards,
+                countBlankPrecincts = ccc.countBlankPrecincts,
+                ballotStylesUnique = ccc.ballotStylesUnique,
+                ballotStyleMin = ccc.ballotStyleMin,
+                precinctStyleMin = ccc.precinctStyleMin,
+                ))
             println("wrote $county  ${data.last()}")
         }
         writeCountyInputData(filename, data)

@@ -38,7 +38,9 @@ data class RelaxedAssertionsResultJson(
 ) {
     override fun toString()= buildString {
         appendLine("RelaxedAssertionContestsJson")
-        contests.forEach { appendLine(it)}
+        contests.forEach { appendLine(" $it")}
+        appendLine(" allBounds:")
+        allBounds.forEach { appendLine("  $it")}
     }
 }
 
@@ -107,8 +109,8 @@ data class RelaxedAssertionsJson(
 ) {
     override fun toString()= buildString {
         appendLine("RelaxedAssertionsJson contest=$contest nseats=$seats")
-        assertions.forEach { appendLine(it)}
-        bounds.forEach { appendLine(it)}
+        assertions.forEach { appendLine("  $it")}
+        bounds.forEach { appendLine("  $it")}
     }
 }
 

@@ -120,7 +120,6 @@ class TestRelaxedAssertions {
         //println(relaxv.show())
         //println("match = ${relax.contestRange().partyRanges() == relaxv.contestRange().partyRanges()}")
         //compareAssorters(relax, relaxv)
-
     }
 
     @Test
@@ -131,10 +130,19 @@ class TestRelaxedAssertions {
     }
 
     @Test
+    fun testWriteOneContestsNoFailuresJson() {
+        val contestRound = lastRound.contestRounds.find { it.id == 10 }!!
+        val filename = "/home/stormy/rla/temp/nofailures.v5.json"
+        val json = writeRelaxedAssertionProofs(filename, listOf(contestRound), config.riskLimit, sampleLimits)
+        //println(json)
+    }
+
+    @Test
     fun testWriteAllContestsJson() {
-        val filename = "/home/stormy/rla/temp/assertions.v5.json"
+        val filename = "/home/stormy/rla/temp/assertions.v7.json"
         val contestRounds = lastRound.contestRounds
-        writeRelaxedAssertionProofs(filename, contestRounds, config.riskLimit, sampleLimits)
+        val json = writeRelaxedAssertionProofs(filename, contestRounds, config.riskLimit, sampleLimits)
+        // println(json)
     }
 
     @Test
@@ -156,7 +164,8 @@ class TestRelaxedAssertions {
         //println(candSeat.showSeatRanges())
 
         val filename = "/home/stormy/rla/temp/assertionsBruxelle.v5.json"
-        writeRelaxedAssertionProofs(filename, listOf(contestRound), config.riskLimit, sampleLimits)
+        val json = writeRelaxedAssertionProofs(filename, listOf(contestRound), config.riskLimit, sampleLimits)
+        println(json)
     }
 
     @Test

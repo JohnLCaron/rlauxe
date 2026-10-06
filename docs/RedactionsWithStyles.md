@@ -149,6 +149,93 @@ Deciding if there is enough information to validate samples needs more thought. 
 
 8. It would be a simple modification to change the row redaction to only put * where the row has non-blank columns. I dont see any guidelines indicating to put * in all columns. Where did that come from?
 
+///////////////////////////////
+Notes on "REVIEWING AND REDACTING CAST VOTE RECORDS AND BALLOT IMAGES"
+
+p.3. 
+
+If in your election at least 10 ballots were cast for each and every district _(= county I assume)_ style (if you
+reported results by district or ballot style) or precinct style (If you reported results by precinct)...
+
+We propose one optional solution, which retains the unique CVR identifying information in Columns A – G, and then
+deletes the voting choices from traceable ballots.
+
+it may be advisable to redact a handful of other CVRs with “yes” votes for Ballot Question 1A,
+  to preserve ballot secrecy.
+
+p.4. 
+
+If an individual CVR is redacted, the corresponding ballot image should not be produced in
+response to a CORA request.
+
+p.5.
+
+````
+Notwithstanding any other provision of this section, no ballot, or any portion
+thereof, may be made available of inspection where the ballot, or any portion
+thereof, is identical in printed form, considering a combination of the election
+contests at issue and precinct coding, to only nine or fewer ballots, or
+comparable portions thereof, among all ballots used in the same election.
+However, any such ballot, or any requested portion thereof, that is identical in
+printed form to ten or more ballots, or comparable portions thereof, used in the
+same election may be inspected.
+````
+
+_where the ballot, "or any portion thereof" == card_
+
+_"combination of the election contests at issue" == ballot style_
+
+_"and precinct coding" == if the precint is encoded on the ballot_
+
+**_No ballot card may be made available for inspection where the ballot card is identical in ballot style and precinct (or just ballot style, if the precinct is not encoded on the ballot) to only 9 or fewer ballots cards among all the ballot cards used in the same election._**
+
+The easiest way to determine whether your county has less than 10 counted ballots of a
+particular district or precinct style is...
+
+_"district or precinct style" another way of saying "ballot style and precinct (or just ballot style, if the precinct is not encoded on the ballot)"_
+
+**_No ballot card may be made available for inspection where the ballot card is identical in district or precinct style to only 9 or fewer ballots cards among all the ballot cards used in the same election._**
+
+p 10.
+
+Sort on Ballot Type, then on CvrNumber, TabulatorNum, BatchId, ImprintedId.
+
+_Note that Precinct Portion is not included in the sorting instructions_
+
+p 11.
+
+Clear all vote columns to blank.
+
+p 13.
+
+Save this file as "Redacted_countyName.csv"
+
+If a county finds it necessary to redact its CVR file, the county should produce this redacted CVR
+file in response to any CORA request.
+
+p 14.
+
+Now save the Redacted CVR file with a new name to reflect that the next version will be
+summed. E.g., Summed_Redacted_countyName.csv. You are doing this because you
+should produce the redacted CVR file in response to the CORA request, not the version you will
+create to independently tabulate all unredacted votes in the CVR file
+
+p 16.
+
+_Sum all vote columns_
+
+You can now compare the vote totals of the redacted file to the final votes reflected in your statement of
+ballots cast or ENR results, to ensure that your redactions resolve all traceable ballot issues, and
+do not create any new ones.
+
+B. Ballots marked on an ICX device are obviously different “in printed form” than pre‐printed mail ballots.
+
+_Whats an ICX ballot?_
+
+
+
+
+
 
 
 

@@ -98,7 +98,7 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaRawCvrsIF, val i
             val canonicalContestIdSet = convertExportCardStyleToCanonical(cvrCardStyle)
             val cleanupName = truncateCommas(cvrCardStyle.name)
             val cardStyle = CardStyle("$county-${cleanupName}", cardStyleId++, canonicalContestIdSet.toIntArray(), true)
-            cardStyle.ncards = cvrCardStyle.countCards
+            cardStyle.ncards = cvrCardStyle.ncards
             Pair(canonicalContestIdSet, cardStyle)
         }.toMap()
 

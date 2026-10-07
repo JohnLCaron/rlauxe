@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.corlacvr.ContestVotes
 import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
@@ -96,7 +97,7 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaRawCvrsIF, val i
 
         cardStyles = corlaCvrs.cardStyleMap().map { (_, cvrCardStyle) ->
             val canonicalContestIdSet = convertExportCardStyleToCanonical(cvrCardStyle)
-            val cleanupName = truncateCommas(cvrCardStyle.name)
+            val cleanupName = truncateCommas(cvrCardStyle.ballotType)
             val cardStyle = CardStyle("$county-${cleanupName}", cardStyleId++, canonicalContestIdSet.toIntArray(), true)
             cardStyle.ncards = cvrCardStyle.ncards
             Pair(canonicalContestIdSet, cardStyle)
@@ -272,4 +273,14 @@ fun CorlaRawCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
         CorlaContestInfo( exportContest.contestName, exportContest.contestIdx, candidateMap, exportContest.isIRV,
             exportContest.voteForN)
     }
+}
+
+fun CorlaRawCvrsIF.makeRealContestInfo(): Map<Int, ContestInfo> {
+    return this.makeContestInfo().map { it ->
+        ContestInfo(
+            it.name, it.id, it.candidateNames,
+            if (it.isIrv) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY,
+            it.nwinners
+        )
+    }.associateBy { it.id }
 }

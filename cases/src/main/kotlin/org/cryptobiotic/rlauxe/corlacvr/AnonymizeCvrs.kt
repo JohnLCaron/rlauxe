@@ -28,9 +28,8 @@ Terminology used throughout this module:
                   in Colorado, but still accepted.
 
   ballot_type   — the value in the BallotType column, if present.
-*/
 
-private val logger = KotlinLogging.logger("AnonymizeCvr2")
+private val logger = KotlinLogging.logger("AnonymizeCvrs")
 private val warnLeakage = false
 private val addNrows = false
 
@@ -50,23 +49,25 @@ class Anonymize(
     val minBallots: Int,
     val outputFile: String?,
     val redactOnPrecinct: Boolean = false,
-    val styleCol: Int? = null,
+    val styleCol: Int? = null, // not supported
     val noContestBalancing: Boolean = false,
     val redactedListFile: String? = null,
-    val redactPrecinct: Boolean = true,
+    val removePrecinctCol: Boolean = true,
 ) {
-    constructor(input:String,
-                minBallots: Int,
-                outputFile: String?,
-                redactOnPrecinct: Boolean,
-                styleCol: Int?,
-                noContestBalancing: Boolean,
-                redactedListFile: String?):
-            this(readCorlaCvrs(input), minBallots, outputFile, redactOnPrecinct, styleCol, noContestBalancing, redactedListFile)
+    constructor(
+        input: String,
+        minBallots: Int,
+        outputFile: String?,
+        redactOnPrecinct: Boolean,
+        styleCol: Int?,
+        noContestBalancing: Boolean,
+        redactedListFile: String?
+    ) : this( readCorlaCvrs(input), minBallots, outputFile, redactOnPrecinct, styleCol, noContestBalancing, redactedListFile)
 
     val schema = corlaCvrs.schema
+    val hasPrecinct = schema.headerIdx[CvrHeader.precinctportion] != null
     val infos: Map<Int, ContestInfo>
-    val styleMap: Map<Set<Int>, CvrCardStyle> = corlaCvrs.cardStyleMap()
+    val styleMap: Map<CardStyleId, CvrCardStyle> = corlaCvrs.cardStyleMap()
     val styleNameMap: Map<String, CvrCardStyle>
 
     val db = CvrDatabase(corlaCvrs)
@@ -89,7 +90,7 @@ class Anonymize(
         }.associateBy { it.id }
 
         rareStyleMap = styleMap.filter { it.value.ncards < minBallots }
-        styleNameMap = styleMap.mapKeys { it.value.name }
+        styleNameMap = styleMap.mapKeys { it.value.ballotType }
 
         val redacted_row_indices = mutableListOf<Int>() // needed ?
         val rare_rows_map = mutableMapOf<CvrCardStyle, MutableList<CvrRow>>()
@@ -190,10 +191,10 @@ class Anonymize(
         var rowIdx = -1
         for (row in corlaCvrs.cvrs()) {
             val rowStyle = styleMap[row.contests()]!!
-            val privacyUnit = rowStyle.name
+            val privacyUnit = rowStyle.ballotType
             rowIdx++
 
-        /* File(csvPath).bufferedReader(Charsets.UTF_8).use { reader ->
+            /* File(csvPath).bufferedReader(Charsets.UTF_8).use { reader ->
             val csvReader = reader.lineSequence().iterator()
             repeat(4) { csvReader.next() }
 
@@ -255,7 +256,7 @@ class Anonymize(
                     if (!poolNeedsMore) {
                         var needsContrast = false
                         for (contestId in rowRareContests) {
-                        // val needsContrast = rowRareContests.any { contestId ->
+                            // val needsContrast = rowRareContests.any { contestId ->
                             val tally: MutableMap<String, Int> = donorVotedTally[contestId] ?: continue
 
                             // For this contest, find the choice with the most votes.
@@ -285,7 +286,10 @@ class Anonymize(
                             //                                    row_voted = choice_name
                             //                                    break
                             // TODO looks like "find which choice the row voted for"
-                            val contestChoiceIds: Map<Int, String> = db.contestChoiceIds.getOrDefault(contestId, emptyMap()) // contest name -> {choiceId, choice_name}
+                            val contestChoiceIds: Map<Int, String> = db.contestChoiceIds.getOrDefault(
+                                contestId,
+                                emptyMap()
+                            ) // contest name -> {choiceId, choice_name}
 
                             val votedForList = row.contestVotesFor(contestId)?.votedFor
                             val choiceName = if (votedForList != null && votedForList.isNotEmpty()) {
@@ -389,7 +393,7 @@ class Anonymize(
             val idx = rowToIdx[ballot.hashCode()]
             if (idx != null) {
                 if (!redactedRowIndices.add(idx)) {
-                    logger.warn{"duplicate ${ballot.hashCode()}"}
+                    logger.warn { "duplicate ${ballot.hashCode()}" }
                 }
             }
         }
@@ -409,7 +413,8 @@ class Anonymize(
         // Print a one-time summary of why ballot borrowing is needed.
         if (aggregate.needsMoreTotalBallots()) {
             val needed = minBallots - aggregate.totalCount()
-            println("  Aggregate has ${aggregate.totalCount()} ballot(s); " +
+            println(
+                "  Aggregate has ${aggregate.totalCount()} ballot(s); " +
                         "need $needed more to reach minimum of $minBallots."
             )
         }
@@ -744,36 +749,52 @@ class Anonymize(
         var rowIdx = 0
         for (row in db.corlaRawCvrs.cvrs()) {
             val rowStyle = styleMap[row.contests()]!!
-            val styleStr = rowStyle.name
-                if (!styleTable.containsKey(styleStr)) {
-                    val styleId = index.styleStrings.size
-                    styleTable[styleStr] = styleId
-                    index.styleStrings.add(styleStr)
-                }
-                val styleId = styleTable[styleStr]!!
-                index.styleIdForRow.add(styleId)
-                val style = index.styleStrings[styleId]
-
-                val pu = byPrivacyUnit.getOrPut(style) { mutableListOf() }
-                pu.add(rowIdx)
-
-                //db.namedStyleCol?.let {
-                //    val namedStyle = row[it].trim()
-                //    byNamedStyle.getOrPut(namedStyle) { mutableListOf() }.add(rowIdx)
-                //}
-
-                val ballotType = row.ballotType
-                if (ballotType != null && ballotType.isNotEmpty()) {
-                    byBallotType.getOrPut(ballotType) { mutableListOf() }.add(rowIdx)
-                }
-                rowIdx++
+            val styleStr = rowStyle.ballotType
+            if (!styleTable.containsKey(styleStr)) {
+                val styleId = index.styleStrings.size
+                styleTable[styleStr] = styleId
+                index.styleStrings.add(styleStr)
             }
+
+            val styleId = styleTable[styleStr]!!
+            index.styleIdForRow.add(styleId)
+            val style: String = index.styleStrings[styleId]
+
+            /*            if redact_on_precinct and db.precinct_portion_idx is not None:
+            precinct = row[db.precinct_portion_idx].strip()
+            else:
+            precinct = ""
+            by_privacy_unit[(style, precinct)].append(row_idx)*/
+
+            val privacyGroup = row.privacyGroup(style)
+            val pup = byPrivacyUnit.getOrPut(privacyGroup) { mutableListOf() }
+            pup.add(rowIdx)
+
+            //db.namedStyleCol?.let {
+            //    val namedStyle = row[it].trim()
+            //    byNamedStyle.getOrPut(namedStyle) { mutableListOf() }.add(rowIdx)
+            //}
+
+            val ballotType = row.ballotType
+            if (ballotType != null && ballotType.isNotEmpty()) {
+                byBallotType.getOrPut(ballotType) { mutableListOf() }.add(rowIdx)
+            }
+            rowIdx++
+        }
 
         index.totalRows = index.styleIdForRow.size
         index.rowsByPrivacyUnit.putAll(byPrivacyUnit.toMap())
         index.rowsByNamedStyle.putAll(byNamedStyle.toMap())
         index.rowsByBallotType.putAll(byBallotType.toMap())
         return index
+    }
+
+    fun CvrRow.privacyGroup(style: String): String {
+        return if (redactOnPrecinct && this.precinctPortion != null) {
+            "$style-${this.precinctPortion.trim()}"
+        } else {
+            style
+        }
     }
 
     class RedactionNeeds {
@@ -1326,7 +1347,7 @@ class Anonymize(
             redactedAggregations.forEach { agg ->
                 val last = schema.nchoices
                 val aggrow = buildString {
-                    append("AGGREGATED")
+                    append("AGGREGATED,")
                     repeat(schema.nheaders - 2) { append(",") }
                     append("AGGREGATED,")
                     var count = 0
@@ -1349,7 +1370,7 @@ class Anonymize(
 
                 if (addNrows) {
                     val ncardrow = buildString {
-                        append("AGGREGATED")
+                        append("AGGREGATED,")
                         repeat(schema.nheaders - 2) { append(",") }
                         append("${redactedRows.size},")
                         append("NCARDS,")
@@ -1377,7 +1398,7 @@ class Anonymize(
     }
 
     fun writeRow(row: CvrRow, redacted: Boolean) = buildString {
-        append(corlaCvrs.csvHeader(row, redactPrecinct = redactPrecinct))
+        append(corlaCvrs.csvHeader(row, redactPrecinct = removePrecinctCol))
         val last = schema.nchoices
         val rowMap: Map<Int, List<Int>> = row.contestVotes.map { Pair(it.contestId, it.votedFor) }.toMap()
         var count = 0
@@ -1596,7 +1617,7 @@ class Anonymize(
         }
 
         val totalStyles = index.styleStrings.size
-        val showPrecinct = false // redactOnPrecinct && db.precinctPortionIdx != null
+        val showPrecinct = redactOnPrecinct && hasPrecinct
 
         if (needs.rarePrivacyUnitPairs.isNotEmpty()) {
             if (showPrecinct) {
@@ -1656,5 +1677,5 @@ class Anonymize(
         }
         reportCheckResults(index, db, needs, redactOnPrecinct)
     }
-
 }
+ */

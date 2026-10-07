@@ -219,7 +219,7 @@ class ContestTabulation(
 
 //////////////////////////////////////////////////////////////////////
 
-// add other into the reciever map
+// add other into the reciever
 // val sumTabs = mutableMapOf<Int, ContestTabulation>()
 // sumTabs.sumContestTabulations(other)
 fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, ContestTabulationIF>) {
@@ -230,10 +230,10 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
 }
 
 // candVotes is a map of candidate Id to nvotes for that candidate
-fun MutableMap<Int, ContestTabulation>.sumContestTabulationsFromCandVotes(info: ContestInfo, candVotes: Map<Int, Int>) {
+fun MutableMap<Int, ContestTabulation>.sumContestTabulationsFromCandVotes(info: ContestInfo, candVotes: Map<Int, Int>, ncards: Int = 1) {
     val contestSum = this.getOrPut(info.id) { ContestTabulation(info) }
     candVotes.forEach { (cand, vote) -> contestSum.addVote(cand, vote)}
-    contestSum.ncardsTabulated++
+    contestSum.ncardsTabulated += ncards
 }
 
 fun sumContestTabulations(others: List<Map<Int, ContestTabulationIF>>):Map<Int, ContestTabulationIF>  {

@@ -261,6 +261,7 @@ class Anonomicer(
                 haveNeeded.add(Pair(it, it.uniqueStyle.intersect(needContestSet)))
             }
             val maxFill = haveNeeded.maxOf { it.second.size }
+            if (maxFill == 0) return false
 
             // any one these styles (that have enough cards, rule d) will do
             val wtf = haveNeeded.filter { it.second.size == maxFill && it.first.ncards >= minBallots + DONOR_SURPLUS_THRESHOLD}
@@ -284,9 +285,9 @@ class Anonomicer(
                     var score = 0
                     row.contestVotes.forEach { contestVote ->
                         val needContestVote = needContestVotes[contestVote.contestId]
-                        if (needContestVote != null && needContestVote.second > 0) {
-                            // didnt vote for leading candidate
-                            if (!contestVote.votedFor.contains(needContestVote.first)) score++
+                        if (needContestVote != null && needContestVote.second > 0 && contestVote.votedFor.isNotEmpty() &&
+                            !contestVote.votedFor.contains(needContestVote.first)) {
+                            score++
                         }
                     }
                     if (score > maxScore) {
@@ -341,7 +342,7 @@ class PrecinctUniqueStyle(val ballotType: String, val uniqueStyle: Set<Int>, val
         row.contestVotes.forEach {
             contestTabs.sumContestTabulationsFromCandVotes(infos[it.contestId]!!, it.candVotes())
         }
-        if (rows.size < MIN_BALLOTS_DEFAULT) rows.add(row)
+        if (rows.size < 10 * MIN_BALLOTS_DEFAULT) rows.add(row)
     }
 
     override fun toString(): String {

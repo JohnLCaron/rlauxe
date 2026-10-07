@@ -139,7 +139,7 @@ class TestAnonomice {
     @Test
     fun testAnonymizeOne() {
         val input = Colorado2020General()
-        val county = "Eagle"
+        val county = "Mesa"
         val countyInput = input.corlaCountyInput(county)!!
         println("County $county from ${countyInput.cvrsSource}")
 

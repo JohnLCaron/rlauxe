@@ -20,7 +20,7 @@ import java.util.zip.ZipInputStream
 import kotlin.text.isEmpty
 
 // this reads CVRs from "Dominion CVR export files", a standard Dominion csv format.
-// It stays low-level and triesnot to muck with the data
+// It stays low-level and tries not to muck with the data
 
 private val logger = KotlinLogging.logger("CorlaRawCvrs")
 
@@ -94,7 +94,7 @@ interface CorlaRawCvrsIF {
     val schema: CvrSchema
     fun cvrs(): List<CvrRow>
     fun redaction(): RedactionIF
-    fun cardStyleMap(): Map<Set<Int>, CvrCardStyle>
+    fun cardStyleMap(): Map<CardStyleId, CvrCardStyle>
     fun cardStyles(): List<CvrCardStyle>
     fun nrows(): Int
 
@@ -209,18 +209,6 @@ class CorlaRawCvrs(val inputSource: String,
                 println()
                 println(schema.showContests())
             }
-
-            /* seems fragile
-            cvrNumberIdx = schema.headerMap["cvrnumber"]
-            tabulatorIdx = schema.headerMap["tabulatornum"]!!
-            batchIdIdx = schema.headerMap["batchid"]!!
-            recordIdIdx = schema.headerMap["recordid"]!!
-            imprintedIdIdx = schema.headerMap["imprintedid"]!!
-            precinctIdx = schema.headerMap["precinctportion"]
-            ballotTypeIdx = schema.headerMap["ballottype"] */
-
-
-
 
         } catch (e: Throwable) {
             e.printStackTrace()
@@ -380,7 +368,9 @@ data class ContestVotes(val contestId: Int, val votedFor: List<Int>) {
     fun candVotes(): Map<Int, Int> =
         votedFor.map { Pair(it, 1) }.toMap()
 }
-data class CvrCardStyle(val name: String, val contestIds: Set<Int>, var ncards: Int = 0) {
+
+data class CvrCardStyle(val ballotType: String, val contestIds: Set<Int>) {
+    var ncards: Int = 0 // not part of equals
     fun contains(contestId: Int) = contestIds.contains(contestId)
 }
 
@@ -393,29 +383,17 @@ data class CvrCardStyle(val name: String, val contestIds: Set<Int>, var ncards: 
 // 12,1,1,12,1-1-12,P1, 2, 0,1,0,1
 // 19,1,1,19,1-1-19,P1, 1, 1,0,,
 
-
+data class CardStyleId(val ballotType: String, val contestIds: Set<Int>)
 class BallotStyles {
-    // keep track of all the card styles in the file
-    val cardStyleMap = mutableMapOf<Set<Int>, CvrCardStyle>()
-    val cardStyleNames = mutableSetOf<String>()
-    var anonStyleCount = 0
+    val cardStyleMap = mutableMapOf<CardStyleId, CvrCardStyle>()
+    val ballotTypes = mutableSetOf<String>()
     var ballotStylesUnique = true
 
     fun add(cvr:CvrRow) {
-        val contestSet = cvr.contests()
-        if (contestSet.isEmpty())
-            println("redacted ??")
-        val ballotType = cardStyleMap.getOrPut(contestSet) {
-            var styleName = if (cvr.ballotType.isNotEmpty()) cvr.ballotType else "Style #${anonStyleCount++}"
-            if (!cardStyleNames.add(styleName)) {
-                // already has a style with that name
-                styleName = "${cvr.ballotType}#${anonStyleCount++}"
-                cardStyleNames.add(styleName)
-                ballotStylesUnique = false
-            }
-            CvrCardStyle(styleName, contestSet)
-        }
-        ballotType.ncards++
+        val cvrStyleId = CardStyleId(cvr.ballotType, cvr.contests())
+        val cardStyle = cardStyleMap.getOrPut(cvrStyleId) { CvrCardStyle(cvr.ballotType, cvr.contests()) }
+        cardStyle.ncards++
+        if (!ballotTypes.add(cvr.ballotType)) ballotStylesUnique = false
     }
 
     fun cardStyles(): List<CvrCardStyle> {
@@ -470,6 +448,22 @@ data class CvrRow(
                     val candVotes = makeRegularVotes(schema, line, lineno, useContest)
                     contestVotes.add(ContestVotes(useContestIdx, candVotes))
                 }
+                colidx += useContest.ncols
+            } else {
+                colidx++
+            }
+        }
+        return this
+    }
+
+    fun findNonNull(schema: CvrSchema, line: CSVRecord): CvrRow {
+        var colidx = schema.nheaders // skip over the first n columns
+        while (colidx < schema.columns.size && colidx < line.size()) {
+            if (line.get(colidx).isNotEmpty()) {
+                val useContestIdx = schema.columns[colidx].contestIdx
+                val useContest: SchemaContestInfo = schema.contests[useContestIdx]
+                // record that the contest was on this redacted row
+                contestVotes.add(ContestVotes(useContestIdx, emptyList()))
                 colidx += useContest.ncols
             } else {
                 colidx++

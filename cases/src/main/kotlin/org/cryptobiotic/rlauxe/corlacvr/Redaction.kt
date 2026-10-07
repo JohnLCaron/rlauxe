@@ -15,12 +15,14 @@ interface RedactionIF {
     fun groups(): List<RedactedGroup>  // Aggregated redactions: make into pools
     fun redactedRows(): List<CvrRow>  // row redactions given in the CVR file
     fun nredactedCvrs(): Int // number of redacted cvrs given in CVR file
+    fun cardCountByContest() : Map<Int, Int> // contestId -> ncards in the redaction
 }
 
 class EmptyRedaction: RedactionIF {
     override fun groups() = emptyList<RedactedGroup>()
     override fun redactedRows() = emptyList<CvrRow>()
     override fun nredactedCvrs() = 0
+    override fun cardCountByContest() = emptyMap<Int, Int> ()
 }
 
 data class RedactionStrategy(val redactedRowsAlsoAggregated: Boolean = false,)
@@ -44,6 +46,17 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
 
     override fun redactedRows() = redactedRows
 
+    override fun cardCountByContest() : Map<Int, Int> {
+        val result = mutableMapOf<Int, Int>()
+        redactedRows.forEach { row ->
+            row.contestVotes.forEach { contestVote ->
+                val accum = result.getOrDefault(contestVote.contestId, 0)
+                result[contestVote.contestId] = accum + 1
+            }
+        }
+        return result
+    }
+
     // number of redacted cvrs given in CVR file
     // here you have to know if the redactedRows are also in an aggregation
     override fun nredactedCvrs(): Int {
@@ -51,12 +64,13 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
         return redactedRows().size + groups().sumOf{ it.ncards()}
     }
 
-    fun addRedactedLine(line: CSVRecord, corlaRawCvrs: CorlaRawCvrs) {
-        val row = corlaRawCvrs.parseHeader(line)
-        // TODO you could look at which fields are non-null
-       redactedRows.add(row)
+    fun addRedactedLine(line: CSVRecord, corlaCvrs: CorlaRawCvrs) {
+        val cvr = corlaCvrs.parseHeader(line)
+        cvr.findNonNull(corlaCvrs.schema, line)
+        redactedRows.add(cvr) // now the redacted rows know which contests they hold (maybe)
     }
 
+    // if you have a group, you expect that the redactedRows have contest info in them
     fun addGroup(redacted:RedactedGroup) {
         val rname =  redacted.groupName
         val existingGroup = redactedGroups[rname]
@@ -81,8 +95,8 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
     open fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaRawCvrs): Boolean {
         val ballotType = corlaRawCvrs.getBallotType(line)
 
-        if (line.get(0).startsWith("AGGREGATED")) {
-            if (show) println("  ** redact: $line")
+        if (line.get(0).startsWith("AGGREGATED") || line.get(0).startsWith("AGGREGATION")) {
+            if (show) println("  ** AGGREGATED: $line")
             val redactedGroup = RedactedGroup(ballotType, line, corlaRawCvrs.schema)
             addGroup(redactedGroup)
             nRedactedRows++
@@ -96,7 +110,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
             //   ** discard: isEmpty CSVRecord [comment='null', recordNumber=2566, values=[, , , , , , , 486, 1958, 3, 1, 7, 0, 24, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 463, 1980, 6, 0, 22, 0, 0, 0, 0, 402, 1965, 46, 12, 2006, 1964, 2056, 2039, 340, 312, 369, 247, 203, 558, 791, 383, 492, 1343, 644, 1279, 676, 1310, 641, 1300, 649, 1575, 425, 2002, 312, 1051, 1292, 1212, 1113, 2096, 322, 1103, 1233, 1166, 1247, 537, 1873, 541, 1853, 1665, 742, 1759, 635, 1398, 888, 764, 1608, 428, 135, 800, 206, 794, 746, 1032, 1190]]
             return true
 
-        } else if (line.get(corlaRawCvrs.schema.nheaders).startsWith("*")) { // El Paso
+        } else if (line.get(corlaRawCvrs.schema.nheaders).startsWith("*")) { // El Paso, our new redactions
             if (show) println("  ** redact *: $line")
             // ballot ids and ballot style, no vote info
             // El Paso
@@ -165,6 +179,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
 }
 
 // these are using local contest ids, candidate ids
+// comes from a subtotal line in the redacted cvrs
 data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val schema: CvrSchema) {
     val candVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
 
@@ -180,12 +195,6 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
         if (groupName != GroupWithLines)
             addVotes(firstCsv)
     }
-
-    /* used externally to override
-    fun setNcards(ncards: Int) {
-        if (fixedNcards != null) { throw RuntimeException("Cant change ncards of a fixed group") }
-        setNcards = ncards
-    } */
 
     fun contests() = candVotes.keys.toSet()
 

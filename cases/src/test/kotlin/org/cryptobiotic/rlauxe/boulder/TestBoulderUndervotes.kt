@@ -17,7 +17,7 @@ class TestBoulderUndervotes {
     fun testBoulderBallotType() {
         println("${input.electionName}")
         println("\nraw corlaRawCvrs.cardStyles() ${corlaCvrs.cardStyles().size}")
-        corlaCvrs.cardStyles().sortedBy { it.name }.forEach {
+        corlaCvrs.cardStyles().sortedBy { it.ballotType }.forEach {
             println("  $it")
         }
 
@@ -60,10 +60,10 @@ class TestBoulderUndervotes {
         }
 
         corlaCvrs.cardStyles().forEach { excs ->
-            val match = constructTypes[excs.name]
-            if (match == null) println("exportCardStyles no match on ${excs.name} in ballotTypes")
+            val match = constructTypes[excs.ballotType]
+            if (match == null) println("exportCardStyles no match on ${excs.ballotType} in ballotTypes")
         }
-        val exportCardStylesMap = corlaCvrs.cardStyles().associateBy { it.name }
+        val exportCardStylesMap = corlaCvrs.cardStyles().associateBy { it.ballotType }
         constructTypes.keys.forEach { type ->
             val match = exportCardStylesMap[type]
             if (match == null) println("ballotTypes has no match on ${type} in exportCardStyles")
@@ -71,7 +71,7 @@ class TestBoulderUndervotes {
 
         val exportCardStyles = mutableMapOf<String, MutableList<CvrCardStyle>>()
         corlaCvrs.cardStyles().forEach { excs ->
-            val CvrCardStyle = exportCardStyles.getOrPut(excs.name) { mutableListOf() }
+            val CvrCardStyle = exportCardStyles.getOrPut(excs.ballotType) { mutableListOf() }
             CvrCardStyle.add(excs)
         }
         val ecardStyles = mutableMapOf<String, CardStyle>()

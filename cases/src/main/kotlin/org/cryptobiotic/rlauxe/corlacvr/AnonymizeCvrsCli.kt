@@ -138,11 +138,11 @@ object AnonymizeCvrsCli {
         mode: Mode, input: String, min_ballots: Int, output: String?, redacted_list_filename: String?,
         redact_on_precinct: Boolean, stylecol: Int?, no_contest_balancing: Boolean
     ) {
-        val anon = Anonymize(input, min_ballots, output, redact_on_precinct, stylecol, no_contest_balancing, redacted_list_filename)
+       /* val anon = Anonymize(input, min_ballots, output, redact_on_precinct, stylecol, no_contest_balancing, redacted_list_filename)
 
         when (mode) {
             Mode.check -> anon.execute_check()
             Mode.redact -> anon.execute_redact()
-        }
+        } */
     }
 }

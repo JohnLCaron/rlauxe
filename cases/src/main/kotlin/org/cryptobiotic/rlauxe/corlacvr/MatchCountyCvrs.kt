@@ -41,47 +41,6 @@ class MatchCountyCvrs(val countyInput: CorlaCountyInput) {
             }
         }
         redactTabs = sumAccum
-
-        ////////////////////////////////////////////////////
-        /* can we use county cvr vote totals to calculate oneaudit subtotals?
-
-        val countyTab = stateInput.countyTabsAllContests()[county]!!
-        val convertedCountyTabs: Map<Int, ContestTabulation> = converter.convertToContestTabulation(countyTab)
-        val diffz = subtractContestTabulationsZ(convertedCountyTabs, convertedCvrTabs)
-        if (showMissingVotes || compareMissingVotes) {
-            println("Missing Votes")
-            val diff = subtractContestTabulations(convertedCountyTabs, convertedCvrTabs)
-            showTabDiffs(diff)
-            val minCards = diff.values.maxOf { it.nvotes() }
-            println("minCards = $minCards")
-
-            // compare to group accumulations
-            if (compareMissingVotes) {
-                val sumAccum = mutableMapOf<Int, ContestTabulation>()
-                redaction.groups().forEach { group ->
-                    group.contestVotes.forEach { (scontestId, votes) ->
-                        val contestId = converter.convertContestId(scontestId)
-                        sumAccum.sumContestTabulationsFromVotes(infos[contestId]!!, votes)
-                    }
-                }
-                val diff2 = subtractContestTabulations(diff, sumAccum)
-                println("Missing Votes - GroupAccum")
-                showTabDiffs(diff2)
-            }
-
-        } else {
-            val prezDiff = diffz[372]!!
-            print("Prez votes missing = ")
-            prezDiff.votes.forEach { (cand, vote) ->
-                if (vote != 0) print("$cand: $vote; ")
-            }
-            println()
-        }
-
-        minCards = diffz.values.maxOf { it.nvotes() }
-        println("minCardsZ = $minCards")
-
-         */
     }
 
     fun manifestCounts(show: Boolean): ManifestCounts {

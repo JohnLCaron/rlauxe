@@ -3,13 +3,12 @@ package org.cryptobiotic.rlauxe.corlaInput
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaCounty.ManifestCounts
+import org.cryptobiotic.rlauxe.corlacvr.CardStyleId
 import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
 import org.cryptobiotic.rlauxe.corlacvr.showTabDiffs
@@ -28,7 +27,7 @@ class CheckCvrsAndManifest(
     val showRedactedCvrs: Boolean = false,
     val compareMissingVotes: Boolean = false,
     startingPoolId: Int = 1,
-    val variant: ElectionVariant = ElectionVariant(ElectionVariantEnum.OnePool)
+    val variant: ElectionVariant = ElectionVariant(ElectionVariantEnum.OnePool) // TODO wtf?
 ) {
     val show = false
     val county = countyInput.countyName
@@ -144,11 +143,10 @@ fun findPrecinctStyleMin(corlaCvrs: CorlaRawCvrsIF): Int {
         var ncards = 0
         var styleMap = emptyMap<String, Int>()
 
-        fun convert(cardStyleMap: Map<Set<Int>, CvrCardStyle>) {
-            styleMap = contests.mapKeys { cardStyleMap[it.key]?.name ?: "unknown" }
+        fun convert(ballotType:String, cardStyleMap: Map<CardStyleId, CvrCardStyle>) {
+            styleMap = contests.mapKeys { cardStyleMap[CardStyleId(ballotType, it.key)]?.ballotType ?: "unknown" }
         }
     }
-
 
     val styleCounters = mutableMapOf<Pair<String, String>, UniqueContests>()
     corlaCvrs.cvrs().forEach { cvr ->
@@ -158,7 +156,7 @@ fun findPrecinctStyleMin(corlaCvrs: CorlaRawCvrsIF): Int {
         unique.contests[cvr.contests()] = count + 1
         unique.ncards++
     }
-    styleCounters.values.forEach { it.convert(corlaCvrs.cardStyleMap()) }
+    styleCounters.forEach { it.value.convert(it.key.first, corlaCvrs.cardStyleMap()) }
 
     return styleCounters.values.minOf { it.ncards }
 }

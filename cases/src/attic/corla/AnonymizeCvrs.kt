@@ -29,6 +29,8 @@ Terminology used throughout this module:
 
   ballot_type   — the value in the BallotType column, if present.
 
+ */
+
 private val logger = KotlinLogging.logger("AnonymizeCvrs")
 private val warnLeakage = false
 private val addNrows = false
@@ -45,7 +47,7 @@ private const val DONOR_SURPLUS_THRESHOLD = 3  // minimum surplus above min_ball
 // 222134,1,GEN-2322,1,1-GEN-2322-1,169,"Property Owner [27, 27, 16, 27, 16, 27, ...]",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 
 class Anonymize(
-    val corlaCvrs: CorlaRawCvrsIF,
+    val corlaCvrs: CorlaCvrsIF,
     val minBallots: Int,
     val outputFile: String?,
     val redactOnPrecinct: Boolean = false,
@@ -830,7 +832,7 @@ class Anonymize(
     }
 
     // TODO go away
-    inner class CvrDatabase(val corlaRawCvrs: CorlaRawCvrsIF) {
+    inner class CvrDatabase(val corlaRawCvrs: CorlaCvrsIF) {
         val hasBallotType: Boolean = corlaRawCvrs.hasBallotType()
         val namedStyleCol = null
 
@@ -1678,4 +1680,4 @@ class Anonymize(
         reportCheckResults(index, db, needs, redactOnPrecinct)
     }
 }
- */
+

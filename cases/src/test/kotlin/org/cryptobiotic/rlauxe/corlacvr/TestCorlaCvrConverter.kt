@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
-
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
@@ -52,7 +51,7 @@ class TestCorlaCvrConverter {
 
         val contestBuilder = BuildCorlaContests(coloradoInput)
         val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
-        val cards: List<AuditableCard> = export.cvrs.map { CorlaConverter.convertToCard(it) }
+        val cards: List<AuditableCard> = export.cvrs().map { CorlaConverter.convertToCard(it) }
         println("ncards = ${cards.size}")
         val filename = "$testdataDir/tests/scratch/testWriteCorlaCvrs.csv"
         writeCardCsvFile(cards, filename)
@@ -72,7 +71,7 @@ fun testCorlaConverterCvrs(county: String, filename: String, coloradoInput: Colo
     testCorlaConverterCvrs(county, export, coloradoInput)
 }
 
-fun testCorlaConverterCvrs(county: String, export: CorlaRawCvrsIF, coloradoInput: ColoradoInput) {
+fun testCorlaConverterCvrs(county: String, export: CorlaCvrsIF, coloradoInput: ColoradoInput) {
 
     val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
 

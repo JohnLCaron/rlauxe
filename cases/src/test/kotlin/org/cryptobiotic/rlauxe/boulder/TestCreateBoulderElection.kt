@@ -37,7 +37,7 @@ class TestCreateBoulderElection {
         assertEquals("2024 Boulder County General Election", corlaCvrs.electionName)
         assertEquals("5.17.17.1", corlaCvrs.versionName)
         assertEquals(65, corlaCvrs.schema.contests.size)
-        assertEquals(384384, corlaCvrs.cvrs.size)
+        assertEquals(384384, corlaCvrs.nrows())
 
         val sovo = readBoulderStatementOfVotes(
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",

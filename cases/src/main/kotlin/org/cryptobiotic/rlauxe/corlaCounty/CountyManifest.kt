@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.corlaCounty
 
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.util.nfz
 import kotlin.collections.forEach
@@ -126,9 +126,7 @@ open class CountyManifest(val manifestBatches: List<ManifestBatch>): Iterable<Ma
         }
     }
 
-    fun manifestCounts(corlaCvrs: CorlaRawCvrsIF, report: MutableList<String>? = null, showUnmatched:Boolean = false): ManifestCounts {
-        val cvrs = corlaCvrs.cvrs()
-
+    fun manifestCounts(corlaCvrs: CorlaCvrsIF, report: MutableList<String>? = null, showUnmatched:Boolean = false): ManifestCounts {
         val manifestIdMap = mutableMapOf<String, ManifestEntry>()
         val meiter = MEiterator(manifestBatches.iterator())
         while (meiter.hasNext()) {
@@ -139,7 +137,7 @@ open class CountyManifest(val manifestBatches: List<ManifestBatch>): Iterable<Ma
         var countMiss = 0 // count of Cvrs not in the manifest
         var countDup = 0  // count of duplicate ids in the Cvrs
         val missedIds = mutableListOf<ManifestEntry>()
-        cvrs.forEach { cvrrow ->
+        corlaCvrs.cvrs().forEach { cvrrow ->
             val manifestMatch = manifestIdMap[cvrrow.imprintedId]
             if (manifestMatch != null) {
                 if (manifestMatch.matched()) countDup++

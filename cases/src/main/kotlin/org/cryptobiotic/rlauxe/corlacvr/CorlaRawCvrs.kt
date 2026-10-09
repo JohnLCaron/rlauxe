@@ -1,116 +1,26 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.util.ZipReader
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.io.Reader
-import java.nio.charset.Charset
-import java.util.zip.ZipInputStream
 import kotlin.text.isEmpty
 
-// this reads CVRs from "Dominion CVR export files", a standard Dominion csv format.
-// It stays low-level and tries not to muck with the data
+// this reads CVRs from "Dominion CVR export files", maybe a standard Dominion csv format.
+// This class stays low-level and tries not to muck with the data
 
 private val logger = KotlinLogging.logger("CorlaRawCvrs")
 
-fun readCorlaCvrs(source: String, redaction: Redaction = Redaction(), showHeaders: Boolean = false): CorlaRawCvrs {
-    return if (source.startsWith("/resources/"))
-        readCorlaCvrsFromResource(source, redaction = redaction, showHeaders=showHeaders)
-    else readCorlaCvrsFromFile(source, redaction = redaction, showHeaders=showHeaders)
-}
-
-fun readCorlaCvrsFromFile(filename: String, showHeaders: Boolean = false, showSchema: Boolean = false,
-                          redaction: Redaction = Redaction()): CorlaRawCvrs {
-    val parser = if (filename.endsWith(".zip")) {
-        val zipReader = ZipReader(filename)
-        // by convention, the file inside is the filename with zip replaced by csv
-        val lastPart = filename.substringAfterLast("/")
-        val innerFilename = lastPart.replace(".zip", ".csv")
-        val inputStream = zipReader.inputStream(innerFilename)
-        val reader: Reader = InputStreamReader(inputStream, "UTF-8")
-        CSVParser.parse(reader, CSVFormat.DEFAULT)
-        // TODO if we could look ahead, we could give them the first row
-
-    } else {
-        CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
-    }
-
-    val corlaRawCvrs = CorlaRawCvrs(filename, parser, showHeaders, showSchema, redaction = redaction)
-    corlaRawCvrs.readRows()
-    return corlaRawCvrs
-}
-
-fun readCorlaCvrsFromResource(resourcePath: String, showHeaders: Boolean = false, showSchema: Boolean = false,
-                              redaction: Redaction = Redaction()): CorlaRawCvrs {
-    val resourceStream = getCsvStreamFromResource(resourcePath)
-    val reader: Reader = InputStreamReader(resourceStream, "UTF-8")
-    val parser =  CSVParser.parse(reader, CSVFormat.DEFAULT)
-    val corlaRawCvrs = CorlaRawCvrs(resourcePath, parser, showHeaders, showSchema, redaction = redaction)
-    corlaRawCvrs.readRows()
-    return corlaRawCvrs
-}
-
-fun getCsvStreamFromResource(resourcePath: String): InputStream {
-    var resourceStream =
-        object {}.javaClass.getResourceAsStream(resourcePath) ?: throw IOException("$resourcePath does not exist")
-    if (resourcePath.endsWith(".zip")) {
-        val innerStream = getZippedCsvResourceStream(resourcePath, resourceStream)
-        if (innerStream == null) throw IOException("zipped $resourcePath does not have the csv file inside")
-        resourceStream = innerStream
-    }
-    return resourceStream
-}
-
-// InputStream implement Closeable
-fun getZippedCsvResourceStream(resourcePath: String, resourceStream: InputStream): InputStream? {
-    val lastPart = resourcePath.substringAfterLast("/")
-    val innerFilename = lastPart.replace(".zip", ".csv")
-    val zipStream = ZipInputStream(resourceStream)
-    var zipEntry = zipStream.nextEntry
-    while (zipEntry != null) {
-        if (!zipEntry.isDirectory && zipEntry.name == innerFilename) {
-            return zipStream
-        }
-        zipStream.closeEntry()
-        zipEntry = zipStream.nextEntry
-    }
-    return null
-}
-
-interface CorlaRawCvrsIF {
-    val electionName: String
-    val versionName: String
-    val schema: CvrSchema
-    fun cvrs(): List<CvrRow>
-    fun redaction(): RedactionIF
-    fun cardStyleMap(): Map<CardStyleId, CvrCardStyle>
-    fun cardStyles(): List<CvrCardStyle>
-    fun nrows(): Int
-
-    fun headers(): List<String>
-    fun hasBallotType(): Boolean
-    fun countBlankPrecincts(): Int
-    fun ballotStyleUnique(): Boolean
-    fun csvHeader(row: CvrRow, redactPrecinct: Boolean): String
-}
-
-class CorlaRawCvrs(val inputSource: String,
+class CorlaRawCvrs(override val inputSource: String,
                    val parser: CSVParser,
                    showHeaders: Boolean = false,
                    showSchema: Boolean = false,
                    val redaction: Redaction = Redaction(),
-): CorlaRawCvrsIF {
+): CorlaCvrsIF {
 
     override val electionName: String
     override val schema: CvrSchema
@@ -120,46 +30,6 @@ class CorlaRawCvrs(val inputSource: String,
     val records: Iterator<CSVRecord>  = parser.iterator()
     val ballotStyles = BallotStyles()
     val cvrs = mutableListOf<CvrRow>()
-
-    //// Colorado auditcenter
-    // 2026 Morgan County Primary,5.17.17.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-    //,,,,,,United States Senator - DEM (Vote For=1),United States Senator - DEM (Vote For=1),Representative to the 120th United States Congress - District 4 - DEM (Vote For=1),Representative to the 120th United States Congress - District 4 - DEM (Vote For=1),Representative to the 120th United States Congress - District 4 - DEM (Vote For=1),Governor - DEM (Vote For=1),Governor - DEM (Vote For=1),Secretary of State - DEM (Vote For=1),Secretary of State - DEM (Vote For=1),State Treasurer - DEM (Vote For=1),Attorney General - DEM (Vote For=1),Attorney General - DEM (Vote For=1),Attorney General - DEM (Vote For=1),Attorney General - DEM (Vote For=1),State Senator - District 1 - DEM (Vote For=1),Secretary of State - LBR (Vote For=1),Secretary of State - LBR (Vote For=1),United States Senator - REP (Vote For=1),Representative to the 120th United States Congress - District 4 - REP (Vote For=1),Governor - REP (Vote For=1),Governor - REP (Vote For=1),Governor - REP (Vote For=1),Governor - REP (Vote For=1),Governor - REP (Vote For=1),Secretary of State - REP (Vote For=1),State Treasurer - REP (Vote For=1),Attorney General - REP (Vote For=1),Attorney General - REP (Vote For=1),State Senator - District 1 - REP (Vote For=1),State Representative - District 63 - REP (Vote For=1),Morgan County Commissioner District 2 - REP (Vote For=1),Morgan County Clerk and Recorder - REP (Vote For=1),Morgan County Treasurer - REP (Vote For=1),Morgan County Assessor - REP (Vote For=1),Morgan County Sheriff - REP (Vote For=1),Morgan County Coroner - REP (Vote For=1),Governor - UNI (Vote For=1),Governor - UNI (Vote For=1)
-    //,,,,,,Julie Gonzales,John Hickenlooper,Eileen Laubacher,Write-in,Jenna Preston,Phil Weiser,Michael Bennet,Amanda Gonzalez,Jessie Danielson,Jeff Bridges,Jena Griswold,David Seligman,Michael Dougherty,Hetal Doshi,Jamie Jeffery,Sean Vadney,Alex Astley,Mark Baisley,Lauren Boebert,Scott Bottoms,Victor Marx,Barb Kirkmeyer,Write-in,"Kelvin ""K-Man"" Wimberly",James Wiley,Kevin Grantham,Michael J. Allen,David Willson,Byron Pelton,Dusty Johnson,Robert W Pennington,Kevin Strauch,Kirstin M Watson,Tim Amen,Dave (David) D. Martin,Mike Dahl,Paul Noël Fiorino,Jeff Peckman
-    //CvrNumber,TabulatorNum,BatchId,RecordId,ImprintedId,BallotType,DEM,DEM,DEM,,,DEM,DEM,DEM,DEM,DEM,DEM,DEM,DEM,DEM,DEM,LBR,LBR,REP,REP,REP,REP,REP,,,REP,REP,REP,REP,REP,REP,REP,REP,REP,REP,REP,REP,UNI,UNI
-    //1,102,1,50,102-1-50,02-REP,,,,,,,,,,,,,,,,,,1,1,0,0,1,0,0,1,1,0,1,1,1,1,1,1,1,1,1,,
-    //2,102,1,49,102-1-49,02-REP,,,,,,,,,,,,,,,,,,1,1,1,0,0,0,0,1,1,0,1,1,1,1,1,1,1,1,1,,
-
-    //// Boulder 2023 election with IRV: (Number of positions=1, Number of ranks=4) // TODO
-    // "2023 Coordinated Election","5.17.17.1",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-    //,,,,,,"City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Longmont - Mayor (Vote For=1)","City of Longmont - Mayor (Vote For=1)","City of Longmont - Mayor (Vote For=1)","City of Longmont - City Council Member At-Large (Vote For=1)","City of Longmont - City Council Member At-Large (Vote For=1)","City of Longmont - City Council Member At-Large (Vote For=1)","City of Longmont - Council Member Ward 1 (Vote For=1)","City of Longmont - Council Member Ward 1 (Vote For=1)","City of Longmont - Council Member Ward 1 (Vote For=1)","City of Longmont - Council Member Ward 3 (Vote For=1)","City of Longmont - Council Member Ward 3 (Vote For=1)","City of Longmont - Council Member Ward 3 (Vote For=1)","City of Longmont - Council Member Ward 3 (Vote For=1)","City of Louisville Mayor At-Large (4 Year Term) (Vote For=1)","City of Louisville Mayor At-Large (4 Year Term) (Vote For=1)","City of Louisville Mayor At-Large (4 Year Term) (Vote For=1)","City of Louisville City Council Ward 1 (4-year term) (Vote For=1)","City of Louisville City Council Ward 2 (4-year term) (Vote For=1)","City of Louisville City Council Ward 2 (4-year term) (Vote For=1)","City of Louisville City Council Ward 3 (Vote For=2)","City of Louisville City Council Ward 3 (Vote For=2)","Boulder Valley School District RE-2 Director District A (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District A (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District C (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District C (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District C (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District D (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District D (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District G (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District G (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District G (4 Years) (Vote For=1)","Estes Park School District R-3 School Board Director At Large (4 Year) (Vote For=2)","Estes Park School District R-3 School Board Director At Large (4 Year) (Vote For=2)","Estes Park School District R-3 School Board Director At Large (4 Year) (Vote For=2)","Estes Park School District R-3 School Board Director At Large (4 Year) (Vote For=2)","Thompson R2-J School District Board of Education Director District A (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District A (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District C (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District C (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District D (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District D (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District G (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District G (4 Year Term) (Vote For=1)","City of Longmont Municipal Court Judge - Frick (Vote For=1)","City of Longmont Municipal Court Judge - Frick (Vote For=1)","Proposition HH (Statutory) (Vote For=1)","Proposition HH (Statutory) (Vote For=1)","Proposition II (Statutory) (Vote For=1)","Proposition II (Statutory) (Vote For=1)","Boulder County Ballot Issue 1A (Vote For=1)","Boulder County Ballot Issue 1A (Vote For=1)","Boulder County Ballot Issue 1B (Vote For=1)","Boulder County Ballot Issue 1B (Vote For=1)","City of Boulder Ballot Issue 2A (Vote For=1)","City of Boulder Ballot Issue 2A (Vote For=1)","City of Boulder Ballot Question 2B (Vote For=1)","City of Boulder Ballot Question 2B (Vote For=1)","City of Boulder Ballot Question 302 (Vote For=1)","City of Boulder Ballot Question 302 (Vote For=1)","Town of Erie Ballot Question 3A (Vote For=1)","Town of Erie Ballot Question 3A (Vote For=1)","Town of Erie Ballot Question 3B (Vote For=1)","Town of Erie Ballot Question 3B (Vote For=1)","City of Longmont Ballot Issue 3C (Vote For=1)","City of Longmont Ballot Issue 3C (Vote For=1)","City of Longmont Ballot Issue 3D (Vote For=1)","City of Longmont Ballot Issue 3D (Vote For=1)","City of Longmont Ballot Issue 3E (Vote For=1)","City of Longmont Ballot Issue 3E (Vote For=1)","City of Louisville Ballot Issue 2C (Vote For=1)","City of Louisville Ballot Issue 2C (Vote For=1)","Town of Superior Ballot Question 301 (Vote For=1)","Town of Superior Ballot Question 301 (Vote For=1)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Nederland Eco Pass Public Improvement District Ballot Issue 6A (Vote For=1)","Nederland Eco Pass Public Improvement District Ballot Issue 6A (Vote For=1)","North Metro Fire Rescue District Ballot Issue 7A (Vote For=1)","North Metro Fire Rescue District Ballot Issue 7A (Vote For=1)"
-    //,,,,,,"Aaron Brockett(1)","Nicole Speer(1)","Bob Yates(1)","Paul Tweedlie(1)","Aaron Brockett(2)","Nicole Speer(2)","Bob Yates(2)","Paul Tweedlie(2)","Aaron Brockett(3)","Nicole Speer(3)","Bob Yates(3)","Paul Tweedlie(3)","Aaron Brockett(4)","Nicole Speer(4)","Bob Yates(4)","Paul Tweedlie(4)","Terri Brncic","Jenny Robins","Aaron Gabriel Neyer","Jacques Decalo","Silas Atkins","Waylon Lewis","Ryan Schuchard","Tara Winer","Tina Marquis","Taishya Adams","Tim Barnes","JD Mangat","Eric Ryant","John W. Watson","Gala W. Orba","David Fridland","Crystal Gallegos","Ethan Augreen","Joan Peck","Terri Goon","Sean P. McCoy","Steve Altschuler","Beka Venturella","Nia Wassink","Diane Crist","Harrison Earl","Ron Gallegos","Gary Hodges","Susie Hidalgo-Fahring","Spencer Adams","Sherry Sommer","Chris Leh","Josh Cooperman","J. Caleb Dickinson","Deborah Fahey","George Colbert","Dietrich Hoefner","Barbara Hamlington","Jason Unger","Neil Fishman","Andrew Steffl","Alex Medler","Cynthia Nevison","Andrew Brandt","Lalenia Quinlan Aweida","Anil Kiran Pesaramelli","Stuart Lord","Jorge Chávez","Kevin G. Morris","Kyri Cox","Brenda L. Wyss","Brad Shochat","Ryan Wilcken","Dawn Kirk","Nancy Rumfelt","Briah Freeman","Denise Alvine Chapman","Yazmin Navarro","Stu Boyd","Elizabeth Kearney","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Dalton Valette","Heather Cracraft","Ryan Hitchler","Claire Dixon","Ryan Welch","Jeff Chu","Sean Maday","Clint Folsom","Chris Hanson","Stephanie Schader","Mike Foster","Yes/For","No/Against","Yes/For","No/Against"
-    //"CvrNumber","TabulatorNum","BatchId","RecordId","ImprintedId","BallotType",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-    //"1","108","1","104","108-1-104","DS-01",1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1,0,1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,0,0,1,0,1,0,0,0,1,,,,,,,,,,,,,,,1,0,1,0,1,0,1,0,1,0,1,0,0,1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-
-    //// votecenter
-    // 2020 Boulder County General Election,5.11.3.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-    //,,,,,,,Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),
-    //,,,,,,,Joseph R. Biden / Kamala D. Harris,Donald J. Trump / Michael R. Pence,Don Blankenship / William Mohr,Bill Hammons / Eric Bodenstab,Howie Hawkins / Angela Nicole Walker,Blake Huber / Frank Atwood,
-    //CvrNumber,TabulatorNum,BatchId,RecordId,ImprintedId,CountingGroup,BallotType,DEM,REP,ACN,UNI,GRN,APV,LBR,AMS,UAF,PRB,ALL,PRO,UAF,SWP,SOE,IAM,SLB,UAF,UAF,UAF,UAF,,,,,
-
-    //// Neals' test files
-    // Test Election 2024,V1,,,,,,
-    //,,,,,,,,A,A,B,B
-    //,,,,,,,,A0,A1,B0,B1
-    //CvrNumber,TabulatorNum,BatchId,RecordId,ImprintedId,CountingGroup,PrecinctPortion,BallotType,A0,A1,B0,B1
-    //1,1,1,1,1-1-1,cg,1R1,,1,0,,
-    //2,1,1,2,1-1-2,cg,2S2,,1,0,1,0
-
-    //// Garfield
-    // RowNumber	BoxID	BoxPosition	BallotID	PrecinctID	BallotStyleID	PrecinctStyleName	ScanComputerName	Status	Remade	Choice_18_1:Presidential Electors:Vote For 1:Write-in:Non-Partisan
-
-    /* val cvrNumberIdx: Int?
-    val tabulatorIdx: Int
-    val batchIdIdx: Int
-    val recordIdIdx: Int
-    val imprintedIdIdx: Int
-    val ballotTypeIdx: Int?
-    val precinctIdx: Int? */
 
     var countBlankPrecincts = 0
     var mungedCount = 0
@@ -199,7 +69,6 @@ class CorlaRawCvrs(val inputSource: String,
                     println("${trunc(contestLine.get(it), 50)}, ${trunc(choiceLine.get(it), -40)}, ${trunc(headerLine.get(it), -30)}")
                 }
             }
-
 
             // make the schema out of those 3 lines
             schema = makeCvrSchema(inputSource, contestLine, choiceLine, headerLine)
@@ -391,9 +260,12 @@ class BallotStyles {
 
     fun add(cvr:CvrRow) {
         val cvrStyleId = CardStyleId(cvr.ballotType, cvr.contests())
-        val cardStyle = cardStyleMap.getOrPut(cvrStyleId) { CvrCardStyle(cvr.ballotType, cvr.contests()) }
+        val cardStyle = cardStyleMap.getOrPut(cvrStyleId) {
+            // if already been added, then there are duplicate contestId sets for this ballotType
+            if (!ballotTypes.add(cvr.ballotType)) ballotStylesUnique = false
+            CvrCardStyle(cvr.ballotType, cvr.contests())
+        }
         cardStyle.ncards++
-        if (!ballotTypes.add(cvr.ballotType)) ballotStylesUnique = false
     }
 
     fun cardStyles(): List<CvrCardStyle> {
@@ -427,12 +299,6 @@ data class CvrRow(
         if (contestVote == null) return null
         return if (contestVote.candVotes().contains(candId)) 1 else 0
     }
-
-    /* init {
-    // Boulder2020:  9/1/1986 != 9-1-86; went through Excel spreadsheet and got munged
-        if (imprintedId != "${tabulatorNum}-${batchId}-${recordId}")
-            println("$imprintedId != ${tabulatorNum}-${batchId}-${recordId}")
-    } */
 
     fun addVotes(schema: CvrSchema, line: CSVRecord, lineno: Int): CvrRow {
         var colidx = schema.nheaders // skip over the first n columns
@@ -605,14 +471,15 @@ fun truncateCommas(originalString: String): String {
     return if (commaPos < 0) originalString else originalString.substring(0, commaPos)
 }
 
+// Boulder2020:  9/1/1986 != 9-1-86; went through Excel spreadsheet and got munged
 // spreadsheet saved the imprintedId as a date. jeesh
 fun reverseMungeDate(id: String): String {
     val count = id.count { it == '/' }
     return if (count != 2) id else {
         val tokens = id.split("/")
         try {
-            var day = tokens[0].trim().toInt()
-            var month = tokens[1].trim().toInt()
+            val day = tokens[0].trim().toInt()
+            val month = tokens[1].trim().toInt()
             var year = tokens[2].trim().toInt()
             if (year > 2000) year -= 2000
             else if (year > 1900) year -= 1900
@@ -622,3 +489,37 @@ fun reverseMungeDate(id: String): String {
         }
     }
 }
+
+//////////////////////////////////////////////////////////////////////////////////
+//// Colorado auditcenter
+// 2026 Morgan County Primary,5.17.17.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+//,,,,,,United States Senator - DEM (Vote For=1),United States Senator - DEM (Vote For=1),Representative to the 120th United States Congress - District 4 - DEM (Vote For=1),Representative to the 120th United States Congress - District 4 - DEM (Vote For=1),Representative to the 120th United States Congress - District 4 - DEM (Vote For=1),Governor - DEM (Vote For=1),Governor - DEM (Vote For=1),Secretary of State - DEM (Vote For=1),Secretary of State - DEM (Vote For=1),State Treasurer - DEM (Vote For=1),Attorney General - DEM (Vote For=1),Attorney General - DEM (Vote For=1),Attorney General - DEM (Vote For=1),Attorney General - DEM (Vote For=1),State Senator - District 1 - DEM (Vote For=1),Secretary of State - LBR (Vote For=1),Secretary of State - LBR (Vote For=1),United States Senator - REP (Vote For=1),Representative to the 120th United States Congress - District 4 - REP (Vote For=1),Governor - REP (Vote For=1),Governor - REP (Vote For=1),Governor - REP (Vote For=1),Governor - REP (Vote For=1),Governor - REP (Vote For=1),Secretary of State - REP (Vote For=1),State Treasurer - REP (Vote For=1),Attorney General - REP (Vote For=1),Attorney General - REP (Vote For=1),State Senator - District 1 - REP (Vote For=1),State Representative - District 63 - REP (Vote For=1),Morgan County Commissioner District 2 - REP (Vote For=1),Morgan County Clerk and Recorder - REP (Vote For=1),Morgan County Treasurer - REP (Vote For=1),Morgan County Assessor - REP (Vote For=1),Morgan County Sheriff - REP (Vote For=1),Morgan County Coroner - REP (Vote For=1),Governor - UNI (Vote For=1),Governor - UNI (Vote For=1)
+//,,,,,,Julie Gonzales,John Hickenlooper,Eileen Laubacher,Write-in,Jenna Preston,Phil Weiser,Michael Bennet,Amanda Gonzalez,Jessie Danielson,Jeff Bridges,Jena Griswold,David Seligman,Michael Dougherty,Hetal Doshi,Jamie Jeffery,Sean Vadney,Alex Astley,Mark Baisley,Lauren Boebert,Scott Bottoms,Victor Marx,Barb Kirkmeyer,Write-in,"Kelvin ""K-Man"" Wimberly",James Wiley,Kevin Grantham,Michael J. Allen,David Willson,Byron Pelton,Dusty Johnson,Robert W Pennington,Kevin Strauch,Kirstin M Watson,Tim Amen,Dave (David) D. Martin,Mike Dahl,Paul Noël Fiorino,Jeff Peckman
+//CvrNumber,TabulatorNum,BatchId,RecordId,ImprintedId,BallotType,DEM,DEM,DEM,,,DEM,DEM,DEM,DEM,DEM,DEM,DEM,DEM,DEM,DEM,LBR,LBR,REP,REP,REP,REP,REP,,,REP,REP,REP,REP,REP,REP,REP,REP,REP,REP,REP,REP,UNI,UNI
+//1,102,1,50,102-1-50,02-REP,,,,,,,,,,,,,,,,,,1,1,0,0,1,0,0,1,1,0,1,1,1,1,1,1,1,1,1,,
+//2,102,1,49,102-1-49,02-REP,,,,,,,,,,,,,,,,,,1,1,1,0,0,0,0,1,1,0,1,1,1,1,1,1,1,1,1,,
+
+//// Boulder 2023 election with IRV: (Number of positions=1, Number of ranks=4) // TODO
+// "2023 Coordinated Election","5.17.17.1",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+//,,,,,,"City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Boulder Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Lafayette City Council Candidates (Vote For=4)","City of Longmont - Mayor (Vote For=1)","City of Longmont - Mayor (Vote For=1)","City of Longmont - Mayor (Vote For=1)","City of Longmont - City Council Member At-Large (Vote For=1)","City of Longmont - City Council Member At-Large (Vote For=1)","City of Longmont - City Council Member At-Large (Vote For=1)","City of Longmont - Council Member Ward 1 (Vote For=1)","City of Longmont - Council Member Ward 1 (Vote For=1)","City of Longmont - Council Member Ward 1 (Vote For=1)","City of Longmont - Council Member Ward 3 (Vote For=1)","City of Longmont - Council Member Ward 3 (Vote For=1)","City of Longmont - Council Member Ward 3 (Vote For=1)","City of Longmont - Council Member Ward 3 (Vote For=1)","City of Louisville Mayor At-Large (4 Year Term) (Vote For=1)","City of Louisville Mayor At-Large (4 Year Term) (Vote For=1)","City of Louisville Mayor At-Large (4 Year Term) (Vote For=1)","City of Louisville City Council Ward 1 (4-year term) (Vote For=1)","City of Louisville City Council Ward 2 (4-year term) (Vote For=1)","City of Louisville City Council Ward 2 (4-year term) (Vote For=1)","City of Louisville City Council Ward 3 (Vote For=2)","City of Louisville City Council Ward 3 (Vote For=2)","Boulder Valley School District RE-2 Director District A (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District A (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District C (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District C (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District C (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District D (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District D (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District G (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District G (4 Years) (Vote For=1)","Boulder Valley School District RE-2 Director District G (4 Years) (Vote For=1)","Estes Park School District R-3 School Board Director At Large (4 Year) (Vote For=2)","Estes Park School District R-3 School Board Director At Large (4 Year) (Vote For=2)","Estes Park School District R-3 School Board Director At Large (4 Year) (Vote For=2)","Estes Park School District R-3 School Board Director At Large (4 Year) (Vote For=2)","Thompson R2-J School District Board of Education Director District A (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District A (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District C (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District C (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District D (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District D (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District G (4 Year Term) (Vote For=1)","Thompson R2-J School District Board of Education Director District G (4 Year Term) (Vote For=1)","City of Longmont Municipal Court Judge - Frick (Vote For=1)","City of Longmont Municipal Court Judge - Frick (Vote For=1)","Proposition HH (Statutory) (Vote For=1)","Proposition HH (Statutory) (Vote For=1)","Proposition II (Statutory) (Vote For=1)","Proposition II (Statutory) (Vote For=1)","Boulder County Ballot Issue 1A (Vote For=1)","Boulder County Ballot Issue 1A (Vote For=1)","Boulder County Ballot Issue 1B (Vote For=1)","Boulder County Ballot Issue 1B (Vote For=1)","City of Boulder Ballot Issue 2A (Vote For=1)","City of Boulder Ballot Issue 2A (Vote For=1)","City of Boulder Ballot Question 2B (Vote For=1)","City of Boulder Ballot Question 2B (Vote For=1)","City of Boulder Ballot Question 302 (Vote For=1)","City of Boulder Ballot Question 302 (Vote For=1)","Town of Erie Ballot Question 3A (Vote For=1)","Town of Erie Ballot Question 3A (Vote For=1)","Town of Erie Ballot Question 3B (Vote For=1)","Town of Erie Ballot Question 3B (Vote For=1)","City of Longmont Ballot Issue 3C (Vote For=1)","City of Longmont Ballot Issue 3C (Vote For=1)","City of Longmont Ballot Issue 3D (Vote For=1)","City of Longmont Ballot Issue 3D (Vote For=1)","City of Longmont Ballot Issue 3E (Vote For=1)","City of Longmont Ballot Issue 3E (Vote For=1)","City of Louisville Ballot Issue 2C (Vote For=1)","City of Louisville Ballot Issue 2C (Vote For=1)","Town of Superior Ballot Question 301 (Vote For=1)","Town of Superior Ballot Question 301 (Vote For=1)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Town of Superior - Home Rule Charter Commission (Vote For=9)","Nederland Eco Pass Public Improvement District Ballot Issue 6A (Vote For=1)","Nederland Eco Pass Public Improvement District Ballot Issue 6A (Vote For=1)","North Metro Fire Rescue District Ballot Issue 7A (Vote For=1)","North Metro Fire Rescue District Ballot Issue 7A (Vote For=1)"
+//,,,,,,"Aaron Brockett(1)","Nicole Speer(1)","Bob Yates(1)","Paul Tweedlie(1)","Aaron Brockett(2)","Nicole Speer(2)","Bob Yates(2)","Paul Tweedlie(2)","Aaron Brockett(3)","Nicole Speer(3)","Bob Yates(3)","Paul Tweedlie(3)","Aaron Brockett(4)","Nicole Speer(4)","Bob Yates(4)","Paul Tweedlie(4)","Terri Brncic","Jenny Robins","Aaron Gabriel Neyer","Jacques Decalo","Silas Atkins","Waylon Lewis","Ryan Schuchard","Tara Winer","Tina Marquis","Taishya Adams","Tim Barnes","JD Mangat","Eric Ryant","John W. Watson","Gala W. Orba","David Fridland","Crystal Gallegos","Ethan Augreen","Joan Peck","Terri Goon","Sean P. McCoy","Steve Altschuler","Beka Venturella","Nia Wassink","Diane Crist","Harrison Earl","Ron Gallegos","Gary Hodges","Susie Hidalgo-Fahring","Spencer Adams","Sherry Sommer","Chris Leh","Josh Cooperman","J. Caleb Dickinson","Deborah Fahey","George Colbert","Dietrich Hoefner","Barbara Hamlington","Jason Unger","Neil Fishman","Andrew Steffl","Alex Medler","Cynthia Nevison","Andrew Brandt","Lalenia Quinlan Aweida","Anil Kiran Pesaramelli","Stuart Lord","Jorge Chávez","Kevin G. Morris","Kyri Cox","Brenda L. Wyss","Brad Shochat","Ryan Wilcken","Dawn Kirk","Nancy Rumfelt","Briah Freeman","Denise Alvine Chapman","Yazmin Navarro","Stu Boyd","Elizabeth Kearney","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Yes/For","No/Against","Dalton Valette","Heather Cracraft","Ryan Hitchler","Claire Dixon","Ryan Welch","Jeff Chu","Sean Maday","Clint Folsom","Chris Hanson","Stephanie Schader","Mike Foster","Yes/For","No/Against","Yes/For","No/Against"
+//"CvrNumber","TabulatorNum","BatchId","RecordId","ImprintedId","BallotType",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+//"1","108","1","104","108-1-104","DS-01",1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,1,0,1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,0,0,1,0,1,0,0,0,1,,,,,,,,,,,,,,,1,0,1,0,1,0,1,0,1,0,1,0,0,1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+
+//// votecenter
+// 2020 Boulder County General Election,5.11.3.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+//,,,,,,,Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),Presidential Electors (Vote For=1),
+//,,,,,,,Joseph R. Biden / Kamala D. Harris,Donald J. Trump / Michael R. Pence,Don Blankenship / William Mohr,Bill Hammons / Eric Bodenstab,Howie Hawkins / Angela Nicole Walker,Blake Huber / Frank Atwood,
+//CvrNumber,TabulatorNum,BatchId,RecordId,ImprintedId,CountingGroup,BallotType,DEM,REP,ACN,UNI,GRN,APV,LBR,AMS,UAF,PRB,ALL,PRO,UAF,SWP,SOE,IAM,SLB,UAF,UAF,UAF,UAF,,,,,
+
+//// Neals' test files
+// Test Election 2024,V1,,,,,,
+//,,,,,,,,A,A,B,B
+//,,,,,,,,A0,A1,B0,B1
+//CvrNumber,TabulatorNum,BatchId,RecordId,ImprintedId,CountingGroup,PrecinctPortion,BallotType,A0,A1,B0,B1
+//1,1,1,1,1-1-1,cg,1R1,,1,0,,
+//2,1,1,2,1-1-2,cg,2S2,,1,0,1,0
+
+//// Garfield
+// RowNumber	BoxID	BoxPosition	BallotID	PrecinctID	BallotStyleID	PrecinctStyleName	ScanComputerName	Status	Remade	Choice_18_1:Presidential Electors:Vote For 1:Write-in:Non-Partisan
+

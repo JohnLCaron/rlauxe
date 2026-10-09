@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrs
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrs
 
-// BoulderInut also has the BoulderStatementOfVotes
+// BoulderInput also has the BoulderStatementOfVotes
 interface BoulderInput : CorlaCountyInput {
     override val countyName: String
         get() = "Boulder"
@@ -16,5 +16,5 @@ interface BoulderInput : CorlaCountyInput {
         return readBoulderSOV(this.sovoSource, this.electionName)
     }
 
-    override fun readCorlaCvrs(): CorlaRawCvrs = readCorlaCvrs(cvrsSource, redaction = RedactionBoulder())
+    override fun readCorlaCvrs() = readCorlaCvrs(cvrsSource, redaction = RedactionBoulder())
 }

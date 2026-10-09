@@ -10,18 +10,19 @@ class WriteCountyInputData {
 
     @Test
     fun write2026p() {
-        writeCountyData("$cases/corlaState/2026p", Colorado2026PwithCvrs())
+        val ourRedactByPrecinct: Map<String, Int> = readRedactionCount("/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anonomice/2026p/redactedCountByPrecinct.csv")
+        writeCountyData("$cases/corlaState/2026p", Colorado2026PwithCvrs(), ourRedactByPrecinct)
     }
 
     @Test
     fun write2020() {
-        writeCountyData("$cases/corlaState/2020", Colorado2020General())
+        val ourRedactByPrecinct: Map<String, Int> = readRedactionCount("/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anonomice/2020/redactedCountByPrecinct.csv")
+        writeCountyData("$cases/corlaState/2020", Colorado2020General(), ourRedactByPrecinct)
     }
 
-    fun writeCountyData(topdir: String, stateInput: ColoradoInputWithCvrs) {
+    // ourRedactByPrecinct written by TestAnonomice
+    fun writeCountyData(topdir: String, stateInput: ColoradoInputWithCvrs, ourRedactByPrecinct: Map<String, Int>) {
         val filename = "$topdir/countyInputData.csv"
-
-        val countNredacted: Map<String, Int> = readRedactionCount("/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/redacted.csv")
 
         val data = mutableListOf<CountyInputData>()
         stateInput.counties().forEach { county ->
@@ -47,12 +48,12 @@ class WriteCountyInputData {
             //    val manifestNoCvr: Int, val ngroups: Int, val minCards: Int)
             data.add(CountyInputData(county,
                 manifestCount=manifestCounts.totalEntries,
-                unredactedCvrs=corlaCvrs.cvrs().size,                            // number of unredacted cvrs
+                unredactedCvrs=corlaCvrs.nrows(),                            // number of unredacted cvrs
                 redactedCvrs=corlaCvrs.redaction().redactedRows().size, // number of redacted cvrs
                 cvrInManifest =  manifestCounts.countCvrsInManifest,
                 cvrNoManifest = manifestCounts.cvrNoManifest,
                 manifestNoCvr = manifestCounts.manifestNoCvr,
-                countNredacted = countNredacted[county] ?: 0,
+                ourRedactByPrecinct = ourRedactByPrecinct[county] ?: 0,
                 minCards = ccc.minCards,
                 countBlankPrecincts = ccc.countBlankPrecincts,
                 ballotStylesUnique = ccc.ballotStylesUnique,

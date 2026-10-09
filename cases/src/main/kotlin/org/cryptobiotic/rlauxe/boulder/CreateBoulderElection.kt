@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
 import org.cryptobiotic.rlauxe.corlacvr.RedactionIF
 import org.cryptobiotic.rlauxe.corlacvr.cleanCsvString
@@ -34,7 +34,7 @@ private val logger = KotlinLogging.logger("CreateBoulderElection")
 class CreateBoulderElection(
     val electionName: String,
     val auditType: AuditType,
-    val corlaCvrs: CorlaRawCvrsIF,
+    val corlaCvrs: CorlaCvrsIF,
     val sovo: BoulderStatementOfVotes,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean = true, // TODO
@@ -464,7 +464,7 @@ fun createBoulderElection(
 
 fun createBoulderElectionWithSovo(
     electionName: String,
-    corlaCvrs: CorlaRawCvrsIF,
+    corlaCvrs: CorlaCvrsIF,
     sovo: BoulderStatementOfVotes,
     topdir: String,
     creation: AuditCreationConfig,

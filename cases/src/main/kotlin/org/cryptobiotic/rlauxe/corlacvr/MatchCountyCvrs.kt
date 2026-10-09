@@ -32,7 +32,7 @@ class MatchCountyCvrs(val countyInput: CorlaCountyInput) {
         }.associateBy { it.id }
         val infosByName = infos.mapKeys { it.value.name }
 
-        cvrTabs = tabulateCvrRows(corlaCvrs.cvrs(), infos)
+        cvrTabs = tabulateCvrRows(corlaCvrs.cvrs().iterator(), infos)
 
         val sumAccum = mutableMapOf<Int, ContestTabulation>()
         corlaCvrs.redaction().groups().forEach { group ->
@@ -90,7 +90,7 @@ fun showTabDiffs(diff: Map<Int, ContestTabulation>) {
     }
 }
 
-fun tabulateCvrRows(rows: List<CvrRow>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+fun tabulateCvrRows(rows: Iterator<CvrRow>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val sum = mutableMapOf<Int, ContestTabulation>()
     rows.forEach { row ->
         row.contestVotes.forEach {

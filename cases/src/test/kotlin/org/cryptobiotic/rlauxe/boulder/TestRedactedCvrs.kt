@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrs
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
@@ -49,14 +50,14 @@ class TestRedactedCvrs {
         testRedactedCvrTabulation(export, electionSimCvrs)
     }
 
-    fun testRedactedCvrTabulation(export: CorlaRawCvrs, election: CreateBoulderElection) {
+    fun testRedactedCvrTabulation(export: CorlaCvrsIF, election: CreateBoulderElection) {
         val cards = election.makeSimulatedCards(election.redactedPools)
         println("nredacted cvrs = ${cards.size}")
 
         val redactedCvrVotes: Map<Int, ContestTabulation> = tabulateCards(cards.iterator(), election.infos)
 
         val redactedDirect = mutableMapOf<Int, MutableMap<Int, Int>>()
-        export.redaction.groups().forEach { redacted ->
+        export.redaction().groups().forEach { redacted ->
             redacted.candVotes.forEach { (contestId, conVotes) ->
                 val accumVotes = redactedDirect.getOrPut(contestId) { mutableMapOf() }
                 conVotes.forEach { (cand, nvotes) ->

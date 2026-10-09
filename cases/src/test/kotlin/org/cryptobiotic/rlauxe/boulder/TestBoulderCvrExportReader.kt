@@ -29,7 +29,7 @@ class TestBoulderCvrExportCsv {
         assertEquals(3, contest.nchoices)
 
         // Check that the 10 expected votes are there.
-        assertEquals(10, export.cvrs.size)
+        assertEquals(10, export.nrows())
     }
 
     @Test
@@ -42,9 +42,10 @@ class TestBoulderCvrExportCsv {
         assertEquals("2023 Coordinated Election", export.electionName)
         assertEquals("5.17.17.1", export.versionName)
         assertEquals(38, export.schema.contests.size)
-        assertEquals(4, export.cvrs.size)
+        assertEquals(4, export.nrows())
 
-        val cvr0 = export.cvrs[0]
+        val cvrs = export.cvrs().iterator()
+        val cvr0 = cvrs.next()
         val expectedVotes0 = mapOf(
             0 to intArrayOf(0, 1, 2, 3),
             1 to intArrayOf(4, 6, 7, 9),
@@ -64,7 +65,7 @@ class TestBoulderCvrExportCsv {
         val actual0 = cvr0.convertToCard().toCvr()
         assertEquals(expected0, actual0)
 
-        val cvr1 = export.cvrs[1]
+        val cvr1 = cvrs.next()
         val expectedVotes1 = mapOf(
             21 to intArrayOf(1),
             22 to intArrayOf(1),
@@ -75,7 +76,7 @@ class TestBoulderCvrExportCsv {
         val actual1 = cvr1.convertToCard().toCvr()
         assertEquals(expected1, actual1)
 
-        val cvr2 = export.cvrs[2]
+        val cvr2 = cvrs.next()
         val expectedVotes2 = mapOf(
             3 to intArrayOf(2),
             4 to intArrayOf(2),
@@ -93,7 +94,7 @@ class TestBoulderCvrExportCsv {
         val actual2 = cvr2.convertToCard().toCvr()
         assertEquals(expected2, actual2)
 
-        val cvr3 = export.cvrs[3]
+        val cvr3 = cvrs.next()
         val expectedVotes3 = mapOf(
             0 to intArrayOf(2, 3, 0, 1),
             1 to intArrayOf(0, 1, 7, 8),
@@ -124,11 +125,11 @@ class TestBoulderCvrExportCsv {
         assertEquals("2024 Boulder County GE Recounts", export.electionName)
         assertEquals("5.17.17.1", export.versionName)
         assertEquals(65, export.schema.contests.size)
-        assertEquals(8, export.redaction.groups().size)
+        assertEquals(8, export.redaction().groups().size)
         // export.redacted.forEach { println(it.contestVotes.toString()) }
 
         // Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
-        val group7 = export.redaction.groups().find { it.groupName == "7"}!!
+        val group7 = export.redaction().groups().find { it.groupName == "7"}!!
         var idx = 0
         assertEquals(listOf(265, 104, 0, 0, 2, 1, 1, 5, 2, 0, 0, 0, 0, 0, 0), group7.candVotes[idx++]!!.toMap().values.toList())
         assertEquals(listOf(228, 74, 6, 2, 5, 0, 0,), group7.candVotes[idx++]!!.toMap().values.toList())
@@ -232,8 +233,8 @@ class TestBoulderCvrExportCsv {
         )
 
         // Check that the first cvr was correctly parsed.
-        assertEquals(export.cvrs.size, 118669)
-        val cvr1 = export.cvrs.get(0)
+        assertEquals(export.nrows(), 118669)
+        val cvr1 = export.cvrs().first()
 
         // IRV
         assertEquals(
@@ -341,7 +342,7 @@ class TestBoulderCvrExportCsv {
         assertEquals("2024 Boulder County GE Recounts", export.electionName)
         assertEquals("5.17.17.1", export.versionName)
         assertEquals(65, export.schema.contests.size)
-        assertEquals(25430, export.cvrs.size)
+        assertEquals(25430, export.nrows())
     }
 }
 

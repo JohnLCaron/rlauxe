@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
-import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.corlacvr.Garfield2020RawCvrs
 import org.cryptobiotic.rlauxe.corlacvr.Redaction
@@ -24,7 +24,7 @@ interface CorlaCountyInput {
     val cvrsSource: String
 
     // TODO dependence on the year
-    fun readCorlaCvrs(): CorlaRawCvrsIF {
+    fun readCorlaCvrs(): CorlaCvrsIF {
         return if (countyName == "Garfield") Garfield2020RawCvrs(cvrsSource)
             else if (countyName == "Boulder") readCorlaCvrs(cvrsSource, redaction = RedactionBoulder())
             else if (countyName == "La Plata") readCorlaCvrs(cvrsSource, redaction = Redaction(RedactionStrategy(true)))
@@ -41,7 +41,7 @@ interface CorlaCountyInput {
     fun countyPopulation(): Int
 }
 
-// convertf drom cvr names/ids to canonical
+// convert from cvr names/ids to canonical
 interface CorlaCountyConverterIF {
     fun convertToCard(dcvr: CvrRow, visit: ((AuditableCardBuilder) -> Unit)? = null): AuditableCard
     fun cardStyles(): Map<Set<Int>, CardStyle> // contest ids -> CardStyle

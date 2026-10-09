@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.boulder
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrs
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.SchemaContestInfo
 import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrs
@@ -42,33 +42,33 @@ class TestBoulderCvrs {
     }
 
     fun test(input: BoulderInput, sumManifest: Int) {
-        val corlaRawCvrs: CorlaRawCvrs = readCorlaCvrs(input.cvrsSource, redaction = RedactionBoulder())
-        println("\n${input.cvrsSource}\nCVR schema contests ${corlaRawCvrs.schema.contests.size}")
+        val corlaCvrs = readCorlaCvrs(input.cvrsSource, redaction = RedactionBoulder())
+        println("\n${input.cvrsSource}\nCVR schema contests ${corlaCvrs.schema.contests.size}")
 
         val sovo = input.sovo()
         println("\n${input.sovoSource}\nSOVO contests ${sovo.contests.size}")
 
-        val election = CreateBoulderElection(input.electionName, AuditType.ONEAUDIT, corlaRawCvrs, sovo, hasStyle = true,
+        val election = CreateBoulderElection(input.electionName, AuditType.ONEAUDIT, corlaCvrs, sovo, hasStyle = true,
             variantEnum = ElectionVariantEnum.Styles
         )
         val contestIds = election.contests.map { Pair(it.name, it.id) }
         println("\nCreateBoulderElection contests ${contestIds.size}")
 
         sovo.setIds(contestIds)
-        compareSovoAndCvrs(corlaRawCvrs, sovo, election)
+        compareSovoAndCvrs(corlaCvrs, sovo, election)
         println("--------------------------------------------------------------------------")
-        testParseBoulderCvrs(corlaRawCvrs, contestIds, sumManifest)
+        testParseBoulderCvrs(corlaCvrs, contestIds, sumManifest)
     }
 
-    fun compareSovoAndCvrs(corlaRawCvrs: CorlaRawCvrs, sovo: BoulderStatementOfVotes, election: CreateBoulderElection) {
+    fun compareSovoAndCvrs(corlaCvrs: CorlaCvrsIF, sovo: BoulderStatementOfVotes, election: CreateBoulderElection) {
 
-        val voteForNs = corlaRawCvrs.schema.contests.map { Pair(it.contestName, it.voteForN) }
+        val voteForNs = corlaCvrs.schema.contests.map { Pair(it.contestName, it.voteForN) }
 
         println("Sovo contests")
         println("  ${SovoContestVotes.header}, calcNc")
         var miss = 0
         sovo.contests.sortedBy {  it.id }.forEach { sovoContest ->
-            val missing = !hasCvrContest(sovoContest.contestTitle, corlaRawCvrs.schema.contests)
+            val missing = !hasCvrContest(sovoContest.contestTitle, corlaCvrs.schema.contests)
             if (missing) {
                 miss++
                 assertEquals(0, sovoContest.totalVotes) // "There are no candidates for this office"
@@ -90,24 +90,24 @@ class TestBoulderCvrs {
         }
         println("maxPhantoms = $maxPhantoms")
 
-        assertEquals(corlaRawCvrs.schema.contests.size,sovo.contests.size - miss)
-        assertEquals(corlaRawCvrs.schema.contests.size,election.contestsUA.size)
+        assertEquals(corlaCvrs.schema.contests.size,sovo.contests.size - miss)
+        assertEquals(corlaCvrs.schema.contests.size,election.contestsUA.size)
     }
 
     fun hasCvrContest(sovoContestName: String, cvrContests: List<SchemaContestInfo>): Boolean {
         return cvrContests.find { it.contestName.contains(sovoContestName) } != null
     }
 
-    fun testParseBoulderCvrs(corlaRawCvrs: CorlaRawCvrs, contestIds:List<Pair<String, Int>>, sumManifest: Int) {
-        val exportCvrs: List<Cvr> = corlaRawCvrs.cvrs.map { it.convertToCard().toCvr() }
+    fun testParseBoulderCvrs(corlaCvrs: CorlaCvrsIF, contestIds:List<Pair<String, Int>>, sumManifest: Int) {
+        val exportCvrs: List<Cvr> = corlaCvrs.cvrs().map { it.convertToCard().toCvr() }
 
-        val votes = tabulateCvrsWithVoteForNs(exportCvrs.iterator(), corlaRawCvrs.schema.voteForNs).toSortedMap()
+        val votes = tabulateCvrsWithVoteForNs(exportCvrs.iterator(), corlaCvrs.schema.voteForNs).toSortedMap()
         votes.forEach { (contestId, tab) ->
             println("  ${contestId}: ${tab}")
         }
 
         println("\nCvr Contests")
-        corlaRawCvrs.schema.contests.sortedBy {  it.contestName }.forEach { cvrContest ->
+        corlaCvrs.schema.contests.sortedBy {  it.contestName }.forEach { cvrContest ->
             val contestId = contestIds.find { cvrContest.contestName.contains(it.first) }
             if (contestId == null) println("cant find ${cvrContest.contestName}") else {
                 val contestVotes = votes[contestId.second]
@@ -116,14 +116,14 @@ class TestBoulderCvrs {
         }
 
         println("\nCvr Card Styles")
-        corlaRawCvrs.cardStyleMap().values.forEach { println("  ${it}") }
-        val countCardStyleCards = corlaRawCvrs.cardStyleMap().values.sumOf { it.ncards }
+        corlaCvrs.cardStyleMap().values.forEach { println("  ${it}") }
+        val countCardStyleCards = corlaCvrs.cardStyleMap().values.sumOf { it.ncards }
         println("countCardStyleCards=${countCardStyleCards}")
         println("Total cvrs=${exportCvrs.size}")
 
         println("\nRedacted Groups")
-        corlaRawCvrs.redaction.groups().forEach { println("  ${it}") }
-        val redactedNcards = corlaRawCvrs.redaction.groups().sumOf { it.ncards() }
+        corlaCvrs.redaction().groups().forEach { println("  ${it}") }
+        val redactedNcards = corlaCvrs.redaction().groups().sumOf { it.ncards() }
         println("Total redacted cards=${redactedNcards}")
         println()
         println("Total cvrs + redacted cards=${exportCvrs.size + redactedNcards}")

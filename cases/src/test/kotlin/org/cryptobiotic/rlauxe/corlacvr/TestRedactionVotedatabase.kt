@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
-import org.cryptobiotic.rlauxe.corlacvr.Redaction
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
@@ -134,7 +133,7 @@ fun lookForRedactions(filename: String, showRedaction: Boolean = false, showHead
     val redaction = if (filename.lowercase().contains("boulder")) RedactionBoulder(show=showRedaction) else Redaction(show=showRedaction)
 
     try {
-        val corlaRawCvrs: CorlaRawCvrs = readCorlaCvrs(filename, redaction = redaction, showHeaders = showHeaders)
+        val corlaRawCvrs = readCorlaCvrs(filename, redaction = redaction, showHeaders = showHeaders)
 
         println("  nrows = ${corlaRawCvrs.nrows()} redacted cvrs = ${corlaRawCvrs.redaction().redactedRows().size} redacted groups = ${corlaRawCvrs.redaction().groups().size} ")
 

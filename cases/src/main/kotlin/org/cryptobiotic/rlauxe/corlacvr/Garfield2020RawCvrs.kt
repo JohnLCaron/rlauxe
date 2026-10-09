@@ -40,7 +40,7 @@ private val showLines = false
 
 // modified cvr2 and renamed as cvr
 
-class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): CorlaRawCvrsIF {
+class Garfield2020RawCvrs(override val inputSource: String, showHeaders: Boolean = false): CorlaCvrsIF {
 
     override val electionName = "Garfield2020"
     override val versionName = "unknown"
@@ -62,16 +62,16 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
     var countBlankPrecincts = 0
 
     init {
-        val parser = if (filename.endsWith(".zip")) {
-            val zipReader = ZipReader(filename)
+        val parser = if (inputSource.endsWith(".zip")) {
+            val zipReader = ZipReader(inputSource)
             // by convention, the file inside is the filename with zip replaced by csv
-            val lastPart = filename.substringAfterLast("/")
+            val lastPart = inputSource.substringAfterLast("/")
             val innerFilename = lastPart.replace(".zip", ".csv")
             val inputStream = zipReader.inputStream(innerFilename)
             val reader: Reader = InputStreamReader(inputStream, "UTF-8")
             CSVParser.parse(reader, CSVFormat.DEFAULT)
         } else {
-            CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
+            CSVParser.parse(File(inputSource), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
         }
 
         records = parser.iterator()
@@ -95,7 +95,7 @@ class Garfield2020RawCvrs(val filename: String, showHeaders: Boolean = false): C
             if (showLines) showLine("choice/candidate", choiceLine)
             lineno++
 
-            schema = makeCvrSchema(filename, contestLine, choiceLine, choiceLine)
+            schema = makeCvrSchema(inputSource, contestLine, choiceLine, choiceLine)
             // println(CvrSchema.showColumns())
             // println()
             // println(CvrSchema.showContests())

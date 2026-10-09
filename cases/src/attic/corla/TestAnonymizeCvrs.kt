@@ -13,7 +13,6 @@ import kotlin.io.path.exists
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/*
 class TestAnonymizeCvrs {
     val base = "/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testCases/generated"
     val baseOut = "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon"
@@ -89,8 +88,8 @@ class TestAnonymizeCvrs {
                 )
             )
 
-            val actual = File("$baseOut/$scenario.csv").readLines()
-            val expect = File("/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testCases/converted/$scenario.csv").readLines()
+            val actual = java.io.File("$baseOut/$scenario.csv").readLines()
+            val expect = java.io.File("/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testCases/converted/$scenario.csv").readLines()
             assertEquals(expect.size, actual.size)
             val combine = expect.zip(actual)
             combine.forEach {
@@ -111,7 +110,7 @@ class TestAnonymizeCvrs {
         val anon = Anonymize(countyInput.readCorlaCvrs(), 10, output)
         anon.execute_redact()
 
-        val actual = File(output).readLines()
+        val actual = java.io.File(output).readLines()
         actual.forEach { line ->
             if (line.startsWith("AGGREGATED")) println(line)
         }
@@ -160,7 +159,7 @@ class TestAnonymizeCvrs {
         val anon = Anonymize(countyInput.readCorlaCvrs(), 10, output)
         anon.execute_redact()
 
-        val actual = File(output).readLines()
+        val actual = java.io.File(output).readLines()
         actual.forEach { line ->
             if (line.startsWith("AGGREGATED")) println(line)
         }
@@ -192,7 +191,7 @@ class TestAnonymizeCvrs {
             )
 
             var countNcards = 0
-            val actual = File("$baseOut/2020/$county.csv").readLines()
+            val actual = java.io.File("$baseOut/2020/$county.csv").readLines()
             actual.forEach { line ->
                 if (line.contains("*,*")) countNcards++
                 if (line.startsWith("AGGREGATED")) println(line)
@@ -205,8 +204,6 @@ class TestAnonymizeCvrs {
         println("that took $stopwatch")
     }
 }
-
- */
 
 fun compareCvrEquivilent(cvrFile1: String, cvrFile2: String) {
     println("compare $cvrFile1")
@@ -243,7 +240,7 @@ fun compareRowEquivilent(row1: CvrRow, row2: CvrRow) {
 
 fun writeRedactionCount(outputFilename: String, countNredacted: Map<String, Int>) {
     // misc data by county
-    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
+    val writer: java.io.OutputStreamWriter = java.io.FileOutputStream(outputFilename).writer()
     writer.write("    county, addRedactedCards\n")
     countNredacted.toSortedMap().forEach {
         writer.write("${sfn(it.key, 10)}, ${nfn(it.value, 7)}\n")
@@ -257,7 +254,7 @@ fun readRedactionCount(filename: String): Map<String, Int> {
     val countNredacted = mutableMapOf<String, Int>()
     if (!Path(filename).exists()) return countNredacted
 
-    val lines = File(filename).readLines()
+    val lines = java.io.File(filename).readLines()
     lines.forEachIndexed { idx, line ->
         if (idx > 0) {
             val tokens = line.split(",")

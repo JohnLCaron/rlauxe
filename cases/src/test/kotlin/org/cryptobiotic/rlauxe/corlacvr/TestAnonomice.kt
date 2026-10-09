@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
-import org.cryptobiotic.rlauxe.votedatabase.votedatabase
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
@@ -44,8 +43,8 @@ class TestAnonomice {
     fun testBallotType() {
         val cvrs = "$base/ballot_type_present.csv"
         val output = "$baseOut/ballot_type_present.csv"
-        Anonomicer(cvrs).redact(output)
 
+        Anonomicer(cvrs).redact(output)
         CheckCvrRedaction(cvrs, output)
     }
 
@@ -53,27 +52,18 @@ class TestAnonomice {
     fun testBlockedStyle() {
         val cvrs = "$base/blocked_style.csv"
         val output = "$baseOut/blocked_style.csv"
-        AnonymizeCvrsCli.main(
-            arrayOf(
-                "-input", cvrs,
-                "-output", output,
-                "--mode", "redact"
-            )
-        )
-
+        Anonomicer(cvrs).redact(output)
+        CheckCvrRedaction(cvrs, output)
     }
 
     @Test
     fun compareAllScenarios() {
         scenarios.forEach { scenario ->
             println("===========================================================================================")
-            AnonymizeCvrsCli.main(
-                arrayOf(
-                    "-input", "$base/$scenario.csv",
-                    "-output", "$baseOut/$scenario.csv",
-                    "--mode", "redact"
-                )
-            )
+            val cvrs = "$base/$scenario.csv"
+            val output = "$baseOut/$scenario.csv"
+            Anonomicer(cvrs).redact(output)
+            CheckCvrRedaction(cvrs, output)
 
             val actual = File("$baseOut/$scenario.csv").readLines()
             val expect = File("/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testCases/converted/$scenario.csv").readLines()
@@ -174,7 +164,8 @@ class TestAnonomice {
             println("===========================================================================================")
             println("County $county from ${countyInput.cvrsSource}")
 
-            Anonomicer(countyInput.readCorlaCvrs()).redact("$baseOut/2020/$county.csv")
+            val anon = Anonomicer(countyInput.readCorlaCvrs())
+            anon.redact("$baseOut/2026p/$county.csv")
 
             var countNcards = 0
             val actual = File("$baseOut/2020/$county.csv").readLines()
@@ -182,11 +173,97 @@ class TestAnonomice {
                 if (line.contains("*,*")) countNcards++
                 if (line.startsWith("AGGREGATED")) println(line)
             }
-            if (countNcards > 0) print("countNcards = $countNcards ")
-            println("success")
-            countNredacted[county] = countNcards
+            if (countNcards > 0) println("countRowsHaveRedactions = $countNcards ourPrecintRedactions=${anon.agg.ourPrecintRedaction()}")
+            countNredacted[county] = anon.agg.ourPrecintRedaction()
         }
-        writeRedactionCount("$baseOut/2020/redactedCount.csv", countNredacted)
+        writeRedactionCount("$baseOut/2020/redactedCountByPrecinct.csv", countNredacted)
         println("that took $stopwatch")
     }
+
+    @Test
+    fun testAnonymize2026pCvrs() {
+        val stopwatch = Stopwatch()
+        val input = Colorado2026PwithCvrs()
+        val countNredacted = mutableMapOf<String, Int>()
+        input.counties().forEach { county ->
+            val countyInput = input.corlaCountyInput(county)!!
+            println("===========================================================================================")
+            println("County $county from ${countyInput.cvrsSource}")
+
+            val anon = Anonomicer(countyInput.readCorlaCvrs())
+            anon.redact("$baseOut/2026p/$county.csv")
+
+            var countNcards = 0
+            val actual = File("$baseOut/2020/$county.csv").readLines()
+            actual.forEach { line ->
+                if (line.contains("*,*")) countNcards++
+                if (line.startsWith("AGGREGATED")) println(line)
+            }
+            if (countNcards > 0) println("countRowsHaveRedactions = $countNcards ourPrecintRedactions=${anon.agg.ourPrecintRedaction()}")
+            countNredacted[county] = anon.agg.ourPrecintRedaction()
+        }
+        writeRedactionCount("$baseOut/2026p/redactedCountByPrecinct.csv", countNredacted)
+        println("that took $stopwatch")
+    }
+}
+
+fun compareCvrEquivilent(cvrFile1: String, cvrFile2: String) {
+    println("compare $cvrFile1")
+    println("     to $cvrFile2")
+
+    val corlaCvr1 = readCorlaCvrs(cvrFile1, redaction = Redaction())
+    val corlaCvr2 = readCorlaCvrs(cvrFile2, redaction = Redaction())
+
+    val cvrs1 = corlaCvr1.cvrs()
+    val cvrs2 = corlaCvr2.cvrs()
+    assertEquals(corlaCvr1.nrows(), corlaCvr2.nrows())
+    cvrs1.zip(cvrs2).forEach { (cvr1, cvr2) ->
+        compareRowEquivilent(cvr1, cvr2)
+    }
+
+    //     fun groups(): List<RedactedGroup>  // Aggregated redactions: make into pools
+    //    fun redactedRows(): List<CvrRow>  // row redactions given in the CVR file
+    //    fun nredactedCvrs()
+    assertEquals(corlaCvr1.redaction().groups(), corlaCvr2.redaction().groups())
+    assertEquals(corlaCvr1.redaction().nredactedCvrs(), corlaCvr2.redaction().nredactedCvrs())
+
+    corlaCvr1.redaction().redactedRows().zip(corlaCvr2.redaction().redactedRows()).forEach { (g1, g2) ->
+        compareRowEquivilent(g1, g2)
+    }
+
+}
+
+fun compareRowEquivilent(row1: CvrRow, row2: CvrRow) {
+    assertEquals(row1.ballotType, row2.ballotType)
+    assertEquals(row1.imprintedId, row2.imprintedId)
+    assertEquals(row1.contestVotes, row2.contestVotes)
+}
+
+
+fun writeRedactionCount(outputFilename: String, countNredacted: Map<String, Int>) {
+    // misc data by county
+    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
+    writer.write("    county, addRedactedCards\n")
+    countNredacted.toSortedMap().forEach {
+        writer.write("${sfn(it.key, 10)}, ${nfn(it.value, 7)}\n")
+    }
+    writer.close()
+    println("wrote ${countNredacted.size} redactionCount to $outputFilename")
+}
+
+fun readRedactionCount(filename: String): Map<String, Int> {
+    // misc data by county
+    val countNredacted = mutableMapOf<String, Int>()
+    if (!Path(filename).exists()) return countNredacted
+
+    val lines = File(filename).readLines()
+    lines.forEachIndexed { idx, line ->
+        if (idx > 0) {
+            val tokens = line.split(",")
+            val county = tokens[0].trim()
+            val nredact = tokens[1].trim().toInt()
+            countNredacted[county] = nredact
+        }
+    }
+    return countNredacted
 }

@@ -31,22 +31,22 @@ class TestCvrsAndManifests {
     fun testCvrsAndManifests(input: BoulderInput) {
         val corlaCvrs = readCorlaCvrs(input.cvrsSource, redaction = RedactionBoulder())
 
-        println("${input.cvrsSource}: nrows = ${corlaCvrs.nrows()} cvrs size = ${corlaCvrs.cvrs().size}")
+        println("${input.cvrsSource}: nrows = ${corlaCvrs.nrows()} cvrs size = ${corlaCvrs.nrows()}")
 
-        val redactedCards = corlaCvrs.redaction.groups().sumOf {  it.ncards() }
-        println("   redacted groups ${corlaCvrs.redaction.groups().size}")
-        corlaCvrs.redaction.groups().forEach { println(it)}
+        val redactedCards = corlaCvrs.redaction().groups().sumOf {  it.ncards() }
+        println("   redacted groups ${corlaCvrs.redaction().groups().size}")
+        corlaCvrs.redaction().groups().forEach { println(it)}
 
         println("   redacted ncards = ${redactedCards}")
-        println("   cvrs + redacted ncards = ${redactedCards + corlaCvrs.cvrs().size}")
-        val totalCvrs = redactedCards + corlaCvrs.cvrs().size
+        println("   cvrs + redacted ncards = ${redactedCards + corlaCvrs.nrows()}")
+        val totalCvrs = redactedCards + corlaCvrs.nrows()
 
         val manifestBatches = readCountyManifestCsv(input.manifestSource)
         val sumManifest = manifestBatches.sumOf{ it.nballotCards }
         println("\n${input.manifestSource}")
         println("  sumManifest = $sumManifest")
 
-        println("  sumManifest - cvrs = ${sumManifest - corlaCvrs.cvrs().size}")
+        println("  sumManifest - cvrs = ${sumManifest - corlaCvrs.nrows()}")
         val diff = sumManifest - totalCvrs
         print("  sumManifest - totalCvrs = ${diff}")
         if (diff > 0) print("  ==  more redacted cards? or overvotes that were thrown out ??")

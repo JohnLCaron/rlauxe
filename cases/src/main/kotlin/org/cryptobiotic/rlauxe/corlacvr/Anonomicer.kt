@@ -9,8 +9,14 @@ import java.io.File
 import kotlin.math.max
 import kotlin.random.Random
 
+const val MIN_BALLOTS_DEFAULT = 10
+const val NEAR_UNANIMOUS_THRESHOLD = 2  // "all but N votes" triggers balancing (Rule c)
+const val MIN_CONTRASTING_VOTES = 3  // contrasting votes needed per contest after balancing
+const val COVERAGE_WEIGHT = 10.0  // weight for contest coverage vs. vote-balance score
+const val DONOR_SURPLUS_THRESHOLD = 3  // minimum surplus above min_ballots for a style/precinct to donate freely
+
 class Anonomicer(
-    val corlaCvrs: CorlaRawCvrsIF,
+    val corlaCvrs: CorlaCvrsIF,
     val minBallots: Int = MIN_BALLOTS_DEFAULT,
     val removePrecinctCol: Boolean = false,
 ) {
@@ -167,7 +173,7 @@ class Anonomicer(
 
             ////// validate results
             val redactedRows = donorRows + rareStyles.map { it.rows }.flatten()
-            val redactTabs = tabulateCvrRows(redactedRows, infos)
+            val redactTabs = tabulateCvrRows(redactedRows.iterator(), infos)
 
             println("ruleA: redactedRowSet.size >= minBallots = ${redactedRowSet!!.size >= minBallots}")
             val ruleB = rareContests.keys.all { contestId ->
@@ -191,11 +197,13 @@ class Anonomicer(
             println("ruleC: all rareContests are not close to unanimous >= minBallots = ${ruleC}")
         }
 
+        fun ourPrecintRedaction() = redactedRowSet!!.size
+
         fun isRedacted(row: CvrRow) = redactedRowSet?.contains(row.cvrNumber) ?: false
 
         fun hasRedaction() = redactedRowSet != null && redactedRowSet!!.size > 0
 
-        // only one aggregation for now
+        // get the contest tabulation from the aggregated set
         fun redactedAggregation() : Map<Int, ContestTabulation> {
             val result = mutableMapOf<Int, ContestTabulation>()
             rareStyles.forEach { rareStyle ->
@@ -240,6 +248,8 @@ class Anonomicer(
 
         // total ballots > minBallots
         fun rulea() {
+            if (!hasRedaction())
+                return
             val rowCount = rareStyles.sumOf { it.rows.size } + donorRows.size
             if (rowCount < minBallots) {
                 repeat(minBallots - rowCount) {
@@ -274,7 +284,8 @@ class Anonomicer(
         }
 
         fun rulec(commonStyles: List<PrecinctUniqueStyle> ): Boolean {
-            if (!needContestVotes.any { it.value.second > 0 }) return false
+            if (!needContestVotes.any { it.value.second > 0 })
+                return false
 
             // choose a card from any commonStyles that satisfies the most needContestVotes
             var maxScore = 0
@@ -373,7 +384,7 @@ class PrecinctCardStyle(val ballotType: String, val precinctPortion: String, val
     }
 }
 
-fun findPrecinctStyles(corlaCvrs: CorlaRawCvrsIF, infos: Map<Int, ContestInfo>): List<PrecinctCardStyle> {
+fun findPrecinctStyles(corlaCvrs: CorlaCvrsIF, infos: Map<Int, ContestInfo>): List<PrecinctCardStyle> {
     val styleCounters = mutableMapOf<Pair<String, String>, PrecinctCardStyle>()
     corlaCvrs.cvrs().forEach { cvr ->
         // val cvrStyleId = CardStyleId(cvr.ballotType, cvr.contests())

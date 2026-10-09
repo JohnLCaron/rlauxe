@@ -23,7 +23,7 @@ class TestBoulderUndervotes {
 
         var count = 0
         val constructTypes = mutableMapOf<String, MutableList<List<Int>>>()
-        corlaCvrs.cvrs.forEach { cvr: CvrRow ->
+        corlaCvrs.cvrs().forEach { cvr: CvrRow ->
             val contestIds = cvr.contestVotes.map { it.contestId }
             val prevContestIds = constructTypes.getOrPut(cvr.ballotType) { mutableListOf() }
             if (!prevContestIds.contains(contestIds)) {
@@ -112,7 +112,7 @@ class TestBoulderUndervotes {
         println()
 
         println("\nlook for redactedGroups with no match in cardStyles:")
-        corlaCvrs.redaction.groups().forEach { rgroup ->
+        corlaCvrs.redaction().groups().forEach { rgroup ->
             // test if theres a cardStyle that matches
             //val gcardStyle = extractBallotType(rgroup.ballotType) + "-" + if (isA) "A" else "B"
             val cardStyle = cardStyles[rgroup.groupName]
@@ -147,7 +147,7 @@ class TestBoulderUndervotes {
     // class CreateBoulderElection(
     //    val electionName: String,
     //    val auditType: AuditType,
-    //    val corlaRawCvrs: CorlaRawCvrsIF,
+    //    val corlaRawCvrs: CorlaCvrsIF,
     //    val sovo: BoulderStatementOfVotes,
     //    val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     //    val hasStyle: Boolean, // TODO

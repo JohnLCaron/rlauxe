@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.corlacvr.ContestVotes
-import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
 import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
@@ -19,10 +19,10 @@ import kotlin.collections.set
 
 private val logger = KotlinLogging.logger("CorlaCvrConverter")
 
-// convert CorlaRawCvrsIF from CVRs ids to canonical ids in coloradoInput
-// each CorlaRawCvrsIF is specific to a County.
+// convert CorlaCvrsIF from CVRs ids to canonical ids in coloradoInput
+// each CorlaCvrsIF is specific to a County.
 // infosByName is from canonical contests
-class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaRawCvrsIF, val infosByName: Map<String, ContestInfo>,
+class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCvrsIF, val infosByName: Map<String, ContestInfo>,
                         val coloradoInput: ColoradoInput, startingStyleId: Int = 1) {
 
     // map export contest to canon contest, then an array mapping export cand id to canonical candidate id
@@ -241,7 +241,7 @@ data class CorlaContestInfo(
 //    val minFraction: Double? = null,    // used in threshold, dhondt, runoff
 //)
 
-fun CorlaRawCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
+fun CorlaCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
     val columns = this.schema.columns
 
     return this.schema.contests.map { exportContest ->
@@ -275,7 +275,7 @@ fun CorlaRawCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
     }
 }
 
-fun CorlaRawCvrsIF.makeRealContestInfo(): Map<Int, ContestInfo> {
+fun CorlaCvrsIF.makeRealContestInfo(): Map<Int, ContestInfo> {
     return this.makeContestInfo().map { it ->
         ContestInfo(
             it.name, it.id, it.candidateNames,

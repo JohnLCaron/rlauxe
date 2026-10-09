@@ -52,7 +52,7 @@ class TestCorlaSchemaConverter {
         val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
         var count = 0
         var countOutOfOrder = 0
-        export.cvrs.map { cvr: CvrRow ->
+        export.cvrs().map { cvr: CvrRow ->
             val card = CorlaConverter.convertToCard(cvr)
             assertEquals(cvr.imprintedId, card.id)
             cvr.contestVotes.forEach { contestVote: ContestVotes ->
@@ -89,7 +89,7 @@ class TestCorlaSchemaConverter {
 
         val contestBuilder = BuildCorlaContests(coloradoInput)
         val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
-        val cards: List<AuditableCard> = export.cvrs.map { CorlaConverter.convertToCard(it) }
+        val cards: List<AuditableCard> = export.cvrs().map { CorlaConverter.convertToCard(it) }
         println("ncards = ${cards.size}")
         val filename = "$testdataDir/tests/scratch/testWriteCorlaCvrs.csv"
         writeCardCsvFile(cards, filename)

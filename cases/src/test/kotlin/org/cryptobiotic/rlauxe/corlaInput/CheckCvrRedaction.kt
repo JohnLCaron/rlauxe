@@ -4,11 +4,8 @@ import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
 import org.cryptobiotic.rlauxe.auditcenter.makeRealContestInfo
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.corlacvr.Anonomicer.Companion.MIN_CONTRASTING_VOTES
 import org.cryptobiotic.rlauxe.corlacvr.Anonomicer.Companion.NEAR_UNANIMOUS_THRESHOLD
-import org.cryptobiotic.rlauxe.corlacvr.CardStyleId
-import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrsIF
-import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.MIN_BALLOTS_DEFAULT
 import org.cryptobiotic.rlauxe.corlacvr.findPrecinctStyles
 import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
@@ -17,7 +14,6 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase
-import kotlin.collections.set
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -153,7 +149,7 @@ class PrecinctStyles(val ballotType: String, val precinctPortion: String) {
     }
 }
 
-fun findPrecinctStyles(corlaCvrs: CorlaRawCvrsIF): List<PrecinctStyles> {
+fun findPrecinctStyles(corlaCvrs: CorlaCvrsIF): List<PrecinctStyles> {
     val styleCounters = mutableMapOf<Pair<String, String>, PrecinctStyles>()
     corlaCvrs.cvrs().forEach { cvr ->
         val id = Pair(cvr.ballotType, cvr.precinctPortion ?: "none")
@@ -180,7 +176,7 @@ data class CvrTabulations(val infos: Map<Int, ContestInfo>,
     }
 }
 
-fun tabulate(corlaCvrs: CorlaRawCvrsIF): CvrTabulations  {
+fun tabulate(corlaCvrs: CorlaCvrsIF): CvrTabulations  {
     val infos = corlaCvrs.makeContestInfo().map { it ->
         ContestInfo(
             it.name, it.id, it.candidateNames,
@@ -189,7 +185,7 @@ fun tabulate(corlaCvrs: CorlaRawCvrsIF): CvrTabulations  {
         )
     }.associateBy { it.id }
 
-    val cvrTabs = tabulateCvrRows(corlaCvrs.cvrs(), infos)
+    val cvrTabs = tabulateCvrRows(corlaCvrs.cvrs().iterator(), infos)
 
     val sumRedaction = mutableMapOf<Int, ContestTabulation>()
     val redaction = corlaCvrs.redaction()

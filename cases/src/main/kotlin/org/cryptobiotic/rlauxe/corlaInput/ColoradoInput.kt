@@ -467,7 +467,7 @@ data class CountyInputData(val county: String,
                            val cvrInManifest:Int,
                            val cvrNoManifest:Int,
                            val manifestNoCvr: Int,
-                           val countNredacted: Int,
+                           val ourRedactByPrecinct: Int,
                            val minCards: Int,
                            val countBlankPrecincts: Int,
                            val ballotStylesUnique: Boolean,
@@ -479,11 +479,11 @@ fun writeCountyInputData(outputFilename: String, data: List<CountyInputData>) {
     // misc data by county
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     writer.write("            county,   manifestCount, unredactedCvrs, redactedCvrs, cvrInManifest, cvrNoManifest, manifestNoCvr, " +
-            "countNredacted, minCards, countBlankPrecincts, ballotStylesUnique, ballotStyleMin, precinctStyleMin\n")
+            "ourRedactByStyle, minCards, countBlankPrecincts, ballotStylesUnique, ballotStyleMin, precinctStyleMin\n")
     data.sortedBy { it.county }.forEach {
         writer.write(
             "${sfn(it.county, 20)}, ${nfn(it.manifestCount, 7)}, ${nfn(it.unredactedCvrs, 7)}, ${nfn(it.redactedCvrs, 7)}, ${nfn(it.cvrInManifest, 7)}, " +
-                    "${nfn(it.cvrNoManifest, 7)}, ${nfn(it.manifestNoCvr, 5)}, ${nfn(it.countNredacted, 5)}, ${nfn(it.minCards, 5)}, " +
+                    "${nfn(it.cvrNoManifest, 7)}, ${nfn(it.manifestNoCvr, 5)}, ${nfn(it.ourRedactByPrecinct, 5)}, ${nfn(it.minCards, 5)}, " +
             "${it.countBlankPrecincts}, ${it.ballotStylesUnique}, ${it.ballotStyleMin}, ${it.precinctStyleMin}\n"
         )
     }
@@ -507,14 +507,14 @@ fun readCountyInputData(filename: String): List<CountyInputData> {
         val cvrInManifest = tokens[idx++].trim().toInt()
         val cvrNoManifest = tokens[idx++].trim().toInt()
         val nredactedRows = tokens[idx++].trim().toInt()
-        val countNredacted = tokens[idx++].trim().toInt()
+        val ourRedactByPrecinct = tokens[idx++].trim().toInt()
         val minCards = tokens[idx++].trim().toInt()
         val countBlankPrecincts = tokens[idx++].trim().toInt()
         val hasPrecinct = tokens[idx++].trim() == "true"
         val ballotStyleMin = tokens[idx++].trim().toInt()
         val precinctStyleMin = tokens[idx++].trim().toInt()
 
-        countyData.add( CountyInputData(countyName, manifestCount, ncvrs, redactedCvrs, cvrInManifest, cvrNoManifest, nredactedRows, countNredacted,
+        countyData.add( CountyInputData(countyName, manifestCount, ncvrs, redactedCvrs, cvrInManifest, cvrNoManifest, nredactedRows, ourRedactByPrecinct,
             minCards, countBlankPrecincts, hasPrecinct, ballotStyleMin, precinctStyleMin))
     }
     reader.close()

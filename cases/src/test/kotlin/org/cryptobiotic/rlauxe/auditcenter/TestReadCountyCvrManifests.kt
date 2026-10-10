@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.test.Test
 
-class TestReadCountyManifests {
+class TestReadCountyCvrManifests {
     val input: ColoradoInput = Colorado2026Primary()
 
     @Test

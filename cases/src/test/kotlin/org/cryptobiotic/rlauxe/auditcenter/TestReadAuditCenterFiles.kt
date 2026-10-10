@@ -128,7 +128,7 @@ class TestReadAuditCenterFiles {
 
     @Test
     fun readContestComparison() {
-        val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile)
+        val (contestMvrs, countyMvrs, mvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile)
         // val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile) { contestNameCleanup(it) }
         println("read ${countyStyles.size} counties from ${input.mvrComparisonFile}; totalStyles=${countyStyles.sumOf { it.styles.size }} totalCards=${ countyStyles.sumOf{it.cardCount} }")
 

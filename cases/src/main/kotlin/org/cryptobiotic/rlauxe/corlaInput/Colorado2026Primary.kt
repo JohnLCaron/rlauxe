@@ -1,15 +1,64 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
+import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
+import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
 import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
+import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
+import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
 
-open class Colorado2026Primary(ac:String?=auditcenter): ColoradoInput(
+open class Colorado2026Primary(ac:String?=auditcenter): ColoradoInputWithManifests(
     generalCanonicalFile = "$ac/2026/primary/finalReports/CanonicalListOfContestsAndChoices.csv",
     contestRoundFile = "$ac/2026/primary/finalReports/ContestsListRound1.csv",
     tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",
-    mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv"
+    mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv",
+    manifestDir = "$ac/2026/primary/files"
 ) {
+
+    // Our fresh recount of all 63 manifest CSVs	1,444,036
+    // Official ballot_card_count column, live ContestsListRound1.csv	1,444,047
+
+    // Alamosa: 3,464 ballots in the public Alamosa.csv download vs. 3,475 in CDOS’s own reconciliation. Every other county matches exactly.
+    // Alamosa,102,138,30,Box 1
+    // Tabulator 102, Batch 139, 11 ballots
+    val statewideManifest: StateManifest by lazy {
+        val countyManifests = counties().map { county ->
+            val noblanks = county.replace("\\s".toRegex(), "")
+            val mainfestList = readCountyManifestCsv("$manifestDir/$noblanks.csv")
+            val correctedList = if (county != "Alamosa") mainfestList else
+                // data class ManifestBatch(
+                //    val countyName: String,
+                //    val tabulatorNum: Int,
+                //    val batchId: String,
+                //    val nballotCards: Int,
+                //    val location: String,
+                //)
+                mainfestList + listOf(ManifestBatch(county, 102, "139", 11,"Box 1"))
+            CountyManifest(county, correctedList)
+        }
+        StateManifest(countyManifests)
+    }
+
+    override fun corlaCountyManifest(countyName: String): CountyManifest? {
+        return statewideManifest.manifests.find { it.county == countyName }
+    }
+
+    override fun corlaStateManifest() = statewideManifest
+
+    //////////////////////////////////////////////////////
     override fun skipCounties(countyName: String) = false
+
+    // in canonical manifest order
+    override fun counties(): List<String> {
+        val alphaList = canonicalContests().values.map { it.counties }
+            .flatten()
+            .toSet()
+            .sorted()
+            .toMutableList()
+        alphaList.remove("Broomfield")
+        alphaList.add("Broomfield")      // add at end
+        return alphaList.toList()
+    }
 
     // canonical contests and choices
     override fun canonicalContests() = canonicalContests
@@ -32,28 +81,7 @@ open class Colorado2026Primary(ac:String?=auditcenter): ColoradoInput(
         result[contestName] = current.copy(choices = achoices).addCounties(current.counties.toList())
     }
 
-    // county round
-    // just auditing in Arapahoe County ??
-    // Arapahoe County - State Senator - District 27 - REP,county_wide_contest,in_progress,1,114629,16590,"""Tom Kim""",6325,0.03000000,0,0,0,0,0,0,0,1.03905000,0,133,133
-    // State Senator - District 27 - REP,opportunistic_benefits,in_progress,1,88443,788,"""Tom Kim""",118,0.03000000,0,0,0,0,0,0,0,1.03905000,0,5462,5462
-
-    // canon
-    // Arapahoe,State Senator - District 27 - DEM,Tom Sullivan
-    // Arapahoe,Arapahoe County - State Senator - District 27 - REP,"Tom Kim, JulieMarie A. Shepherd Macklin"
-    // Douglas,State Senator - District 27 - DEM,Tom Sullivan
-    // Douglas,State Senator - District 27 - REP,"Tom Kim, JulieMarie A. Shepherd Macklin"
-
-    // same here - Garfield ??
-    // Adams,Adams County - United States Senator - REP,"Ron Hanks, Joe O'Dea, Daniel Hendricks"
-    // Gilpin,United States Senator - REP,"Ron Hanks, Joe O'Dea, Daniel Hendricks"
-    // Garfield,Garfield County - United States Senator - REP,"Ron Hanks, Joe O'Dea, Daniel Hendricks"
-
-    // ------------------------- checkContestTabulateHasCanonical
-    //    missing choice  'Daniel Hendricks' in contestTab 'Garfield County - United States Senator - REP'
-
-
     override fun contestNameCleanup(county: String, name: String): String {
-
         return when (county) {
             "La Plata" -> when (name) {
                 "Secretary of State" -> "Secretary of State - LBR"

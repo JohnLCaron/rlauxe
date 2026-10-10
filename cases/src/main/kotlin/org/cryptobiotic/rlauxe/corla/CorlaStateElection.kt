@@ -86,6 +86,7 @@ class CorlaStateElection(
 
             // these are mvrs; for all but phantoms, use simulated mvrs that match the pool totals.
             // for phantom variant, makeSimulatedMvrs is empty; add phantom cards
+            // TODO all in memory
             val allCountyMvrs = cvrsFromManifest.unredactedCvrs + cvrsFromManifest.makeSimulatedMvrs() + phantomCards // in memory
 
             // write them out while we have them in memory

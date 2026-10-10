@@ -133,7 +133,7 @@ class Colorado2026PMerged(ac:String?=auditcenter): ColoradoInput(
             countyStyles.add(countyStyle)
         }
 
-        CardComparisonResults(mergedMvrs.values.toList(), org.countyMvrs, countyStyles)
+        CardComparisonResults(mergedMvrs.values.toList(), org.countyMvrs, org.mvrs, countyStyles)
     }
 
     override fun mergedInfo() = mergedInfo

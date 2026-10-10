@@ -188,3 +188,30 @@ fun cleanChoiceName(choiceName: String) : String {
     }
     return work.trim()
 }
+
+
+// heres where we remove the (Vote For=N)
+fun parseContestNameAndVoteFor(name: String) : Pair<String, Int> {
+    if (name.contains("(Vote For1")) {
+        val clean = name.substringBefore("(")
+        return Pair(clean.trim(), 1)
+    }
+    if (!name.contains("(Vote For=")) return Pair(name.trim(), 1)
+
+    val tokens = name.split("(Vote For=")
+    require(tokens.size == 2) { "unexpected contest name $name" }
+    val namet = tokens[0].trim()
+    val ncand = tokens[1].substringBefore(")").toInt()
+    return Pair(namet, ncand)
+}
+
+// City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)
+fun parseIrvContestName(name: String) : Pair<String, Int> {
+    if (!name.contains("(Number of positions=")) return Pair(name.trim(), 1)
+
+    val tokens = name.split("(Number of positions=")
+    require(tokens.size == 2) { "unexpected contest name $name" }
+    val namet = tokens[0].trim()
+    val ncand = tokens[1].substringBefore(",").toInt()
+    return Pair(namet, ncand)
+}

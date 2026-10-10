@@ -59,4 +59,29 @@ data class StateManifest(val manifests: List<CountyManifest>) {
 
         return manifest.idFromIndex(indexInManifest)
     }
+
+    fun batchInterator() = BatchIterator()
+
+    inner class BatchIterator(): Iterator<ManifestBatch> {
+        var countyManifests = manifests.iterator()
+        var currentBatches: Iterator<ManifestBatch>
+
+        init {
+            val currentCounty = countyManifests.next()
+            currentBatches = currentCounty.batches.iterator()
+        }
+
+        override fun next(): ManifestBatch {
+            return currentBatches.next()
+        }
+
+        override fun hasNext(): Boolean {
+            if (currentBatches.hasNext()) return true
+            if (!countyManifests.hasNext()) return false
+            val currentCounty = countyManifests.next()
+            currentBatches = currentCounty.batches.iterator()
+
+            return true
+        }
+    }
 }

@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.kotlinx.cli)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.bundles.logging)
+    implementation("com.jsoizo:kotlin-csv-jvm:2.0.0")
     implementation(libs.commons.csv)
     implementation(libs.logback.classic)
 

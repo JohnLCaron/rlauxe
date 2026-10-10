@@ -78,8 +78,7 @@ fun getZippedCsvResourceStream(resourcePath: String, resourceStream: InputStream
     return null
 }
 
-// read all the cvrs into memory so that it can implement cardStyles, nrows,  redaction, ballotStyleUnique
-// TODO perhaps there should be a separate object using cvrs: CloseableIterable ??
+// read through all the cvrs so that it can implement cardStyles, nrows,  redaction, ballotStyleUnique
 interface CorlaCvrsIF {
     val inputSource: String
     val electionName: String

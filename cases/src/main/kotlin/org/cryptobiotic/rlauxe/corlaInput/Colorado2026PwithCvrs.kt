@@ -141,7 +141,7 @@ class Colorado2026PwithCvrs(ac:String?=auditcenter): ColoradoInputWithCvrs(
             countyStyles.add(countyStyle)
         }
 
-        CardComparisonResults(mergedMvrs.values.toList(), org.countyMvrs, countyStyles)
+        CardComparisonResults(mergedMvrs.values.toList(), org.countyMvrs, org.mvrs, countyStyles)
     }
 
     // data class MergedInfo(

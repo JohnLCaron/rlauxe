@@ -1,219 +1,62 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
-import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
-import org.cryptobiotic.rlauxe.corlacvr.CvrRow
-import org.cryptobiotic.rlauxe.util.nfz
-import kotlin.collections.forEach
 
-interface ManifestEntry: Comparable<ManifestEntry> {
-    fun imprintedId(): String
-    fun location(): String
-    fun matched(): Boolean
-    fun setMatched(match: Boolean)
-    fun tab(): Int // needed ??
-}
-
-data class GarfieldEntry(val tab: Int, val batch: String, val record: Int, val location: String): ManifestEntry {
-    private var matched = false // did we find a match yet?
-
-    constructor(cvr: CvrRow) : this(cvr.tabulatorNum, cvr.batchId, cvr.recordId, "") {
-        if (cvr.imprintedId != imprintedId())
-            println("Garfield ${cvr.imprintedId} != ${imprintedId()}")
-    }
-
-    override fun imprintedId(): String {
-        val plusValue = 10_000 + 2*record+1
-        return "$batch+$plusValue"
-    }
-    override fun location() = location
-    override fun matched() = matched
-    override fun setMatched(match: Boolean) { matched = match }
-    override fun tab() = 1
-
-    override fun compareTo(other: ManifestEntry): Int {
-        return imprintedId().compareTo(other.imprintedId())
-    }
-}
-
-class GarfieldManifest(manifestSource: String): CountyManifest(manifestSource), Iterable<ManifestEntry> {
-
-    override fun makeEntry(tab: Int, batch: String, record: Int, location: String) : ManifestEntry {
-        return GarfieldEntry(tab, batch, record, location)
-    }
-
-    override fun makeEntry(cvrrow: CvrRow) : ManifestEntry {
-        return GarfieldEntry(cvrrow)
-    }
-
-}
-
-data class ManifestId(val tab: Int, val batch: String, val record: Int, val location: String): ManifestEntry {
-    private var matched = false // did we find a match yet?
-    private val id = "$tab-$batch-$record"
-    private val sorter: String
+// Find Manifest entries (imprinted_ids) from a PRN modulo ncvrs
+data class CountyManifest(val county: String, val batches: List<ManifestBatch>) {
+    val batchBound: List<Int>
+    val nbatches = batches.size
+    val nballotCards: Int
 
     init {
-        var tsorter = ""
-        try {
-            val batchAsInt = batch.toInt()
-            tsorter = (1000_000 * tab + 1000 * batchAsInt + record).toString()
-        } catch (e: Throwable) {
-            tsorter = nfz(tab,4) + batch + nfz(record,4)
+        var cumul = 0
+        batchBound = batches.map {
+            cumul += it.nballotCards
+            cumul
         }
-        sorter = tsorter
+        nballotCards = cumul
     }
 
-    constructor(cvr: CvrRow) : this(cvr.tabulatorNum, cvr.batchId, cvr.recordId, "")
+    fun idFromIndex(index: Int): String {
+        var batchIdx = 0
+        while (batchIdx < nbatches && index > batchBound[batchIdx] ) {
+            batchIdx++
+        }
+        if (batchIdx >= nbatches) {
+            throw RuntimeException("county $county index=$index out of bounds")
+        }
+        val batch = batches[batchIdx]
+        val indexInBatch = if (batchIdx == 0) index else index - batchBound[batchIdx-1]
 
-    override fun imprintedId() = id
-    override fun location() = location
-    override fun matched() = matched
-    override fun setMatched(match: Boolean) { matched = match }
-    override fun tab() = tab
-
-    override fun compareTo(other: ManifestEntry): Int {
-        return sorter.compareTo((other as ManifestId).sorter)
+        return "$county: ${batch.tabulatorNum}-${batch.batchId}-${indexInBatch}"
     }
 }
 
-open class CountyManifest(val manifestBatches: List<ManifestBatch>): Iterable<ManifestEntry> {
+data class StateManifest(val manifests: List<CountyManifest>) {
+    val manifestBound: List<Int>
+    val nmanifests = manifests.size
     val totalCards: Int
 
     init {
-        totalCards = manifestBatches.sumOf{ it.nballotCards }
+        var cumul = 0
+        manifestBound = manifests.map {
+            cumul += it.nballotCards
+            cumul
+        }
+        totalCards = cumul
     }
 
-    constructor(manifestSource: String): this(readCountyManifestCsv(manifestSource))
-
-    fun uppercase(): CountyManifest{
-        val upperBatches = manifestBatches.map { it.copy( batchId = it.batchId.uppercase() ) }
-        return CountyManifest(upperBatches)
-    }
-
-    open fun makeEntry(tab: Int, batch: String, record: Int, location: String) : ManifestEntry {
-        return ManifestId(tab, batch, record, location)
-    }
-
-    open fun makeEntry(cvrrow: CvrRow) : ManifestEntry {
-        return ManifestId(cvrrow)
-    }
-
-    override fun iterator(): Iterator<ManifestEntry> = MEiterator(manifestBatches.iterator())
-
-    inner class MEiterator(val batchIterator: Iterator<ManifestBatch>) : Iterator<ManifestEntry> {
-        var batch: ManifestBatch? = null
-        var recordNo = 1
-
-        init {
-            if (batchIterator.hasNext()) batch = batchIterator.next()
+    fun idFromIndex(index: Int): String {
+        var manifestIdx = 0
+        while (manifestIdx < nmanifests && index > manifestBound[manifestIdx] ) {
+            manifestIdx++
         }
-
-        override fun next(): ManifestEntry {
-            return makeEntry(batch!!.tabulatorNum, batch!!.batchId, recordNo++, batch!!.location)
+        if (manifestIdx >= nmanifests) {
+            throw RuntimeException("state index=$index out of bounds")
         }
+        val manifest = manifests[manifestIdx]
+        val indexInManifest = if (manifestIdx == 0) index else index - manifestBound[manifestIdx-1]
 
-        override fun hasNext(): Boolean {
-            if (recordNo <= batch!!.nballotCards) return true
-            if (batchIterator.hasNext()) {
-                batch = batchIterator.next()
-                recordNo = 1
-                return true
-            }
-            batch = null
-            return false
-        }
-    }
-
-    fun manifestCounts(corlaCvrs: CorlaCvrsIF, report: MutableList<String>? = null, showUnmatched:Boolean = false): ManifestCounts {
-        val manifestIdMap = mutableMapOf<String, ManifestEntry>()
-        val meiter = MEiterator(manifestBatches.iterator())
-        while (meiter.hasNext()) {
-            val me2 = meiter.next()
-            manifestIdMap[me2.imprintedId()] = me2
-        }
-
-        var countMiss = 0 // count of Cvrs not in the manifest
-        var countDup = 0  // count of duplicate ids in the Cvrs
-        val missedIds = mutableListOf<ManifestEntry>()
-        corlaCvrs.cvrs().forEach { cvrrow ->
-            val manifestMatch = manifestIdMap[cvrrow.imprintedId]
-            if (manifestMatch != null) {
-                if (manifestMatch.matched()) countDup++
-                manifestMatch.setMatched(true)
-            } else {
-                countMiss++
-                missedIds.add(makeEntry(cvrrow))
-            }
-        }
-
-        // check redacted rows are in manifest (and missing)
-        var countUnknownRedaction = 0
-        var countRedactionDup = 0
-        corlaCvrs.redaction().redactedRows().forEach { cvrrow ->
-            val manifestMatch = manifestIdMap[cvrrow.imprintedId]
-            if (manifestMatch != null) {
-                if (manifestMatch.matched()) countRedactionDup++
-            } else {
-                countUnknownRedaction++
-                throw RuntimeException("redaction ${cvrrow.imprintedId} not in manifest") // temp ??
-            }
-        }
-
-        var unmatched = 0
-        val redactedIDs = mutableListOf<ManifestEntry>()
-        manifestIdMap.values.forEach { mid ->
-            if (!mid.matched()) {
-                redactedIDs.add(mid)
-                unmatched++
-            }
-        }
-
-        if (report != null) {
-            var count = 1
-            var currentTab =  0
-            missedIds.sorted().forEach { mid ->
-                if (mid.tab() != currentTab) {
-                    report.add("")
-                    count = 1
-                }
-                currentTab = mid.tab()
-                report.add("$count  didnt find cvr imprintedId '${mid.imprintedId()}' in manifest")
-                count++
-            }
-
-            if (showUnmatched) {
-                report.add("")
-                var count = 1
-                manifestIdMap.values.forEach { mid ->
-                    if (!mid.matched()) {
-                        report.add("$count  mvr '${mid.imprintedId()}' has no match in the CVRs")
-                        count++
-                    }
-                }
-            }
-
-            report.add("")
-            report.add("cvrs not found in manifest= $countMiss")
-            report.add("cvrs found in manifest=${manifestIdMap.size - countMiss}")
-            report.add("manifest entries without matching unredacted cvr= $unmatched")
-            report.add("")
-            report.add("redactedCvrs= ${corlaCvrs.redaction().redactedRows().size}; not found in manifest= $countUnknownRedaction")
-            report.add("count duplicate cvr id=$countDup count duplicate redacted cvr id=$countRedactionDup")
-            report.add("-------------------------------------------------------------------------------")
-        }
-        val countCvrsInManifest = totalCards - unmatched
-        return ManifestCounts(this.totalCards, unmatched, countCvrsInManifest, countMiss, unmatched, manifestIdMap, redactedIDs)
+        return manifest.idFromIndex(indexInManifest)
     }
 }
-
-data class ManifestCounts(
-    val totalEntries: Int,                    // total entries in the manifest
-    val unmatched: Int,                       // count of Manifest entries not in the Cvrs; presumed to be == redacted CVRs
-    val countCvrsInManifest: Int,             // count of Cvrs that match entries in the Manifest
-    val cvrNoManifest: Int,                 // cvrs without matching manifest entry
-    val manifestNoCvr: Int,                 // manifest entries without matching cvr
-    val match: Map<String, ManifestEntry>,    // imprintedId -> ManifestEntry
-    val redactedIds: List<ManifestEntry>      // didnt match a cvr, assume to be in the redactions
-)

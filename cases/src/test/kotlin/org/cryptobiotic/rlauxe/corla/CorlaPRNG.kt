@@ -47,11 +47,7 @@ class CorlaPRNG(
      * @param the_minimum The minimum value to generate
      * @param the_maximum The maximum value to generate
      */
-    //@ requires 20 <= the_seed.length();
-    //@ requires seedOnlyContainsDigits(the_seed);
-    //@ requires the_minimum <= the_maximum;
     init {
-        // @trace randomness.seed side condition
         assert(MINIMUM_SEED_LENGTH <= seed.length)
         my_maximum_index = my_maximum - my_minimum + 1
     }
@@ -64,9 +60,6 @@ class CorlaPRNG(
      * 
      * @return A list containing the_to - the_from + 1 random numbers
      */
-    //@ requires the_from <= the_to;
-    // @todo kiniry Refine this specification to include public model fields.
-    // requires my_with_replacement || the_to <= my_maximum_index;
     fun getRandomNumbers(the_from: Int, the_to: Int): List<Int> {
         assert(the_from <= the_to)
         assert(with_replacement || the_to <= my_maximum_index)
@@ -81,9 +74,6 @@ class CorlaPRNG(
      * A helper function to extend the list of generated random numbers.
      * @param the_length the number of random numbers to generate.
      */
-    //@ private behavior
-    //@   requires 0 <= the_length;
-    //@   ensures my_random_numbers.size() == the_length;
     private fun extendList(the_length: Int) {
         while (my_random_numbers.size < the_length) {
             generateNext()
@@ -99,7 +89,8 @@ class CorlaPRNG(
         my_count++
         assert(with_replacement || my_count <= my_maximum_index)
 
-        // CORLA's own SHA-256 PRNG draw sequence from the public random seed and the county ballot manifest(s) (SHA256(seed + "," + i) mod domain_size,
+        // CORLA's own SHA-256 PRNG draw sequence from the public random seed and the county ballot manifest(s)
+        // (SHA256(seed + "," + i) mod domain_size,
         val hash_input = seed + "," + my_count
 
         val hash_output = sha256_digest.digest(hash_input.toByteArray(StandardCharsets.UTF_8))
@@ -137,11 +128,7 @@ class CorlaPRNG(
          * Checks to see if the passed potential seed only contains digits.
          * @param the_seed is the seed to check.
          */
-        /*@ behavior
-    @   ensures (\forall int i; 0 <= i && i < the_seed.length(); 
-    @            Character.isDigit(the_seed.charAt(i)));
-    @*/
-        /*@ pure @*/ fun seedOnlyContainsDigits(the_seed: String): Boolean {
+        fun seedOnlyContainsDigits(the_seed: String): Boolean {
             for (i in 0..<the_seed.length) {
                 if (!Character.isDigit(the_seed.get(i))) {
                     return false

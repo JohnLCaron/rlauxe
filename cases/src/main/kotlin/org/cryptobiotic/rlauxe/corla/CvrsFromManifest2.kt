@@ -34,7 +34,7 @@ class CvrsFromManifest2(
     val county = countyInput.countyName
     val converter: CorlaCvrConverter
 
-    // val converter: CorlaCvrConverter
+    // TODO all in memory
     val unredactedCvrs = mutableListOf<AuditableCard>()
     val unredactedCvrTabs : Map<Int, ContestTabulation>
 

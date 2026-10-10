@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corlaInput
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
-import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
+import org.cryptobiotic.rlauxe.corlaCounty.CountyCvrManifest
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.corlacvr.Garfield2020RawCvrs
@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrs
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 
-// CorlaCountyInput has cvrs, presumably redacted, and a CountyManifest.
+// CorlaCountyInput has cvrs, presumably redacted, and a CountyCvrManifest.
 // it knows the county's total number of ballots
 // should it be in corlaCounty ??
 interface CorlaCountyInput {
@@ -34,8 +34,8 @@ interface CorlaCountyInput {
 
     fun hasABgroups() = false
 
-    fun readCountyManifest(): CountyManifest {
-        return CountyManifest(manifestSource)
+    fun readCountyManifest(): CountyCvrManifest {
+        return CountyCvrManifest(manifestSource)
     }
 
     fun countyPopulation(): Int

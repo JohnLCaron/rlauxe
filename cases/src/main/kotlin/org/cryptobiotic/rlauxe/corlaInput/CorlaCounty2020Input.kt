@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
-import org.cryptobiotic.rlauxe.corlaCounty.GarfieldManifest
+import org.cryptobiotic.rlauxe.corlaCounty.CountyCvrManifest
+import org.cryptobiotic.rlauxe.corlaCounty.GarfieldCvrManifest
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
@@ -18,9 +18,9 @@ class CorlaCounty2020Input(
     override val manifestSource = "$manifestDir/manifest-${countyNameZ}.csv"
     override val cvrsSource: String = votedatabase[countyName]!!
 
-    override fun readCountyManifest(): CountyManifest {
+    override fun readCountyManifest(): CountyCvrManifest {
         if (countyName == "Garfield") {
-            return GarfieldManifest(manifestSource)
+            return GarfieldCvrManifest(manifestSource)
         }
 
         var result = super.readCountyManifest()

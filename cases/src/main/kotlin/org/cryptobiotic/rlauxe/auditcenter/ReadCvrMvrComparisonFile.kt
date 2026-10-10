@@ -73,6 +73,7 @@ data class CountyMvrCount(val countyName: String) {
 data class CardComparisonResults(
     val contestMvrs: List<ContestMvrCount>,
     val countyMvrs: List<CountyMvrCount>,
+    val mvrs: Set<ComparisonMvr>,
     val stylesByCounty: List<CountyStylesFromMvrs>
 )
 
@@ -112,6 +113,9 @@ private data class Card(val cvrId: Int) {
     }
 }
 
+// Claude: cvrId is a Postgres GenerationType.SEQUENCE column, assigned at row-insert time during CVR import
+// (DominionCVRExportParser.java:704), in whatever order the 63 counties’ files happened to get uploaded.
+
 private data class ComparisonLine(
     val countyName: String,
     val contestName: String,
@@ -119,7 +123,15 @@ private data class ComparisonLine(
     val ballotType: String,
     val cvrChoice: String,
     val mvrChoice: String,
-    val cvrId: Int,
+    val cvrId: Int, // apparently the opaque "db creation id"
+    val statewide: Boolean,
+)
+
+// information for validating CorlaRLA sample sequences
+data class ComparisonMvr(
+    val countyName: String,
+    val imprintedId: String,
+    val dbid: Int,
     val statewide: Boolean,
 )
 
@@ -133,7 +145,8 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
     val header = headerRecord.toList().joinToString(", ")
     // println("readContestComparisonCsv from $filename")
 
-    val cards = mutableMapOf<Int, Card>()
+    val compareMvrs = mutableSetOf<ComparisonMvr>()
+    val cards = mutableMapOf<Int, Card>() // remove duplicate
     var count = 0
     var line: CSVRecord? = null
     try {
@@ -143,7 +156,7 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
                 // 0 county_name,contest_name,imprinted_id,ballot_type, choice_per_voting_computer,audit_board_selection,
                 // 6 consensus,record_type,audit_board_comment,timestamp,cvr_id,
                 // 11 audit_reason (optional)
-                val compareLine = ComparisonLine(
+                val cmpline = ComparisonLine(
                     line.get(0).trim(), // county_name
                     line.get(1).trim(), // contest_name
                     line.get(2).trim(), // imprinted_id
@@ -152,9 +165,10 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
                     line.get(5).trim(), // audit_board_selection
                     line.get(10).toInt(), // cvr_id
                     if (line.size() > 11) (line.get(11).trim() == "STATE_WIDE_CONTEST") else false, // audit_reason
-                    )
-                val card = cards.getOrPut(compareLine.cvrId) { Card(compareLine.cvrId) }
-                card.add(compareLine)
+                )
+                val card = cards.getOrPut(cmpline.cvrId) { Card(cmpline.cvrId) }
+                card.add(cmpline)
+                compareMvrs.add(ComparisonMvr(cmpline.countyName, cmpline.imprintedId, cmpline.cvrId, cmpline.statewide))
                 count++
 
             } catch (e: Exception) {
@@ -196,5 +210,5 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
         countyStyles.add(card.contests())
     }
 
-    return CardComparisonResults(contestMvrs.values.toList(), countyMvrs.values.toList(), stylesByCounty.values.toList())
+    return CardComparisonResults(contestMvrs.values.toList(), countyMvrs.values.toList(), compareMvrs, stylesByCounty.values.toList())
 }

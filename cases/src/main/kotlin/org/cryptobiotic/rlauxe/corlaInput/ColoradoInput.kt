@@ -16,6 +16,9 @@ import org.cryptobiotic.rlauxe.auditcenter.readContestComparisonCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.corlaCounty.CountyCvrManifest
+import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
+import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
@@ -61,6 +64,17 @@ private val logger = KotlinLogging.logger("ColoradoInput")
    subclasses provide contestNameCleanup and candidateNameCleanup
  */
 
+abstract class ColoradoInputWithManifests(
+    generalCanonicalFile: String, contestRoundFile: String, tabulateCountyFile: String, mvrComparisonFile: String,
+    val manifestDir: String,
+): ColoradoInput(
+    generalCanonicalFile, contestRoundFile, tabulateCountyFile, mvrComparisonFile)
+{
+    abstract fun corlaCountyManifest(countyName: String): CountyManifest?
+
+    abstract fun corlaStateManifest(): StateManifest?
+}
+
 abstract class ColoradoInputWithCvrs(
     generalCanonicalFile: String, contestRoundFile: String, tabulateCountyFile: String, mvrComparisonFile: String
 ): ColoradoInput(
@@ -87,6 +101,7 @@ abstract class ColoradoInput(
 
     abstract fun canonicalContests(): Map<String, CanonicalContest>
 
+    // in canonical manifest order
     open fun counties(): List<String>  = canonicalContests().values.map { it.counties }
         .flatten()
         .filter { !skipCounties(it) }

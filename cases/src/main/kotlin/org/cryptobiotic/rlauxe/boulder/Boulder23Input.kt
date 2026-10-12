@@ -5,6 +5,7 @@ class Boulder23Input: BoulderInput {
     override val manifestSource = "src/test/data/Boulder2023/Boulder-IRV-Manifest.csv" // TODO seems wrong
     override val cvrsSource = "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv"
     override val sovoSource = "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes.csv"
+    override val year = 2023
 
     // or use sovo ??
     override fun countyPopulation(): Int {

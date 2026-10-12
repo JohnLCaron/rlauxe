@@ -225,3 +225,23 @@ read the cardManifest and tabulate npops. Alos, could add that to CorlaStateElec
 10/05/2026
 
 Boulder has no precinct portion. It also has 1600 redacted ballots. I suspect they used precincts in their redaction, and then removed that column.
+
+
+### Summary pf Redaction for trial counties
+
+Ok heres what I know: none of La Plata, Weld or Morgan had the problem with CVRs (where the same ballotType had different contests, aka card styles), in either the 2026 primary or the 2020 general election. Douglas also did not have that problem in its 2020 CVRs.
+
+In the 2026 Primary, La Plata and Morgan clearly ran our anonymizer which redacted 9 and 25 ballots, respectively. Weld did not run our anonymizer, but they redacted 20 rows by blanking out the votes. Our anonymizer did not find further ballots for Weld it thought should be redacted, but of course it did not have the unredacted CVR file.
+
+In 2020 General, Douglas had 56 redacted ballots and our anonomizer did not find further ballots it thought should be redacted.
+
+In summary, those 4 counties don't appear to have any of the problems that might mess up our Excel macro. And it seems to me that the current macro will work fine on all of these counties without change. The macro can replace what they are doing now. (Lori, am I missing something about that?)
+
+The macro only does rare styles, not "contest balancing", so if those counties were willing to again run our python anonomizer, that would be more accurate. And we also think that with the exception of Boulder, no county is currently doing contest balancing, so the macro isn't making things worse.
+
+I think I will send a pull request to Neal's repo (or should i use Lori's?) to change it to put * only where redacted votes exist. So if that is an option for some counties, they can use the python anonomizer and the file format will look the same as with the macro.
+
+If we only have 4 counties, if needed maybe each of us can be at one of the counties when they do the redaction, in case there is a problem.
+
+
+PS: there is one factoid not particularly relevant to redaction, but in 2026 Primary, La Plata had 50 cvrs in the CVR file that were not present in their manifest that we have in auditcenter. I mention it only because maybe we can alert them so they can double-check it next time.

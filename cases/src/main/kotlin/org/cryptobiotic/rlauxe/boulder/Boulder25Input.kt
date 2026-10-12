@@ -7,6 +7,7 @@ class Boulder25Input: BoulderInput  {
     override val manifestSource = "$auditcenter/2025/files/BoulderManifest.csv"
     override val cvrsSource = "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv"
     override val sovoSource = "src/test/data/Boulder2025/2025C-Boulder-County-Official-Statement-of-Votes.csv"
+    override val year = 2025
 
     override fun countyPopulation(): Int {
         val manifests = readCountyManifest()

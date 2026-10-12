@@ -20,9 +20,11 @@ class WriteCountyInputData {
         writeCountyData("$cases/corlaState/2020", Colorado2020General(), ourRedactByPrecinct)
     }
 
-    // ourRedactByPrecinct written by TestAnonomice
+    // ourRedactByPrecinct written by TestAnonScenarios
     fun writeCountyData(topdir: String, stateInput: ColoradoInputWithCvrs, ourRedactByPrecinct: Map<String, Int>) {
         val filename = "$topdir/countyInputData.csv"
+
+        stateInput.counties().forEach { county -> println("'$county',")}
 
         val data = mutableListOf<CountyInputData>()
         stateInput.counties().forEach { county ->

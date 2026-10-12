@@ -22,14 +22,19 @@ interface CorlaCountyInput {
     val countyName: String
     val manifestSource: String
     val cvrsSource: String
+    val year: Int // four digits: eg 1992, 2026
 
-    // TODO dependence on the year
     fun readCorlaCvrs(): CorlaCvrsIF {
-        return if (countyName == "Garfield") Garfield2020RawCvrs(cvrsSource)
-            else if (countyName == "Boulder") readCorlaCvrs(cvrsSource, redaction = RedactionBoulder())
-            else if (countyName == "La Plata") readCorlaCvrs(cvrsSource, redaction = Redaction(RedactionStrategy(true)))
-            else if (countyName == "Morgan") readCorlaCvrs(cvrsSource, redaction = Redaction(RedactionStrategy(true)))
-            else readCorlaCvrs(cvrsSource, redaction = Redaction())
+        when {
+            (year == 2020) -> when {
+                (countyName == "Garfield") -> Garfield2020RawCvrs(cvrsSource)
+                (countyName == "Boulder") -> readCorlaCvrs(cvrsSource, redaction = RedactionBoulder())
+                (countyName == "La Plata") -> readCorlaCvrs(cvrsSource, redaction = Redaction(RedactionStrategy(true)))
+                (countyName == "Morgan") -> readCorlaCvrs(cvrsSource, redaction = Redaction(RedactionStrategy(true)))
+                else -> readCorlaCvrs(cvrsSource, redaction = Redaction())
+            }
+        }
+        return readCorlaCvrs(cvrsSource, redaction = Redaction())
     }
 
     fun hasABgroups() = false

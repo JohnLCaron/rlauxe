@@ -25,7 +25,7 @@ class EmptyRedaction: RedactionIF {
     override fun cardCountByContest() = emptyMap<Int, Int> ()
 }
 
-data class RedactionStrategy(val redactedRowsAlsoAggregated: Boolean = false,)
+data class RedactionStrategy(val redactedRowsAlsoAggregated: Boolean = true,)
 
 // just gather the raw info
 open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val show: Boolean = false): RedactionIF {

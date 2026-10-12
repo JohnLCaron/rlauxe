@@ -65,7 +65,7 @@ State Senator - District 17 -> State Senator - District 17
 (557180) ContestVotes(contestId=5, candVotes=[3]) != 543:  [2]
  */
 
-// this tests coverting all of the cvrs and checking them against the ExportCvr
+// this tests converting all of the cvrs and checking them against the ExportCvr
 fun testCorlaConverterCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
     val export = readCorlaCvrs(filename)
     testCorlaConverterCvrs(county, export, coloradoInput)

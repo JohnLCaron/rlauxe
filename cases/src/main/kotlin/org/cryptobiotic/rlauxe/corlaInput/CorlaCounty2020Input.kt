@@ -17,6 +17,7 @@ class CorlaCounty2020Input(
     // TODO Gunnison has Manifest-Gunnison.csv; but Gunnison is an excluded county
     override val manifestSource = "$manifestDir/manifest-${countyNameZ}.csv"
     override val cvrsSource: String = votedatabase[countyName]!!
+    override val year = 2020
 
     override fun readCountyManifest(): CountyCvrManifest {
         if (countyName == "Garfield") {

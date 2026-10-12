@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.corlacvr
 
 import kotlin.test.Test
 
-class TestCvrExportRedaction {
+class ShowRedactionBoulder {
     val show = false
 
     @Test

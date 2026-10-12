@@ -5,6 +5,8 @@ class Morgan26PInput: CorlaCountyInput {
     override val countyName= "Morgan"
     override val cvrsSource = "$auditcenter/2026/primary/observerfiles/Morgan_CVR_Export_20260709092315_Redacted.csv"
     override val manifestSource = "$auditcenter/2026/primary/observerfiles/Morgan_BallotManifest.csv"
+    override val year = 2026
+
     val otherManifest = "$auditcenter/2026/primary/files/Morgan.csv"
 
     /* TODO automate this ??

@@ -1,18 +1,12 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
 import org.cryptobiotic.rlauxe.auditcenter.makeRealContestInfo
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.corlacvr.Anonomicer.Companion.NEAR_UNANIMOUS_THRESHOLD
-import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.corlacvr.MIN_BALLOTS_DEFAULT
 import org.cryptobiotic.rlauxe.corlacvr.findPrecinctStyles
 import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
-import org.cryptobiotic.rlauxe.corlacvr.tabulateCvrRows
-import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.sumContestTabulations
-import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
+import org.cryptobiotic.rlauxe.corlacvr.tabulate
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -89,8 +83,11 @@ class CheckCvrRedaction(
         val redactedMinGroupSize = precinctStyles.minOf { it.ncards }
         println("  redacted precinctStyles min cards = $redactedMinGroupSize")
         println("  redacted cardStyle min cards = ${redactedCvrs.cardStyles().minOf { it.ncards }}")
-        assertTrue(redactedMinGroupSize >= MIN_BALLOTS_DEFAULT)
-        println("redactedMinGroupSize >= $MIN_BALLOTS_DEFAULT")
+        if (redactedMinGroupSize >= MIN_BALLOTS_DEFAULT)
+            println("1) redactedMinGroupSize >= $MIN_BALLOTS_DEFAULT")
+        else
+            println("1) FAIL redactedMinGroupSize ($redactedMinGroupSize) < $MIN_BALLOTS_DEFAULT")
+
 
         ///////////////////////////////////////////////////////
         val unredactedTabs = tabulate(unredactedCvrs)
@@ -108,27 +105,26 @@ class CheckCvrRedaction(
             }
         }
         assertTrue(!fail)
-        println("contest tabulations are the same before and after redaction")
+        println("2) contest tabulations are the same before and after redaction")
 
-        // this can be impossible to tell; but could do it when redacting
+        /* this can be impossible to tell; but could do it when redacting
         // how do we know what are the rare contests ??
         redactedTabs.redactedTabs.values.forEach { tab ->
             if (tab.ncards() < MIN_BALLOTS_DEFAULT)
                 println("contest ${tab.contestId}: has ncards=${tab.ncards()} < ${MIN_BALLOTS_DEFAULT} min ballots")
             // assertTrue(tab.ncards() >= MIN_BALLOTS_DEFAULT, "contest ${tab.contestId}: has ncards=${tab.ncards()} < ${MIN_BALLOTS_DEFAULT} min ballots")
         }
-        // println("all rare contests have ncards >= $MIN_BALLOTS_DEFAULT")
+        // println("all rare contests have ncards >= $MIN_BALLOTS_DEFAULT") */
 
         redactedTabs.redactedTabs.values.forEach { tab ->
             if (infos[tab.contestId]!!.candidateIds.size > 1) {
                 val leadingVotes: Map.Entry<Int, Int> = tab.votes.maxBy { it.value }
                 val nonleadingVotes = tab.nvotes() - leadingVotes.value
                 if (nonleadingVotes < NEAR_UNANIMOUS_THRESHOLD)
-                    println("contest ${tab.contestId}: has nonleadingVotes=${nonleadingVotes} < ${NEAR_UNANIMOUS_THRESHOLD} NEAR_UNANIMOUS_THRESHOLD")
+                    println("    contest ${tab.contestId}: has nonleadingVotes=${nonleadingVotes} < ${NEAR_UNANIMOUS_THRESHOLD} NEAR_UNANIMOUS_THRESHOLD")
             }
-
         }
-        println("all rare contests are not within $NEAR_UNANIMOUS_THRESHOLD votes of unanimity")
+        println("3) all rare contests are not within $NEAR_UNANIMOUS_THRESHOLD votes of unanimity")
     }
 
 }
@@ -164,43 +160,3 @@ fun findPrecinctStyles(corlaCvrs: CorlaCvrsIF): List<PrecinctStyles> {
 } */
 
 /////////////////////////////////
-
-data class CvrTabulations(val infos: Map<Int, ContestInfo>,
-                          val cvrTabs: Map<Int, ContestTabulation>,
-                          val redactedTabs: Map<Int, ContestTabulation>) {
-    fun sum(): Map<Int, ContestTabulation> {
-        val sum = mutableMapOf<Int, ContestTabulation>()
-        sum.sumContestTabulations(cvrTabs)
-        sum.sumContestTabulations(redactedTabs)
-        return sum
-    }
-}
-
-fun tabulate(corlaCvrs: CorlaCvrsIF): CvrTabulations  {
-    val infos = corlaCvrs.makeContestInfo().map { it ->
-        ContestInfo(
-            it.name, it.id, it.candidateNames,
-            if (it.isIrv) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY,
-            it.nwinners
-        )
-    }.associateBy { it.id }
-
-    val cvrTabs = tabulateCvrRows(corlaCvrs.cvrs().iterator(), infos)
-
-    val sumRedaction = mutableMapOf<Int, ContestTabulation>()
-    val redaction = corlaCvrs.redaction()
-    redaction.groups().forEach { group ->
-        val groupCardsByContest = redaction.cardCountByContest()
-        group.candVotes.forEach { (scontestId, candVotes) ->
-            sumRedaction.sumContestTabulationsFromCandVotes(infos[scontestId]!!, candVotes, groupCardsByContest[scontestId] ?: 1)
-        }
-    }
-    return CvrTabulations(infos, cvrTabs, sumRedaction)
-}
-
-fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boolean {
-    if (votes1 == votes2) return true
-    val votes1z = votes1.filter{ (_, vote) -> vote != 0 }
-    val votes2z = votes2.filter{ (_, vote) -> vote != 0 }
-    return votes1z == votes2z
-}

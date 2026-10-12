@@ -32,7 +32,7 @@ data class CvrRow(
     fun contests() = contestVotes.map { it.contestId }.toSet()
 
     fun contestVotesFor(contestId: Int): ContestVotes? {
-        return contestVotes.find{ it.contestId == contestId}
+        return contestVotes.find { it.contestId == contestId}
     }
 
     fun candVote(contestId: Int, candId: Int): Int? {

@@ -180,6 +180,7 @@ fun createAndRunOneBelgiumElection(electionName: String, toptopdir: String, cont
         contestId = contestId, runRounds=false)
 }
 
+// taken from https://resultatselection.belgium.be/fr/search/chambre-des-repr%C3%A9sentants/2024/circonscription-%C3%A9lectorale
 val belgiumData = "/resources/data/cases/belgium/belgium2024"
 val belgiumJsonInputResource = mapOf(
     "Anvers" to "$belgiumData/2024_chambre-des-représentants_Circonscription d'Anvers.json",

@@ -6,7 +6,7 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
 
-class TestRedactionVotedatabase {
+class ShowRedactionVotedatabase {
     val show = false
 
     @Test
@@ -124,29 +124,5 @@ class TestRedactionVotedatabase {
                     }
                 }
             }
-    }
-}
-
-fun lookForRedactions(filename: String, showRedaction: Boolean = false, showHeaders: Boolean = false) {
-    println("## Reading cvrs from $filename")
-
-    val redaction = if (filename.lowercase().contains("boulder")) RedactionBoulder(show=showRedaction) else Redaction(show=showRedaction)
-
-    try {
-        val corlaRawCvrs = readCorlaCvrs(filename, redaction = redaction, showHeaders = showHeaders)
-
-        println("  nrows = ${corlaRawCvrs.nrows()} redacted cvrs = ${corlaRawCvrs.redaction().redactedRows().size} redacted groups = ${corlaRawCvrs.redaction().groups().size} ")
-
-        if (corlaRawCvrs.redaction().groups().size > 0) {
-            var sumInGroups = 0
-            corlaRawCvrs.redaction().groups().forEach { group ->
-                println("  $group")
-                sumInGroups += group.ncards()
-            }
-            println("sumInGroups = $sumInGroups")
-        }
-
-    } catch (e: Throwable) {
-        println("$filename got error ${e.message}")
     }
 }

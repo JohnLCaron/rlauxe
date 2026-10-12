@@ -53,7 +53,7 @@ open class Colorado2026Primary(ac:String?=auditcenter): ColoradoInputWithManifes
         val alphaList = canonicalContests().values.map { it.counties }
             .flatten()
             .toSet()
-            .sorted()
+            .sortedBy{ it.replace(" ", "").lowercase() } // tricked again
             .toMutableList()
         alphaList.remove("Broomfield")
         alphaList.add("Broomfield")      // add at end

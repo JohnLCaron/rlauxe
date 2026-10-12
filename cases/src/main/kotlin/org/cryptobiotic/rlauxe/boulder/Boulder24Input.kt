@@ -12,6 +12,7 @@ class Boulder24Input: BoulderInput {
     override val manifestSource = "$auditcenter/2024/general/ballotManifests/BoulderBallotManifest.csv"
     override val cvrsSource = "/resources/data/cases/boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
     override val sovoSource = "/resources/data/cases/boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv"
+    override val year = 2024
 
     override fun readCorlaCvrs(): CorlaCvrsIF {
         val org = readCorlaCvrs(cvrsSource, redaction = RedactionBoulder())

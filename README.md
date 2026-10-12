@@ -3,8 +3,6 @@
 WORK IN PROGRESS
 _last changed: 10/12/2026_
 
-The rlauxe and rlauxe-viewer are now under https://github.com/sunyarla/.
-
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
 [published papers](#primary-reference-papers) of Stark et al.

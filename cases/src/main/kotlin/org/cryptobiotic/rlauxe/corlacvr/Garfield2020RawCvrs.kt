@@ -127,7 +127,7 @@ class Garfield2020RawCvrs(override val inputSource: String, showHeaders: Boolean
     }
 
     // //RowNumber,Tabulator,BoxID,BoxPosition,BallotID,CG,PrecinctID,BallotStyleID,Donald J. Trump / Michael R. Pence:Republican,Joseph R. Biden / Kamala D. Harris:Democratic,Bill Hammons / Eric Bodenstab:Unity,Blake Huber / Frank Atwood:Approval Voting,"Jo Jorgensen / Jeremy """"Spike"""" Cohen:Libertarian""",Brian Carroll / Amar Patel:American Solidarity,Mark Charles / Adrian Wallace:Unaffiliated,Phil Collins / Billy Joe Parker:Prohibition,"Roque """"Rocky"""" De La Fuente / Darcy G. Richardson:Alliance""",Dario Hunter / Dawn Neptune Adams:Progressive,Princess Khadijah Maryam Jacob-Fambro/Khadijah Maryam Jacob :Unaffiliated,Alyson Kennedy / Malcolm Jarrett:Socialist Workers,Joseph Kishore / Norissa Santa Cruz:Socialist Equality,Kyle Kenley Kopitke / Nathan Re Vo Sorenson:Independent American,Gloria La Riva / Sunil Freeman:Socialism and Liberation,Joe McHugh / Elizabeth Storm:Unaffiliated,Brock Pierce / Karla Ballard:Unaffiliated,"Jordan """"Cancer"""" Scott / Jennifer Tepool:Unaffiliated""",Kanye West / Michelle Tidball:Unaffiliated,Don Blankenship / William Mohr:American Constitution,Howie Hawkins / Angela Nicole Walker:Green,Write-in,John W. Hickenlooper:Democratic,Cory Gardner:Republican,Daniel Doyle:Approval Voting,"Stephan """"Seku"""" Evans:Unity""",Raymon Anthony Doane:Libertarian,Lauren Boebert:Republican,Diane E. Mitsch Bush:Democratic,John Ryan Keil:Libertarian,Critter Milton:Unity,Mayling Simpson:Democratic,Joyce Rankin:Republican,Karl Hanlon:Democratic,Bob Rankin:Republican,Perry Will:Republican,Colin Wilhelm:Democratic,Jefferson J. Cheney:Republican,John Martin:Republican,Beatriz Soto:Democratic,Brian Bark:Unaffiliated,Leslie Robinson:Democratic,Mike Samson:Republican,Yes,No,Yes,No,Yes,No,Yes,No,Yes,No,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against
-    override fun csvHeader(row: CvrRow, redactPrecinct: Boolean) = buildString {
+    override fun rowHeaderCols(row: CvrRow, redact: Set<CvrHeader>) = buildString {
         var idx = 0
         append("${row.headerValues[idx++]},") // RowNumber
         append("${row.headerValues[idx++]},") // Tabulator
@@ -137,11 +137,14 @@ class Garfield2020RawCvrs(override val inputSource: String, showHeaders: Boolean
         append("${row.headerValues[idx++]},") // CG
         val precinctId = row.headerValues[idx++]
         if (precinctId.trim().isEmpty()) countBlankPrecincts++
-        if (!redactPrecinct) append("$precinctId,") else { // PrecinctID
+        if (!redact.contains(CvrHeader.precinctportion)) append("$precinctId,") else { // PrecinctID
             append(",")
             idx++
         }
-        append("${row.headerValues[idx++]},") // BallotStyleID
+        if (!redact.contains(CvrHeader.ballottype)) append("${row.headerValues[idx++]},") else { // BallotStyleID
+            append(",")
+            idx++
+        }
     }
 
     override fun redaction() = EmptyRedaction()
@@ -149,6 +152,7 @@ class Garfield2020RawCvrs(override val inputSource: String, showHeaders: Boolean
     override fun cardStyles() = ballotStyles.cardStyles()
     override fun cvrs() = cvrs
     override fun nrows() = lineno
+    override fun unredactedRows() = cvrs.size
     override fun headers() = headers
     override fun hasBallotType() = ballotTypeIdx != null
     override fun countBlankPrecincts() = countBlankPrecincts

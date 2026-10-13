@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
 import java.lang.StrictMath.sqrt
 
-enum class CvrHeader { cvrnumber, tabulatornum, batchid, recordid, imprintedid, precinctportion, ballottype }
+enum class CvrHeader { cvrnumber, tabulatornum, batchid, recordid, imprintedid, countinggroup, precinctportion, ballottype }
 
 class CvrSchema(val inputSource: String,
                 val headers: List<String>, // header names, lowercase

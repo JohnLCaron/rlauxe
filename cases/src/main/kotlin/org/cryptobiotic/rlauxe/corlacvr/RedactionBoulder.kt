@@ -42,7 +42,7 @@ class RedactionBoulder(show: Boolean = false) : Redaction(show=show) {
 
         }  else if (line.get(0).isEmpty()) {
             // ballot style but no id; merge into groups by style
-            // (2020) Boulder
+            // (2020) Boulder: has 0's everywhere (no style info). no redacted rows.
             // ,,,,,,DS-27,6,3,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,3,0,0,1,0,0,0,0,6,2,2,0,0,0,0,0,5,2,2,0,0,0,0,6,3,5,4,0,0,0,0,0,0,0,0,0,6,7,0,5,2,5,2,6,1,6,1,4,3,5,2,5,2,5,2,4,3,4,6,7,3,0,0,0,0,0,0,0,4,5,6,3,5,5,5,5,6,4,6,3,8,2,3,7,6,3,3,6,6,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,3
             if (show) println("  ** redact: isEmpty $line")
             val ballotType = corlaRawCvrs.getBallotType(line)

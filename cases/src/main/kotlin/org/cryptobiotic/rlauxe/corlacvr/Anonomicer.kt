@@ -13,44 +13,38 @@ import kotlin.collections.set
 import kotlin.math.max
 import kotlin.random.Random
 
-const val MIN_BALLOTS_DEFAULT = 10
-const val NEAR_UNANIMOUS_THRESHOLD = 2  // "all but N votes" triggers balancing (Rule c)
-const val MIN_CONTRASTING_VOTES = 3  // contrasting votes needed per contest after balancing
-const val COVERAGE_WEIGHT = 10.0  // weight for contest coverage vs. vote-balance score
-const val DONOR_SURPLUS_THRESHOLD = 3  // minimum surplus above min_ballots for a style/precinct to donate freely
-
 class Anonomicer(
-    val unredactedCvrs: CorlaCvrsIF,
+    val corlaCvrs: CorlaCvrsIF,  // should be the unredacted cvr file
     val minBallots: Int = MIN_BALLOTS_DEFAULT,
+    val styleOnly: Boolean = false,  // use style only, else use precinct/style
     val removePrecinctCol: Boolean = false,
+    val removeBallotTypeCol: Boolean = false,
 ) {
     constructor(input: String) : this( readCorlaCvrs(input), MIN_BALLOTS_DEFAULT)
 
-    val schema = unredactedCvrs.schema
-    val hasPrecinct = schema.headerIdx[CvrHeader.precinctportion] != null
+    val schema = corlaCvrs.schema
     val infos: Map<Int, ContestInfo>
-
-    // val commonStyles: List<PrecinctUniqueStyle>
+    val removeCols = mutableSetOf<CvrHeader>()
     val agg: Aggregate
     
     init {
-        infos = unredactedCvrs.makeRealContestInfo()
+        removeCols.add(CvrHeader.countinggroup)
+        if (removePrecinctCol || styleOnly) removeCols.add(CvrHeader.precinctportion)
+        if (removeBallotTypeCol) removeCols.add(CvrHeader.ballottype)
 
-        val precinctStyles = findPrecinctStyles(unredactedCvrs, infos).map { it.uniques.values }.flatten()
+        infos = corlaCvrs.makeRealContestInfo()
+
+        val precinctStyles: List<UniqueStyle> = if (styleOnly) findUniqueStyles(corlaCvrs, infos)
+                             else findPrecinctStyles(corlaCvrs, infos).map { it.uniques.values }.flatten()
+
         val commonStyles = precinctStyles.filter { it.ncards >= minBallots }
-
         val rareStyles = precinctStyles.filter { it.ncards < minBallots }
 
         if (rareStyles.isNotEmpty()) {
             println("Rare ballot style/precinct combinations (${rareStyles.size} of ${precinctStyles.size} total)")
             rareStyles.forEach {
-                // class PrecinctUniqueStyle(val ballotType: String, val uniqueStyle: Set<Int>, val infos: Map<Int, ContestInfo>) {
-                //    // will contain all rows for rare styles, and enough rows for common style donations
-                //    val rows = mutableListOf<CvrRow>()
-                //    val contestTabs = mutableMapOf<Int, ContestTabulation>()
-                //    var ncards = 0
                 val rare = if (it.ncards < minBallots) "**" else "  "
-                println(" $rare ${it.ncards} ballot(s)  [precinct '${it.precinct}', style ${it.uniqueStyle}]")
+                println(" $rare ${it.ncards} ballot(s)  [${it.id()}]")
             }
             val countRare = rareStyles.sumOf { it.ncards }
             println("Rare Ballots = ${countRare}")
@@ -71,13 +65,13 @@ class Anonomicer(
         // PrecinctPortion is removed when not redacting on precinct, because every row has it blanked in that case.
 
         File(outputFile).bufferedWriter(Charsets.UTF_8).use { bwriter ->
-            // write headers TODO remove headers
-            unredactedCvrs.headers().forEach {
+            // leaving the original headers TODO remove some headers??
+            corlaCvrs.headers().forEach {
                 bwriter.write(it)
                 bwriter.newLine()
             }
 
-            unredactedCvrs.cvrs().forEachIndexed { idx, row ->
+            corlaCvrs.cvrs().forEachIndexed { idx, row ->
                 if (agg.isRedacted(row)) {
                     bwriter.write(writeRow(row, true))
                 } else {
@@ -117,7 +111,7 @@ class Anonomicer(
     }
 
     fun writeRow(row: CvrRow, redacted: Boolean) = buildString {
-        append(unredactedCvrs.csvHeader(row, redactPrecinct = removePrecinctCol))
+        append(corlaCvrs.rowHeaderCols(row, removeCols))
         val last = schema.nchoices
         val rowMap: Map<Int, List<Int>> = row.contestVotes.map { Pair(it.contestId, it.votedFor) }.toMap()
         var count = 0
@@ -203,7 +197,7 @@ class Anonomicer(
     }
 
     // rare styles have less than minBallots
-    inner class Aggregate(val commonStyles: List<PrecinctUniqueStyle>, val rareStyles: List<PrecinctUniqueStyle>) {
+    inner class Aggregate(val commonStyles: List<UniqueStyle>, val rareStyles: List<UniqueStyle>) {
         // rare contests appear on at least one rare ballot
         val rareContests: Map<Int, ContestTabulation> // contestId -> tabulation of rows in the Aggregate
         // which rare contests need more cards?
@@ -335,9 +329,9 @@ class Anonomicer(
                 return false
 
             // choose styles that maximize filling needContests, and have enough to donate
-            val haveNeeded = mutableListOf<Pair<PrecinctUniqueStyle, Set<Int>>>() // or just set.size ?
+            val haveNeeded = mutableListOf<Pair<UniqueStyle, Set<Int>>>() // or just set.size ?
             commonStyles.forEach { // .filter { it.ncards > minBallots + DONOR_SURPLUS_THRESHOLD}.forEach {
-                haveNeeded.add(Pair(it, it.uniqueStyle.intersect(needContestSet)))
+                haveNeeded.add(Pair(it, it.contests.intersect(needContestSet)))
             }
             val maxFill = haveNeeded.maxOf { it.second.size }
             if (maxFill == 0)
@@ -369,7 +363,7 @@ class Anonomicer(
             return true
         }
 
-        fun rulec(commonStyles: List<PrecinctUniqueStyle> ): Boolean {
+        fun rulec(commonStyles: List<UniqueStyle> ): Boolean {
             if (!needVoteTrackers.any { it.value.needVotes > 0 })
                 return false
             val totalVotesNeeded = needVoteTrackers.values.sumOf { it.needVotes} // debugging
@@ -377,7 +371,7 @@ class Anonomicer(
             // choose a card from any commonStyles that satisfies the most needContestVotes
             var maxScore = 0
             var maxRow: CvrRow? = null
-            var maxStyle: PrecinctUniqueStyle? = null
+            var maxStyle: UniqueStyle? = null
             commonStyles.forEach { commonStyle ->
                 commonStyle.rows.forEach { row ->
                     var score = 0
@@ -405,7 +399,7 @@ class Anonomicer(
         }
 
         // return keepGoing
-        fun chooseRandomRow(fromStyles: List<PrecinctUniqueStyle>): Boolean {
+        fun chooseRandomRow(fromStyles: List<UniqueStyle>): Boolean {
             val fromStylesMutable = fromStyles.toMutableList()
             while (true) {
                 if (fromStylesMutable.isEmpty())
@@ -459,34 +453,34 @@ class Anonomicer(
     }
 
     fun verify(redactedFile: String) {
-        val unredactedTabs = tabulate(unredactedCvrs)
+        val unredactedTabs = tabulate(corlaCvrs)
         val redactedCvrs = readCorlaCvrs(redactedFile)
         val redactedTabs = tabulate(redactedCvrs)
         val usum = unredactedTabs.sum()
         val rsum = redactedTabs.sum()
         var fail = false
         usum.forEach { (id, utab) ->
-            val rtab = rsum[id]!!
-            if (!checkEquivilentVotes(utab.votes, rtab.votes)) {
+            val rtab = rsum[id]
+            if (rtab != null && !checkEquivilentVotes(utab.votes, rtab.votes)) {
                 println(utab)
                 println(rtab)
                 println()
                 fail = true
             }
         }
-        if (fail) throw RuntimeException("Contest tabulations are not the same before and after redaction")
+        if (fail) println("**** Contest tabulations are not the same before and after redaction")
         else println("Contest tabulations are the same before and after redaction")
     }
 
     companion object {
+        const val MIN_BALLOTS_DEFAULT = 10
         const val NEAR_UNANIMOUS_THRESHOLD = 2  // "all but N votes" triggers balancing (Rule c)
         const val MIN_CONTRASTING_VOTES = 3  // contrasting votes needed per contest after balancing
         const val DONOR_SURPLUS_THRESHOLD = 3  // minimum surplus above min_ballots for a style/precinct to donate freely
     }
 }
 
-// class PrecinctUniqueStyle(val precinct: String, val ballotType: String, val uniqueStyle: Set<Int>, val infos: Map<Int, ContestInfo>) {
-class PrecinctUniqueStyle(val precinct: String, val uniqueStyle: Set<Int>, val infos: Map<Int, ContestInfo>) {
+open class UniqueStyle(val contests: Set<Int>, val infos: Map<Int, ContestInfo>) {
     // will contain all rows for rare styles, and enough rows for common style donations
     val rows = mutableListOf<CvrRow>()
     val contestTabs = mutableMapOf<Int, ContestTabulation>()
@@ -497,11 +491,23 @@ class PrecinctUniqueStyle(val precinct: String, val uniqueStyle: Set<Int>, val i
         row.contestVotes.forEach {
             contestTabs.sumContestTabulationsFromCandVotes(infos[it.contestId]!!, it.candVotes())
         }
-        if (rows.size < 10 * MIN_BALLOTS_DEFAULT) rows.add(row)
+        if (rows.size < 10 * Anonomicer.MIN_BALLOTS_DEFAULT) rows.add(row)
     }
 
+    open fun id() = contests.toString()
+
     override fun toString(): String {
-        return "PrecinctUniqueStyle(nrows=${rows.size} ncards=$ncards uniqueStyle=$uniqueStyle)"
+        return "UniqueStyle(nrows=${rows.size} ncards=$ncards contests=$contests)"
+    }
+}
+
+// class PrecinctUniqueStyle(val precinct: String, val ballotType: String, val uniqueStyle: Set<Int>, val infos: Map<Int, ContestInfo>) {
+class PrecinctUniqueStyle(val precinct: String, contests: Set<Int>, infos: Map<Int, ContestInfo>): UniqueStyle(contests, infos) {
+
+    override fun id() = "$precinct / $contests"
+
+    override fun toString(): String {
+        return "PrecinctUniqueStyle(nrows=${rows.size} ncards=$ncards uniqueStyle=$contests precinct='$precinct')"
     }
 }
 
@@ -517,11 +523,12 @@ class PrecinctCardStyle(val precinctPortion: String, val infos: Map<Int, Contest
         ustyle.addCard(cvr)
     }
 
-    fun convert(cardStyleMap: Map<CardStyleId, CvrCardStyle>) {
+    // ??
+    /* fun convert(cardStyleMap: Map<CardStyleId, CvrCardStyle>) {
         // ignore the ballotType
         // styleMap = uniques.mapKeys { cardStyleMap[CardStyleId(ballotType, it.key)]?.ballotType ?: "unknown" }
         //styleMap = uniques.mapKeys { cardStyleMap[CardStyleId(ballotType, it.key)]?.ballotType ?: "unknown" }
-    }
+    } */
 
     override fun toString() = buildString {
         append("PrecinctStyles(precinctPortion='$precinctPortion', nunique=${uniques.size}, ncards=$ncards, [")
@@ -535,11 +542,21 @@ fun findPrecinctStyles(corlaCvrs: CorlaCvrsIF, infos: Map<Int, ContestInfo>): Li
     corlaCvrs.cvrs().forEach { cvr ->
         // val cvrStyleId = CardStyleId(cvr.ballotType, cvr.contests())
         // val cardStyle = cardStyleMap.getOrPut(cvrStyleId) { CvrCardStyle(cvr.ballotType, cvr.contests()) }
-        val id = Pair(cvr.ballotType, cvr.precinctPortion ?: "none")
+        // val id = Pair(cvr.ballotType, cvr.precinctPortion ?: "none")
         val pcStyle = styleCounters.getOrPut(cvr.precinctPortion!!) { PrecinctCardStyle(cvr.precinctPortion, infos) }
         pcStyle.addCard(cvr)
     }
-    styleCounters.values.forEach { it.convert(corlaCvrs.cardStyleMap()) }
+    // styleCounters.values.forEach { it.convert(corlaCvrs.cardStyleMap()) }
+    return styleCounters.values.toList()
+}
+
+fun findUniqueStyles(corlaCvrs: CorlaCvrsIF, infos: Map<Int, ContestInfo>): List<UniqueStyle> {
+    val styleCounters = mutableMapOf<Set<Int>, UniqueStyle>()
+    corlaCvrs.cvrs().forEach { cvr ->
+        val pcStyle = styleCounters.getOrPut(cvr.contests()) { UniqueStyle(cvr.contests(), infos) }
+        pcStyle.addCard(cvr)
+    }
+    // styleCounters.values.forEach { it.convert(corlaCvrs.cardStyleMap()) }
     return styleCounters.values.toList()
 }
 

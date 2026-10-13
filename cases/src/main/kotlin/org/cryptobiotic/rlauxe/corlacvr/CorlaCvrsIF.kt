@@ -88,11 +88,13 @@ interface CorlaCvrsIF {
     fun redaction(): RedactionIF
     fun cardStyleMap(): Map<CardStyleId, CvrCardStyle>
     fun cardStyles(): List<CvrCardStyle>
-    fun nrows(): Int
+    fun nrows(): Int  // total row count
+    fun unredactedRows(): Int
+    fun redactedRows() = redaction().redactedRows().size
 
     fun headers(): List<String>
     fun hasBallotType(): Boolean
     fun countBlankPrecincts(): Int
     fun ballotStyleUnique(): Boolean
-    fun csvHeader(row: CvrRow, redactPrecinct: Boolean): String
+    fun rowHeaderCols(row: CvrRow, redact: Set<CvrHeader> = emptySet()): String
 }

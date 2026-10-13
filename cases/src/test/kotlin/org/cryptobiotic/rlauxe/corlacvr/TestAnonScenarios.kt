@@ -115,7 +115,7 @@ Done. near_unanimous_fixable.csv files written.
             Anonomicer(cvrs).redact(output)
             CheckCvrRedaction(cvrs, output)
 
-            if (compareTwoRedactions("$PYTHON_OUTPUT_DIR/$scenario.csv", output)) countFail++
+            if (compareTwoRedactions("$PYTHON_OUTPUT_DIR/$scenario.csv", output).fail) countFail++
         }
             /* var fail = false
 
@@ -134,26 +134,30 @@ Done. near_unanimous_fixable.csv files written.
         println("failures = $countFail out of ${scenarios.size}")
     }
 }
+data class CompareWithPython(val pythonNredact: Int, val rlauxeNredact: Int, val fail: Boolean)
 
-// compare python vs rlauxe
-fun compareTwoRedactions(expectFile: String, actualFile: String, show: Boolean = false): Boolean {
-    val expect = readCorlaCvrs(expectFile)
+fun compareTwoRedactions(expectFile: String?, actualFile: String, show: Boolean = false): CompareWithPython {
     val actual = readCorlaCvrs(actualFile)
     var fail = false
 
-    if (expect.nrows() != actual.nrows()) {
-        fail = true
-        println("*** nrows: expect ${expect.nrows()} != ${actual.nrows()} actual")
-    }
-    if (expect.redaction().nredactedCvrs() != actual.redaction().nredactedCvrs()) {
-        fail = true
-        println("*** nredacted: expect ${expect.redaction().nredactedCvrs()} != ${actual.redaction().nredactedCvrs()} actual")
+    if (expectFile != null) {
+        val expect = readCorlaCvrs(expectFile)
+
+        if (expect.nrows() != actual.nrows()) {
+            fail = true
+            println("*** nrows: expect ${expect.nrows()} != ${actual.nrows()} actual")
+        }
+        if (expect.redaction().nredactedCvrs() != actual.redaction().nredactedCvrs()) {
+            fail = true
+            println("*** nredacted: expect ${expect.redaction().nredactedCvrs()} != ${actual.redaction().nredactedCvrs()} actual")
+        }
+
+        if (show) {
+            println("\nexpect\n${tabulate(expect)}")
+            println("\nactual\n${tabulate(actual)}")
+        }
+        return CompareWithPython(expect.redaction().nredactedCvrs(), actual.redaction().nredactedCvrs(), fail)
     }
 
-    if (show) {
-        println("\nexpect\n${tabulate(expect)}")
-        println("\nactual\n${tabulate(actual)}")
-    }
-
-    return fail
+    return CompareWithPython(-1, actual.redaction().nredactedCvrs(), fail)
 }

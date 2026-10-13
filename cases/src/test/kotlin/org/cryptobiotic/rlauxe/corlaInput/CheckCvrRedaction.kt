@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.makeRealContestInfo
+import org.cryptobiotic.rlauxe.corlacvr.Anonomicer
 import org.cryptobiotic.rlauxe.corlacvr.Anonomicer.Companion.NEAR_UNANIMOUS_THRESHOLD
 import org.cryptobiotic.rlauxe.corlacvr.checkEquivilentVotes
-import org.cryptobiotic.rlauxe.corlacvr.MIN_BALLOTS_DEFAULT
 import org.cryptobiotic.rlauxe.corlacvr.findPrecinctStyles
 import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
 import org.cryptobiotic.rlauxe.corlacvr.tabulate
@@ -72,21 +72,21 @@ class CheckCvrRedaction(
         redaction.groups().forEach { println("       ${it.firstCsv}") }
         println()
 
-        val precinctStyles = findPrecinctStyles(redactedCvrs, infos)
+        val precinctStyles = findPrecinctStyles(redactedCvrs, infos) // TODO styleOnly ??
         if (show) {
             println("redacted precinctStyles")
             precinctStyles.sortedBy { it.ncards }.forEach {
-                it.convert(redactedCvrs.cardStyleMap())
+                // it.convert(redactedCvrs.cardStyleMap())
                 if (it.ncards < 10) println("  $it")
             }
         }
         val redactedMinGroupSize = precinctStyles.minOf { it.ncards }
         println("  redacted precinctStyles min cards = $redactedMinGroupSize")
         println("  redacted cardStyle min cards = ${redactedCvrs.cardStyles().minOf { it.ncards }}")
-        if (redactedMinGroupSize >= MIN_BALLOTS_DEFAULT)
-            println("1) redactedMinGroupSize >= $MIN_BALLOTS_DEFAULT")
+        if (redactedMinGroupSize >= Anonomicer.MIN_BALLOTS_DEFAULT)
+            println("1) redactedMinGroupSize >= ${Anonomicer.MIN_BALLOTS_DEFAULT}")
         else
-            println("1) FAIL redactedMinGroupSize ($redactedMinGroupSize) < $MIN_BALLOTS_DEFAULT")
+            println("1) FAIL redactedMinGroupSize ($redactedMinGroupSize) < ${Anonomicer.MIN_BALLOTS_DEFAULT}")
 
 
         ///////////////////////////////////////////////////////

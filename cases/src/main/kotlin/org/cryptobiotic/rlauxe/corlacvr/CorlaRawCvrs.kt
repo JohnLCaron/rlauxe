@@ -90,6 +90,9 @@ class CorlaRawCvrs(override val inputSource: String,
     override fun cardStyles() = ballotStyles.cardStyles()
     override fun cvrs() = cvrs
     override fun nrows() = rowCount
+    override fun unredactedRows() = cvrs().size
+    override fun redactedRows() = redaction.redactedRows().size
+
     override fun headers() = headers
     override fun hasBallotType() = schema.headerIdx[CvrHeader.ballottype] != null
     override fun countBlankPrecincts() = countBlankPrecincts
@@ -132,7 +135,7 @@ class CorlaRawCvrs(override val inputSource: String,
             println("number of Redacted Groups = ${redaction.groups().size}")
             redaction.groups().sortedBy{it.groupName}.forEach { println("  $it") }
         }
-        if (mungedCount > 0) logger.warn { "$inputSource has $mungedCount munged imprintedIds out of $rowCount"}
+        if (mungedCount > 0) logger.warn { "$inputSource had $mungedCount munged imprintedIds out of $rowCount (now fixed)"}
     }
 
     fun parseHeader(line: CSVRecord, defCvrNumber: Int = -1): CvrRow {
@@ -154,8 +157,8 @@ class CorlaRawCvrs(override val inputSource: String,
             val munged = reverseMungeDate(cvr.imprintedId)
             val mungedCvr = cvr.copy(imprintedId=munged)
             if (mungedCvr.testImprintedIdFormat()) {
-                if (mungedCount % 1000 == 0)
-                    logger.warn { "$inputSource (${defCvrNumber}) has incorrect imprintedId='${cvr.imprintedId}' replace with '$munged' count=$mungedCount"}
+                // if (mungedCount % 1000 == 0)
+                //    logger.warn { "$inputSource (${defCvrNumber}) has incorrect imprintedId='${cvr.imprintedId}' replace with '$munged' count=$mungedCount"}
                 cvr = mungedCvr
                 mungedCount++
             }
@@ -194,18 +197,19 @@ class CorlaRawCvrs(override val inputSource: String,
     }
 
     // used by anonymizer
-    override fun csvHeader(row: CvrRow, redactPrecinct: Boolean) = buildString {
+    override fun rowHeaderCols(row: CvrRow, redact: Set<CvrHeader>) = buildString {
         repeat(schema.nheaders) { idx ->
             val header = schema.headerAt[idx]
             val useValue = when (header) {
-                // cvrnumber, tabulatornum, batchid, recordid, imprintedid, precinctportion, ballottype
+                // cvrnumber, tabulatornum, batchid, recordid, imprintedid, countinggroup, precinctportion, ballottype
                 CvrHeader.cvrnumber -> row.cvrNumber
                 CvrHeader.tabulatornum -> row.tabulatorNum
                 CvrHeader.batchid -> row.batchId
                 CvrHeader.recordid -> row.recordId
                 CvrHeader.imprintedid -> quoteString(row.imprintedId)
-                CvrHeader.ballottype -> quoteString(row.ballotType)
-                CvrHeader.precinctportion -> if (redactPrecinct) "" else row.precinctPortion ?: row.headerValues[idx]
+                CvrHeader.countinggroup -> if (redact.contains(CvrHeader.countinggroup)) "" else row.headerValues[idx]
+                CvrHeader.precinctportion -> if (redact.contains(CvrHeader.precinctportion)) "" else row.precinctPortion ?: row.headerValues[idx]
+                CvrHeader.ballottype -> if (redact.contains(CvrHeader.ballottype)) "" else quoteString(row.ballotType)
                 else -> row.headerValues[idx]
             }
             append("$useValue,")

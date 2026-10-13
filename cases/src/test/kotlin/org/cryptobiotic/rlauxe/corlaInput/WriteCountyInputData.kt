@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.corlacvr.CompareWithPython
 import org.cryptobiotic.rlauxe.corlacvr.readRedactionCount
 
 import kotlin.test.Test
@@ -8,26 +9,29 @@ import kotlin.test.assertEquals
 
 class WriteCountyInputData {
 
+    val base2026Precinct = "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2026/precinct"
+    val base2020Precinct = "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/precinct"
+
     @Test
     fun write2026p() {
-        val ourRedactByPrecinct: Map<String, Int> = readRedactionCount("/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anonomice/2026p/redactedCountByPrecinct.csv")
+        val ourRedactByPrecinct: Map<String, CompareWithPython> = readRedactionCount("$base2026Precinct/redactedCountByPrecinct.csv")
         writeCountyData("$cases/corlaState/2026p", Colorado2026PwithCvrs(), ourRedactByPrecinct)
     }
 
     @Test
     fun write2020() {
-        val ourRedactByPrecinct: Map<String, Int> = readRedactionCount("/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anonomice/2020/redactedCountByPrecinct.csv")
+        val ourRedactByPrecinct = readRedactionCount("$base2020Precinct/redactedCountByPrecinct.csv")
         writeCountyData("$cases/corlaState/2020", Colorado2020General(), ourRedactByPrecinct)
     }
 
     // ourRedactByPrecinct written by TestAnonScenarios
-    fun writeCountyData(topdir: String, stateInput: ColoradoInputWithCvrs, ourRedactByPrecinct: Map<String, Int>) {
+    fun writeCountyData(topdir: String, stateInput: ColoradoInputWithCvrs, ourRedactByPrecinct: Map<String, CompareWithPython>) {
         val filename = "$topdir/countyInputData.csv"
 
         stateInput.counties().forEach { county -> println("'$county',")}
 
         val data = mutableListOf<CountyInputData>()
-        stateInput.counties().forEach { county ->
+        stateInput.counties().filter{ it != "Garfield" }.forEach { county ->
             val countyInput = stateInput.corlaCountyInput(county)!!
             val ccc: CheckCvrsAndManifest = CheckCvrsAndManifest(stateInput, countyInput, showMatch = true, showMissingVotes = true, showRedactedCvrs = true)
             val corlaCvrs = ccc.corlaCvrs
@@ -50,12 +54,13 @@ class WriteCountyInputData {
             //    val manifestNoCvr: Int, val ngroups: Int, val minCards: Int)
             data.add(CountyInputData(county,
                 manifestCount=manifestCounts.totalEntries,
-                unredactedCvrs=corlaCvrs.nrows(),                            // number of unredacted cvrs
-                redactedCvrs=corlaCvrs.redaction().redactedRows().size, // number of redacted cvrs
+                unredactedCvrs=corlaCvrs.unredactedRows(),
+                redactedCvrs=corlaCvrs.redactedRows(),
                 cvrInManifest =  manifestCounts.countCvrsInManifest,
                 cvrNoManifest = manifestCounts.cvrNoManifest,
                 manifestNoCvr = manifestCounts.manifestNoCvr,
-                ourRedactByPrecinct = ourRedactByPrecinct[county] ?: 0,
+                pythonNredact = ourRedactByPrecinct[county]?.pythonNredact ?: 0,
+                rlauxeNredact = ourRedactByPrecinct[county]?.rlauxeNredact ?: 0,
                 minCards = ccc.minCards,
                 countBlankPrecincts = ccc.countBlankPrecincts,
                 ballotStylesUnique = ccc.ballotStylesUnique,

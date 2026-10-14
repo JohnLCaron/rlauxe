@@ -139,10 +139,10 @@ class TestRelaxedAssertions {
 
     @Test
     fun testWriteAllContestsJson() {
-        val filename = "/home/stormy/rla/temp/assertions.v7.json"
+        val filename = "/home/stormy/rla/temp/assertions.v9.json"
         val contestRounds = lastRound.contestRounds
         val json = writeRelaxedAssertionProofs(filename, contestRounds, config.riskLimit, sampleLimits)
-        // println(json)
+        println(json)
     }
 
     @Test

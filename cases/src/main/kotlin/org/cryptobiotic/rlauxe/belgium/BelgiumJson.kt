@@ -49,6 +49,7 @@ data class ElectionList(
 data class Candidate(
     val FullName: String,
     val NrOfVotes: Int,
+    val IsSuccessor: Boolean
 )
 
 //////////////////////////////////////////////////////////////////////////////////////////////

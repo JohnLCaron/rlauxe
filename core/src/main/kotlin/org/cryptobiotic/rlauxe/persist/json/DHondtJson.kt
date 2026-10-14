@@ -49,56 +49,16 @@ fun RelaxedAssertionsResult.publishJson() = RelaxedAssertionsResultJson(
         this.allRanges
     )
 
-/*fun RelaxedAssertionsResultJson.import() = RelaxedAssertionsResult(
-        this.contests.map { it.import() },
-        this.allBounds
-    ) */
-
 @Serializable
 data class Bound(
     val party: Int,
     val name: String,
     val minSeats: Int,
     val maxSeats: Int,
+    val fieldedCandidates: Int? = null,
 ) {
-    constructor(party: PartyRange): this(party.partyId, party.partyName, party.minSeats, party.maxSeats, )
+    constructor(party: PartyRange): this(party.partyId, party.partyName, party.minSeats, party.maxSeats, party.fieldedCandidates, )
 }
-
-
-////////////////////////////////////////
-/* data class RelaxedAssertionsImpl(
-    override val orgContest: DhondtContest,
-    override val Npop: Int,
-    override val nsamples: Int,
-    override val alpha: Double,
-
-    val ThresholdFailure: List<AltContest>,
-    val assortersForProof: List<AssorterIF>,
-    val totalContestRange: ContestRange,
-    val failures: List<DhondtFailure>,
-    val tfailures: List<ThresholdFailure>,
-): RelaxedAssertionsIF {
-    override fun altContests() = ThresholdFailure
-    override fun assortersForProof() = assortersForProof
-    override fun totalContestRange() = totalContestRange
-    override fun failures() = failures
-    override fun tfailures() = tfailures
-    override fun show() = "no"
-}
-
-data class RelaxedAssertionsBrief(
-    val contest: String,
-    val assertions: List<DAssertionWithMargin>,
-    val seats: Int,
-    val bounds: List<Bound>,
-) {
-    constructor(from: RelaxedAssertionsIF): this(
-        from.orgContest.name,
-        from.assortersForProof(),
-        from.orgContest.nseats,
-        from.totalContestRange(),
-        )
-} */
 
 @Serializable
 data class RelaxedAssertionsJson(
@@ -129,7 +89,7 @@ fun RelaxedAssertionsIF.publishJson(): RelaxedAssertionsJson {
 
     val bounds = this.totalContestRange().partyRanges().map { party ->
         val name = dcontest.info().candidateIdToName[party.partyId]
-        Bound(party.partyId, name!!, party.minSeats, party.maxSeats)
+        Bound(party.partyId, name!!, party.minSeats, party.maxSeats, party.fieldedCandidates)
     }
     return RelaxedAssertionsJson(dcontest.name, dasm.publishJson(), dcontest.nseats, bounds)
 }
@@ -275,63 +235,9 @@ object TestOne {
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-
-/* still used ??
-fun writeDHondtAssertionsJson(dcontest: DhondtContest, assorters: List<AssorterIF>, candidates: List<PartyRange>) {
-    val relaxData = RelaxedAssertionData(dcontest, assorters, candidates)
-    val json = relaxData.publishJson()
-    val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
-    val bos = ByteArrayOutputStream()
-    jsonReader.encodeToStream(json, bos)
-    println(bos)
-}
-
-// TODO do we need to write the BT failures ??
-fun writeOneContestProof(contestRound: ContestRound, relax: RelaxedAssertionsIF, filename: String,
-                         pretty: Boolean = false): RelaxedAssertionsJson {
-    val failedAssorters = relax.failures().map { it.assorter }
-    val assorters = contestRound.contestUA.clcaAssertions.map { it.assorter }.filter { !failedAssorters.contains(it) }
-
-    val dcontest = contestRound.contestUA.contest as DhondtContest
-    val relaxData = RelaxedAssertionData(dcontest, assorters, relax.totalContestRange().partyRanges().toList())
-
-    val json = relaxData.publishJson()
-    val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = pretty }
-    FileOutputStream(filename).use { out ->
-        jsonReader.encodeToStream(json, out)
-        out.close()
-    }
-    return json
-}
-
-
-fun readDHondtAssertionsJsonFile(filename: String): Result<RelaxedAssertionsJson, ErrorMessages> {
-    val errs = ErrorMessages("readDHondtAssertionsJsonFile '${filename}'")
-    val filepath = Path(filename)
-    if (!Files.exists(filepath)) {
-        return errs.add("file does not exist")
-    }
-    val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true }
-
-    return try {
-        Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
-            val json = jsonReader.decodeFromStream<RelaxedAssertionsJson>(inp)
-            if (errs.hasErrors()) Err(errs) else Ok(json)
-        }
-    } catch (t: Throwable) {
-        errs.add("Exception= ${t.message} ${t.stackTraceToString()}")
-    }
-}
-
-fun readDHondtAssertionsJsonUnwrapped(filename: String): RelaxedAssertionsJson? {
-    val result = readDHondtAssertionsJsonFile(filename)
-    return if (result.isOk) result.unwrap() else null
-} */
-
 //////////////////////////////////////////////////////////////////////////////
 
-// resturn json for roundtrip testing
+// return json for roundtrip testing
 fun writeRelaxedAssertionProofs(filename: String,
                                 contestRounds: List<ContestRound>,
                                 alpha: Double,

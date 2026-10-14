@@ -97,4 +97,6 @@ interface CorlaCountyCvrsIF {
     fun countBlankPrecincts(): Int
     fun ballotStyleUnique(): Boolean
     fun rowHeaderCols(row: CvrRow, redact: Set<CvrHeader> = emptySet()): String
+
+    fun show() = "$electionName nrows=${nrows()} unredactedRows=${unredactedRows()}  redactedRows=${redactedRows()}  "
 }

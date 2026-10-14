@@ -20,4 +20,11 @@ class Test2020Cvrs {
         testCorlaConverterCvrs("Mesa", countyInput.readCorlaCvrs(), input)
     }
 
+    @Test
+    fun testArapahoeCvrs() {
+        val input = Colorado2020General()
+        val countyInput = input.corlaCountyInput("Arapahoe")!!
+        countyInput.readCorlaCvrs()
+    }
+
 }

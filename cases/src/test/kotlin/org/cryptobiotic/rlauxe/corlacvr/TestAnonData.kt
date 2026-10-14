@@ -15,8 +15,10 @@ import kotlin.test.assertEquals
 
 class TestAnonData {
     val python = "/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testData/2020"
-    val base2026Precinct = "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2026/precinct"
-    val base2020Precinct = "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/precinct"
+    val base2026 = "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2026"
+    val base2026Precinct = "$base2026/precinct"
+    val base2020 = "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/"
+    val base2020Precinct = "$base2020/precinct"
 
     /*
     *** Pass 1: Looking for rare ballot styles.
@@ -135,7 +137,7 @@ class TestAnonData {
                 println("failed on $county: ${e.message}")
             }
         }
-        writeRedactionCount("$base2020Precinct/redactedCountByPrecinct.csv", countNredacted)
+        writeRedactionCount("$base2020/redactedCountByPrecinct.csv", countNredacted)
         println("that took $stopwatch")
     }
 
@@ -158,7 +160,7 @@ class TestAnonData {
             countNredacted[county] = compareTwoRedactions(null, output, show = true)
 
         }
-        writeRedactionCount("$base2026Precinct/redactedCountByPrecinct.csv", countNredacted)
+        writeRedactionCount("$base2026/redactedCountByPrecinct.csv", countNredacted)
         println("that took $stopwatch")
     }
 }

@@ -115,6 +115,8 @@ class CorlaCountyCvrs(override val inputSource: String,
                         val cvr = parseHeader(line, rowCount)
                         cvr.addVotes(schema, line, rowCount)
 
+                        if (!cvr.contests().contains(0))
+                            print("")
                         cvrs.add(cvr)
                         ballotStyles.add(cvr)
 

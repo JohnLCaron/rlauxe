@@ -63,28 +63,3 @@ fun votedatabase2020Counties(votedatabase: String): Map<String, String> {
     }
     return cvrdata.toMap()
 }
-
-// oops manifests not available in 2020
-fun auditcenter2020Manifests(auditcenter: String): Map<String, String> {
-    val path = Path(auditcenter) // or does votedatabase include
-
-    val manifests = mutableListOf<Pair<String, String>>()
-    path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202")}.forEach { subdir ->
-        val county = subdir.fileName.toString()
-        // Baca duplicates Huerfano
-        // Gunnison is missing contest tabulation
-        // Las Animas has only 120 of 8000 cvrs
-        // San Juan is missing
-        // Monroe, Rooselvelt: no such county in Colorado
-        if (county !in listOf("Baca", "Gunnison", "Las Animas", "San Juan", "Monroe", "Roosevelt")) {
-            try {
-                val filename = "${subdir}/cvr.csv" // entry.toString()
-                manifests.add(Pair(county, filename))
-            } catch (e: Exception) {
-                println(e.message)
-                throw e
-            }
-        }
-    }
-    return manifests.toMap()
-}

@@ -62,7 +62,7 @@ class CorlaStateElection(
             val countyInput = stateInput.corlaCountyInput(countyName, votedatabase)!!
             val countyPopulation = countyInput.countyPopulation()
 
-            val cvrsFromManifest = CvrsFromManifest2(variant, countyInput, stateInput, infos, nextStyleId)
+            val cvrsFromManifest = CanonicalCvrsFromManifest(variant, countyInput, stateInput, infos, nextStyleId)
 
             // only needed for (variant.phantoms)
             val phantomCards = if (variant.phantoms) makePhantomCards(cvrsFromManifest.phantomsByContest, countyName)

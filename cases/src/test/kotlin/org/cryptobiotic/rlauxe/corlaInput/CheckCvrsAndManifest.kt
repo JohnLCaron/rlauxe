@@ -9,9 +9,8 @@ import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaCounty.ManifestCounts
 import org.cryptobiotic.rlauxe.corlacvr.CardStyleId
-import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
-import org.cryptobiotic.rlauxe.corlacvr.showTabDiffs
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.subtractContestTabulations
@@ -40,7 +39,7 @@ class CheckCvrsAndManifest(
     val manifestCounts: ManifestCounts
     val convertedCvrTabs : Map<Int, ContestTabulation>
 
-    val corlaCvrs: CorlaCvrsIF
+    val corlaCvrs: CorlaCountyCvrsIF
     val minCards: Int
     val countBlankPrecincts: Int
     val ballotStylesUnique: Boolean
@@ -136,7 +135,7 @@ class CheckCvrsAndManifest(
     }
 }
 
-fun findPrecinctStyleMin(corlaCvrs: CorlaCvrsIF): Int {
+fun findPrecinctStyleMin(corlaCvrs: CorlaCountyCvrsIF): Int {
 
     class UniqueContests() {
         val contests = mutableMapOf<Set<Int>, Int>() // count unique contests within the precinct
@@ -175,7 +174,7 @@ fun showTabDiffs(diff: Map<Int, ContestTabulation>) {
 
 /*
 ///////////////////////////////////////////////////////////////
-fun compareCvrsAndManifests(input: CorlaCountyInput, corlaRawCvrs: CorlaCvrsIF, showMissed: Boolean = true, showUnmatched: Boolean = false) {
+fun compareCvrsAndManifests(input: CorlaCountyInput, corlaRawCvrs: CorlaCountyCvrsIF, showMissed: Boolean = true, showUnmatched: Boolean = false) {
     val allCvrs = corlaRawCvrs.cvrs() + corlaRawCvrs.redactedCvrs()
 
     val nCvrs = allCvrs.size

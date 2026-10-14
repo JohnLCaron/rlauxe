@@ -25,6 +25,7 @@ class EmptyRedaction: RedactionIF {
     override fun cardCountByContest() = emptyMap<Int, Int> ()
 }
 
+// TODO default ??
 data class RedactionStrategy(val redactedRowsAlsoAggregated: Boolean = true,)
 
 // just gather the raw info
@@ -64,7 +65,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
         return redactedRows().size + groups().sumOf{ it.ncards()}
     }
 
-    fun addRedactedLine(line: CSVRecord, corlaCvrs: CorlaRawCvrs) {
+    fun addRedactedLine(line: CSVRecord, corlaCvrs: CorlaCountyCvrs) {
         val cvr = corlaCvrs.parseHeader(line)
         cvr.findNonNull(corlaCvrs.schema, line)
         redactedRows.add(cvr) // now the redacted rows know which contests they hold (maybe)
@@ -92,7 +93,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
         }
     }
 
-    open fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaRawCvrs): Boolean {
+    open fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaCountyCvrs): Boolean {
         val ballotType = corlaRawCvrs.getBallotType(line)
 
         if (line.get(0).startsWith("AGGREGATED") || line.get(0).startsWith("AGGREGATION")) {

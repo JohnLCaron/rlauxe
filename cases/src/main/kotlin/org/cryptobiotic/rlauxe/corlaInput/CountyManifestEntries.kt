@@ -2,13 +2,12 @@ package org.cryptobiotic.rlauxe.corlaCounty
 
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.util.nfz
 import kotlin.collections.forEach
 
-// Compare manifests with CVRs
-
+// Create ManifestEntries from the county manifest, use to match with CVRs
 interface ManifestEntry: Comparable<ManifestEntry> {
     fun imprintedId(): String
     fun location(): String
@@ -39,7 +38,7 @@ data class GarfieldEntry(val tab: Int, val batch: String, val record: Int, val l
     }
 }
 
-class GarfieldCvrManifest(manifestSource: String): CountyCvrManifest(manifestSource), Iterable<ManifestEntry> {
+class GarfieldManifestEntries(manifestSource: String): CountyManifestEntries(manifestSource), Iterable<ManifestEntry> {
 
     override fun makeEntry(tab: Int, batch: String, record: Int, location: String) : ManifestEntry {
         return GarfieldEntry(tab, batch, record, location)
@@ -79,14 +78,14 @@ data class ManifestId(val tab: Int, val batch: String, val record: Int, val loca
     }
 }
 
-open class CountyCvrManifest(val manifestBatches: List<ManifestBatch>): Iterable<ManifestEntry> {
+open class CountyManifestEntries(val manifestBatches: List<ManifestBatch>): Iterable<ManifestEntry> {
     val totalCards = manifestBatches.sumOf{ it.nballotCards }
 
     constructor(manifestSource: String): this( readCountyManifestCsv(manifestSource) )
 
-    fun uppercase(): CountyCvrManifest{
+    fun uppercase(): CountyManifestEntries{
         val upperBatches = manifestBatches.map { it.copy( batchId = it.batchId.uppercase() ) }
-        return CountyCvrManifest(upperBatches)
+        return CountyManifestEntries(upperBatches)
     }
 
     open fun makeEntry(tab: Int, batch: String, record: Int, location: String) : ManifestEntry {
@@ -123,7 +122,7 @@ open class CountyCvrManifest(val manifestBatches: List<ManifestBatch>): Iterable
         }
     }
 
-    fun manifestCounts(corlaCvrs: CorlaCvrsIF, report: MutableList<String>? = null, showUnmatched:Boolean = false): ManifestCounts {
+    fun manifestCounts(corlaCvrs: CorlaCountyCvrsIF, report: MutableList<String>? = null, showUnmatched:Boolean = false): ManifestCounts {
         val manifestIdMap = mutableMapOf<String, ManifestEntry>()
         val meiter = MEiterator(manifestBatches.iterator())
         while (meiter.hasNext()) {

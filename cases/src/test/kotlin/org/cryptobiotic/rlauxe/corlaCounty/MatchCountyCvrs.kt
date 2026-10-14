@@ -1,10 +1,10 @@
-package org.cryptobiotic.rlauxe.corlacvr
+package org.cryptobiotic.rlauxe.corlaCounty
 
 import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
-import org.cryptobiotic.rlauxe.corlaCounty.ManifestCounts
+import org.cryptobiotic.rlauxe.corlacvr.tabulateCvrRows
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
@@ -44,7 +44,7 @@ class MatchCountyCvrs(val countyInput: CorlaCountyInput) {
     }
 
     fun manifestCounts(show: Boolean): ManifestCounts {
-        val manifest = countyInput.readCountyManifest()
+        val manifest: CountyManifestEntries = countyInput.readCountyManifest()
         return if (show) {
             val report = mutableListOf<String>()
             val mc = manifest.manifestCounts(corlaCvrs, report)
@@ -88,14 +88,4 @@ fun showTabDiffs(diff: Map<Int, ContestTabulation>) {
             println()
         }
     }
-}
-
-fun tabulateCvrRows(rows: Iterator<CvrRow>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
-    val sum = mutableMapOf<Int, ContestTabulation>()
-    rows.forEach { row ->
-        row.contestVotes.forEach {
-            sum.sumContestTabulationsFromCandVotes(infos[it.contestId]!!, it.candVotes())
-        }
-    }
-    return sum
 }

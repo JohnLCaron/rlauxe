@@ -19,7 +19,7 @@ class TestCorlaRawCvrsOnTestExamples {
     @Test
     fun parseThreeCandidatesTenVotesSucceeds() {
         val filename = "src/test/data/corla/1misc/ThreeCandidatesTenVotes.csv"
-        val result = readCorlaCvrs(filename,)
+        val result = readCountyCvrs(filename,)
         println(result)
 
         // There should be one contest, the one we just read in.
@@ -40,7 +40,7 @@ class TestCorlaRawCvrsOnTestExamples {
     @Test
     fun test4CvrsWithIRV() {
         val filename = "src/test/data/Boulder2023/Test4CvrsWithIRV.csv"
-        val export = readCorlaCvrs(filename,)
+        val export = readCountyCvrs(filename,)
         println(export)
 
         assertEquals("src/test/data/Boulder2023/Test4CvrsWithIRV.csv", export.inputSource)
@@ -123,7 +123,7 @@ class TestCorlaRawCvrsOnTestExamples {
     @Test
     fun testWithRedactions() {
         val filename = "src/test/data/Boulder2024/TestWithRedactions.csv"
-        val export = readCorlaCvrs(filename, redaction = RedactionBoulder())
+        val export = readCountyCvrs(filename, redaction = RedactionBoulder())
         println(export)
 
         assertEquals("src/test/data/Boulder2024/TestWithRedactions.csv", export.inputSource)
@@ -151,7 +151,7 @@ class TestCorlaRawCvrsOnTestExamples {
     @Test
     fun parseBoulder23Succeeds() {
         val filename = "src/test/data/Boulder2023/Boulder-2023-Coordinated-CVR-Redactions-removed.csv"
-        val result = readCorlaCvrs(filename,)
+        val result = readCountyCvrs(filename,)
         println(result)
 
         val schema = result.schema
@@ -285,7 +285,7 @@ class TestCorlaRawCvrsOnTestExamples {
     fun parseBoulder24Recount() {
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
-        val export = readCorlaCvrs(filename, redaction = RedactionBoulder())
+        val export = readCountyCvrs(filename, redaction = RedactionBoulder())
         println(export)
 
         assertEquals(

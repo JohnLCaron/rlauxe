@@ -1,12 +1,13 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import org.cryptobiotic.rlauxe.corlaInput.Colorado2020Redacted
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import kotlin.test.Test
 
 // check name consistency in ColoradoInput
 class TestColoradoInput {
-    val input: ColoradoInput = Colorado2026PwithCvrs()
+    val input: ColoradoInput = Colorado2020Redacted()
     val canonical = input.canonicalContests()
 
     @Test
@@ -20,6 +21,10 @@ class TestColoradoInput {
         val counties = canonical.values.map { it.counties }.flatten().toSet().toList().sorted()
         counties.forEach { println( it )}
         println("there are ${counties.size} auditcenter counties")
+
+        val inputCounties = input.counties()
+        println("there are ${inputCounties.size} input counties")
+        compareLists(counties, inputCounties, "auditcenter Counties", "inputCounties")
     }
 
     @Test

@@ -2,10 +2,10 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
 import org.cryptobiotic.rlauxe.corlaInput.auditcenter
-import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
-import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrs
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 
 class Boulder24Input: BoulderInput {
     override val electionName= "Boulder2024"
@@ -14,8 +14,8 @@ class Boulder24Input: BoulderInput {
     override val sovoSource = "/resources/data/cases/boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv"
     override val year = 2024
 
-    override fun readCorlaCvrs(): CorlaCvrsIF {
-        val org = readCorlaCvrs(cvrsSource, redaction = RedactionBoulder())
+    override fun readCorlaCvrs(): CorlaCountyCvrsIF {
+        val org = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
         removeContest12FromPool6(org.redaction().groups())
         return org
     }
@@ -24,8 +24,8 @@ class Boulder24Input: BoulderInput {
     // "the ballot types may have two cards, A and B, with disjoint contests"
     override fun hasABgroups() = true
 
-    override fun countyPopulation() = stateInput.strataPopulation()[countyName]!!
-    val stateInput = Colorado2024General()
+    // TODO remove dependence on stateInput
+    override fun countyPopulation() = Colorado2024General().strataPopulation()[countyName]!!
 
     companion object {
         // from cases/src/test/kotlin/org/cryptobiotic/rlauxe/boulder/TestBoulderUndervotes.kt

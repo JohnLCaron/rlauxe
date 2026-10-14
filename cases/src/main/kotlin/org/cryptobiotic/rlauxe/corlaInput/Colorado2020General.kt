@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
 import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 
-class Colorado2020General(ac:String?=auditcenter): ColoradoInputWithCvrs(
+open class Colorado2020General(ac:String?=auditcenter): ColoradoInputWithCvrs(
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
     contestRoundFile = "$ac/2020/general/round_1/contest.csv",
     tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
@@ -16,7 +16,7 @@ class Colorado2020General(ac:String?=auditcenter): ColoradoInputWithCvrs(
     }
 
     // if you skip counties, you have to adjust Nc
-    val skipCounties = listOf("Baca", "Gunnison", "Las Animas", "San Juan")
+    private val skipCounties = listOf("Baca", "Gunnison", "Las Animas", "San Juan")
     override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
 
     override fun contestTabsAllCounties(): Map<String, ContestTabAllCounties>  = contestTabsAllCounties

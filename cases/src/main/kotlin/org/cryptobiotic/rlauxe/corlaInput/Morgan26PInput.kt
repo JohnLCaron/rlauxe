@@ -10,7 +10,7 @@ class Morgan26PInput: CorlaCountyInput {
     val otherManifest = "$auditcenter/2026/primary/files/Morgan.csv"
 
     /* TODO automate this ??
-    override fun readCorlaCvrs(): CorlaRawCvrs {
+    override fun readCorlaCvrs(): CorlaCountyCvrs {
         val org = readCorlaCvrs(cvrsSource, redaction = Redaction())
         val orgGroups = org.redactedGroups()
         require(orgGroups.size == 1)
@@ -19,6 +19,6 @@ class Morgan26PInput: CorlaCountyInput {
         return org
     } */
 
-    override fun countyPopulation() = stateInput.strataPopulation()[countyName]!!
-    val stateInput = Colorado2026Primary()
+    // or from manifest ?
+    override fun countyPopulation() = Colorado2026Primary().strataPopulation()[countyName]!!
 }

@@ -10,6 +10,6 @@ class Boulder26PInput: BoulderInput  {
     override val sovoSource = "/resources/data/cases/boulder26p/2026P-Boulder-County-Official-Statement-of-Votes.csv"
     override val year = 2026 // TODO primary vs general
 
-    override fun countyPopulation() = stateInput.strataPopulation()[countyName]!!
-    val stateInput = Colorado2026Primary()
+    // or use sovo ??
+    override fun countyPopulation() = Colorado2026Primary().strataPopulation()[countyName]!!
 }

@@ -16,7 +16,6 @@ import org.cryptobiotic.rlauxe.auditcenter.readContestComparisonCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.corlaCounty.CountyCvrManifest
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
@@ -473,8 +472,6 @@ fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAs
 //////////////////////////////////////////////////////////////////////////////
 // see WriteCountyInputData
 
-// data class CountyInputData(val county: String, val manifestCount: Int, val ncvrs, val cvrInManifest: Int, val cvrNoManifest:Int,
-//    val manifestNoCvr: Int, val ngroups: Int, val minCards: Int)
 data class CountyInputData(val county: String,
                            val manifestCount: Int,
                            val unredactedCvrs: Int,

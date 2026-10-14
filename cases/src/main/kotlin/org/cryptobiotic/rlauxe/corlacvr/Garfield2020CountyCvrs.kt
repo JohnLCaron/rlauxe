@@ -40,7 +40,7 @@ private val showLines = false
 
 // modified cvr2 and renamed as cvr
 
-class Garfield2020RawCvrs(override val inputSource: String, showHeaders: Boolean = false): CorlaCvrsIF {
+class Garfield2020CountyCvrs(override val inputSource: String, showHeaders: Boolean = false): CorlaCountyCvrsIF {
 
     override val electionName = "Garfield2020"
     override val versionName = "unknown"

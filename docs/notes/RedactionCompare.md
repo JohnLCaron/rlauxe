@@ -133,6 +133,76 @@ I think this problem is due to the size and composition of Arapahoe County, and 
 
 This is probably the stellar argument for allowing a "style-only" redaction option.
 
+| contestIdx | contestName                                                     |
+|------------|-----------------------------------------------------------------|
+| 0          | Presidential Electors                                           |
+| 1          | United States Senator                                           |
+| 2          | Representative to the 117th United States Congress-District 1   |
+| 3          | Representative to the 117th United States Congress-District 4   |
+| 4          | Representative to the 117th United States Congress-District 6   |
+| 5          | State Board of Education Member - Congressional District 1      |
+| 6          | Regent of the University of Colorado - Congressional District 6 |
+| 7          | State Senator - District 26                                     |
+| 8          | State Senator - District 27                                     |
+| 9          | State Senator - District 28                                     |
+| 10         | State Senator - District 29                                     |
+| 11         | State Senator - District 31                                     |
+| 12         | State Representative - District 3                               |
+| 13         | State Representative - District 9                               |
+| 14         | State Representative - District 36                              |
+| 15         | State Representative - District 37                              |
+| 16         | State Representative - District 38                              |
+| 17         | State Representative - District 40                              |
+| 18         | State Representative - District 41                              |
+| 19         | State Representative - District 42                              |
+| 20         | State Representative - District 56                              |
+| 21         | District Attorney - 18th Judicial District                      |
+| 22         | Regional Transportation District Director - District A          |
+| 23         | Regional Transportation District Director - District D          |
+| 24         | Regional Transportation District Director - District E          |
+| 25         | Regional Transportation District Director - District F          |
+| 26         | Regional Transportation District Director - District G          |
+| 27         | Regional Transportation District Director - District H          |
+| 28         | Arapahoe County Commissioner - District 1                       |
+| 29         | Arapahoe County Commissioner - District 3                       |
+| 30         | Arapahoe County Commissioner - District 5                       |
+| 31         | Justice of the Colorado Supreme Court - Hart                    |
+| 32         | Justice of the Colorado Supreme Court - Samour                  |
+| 33         | Colorado Court of Appeals Judge - Tow                           |
+| 34         | Colorado Court of Appeals Judge - Welling                       |
+| 35         | District Court Judge - 18th Judicial District - Amico           |
+| 36         | District Court Judge - 18th Judicial District - Baum            |
+| 37         | District Court Judge - 18th Judicial District - Mares           |
+| 38         | District Court Judge - 18th Judicial District - Scipione        |
+| 39         | District Court Judge - 18th Judicial District - Slade           |
+| 40         | District Court Judge - 18th Judicial District - Vahle           |
+| 41         | District Court Judge - 18th Judicial District - Volz            |
+| 42         | Arapahoe County Court - Contiguglia                             |
+| 43         | Arapahoe County Court - Ollada                                  |
+| 44         | Arapahoe County Court - Williford                               |
+| 45         | Amendment B (Constitutional)                                    |
+| 46         | Amendment C (Constitutional)                                    |
+| 47         | Amendment 76 (Constitutional)                                   |
+| 48         | Amendment 77 (Constitutional)                                   |
+| 49         | Proposition EE (Statutory)                                      |
+| 50         | Proposition 113 (Statutory)                                     |
+| 51         | Proposition 114 (Statutory)                                     |
+| 52         | Proposition 115 (Statutory)                                     |
+| 53         | Proposition 116 (Statutory)                                     |
+| 54         | Proposition 117 (Statutory)                                     |
+| 55         | Proposition 118 (Statutory)                                     |
+| 56         | Ballot Question 2A                                              |
+| 57         | Ballot Issue 2B                                                 |
+| 58         | Referred Ballot Question No. 3A                                 |
+| 59         | Initiated Ballot Question No. 300                               |
+| 60         | Ballot Issue 4C                                                 |
+| 61         | Ballot Issue 5A                                                 |
+| 62         | Ballot Issue 4A                                                 |
+| 63         | Ballot Issue 4B                                                 |
+| 64         | Ballot Issue 5B                                                 |
+| 65         | Ballot Issue 6A                                                 |
+| 66         | Ballot Issue 6B                                                 |
+
 
 ### Boulder 2020
 

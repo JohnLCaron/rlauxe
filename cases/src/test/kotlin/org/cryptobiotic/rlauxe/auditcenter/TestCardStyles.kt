@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2022Primary
 import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
-import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrs
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import kotlin.test.Test
 
 // compare cardStyles from coloradoInput.countyStyles (taken from mvr files)
@@ -21,7 +21,7 @@ class TestCardStyles {
 
     fun compareCvrSchemaVscoloradoInput(filename: String, coloradoInput: ColoradoInput) {
         // println(CastVoteRecord.header)
-        val export = readCorlaCvrs(filename)
+        val export = readCountyCvrs(filename)
         val exportContestInfos = export.makeContestInfo().associateBy { it.id }
 
         // these contest id's are internal to the export.

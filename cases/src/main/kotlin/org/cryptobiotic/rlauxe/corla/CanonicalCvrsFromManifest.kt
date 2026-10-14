@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.corlaCounty.CountyManifestEntries
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ManifestCounts
 import org.cryptobiotic.rlauxe.corlaCounty.ManifestEntry
@@ -20,10 +21,12 @@ import org.cryptobiotic.rlauxe.util.tabulateCards
 import kotlin.math.max
 import kotlin.math.min
 
-private val logger = KotlinLogging.logger("CvrsFromManifest")
+private val logger = KotlinLogging.logger("CanonicalCvrsFromManifest")
 
+// TODO seems like you need to truly make the cards from the manifest, and then attach the cvrs ??
+//   also, redacted cards may know their styles. So what to do with that ??
 // use in CorlaStateElection; how differ from CvrsFromManifest ?
-class CvrsFromManifest2(
+class CanonicalCvrsFromManifest(
     val variant: ElectionVariant,
     val countyInput: CorlaCountyInput,
     val stateInput: ColoradoInput,
@@ -52,7 +55,7 @@ class CvrsFromManifest2(
         // in order of the CVR file. redacted cvrs are skipped.
         val corlaCvrs = countyInput.readCorlaCvrs()
 
-        val manifest = countyInput.readCountyManifest()
+        val manifest: CountyManifestEntries = countyInput.readCountyManifest()
         manifestCounts = manifest.manifestCounts(corlaCvrs)
 
         val infosByName = infos.mapKeys { it.value.name } //  canonical names
@@ -60,9 +63,10 @@ class CvrsFromManifest2(
         cvrStyles = converter.cardStyles.values.toList()
         nextStyleId = startingStyleId + cvrStyles.size
 
+        // should be forEach
         corlaCvrs.cvrs().map {
             val manifestEntry = manifestCounts.match[it.imprintedId]
-            if (manifestEntry != null) { // must be in the manifest
+            if (manifestEntry != null) { // DIFF: must be in the manifest
                 val convertedCvr = converter.convertToCard(it) { cvrb: AuditableCardBuilder ->
                     cvrb.location = "$county:${manifestEntry.location()}"
                 }
@@ -70,6 +74,8 @@ class CvrsFromManifest2(
             }
         }
         unredactedCvrTabs = tabulateCards(unredactedCvrs.iterator(), infos)
+
+        // DIFF none of this below is in CvrsFromManifest
 
         // TODO add this calculation to CorlaInput.Counties
         val countyTab = stateInput.countyTabsAllContests()[county]!!

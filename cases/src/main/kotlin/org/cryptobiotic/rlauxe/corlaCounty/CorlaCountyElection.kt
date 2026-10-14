@@ -33,10 +33,10 @@ class ElectionVariant(variantEnum: ElectionVariantEnum) {
     fun isOA() = auditType.isOA()
 }
 
-// create election out of a single county. Creates AuditRecord not CountyAuditRecord.
+// create election out of a single county. Creates AuditRecord, not CountyAuditRecord.
 class CorlaCountyElection(
     val countyInput: CorlaCountyInput,
-    val stateInput: ColoradoInput,
+    val stateInput: ColoradoInput, // what if we didnt convert to canonical ??
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean, // TODO
     variantEnum: ElectionVariantEnum,

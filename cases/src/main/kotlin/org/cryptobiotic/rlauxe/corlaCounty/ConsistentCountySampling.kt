@@ -1,15 +1,12 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
-import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
-import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.random.Random
 
-// Used by CountyAudit UI. Sample within one county's CVRS, to estimate how many samples would be needed within that county.
+// Used by CountySampling in viewer.
+// Sample within one county's CVRS, to estimate how many samples would be needed within that county.
 
 fun sampleCountyCvrs(countyAudit: CountyAuditRecord, county: String, wantNmvrs: Map<Int, Int>, maxSamples: Int, ntrials: Int): List<Int> {
     val cvrs = countyAudit.readCountyCvrs(county) // , limit = 100_000)

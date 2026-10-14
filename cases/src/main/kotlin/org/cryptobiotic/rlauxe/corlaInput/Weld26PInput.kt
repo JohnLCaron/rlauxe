@@ -9,6 +9,6 @@ class Weld26PInput: CorlaCountyInput {
 
     val otherManifest = "$auditcenter/2026/primary/files/Weld.csv"
 
-    override fun countyPopulation() = stateInput.strataPopulation()[countyName]!!
-    val stateInput = Colorado2026Primary()
+    // or from manifest ??
+    override fun countyPopulation() = Colorado2026Primary().strataPopulation()[countyName]!!
 }

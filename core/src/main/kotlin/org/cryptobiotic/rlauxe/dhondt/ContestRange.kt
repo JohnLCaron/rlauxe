@@ -13,13 +13,13 @@ val candNameWidth = 20
 ///////////////////////////////////////////////////////////////////
 // all party's min/max/reported for one contest
 class ContestRange(val dcontest: DhondtContest) {
-    private val partyMap = mutableMapOf<Int, PartyRange>() // one for each candidate
+    private val partyMap = mutableMapOf<Int, PartyRange>() // one for each candidate aka party
     private val dhFailures = mutableListOf<DhondtFailure>()
 
     init {
         // all parties have an entry
         dcontest.parties.forEach { party ->
-            partyMap[party.id] = PartyRange(party.id, party.partyName)
+            partyMap[party.id] = PartyRange(party.id, party.partyName, party.nCandidates)
         }
         dcontest.winnerSeatCount.forEach { partyId, nseats ->
             partyMap[partyId]!!.setReportedWinners(nseats)
@@ -99,7 +99,7 @@ class ContestRange(val dcontest: DhondtContest) {
 
 
 // one party's min/max/reported
-class PartyRange(val partyId: Int, val partyName: String) {
+class PartyRange(val partyId: Int, val partyName: String, val fieldedCandidates: Int) {
     var minSeats = 0
     var reportedSeats = 0
     var maxSeats = 0
@@ -169,7 +169,7 @@ data class AllSeats(val contestRanges: List<ContestRange>)  {
         val sum = mutableMapOf<Int, PartyRange>()
         contestRanges.forEach { candRange ->
             candRange.partyRanges().forEach { range ->
-                val sumCandidate = sum.getOrPut(range.partyId) { PartyRange(range.partyId, range.partyName) }
+                val sumCandidate = sum.getOrPut(range.partyId) { PartyRange(range.partyId, range.partyName, 0) }
                 sumCandidate.minSeats += range.minSeats
                 sumCandidate.reportedSeats += range.reportedSeats
                 sumCandidate.maxSeats += range.maxSeats

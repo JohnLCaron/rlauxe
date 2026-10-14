@@ -105,6 +105,7 @@ fun createBelgiumAndRunAllRounds(electionName: String,
     copyResourceFile("$belgiumData/parties.txt", "$toptopdir/parties.txt")
 
     val nwinners = belgiumElectionJson.ElectionLists.sumOf { it.NrOfSeats }
+    val fieldedCandidates = belgiumElectionJson.ElectionLists.sumOf { it.NrOfSeats }
     val totalVotes = belgiumElectionJson.NrOfValidVotes + belgiumElectionJson.NrOfBlankVotes // TODO undervotes = belgiumElection.NrOfBlankVotes
 
     val dhondtParties = belgiumElectionJson.ElectionLists.map {
@@ -112,7 +113,7 @@ fun createBelgiumAndRunAllRounds(electionName: String,
             it.PartyLabel,
             partyIds[it.PartyLabel]!!,
             it.NrOfVotes,
-            it.Candidates.size
+            it.Candidates.filter{ !it.IsSuccessor }.count(),
         )
     }
 

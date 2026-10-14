@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.corlacvr.Anonomicer
 import org.cryptobiotic.rlauxe.corlacvr.Anonomicer.Companion.NEAR_UNANIMOUS_THRESHOLD
 import org.cryptobiotic.rlauxe.corlacvr.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.corlacvr.findPrecinctStyles
-import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrsFromFile
 import org.cryptobiotic.rlauxe.corlacvr.tabulate
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase
 import kotlin.test.Test
@@ -45,7 +45,7 @@ class CheckCvrRedaction(
     init {
         println(unredactedfile)
         println(redactedFile)
-        val unredactedCvrs = readCorlaCvrsFromFile(unredactedfile, showHeaders = false, showSchema = false)
+        val unredactedCvrs = readCountyCvrsFromFile(unredactedfile, showHeaders = false, showSchema = false)
 
         val infos = unredactedCvrs.makeRealContestInfo()
         val unredactedGroups = findPrecinctStyles(unredactedCvrs, infos)
@@ -59,7 +59,7 @@ class CheckCvrRedaction(
         println("  unredacted precinctStyles min cards = $unredactedMinGroupSuze")
         println("  unredacted cardStyle min cards = ${unredactedCvrs.cardStyles().minOf { it.ncards }}")
 
-        val redactedCvrs = readCorlaCvrsFromFile(redactedFile, showHeaders = false, showSchema = false)
+        val redactedCvrs = readCountyCvrsFromFile(redactedFile, showHeaders = false, showSchema = false)
         println("\nredactedCvrs")
         println("  countBlankPrecincts = ${redactedCvrs.countBlankPrecincts()}")
         println("  ballotStyleUnique = ${redactedCvrs.ballotStyleUnique()}")
@@ -145,7 +145,7 @@ class PrecinctStyles(val ballotType: String, val precinctPortion: String) {
     }
 }
 
-fun findPrecinctStyles(corlaCvrs: CorlaCvrsIF): List<PrecinctStyles> {
+fun findPrecinctStyles(corlaCvrs: CorlaCountyCvrsIF): List<PrecinctStyles> {
     val styleCounters = mutableMapOf<Pair<String, String>, PrecinctStyles>()
     corlaCvrs.cvrs().forEach { cvr ->
         val id = Pair(cvr.ballotType, cvr.precinctPortion ?: "none")

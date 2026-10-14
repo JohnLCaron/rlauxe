@@ -9,6 +9,7 @@ class Boulder25Input: BoulderInput  {
     override val sovoSource = "src/test/data/Boulder2025/2025C-Boulder-County-Official-Statement-of-Votes.csv"
     override val year = 2025
 
+    // or use sovo ??
     override fun countyPopulation(): Int {
         val manifests = readCountyManifest()
         return manifests.totalCards

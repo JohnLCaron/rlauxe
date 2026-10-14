@@ -1,9 +1,8 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
-import org.cryptobiotic.rlauxe.util.trunc
 
-// Find Manifest entries (imprinted_ids) from a PRN modulo ncvrs
+// Find Manifest entries (imprinted_ids) from a PRN, using modulo ncvrs, to match ColoradoRLA
 data class CountyManifest(val county: String, val batches: List<ManifestBatch>) {
     val batchBound: List<Int>
     val nbatches = batches.size
@@ -75,8 +74,6 @@ data class StateManifest(val manifests: List<CountyManifest>) {
             cumul
         }
         totalCards = cumul
-
-
     }
 
     fun idFromIndex(index: Int): String {
@@ -104,17 +101,14 @@ data class StateManifest(val manifests: List<CountyManifest>) {
             val currentCounty = countyManifests.next()
             currentBatches = currentCounty.batches.iterator()
         }
-
         override fun next(): ManifestBatch {
             return currentBatches.next()
         }
-
         override fun hasNext(): Boolean {
             if (currentBatches.hasNext()) return true
             if (!countyManifests.hasNext()) return false
             val currentCounty = countyManifests.next()
             currentBatches = currentCounty.batches.iterator()
-
             return true
         }
     }

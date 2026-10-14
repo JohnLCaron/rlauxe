@@ -167,8 +167,8 @@ fun compareCvrEquivilent(cvrFile1: String, cvrFile2: String) {
     println("compare $cvrFile1")
     println("     to $cvrFile2")
 
-    val corlaCvr1 = readCorlaCvrs(cvrFile1, redaction = Redaction())
-    val corlaCvr2 = readCorlaCvrs(cvrFile2, redaction = Redaction())
+    val corlaCvr1 = readCountyCvrs(cvrFile1, redaction = Redaction())
+    val corlaCvr2 = readCountyCvrs(cvrFile2, redaction = Redaction())
 
     val cvrs1 = corlaCvr1.cvrs()
     val cvrs2 = corlaCvr2.cvrs()

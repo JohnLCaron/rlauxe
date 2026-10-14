@@ -137,11 +137,11 @@ Done. near_unanimous_fixable.csv files written.
 data class CompareWithPython(val pythonNredact: Int, val rlauxeNredact: Int, val fail: Boolean)
 
 fun compareTwoRedactions(expectFile: String?, actualFile: String, show: Boolean = false): CompareWithPython {
-    val actual = readCorlaCvrs(actualFile)
+    val actual = readCountyCvrs(actualFile)
     var fail = false
 
     if (expectFile != null) {
-        val expect = readCorlaCvrs(expectFile)
+        val expect = readCountyCvrs(expectFile)
 
         if (expect.nrows() != actual.nrows()) {
             fail = true

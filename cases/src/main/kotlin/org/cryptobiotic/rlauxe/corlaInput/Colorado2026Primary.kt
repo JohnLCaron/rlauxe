@@ -15,7 +15,7 @@ open class Colorado2026Primary(ac:String?=auditcenter): ColoradoInputWithManifes
     manifestDir = "$ac/2026/primary/files"
 ) {
 
-    // Our fresh recount of all 63 manifest CSVs	1,444,036
+    // Our fresh recount of all 63 manifest CSVs 1,444,036
     // Official ballot_card_count column, live ContestsListRound1.csv	1,444,047
 
     // Alamosa: 3,464 ballots in the public Alamosa.csv download vs. 3,475 in CDOS’s own reconciliation. Every other county matches exactly.

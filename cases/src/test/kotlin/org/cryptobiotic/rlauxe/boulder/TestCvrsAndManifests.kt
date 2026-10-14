@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.boulder
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
 import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
-import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrs
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import kotlin.test.Test
 
 class TestCvrsAndManifests {
@@ -29,7 +29,7 @@ class TestCvrsAndManifests {
     }
 
     fun testCvrsAndManifests(input: BoulderInput) {
-        val corlaCvrs = readCorlaCvrs(input.cvrsSource, redaction = RedactionBoulder())
+        val corlaCvrs = readCountyCvrs(input.cvrsSource, redaction = RedactionBoulder())
 
         println("${input.cvrsSource}: nrows = ${corlaCvrs.nrows()} cvrs size = ${corlaCvrs.nrows()}")
 

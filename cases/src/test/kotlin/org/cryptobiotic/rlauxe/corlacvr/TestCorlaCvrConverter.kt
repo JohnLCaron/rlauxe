@@ -22,7 +22,7 @@ class TestCorlaCvrConverter {
     }
     // this tests running and checking CorlaCvrConverter
     fun testCorlaConverter(county: String, filename: String, coloradoInput: ColoradoInput) {
-        val export = readCorlaCvrs(filename)
+        val export = readCountyCvrs(filename)
         val contestBuilder = BuildCorlaContests(coloradoInput) // to get the infos by name
         val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
     }
@@ -47,7 +47,7 @@ class TestCorlaCvrConverter {
 
     // this tests coverting all of the cvrs and writing them to a file
     fun testWriteCorlaCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
-        val export = readCorlaCvrs(filename)
+        val export = readCountyCvrs(filename)
 
         val contestBuilder = BuildCorlaContests(coloradoInput)
         val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
@@ -67,11 +67,11 @@ State Senator - District 17 -> State Senator - District 17
 
 // this tests converting all of the cvrs and checking them against the ExportCvr
 fun testCorlaConverterCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
-    val export = readCorlaCvrs(filename)
+    val export = readCountyCvrs(filename)
     testCorlaConverterCvrs(county, export, coloradoInput)
 }
 
-fun testCorlaConverterCvrs(county: String, export: CorlaCvrsIF, coloradoInput: ColoradoInput) {
+fun testCorlaConverterCvrs(county: String, export: CorlaCountyCvrsIF, coloradoInput: ColoradoInput) {
 
     val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
 

@@ -14,14 +14,14 @@ import java.util.zip.ZipInputStream
 
 private val logger = KotlinLogging.logger("CorlaCvrs")
 
-fun readCorlaCvrs(source: String, redaction: Redaction = Redaction(), showHeaders: Boolean = false): CorlaCvrsIF {
+fun readCountyCvrs(source: String, redaction: Redaction = Redaction(), showHeaders: Boolean = false): CorlaCountyCvrsIF {
     return if (source.startsWith("/resources/"))
-        readCorlaCvrsFromResource(source, redaction = redaction, showHeaders=showHeaders)
-    else readCorlaCvrsFromFile(source, redaction = redaction, showHeaders=showHeaders)
+        readCountyCvrsFromResource(source, redaction = redaction, showHeaders=showHeaders)
+    else readCountyCvrsFromFile(source, redaction = redaction, showHeaders=showHeaders)
 }
 
-fun readCorlaCvrsFromFile(filename: String, showHeaders: Boolean = false, showSchema: Boolean = false,
-                          redaction: Redaction = Redaction()): CorlaCvrsIF {
+fun readCountyCvrsFromFile(filename: String, showHeaders: Boolean = false, showSchema: Boolean = false,
+                           redaction: Redaction = Redaction()): CorlaCountyCvrsIF {
     val parser = if (filename.endsWith(".zip")) {
         val zipReader = ZipReader(filename)
         // by convention, the file inside is the filename with zip replaced by csv
@@ -36,22 +36,22 @@ fun readCorlaCvrsFromFile(filename: String, showHeaders: Boolean = false, showSc
         CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
     }
 
-    val corlaRawCvrs = CorlaRawCvrs(filename, parser, showHeaders, showSchema, redaction = redaction)
+    val corlaRawCvrs = CorlaCountyCvrs(filename, parser, showHeaders, showSchema, redaction = redaction)
     corlaRawCvrs.readRows()
     return corlaRawCvrs
 }
 
-fun readCorlaCvrsFromResource(resourcePath: String, showHeaders: Boolean = false, showSchema: Boolean = false,
-                              redaction: Redaction = Redaction()): CorlaCvrsIF {
+fun readCountyCvrsFromResource(resourcePath: String, showHeaders: Boolean = false, showSchema: Boolean = false,
+                               redaction: Redaction = Redaction()): CorlaCountyCvrsIF {
     val resourceStream = getCsvStreamFromResource(resourcePath)
     val reader: Reader = InputStreamReader(resourceStream, "UTF-8")
     val parser =  CSVParser.parse(reader, CSVFormat.DEFAULT)
-    val corlaRawCvrs = CorlaRawCvrs(resourcePath, parser, showHeaders, showSchema, redaction = redaction)
+    val corlaRawCvrs = CorlaCountyCvrs(resourcePath, parser, showHeaders, showSchema, redaction = redaction)
     corlaRawCvrs.readRows()
     return corlaRawCvrs
 }
 
-fun getCsvStreamFromResource(resourcePath: String): InputStream {
+private fun getCsvStreamFromResource(resourcePath: String): InputStream {
     var resourceStream =
         object {}.javaClass.getResourceAsStream(resourcePath) ?: throw IOException("$resourcePath does not exist")
     if (resourcePath.endsWith(".zip")) {
@@ -63,7 +63,7 @@ fun getCsvStreamFromResource(resourcePath: String): InputStream {
 }
 
 // TODO should InputStream implement Closeable?
-fun getZippedCsvResourceStream(resourcePath: String, resourceStream: InputStream): InputStream? {
+private fun getZippedCsvResourceStream(resourcePath: String, resourceStream: InputStream): InputStream? {
     val lastPart = resourcePath.substringAfterLast("/")
     val innerFilename = lastPart.replace(".zip", ".csv")
     val zipStream = ZipInputStream(resourceStream)
@@ -79,7 +79,7 @@ fun getZippedCsvResourceStream(resourcePath: String, resourceStream: InputStream
 }
 
 // read through all the cvrs so that it can implement cardStyles, nrows,  redaction, ballotStyleUnique
-interface CorlaCvrsIF {
+interface CorlaCountyCvrsIF {
     val inputSource: String
     val electionName: String
     val versionName: String

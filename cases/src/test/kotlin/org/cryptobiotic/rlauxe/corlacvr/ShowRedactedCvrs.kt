@@ -22,7 +22,7 @@ class ShowRedactedCvrs {
 
     @Test
     fun testGarfield() {
-        val corlaCvrs = Garfield2020RawCvrs("/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Garfield.csv")
+        val corlaCvrs = Garfield2020CountyCvrs("/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Garfield.csv")
         println("  nrows = ${corlaCvrs.nrows()} redacted cvrs = ${corlaCvrs.redaction().redactedRows().size} redacted groups = ${corlaCvrs.redaction().groups().size} ")
     }
 }
@@ -34,7 +34,7 @@ fun lookForRedactions(filename: String, showRedaction: Boolean = false, showHead
     val redaction = if (filename.lowercase().contains("boulder")) RedactionBoulder(show=showRedaction) else Redaction(show=showRedaction)
 
     try {
-        val corlaRawCvrs = readCorlaCvrs(filename, redaction = redaction, showHeaders = showHeaders)
+        val corlaRawCvrs = readCountyCvrs(filename, redaction = redaction, showHeaders = showHeaders)
 
         println("  nrows = ${corlaRawCvrs.nrows()} redacted cvrs = ${corlaRawCvrs.redaction().redactedRows().size} redacted groups = ${corlaRawCvrs.redaction().groups().size} ")
 

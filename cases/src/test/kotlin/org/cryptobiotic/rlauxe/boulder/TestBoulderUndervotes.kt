@@ -147,7 +147,7 @@ class TestBoulderUndervotes {
     // class CreateBoulderElection(
     //    val electionName: String,
     //    val auditType: AuditType,
-    //    val corlaRawCvrs: CorlaCvrsIF,
+    //    val corlaRawCvrs: CorlaCountyCvrsIF,
     //    val sovo: BoulderStatementOfVotes,
     //    val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     //    val hasStyle: Boolean, // TODO

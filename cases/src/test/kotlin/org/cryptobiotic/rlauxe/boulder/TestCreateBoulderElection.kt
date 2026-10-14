@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
-import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrsFromFile
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.testdataDir
@@ -26,7 +26,7 @@ class TestCreateBoulderElection {
         val stopwatch = Stopwatch()
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val corlaCvrs = readCorlaCvrsFromFile(filename, showHeaders = false, showSchema = false, redaction = RedactionBoulder())
+        val corlaCvrs = readCountyCvrsFromFile(filename, showHeaders = false, showSchema = false, redaction = RedactionBoulder())
         // println(export.summary())
         println("took = $stopwatch")
 

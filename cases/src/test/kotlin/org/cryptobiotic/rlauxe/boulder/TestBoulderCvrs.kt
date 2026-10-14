@@ -3,10 +3,10 @@ package org.cryptobiotic.rlauxe.boulder
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.SchemaContestInfo
-import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrs
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import org.cryptobiotic.rlauxe.estimate.tabulateCvrsWithVoteForNs
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -42,7 +42,7 @@ class TestBoulderCvrs {
     }
 
     fun test(input: BoulderInput, sumManifest: Int) {
-        val corlaCvrs = readCorlaCvrs(input.cvrsSource, redaction = RedactionBoulder())
+        val corlaCvrs = readCountyCvrs(input.cvrsSource, redaction = RedactionBoulder())
         println("\n${input.cvrsSource}\nCVR schema contests ${corlaCvrs.schema.contests.size}")
 
         val sovo = input.sovo()
@@ -60,7 +60,7 @@ class TestBoulderCvrs {
         testParseBoulderCvrs(corlaCvrs, contestIds, sumManifest)
     }
 
-    fun compareSovoAndCvrs(corlaCvrs: CorlaCvrsIF, sovo: BoulderStatementOfVotes, election: CreateBoulderElection) {
+    fun compareSovoAndCvrs(corlaCvrs: CorlaCountyCvrsIF, sovo: BoulderStatementOfVotes, election: CreateBoulderElection) {
 
         val voteForNs = corlaCvrs.schema.contests.map { Pair(it.contestName, it.voteForN) }
 
@@ -98,7 +98,7 @@ class TestBoulderCvrs {
         return cvrContests.find { it.contestName.contains(sovoContestName) } != null
     }
 
-    fun testParseBoulderCvrs(corlaCvrs: CorlaCvrsIF, contestIds:List<Pair<String, Int>>, sumManifest: Int) {
+    fun testParseBoulderCvrs(corlaCvrs: CorlaCountyCvrsIF, contestIds:List<Pair<String, Int>>, sumManifest: Int) {
         val exportCvrs: List<Cvr> = corlaCvrs.cvrs().map { it.convertToCard().toCvr() }
 
         val votes = tabulateCvrsWithVoteForNs(exportCvrs.iterator(), corlaCvrs.schema.voteForNs).toSortedMap()

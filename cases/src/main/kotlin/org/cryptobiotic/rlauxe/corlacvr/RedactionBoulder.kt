@@ -10,7 +10,7 @@ class RedactionBoulder(show: Boolean = false) : Redaction(show=show) {
 
     // "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
     // "src/test/data/Boulder2025/Redacted-CVR-PUBLIC.csv"
-    override fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaRawCvrs): Boolean {
+    override fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaCountyCvrs): Boolean {
         val ballotType = corlaRawCvrs.getBallotType(line)
 
         if (line.get(0).startsWith("Redacted")) {

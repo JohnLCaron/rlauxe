@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.corlaCounty.CountyCvrManifest
-import org.cryptobiotic.rlauxe.corlaCounty.GarfieldCvrManifest
+import org.cryptobiotic.rlauxe.corlaCounty.CountyManifestEntries
+import org.cryptobiotic.rlauxe.corlaCounty.GarfieldManifestEntries
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
@@ -14,14 +14,14 @@ class CorlaCounty2020Input(
     val votedatabase: Map<String, String> = votedatabaseIn ?: votedatabase2020Counties("/home/stormy/datadrive/votedatabase/cvr/Colorado/")
 
     override val electionName = "${countyName}2020"
-    // TODO Gunnison has Manifest-Gunnison.csv; but Gunnison is an excluded county
+    // TODO Gunnison has Manifest-Gunnison.csv; but Gunnison is an excluded county in 2020
     override val manifestSource = "$manifestDir/manifest-${countyNameZ}.csv"
     override val cvrsSource: String = votedatabase[countyName]!!
     override val year = 2020
 
-    override fun readCountyManifest(): CountyCvrManifest {
+    override fun readCountyManifest(): CountyManifestEntries {
         if (countyName == "Garfield") {
-            return GarfieldCvrManifest(manifestSource)
+            return GarfieldManifestEntries(manifestSource)
         }
 
         var result = super.readCountyManifest()
@@ -33,11 +33,10 @@ class CorlaCounty2020Input(
         return result
     }
 
-    override fun countyPopulation() = stateInput.strataPopulation()[countyName]!!
+    override fun countyPopulation() = Colorado2020General().strataPopulation()[countyName]!!
 
     companion object {
         val manifestDir = "$auditcenter/2020/general/round_1"
-        val stateInput = Colorado2020General()
     }
 }
 
@@ -65,7 +64,7 @@ fun votedatabase2020Counties(votedatabase: String): Map<String, String> {
     return cvrdata.toMap()
 }
 
-// OOOps manifests not available
+// oops manifests not available in 2020
 fun auditcenter2020Manifests(auditcenter: String): Map<String, String> {
     val path = Path(auditcenter) // or does votedatabase include
 

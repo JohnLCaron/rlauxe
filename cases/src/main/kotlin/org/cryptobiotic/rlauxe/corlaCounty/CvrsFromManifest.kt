@@ -22,11 +22,13 @@ import kotlin.random.Random
 
 private val logger = KotlinLogging.logger("CvrsFromManifest")
 
-// used in CorlaCountyElection
+// TODO try not converting to canonical.
+// TODO seems like you need to truly make the cards from the manifest, and then attach the cvrs ??
+// Also see MatchCountyCvrs
 class CvrsFromManifest(
     val variant: ElectionVariant,
     val countyInput: CorlaCountyInput,
-    val stateInput: ColoradoInput,
+    val stateInput: ColoradoInput, // used for converter. TODO What if we didnt convert ??
     val infos: Map<Int, ContestInfo>,
     startingPoolId: Int,
 ) {
@@ -51,7 +53,6 @@ class CvrsFromManifest(
 
     init {
         val corlaCvrs = countyInput.readCorlaCvrs()
-        // corlaRawCvrs.redactedGroups()
 
         val manifest = countyInput.readCountyManifest()
         manifestIds = manifest.manifestCounts(corlaCvrs)
@@ -60,6 +61,7 @@ class CvrsFromManifest(
         cvrStyles = converter.cardStyles.values.toList()
         nextStyleId = startingPoolId + cvrStyles.size
 
+        // convert cvrs to use canonical contests and candidates; allowed to not be in manifest
         convertedCvrs = corlaCvrs.cvrs().map {
             converter.convertToCard(it) { cvrb: AuditableCardBuilder ->
                 val manifestEntry = manifestIds.match[cvrb.id]
@@ -190,8 +192,13 @@ class CvrsFromManifest(
         var count = 0
         while (redactedIter.hasNext() && count < cardPool.ncards()) {
             val manifestEntry = redactedIter.next()
-            val cvb2 = AuditableCardBuilder(manifestEntry.imprintedId(), "$county:${manifestEntry.location()}", count, 0L, variant.phantoms,
-                cardPool.poolId, cardPool.poolId, null, null)
+            val cvb2 = AuditableCardBuilder(
+                manifestEntry.imprintedId(),
+                "$county:${manifestEntry.location()}",
+                count, 0L,
+                variant.phantoms, // TODO ??
+                cardPool.poolId,
+                cardPool.poolId, null, null)
             vunderPool.simulatePooledCard(cvb2) // fill in the vote
             cardsForPool.add(cvb2.build())
             count++

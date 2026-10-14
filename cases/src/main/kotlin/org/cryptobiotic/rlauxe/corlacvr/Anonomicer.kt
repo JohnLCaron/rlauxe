@@ -14,13 +14,13 @@ import kotlin.math.max
 import kotlin.random.Random
 
 class Anonomicer(
-    val corlaCvrs: CorlaCvrsIF,  // should be the unredacted cvr file
+    val corlaCvrs: CorlaCountyCvrsIF,  // should be the unredacted cvr file
     val minBallots: Int = MIN_BALLOTS_DEFAULT,
     val styleOnly: Boolean = false,  // use style only, else use precinct/style
     val removePrecinctCol: Boolean = false,
     val removeBallotTypeCol: Boolean = false,
 ) {
-    constructor(input: String) : this( readCorlaCvrs(input), MIN_BALLOTS_DEFAULT)
+    constructor(input: String) : this( readCountyCvrs(input), MIN_BALLOTS_DEFAULT)
 
     val schema = corlaCvrs.schema
     val infos: Map<Int, ContestInfo>
@@ -454,7 +454,7 @@ class Anonomicer(
 
     fun verify(redactedFile: String) {
         val unredactedTabs = tabulate(corlaCvrs)
-        val redactedCvrs = readCorlaCvrs(redactedFile)
+        val redactedCvrs = readCountyCvrs(redactedFile)
         val redactedTabs = tabulate(redactedCvrs)
         val usum = unredactedTabs.sum()
         val rsum = redactedTabs.sum()
@@ -537,7 +537,7 @@ class PrecinctCardStyle(val precinctPortion: String, val infos: Map<Int, Contest
     }
 }
 
-fun findPrecinctStyles(corlaCvrs: CorlaCvrsIF, infos: Map<Int, ContestInfo>): List<PrecinctCardStyle> {
+fun findPrecinctStyles(corlaCvrs: CorlaCountyCvrsIF, infos: Map<Int, ContestInfo>): List<PrecinctCardStyle> {
     val styleCounters = mutableMapOf<String, PrecinctCardStyle>()
     corlaCvrs.cvrs().forEach { cvr ->
         // val cvrStyleId = CardStyleId(cvr.ballotType, cvr.contests())
@@ -550,7 +550,7 @@ fun findPrecinctStyles(corlaCvrs: CorlaCvrsIF, infos: Map<Int, ContestInfo>): Li
     return styleCounters.values.toList()
 }
 
-fun findUniqueStyles(corlaCvrs: CorlaCvrsIF, infos: Map<Int, ContestInfo>): List<UniqueStyle> {
+fun findUniqueStyles(corlaCvrs: CorlaCountyCvrsIF, infos: Map<Int, ContestInfo>): List<UniqueStyle> {
     val styleCounters = mutableMapOf<Set<Int>, UniqueStyle>()
     corlaCvrs.cvrs().forEach { cvr ->
         val pcStyle = styleCounters.getOrPut(cvr.contests()) { UniqueStyle(cvr.contests(), infos) }
@@ -579,7 +579,17 @@ data class CvrTabulations(val infos: Map<Int, ContestInfo>,
     }
 }
 
-fun tabulate(corlaCvrs: CorlaCvrsIF): CvrTabulations  {
+fun tabulateCvrRows(rows: Iterator<CvrRow>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+    val sum = mutableMapOf<Int, ContestTabulation>()
+    rows.forEach { row ->
+        row.contestVotes.forEach {
+            sum.sumContestTabulationsFromCandVotes(infos[it.contestId]!!, it.candVotes())
+        }
+    }
+    return sum
+}
+
+fun tabulate(corlaCvrs: CorlaCountyCvrsIF): CvrTabulations  {
     val infos = corlaCvrs.makeContestInfo().map { it ->
         ContestInfo(
             it.name, it.id, it.candidateNames,

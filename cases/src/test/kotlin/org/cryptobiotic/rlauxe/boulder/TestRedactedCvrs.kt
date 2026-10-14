@@ -2,10 +2,9 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corlacvr.CorlaCvrsIF
-import org.cryptobiotic.rlauxe.corlacvr.CorlaRawCvrs
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
-import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrsFromFile
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.tabulateCards
@@ -23,7 +22,7 @@ class TestRedactedCvrs {
         val sovoFilename = "$datadir/2025C-Boulder-County-Official-Statement-of-Votes.utf8.csv"
         val sovo: BoulderStatementOfVotes = readBoulderStatementOfVotes(sovoFilename, "Boulder2024")
 
-        val export = readCorlaCvrsFromFile(cvrFilename, redaction = RedactionBoulder())
+        val export = readCountyCvrsFromFile(cvrFilename, redaction = RedactionBoulder())
 
         val electionSimCvrs = CreateBoulderElection("boulder2025", AuditType.CLCA, export, sovo, hasStyle = true,
             variantEnum = ElectionVariantEnum.Styles
@@ -35,7 +34,7 @@ class TestRedactedCvrs {
     fun test2024RedactedCvrs() {
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export = readCorlaCvrsFromFile(filename, redaction = RedactionBoulder())
+        val export = readCountyCvrsFromFile(filename, redaction = RedactionBoulder())
 
         val sovo = readBoulderStatementOfVotes(
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
@@ -50,7 +49,7 @@ class TestRedactedCvrs {
         testRedactedCvrTabulation(export, electionSimCvrs)
     }
 
-    fun testRedactedCvrTabulation(export: CorlaCvrsIF, election: CreateBoulderElection) {
+    fun testRedactedCvrTabulation(export: CorlaCountyCvrsIF, election: CreateBoulderElection) {
         val cards = election.makeSimulatedCards(election.redactedPools)
         println("nredacted cvrs = ${cards.size}")
 

@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
-import org.cryptobiotic.rlauxe.corlacvr.readCorlaCvrsFromFile
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrsFromFile
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import kotlin.test.assertTrue
 import kotlin.test.Test
@@ -14,7 +14,7 @@ class TestBoulderCvrExportCsv {
     @Test
     fun parseThreeCandidatesTenVotesSucceeds() {
         val filename = "src/test/data/corla/1misc/ThreeCandidatesTenVotes.csv"
-        val export = readCorlaCvrsFromFile(filename)
+        val export = readCountyCvrsFromFile(filename)
         println(export)
 
         // There should be one contest, the one we just read in.
@@ -35,7 +35,7 @@ class TestBoulderCvrExportCsv {
     @Test
     fun test4CvrsWithIRV() {
         val filename = "src/test/data/Boulder2023/Test4CvrsWithIRV.csv"
-        val export = readCorlaCvrsFromFile(filename)
+        val export = readCountyCvrsFromFile(filename)
         println(export)
 
         assertEquals("src/test/data/Boulder2023/Test4CvrsWithIRV.csv", export.inputSource)
@@ -118,7 +118,7 @@ class TestBoulderCvrExportCsv {
     @Test
     fun testWithRedactions() {
         val filename = "src/test/data/Boulder2024/TestWithRedactions.csv"
-        val export = readCorlaCvrsFromFile(filename, redaction = RedactionBoulder())
+        val export = readCountyCvrsFromFile(filename, redaction = RedactionBoulder())
         // println(export.summary())
 
         assertEquals(filename, export.inputSource)
@@ -201,7 +201,7 @@ class TestBoulderCvrExportCsv {
     @Test
     fun parseBoulder23Succeeds() {
         val filename = "src/test/data/Boulder2023/Boulder-2023-Coordinated-CVR-Redactions-removed.csv"
-        val export = readCorlaCvrsFromFile(filename, redaction = RedactionBoulder())
+        val export = readCountyCvrsFromFile(filename, redaction = RedactionBoulder())
 
         val schema = export.schema
         // There should be 38 contests. Check their metadata.
@@ -333,7 +333,7 @@ class TestBoulderCvrExportCsv {
     fun parseBoulder24Recount() {
         // redaction lines are present
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
-        val export = readCorlaCvrsFromFile(filename, redaction = RedactionBoulder())
+        val export = readCountyCvrsFromFile(filename, redaction = RedactionBoulder())
 
         assertEquals(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv",

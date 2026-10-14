@@ -9,17 +9,18 @@ import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.text.isEmpty
 
 // this reads CVRs from "Dominion CVR export files", maybe a standard Dominion csv format.
-// This class stays low-level and tries not to muck with the data
+// This class stays low-level and tries not to muck with the data.
+// However, it does remove the redacted rows, which are available in Redaction.redactedRows().
 // TODO perhaps there should be a separate object using cvrs: CloseableIterable ??
 //      and read through all the cvrs to implement cardStyles, nrows,  redaction, ballotStyleUnique
-private val logger = KotlinLogging.logger("CorlaRawCvrs")
+private val logger = KotlinLogging.logger("CorlaCountyCvrs")
 
-class CorlaRawCvrs(override val inputSource: String,
-                   val parser: CSVParser,
-                   showHeaders: Boolean = false,
-                   showSchema: Boolean = false,
-                   val redaction: Redaction = Redaction(),
-): CorlaCvrsIF {
+class CorlaCountyCvrs(override val inputSource: String,
+                      val parser: CSVParser,
+                      showHeaders: Boolean = false,
+                      showSchema: Boolean = false,
+                      val redaction: Redaction = Redaction(),
+): CorlaCountyCvrsIF {
 
     override val electionName: String
     override val schema: CvrSchema

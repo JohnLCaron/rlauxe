@@ -1,13 +1,13 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
-import org.cryptobiotic.rlauxe.boulder.Boulder23Input
+import org.cryptobiotic.rlauxe.corlaInput.Arapahoe2020Input
 import kotlin.test.Test
 
-class TestCorlaCvrs {
+class TestMatchCountyCvrs {
 
     @Test
-    fun testOneCorlaCountyInput() {
-        val testMatchCountyCvrs = MatchCountyCvrs(Boulder23Input())
+    fun testMatchCountyCvrs() {
+        val testMatchCountyCvrs = MatchCountyCvrs(Arapahoe2020Input())
         testMatchCountyCvrs.showRedactedCvrs()
         testMatchCountyCvrs.manifestCounts(show = true)
         testMatchCountyCvrs.showTabulations()

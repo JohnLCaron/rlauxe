@@ -29,7 +29,8 @@ import java.io.OutputStreamWriter
 import kotlin.collections.forEach
 import kotlin.text.split
 
-val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
+// val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
+val auditcenter = "/home/joncifer/IdeaProjects/auditcenter"
 
 private val logger = KotlinLogging.logger("ColoradoInput")
 

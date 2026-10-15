@@ -57,8 +57,9 @@ class MatchCountyCvrs(val countyInput: CorlaCountyInput) {
 
     fun showRedactedCvrs() {
         val redaction = corlaCvrs.redaction()
-        println("Redacted Cvrs (${redaction.redactedRows().size})")
+        println("Redacted Cvr Rows (${redaction.redactedRows().size})")
         redaction.redactedRows().forEach { println("  $it")}
+        println("Redacted Cvr Groups (${redaction.groups().size})")
         redaction.groups().forEach { println("  ${it.firstCsv}")}
         println()
     }

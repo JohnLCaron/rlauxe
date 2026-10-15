@@ -113,6 +113,17 @@ class TestAnonData {
         compareTwoRedactions("$python/$county.csv", output, show=true)
     }
 
+    @Test
+    fun testAnonymizeArapahoe() {
+        val stopwatch = Stopwatch()
+
+        val output = "/home/joncifer/tmp/ArapahoeRedacted.csv"
+
+        val cvrs = readCountyCvrs("/home/joncifer/Downloads/REDACTED_CVR_Export_20201130085221.csv")
+        Anonomicer(cvrs, styleOnly=false).redact(output)
+        println("that took $stopwatch")
+    }
+
     // needs redaction: Arapahoe (301 s), Denver (517 s), La Plata(640 ms), Larimer (2 sec), Mesa (32 s), Routt (6), Saguache (2), Sedgwick(214 ms)
     @Test
     fun testAnonymize2020Cvrs() {

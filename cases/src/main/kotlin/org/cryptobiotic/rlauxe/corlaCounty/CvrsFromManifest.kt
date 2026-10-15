@@ -24,7 +24,7 @@ private val logger = KotlinLogging.logger("CvrsFromManifest")
 
 // TODO try not converting to canonical.
 // TODO seems like you need to truly make the cards from the manifest, and then attach the cvrs ??
-// Also see MatchCountyCvrs
+//      Also see MatchCountyCvrs
 class CvrsFromManifest(
     val variant: ElectionVariant,
     val countyInput: CorlaCountyInput,

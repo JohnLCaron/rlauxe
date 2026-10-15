@@ -17,7 +17,7 @@ class ShowRedactedCvrs {
     @Test
     fun oneColorado2020Counties() {
         // lookForRedactions("/home/stormy/datadrive/votedatabase/cvr/Colorado/Phillips/cvr.csv", showHeaders = true)
-        lookForRedactions("/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Phillips.csv", showHeaders = true)
+        lookForRedactions("/home/joncifer/Downloads/REDACTED_CVR_Export_20201130085221.csv", showHeaders = true)
     }
 
     @Test
@@ -48,6 +48,6 @@ fun lookForRedactions(filename: String, showRedaction: Boolean = false, showHead
         }
 
     } catch (e: Throwable) {
-        println("$filename got error ${e.message}")
+        e.printStackTrace()
     }
 }

@@ -115,7 +115,7 @@ class CanonicalCvrsFromManifest(
         return rcvrs
     }
 
-    // make simulated MVRs for one pool, all contests, using the unmatched manifestIds; set styleId, poolId if not sim.
+    // make simulated MVRs for one pool, all contests, using the unmatched manifestIds; set styleId, poolId if not version = sim.
     private fun makeMvrsForOnePool(cardPool: CardPool, redactedIter: Iterator<ManifestEntry>) : List<AuditableCard> { // contestId -> candidateId -> nvotes
         val vunders = cardPool.possibleContests().associate { Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
         val vunderPool = VunderPool(vunders, cardPool.poolName, cardPool.poolId, cardPool.hasExactContests)

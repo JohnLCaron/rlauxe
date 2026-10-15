@@ -14,9 +14,8 @@ import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 
-// CorlaCountyInput has cvrs, presumably redacted, and a CountyManifestEntries.
+// CorlaCountyInput has cvrs, presumably redacted, and a CountyManifest.
 // it knows the county's total number of ballots
-// should it be in corlaCounty ??
 interface CorlaCountyInput {
     val electionName: String
     val countyName: String

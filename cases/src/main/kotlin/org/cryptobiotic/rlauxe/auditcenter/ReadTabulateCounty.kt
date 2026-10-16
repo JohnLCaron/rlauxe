@@ -6,7 +6,6 @@ import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
-import org.cryptobiotic.rlauxe.corlaInput.matchCandidateName
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
 import java.io.File
@@ -108,7 +107,7 @@ data class CountyContestVotes(override val countyName: String, override val cont
 
     fun canonicalChoices(canonicalContest: CanonicalContest): Map<String, Int> {
         return choices.filter { !isWriteIn(it.key) }.mapKeys {
-            canonicalContest.matchCandidateName(it.key )!!
+            canonicalContest.matchCanonicalCandidate(it.key )!!
         }
     }
 
@@ -116,10 +115,8 @@ data class CountyContestVotes(override val countyName: String, override val cont
         val candidateVotes = canonicalChoices(canonicalContest).map { (canonicalChoiceName, vote) ->
             if (info.candidateNames[canonicalChoiceName] == null)
                 throw RuntimeException("contestTab candidate name $canonicalChoiceName not found in info")
-
             Pair( info.candidateNames[canonicalChoiceName]!!, vote)
         }.toMap()
-
         return ContestTabulation(info, candidateVotes, ncards)
     }
 
@@ -170,10 +167,10 @@ fun readCountyTabulateCsv(filename: String): Map<String, CountyTabAllContests> {
         println(line)
         ex.printStackTrace()
     }
-    // println("read $count lines")
     return counties.toSortedMap()
 }
 
+// this is derived from CountyTabAllContests
 data class ContestTabAllCounties(override val contestName: String): ContestTabAllCountiesIF {
     override val choices = mutableMapOf<String, Int>() // original choice name -> votes
     override val counties = mutableSetOf<String>()     // countyNames
@@ -193,9 +190,9 @@ data class ContestTabAllCounties(override val contestName: String): ContestTabAl
     fun canonicalChoices(canonicalContest: CanonicalContest): Map<String, Int>  { // canonical choice name -> votes
         val result = mutableMapOf<String, Int>()
         choices.filter{ !isWriteIn(it.key) }.forEach { (choiceName, votes) ->
-            val canonCand = canonicalContest.matchCandidateName(choiceName)
+            val canonCand = canonicalContest.matchCanonicalCandidate(choiceName) // need county override, so dont do this here
             if (canonCand == null) {
-                println("'${choiceName}' not found in canonical contest '${canonicalContest.contestName}'")
+                logger.error{"'${choiceName}' not found in canonical contest '${canonicalContest.contestName}'"}
                 throw RuntimeException()
             }
             val accum = result.getOrDefault(canonCand, 0)

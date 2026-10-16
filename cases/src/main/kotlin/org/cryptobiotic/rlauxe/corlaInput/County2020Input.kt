@@ -6,10 +6,10 @@ import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 
-class CorlaCounty2020Input(
+class County2020Input(
     override val countyName: String,
     votedatabaseIn: Map<String, String>? = null,
-): CorlaCountyInput {
+): CountyInput {
     val countyNameZ = countyName.replace(" ", "")
     val votedatabase: Map<String, String> = votedatabaseIn ?: votedatabase2020Counties("/home/stormy/datadrive/votedatabase/cvr/Colorado/")
 
@@ -33,7 +33,7 @@ class CorlaCounty2020Input(
         return result
     }
 
-    override fun countyPopulation() = Colorado2020General().strataPopulation()[countyName]!!
+    override fun countyPopulation() = Statewide2020General().strataPopulation()[countyName]!!
 
     companion object {
         val manifestDir = "$auditcenter/2020/general/round_1"

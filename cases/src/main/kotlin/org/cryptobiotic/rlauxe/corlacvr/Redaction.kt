@@ -188,7 +188,7 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
     var fixedNcards: Int? = null  // when we are told how many cards are in the group
     // var style : CvrCardStyle? = null TODO
     var singleCards = true
-    // var setNcards: Int? = null
+    var setNcards = 0
 
     init {
         if (groupName.isEmpty())
@@ -235,7 +235,7 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
 
     // merge two RedactedGroups together
     fun merge(other: RedactedGroup): RedactedGroup  {
-        if (fixedNcards != null || other.fixedNcards != null) { throw RuntimeException("Cant merge fixed group") }
+        // if (fixedNcards != null || other.fixedNcards != null) { throw RuntimeException("Cant merge fixed group") }
 
         // require (this.ballotType == other.ballotType)
         other.candVotes.forEach { (contestId, otherCands) ->
@@ -247,7 +247,7 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
         }
         this.nlines += other.nlines // other.minCards(voteForNmap)
         this.singleCards = this.singleCards && other.singleCards
-        // TODO can you merged fixed groups ?? this.fixedNcards += other.fixedNcards ?: 0
+        // TODO this.fixedNcards = (this.fixedNcards ?: 0) + (other.fixedNcards ?: 0)
 
         return this
     }
@@ -266,7 +266,7 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
 
     // TODO
     fun ncards():Int {
-        return fixedNcards?: max(nlines, minCards())
+        return fixedNcards?: max( max(nlines, minCards()), setNcards)
     }
 
     override fun toString() = buildString {

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.auditcenter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
@@ -19,11 +19,11 @@ import kotlin.collections.set
 
 private val logger = KotlinLogging.logger("CorlaCvrConverter")
 
-// convert CorlaCountyCvrsIF from CVRs ids to canonical ids in coloradoInput
+// convert CorlaCountyCvrsIF from CVRs ids to canonical ids in statewideInput
 // each CorlaCountyCvrsIF is specific to a County.
 // infosByName is from canonical contests
 class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCountyCvrsIF, val infosByName: Map<String, ContestInfo>,
-                        val coloradoInput: ColoradoInput, startingStyleId: Int = 1) {
+                        val statewideInput: StatewideInput, startingStyleId: Int = 1) {
 
     // map export contest to canon contest, then an array mapping export cand id to canonical candidate id
     val exportToCanonLookup = mutableMapOf<Int, ExportToCanonLookup>() // export contestId -> ExportToCanonLookup
@@ -45,11 +45,11 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCountyCvrsIF, va
         var countMissing = 0
         var countMissingCand = 0
         schemaContestInfos.forEach { schemaContestInfo ->
-            val canonicalContest = coloradoInput.matchCanonicalContest(county, schemaContestInfo.name) // clean up your act, sheesh
+            val canonicalContest = statewideInput.matchCanonicalContest(county, schemaContestInfo.name) // clean up your act, sheesh
             if (canonicalContest == null) {
-                logger.warn{"  *** missing schema contest: '${schemaContestInfo.name}' from county $county"}
-                // coloradoInput.canonicalContestMungedNames.keys.sorted().forEach { println(" $it") }
-                coloradoInput.matchCanonicalContest(county, schemaContestInfo.name)
+                logger.debug{"  *** missing schema contest: '${schemaContestInfo.name}' from county $county"}
+                // statewideInput.canonicalContestMungedNames.keys.sorted().forEach { println(" $it") }
+                // statewideInput.matchCanonicalContest(county, schemaContestInfo.name)
                 countMissing++
             } else {
                 val info = infosByName[canonicalContest.contestName]
@@ -67,10 +67,10 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCountyCvrsIF, va
 
                 schemaContestInfo.candidateNames.filter { !isWriteIn(it.key) }.forEach { (exportCandidate, schemaCandId) ->
                     // use a lookup instead of a map TODO worth the complexity ??
-                    val canonCandidateName = coloradoInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
+                    val canonCandidateName = statewideInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
                     if (canonCandidateName == null) {
                         logger.error{"no match on exportCandidateName '$exportCandidate' from county $county contest ${schemaContestInfo.name}"}
-                        coloradoInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
+                        statewideInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
                         throw Exception("no match on exportCandidateName '$exportCandidate' from county $county contest ${schemaContestInfo.name}")
                     }
                     val canonCandId = info.candidateNames[canonCandidateName] // what if this fails ??
@@ -148,6 +148,7 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCountyCvrsIF, va
         val cardStyle = cardStyles[canonicalIdSet]
         val useCardStyleId = cardStyle?.id() ?: throw RuntimeException("Cant find style") // CardStyle.fromCvrStyle.id // can this happen ??
         val cvrb = AuditableCardBuilder(dcvr.imprintedId, null,  0, 0L, false, styleId=useCardStyleId, poolId=null, votesIn=null)
+
         // have to map both contestId and candVotes
         dcvr.contestVotes.forEach { contestVote ->
             val lookup = exportToCanonLookup[contestVote.contestId]
@@ -155,8 +156,8 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCountyCvrsIF, va
                 val cannonCandidateIds = contestVote.votedFor.map { lookup.candLookup[it] }.filter { it >= 0 }
                 cvrb.replaceContestVotes(lookup.canonContestId, cannonCandidateIds.toIntArray() )
             } else {
-                logger.error{"cant find exportToCanonLookup[${contestVote.contestId}] in county '$county'"}
-                throw Exception("cant find contest")
+                // the contest was removed from canonical contests
+                logger.debug{"cant find exportToCanonLookup[${contestVote.contestId}] in county '$county'"}
             }
         }
         if (visit != null) visit(cvrb)
@@ -184,7 +185,7 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCountyCvrsIF, va
     fun convertToContestTabulation(countyTab: CountyTabAllContests): Map<Int, ContestTabulation> {
         val canonTabs = mutableMapOf<Int, ContestTabulation>()
         countyTab.contests.forEach{ (contestName, contestVotes: CountyContestVotes  ) ->
-            val canonicalContest = coloradoInput.matchCanonicalContest(county, contestName)!!
+            val canonicalContest = statewideInput.matchCanonicalContest(county, contestName)!!
             val info = infosByName[canonicalContest.contestName]!!
 
             // TODO where to get ncards ?????

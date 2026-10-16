@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.auditcenter
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -11,7 +11,7 @@ class TestStateManifest {
 
     @Test
     fun testAgainstManifestCompareFile() {
-        val stateInput = Colorado2026Primary()
+        val stateInput = Statewide2026Primary()
         val stateManifest = stateInput.statewideManifest
         val stateBatches = stateManifest.batchInterator()
         val mcs: List<ManifestCompare> = ManifestCompare.readFromFile("$auditcenter/2026/primary/finalReports/CountyBallotManifestToCVRcomparison.csv")

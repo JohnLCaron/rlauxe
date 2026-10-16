@@ -172,7 +172,7 @@ class CorlaCountyCvrs(override val inputSource: String,
     fun parseColAsInt(header: CvrHeader, line: CSVRecord, def: Int = -1): Int {
         val colidx = schema.headerIdx[header]
         return if (colidx != null && colidx < line.size()) {
-            val col = line.get(colidx)
+            val col = line.get(colidx) // does this trim whitespace ?
             // TODO doesnt actually guard against not being an Int, just if its empty
             if (col.isEmpty()) def else removeLeadingEquals(col).toInt()
         } else def

@@ -19,8 +19,8 @@ import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
 import org.cryptobiotic.rlauxe.util.tabulateCards
 
 class CheckCvrsAndManifest(
-    val stateInput: ColoradoInput,
-    val countyInput: CorlaCountyInput,
+    val stateInput: StatewideInput,
+    val countyInput: CountyInput,
     val showMatch: Boolean = false,
     val showMissingVotes: Boolean = false,
     val showRedactedCvrs: Boolean = false,
@@ -174,7 +174,7 @@ fun showTabDiffs(diff: Map<Int, ContestTabulation>) {
 
 /*
 ///////////////////////////////////////////////////////////////
-fun compareCvrsAndManifests(input: CorlaCountyInput, corlaRawCvrs: CorlaCountyCvrsIF, showMissed: Boolean = true, showUnmatched: Boolean = false) {
+fun compareCvrsAndManifests(input: CountyInput, corlaRawCvrs: CorlaCountyCvrsIF, showMissed: Boolean = true, showUnmatched: Boolean = false) {
     val allCvrs = corlaRawCvrs.cvrs() + corlaRawCvrs.redactedCvrs()
 
     val nCvrs = allCvrs.size

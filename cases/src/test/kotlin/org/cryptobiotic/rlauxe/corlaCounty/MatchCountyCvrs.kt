@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corlaCounty
 import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.corlacvr.tabulateCvrRows
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
 import org.cryptobiotic.rlauxe.util.trunc
 
 // Match manifest and Cvrs without reference to the state files
-class MatchCountyCvrs(val countyInput: CorlaCountyInput) {
+class MatchCountyCvrs(val countyInput: CountyInput) {
     val show = false
     val corlaCvrs = countyInput.readCorlaCvrs()
     val county = countyInput.countyName

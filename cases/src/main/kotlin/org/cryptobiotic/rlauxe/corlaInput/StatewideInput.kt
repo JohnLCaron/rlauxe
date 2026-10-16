@@ -14,25 +14,38 @@ import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.auditcenter.readColoradoContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.readContestComparisonCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
+import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
-import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.util.sfn
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStreamWriter
 import kotlin.collections.forEach
-import kotlin.text.split
 
-// val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
-val auditcenter = "/home/joncifer/IdeaProjects/auditcenter"
+val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
+// val auditcenter = "/home/joncifer/IdeaProjects/auditcenter"
 
-private val logger = KotlinLogging.logger("ColoradoInput")
+private val logger = KotlinLogging.logger("StatewideInput")
+
+abstract class StatewideInputWithManifests(
+    generalCanonicalFile: String, contestRoundFile: String, tabulateCountyFile: String, mvrComparisonFile: String,
+    val manifestDir: String,
+): StatewideInput(
+    generalCanonicalFile, contestRoundFile, tabulateCountyFile, mvrComparisonFile)
+{
+    abstract fun corlaCountyManifest(countyName: String): CountyManifest?
+
+    abstract fun corlaStateManifest(): StateManifest?
+}
+
+abstract class StatewideInputWithCvrs(
+    generalCanonicalFile: String, contestRoundFile: String, tabulateCountyFile: String, mvrComparisonFile: String
+): StatewideInput(
+    generalCanonicalFile, contestRoundFile, tabulateCountyFile, mvrComparisonFile)
+{
+    // TODO should not have votedatabase parameter
+    abstract fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>? = null): CountyInput?
+}
+
 
 /*
    1. Identify the following 4 files in auditcenter
@@ -58,38 +71,22 @@ private val logger = KotlinLogging.logger("ColoradoInput")
         Adams,17th Judicial District Ballot Question 7B,101-130-14,14,"""Yes/For""","""Yes/For""",YES,uploaded,"",2024-11-19 09:49:44.148182,240137,
         Adams,17th Judicial District Ballot Question 7B,101-146-54,65,"""No/Against""","""No/Against""",YES,uploaded,"",2024-11-19 09:54:41.65526,250284,
 
-   2. use TestColoradoInputNames to cross check names with generalCanonicalFile
+   2. use CheckCanonicalNames to cross check names with generalCanonicalFile
 
    additionally, we may need to make adjustments for cvrExport files, which tend to be divergent.
    subclasses provide contestNameCleanup and candidateNameCleanup
  */
 
-abstract class ColoradoInputWithManifests(
-    generalCanonicalFile: String, contestRoundFile: String, tabulateCountyFile: String, mvrComparisonFile: String,
-    val manifestDir: String,
-): ColoradoInput(
-    generalCanonicalFile, contestRoundFile, tabulateCountyFile, mvrComparisonFile)
-{
-    abstract fun corlaCountyManifest(countyName: String): CountyManifest?
-
-    abstract fun corlaStateManifest(): StateManifest?
-}
-
-abstract class ColoradoInputWithCvrs(
-    generalCanonicalFile: String, contestRoundFile: String, tabulateCountyFile: String, mvrComparisonFile: String
-): ColoradoInput(
-    generalCanonicalFile, contestRoundFile, tabulateCountyFile, mvrComparisonFile)
-{
-    abstract fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>? = null): CorlaCountyInput?
-}
-
-abstract class ColoradoInput(
+abstract class StatewideInput(
     val generalCanonicalFile: String,
     val contestRoundFile: String,
     val tabulateCountyFile: String,
     val mvrComparisonFile: String
-) {
-    val name = this.javaClass.simpleName
+): ColoradoInput {
+
+    override fun name() = this.javaClass.simpleName
+    override fun ncontests() = canonicalContests().size
+    override fun nuncontested() = canonicalContests().count() { it.value.choices.size < 2 }
 
     abstract fun skipCounties(countyName: String): Boolean
 
@@ -100,6 +97,16 @@ abstract class ColoradoInput(
     //    val counties =  mutableSetOf<String>()
 
     abstract fun canonicalContests(): Map<String, CanonicalContest>
+    fun initializeCanonicalContests(): MutableMap<String, CanonicalContest> {
+        val result: List<CanonicalContest> = readGeneralCanonicalList(generalCanonicalFile, this)
+        return result.associateBy { it.contestName }.toMutableMap()
+    }
+
+    fun addCandidates(result: MutableMap<String, CanonicalContest>, contestName: String, addCandidates: List<String>) {
+        val current = result[contestName]!!
+        val achoices = current.choices + addCandidates
+        result[contestName] = CanonicalContest(current.stateInput, current.contestName, choicesIn = achoices).addCounties(current.counties.toList())
+    }
 
     // in canonical manifest order
     open fun counties(): List<String>  = canonicalContests().values.map { it.counties }
@@ -219,28 +226,32 @@ abstract class ColoradoInput(
     private val strataPopulation: Map<String, Int> by lazy { mergedInfo().strataInfo.associate { it.strataName to it.ballotCardCount } } // county name to population
     val statewideContests: List<CorlaContestRoundCsv> by lazy { mergedInfo().statewideContests }
 
-    // dont use these directly, use matchCanonicalContest() and matchCanonicalCandidate()
-    open fun contestNameCleanup(county: String, name: String) = name
-    open fun candidateNameCleanup(county: String, name: String) = name
-
-    //// needed to match the export contest/candidata names, all ColoradoInput classes should be consistent already
-
+    //// TODO all StatewideInput classes should be consistent already
+    //// needed to match the export contest/candidata names, all StatewideInput classes should be consistent already
     fun matchCanonicalContest(county: String, exportContestName: String): CanonicalContest? {
-        val transform = contestNameCleanup(county, exportContestName)
-        val cleanup = munge(transform)
-        return canonicalContestMungedNames[cleanup]
+        val cleaned = contestNameCleanup(county, exportContestName)
+        val munged = munge(cleaned)
+        val result = canonicalContestMungedNames[munged]
+        return result
     }
 
+    fun matchCanonicalContest(exportContestName: String): CanonicalContest? {
+        val munged = munge(exportContestName)
+        return canonicalContestMungedNames[munged]
+    }
+
+    // abstract fun matchCanonicalCandidate(county: CanonicalContest, contest2: String)
+
     // return canonical candidate name
-    fun matchCanonicalCandidate(county: String, contest: CanonicalContest, exportCandidateName: String): String? {
-        val transform = candidateNameCleanup(county, exportCandidateName)
-        var match = contest.choices.find { munge(it) == munge(transform) }
-        if (match == null) match = contest.choices.find { it == yesno(exportCandidateName) }
+    fun matchCanonicalCandidate(county: String, contest: CanonicalContest, choice: String): String? {
+        val cleaned = candidateNameCleanup(county, choice)
+        var match = contest.choices.find { munge(it) == munge(cleaned) }
+        if (match == null) match = contest.choices.find { it == yesnoCanon(choice) }
         return match
     }
 
     // return canonical candidate name
-    fun matchCandidate(county: String, contestName: String, candName: String): String {
+    fun matchCanonicalCandidate(county: String, contestName: String, candName: String): String {
         val canon = matchCanonicalContest(county, contestName)!!
         return matchCanonicalCandidate(county, canon, candName)!!
     }
@@ -253,21 +264,33 @@ abstract class ColoradoInput(
         val transform = contestNameCleanup(countyName, contestName)
         return munge(transform)
     }
+
+    ///////// TODO these could be on the CountyInput
+    // dont use these directly, use matchCanonicalContest() and matchCanonicalCandidate()
+    open fun contestNameCleanup(county: String, name: String) = name
+    open fun candidateNameCleanup(county: String, name: String) = name
 }
 
 private val alphnumRE = "[^A-Za-z0-9]".toRegex()
 fun munge(name: String): String {
+    // var munge = removeParen(name) //  not sure
     var munge = name.replace(alphnumRE, "").lowercase()
-    // println("'$name' -> '$munge'")
     return munge
 }
 
 fun yesno(candName:String):String {
-    return when (candName) {
-        "Yes/For" -> "Yes"
-        "No/Against" -> "No"
-        "Yes" -> "Yes/For"
-        "No" -> "No/Against"
+    return when (candName.lowercase()) {
+        "yes/for" -> "Yes"
+        "no/against" -> "No"
+        "yes" -> "Yes/For"
+        "no" -> "No/Against"
+        else -> candName
+    }
+}
+fun yesnoCanon(candName:String):String {
+    return when (candName.lowercase()) {
+        "for the measure", "yes/for", "yes" -> "Yes"
+        "against the measure", "no/against", "no" -> "No"
         else -> candName
     }
 }
@@ -276,6 +299,18 @@ fun isWriteIn(candidateName: String) : Boolean {
     val cleanup = munge(candidateName)
     return cleanup.contains("writein")
 }
+
+fun removeParen(name: String): String {
+    val pos1 = name.indexOf("(")
+    val pos2 = name.indexOf(")")
+    if (pos1 > 0 && pos2 > 0) {
+        return (name.substring(0, pos1) +
+                if (pos2 == name.length-1) "" else name.substring(pos2+1, name.length)).trim()
+    }
+    return name
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
 
 data class MergedContestInfo(
     // canonical
@@ -322,14 +357,7 @@ data class MergedInfo(
     val statewideContests: List<CorlaContestRoundCsv>,
 )
 
-// just use munge to match names, no county name cleanup
-fun CanonicalContest.matchCandidateName(candidateName: String): String? {
-    var match = this.choices.find { munge(it) == munge(candidateName) }
-    if (match == null) match = this.choices.find { it == yesno(candidateName) }
-    return match
-}
-
-fun mergeContestInfo(input: ColoradoInput): MergedInfo {
+fun mergeContestInfo(input: StatewideInput): MergedInfo {
     val canonical: Map<String, CanonicalContest> = input.canonicalContests() // has canonical name
 
     val roundContests: Map<String, CorlaContestRoundCsv> = input.roundContests() // not canonical name
@@ -413,126 +441,4 @@ fun CountyContestVotes.makeContestTabulation(canonicalContest: CanonicalContest,
     }.toMap()
 
     return ContestTabulation(info, candidateVotes, ncards)
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-fun writeCountyData(topdir: String, strataInfo: List<StrataInfo>) {
-    // misc data by county
-    val outputFilename = "$topdir/${CountyAuditRecord.countyDataFile}"
-    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
-    writer.write("county,   nmvrs, ballotCardCount\n")
-    strataInfo.sortedBy { it.strataName }.forEach {
-        writer.write("${it.strataName}, ${nfn(it.nmvrs, 5)}, ${nfn(it.ballotCardCount, 5)}\n")
-    }
-    writer.close()
-    logger.info{"wrote ${strataInfo.size} countyData to $outputFilename"}
-}
-
-// data class CountyContestTab(val countyName: String) {
-//    val contests = mutableMapOf<String, ContestTab>()
-// data class ContestTab(val contestName: String) {
-//    val choices = mutableMapOf<String, Int>()
-
-fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAssertions>, coloradoInput: ColoradoInput) {
-    val countyTabs = coloradoInput.countyTabsAllContests()
-    // misc data by county
-    val outputFilename = "$topdir/${CountyAuditRecord.countyContestDataFile}"
-    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
-    writer.write("county, contest, id, voteDiff, votes,\n")
-
-    var count = 0
-    countyTabs.values.forEach { countyTab ->
-        countyTab.contests.values.forEach { ccv: CountyContestVotes ->
-            val contestUA = contestMap[ccv.contestName]
-            val canonicalContest = coloradoInput.canonicalContests()[ccv.contestName]
-            if (contestUA != null && canonicalContest != null) {
-                val contest = contestUA.contest
-                val info = contest.info()
-                val candidateVotes: Map<String, Int> = ccv.canonicalChoices(canonicalContest)
-                val votesByCandId = candidateVotes.mapKeys { info.candidateNames[it.key]!! }
-
-                // calculate the vote difference for the minimum assorter
-                val minAssertion = contestUA.minAssertion()
-                val voteDiff = if (minAssertion == null) 0
-                    else minAssertion.assorter.calcMarginFromRegVotes(votesByCandId, 1).toInt()
-
-                writer.write("${countyTab.countyName}, ${ccv.contestName}, ${info.id}, $voteDiff, ")
-                votesByCandId.forEach { (id, vote) ->
-                    writer.write("$id:$vote, ")
-                }
-                writer.write("\n")
-                count++
-            }
-        }
-    }
-    writer.close()
-    logger.info{"wrote ${count}  countyContestData to $outputFilename"}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// see WriteCountyInputData
-
-data class CountyInputData(val county: String,
-                           val manifestCount: Int,
-                           val unredactedCvrs: Int,
-                           val redactedCvrs: Int,
-                           val cvrInManifest:Int,
-                           val cvrNoManifest:Int,
-                           val manifestNoCvr: Int,
-                           val pythonNredact: Int,
-                           val rlauxeNredact: Int,
-                           val minCards: Int,
-                           val countBlankPrecincts: Int,
-                           val ballotStylesUnique: Boolean,
-                           val ballotStyleMin: Int,
-                           val precinctStyleMin: Int,
-)
-
-fun writeCountyInputData(outputFilename: String, data: List<CountyInputData>) {
-    // misc data by county
-    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
-    writer.write("            county,   manifestCount, unredactedCvrs, redactedCvrs, cvrInManifest, cvrNoManifest, manifestNoCvr, " +
-            "pythonNredact, rlauxeNredact, minCards, countBlankPrecincts, ballotStylesUnique, ballotStyleMin, precinctStyleMin\n")
-    data.sortedBy { it.county }.forEach {
-        writer.write(
-            "${sfn(it.county, 20)}, ${nfn(it.manifestCount, 7)}, ${nfn(it.unredactedCvrs, 7)}, ${nfn(it.redactedCvrs, 7)}, ${nfn(it.cvrInManifest, 7)}, " +
-                    "${nfn(it.cvrNoManifest, 7)}, ${nfn(it.manifestNoCvr, 5)}, ${nfn(it.pythonNredact, 5)}, ${nfn(it.rlauxeNredact, 5)}, ${nfn(it.minCards, 5)}, " +
-            "${it.countBlankPrecincts}, ${it.ballotStylesUnique}, ${it.ballotStyleMin}, ${it.precinctStyleMin}\n"
-        )
-    }
-    writer.close()
-    println("wrote ${data.size} countyData to $outputFilename")
-}
-
-fun readCountyInputData(filename: String): List<CountyInputData> {
-    val reader: BufferedReader = File(filename).bufferedReader()
-    reader.readLine() // skip header line
-
-    val countyData = mutableListOf<CountyInputData>()
-    while (true) {
-        val line = reader.readLine() ?: break
-        var idx = 0
-        val tokens = line.split(",")
-        val countyName = tokens[idx++].trim()
-        val manifestCount = tokens[idx++].trim().toInt()
-        val ncvrs = tokens[idx++].trim().toInt()
-        val redactedCvrs = tokens[idx++].trim().toInt()
-        val cvrInManifest = tokens[idx++].trim().toInt()
-        val cvrNoManifest = tokens[idx++].trim().toInt()
-        val nredactedRows = tokens[idx++].trim().toInt()
-        val pythonNredact = tokens[idx++].trim().toInt()
-        val rlauxeNredact = tokens[idx++].trim().toInt()
-        val minCards = tokens[idx++].trim().toInt()
-        val countBlankPrecincts = tokens[idx++].trim().toInt()
-        val hasPrecinct = tokens[idx++].trim() == "true"
-        val ballotStyleMin = tokens[idx++].trim().toInt()
-        val precinctStyleMin = tokens[idx++].trim().toInt()
-
-        countyData.add( CountyInputData(countyName, manifestCount, ncvrs, redactedCvrs, cvrInManifest, cvrNoManifest, nredactedRows, pythonNredact,
-            rlauxeNredact, minCards, countBlankPrecincts, hasPrecinct, ballotStyleMin, precinctStyleMin))
-    }
-    reader.close()
-
-    return countyData
 }

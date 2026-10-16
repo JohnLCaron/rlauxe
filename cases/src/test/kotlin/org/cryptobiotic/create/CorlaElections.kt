@@ -1,12 +1,12 @@
 package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.audit.Sampling
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2022Primary
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PMerged
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2022Primary
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PMerged
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.auditcenter
 import org.cryptobiotic.rlauxe.corla.auditcenter2026Counties
 import org.cryptobiotic.rlauxe.corla.corlaCreationSettings
@@ -30,7 +30,7 @@ class CorlaElections {
         val topdir = "$cases/corla/corla2026/primaryMerged"
 
         createCountyElectionSimCvrs(
-            topdir, Colorado2026PMerged(),
+            topdir, Statewide2026PMerged(),
             corlaCreationSettings(2026),
             corlaRoundSettings(sampling = Sampling.consistent),
             name = "Colorado2026PrimaryMerged", startFirstRound = true
@@ -42,10 +42,10 @@ class CorlaElections {
         val topdir = "$cases/corla/corla2026/primary"
 
         createCountyElectionSimCvrs(
-            topdir, Colorado2026Primary(),
+            topdir, Statewide2026Primary(),
             corlaCreationSettings(2026),
             corlaRoundSettings(sampling = Sampling.consistent),
-            name = "Colorado2026Primary", startFirstRound = true
+            name = "Statewide2026Primary", startFirstRound = true
         )
     }
 
@@ -54,7 +54,7 @@ class CorlaElections {
         val topdir = "$cases/corla/corla2024"
 
         createCountyElectionSimCvrs(
-            topdir, Colorado2024General(),
+            topdir, Statewide2024General(),
             corlaCreationSettings(2024),
             corlaRoundSettings(sampling = Sampling.consistent),
             name = "County2024General", startFirstRound = true
@@ -66,10 +66,10 @@ class CorlaElections {
         val topdir = "$cases/corla/corla2022Primary"
 
         createCountyElectionSimCvrs(
-            topdir, Colorado2022Primary(),
+            topdir, Statewide2022Primary(),
             corlaCreationSettings(2022),
             corlaRoundSettings(sampling = Sampling.consistent),
-            name = "Colorado2022Primary", startFirstRound = true
+            name = "Statewide2022Primary", startFirstRound = true
         )
     }
 
@@ -78,7 +78,7 @@ class CorlaElections {
         val topdir = "$cases/corla/corla2020/sim"
 
         createCountyElectionSimCvrs(
-            topdir, Colorado2020General(),
+            topdir, Statewide2020General(),
             corlaCreationSettings(2020),
             corlaRoundSettings(sampling = Sampling.consistent),
             name = "Colorado2020clca", startFirstRound = true
@@ -90,7 +90,7 @@ class CorlaElections {
         val topdir = "$cases/corla/corla2020/sans"
 
         createCountyElectionSansCvrs(
-            topdir, Colorado2020General(),
+            topdir, Statewide2020General(),
             corlaCreationSettings(2020),
             corlaRoundSettings(sampling = Sampling.consistent),
             name = "Colorado2020clca", startFirstRound = true
@@ -106,7 +106,7 @@ class CorlaElections {
 
         countyElectionWithCvrs(
             votedatabase2020Counties(votedatabase2020),
-            Colorado2020General(),
+            Statewide2020General(),
             topdir,
             corlaCreationSettings(2020),
             corlaRoundSettings(sampling = Sampling.consistent),
@@ -122,7 +122,7 @@ class CorlaElections {
 
         countyElectionWithCvrs(
             votedatabase2020Counties(votedatabase2020),
-            Colorado2020General(),
+            Statewide2020General(),
             topdir,
             corlaCreationSettings(2020),
             corlaRoundSettings(sampling = Sampling.uniform),
@@ -138,7 +138,7 @@ class CorlaElections {
 
         countyElectionWithCvrs(
             auditcenter2026Counties("$auditcenter/2026/primary/observerfiles"),
-            Colorado2026PwithCvrs(),
+            Statewide2026PwithCvrs(),
             topdir,
             corlaCreationSettings(2026),
             corlaRoundSettings(sampling = Sampling.consistent),
@@ -177,7 +177,7 @@ class CorlaElections {
         val topdir = "$cases/corla/corla2020/sim"
         val auditRecord = AuditRecord.read(topdir)!!
 
-        val coloradoInput = Colorado2022Primary()
+        val coloradoInput = Statewide2022Primary()
         val contestMap = auditRecord.contests.associate { it.contest.info().name to it }
         writeCountyContestData(topdir, contestMap, coloradoInput)
     }

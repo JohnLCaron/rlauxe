@@ -8,12 +8,12 @@ import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.audit.startFirstRound
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corla.createCorlaStateElection
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInputWithCvrs
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInputWithCvrs
 import kotlin.test.Test
 
 class CorlaStateElections {
@@ -22,7 +22,7 @@ class CorlaStateElections {
 
     @Test
     fun createOne() {
-        val stateInput = Colorado2026PwithCvrs()
+        val stateInput = Statewide2026PwithCvrs()
 
         createCorlaStateElection(
             topdir = "$top2026pdir/onepool",
@@ -35,7 +35,7 @@ class CorlaStateElections {
 
     @Test
     fun createAll2020Variants() {
-        val stateInput = Colorado2020General()
+        val stateInput = Statewide2020General()
 
         createCorlaStateVariants(
             toptopdir = top2020dir,
@@ -46,7 +46,7 @@ class CorlaStateElections {
 
     @Test
     fun createAll2026pVariants() {
-        val stateInput = Colorado2026PwithCvrs()
+        val stateInput = Statewide2026PwithCvrs()
 
         createCorlaStateVariants(
             toptopdir = top2026pdir,
@@ -55,7 +55,7 @@ class CorlaStateElections {
         )
     }
 
-    fun createCorlaStateVariants(toptopdir: String, stateInput: ColoradoInputWithCvrs, riskLimit: Double) {
+    fun createCorlaStateVariants(toptopdir: String, stateInput: StatewideInputWithCvrs, riskLimit: Double) {
         // redacted ballots are simulated
         createCorlaStateElection(
             topdir = "$toptopdir/sim",

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
-class LaPlata26PInput: CorlaCountyInput {
+class LaPlata26PInput: CountyInput {
     override val electionName= "LaPlata2026p"
     override val countyName= "La Plata"
     override val cvrsSource = "$auditcenter/2026/primary/observerfiles/LaPlata_RedactedTest_NoContestBalance_CVR_Export_20260709081424.csv"
@@ -10,5 +10,5 @@ class LaPlata26PInput: CorlaCountyInput {
     val otherManifest = "$auditcenter/2026/primary/files/LaPlata.csv"
 
     // or from manifest ?
-    override fun countyPopulation() = Colorado2026Primary().strataPopulation()[countyName]!!
+    override fun countyPopulation() = Statewide2026Primary().strataPopulation()[countyName]!!
 }

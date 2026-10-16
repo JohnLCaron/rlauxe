@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyContestData
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyData
 import org.cryptobiotic.rlauxe.estimate.CreateCardsForCountyPools
@@ -24,7 +24,7 @@ import kotlin.io.path.Path
 // A Corla state election with simulated CVRS
 // We want to synthesis cvrs and use them as the cvrPools, using CountyPoolsSimCvrs.
 open class CountyElectionSimCvrs (
-    val coloradoInput: ColoradoInput,
+    val statewideInput: StatewideInput,
     val topdir: String,
     val hasStyle: Boolean,
     val name: String,
@@ -41,12 +41,12 @@ open class CountyElectionSimCvrs (
 
     init {
         // contests made from auditcenter
-        val contestBuilder = BuildCorlaContests(coloradoInput)
+        val contestBuilder = BuildCorlaContests(statewideInput)
 
         val contestTabByCounty: Map<String, CountyTabAllContests> = if (onlyCounty == null)
-            coloradoInput.countyTabsAllContests().filter { !coloradoInput.skipCounties(it.key) }
+            statewideInput.countyTabsAllContests().filter { !statewideInput.skipCounties(it.key) }
         else
-            mapOf(onlyCounty to coloradoInput.countyTabsAllContests()[onlyCounty]!!)
+            mapOf(onlyCounty to statewideInput.countyTabsAllContests()[onlyCounty]!!)
 
         // make the pools from the auditcenter
 
@@ -60,11 +60,11 @@ open class CountyElectionSimCvrs (
         val countyPoolsSimCvrs = CountyPoolsSimCvrs(
             contestBuilder.infosByName,
             contestBuilder.corlaContestBuilders.associate { it.info.name to it.Nc },
-            coloradoInput.strataPopulation(),
+            statewideInput.strataPopulation(),
             contestTabByCounty,
-            coloradoInput.contestTabsAllCounties(),
-            coloradoInput.stylesFromMvrs.associate { it.countyName to it.styles.values.toList() },
-            { countyName, contestName, choiceName -> coloradoInput.matchCandidate(countyName, contestName, choiceName) },
+            statewideInput.contestTabsAllCounties(),
+            statewideInput.stylesFromMvrs.associate { it.countyName to it.styles.values.toList() },
+            { countyName, contestName, choiceName -> statewideInput.matchCanonicalCandidate(countyName, contestName, choiceName) },
             onlyContest,
         )
 
@@ -232,7 +232,7 @@ open class CountyElectionSimCvrs (
 // Create audit where pools are from the county totals. May be CLCA or OneAudit
 fun createCountyElectionSimCvrs(
     topdir: String,
-    coloradoInput: ColoradoInput,
+    statewideInput: StatewideInput,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     startFirstRound: Boolean = true,
@@ -245,7 +245,7 @@ fun createCountyElectionSimCvrs(
     CountyElectionSimCvrs.logger.info {"-------------- createCountyElectionSimCvrs $topdir"}
 
     val election =
-        CountyElectionSimCvrs(coloradoInput,  topdir, name=name,
+        CountyElectionSimCvrs(statewideInput,  topdir, name=name,
             hasStyle = roundConfig.sampling.sampling == Sampling.consistent,
             onlyCounty = onlyCounty)
 
@@ -254,9 +254,9 @@ fun createCountyElectionSimCvrs(
 
     createAuditRecord(config, election, topdir = topdir, externalSortDir = topdir, sortManifest = true)
 
-    writeCountyData(topdir, coloradoInput.strataMap.values.toList())
+    writeCountyData(topdir, statewideInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, coloradoInput)
+    writeCountyContestData(topdir, contestMap, statewideInput)
 
     if (startFirstRound) {
         val result = startFirstRound(topdir)

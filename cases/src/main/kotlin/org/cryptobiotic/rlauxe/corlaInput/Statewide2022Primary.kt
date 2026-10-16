@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corlaInput
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 
-class Colorado2022Primary(ac:String?=auditcenter): ColoradoInput(
+class Statewide2022Primary(ac:String?=auditcenter): StatewideInput(
     generalCanonicalFile = "$ac/2022/primary/2022PrimaryRLACounty-CandidateList.csv",
     contestRoundFile = "$ac/2022/primary/round_1/contest.csv",
     tabulateCountyFile = "$ac/2022/primary/tabulate_county.csv",
@@ -14,12 +14,11 @@ class Colorado2022Primary(ac:String?=auditcenter): ColoradoInput(
     // canonical contests and choices
     override fun canonicalContests() = canonicalContests
     private val canonicalContests: Map<String, CanonicalContest> by lazy {
-        val result: MutableMap<String, CanonicalContest> =
-            readGeneralCanonicalList(generalCanonicalFile).associateBy { it.contestName }.toMutableMap()
+        val result = initializeCanonicalContests()
 
         // add these missing contests:
         val extras = listOf(
-            CanonicalContest("Adams County Assessor - DEM", choices = listOf("Ken Musso",)).addCounties(listOf("Adams",))
+            CanonicalContest(this, "Adams County Assessor - DEM", listOf("Ken Musso",)).addCounties(listOf("Adams",))
         )
         extras.forEach { result[it.contestName] = it }
 
@@ -27,12 +26,6 @@ class Colorado2022Primary(ac:String?=auditcenter): ColoradoInput(
         addCandidates(result, "Gilpin County Commissioner - District 2 - REP", listOf("Rick Wenzel"))
 
         result.toSortedMap()
-    }
-
-    fun addCandidates(result: MutableMap<String, CanonicalContest>, contestName: String, addCandidates: List<String>) {
-        val current = result[contestName]!!
-        val achoices = current.choices + addCandidates
-        result[contestName] = current.copy(choices = achoices).addCounties(current.counties.toList())
     }
 
     // county round

@@ -1,10 +1,5 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
-import org.cryptobiotic.rlauxe.util.Stopwatch
-import java.io.File
-import kotlin.test.Test
-
 class TestAnonSynthData {
     val INPUT_DIR = "/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testCases/unredacted"
     val OUTPUT_DIR = "/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testCases/redactedByPrecinct"

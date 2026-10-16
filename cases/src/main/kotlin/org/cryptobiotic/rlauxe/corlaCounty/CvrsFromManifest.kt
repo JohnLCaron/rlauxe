@@ -5,9 +5,9 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolBuilder
 import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
 import org.cryptobiotic.rlauxe.corlacvr.cleanCsvString
@@ -27,8 +27,8 @@ private val logger = KotlinLogging.logger("CvrsFromManifest")
 //      Also see MatchCountyCvrs
 class CvrsFromManifest(
     val variant: ElectionVariant,
-    val countyInput: CorlaCountyInput,
-    val stateInput: ColoradoInput, // used for converter. TODO What if we didnt convert ??
+    val countyInput: CountyInput,
+    val stateInput: StatewideInput, // used for converter. TODO What if we didnt convert ??
     val infos: Map<Int, ContestInfo>,
     startingPoolId: Int,
 ) {

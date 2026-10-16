@@ -8,12 +8,12 @@ import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2022Primary
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PMerged
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2022Primary
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PMerged
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.votedatabase2020Counties
 import kotlin.collections.forEach
 import kotlin.io.path.Path
@@ -36,7 +36,7 @@ fun makeCorla2020ClcaWithCvrs(toptopdir: String, auditcenter: String, votedataba
     // uses votedatabase; redacted ballots are simulated; perhaps should be onepool ?
     createCorlaStateElection(
         topdir = topdir,
-        Colorado2020General(auditcenter),
+        Statewide2020General(auditcenter),
         creation = corlaCreationSettings(2020),
         roundConfig = corlaRoundSettings(sampling = Sampling.consistent),
         variant = ElectionVariantEnum.Sim,
@@ -45,7 +45,7 @@ fun makeCorla2020ClcaWithCvrs(toptopdir: String, auditcenter: String, votedataba
 
     /* createCountyElectionSimCvrs(
         topdir,
-        Colorado2020General(auditcenter),
+        Statewide2020General(auditcenter),
         corlaCreationSettings(2020),
         corlaRoundSettings(sampling = Sampling.consistent),
         name = "Colorado 2020 clca",
@@ -58,7 +58,7 @@ fun makeCorla2020Uniform(toptopdir: String, auditcenter: String)  {
 
     createCountyElectionSimCvrs(
         topdir,
-        Colorado2020General(auditcenter),
+        Statewide2020General(auditcenter),
         corlaCreationSettings(2020),
         corlaRoundSettings(sampling = Sampling.uniform),
         name = "Colorado 2020 uniform",
@@ -71,7 +71,7 @@ fun makeCorla2020Clca(toptopdir: String, auditcenter: String) {
 
     createCountyElectionSimCvrs(
         topdir,
-        Colorado2020General(auditcenter),
+        Statewide2020General(auditcenter),
         corlaCreationSettings(2020),
         corlaRoundSettings(sampling = Sampling.consistent),
         name = "Colorado2020 Clca with Cvrs",
@@ -80,7 +80,7 @@ fun makeCorla2020Clca(toptopdir: String, auditcenter: String) {
 
     /* countyElectionWithCvrs(
         votedatabase2020Counties(votedatabase),
-        Colorado2020General(auditcenter),
+        Statewide2020General(auditcenter),
         topdir,
         corlaCreationSettings(2020),
         corlaRoundSettings(sampling = Sampling.consistent),
@@ -94,7 +94,7 @@ fun makeCorla2020UniformSimCvrs(toptopdir: String, auditcenter: String, votedata
     val topdir = "$toptopdir/uniform"
 
     createCountyElectionSimCvrs(
-        topdir, Colorado2020General(auditcenter),
+        topdir, Statewide2020General(auditcenter),
         corlaCreationSettings(2020),
         corlaRoundSettings(sampling = Sampling.uniform),
         name = "Colorado2020 Clca with Cvrs",
@@ -103,7 +103,7 @@ fun makeCorla2020UniformSimCvrs(toptopdir: String, auditcenter: String, votedata
 
     /* countyElectionWithCvrs(
         votedatabase2020Counties(votedatabase),
-        Colorado2020General(auditcenter),
+        Statewide2020General(auditcenter),
         topdir,
         corlaCreationSettings(2020),
         corlaRoundSettings(sampling = Sampling.uniform),
@@ -117,10 +117,10 @@ fun makeCorla2022Primary(toptopdir: String, auditcenter: String) {
     val topdir = toptopdir
 
     createCountyElectionSimCvrs(
-        topdir, Colorado2022Primary(auditcenter),
+        topdir, Statewide2022Primary(auditcenter),
         corlaCreationSettings(2022),
         corlaRoundSettings(sampling = Sampling.consistent),
-        name = "Colorado2022Primary", startFirstRound = true
+        name = "Statewide2022Primary", startFirstRound = true
     )
 }
 
@@ -128,7 +128,7 @@ fun makeCorla2024(toptopdir: String, auditcenter: String) {
     val topdir = toptopdir
 
     createCountyElectionSimCvrs(
-        topdir, Colorado2024General(auditcenter),
+        topdir, Statewide2024General(auditcenter),
         corlaCreationSettings(2024),
         corlaRoundSettings(sampling = Sampling.consistent),
         name = "County2024General", startFirstRound = true
@@ -139,7 +139,7 @@ fun makeCorla2026p(toptopdir: String, auditcenter: String) {
     val topdir = toptopdir
 
     createCountyElectionSimCvrs(
-        topdir, Colorado2026Primary(auditcenter),
+        topdir, Statewide2026Primary(auditcenter),
         corlaCreationSettings(2026),
         corlaRoundSettings(sampling = Sampling.consistent),
         name = "Colorado2026PrimaryMerged", startFirstRound = true
@@ -150,10 +150,10 @@ fun makeCorla2026pm(toptopdir: String, auditcenter: String) {
     val topdir = toptopdir
 
     createCountyElectionSimCvrs(
-        topdir, Colorado2026PMerged(auditcenter),
+        topdir, Statewide2026PMerged(auditcenter),
         corlaCreationSettings(2026),
         corlaRoundSettings(sampling = Sampling.consistent),
-        name = "Colorado2026Primary", startFirstRound = true
+        name = "Statewide2026Primary", startFirstRound = true
     )
 }
 
@@ -163,7 +163,7 @@ fun makeCorla2026Pcvrs(toptopdir: String, auditcenter: String) {
     // uses auditcenter 4 counties; redacted ballots are simulated
     createCorlaStateElection(
         topdir = topdir,
-        Colorado2026PwithCvrs(auditcenter),
+        Statewide2026PwithCvrs(auditcenter),
         creation = corlaCreationSettings(2026),
         roundConfig = corlaRoundSettings(sampling = Sampling.consistent),
         variant = ElectionVariantEnum.Sim,
@@ -171,7 +171,7 @@ fun makeCorla2026Pcvrs(toptopdir: String, auditcenter: String) {
 
     /* countyElectionWithCvrs(
         auditcenter2026Counties("$auditcenter/2026/primary/observerfiles"),
-        Colorado2026PwithCvrs(),
+        Statewide2026PwithCvrs(),
         topdir,
         corlaCreationSettings(2026),
         corlaRoundSettings(sampling = Sampling.consistent),

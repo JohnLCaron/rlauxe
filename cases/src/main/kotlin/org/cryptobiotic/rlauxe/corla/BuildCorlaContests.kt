@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.MergedContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.StrataInfo
 import org.cryptobiotic.rlauxe.util.*
@@ -13,9 +13,9 @@ import kotlin.String
 
 private val logger = KotlinLogging.logger("CountyContestBuilder")
 
-// Build Corla Contests from ColoradoInput. used by CorlaStateElection
+// Build Corla Contests from StatewideInput. used by CorlaStateElection
 // TODO should add up the county votes, not use the statewide total since some counties are missing
-open class BuildCorlaContests(val coloradoInput: ColoradoInput) {
+open class BuildCorlaContests(val statewideInput: StatewideInput) {
     val corlaContestBuilders: List<CorlaContestBuilder> = makeContestBuilders() // 181
     val infos: Map<Int, ContestInfo> = corlaContestBuilders.map { it.info }.associateBy{ it.id }
     val infosByName = infos.mapKeys { it.value.name }
@@ -26,14 +26,14 @@ open class BuildCorlaContests(val coloradoInput: ColoradoInput) {
     }
 
     private fun makeContestBuilders(): List<CorlaContestBuilder> {
-        val mergedContestMap = coloradoInput.mergedContestMap
-        val strataMap = coloradoInput.strataMap
+        val mergedContestMap = statewideInput.mergedContestMap
+        val strataMap = statewideInput.strataMap
 
         val contestBuilders = mutableListOf<CorlaContestBuilder>()
 
         // canonical drives the boat
         mergedContestMap.values.forEach{ mcontest ->
-            val contestTabAllCounties = coloradoInput.contestTabsAllCounties()[mcontest.contestName]
+            val contestTabAllCounties = statewideInput.contestTabsAllCounties()[mcontest.contestName]
             if (contestTabAllCounties == null) {
                 logger.warn{"*** Cant find contestTab for '${mcontest.contestName}': remove from audit" }
                 // throw RuntimeException()

@@ -1,13 +1,13 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestReadTabulateCounty {
-    val input: ColoradoInput = Colorado2026Primary()
+    val input: StatewideInput = Statewide2026Primary()
 
     @Test
     fun readTabulateCounties() {

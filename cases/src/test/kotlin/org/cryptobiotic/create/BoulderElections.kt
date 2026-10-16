@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.boulder.Boulder23Input
 import org.cryptobiotic.rlauxe.boulder.Boulder24Input
-import org.cryptobiotic.rlauxe.boulder.Boulder25Input
+import org.cryptobiotic.rlauxe.corlaInput.Boulder25Input
 import org.cryptobiotic.rlauxe.boulder.Boulder26PInput
 import org.cryptobiotic.rlauxe.boulder.boulderRoundSettings
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection

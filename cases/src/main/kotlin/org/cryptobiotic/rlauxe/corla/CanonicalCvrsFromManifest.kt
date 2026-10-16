@@ -4,9 +4,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.StyleIF
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifestEntries
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
@@ -28,8 +28,8 @@ private val logger = KotlinLogging.logger("CanonicalCvrsFromManifest")
 // use in CorlaStateElection; how differ from CvrsFromManifest ?
 class CanonicalCvrsFromManifest(
     val variant: ElectionVariant,
-    val countyInput: CorlaCountyInput,
-    val stateInput: ColoradoInput,
+    val countyInput: CountyInput,
+    val stateInput: StatewideInput,
     val infos: Map<Int, ContestInfo>,
     startingStyleId: Int,
 ) {

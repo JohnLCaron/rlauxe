@@ -1,10 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 
 class TestCorlaPrng {
@@ -26,7 +23,7 @@ class TestCorlaPrng {
 
     @Test
     fun testCorla2026pPrngStatewide() {
-        val stateInput = Colorado2026Primary()
+        val stateInput = Statewide2026Primary()
         val ccmvrs = stateInput.cardComparison().mvrs.associate {
             "${it.countyName}: ${it.imprintedId}" to it
         }
@@ -67,7 +64,7 @@ class TestCorlaPrng {
     @Test
     fun testCorla2026pPrngCounty() {
         val county = "El Paso"
-        val stateInput = Colorado2026Primary()
+        val stateInput = Statewide2026Primary()
         // stateInput.counties().forEach { county ->
             println("-------------- $county")
             val ccmvrs = stateInput.cardComparison().mvrs.filter { it.countyName == county }.map {

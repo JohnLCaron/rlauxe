@@ -2,10 +2,10 @@ package org.cryptobiotic.rlauxe.corlaCounty
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.MergedContestInfo
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.irv.IrvContest
 import org.cryptobiotic.rlauxe.irv.makeRaireContest
 import org.cryptobiotic.rlauxe.irv.makeRaireOneAuditContest
@@ -35,8 +35,8 @@ class ElectionVariant(variantEnum: ElectionVariantEnum) {
 
 // create election out of a single county. Creates AuditRecord, not CountyAuditRecord.
 class CorlaCountyElection(
-    val countyInput: CorlaCountyInput,
-    val stateInput: ColoradoInput, // what if we didnt convert to canonical ??
+    val countyInput: CountyInput,
+    val stateInput: StatewideInput, // what if we didnt convert to canonical ??
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean, // TODO
     variantEnum: ElectionVariantEnum,
@@ -301,8 +301,8 @@ class CCContestBuilder(
 // variant.Phantoms: OneAudit with redacted cards set to isPhantom
 
 fun createCorlaCountyElection(
-    countyInput: CorlaCountyInput,
-    stateInput: ColoradoInput,
+    countyInput: CountyInput,
+    stateInput: StatewideInput,
     topdir: String,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,

@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.makeContestTabs
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyContestData
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyData
@@ -27,7 +27,7 @@ private val logger = KotlinLogging.logger("CountyElectionWithCvrs")
 // obsolete use CorlaCountyElection
 open class CountyElectionWithCvrs (
     val counties: Map<String, String>, // countyName -> exportCvrFile
-    val coloradoInput: ColoradoInput,
+    val statewideInput: StatewideInput,
     val topdir: String,
     val hasStyle: Boolean,
     val name: String,
@@ -42,11 +42,11 @@ open class CountyElectionWithCvrs (
     val publisher = Publisher(topdir)
 
     init {
-        val contestBuilder = BuildCorlaContests(coloradoInput)
+        val contestBuilder = BuildCorlaContests(statewideInput)
         val infos = contestBuilder.infos
         val infosByName = infos.mapKeys{ it.value.name }
 
-        val countyTabMap = coloradoInput.countyTabsAllContests()
+        val countyTabMap = statewideInput.countyTabsAllContests()
         val totalPoolTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
 
         var totalCvrCardCount = 0
@@ -62,7 +62,7 @@ open class CountyElectionWithCvrs (
                 else if (county == "Boulder") readCountyCvrsFromFile(exportFile, redaction = RedactionBoulder())
                 else readCountyCvrsFromFile(exportFile)
 
-            val converter = CorlaCvrConverter(county, export, infosByName, coloradoInput, nextStyleId)
+            val converter = CorlaCvrConverter(county, export, infosByName, statewideInput, nextStyleId)
             val exportCvrs: List<AuditableCard> = export.cvrs().map { converter.convertToCard(it) }
 
             /*
@@ -92,7 +92,7 @@ open class CountyElectionWithCvrs (
 
             // auditcenter tabulations
             val countyTab: CountyTabAllContests = countyTabMap[county]!! // // for one contest, all counties
-            val contestTabs = countyTab.makeContestTabs(coloradoInput.canonicalContests(), infosByName, ncards, )
+            val contestTabs = countyTab.makeContestTabs(statewideInput.canonicalContests(), infosByName, ncards, )
                                        .associateBy { it.contestId }
 
             // Note using same countyPoolId for both cvrPools and countyPools
@@ -162,7 +162,7 @@ open class CountyElectionWithCvrs (
 
 fun countyElectionWithCvrs(
     counties: Map<String, String>, // countyName -> exportFile
-    coloradoInput: ColoradoInput,
+    statewideInput: StatewideInput,
     topdir: String,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
@@ -176,7 +176,7 @@ fun countyElectionWithCvrs(
     logger.info {"-------------- countyElectionWithCvrs $topdir"}
 
     val election =
-        CountyElectionWithCvrs(counties, coloradoInput,
+        CountyElectionWithCvrs(counties, statewideInput,
             topdir, name=name, hasStyle = roundConfig.sampling.sampling == Sampling.consistent,
             isUniform=isUniform )
 
@@ -185,9 +185,9 @@ fun countyElectionWithCvrs(
 
     createAuditRecord(config, election, topdir = topdir, externalSortDir = topdir)
 
-    writeCountyData(topdir, coloradoInput.strataMap.values.toList())
+    writeCountyData(topdir, statewideInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, coloradoInput)
+    writeCountyContestData(topdir, contestMap, statewideInput)
 
     if (startFirstRound) {
         val result = startFirstRound(topdir)

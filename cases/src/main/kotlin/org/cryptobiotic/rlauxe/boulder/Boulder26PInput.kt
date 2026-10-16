@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.auditcenter
 
 class Boulder26PInput: BoulderInput  {
@@ -11,5 +11,5 @@ class Boulder26PInput: BoulderInput  {
     override val year = 2026 // TODO primary vs general
 
     // or use sovo ??
-    override fun countyPopulation() = Colorado2026Primary().strataPopulation()[countyName]!!
+    override fun countyPopulation() = Statewide2026Primary().strataPopulation()[countyName]!!
 }

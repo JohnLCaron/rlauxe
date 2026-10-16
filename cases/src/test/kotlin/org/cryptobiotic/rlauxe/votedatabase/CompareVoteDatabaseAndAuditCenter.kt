@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.votedatabase
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.Garfield2020CountyCvrs
 import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
@@ -23,13 +23,13 @@ class CompareVoteDatabaseAndAuditCenter {
 
     @Test
     fun testRedactionProblem() {
-        val errs = matchNames("Larimer", "$votedatabase2020/Larimer/cvr.csv", Colorado2020General())
+        val errs = matchNames("Larimer", "$votedatabase2020/Larimer/cvr.csv", Statewide2020General())
         assertEquals(0, errs)
     }
 
     @Test
     fun testGarfield() { // also Roosevelt
-        val errs = matchNames("Garfield", "$votedatabase2020/Garfield/cvr.csv", Colorado2020General())
+        val errs = matchNames("Garfield", "$votedatabase2020/Garfield/cvr.csv", Statewide2020General())
         assertEquals(0, errs)
     }
 
@@ -53,14 +53,14 @@ class CompareVoteDatabaseAndAuditCenter {
         }
         reader.close() */
 
-        matchNames("Douglas", "$votedatabase2020/Douglas/cvr.csv", Colorado2020General())
+        matchNames("Douglas", "$votedatabase2020/Douglas/cvr.csv", Statewide2020General())
         // assertEquals(0, errs)
     }
 
     @Test
     fun testSuggest() {
         val contest = "Candidates for Town Council"
-        val suggest = suggest("Eagle", contest, Colorado2020General())
+        val suggest = suggest("Eagle", contest, Statewide2020General())
         println("$contest -> $suggest")
     }
 
@@ -73,7 +73,7 @@ class CompareVoteDatabaseAndAuditCenter {
             if (county !in listOf("Monroe", "Roosevelt", "Baca", "Gunnison", "Las Animas") && county > "A") {
                 try {
                     val filename = "${subdir.toString()}/cvr.csv" // entry.toString()
-                    val errs = matchNames(county, filename, Colorado2020General())
+                    val errs = matchNames(county, filename, Statewide2020General())
                     assertEquals(errCount[county] ?: 0, errs)
                 } catch (e: Exception) {
                     println(e.message)
@@ -113,7 +113,7 @@ class CompareVoteDatabaseAndAuditCenter {
 
     // could allow contained contests to be defined by the county
 
-    fun matchNames(county: String, exportFile: String, input: ColoradoInput): Int {
+    fun matchNames(county: String, exportFile: String, input: StatewideInput): Int {
         println("\n-----------------------------------")
         println("county=$county csvfile = $exportFile")
 
@@ -171,7 +171,7 @@ fun readCvrExportsFromFile(county: String, cvrFile: String): CorlaCountyCvrsIF {
         readCountyCvrsFromFile(cvrFile)
 }
 
-fun suggest(county: String, contest: String, input: ColoradoInput): String {
+fun suggest(county: String, contest: String, input: StatewideInput): String {
     val countyContestTabs = input.countyTabsAllContests()[county]
     if (countyContestTabs == null) return "unknown"
 

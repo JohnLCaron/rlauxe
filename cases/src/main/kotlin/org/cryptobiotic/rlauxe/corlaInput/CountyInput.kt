@@ -1,28 +1,23 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifestEntries
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
-import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.corlacvr.Garfield2020CountyCvrs
 import org.cryptobiotic.rlauxe.corlacvr.Redaction
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.RedactionStrategy
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
-import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 
-// CorlaCountyInput has cvrs, presumably redacted, and a CountyManifest.
+// CountyInput has cvrs, presumably redacted, and a CountyManifest.
 // it knows the county's total number of ballots
-interface CorlaCountyInput {
+interface CountyInput: ColoradoInput {
     val electionName: String
     val countyName: String
     val manifestSource: String
     val cvrsSource: String
     val year: Int // four digits: eg 1992, 2026
 
+    // TODO cache this I think ?? Or does it need to stream ??
     fun readCorlaCvrs(): CorlaCountyCvrsIF {
         when {
             (year == 2020) -> when {
@@ -36,6 +31,7 @@ interface CorlaCountyInput {
         return readCountyCvrs(cvrsSource, redaction = Redaction())
     }
 
+    // not needed I think
     fun hasABgroups() = false
 
     fun readCountyManifest(): CountyManifestEntries {
@@ -43,15 +39,10 @@ interface CorlaCountyInput {
     }
 
     fun countyPopulation(): Int
-}
+    fun contestNameCleanup(name: String) = name
+    fun candidateNameCleanup(name: String) = name
 
-// NOT USED
-// convert from cvr names/ids to canonical
-interface CorlaCountyConverterIF {
-    fun convertToCard(dcvr: CvrRow, visit: ((AuditableCardBuilder) -> Unit)? = null): AuditableCard
-    fun cardStyles(): Map<Set<Int>, CardStyle> // contest ids -> CardStyle
-
-    // return canonical contest id -> ContestTabulation with canonical candidate ids
-    // fun convertToContestTabulation(rgroup: RedactedGroup): Map<Int, ContestTabulation> // not used
-    fun convertToContestTabulation(countyTab: CountyTabAllContests): Map<Int, ContestTabulation>
+    override fun name() = electionName
+    override fun ncontests() = -1  // unknown at the moment
+    override fun nuncontested() = -1 // unknown at the moment
 }

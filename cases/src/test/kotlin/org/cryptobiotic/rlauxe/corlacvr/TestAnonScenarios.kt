@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
 import org.cryptobiotic.rlauxe.corlaInput.CheckCvrRedaction
+import org.cryptobiotic.rlauxe.corlaInput.RedactionCount
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import kotlin.test.Test
 
@@ -134,9 +135,9 @@ Done. near_unanimous_fixable.csv files written.
         println("failures = $countFail out of ${scenarios.size}")
     }
 }
-data class CompareWithPython(val pythonNredact: Int, val rlauxeNredact: Int, val fail: Boolean)
 
-fun compareTwoRedactions(expectFile: String?, actualFile: String, show: Boolean = false): CompareWithPython {
+fun compareTwoRedactions(expectFile: String?, actualFile: String, show: Boolean = false): RedactionCount {
+    println("expect $expectFile actual $actualFile")
     val actual = readCountyCvrs(actualFile)
     var fail = false
 
@@ -156,8 +157,8 @@ fun compareTwoRedactions(expectFile: String?, actualFile: String, show: Boolean 
             println("\nexpect\n${tabulate(expect)}")
             println("\nactual\n${tabulate(actual)}")
         }
-        return CompareWithPython(expect.redaction().nredactedCvrs(), actual.redaction().nredactedCvrs(), fail)
+        return RedactionCount(expect.redaction().nredactedCvrs(), actual.redaction().nredactedCvrs(), fail)
     }
 
-    return CompareWithPython(-1, actual.redaction().nredactedCvrs(), fail)
+    return RedactionCount(-1, actual.redaction().nredactedCvrs(), fail)
 }

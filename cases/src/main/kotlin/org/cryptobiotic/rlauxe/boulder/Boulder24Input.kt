@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlaInput.auditcenter
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
@@ -25,7 +25,7 @@ class Boulder24Input: BoulderInput {
     override fun hasABgroups() = true
 
     // TODO remove dependence on stateInput
-    override fun countyPopulation() = Colorado2024General().strataPopulation()[countyName]!!
+    override fun countyPopulation() = Statewide2024General().strataPopulation()[countyName]!!
 
     companion object {
         // from cases/src/test/kotlin/org/cryptobiotic/rlauxe/boulder/TestBoulderUndervotes.kt

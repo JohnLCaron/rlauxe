@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.auditcenter
 
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.corla.CountyElectionSimCvrs
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import kotlin.test.Test
 
 class TestCountyPoolsSimCvrs {
@@ -12,7 +12,7 @@ class TestCountyPoolsSimCvrs {
         val topdir = "$cases/corla/corla2024test"
 
         CountyElectionSimCvrs(
-            Colorado2024General(), topdir, name = "testCountyElectionSimCvrs",
+            Statewide2024General(), topdir, name = "testCountyElectionSimCvrs",
             hasStyle = true,
             onlyCounty = "Elbert",
         )

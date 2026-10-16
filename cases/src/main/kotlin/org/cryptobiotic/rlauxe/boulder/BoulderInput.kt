@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.corlaInput.CorlaCountyInput
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 
 // BoulderInput also has the BoulderStatementOfVotes
-interface BoulderInput : CorlaCountyInput {
+interface BoulderInput : CountyInput {
     override val countyName: String
         get() = "Boulder"
 

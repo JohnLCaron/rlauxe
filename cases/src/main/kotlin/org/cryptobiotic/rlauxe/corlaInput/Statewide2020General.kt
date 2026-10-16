@@ -2,17 +2,17 @@ package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
-import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 
-open class Colorado2020General(ac:String?=auditcenter): ColoradoInputWithCvrs(
+open class Statewide2020General(ac:String?=auditcenter): StatewideInputWithCvrs(
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
     contestRoundFile = "$ac/2020/general/round_1/contest.csv",
     tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
     mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
 ) {
 
-    override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CorlaCountyInput? {
-        return if (counties().contains(countyName)) CorlaCounty2020Input(countyName, votedatabase) else null
+    override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CountyInput? {
+        if (countyName == "Arapahoe") return Arapahoe2020Redacted()
+        return if (counties().contains(countyName)) County2020Input(countyName, votedatabase) else null
     }
 
     // if you skip counties, you have to adjust Nc
@@ -34,12 +34,11 @@ open class Colorado2020General(ac:String?=auditcenter): ColoradoInputWithCvrs(
     // canonical contests and choices
     override fun canonicalContests() = canonicalContests
     private val canonicalContests: Map<String, CanonicalContest> by lazy {
-        val result: MutableMap<String, CanonicalContest> =
-            readGeneralCanonicalList(generalCanonicalFile).associateBy { it.contestName }.toMutableMap()
+        val result = initializeCanonicalContests()
 
         // add these missing contests:
         val extras = listOf(
-            CanonicalContest("Adams County Ballot Issue 1A", listOf("Yes/For", "No/Against",)).addCounties(listOf("Adams"))
+            CanonicalContest(this, "Adams County Ballot Issue 1A", listOf("Yes/For", "No/Against",)).addCounties(listOf("Adams"))
         )
         extras.forEach { result[it.contestName] = it }
 

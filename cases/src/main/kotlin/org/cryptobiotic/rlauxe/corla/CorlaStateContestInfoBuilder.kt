@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.StrataInfo
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
@@ -10,9 +10,9 @@ import kotlin.String
 
 private val logger = KotlinLogging.logger("CorlaStateContestInfoBuilder")
 
-// Build Corla Contests from ColoradoInput. used by CorlaStateElection
+// Build Corla Contests from StatewideInput. used by CorlaStateElection
 // TODO should add up the county votes, not use the statewide total since some counties are missing
-open class CorlaStateContestInfoBuilder(val coloradoInput: ColoradoInput) {
+open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
     // val corlaContestBuilders: List<CorlaContestBuilder> = makeContestBuilders() // 181
     val infos: Map<Int, ContestInfo> = makeContestInfos().associateBy { it.id }
     val infosByName = infos.mapKeys { it.value.name }
@@ -24,14 +24,14 @@ open class CorlaStateContestInfoBuilder(val coloradoInput: ColoradoInput) {
 
     // all contests
     fun makeContestInfos(): List<ContestInfo> {
-        val mergedContestMap = coloradoInput.mergedContestMap
-        val strataMap = coloradoInput.strataMap
+        val mergedContestMap = statewideInput.mergedContestMap
+        val strataMap = statewideInput.strataMap
 
         val contestInfos = mutableListOf<ContestInfo>()
 
         // canonical drives the boat
         mergedContestMap.values.forEach{ mcontest ->
-            val contestTabAllCounties = coloradoInput.contestTabsAllCounties()[mcontest.contestName]
+            val contestTabAllCounties = statewideInput.contestTabsAllCounties()[mcontest.contestName]
             if (contestTabAllCounties == null) {
                 logger.warn{"*** Cant find contestTab for '${mcontest.contestName}': remove from audit" }
                 // throw RuntimeException()

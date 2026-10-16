@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2020Redacted
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
@@ -9,7 +9,7 @@ class TestRedactedData {
     @Test
     fun testRedacted2020Cvrs() {
         val stopwatch = Stopwatch()
-        val input = Colorado2020Redacted()
+        val input = Statewide2020General()
         input.counties().forEach { county ->
             try {
                 val stopwatchCounty = Stopwatch()

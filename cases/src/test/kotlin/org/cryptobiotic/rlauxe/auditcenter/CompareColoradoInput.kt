@@ -1,18 +1,18 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import kotlin.test.Test
 
-// compare two sources of ColoradoInput supposedly identical
+// compare two sources of StatewideInput supposedly identical
 class CompareContestInput {
-    val input1: ColoradoInput = Colorado2024General()
-    val input2: ColoradoInput = Colorado2024General()
+    val input1: StatewideInput = Statewide2024General()
+    val input2: StatewideInput = Statewide2024General()
 
     @Test
     fun compareGeneralCanonicalList() {
-        val canon1 = readGeneralCanonicalList(input1.generalCanonicalFile)
-        val canon2 = readGeneralCanonicalList(input2.generalCanonicalFile)
+        val canon1 = readGeneralCanonicalList(input1.generalCanonicalFile, input1)
+        val canon2 = readGeneralCanonicalList(input2.generalCanonicalFile, input2)
 
         println("compare canonical contest names")
         compareLists(

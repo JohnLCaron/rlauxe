@@ -1,9 +1,8 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
-import org.cryptobiotic.rlauxe.corlaInput.matchCandidateName
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.mergeContestInfo
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
@@ -11,7 +10,7 @@ import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.test.Test
 
 class TestReadAuditCenterFiles {
-    val input: ColoradoInput = Colorado2026Primary()
+    val input: StatewideInput = Statewide2026Primary()
 
     // @Test
     fun problem() {
@@ -30,7 +29,8 @@ class TestReadAuditCenterFiles {
         val ctacChoices = pres.choices.map { Pair(it.key, it.value) }.sortedBy { it.first }.toMap()
         println(pres.contestName)
 
-        val canonical: CanonicalContest = readGeneralCanonicalList(input.generalCanonicalFile).find { it.contestName == "Presidential Electors"}!!
+        val canonical: CanonicalContest = readGeneralCanonicalList(input.generalCanonicalFile, input)
+            .find { it.contestName == "Presidential Electors"}!!
         val canonVotes = canonical.choices.sorted()
         canonVotes.forEach {
             val match = ctacChoices[it] != null
@@ -40,7 +40,7 @@ class TestReadAuditCenterFiles {
         println()
 
         ctacChoices.forEach {
-            val match = canonical.matchCandidateName(it.key)
+            val match = canonical.matchCanonicalCandidate(it.key)
             val match2 = candidateNames[it.key]?.toString() ?: "HEYA STUPID"
             println("${trunc(it.key, 40)}: ${it.value} -> $match2 : $match")
         }
@@ -55,7 +55,7 @@ class TestReadAuditCenterFiles {
     //  }
     @Test
     fun readGeneralCanonicalList() {
-        val canonical = readGeneralCanonicalList(input.generalCanonicalFile)
+        val canonical = readGeneralCanonicalList(input.generalCanonicalFile, input)
         println("read ${canonical.size} contests from ${input.generalCanonicalFile} (${canonical.sumOf { it.choices.size }} choices)")
         canonical.sortedBy { it.contestName }.forEach { println("  $it") }
 
@@ -185,7 +185,7 @@ class TestReadAuditCenterFiles {
     //)
     @Test
     fun showMergeContestInfo() {
-        val (mergedContestInfo, mergedCountyInfo, statewideContests) = mergeContestInfo(Colorado2024General())
+        val (mergedContestInfo, mergedCountyInfo, statewideContests) = mergeContestInfo(Statewide2024General())
 
         println("\nMerged Contest Info")
         println("\n${trunc("contest", -50)}    Npop,      Nc, voteMargin, countyMvrs, stateMvrs, Ncounties, auditReason")

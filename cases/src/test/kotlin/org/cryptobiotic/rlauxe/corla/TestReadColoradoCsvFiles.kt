@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2024General
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
@@ -14,7 +14,7 @@ import kotlin.math.abs
 import kotlin.test.Test
 
 class TestReadColoradoCsvFiles {
-    val input: ColoradoInput = Colorado2024General()
+    val input: StatewideInput = Statewide2024General()
 
     // data class ResultsReportContest(
     //        val contestName: String,

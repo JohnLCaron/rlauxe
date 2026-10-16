@@ -2,9 +2,7 @@ package org.cryptobiotic.rlauxe.corla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
-import org.cryptobiotic.rlauxe.corla.CorlaContestBuilder
-import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyContestData
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyData
 import org.cryptobiotic.rlauxe.core.*
@@ -22,7 +20,7 @@ private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
 // TODO replicate in CountyElection
 open class CreateUniformElection (
-    val coloradoInput: ColoradoInput,
+    val statewideInput: StatewideInput,
     val stateElection: BuildCorlaContests,
     val auditType: AuditType,
     val topdir: String,
@@ -83,7 +81,7 @@ open class CreateUniformElection (
 // Create audit using mvrs from Corla, dont write cards (!)
 fun createUniformElection(
     topdir: String,
-    coloradoInput: ColoradoInput,
+    statewideInput: StatewideInput,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     startFirstRound: Boolean = true,
@@ -92,10 +90,10 @@ fun createUniformElection(
     val stopwatch = Stopwatch()
     require (roundConfig.sampling.sampling == Sampling.uniform)
 
-    val countyElection = BuildCorlaContests(coloradoInput)
+    val countyElection = BuildCorlaContests(statewideInput)
 
     val election =
-        CreateUniformElection(coloradoInput, countyElection, creation.auditType, topdir, pollingMode=null, name=name)
+        CreateUniformElection(statewideInput, countyElection, creation.auditType, topdir, pollingMode=null, name=name)
 
     // skip the simulated cvrs
     val contestsUA = election.contestsUA()
@@ -117,9 +115,9 @@ fun createUniformElection(
     val config = Config(election.electionInfo(), creation, roundConfig)
     createAuditRecord(config, election, topdir = topdir, externalSortDir = null, sortManifest = false)
 
-    writeCountyData(topdir, coloradoInput.strataMap.values.toList())
+    writeCountyData(topdir, statewideInput.strataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, coloradoInput)
+    writeCountyContestData(topdir, contestMap, statewideInput)
 
     if (startFirstRound) {
         val result = startFirstRound(topdir)

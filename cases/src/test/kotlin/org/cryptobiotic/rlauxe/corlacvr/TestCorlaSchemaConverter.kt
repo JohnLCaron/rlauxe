@@ -5,9 +5,9 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
 import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2020General
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026PwithCvrs
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
@@ -19,7 +19,7 @@ class TestCorlaSchemaConverter {
 
     @Test
     fun testBuildCorlaContests() {
-        val coloradoInput = Colorado2026PwithCvrs()
+        val coloradoInput = Statewide2026PwithCvrs()
         val countyName = "La Plata"
         val countyInput = coloradoInput.corlaCountyInput(countyName)!!
         val corlaCvrs = countyInput.readCorlaCvrs()
@@ -37,19 +37,19 @@ class TestCorlaSchemaConverter {
     @Test
     fun testCorlaCvrConverter() {
         val filename = "$votedatabase2020/Broomfield/cvr.csv"
-        testCorlaConverterCvrs("Broomfield", filename, coloradoInput = Colorado2020General())
+        testCorlaConverterCvrs("Broomfield", filename, statewideInput = Statewide2020General())
     }
 
     // this tests coverting all of the cvrs and checking them against the ExportCvr
-    fun testCorlaConverterCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
+    fun testCorlaConverterCvrs(county: String, filename: String, statewideInput: StatewideInput) {
         val export = readCountyCvrs(filename)
         val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
 
-        val contestBuilder = BuildCorlaContests(coloradoInput)
+        val contestBuilder = BuildCorlaContests(statewideInput)
         val contests = contestBuilder.contests(emptyMap())
         val contestMap = contests.associateBy{ it.name }
 
-        val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
+        val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, statewideInput)
         var count = 0
         var countOutOfOrder = 0
         export.cvrs().map { cvr: CvrRow ->
@@ -57,15 +57,15 @@ class TestCorlaSchemaConverter {
             assertEquals(cvr.imprintedId, card.id)
             cvr.contestVotes.forEach { contestVote: ContestVotes ->
                 val sinfo = schemaInfoMap[contestVote.contestId]!!
-                val canonicalContest = coloradoInput.matchCanonicalContest(county, sinfo.name)!!
+                val canonicalContest = statewideInput.matchCanonicalContest(county, sinfo.name)!!
                 val contest = contestMap[canonicalContest.contestName]
                 val cvrVotes = card.votes(contest!!.id)
                 if (contestVote.votedFor != cvrVotes!!.toList()) {
                     val info = contest.info()
                     val candNames = cvrVotes.map { info.candidateIdToName[it]!! }
                     val scandNames = contestVote.votedFor.map {
-                        // coloradoInput.candidateNameCleanup(sinfo.candidateIdToName[it]!!)
-                        coloradoInput.matchCanonicalCandidate(county, canonicalContest, sinfo.candidateIdToName[it]!!)
+                        // statewideInput.candidateNameCleanup(sinfo.candidateIdToName[it]!!)
+                        statewideInput.matchCanonicalCandidate(county, canonicalContest, sinfo.candidateIdToName[it]!!)
                     }
                     // not a problem to be out of order as long as the names agree
                     assertEquals(candNames, scandNames)
@@ -80,15 +80,15 @@ class TestCorlaSchemaConverter {
     @Test
     fun testCorlaCvrWriting() {
         val filename = "$votedatabase2020/Dolores/cvr.csv"
-        testWriteCorlaCvrs("Dolores", filename, coloradoInput = Colorado2020General())
+        testWriteCorlaCvrs("Dolores", filename, statewideInput = Statewide2020General())
     }
 
     // this tests coverting all of the cvrs and writing them to a file
-    fun testWriteCorlaCvrs(county: String, filename: String, coloradoInput: ColoradoInput) {
+    fun testWriteCorlaCvrs(county: String, filename: String, statewideInput: StatewideInput) {
         val export = readCountyCvrs(filename)
 
-        val contestBuilder = BuildCorlaContests(coloradoInput)
-        val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, coloradoInput)
+        val contestBuilder = BuildCorlaContests(statewideInput)
+        val CorlaConverter = CorlaCvrConverter(county, export, contestBuilder.infosByName, statewideInput)
         val cards: List<AuditableCard> = export.cvrs().map { CorlaConverter.convertToCard(it) }
         println("ncards = ${cards.size}")
         val filename = "$testdataDir/tests/scratch/testWriteCorlaCvrs.csv"

@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaCounty.makeContestWAs
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInputWithCvrs
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInputWithCvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -28,7 +28,7 @@ private val logger = KotlinLogging.logger("CorlaStateElection")
 // A Corla state election with CVRS. Creates a CountyAuditRecord.
 class CorlaStateElection(
     val topdir: String,
-    val stateInput: ColoradoInputWithCvrs,
+    val stateInput: StatewideInputWithCvrs,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean, // TODO
     variantEnum: ElectionVariantEnum,
@@ -254,7 +254,7 @@ class CardIteratorfromCountyMvrs(
 
 fun createCorlaStateElection(
     topdir: String,
-    stateInput: ColoradoInputWithCvrs,
+    stateInput: StatewideInputWithCvrs,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,

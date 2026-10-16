@@ -1,25 +1,25 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
 import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2022Primary
-import org.cryptobiotic.rlauxe.corlaInput.Colorado2026Primary
-import org.cryptobiotic.rlauxe.corlaInput.ColoradoInput
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2022Primary
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import kotlin.test.Test
 
-// compare cardStyles from coloradoInput.countyStyles (taken from mvr files)
+// compare cardStyles from statewideInput.countyStyles (taken from mvr files)
 // vs what we see in DominionCvrExport (taken from cvrs)
 class TestCardStyles {
     val show = false
-    val colorado2026 = Colorado2026Primary()
-    val colorado2022 = Colorado2022Primary()
+    val colorado2026 = Statewide2026Primary()
+    val colorado2022 = Statewide2022Primary()
 
     @Test
     fun test2022CvrSchema() {
         compareCvrSchemaVscoloradoInput("/home/stormy/datadrive/votedatabase/cvr/2022Primaries/Colorado/Boulder CO '22 Primary.csv", colorado2022)
     }
 
-    fun compareCvrSchemaVscoloradoInput(filename: String, coloradoInput: ColoradoInput) {
+    fun compareCvrSchemaVscoloradoInput(filename: String, statewideInput: StatewideInput) {
         // println(CastVoteRecord.header)
         val export = readCountyCvrs(filename)
         val exportContestInfos = export.makeContestInfo().associateBy { it.id }
@@ -32,9 +32,9 @@ class TestCardStyles {
         }
         println()
 
-        val contestBuilder = BuildCorlaContests(coloradoInput)
+        val contestBuilder = BuildCorlaContests(statewideInput)
         val infosByName = contestBuilder.infos.mapKeys { it.value.name }
-        val converter = CorlaCvrConverter("test", export, infosByName, coloradoInput, 1,)
+        val converter = CorlaCvrConverter("test", export, infosByName, statewideInput, 1,)
 
         println("converter.cardStyles")
         converter.cardStyles.values.forEach {
@@ -45,7 +45,7 @@ class TestCardStyles {
         val contests = contestBuilder.contests(emptyMap())
         val contestMap = contests.associateBy{ it.name }
         val contestNameToId = contests.associate{ it.name to it.id }
-        val boulderCountyStyles : CountyStylesFromMvrs = coloradoInput.stylesFromMvrs.find { it.countyName == "Boulder" }!!
+        val boulderCountyStyles : CountyStylesFromMvrs = statewideInput.stylesFromMvrs.find { it.countyName == "Boulder" }!!
         // data class CountyStyles(val countyName: String) {
         //    val styles = mutableMapOf<Set<String>, Style>()
         //    var cardCount = 0

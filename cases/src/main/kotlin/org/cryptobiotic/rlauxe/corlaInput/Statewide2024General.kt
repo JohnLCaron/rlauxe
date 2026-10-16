@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corlaInput
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 
-class Colorado2024General(ac:String?=auditcenter): ColoradoInput(
+class Statewide2024General(ac:String?=auditcenter): StatewideInput(
     generalCanonicalFile = "$ac/2024/general/2024GeneralCanonicalList.csv",
     contestRoundFile = "$ac/2024/general/round1/contest.csv",
     tabulateCountyFile = "$ac/2024/general/tabulateCounty.csv",
@@ -15,13 +15,12 @@ class Colorado2024General(ac:String?=auditcenter): ColoradoInput(
     // canonical contests and choices
     override fun canonicalContests(): Map<String, CanonicalContest> = canonicalContests
     private val canonicalContests by lazy {
-        val result: MutableMap<String, CanonicalContest> =
-            readGeneralCanonicalList(generalCanonicalFile).associateBy { it.contestName }.toMutableMap()
+        val result = initializeCanonicalContests()
 
-        //add these missing contests:
+        // add these missing contests:
         val extras = listOf(
-            CanonicalContest("Bannock Ballot Issue 6A", choices = listOf("Yes", "No")).addCounties(listOf("Douglas")),
-            CanonicalContest("Spring Canyon Ballot Issue 6B", choices = listOf("Yes", "No")).addCounties(listOf("Douglas")),
+            CanonicalContest(this, "Bannock Ballot Issue 6A", listOf("Yes", "No")).addCounties(listOf("Douglas")),
+            CanonicalContest(this, "Spring Canyon Ballot Issue 6B", listOf("Yes", "No")).addCounties(listOf("Douglas")),
         )
         extras.forEach { result[it.contestName] = it }
 

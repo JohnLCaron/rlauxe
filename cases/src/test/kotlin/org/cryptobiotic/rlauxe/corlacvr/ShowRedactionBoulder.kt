@@ -38,6 +38,6 @@ class ShowRedactionBoulder {
 
     @Test
     fun testBoulder26() {
-        lookForRedactions("/resources/data/cases/boulder26p/2026P-Redacted-CVR-Public.csv")
+        lookForRedactions("/resources/data/cases/boulder2026p/2026P-Redacted-CVR-Public.csv")
     }
 }

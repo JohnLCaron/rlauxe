@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 
@@ -15,5 +16,7 @@ interface BoulderInput : CountyInput {
         return readBoulderSOV(this.sovoSource, this.electionName)
     }
 
-    override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
+    override fun readCorlaCvrs(): CorlaCountyCvrsIF {
+        return readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
+    }
 }

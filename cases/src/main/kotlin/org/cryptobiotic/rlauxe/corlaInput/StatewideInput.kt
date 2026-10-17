@@ -295,8 +295,8 @@ fun yesno(candName:String):String {
 }
 fun yesnoCanon(candName:String):String {
     return when (candName.lowercase()) {
-        "for the measure", "yes/for", "yes" -> "Yes"
-        "against the measure", "no/against", "no" -> "No"
+        "for the measure", "yes/for", "yes / for", "yes" -> "Yes"
+        "against the measure", "no/against", "no / against", "no" -> "No"
         else -> candName
     }
 }

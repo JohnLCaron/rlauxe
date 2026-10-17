@@ -11,7 +11,7 @@ a real audit. This is for testing purposes only: the data is not official.
 * Baca has a copy of Huerfano's cvrs instead of Baca's cvrs.
 * Garfield has an older or ad-hoc export format (added a workaround)
 * Las Animas only has 106 cards out of ~8000
-* Las Platas was missing the last 5 contest headers (fixed in our copy of votedatabase)
+* La Plata was missing the last 5 contest headers (fixed in our copy of votedatabase)
 
 ### imprintedId mistakenly converted to date  
 

@@ -152,7 +152,7 @@ class Garfield2020CountyCvrs(override val inputSource: String, showHeaders: Bool
     override fun cardStyles() = ballotStyles.cardStyles()
     override fun cvrs() = cvrs
     override fun nrows() = lineno
-    override fun unredactedRows() = cvrs.size
+    override fun unredactedCvrs() = cvrs.size
     override fun headers() = headers
     override fun hasBallotType() = ballotTypeIdx != null
     override fun countBlankPrecincts() = countBlankPrecincts

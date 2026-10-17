@@ -96,6 +96,7 @@ data class SchemaColumnInfo(val colno:Int, val contest: String, val choiceName: 
         return "${nfn(colno, 3)}, ${trunc(contest, contestWidth)}, ${nfn(contestIdx, 3)}, " +
                 "${trunc(choiceName, choiceWidth)}, ${trunc(headerName, 5)}"
     }
+
     companion object {
         val header = "colno,          header name"
         val colHeader = "colno, ${trunc("contest", contestWidth)}, idx, ${trunc("choice", choiceWidth)}, party"

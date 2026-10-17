@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
@@ -7,7 +8,7 @@ import kotlin.test.Test
 
 // check name consistency in StatewideInput
 class ShowStatewideInput {
-    val input: StatewideInput = Statewide2025Coordinated()
+    val input: StatewideInput = Statewide2020General()
     val canonical = input.canonicalContests()
 
     @Test

@@ -143,7 +143,7 @@ fun findPrecinctStyleMin(corlaCvrs: CorlaCountyCvrsIF): Int {
         var styleMap = emptyMap<String, Int>()
 
         fun convert(ballotType:String, cardStyleMap: Map<CardStyleId, CvrCardStyle>) {
-            styleMap = contests.mapKeys { cardStyleMap[CardStyleId(ballotType, it.key)]?.ballotType ?: "unknown" }
+            styleMap = contests.mapKeys { cardStyleMap[CardStyleId(ballotType, it.key)]?.cardType ?: "unknown" }
         }
     }
 

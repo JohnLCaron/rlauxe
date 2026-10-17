@@ -35,12 +35,12 @@ This is called "column redaction": the ids are retained and the votes are redact
 * Eagle: 20; "Redacted per 24-27-205.5 (4)(b)(III) C.R.S"
 * El Paso 44; *
 * Jefferson 47; has "Redacted" over contest vote, know style
-* Larimer 57; "REDACTED"
+* Larimer 57; "REDACTED":  Individual cards with Style and IDs, no vote counts
 * Logan 21; empty votes
 * Morgan 5; empty votes
 * Pitkin 26; has 'X' over contest vote, know style
 * Pueblo 47; empty votes
-* Rio Blanco 4; empty votesIndividual cards with Style and IDs, no vote counts
+* Rio Blanco 4; empty votes
 * Summit 169; empty votes
 * Weld 41; empty votes
 

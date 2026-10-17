@@ -175,7 +175,7 @@ open class CountyManifestEntries(val manifestBatches: List<ManifestBatch>): Iter
                     count = 1
                 }
                 currentTab = mid.tab()
-                report.add("$count  didnt find cvr imprintedId '${mid.imprintedId()}' in manifest")
+                if (count % 100 == 1) report.add("$count  didnt find cvr imprintedId '${mid.imprintedId()}' in manifest")
                 count++
             }
 

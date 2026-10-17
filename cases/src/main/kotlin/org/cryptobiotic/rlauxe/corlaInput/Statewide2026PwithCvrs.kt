@@ -10,6 +10,8 @@ import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.boulder.BoulderInput
+import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import kotlin.collections.forEach
 
 // we have Boulder, La Plata, Morgan, and Weld CVR_export files
@@ -186,15 +188,16 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInputWithCvrs(
 class CountyInput2026(val county: String): CountyInput {
     override val electionName = "$county-2026p"
     override val countyName = county
-    override val manifestSource = "2026/primary/observerfiles/${county}_BallotManifest.csv"
+    val countyZ = county.replace("\\s".toRegex(), "")
+    override val manifestSource = "$auditcenter/2026/primary/files/${countyZ}.csv"
     override val cvrsSource: String
     override val year = 2025
 
     init {
         val filename = when (county) {
-            "La Plata" -> "LaPlata_RedactedTest_NoContestBalance_CVR_Export_20260709081424.cs"
+            "La Plata" -> "LaPlata_RedactedTest_NoContestBalance_CVR_Export_20260709081424.csv"
             "Morgan" -> "Morgan_CVR_Export_20260709092315_Redacted.csv"
-            "Weld" -> "Weld_BallotManifest.csv"
+            "Weld" -> "Weld_CVR_Export_20260709140755.csv"
             else -> "none"
         }
         cvrsSource = "$auditcenter/2026/primary/observerfiles/$filename"
@@ -215,4 +218,6 @@ class Boulder26PInput: BoulderInput  {
 
     // or use sovo ??
     override fun countyPopulation() = Statewide2026Primary().strataPopulation()[countyName]!!
+
+    override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
 }

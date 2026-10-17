@@ -29,7 +29,7 @@ data class CvrRow(
     // equivilent to Map<contestId, IntArray>, where candId =
     var contestVotes = mutableListOf<ContestVotes>() // equivilent to Map<contestId, IntArray>
 
-    fun contests() = contestVotes.map { it.contestId }.toSet()
+    fun contests() = contestVotes.map { it.contestId }.sorted().toSet()
 
     fun contestVotesFor(contestId: Int): ContestVotes? {
         return contestVotes.find { it.contestId == contestId}

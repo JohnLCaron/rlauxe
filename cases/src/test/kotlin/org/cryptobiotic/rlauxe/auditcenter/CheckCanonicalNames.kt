@@ -82,6 +82,12 @@ class CheckCanonicalNames( val input: StatewideInput) {
         val contestTabs: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties()
         canonical.values.forEach { cc ->
             if (!contestTabs.contains(cc.contestName)) {
+                if (cc.contestName.startsWith("Springfield")) {
+                    val countyTabs: Map<String, CountyTabAllContests> = input.countyTabsAllContests()
+                    val baca: CountyTabAllContests = countyTabs["Baca"]!!
+                    val bacaContest = baca.contests[cc.contestName]
+                    print("")
+                }
                 println("contestTabulate missing canonical contest '${cc.contestName}'")
                 missing.add(cc.contestName)
             } else {

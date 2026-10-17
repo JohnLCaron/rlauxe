@@ -1,9 +1,11 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
-import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
+import org.cryptobiotic.rlauxe.boulder.BoulderInput
+import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 
-class Statewide2024General(ac:String?=auditcenter): StatewideInput(
+class Statewide2024General(ac:String?=auditcenter): StatewideInputWithCvrs(
     generalCanonicalFile = "$ac/2024/general/2024GeneralCanonicalList.csv",
     contestRoundFile = "$ac/2024/general/round1/contest.csv",
     tabulateCountyFile = "$ac/2024/general/tabulateCounty.csv",
@@ -17,6 +19,13 @@ class Statewide2024General(ac:String?=auditcenter): StatewideInput(
     }
 
     override fun skipCounties(countyName: String) = false
+
+    override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CountyInput? {
+        return when (countyName) {
+            "Boulder" -> Boulder24Input()
+            else -> null
+        }
+    }
 
     // canonical contests and choices
     override fun canonicalContests(): Map<String, CanonicalContest> = canonicalContests
@@ -164,5 +173,20 @@ class Statewide2024General(ac:String?=auditcenter): StatewideInput(
             }
         }
     }
+}
 
+class Boulder24Input: BoulderInput  {
+    override val electionName= "Boulder-2024"
+    override val manifestSource = "$auditcenter/2024/general/BoulderBallotManifest.csv"
+    override val cvrsSource = "/resources/data/cases/boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
+    override val sovoSource = "/resources/data/cases/boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv"
+    override val year = 2024
+
+    // or use sovo ??
+    override fun countyPopulation(): Int {
+        val manifests = readCountyManifest()
+        return manifests.totalCards
+    }
+
+    override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
 }

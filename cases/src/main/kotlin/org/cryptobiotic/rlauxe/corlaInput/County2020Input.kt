@@ -15,8 +15,9 @@ class County2020Input(
 
     override val electionName = "${countyName}2020"
     // TODO Gunnison has Manifest-Gunnison.csv; but Gunnison is an excluded county in 2020
-    override val manifestSource = "$manifestDir/manifest-${countyNameZ}.csv"
-    override val cvrsSource: String = votedatabase[countyName]!!
+    override val manifestSource = if (countyName == "Gunnison") "$manifestDir/Manifest-${countyNameZ}.csv"
+                                  else "$manifestDir/manifest-${countyNameZ}.csv"
+    override val cvrsSource = votedatabase[countyName]!!
     override val year = 2020
 
     override fun readCountyManifest(): CountyManifestEntries {
@@ -51,7 +52,7 @@ fun votedatabase2020Counties(votedatabase: String): Map<String, String> {
         // Las Animas has only 120 of 8000 cvrs
         // San Juan is missing
         // Monroe, Rooselvelt: no such county in Colorado
-        if (county !in listOf("Baca", "Gunnison", "Las Animas", "San Juan", "Monroe", "Roosevelt")) {
+        if (county !in listOf("Baca", "San Juan", "Monroe", "Roosevelt")) {
             try {
                 val filename = "${subdir}/cvr.csv" // entry.toString()
                 cvrdata.add(Pair(county, filename))

@@ -89,8 +89,8 @@ interface CorlaCountyCvrsIF {
     fun cardStyleMap(): Map<CardStyleId, CvrCardStyle>
     fun cardStyles(): List<CvrCardStyle>
     fun nrows(): Int  // total row count
-    fun unredactedRows(): Int
-    fun redactedRows() = redaction().redactedRows().size
+    fun unredactedCvrs(): Int
+    fun redactedCvrs() = redaction().nredactedCvrs()
 
     fun headers(): List<String>
     fun hasBallotType(): Boolean
@@ -98,5 +98,5 @@ interface CorlaCountyCvrsIF {
     fun ballotStyleUnique(): Boolean
     fun rowHeaderCols(row: CvrRow, redact: Set<CvrHeader> = emptySet()): String
 
-    fun show() = "$electionName nrows=${nrows()} unredactedRows=${unredactedRows()}  redactedRows=${redactedRows()}  "
+    fun show() = "$electionName nrows=${nrows()} unredactedRows=${unredactedCvrs()}  redactedRows=${redactedCvrs()}  "
 }

@@ -1,7 +1,10 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
-import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
+import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
+import org.cryptobiotic.rlauxe.corlacvr.CvrTabulations
+import org.cryptobiotic.rlauxe.corlacvr.tabulate
 
 open class Statewide2020General(ac:String?=auditcenter): StatewideInputWithCvrs(
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
@@ -18,24 +21,39 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInputWithCvrs(
 
     override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CountyInput? {
         if (countyName == "Arapahoe") return Arapahoe2020Redacted()
+        if (countyName == "Baca") return null
         return if (counties().contains(countyName)) County2020Input(countyName, votedatabase) else null
     }
 
     // if you skip counties, you have to adjust Nc
-    private val skipCounties = listOf("Baca", "Gunnison", "Las Animas", "San Juan")
+    private val skipCounties = listOf("San Juan")
     override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
 
-    override fun contestTabsAllCounties(): Map<String, ContestTabAllCounties>  = contestTabsAllCounties
+    // add Gunnison cvr totals to countyTabsAllContests, since those are missing from the tabulateCountyFile file
+    override fun countyTabsAllContests(): Map<String, CountyTabAllContests> = countyTabsAllContests
+    private val countyTabsAllContests: Map<String, CountyTabAllContests> by lazy {
+        val countyTabs = readCountyTabulateCsv(tabulateCountyFile)
+        val gunnisonCvrs = corlaCountyInput("Gunnison")!!.readCorlaCvrs()
+        val gunnisonTabulate: CvrTabulations = tabulate(gunnisonCvrs)
+
+        val gunnisonCountyTab = CountyTabAllContests("Gunnison")
+        val infos = gunnisonTabulate.infos.mapValues { it.value.copy(name = contestNameCleanup("Gunnison", it.value.name)) }
+        gunnisonCountyTab.addContestTabulations(gunnisonTabulate.sum(), infos)
+
+        countyTabs + mapOf("Gunnison" to gunnisonCountyTab)
+    }
+
+    /* override fun contestTabsAllCounties(): Map<String, ContestTabAllCounties>  = contestTabsAllCounties
     private val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
         val tabs = mutableMapOf<String, ContestTabAllCounties>()
-        countyTabsAllContests().values.filter { it.countyName !in listOf("Baca", "Gunnison", "Las Animas") }.forEach { countyTabAllContests ->
+        countyTabsAllContests().values.forEach { countyTabAllContests ->
             countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
                 val tab = tabs.getOrPut(contestName) { ContestTabAllCounties(contestName) }
                 tab.add(countyTabAllContests.countyName, countyContestVotes)
             }
         }
         tabs.toMap()
-    }
+    } */
 
     // canonical contests and choices
     override fun canonicalContests() = canonicalContests
@@ -62,6 +80,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInputWithCvrs(
         //countyTabulate missing auditcenter 'San Juan County Commissioner - District 2'
         //countyTabulate missing auditcenter 'San Juan County Court Judge - Edwards'
 
+        /*
         //// Baca
         result.remove("Baca County Commissioner - District 1")
         result.remove("Baca County Commissioner - District 3")
@@ -76,6 +95,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInputWithCvrs(
         result.remove("Town of Marble - Board of Trustees")
         result.remove("Town of Marble Ballot Issue 2A")
 
+        // or some resom there no tabulation for these contests
         //// Las Animas
         result.remove("Las Animas County Commissioner - District 1")
         result.remove("Las Animas County Commissioner - District 2")
@@ -86,7 +106,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInputWithCvrs(
         result.remove("San Juan County Commissioner - District 1")
         result.remove("San Juan County Commissioner - District 2")
         result.remove("San Juan County Court Judge - Edwards")
-
+*/
         result.toSortedMap()
     }
 

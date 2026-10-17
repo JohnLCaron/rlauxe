@@ -14,7 +14,7 @@ import kotlin.String
 private val logger = KotlinLogging.logger("CountyContestBuilder")
 
 // Build Corla Contests from StatewideInput. used by CorlaStateElection
-// TODO should add up the county votes, not use the statewide total since some counties are missing
+// TODO should add up the county votes, not use the statewide total since some counties may be missing, eg San Juan
 open class BuildCorlaContests(val statewideInput: StatewideInput) {
     val corlaContestBuilders: List<CorlaContestBuilder> = makeContestBuilders() // 181
     val infos: Map<Int, ContestInfo> = corlaContestBuilders.map { it.info }.associateBy{ it.id }
@@ -78,7 +78,7 @@ open class BuildCorlaContests(val statewideInput: StatewideInput) {
                     contestTabAllCounties,
                 )
                 contestBuilders.add(contest)
-            }
+           }
         }
 
         // println("number of contestBuilders = ${contestBuilders.size}")
@@ -114,7 +114,7 @@ open class BuildCorlaContests(val statewideInput: StatewideInput) {
 /////////////////////////////////////////////////////////////////////////////
 // one contest
 
-class CorlaContestBuilder(val info: ContestInfo, val mcontest: MergedContestInfo, val strata: StrataInfo, val contestTabAllCounties: ContestTabAllCounties) {
+class CorlaContestBuilder(val info: ContestInfo, val mcontest: MergedContestInfo, val strata: StrataInfo, contestTabAllCounties: ContestTabAllCounties) {
     val contestId = info.id
     val Nc: Int     // taken from contestRound.contestBallotCardCount
     val minCardsNeeded: Int

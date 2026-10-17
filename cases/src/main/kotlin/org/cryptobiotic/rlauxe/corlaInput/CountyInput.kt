@@ -20,7 +20,7 @@ interface CountyInput: ColoradoInput {
     // TODO cache this I think ?? Or does it need to stream ??
     fun readCorlaCvrs(): CorlaCountyCvrsIF {
         when {
-            (year == 2020) -> when {
+            (year == 2020) -> return when {
                 (countyName == "Garfield") -> Garfield2020CountyCvrs(cvrsSource)
                 (countyName == "Boulder") -> readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
                 (countyName == "La Plata") -> readCountyCvrs(cvrsSource, redaction = Redaction(RedactionStrategy(true)))
@@ -31,7 +31,7 @@ interface CountyInput: ColoradoInput {
         return readCountyCvrs(cvrsSource, redaction = Redaction())
     }
 
-    // not needed I think
+    // TODO useful?
     fun hasABgroups() = false
 
     fun readCountyManifest(): CountyManifestEntries {

@@ -8,14 +8,20 @@ class WriteCountyInputData {
     val baseSummaryData = "src/main/resources/resources/data/cases/corla/countySummaryData"
 
     @Test
+    fun writeOne() {
+        //val ourRedactByPrecinct = readRedactionCount("$base2020Precinct/redactedCountByPrecinct.csv")
+        writeCountyData(Statewide2020General()) // , ourRedactByPrecinct)
+    }
+
+    @Test
     fun writeAllCountyInputData() {
         writeCountyData(Statewide2020General())
-        //testAnonStatewideInput(Statewide2022Primary())
+        //writeCountyData(Statewide2022Primary())
         writeCountyData(Statewide2023Coordinated())
-        //testAnonStatewideInput(Statewide2024General())
+        writeCountyData(Statewide2024General())
         writeCountyData(Statewide2025Coordinated())
-        //testAnonStatewideInput(Statewide2026Primary())
-        //testAnonStatewideInput(Statewide2026PMerged())
+        //writeCountyData(Statewide2026Primary())
+        //writeCountyData(Statewide2026PMerged())
         writeCountyData(Statewide2026PwithCvrs())
     }
 
@@ -26,6 +32,8 @@ class WriteCountyInputData {
         val data = mutableListOf<CountyInputData>()
         stateInput.counties().forEach { county ->
             val countyInput = stateInput.corlaCountyInput(county)
+            if (county == ("Jefferson"))
+                print("")
             if (countyInput != null) {
                 val ccc = CheckCvrsAndManifest(stateInput, countyInput, showMatch = true, showMissingVotes = true, showRedactedCvrs = true)
                 val corlaCvrs = ccc.corlaCvrs
@@ -50,13 +58,11 @@ class WriteCountyInputData {
                     CountyInputData(
                         county,
                         manifestCount = manifestCounts.totalEntries,
-                        unredactedCvrs = corlaCvrs.unredactedRows(),
-                        redactedCvrs = corlaCvrs.redactedRows(), // TODO some of the redaction may be just in the redaction groups
+                        unredactedCvrs = corlaCvrs.unredactedCvrs(),
+                        redactedCvrs = corlaCvrs.redactedCvrs(),
                         cvrInManifest = manifestCounts.countCvrsInManifest,
                         cvrNoManifest = manifestCounts.cvrNoManifest,
                         manifestNoCvr = manifestCounts.manifestNoCvr,
-                        // pythonNredact = ourRedactByPrecinct[county]?.pythonNredact ?: 0,
-                        // rlauxeNredact = ourRedactByPrecinct[county]?.rlauxeNredact ?: 0,
                         minCards = ccc.minCards,
                         countBlankPrecincts = ccc.countBlankPrecincts,
                         ballotStylesUnique = ccc.ballotStylesUnique,
@@ -71,7 +77,9 @@ class WriteCountyInputData {
         writeCountyInputData(filename, data)
         println("that took $stopwatch")
 
-        val roundtrip = CountyInputData.readFromResource("/resources/data/cases/corla/countySummaryData/Statewide2026PwithCvrs.csv")
-        assertEquals(data.sortedBy{it.county}, roundtrip)
+        data.sortedBy {it.county}.forEach { println(it)}
+        val roundtrip = readCountyInputData(filename)
+        assertEquals(data.sortedBy {it.county} , roundtrip)
     }
 }
+

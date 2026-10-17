@@ -28,11 +28,16 @@ class TestAnonAllInputs {
     val baseRedactedCount = "src/main/resources/resources/data/cases/corla/redactedCount"
 
     @Test
+    fun testOneAnonStatewideInput() {
+        testAnonStatewideInput(Statewide2024General())
+    }
+
+    @Test
     fun testAllAnonStatewideInput() {
         testAnonStatewideInput(Statewide2020General())
         //testAnonStatewideInput(Statewide2022Primary())
         testAnonStatewideInput(Statewide2023Coordinated())
-        //testAnonStatewideInput(Statewide2024General())
+        testAnonStatewideInput(Statewide2024General())
         testAnonStatewideInput(Statewide2025Coordinated())
         //testAnonStatewideInput(Statewide2026Primary())
         //testAnonStatewideInput(Statewide2026PMerged())

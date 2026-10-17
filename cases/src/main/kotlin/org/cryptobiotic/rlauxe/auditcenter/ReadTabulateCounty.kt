@@ -93,6 +93,15 @@ data class CountyTabAllContests(override val countyName: String): CountyTabAllCo
         val contest = contests.getOrPut(line.contestName ) { CountyContestVotes(countyName, line.contestName) }
         contest.addChoice(line.choiceName, line.countyVote)
     }
+
+    fun addContestTabulations(contestTabs: Map<Int, ContestTabulation>, infos: Map<Int, ContestInfo>) {
+        contestTabs.forEach { (contestId, contestTab) ->
+            val info = infos[contestId]!!
+            val ccvFromTab = CountyContestVotes.fromContestTab(countyName, contestTab, info)
+            val ccv = contests.getOrPut(info.name ) { CountyContestVotes(countyName, info.name) }
+            ccvFromTab.choices.forEach { (name, vote) -> ccv.addChoice(name, vote) }
+        }
+    }
 }
 
 // we only know votes, not ncards or undervotes.
@@ -124,6 +133,14 @@ data class CountyContestVotes(override val countyName: String, override val cont
 
     override fun toString() = buildString {
         append("'$contestName': $choices")
+    }
+
+    companion object {
+        fun fromContestTab(county: String, contestTab: ContestTabulation, info: ContestInfo): CountyContestVotes {
+            val ccv = CountyContestVotes(county, info.name)
+            contestTab.votes.forEach { (candId, candVote) -> ccv.addChoice(info.candidateIdToName[candId]!!, candVote) }
+            return ccv
+        }
     }
 }
 
@@ -170,6 +187,7 @@ fun readCountyTabulateCsv(filename: String): Map<String, CountyTabAllContests> {
     return counties.toSortedMap()
 }
 
+/////////////////////////////////////////////////
 // this is derived from CountyTabAllContests
 data class ContestTabAllCounties(override val contestName: String): ContestTabAllCountiesIF {
     override val choices = mutableMapOf<String, Int>() // original choice name -> votes

@@ -91,8 +91,8 @@ class CorlaCountyCvrs(override val inputSource: String,
     override fun cardStyles() = ballotStyles.cardStyles()
     override fun cvrs() = cvrs
     override fun nrows() = rowCount
-    override fun unredactedRows() = cvrs().size
-    override fun redactedRows() = redaction.redactedRows().size
+    override fun unredactedCvrs() = cvrs().size
+    override fun redactedCvrs() = redaction.nredactedCvrs()
 
     override fun headers() = headers
     override fun hasBallotType() = schema.headerIdx[CvrHeader.ballottype] != null
@@ -172,9 +172,12 @@ class CorlaCountyCvrs(override val inputSource: String,
     fun parseColAsInt(header: CvrHeader, line: CSVRecord, def: Int = -1): Int {
         val colidx = schema.headerIdx[header]
         return if (colidx != null && colidx < line.size()) {
-            val col = line.get(colidx) // does this trim whitespace ?
-            // TODO doesnt actually guard against not being an Int, just if its empty
-            if (col.isEmpty()) def else removeLeadingEquals(col).toInt()
+            val col = line.get(colidx) // does this trim whitespace ? seems to
+            try {
+                if (col.isEmpty()) def else removeLeadingEquals(col).toInt()
+            } catch (e: Exception) {
+                def
+            }
         } else def
     }
 
@@ -262,12 +265,6 @@ fun escHeaders(header: CSVRecord) = buildString {
     }
 }
 
-
-data class CvrCardStyle(val ballotType: String, val contestIds: Set<Int>) {
-    var ncards: Int = 0 // not part of equals
-    fun contains(contestId: Int) = contestIds.contains(contestId)
-}
-
 // scenario_ballot_type_present
 // has two ballot styles with same contest set [0,1], these generate a single CardStyle
 // and ballot style [1] has rows with different set [0], [0,1]
@@ -277,18 +274,46 @@ data class CvrCardStyle(val ballotType: String, val contestIds: Set<Int>) {
 // 12,1,1,12,1-1-12,P1, 2, 0,1,0,1
 // 19,1,1,19,1-1-19,P1, 1, 1,0,,
 
+data class CvrCardStyle(val cardType: String, val contestIds: Set<Int>) {
+    var ncards: Int = 0 // not part of equals
+    fun contains(contestId: Int) = contestIds.contains(contestId)
+    fun setNcards(n:Int): CvrCardStyle {
+        this.ncards = n
+        return this
+    }
+}
+
 data class CardStyleId(val ballotType: String, val contestIds: Set<Int>)
+
 class BallotStyles {
     val cardStyleMap = mutableMapOf<CardStyleId, CvrCardStyle>()
-    val ballotTypes = mutableSetOf<String>()
+    val ballotTypes = mutableMapOf<String, List<CvrCardStyle>>() //all cardtypes for this ballotType
     var ballotStylesUnique = true
 
     fun add(cvr:CvrRow) {
-        val cvrStyleId = CardStyleId(cvr.ballotType, cvr.contests())
+        val cleanBallotType = cleanCsvString(cvr.ballotType) // no commas
+        val cvrStyleId = CardStyleId(cleanBallotType, cvr.contests())
         val cardStyle = cardStyleMap.getOrPut(cvrStyleId) {
-            // if already been added, then there are duplicate contestId sets for this ballotType
-            if (!ballotTypes.add(cvr.ballotType)) ballotStylesUnique = false
-            CvrCardStyle(cvr.ballotType, cvr.contests())
+            // if already exists, then there are duplicate contestId sets for this ballotType
+            val cardList = ballotTypes[cleanBallotType]
+            if (cardList == null) {
+                val newStyle = CvrCardStyle(cleanBallotType, cvr.contests())
+                ballotTypes[cleanBallotType] = listOf(newStyle)
+                newStyle
+            } else {
+                ballotStylesUnique = false
+                // adjust the cardType names to be ballotType-A, ballotType-B, ...
+                // sort on lowest contest in the set (which is sorted, so the first)
+                val newStyle = CvrCardStyle(cleanBallotType, cvr.contests())
+                val allStyles = cardList + listOf(newStyle)
+                val allStylesSorted : List<CvrCardStyle> = allStyles.sortedBy { it.contestIds.first() }
+                val firstChar = 'A'
+                val newStyles= allStylesSorted.mapIndexed { idx, it ->
+                    it.copy(cardType = cleanBallotType + "-${firstChar+idx}").setNcards(it.ncards)
+                }
+                ballotTypes[cleanBallotType] = newStyles
+                newStyles.find { it.contestIds == cvr.contests() }!!
+            }
         }
         cardStyle.ncards++
     }
@@ -305,8 +330,7 @@ class BallotStyles {
 //="2",="2",="1",="23",="2-1-23","Mail","3356255005
 private val regexLE = Regex("[=\"]") // matches a quote or equals
 fun removeLeadingEquals(input: String): String {
-    val result = if (input.startsWith("="))
-            input.replace(regexLE, "")
+    val result = if (input.startsWith("=")) input.replace(regexLE, "")
         else input
     return result
 }

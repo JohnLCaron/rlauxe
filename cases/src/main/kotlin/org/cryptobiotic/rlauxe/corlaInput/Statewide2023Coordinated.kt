@@ -5,6 +5,8 @@ import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
 import org.cryptobiotic.rlauxe.boulder.BoulderInput
 import org.cryptobiotic.rlauxe.boulder.BoulderStatementOfVotes
 import org.cryptobiotic.rlauxe.boulder.readBoulderStatementOfVotes
+import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 
 open class Statewide2023Coordinated(ac:String?=auditcenter): StatewideInputWithCvrs(
     generalCanonicalFile = "$ac/2023/coordinated/canonicalListFinal.csv",
@@ -91,6 +93,8 @@ class Boulder23Input: BoulderInput {
     override val sovoSource = "/resources/data/cases/boulder2023/2023C-Boulder-County-Official-Statement-of-Votes.csv"
     val sovoRcvSource = "/resources/data/cases/boulder2023/2023C-Boulder-County-Official-Statement-of-Votes-RCV.csv"
     override val year = 2023
+
+    override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
 
     // or use sovo ??
     override fun countyPopulation(): Int {

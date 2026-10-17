@@ -564,7 +564,7 @@ data class CvrTabulations(val infos: Map<Int, ContestInfo>,
                           val cvrTabs: Map<Int, ContestTabulation>,
                           val redactedTabs: Map<Int, ContestTabulation>) {
 
-    fun sum(): Map<Int, ContestTabulation> {
+    fun sum(): Map<Int, ContestTabulation> { // contest -> contestTab
         val sum = mutableMapOf<Int, ContestTabulation>()
         sum.sumContestTabulations(cvrTabs)
         sum.sumContestTabulations(redactedTabs)

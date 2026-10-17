@@ -25,15 +25,15 @@ class EmptyRedaction: RedactionIF {
     override fun cardCountByContest() = emptyMap<Int, Int> ()
 }
 
-// TODO default ??
+// default is our anonymizer
 data class RedactionStrategy(val redactedRowsAlsoAggregated: Boolean = true,)
 
 // just gather the raw info
-open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val show: Boolean = false): RedactionIF {
+open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(true), val show: Boolean = false): RedactionIF {
     var nRedactedRows = 0
     val redactedGroups = mutableMapOf<String, RedactedGroup>()
     val redactedGroupsSet = mutableMapOf<Set<Int>, RedactedGroup>()
-    val redactedRows = mutableListOf<CvrRow>()
+    val redacted = mutableListOf<CvrRow>()
 
     private var redactionExtensions = 1
     private val showDontMatch = true
@@ -45,11 +45,11 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
         return result
     }
 
-    override fun redactedRows() = redactedRows
+    override fun redactedRows() = redacted
 
     override fun cardCountByContest() : Map<Int, Int> {
         val result = mutableMapOf<Int, Int>()
-        redactedRows.forEach { row ->
+        redacted.forEach { row ->
             row.contestVotes.forEach { contestVote ->
                 val accum = result.getOrDefault(contestVote.contestId, 0)
                 result[contestVote.contestId] = accum + 1
@@ -61,14 +61,16 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
     // number of redacted cvrs given in CVR file
     // here you have to know if the redactedRows are also in an aggregation
     override fun nredactedCvrs(): Int {
-        if (strategy.redactedRowsAlsoAggregated) return redactedRows().size
-        return redactedRows().size + groups().sumOf{ it.ncards()}
+        val groupRows = groups().sumOf{ it.ncards()}
+        return if (!strategy.redactedRowsAlsoAggregated) redactedRows().size + groupRows
+               else { if (groupRows > 0) groupRows else redactedRows().size }
     }
 
-    fun addRedactedLine(line: CSVRecord, corlaCvrs: CorlaCountyCvrs) {
+    fun addRedactedLine(line: CSVRecord, corlaCvrs: CorlaCountyCvrs, findNonNull: Boolean = true) {
         val cvr = corlaCvrs.parseHeader(line)
-        cvr.findNonNull(corlaCvrs.schema, line)
-        redactedRows.add(cvr) // now the redacted rows know which contests they hold (maybe)
+        if (findNonNull) cvr.findNonNull(corlaCvrs.schema, line)
+            else cvr.addVotes(corlaCvrs.schema, line, -1)
+        redacted.add(cvr) // now the redacted rows know which contests they hold (maybe)
     }
 
     // if you have a group, you expect that the redactedRows have contest info in them
@@ -174,6 +176,11 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
         return false
     }
 
+    override fun toString() = buildString {
+        appendLine("${this@Redaction.javaClass.simpleName}: nredactedRows=${redacted.size}, nredactedGroups=${redactedGroups.size}, nredactedCvrs=${nredactedCvrs()}")
+        redactedGroups.forEach { appendLine("    $it")}
+    }
+
     companion object {
         val GroupWithLines = "GroupWithLines"
     }
@@ -182,6 +189,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(), val 
 // these are using local contest ids, candidate ids
 // comes from a subtotal line in the redacted cvrs
 data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val schema: CvrSchema) {
+    // why not ContestTabulation ?? becaue we dont have info ??
     val candVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
 
     var nlines = 0  // used by the accumulating group
@@ -198,6 +206,11 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
     }
 
     fun contests() = candVotes.keys.toSet()
+
+    // TODO
+    fun ncards():Int {
+        return fixedNcards?: max( max(nlines, minCards()), setNcards)
+    }
 
     fun addVotes(line: CSVRecord): RedactedGroup {
         var colidx = schema.nheaders // start where the votes begin
@@ -235,7 +248,6 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
 
     // merge two RedactedGroups together
     fun merge(other: RedactedGroup): RedactedGroup  {
-        // if (fixedNcards != null || other.fixedNcards != null) { throw RuntimeException("Cant merge fixed group") }
 
         // require (this.ballotType == other.ballotType)
         other.candVotes.forEach { (contestId, otherCands) ->
@@ -247,7 +259,6 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
         }
         this.nlines += other.nlines // other.minCards(voteForNmap)
         this.singleCards = this.singleCards && other.singleCards
-        // TODO this.fixedNcards = (this.fixedNcards ?: 0) + (other.fixedNcards ?: 0)
 
         return this
     }
@@ -264,14 +275,9 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val sch
 
     fun totalVotes() = candVotes.values.map{ it.values }.flatten().sum()
 
-    // TODO
-    fun ncards():Int {
-        return fixedNcards?: max( max(nlines, minCards()), setNcards)
-    }
-
     override fun toString() = buildString {
         val contests = candVotes.map { it.key }.sorted()
-        append("RedactedGroup('$groupName', nlines=$nlines, minCards= ${minCards()} totalVotes=${totalVotes()} singleCards = $singleCards, contests=${contests} )")
+        append("RedactedGroup('$groupName', ncards=${ncards()}, nlines=$nlines, minCards= ${minCards()} totalVotes=${totalVotes()} singleCards = $singleCards, contests=${contests} )")
         // appendLine(csvRecord.toString())
     }
 

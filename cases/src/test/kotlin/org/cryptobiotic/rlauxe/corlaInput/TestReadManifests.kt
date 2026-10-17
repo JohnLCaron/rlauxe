@@ -36,4 +36,36 @@ class TestReadManifests {
         assertEquals(count, expectCards ?: sm.totalCards)
     }
 
+    @Test
+    fun testCountyInput() {
+        val input = Statewide2020General()
+        input.counties().forEach { county ->
+            getCountyInput(input, county)
+        }
+    }
+
+    @Test
+    fun testRedactionOneCounty() {
+        val input = Statewide2020General()
+        val countyInput = input.corlaCountyInput("Jefferson")!!
+        val corlaCvrs = countyInput.readCorlaCvrs()
+        println(corlaCvrs.nrows())
+        println(corlaCvrs.redaction())
+        println(corlaCvrs.redaction().nredactedCvrs())
+        println(corlaCvrs.redactedCvrs())
+    }
+
+    fun getCountyInput(input: StatewideInputWithCvrs, county: String) {
+        println(county)
+        val countyInput = input.corlaCountyInput(county)
+        if (countyInput != null) {
+            println(countyInput.manifestSource)
+            println(countyInput.readCountyManifest().totalCards)
+        }
+
+        val countyTabs = input.countyTabsAllContests()
+        println(countyTabs[county])
+        println()
+    }
+
 }

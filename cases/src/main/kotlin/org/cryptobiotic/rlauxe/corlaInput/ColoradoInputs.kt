@@ -9,6 +9,8 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
+import java.io.BufferedReader
+import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import kotlin.collections.forEach
@@ -79,7 +81,6 @@ data class CountyInputData(val county: String,
 
 fun parseColAsInt(col:String) = col.trim().toInt()
 
-
 fun writeCountyInputData(outputFilename: String, data: List<CountyInputData>) {
     // misc data by county
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
@@ -94,6 +95,36 @@ fun writeCountyInputData(outputFilename: String, data: List<CountyInputData>) {
     }
     writer.close()
     println("wrote ${data.size} countyData to $outputFilename")
+}
+
+fun readCountyInputData(filename: String): List<CountyInputData> {
+    val reader: BufferedReader = File(filename).bufferedReader()
+    reader.readLine() // skip header line
+
+    val countyData = mutableListOf<CountyInputData>()
+    while (true) {
+        val line = reader.readLine() ?: break
+        var idx = 0
+        val tokens = line.split(",")
+        val countyName = tokens[idx++].trim()
+        val manifestCount = tokens[idx++].trim().toInt()
+        val unredactedCvrs = tokens[idx++].trim().toInt()
+        val redactedCvrs = tokens[idx++].trim().toInt()
+        val cvrInManifest = tokens[idx++].trim().toInt()
+        val cvrNoManifest = tokens[idx++].trim().toInt()
+        val manifestNoCvr = tokens[idx++].trim().toInt()
+        val minCards = tokens[idx++].trim().toInt()
+        val countBlankPrecincts = tokens[idx++].trim().toInt()
+        val ballotStylesUnique = tokens[idx++].trim() == "true"
+        val ballotStyleMin = tokens[idx++].trim().toInt()
+        val precinctStyleMin = tokens[idx++].trim().toInt()
+
+        countyData.add( CountyInputData(countyName, manifestCount, unredactedCvrs, redactedCvrs, cvrInManifest, cvrNoManifest, manifestNoCvr,
+            minCards, countBlankPrecincts, ballotStylesUnique, ballotStyleMin, precinctStyleMin))
+    }
+    reader.close()
+
+    return countyData
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

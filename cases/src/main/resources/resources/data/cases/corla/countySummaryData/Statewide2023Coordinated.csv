@@ -1,0 +1,2 @@
+county, manifestCount, unredactedCvrs, redactedCvrs, cvrInManifest, cvrNoManifest, manifestNoCvr, minCards, countBlankPrecincts, ballotStylesUnique, ballotStyleMin, precinctStyleMin
+             Boulder,  119772,  118669,    1092,  118669,       0,  1103,  1084, 118669, true, 12, 12

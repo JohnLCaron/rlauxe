@@ -5,9 +5,9 @@ import kotlin.test.Test
 class TestCheckCvrsAndManifest {
 
     @Test
-    fun testOneCorlaCountyInput() {
-        val stateInput = Statewide2026PwithCvrs()
-        val input = stateInput.corlaCountyInput("Weld")!!
+    fun testOneCountyInput() {
+        val stateInput = Statewide2020General()
+        val input = stateInput.corlaCountyInput("Garfield")!!
 
         CheckCvrsAndManifest(stateInput, input, compareMissingVotes = true, showMatch = true)
     }

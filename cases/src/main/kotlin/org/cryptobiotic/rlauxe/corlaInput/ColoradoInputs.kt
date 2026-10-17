@@ -9,15 +9,23 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
-import java.io.BufferedReader
-import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import kotlin.collections.forEach
-import kotlin.text.split
 import kotlin.text.toInt
 
 private val logger = KotlinLogging.logger("ColoradoInput")
+
+val statewideInputs = listOf(
+    Statewide2020General(),
+    Statewide2022Primary(),
+    Statewide2023Coordinated(),
+    Statewide2024General(),
+    Statewide2025Coordinated(),
+    Statewide2026Primary(),
+    Statewide2026PMerged(),
+    Statewide2026PwithCvrs(),
+)
 
 interface ColoradoInput {
     fun name(): String

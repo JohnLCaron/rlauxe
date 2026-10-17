@@ -3,7 +3,9 @@ package org.cryptobiotic.rlauxe.boulder
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
+import org.cryptobiotic.rlauxe.corlaInput.Boulder23Input
 import org.cryptobiotic.rlauxe.corlaInput.Boulder25Input
+import org.cryptobiotic.rlauxe.corlaInput.Boulder26PInput
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.SchemaContestInfo

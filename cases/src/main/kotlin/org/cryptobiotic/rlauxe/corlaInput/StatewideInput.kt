@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.auditcenter.readColoradoContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.readContestComparisonCsv
+import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
 import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -26,26 +27,17 @@ val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
 
 private val logger = KotlinLogging.logger("StatewideInput")
 
-abstract class StatewideInputWithManifests(
-    generalCanonicalFile: String, contestRoundFile: String, tabulateCountyFile: String, mvrComparisonFile: String,
-    val manifestDir: String,
-): StatewideInput(
-    generalCanonicalFile, contestRoundFile, tabulateCountyFile, mvrComparisonFile)
-{
-    abstract fun corlaCountyManifest(countyName: String): CountyManifest?
-
-    abstract fun corlaStateManifest(): StateManifest?
-}
-
 abstract class StatewideInputWithCvrs(
-    generalCanonicalFile: String, contestRoundFile: String, tabulateCountyFile: String, mvrComparisonFile: String
+    generalCanonicalFile: String,
+    contestRoundFile: String,
+    tabulateCountyFile: String,
+    mvrComparisonFile: String,
 ): StatewideInput(
     generalCanonicalFile, contestRoundFile, tabulateCountyFile, mvrComparisonFile)
 {
     // TODO should not have votedatabase parameter
     abstract fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>? = null): CountyInput?
 }
-
 
 /*
    1. Identify the following 4 files in auditcenter
@@ -81,13 +73,29 @@ abstract class StatewideInput(
     val generalCanonicalFile: String,
     val contestRoundFile: String,
     val tabulateCountyFile: String,
-    val mvrComparisonFile: String
+    val mvrComparisonFile: String,
 ): ColoradoInput {
 
     override fun name() = this.javaClass.simpleName
     override fun ncontests() = canonicalContests().size
     override fun nuncontested() = canonicalContests().count() { it.value.choices.size < 2 }
 
+    abstract fun manifestFile(county: String): String
+
+    open fun statewideManifest() = statewideManifest
+    private val statewideManifest: StateManifest by lazy {
+        val countyManifests = counties().map { county ->
+            val mainfestList = readCountyManifestCsv(manifestFile(county))
+            CountyManifest(county, mainfestList)
+        }
+        StateManifest(countyManifests)
+    }
+
+    fun countyManifest(countyName: String): CountyManifest? {
+        return statewideManifest().manifests.find { it.county == countyName }
+    }
+
+    //////////////////////////////////////////////////////
     abstract fun skipCounties(countyName: String): Boolean
 
     //
@@ -128,7 +136,7 @@ abstract class StatewideInput(
     //    val gamma: Double,
     //    val optimisticSamplesToAudit: Int,
     //    val estimatedSamplesToAudit: Int,
-    //)
+    // )
     open fun roundContests(): Map<String, CorlaContestRoundCsv> = roundContests
     private val roundContests: Map<String, CorlaContestRoundCsv> by lazy {
         readColoradoContestRoundCsv(contestRoundFile)
@@ -239,8 +247,6 @@ abstract class StatewideInput(
         val munged = munge(exportContestName)
         return canonicalContestMungedNames[munged]
     }
-
-    // abstract fun matchCanonicalCandidate(county: CanonicalContest, contest2: String)
 
     // return canonical candidate name
     fun matchCanonicalCandidate(county: String, contest: CanonicalContest, choice: String): String? {

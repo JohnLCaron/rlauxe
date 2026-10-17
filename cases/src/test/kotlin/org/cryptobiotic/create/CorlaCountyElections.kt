@@ -8,14 +8,12 @@ import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.boulder.Boulder24Input
-import org.cryptobiotic.rlauxe.boulder.Boulder26PInput
+import org.cryptobiotic.rlauxe.corlaInput.Boulder26PInput
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corlaInput.LaPlata26PInput
-import org.cryptobiotic.rlauxe.corlaInput.Morgan26PInput
-import org.cryptobiotic.rlauxe.corlaInput.Weld26PInput
 import org.cryptobiotic.rlauxe.corlaCounty.createCorlaCountyElection
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput2026
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import kotlin.test.Test
@@ -26,7 +24,7 @@ class CorlaCountyElections {
     @Test
     fun createOne() {
         val toptopdir = "$cases/corlaCounty/morgan26p"
-        val countyInput = Morgan26PInput()
+        val countyInput = CountyInput2026("Morgan")
         val stateInput = Statewide2026PwithCvrs()
 
         // fun createCorlaCountyElection(
@@ -103,7 +101,7 @@ class CorlaCountyElections {
     @Test
     fun createLaPlata26p() {
         createCorlaCountyVariants("$cases/corlaCounty/laplata26p",
-            LaPlata26PInput(),
+            CountyInput2026("La Plata"),
             Statewide2026PwithCvrs()
         )
     }
@@ -111,7 +109,7 @@ class CorlaCountyElections {
     @Test
     fun createMorgan26p() {
         createCorlaCountyVariants("$cases/corlaCounty/morgan26p",
-            Morgan26PInput(),
+            CountyInput2026("Morgan"),
             Statewide2026PwithCvrs()
         )
     }
@@ -119,7 +117,7 @@ class CorlaCountyElections {
     @Test
     fun createWeld26p() {
         createCorlaCountyVariants("$cases/corlaCounty/weld26p",
-            Weld26PInput(),
+            CountyInput2026("Weld"),
             Statewide2026PwithCvrs()
         )
     }

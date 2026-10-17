@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
-import org.cryptobiotic.rlauxe.boulder.Boulder26PInput
+import org.cryptobiotic.rlauxe.boulder.BoulderInput
 import kotlin.collections.forEach
 
 // we have Boulder, La Plata, Morgan, and Weld CVR_export files
@@ -17,9 +17,12 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInputWithCvrs(
     generalCanonicalFile = "$ac/2026/primary/finalReports/CanonicalListOfContestsAndChoices.csv",
     contestRoundFile = "$ac/2026/primary/finalReports/ContestsListRound1.csv",
     tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",
-    mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv"
+    mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv",
 ) {
     val parent = Statewide2026PMerged(ac)
+
+    override fun manifestFile(county: String) = parent.manifestFile(county)
+    override fun statewideManifest() = parent.statewideManifest()
 
     val useCounties = setOf("Boulder", "La Plata", "Morgan", "Weld") // the counties we have cvrs for
     override fun skipCounties(countyName: String) = !useCounties.contains(countyName)
@@ -31,9 +34,7 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInputWithCvrs(
     override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CountyInput? {
         return when (countyName) {
             "Boulder" -> Boulder26PInput()
-            "La Plata" -> LaPlata26PInput()
-            "Morgan" -> Morgan26PInput()
-            "Weld" -> Weld26PInput()
+            "La Plata", "Morgan", "Weld" -> CountyInput2026(countyName)
             else -> null
         }
     }
@@ -180,4 +181,38 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInputWithCvrs(
     override fun candidateNameCleanup(county: String, name: String): String {
         return parent.candidateNameCleanup(county, name)
     }
+}
+
+class CountyInput2026(val county: String): CountyInput {
+    override val electionName = "$county-2026p"
+    override val countyName = county
+    override val manifestSource = "2026/primary/observerfiles/${county}_BallotManifest.csv"
+    override val cvrsSource: String
+    override val year = 2025
+
+    init {
+        val filename = when (county) {
+            "La Plata" -> "LaPlata_RedactedTest_NoContestBalance_CVR_Export_20260709081424.cs"
+            "Morgan" -> "Morgan_CVR_Export_20260709092315_Redacted.csv"
+            "Weld" -> "Weld_BallotManifest.csv"
+            else -> "none"
+        }
+        cvrsSource = "$auditcenter/2026/primary/observerfiles/$filename"
+    }
+
+    override fun countyPopulation(): Int {
+        val manifests = readCountyManifest()
+        return manifests.totalCards
+    }
+}
+
+class Boulder26PInput: BoulderInput  {
+    override val electionName= "Boulder2026p"
+    override val cvrsSource = "/resources/data/cases/boulder2026p/2026P-Redacted-CVR-Public.csv"
+    override val manifestSource = "$auditcenter/2026/primary/files/Boulder.csv"
+    override val sovoSource = "/resources/data/cases/boulder2026p/2026P-Boulder-County-Official-Statement-of-Votes.csv"
+    override val year = 2026 // TODO primary vs general
+
+    // or use sovo ??
+    override fun countyPopulation() = Statewide2026Primary().strataPopulation()[countyName]!!
 }

@@ -6,25 +6,17 @@ import kotlin.test.assertEquals
 
 class WriteCountyInputData {
     val baseSummaryData = "src/main/resources/resources/data/cases/corla/countySummaryData"
-    val base2026Precinct = "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2026/precinct"
-    val base2020Precinct = "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/precinct"
 
     @Test
-    fun write2026p() {
-        //val ourRedactByPrecinct: Map<String, RedactionCount> = readRedactionCount("$base2026Precinct/redactedCountByPrecinct.csv")
-        writeCountyData(Statewide2026PwithCvrs()) //, ourRedactByPrecinct)
-    }
-
-    @Test
-    fun write2023() {
-        //val ourRedactByPrecinct = readRedactionCount("$base2020Precinct/redactedCountByPrecinct.csv")
-        writeCountyData(Statewide2023Coordinated()) // , ourRedactByPrecinct)
-    }
-
-    @Test
-    fun write2020() {
-        //val ourRedactByPrecinct = readRedactionCount("$base2020Precinct/redactedCountByPrecinct.csv")
-        writeCountyData(Statewide2020General()) // , ourRedactByPrecinct)
+    fun writeAllCountyInputData() {
+        writeCountyData(Statewide2020General())
+        //testAnonStatewideInput(Statewide2022Primary())
+        writeCountyData(Statewide2023Coordinated())
+        //testAnonStatewideInput(Statewide2024General())
+        writeCountyData(Statewide2025Coordinated())
+        //testAnonStatewideInput(Statewide2026Primary())
+        //testAnonStatewideInput(Statewide2026PMerged())
+        writeCountyData(Statewide2026PwithCvrs())
     }
 
     // ourRedactByPrecinct written by TestAnonScenarios

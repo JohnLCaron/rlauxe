@@ -21,10 +21,13 @@ class Statewide2026PMerged(ac:String?=auditcenter): StatewideInput(
     generalCanonicalFile = "$ac/2026/primary/finalReports/CanonicalListOfContestsAndChoices.csv",
     contestRoundFile = "$ac/2026/primary/finalReports/ContestsListRound1.csv",
     tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",
-    mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv"
+    mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv",
 ) {
     override fun skipCounties(countyName: String) = false
     val parent = Statewide2026Primary(ac)
+
+    override fun manifestFile(county: String) = parent.manifestFile(county)
+    override fun statewideManifest() = parent.statewideManifest
 
     override fun canonicalContests() = canonicalContests
     private val canonicalContests: Map<String, CanonicalContest> by lazy {

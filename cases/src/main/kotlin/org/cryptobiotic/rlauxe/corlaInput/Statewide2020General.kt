@@ -9,6 +9,12 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInputWithCvrs(
     tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
     mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
 ) {
+    val manifestDir = "$ac/2020/general/round_1"
+
+    override fun manifestFile(county: String): String {
+        val noblanks = county.replace("\\s".toRegex(), "")
+        return "$manifestDir/manifest-${noblanks}.csv"
+    }
 
     override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CountyInput? {
         if (countyName == "Arapahoe") return Arapahoe2020Redacted()

@@ -8,8 +8,14 @@ open class Statewide2025Coordinated(ac:String?=auditcenter): StatewideInputWithC
     generalCanonicalFile = "$ac/2025/canonicalList.csv", // Needs ISO-8859-1
     contestRoundFile = "$ac/2025/round1/contest.csv",
     tabulateCountyFile = "$ac/2025/tabulateCountyPlurality.csv",
-    mvrComparisonFile = "$ac/2025/finalReports/contestComparison.csv"
+    mvrComparisonFile = "$ac/2025/finalReports/contestComparison.csv",
 ) {
+    val manifestDir = "$ac/2025/files"
+
+    override fun manifestFile(county: String): String {
+        val noblanks = county.replace("\\s".toRegex(), "")
+        return "$manifestDir/${noblanks}Manifest.csv"
+    }
 
     override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CountyInput? {
         return when (countyName) {
@@ -99,7 +105,6 @@ class CountyInput2025(val county: String): CountyInput {
         val manifests = readCountyManifest()
         return manifests.totalCards
     }
-
 }
 
 class Boulder25Input: BoulderInput  {

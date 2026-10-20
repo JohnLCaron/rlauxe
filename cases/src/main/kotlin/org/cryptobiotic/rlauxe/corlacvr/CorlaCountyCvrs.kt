@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corlacvr
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -89,6 +90,7 @@ class CorlaCountyCvrs(override val inputSource: String,
     override fun redaction() = redaction
     override fun cardStyleMap() = ballotStyles.cardStyleMap
     override fun cardStyles() = ballotStyles.cardStyles()
+    override fun ballotStyles() = ballotStyles
     override fun cvrs() = cvrs
     override fun nrows() = rowCount
     override fun unredactedCvrs() = cvrs().size
@@ -134,14 +136,14 @@ class CorlaCountyCvrs(override val inputSource: String,
         }
 
         if (showRedactedGroups) {
-            logger.info{"  read ${redaction.nRedactedRows} Redacted lines from ${inputSource}"}
+            logger.info{"  read ${redaction.nredactedCvrs() } redacted CVRs from ${inputSource}"}
             println("number of Redacted Groups = ${redaction.groups().size}")
             redaction.groups().sortedBy{it.groupName}.forEach { println("  $it") }
         }
         if (mungedCount > 0) logger.warn { "$inputSource had $mungedCount munged imprintedIds out of $rowCount (now fixed)"}
     }
 
-    fun parseHeader(line: CSVRecord, defCvrNumber: Int = -1): CvrRow {
+    override fun parseHeader(line: CSVRecord, defCvrNumber: Int): CvrRow {
 
         var cvr = CvrRow(
             line.values().take(schema.nheaders),
@@ -189,7 +191,7 @@ class CorlaCountyCvrs(override val inputSource: String,
         } else ""
     }
 
-    fun getBallotType(line: CSVRecord): String {
+    override fun getBallotType(line: CSVRecord): String {
         val ballottype = parseColAsString(CvrHeader.ballottype, line)
         return ballottype.ifEmpty { "NoBallotType" }
     }
@@ -265,64 +267,6 @@ fun escHeaders(header: CSVRecord) = buildString {
     }
 }
 
-// scenario_ballot_type_present
-// has two ballot styles with same contest set [0,1], these generate a single CardStyle
-// and ballot style [1] has rows with different set [0], [0,1]
-// row 19 could create a second CardStyle with name "1+1" meaning  balot type 1, variant1, with different contest set
-//                    type votes
-// 9,1,1,9,1-1-9,P1,    1, 1,0,1,0
-// 12,1,1,12,1-1-12,P1, 2, 0,1,0,1
-// 19,1,1,19,1-1-19,P1, 1, 1,0,,
-
-data class CvrCardStyle(val cardType: String, val contestIds: Set<Int>) {
-    var ncards: Int = 0 // not part of equals
-    fun contains(contestId: Int) = contestIds.contains(contestId)
-    fun setNcards(n:Int): CvrCardStyle {
-        this.ncards = n
-        return this
-    }
-}
-
-data class CardStyleId(val ballotType: String, val contestIds: Set<Int>)
-
-class BallotStyles {
-    val cardStyleMap = mutableMapOf<CardStyleId, CvrCardStyle>()
-    val ballotTypes = mutableMapOf<String, List<CvrCardStyle>>() //all cardtypes for this ballotType
-    var ballotStylesUnique = true
-
-    fun add(cvr:CvrRow) {
-        val cleanBallotType = cleanCsvString(cvr.ballotType) // no commas
-        val cvrStyleId = CardStyleId(cleanBallotType, cvr.contests())
-        val cardStyle = cardStyleMap.getOrPut(cvrStyleId) {
-            // if already exists, then there are duplicate contestId sets for this ballotType
-            val cardList = ballotTypes[cleanBallotType]
-            if (cardList == null) {
-                val newStyle = CvrCardStyle(cleanBallotType, cvr.contests())
-                ballotTypes[cleanBallotType] = listOf(newStyle)
-                newStyle
-            } else {
-                ballotStylesUnique = false
-                // adjust the cardType names to be ballotType-A, ballotType-B, ...
-                // sort on lowest contest in the set (which is sorted, so the first)
-                val newStyle = CvrCardStyle(cleanBallotType, cvr.contests())
-                val allStyles = cardList + listOf(newStyle)
-                val allStylesSorted : List<CvrCardStyle> = allStyles.sortedBy { it.contestIds.first() }
-                val firstChar = 'A'
-                val newStyles= allStylesSorted.mapIndexed { idx, it ->
-                    it.copy(cardType = cleanBallotType + "-${firstChar+idx}").setNcards(it.ncards)
-                }
-                ballotTypes[cleanBallotType] = newStyles
-                newStyles.find { it.contestIds == cvr.contests() }!!
-            }
-        }
-        cardStyle.ncards++
-    }
-
-    fun cardStyles(): List<CvrCardStyle> {
-        return cardStyleMap.values.sortedBy { it.ncards }.reversed()
-    }
-}
-
 // 6/15/2026
 // some counties have first 5 fields of the vote rows as ="field". The quoting seems typical, the mistake is the leading =
 // "CvrNumber","TabulatorNum","BatchId","RecordId","ImprintedId","CountingGroup","PrecinctPortion","BallotType","","","","","","","","","","","","","","","","","","","","","","","","","","DEM","REP","APV","UNI","LBR","","","","","REP","DEM","LBR","UNI","DEM","REP","REP","DEM","DEM","REP","DEM","REP","DEM","DEM","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""
@@ -331,17 +275,8 @@ class BallotStyles {
 private val regexLE = Regex("[=\"]") // matches a quote or equals
 fun removeLeadingEquals(input: String): String {
     val result = if (input.startsWith("=")) input.replace(regexLE, "")
-        else input
+    else input
     return result
-}
-
-fun CSVRecord.isEmpty(): Boolean {
-    val iter = this.iterator()
-    while (iter.hasNext()) {
-        val value = iter.next()
-        if (!value.isEmpty()) return false
-    }
-    return true
 }
 
 private val regexComma = Regex("[,]") // Matches comma

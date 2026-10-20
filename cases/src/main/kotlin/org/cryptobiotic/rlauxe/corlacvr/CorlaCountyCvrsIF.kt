@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corlacvr
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
+import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.File
 import java.io.IOException
@@ -88,6 +89,7 @@ interface CorlaCountyCvrsIF {
     fun redaction(): RedactionIF
     fun cardStyleMap(): Map<CardStyleId, CvrCardStyle>
     fun cardStyles(): List<CvrCardStyle>
+    fun ballotStyles(): BallotStyles
     fun nrows(): Int  // total row count
     fun unredactedCvrs(): Int
     fun redactedCvrs() = redaction().nredactedCvrs()
@@ -98,5 +100,7 @@ interface CorlaCountyCvrsIF {
     fun ballotStyleUnique(): Boolean
     fun rowHeaderCols(row: CvrRow, redact: Set<CvrHeader> = emptySet()): String
 
-    fun show() = "$electionName nrows=${nrows()} unredactedRows=${unredactedCvrs()}  redactedRows=${redactedCvrs()}  "
+    fun show() = "$electionName nrows=${nrows()} unredactedRows=${unredactedCvrs()}  redactedRows=${redactedCvrs()}"
+    fun getBallotType(line: CSVRecord): String
+    fun parseHeader(line: CSVRecord, defCvrNumber: Int = -1): CvrRow
 }

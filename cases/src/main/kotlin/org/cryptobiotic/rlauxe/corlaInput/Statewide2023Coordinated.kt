@@ -14,6 +14,7 @@ open class Statewide2023Coordinated(ac:String?=auditcenter): StatewideInputWithC
     tabulateCountyFile = "$ac/2023/coordinated/tabulateCounty.csv",
     mvrComparisonFile = "$ac/2023/coordinated/round_2/CVRtoAuditBoardInterpretationComparison.csv"
 ) {
+    override val year = "2023"
     val manifestDir = "$ac/2023/coordinated/round_1"
 
     override fun manifestFile(county: String): String {
@@ -92,7 +93,7 @@ class Boulder23Input: BoulderInput {
     override val cvrsSource = "/resources/data/cases/boulder2023/Redacted-2023Coordinated-CVR.csv"
     override val sovoSource = "/resources/data/cases/boulder2023/2023C-Boulder-County-Official-Statement-of-Votes.csv"
     val sovoRcvSource = "/resources/data/cases/boulder2023/2023C-Boulder-County-Official-Statement-of-Votes-RCV.csv"
-    override val year = 2023
+    override val year = "2023"
 
     override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
 

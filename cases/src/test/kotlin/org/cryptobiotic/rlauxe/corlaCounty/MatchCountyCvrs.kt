@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.corlaCounty
 import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.corla.ManifestCounts
+import org.cryptobiotic.rlauxe.corla.ManifestEntries
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.corlacvr.tabulateCvrRows
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -44,7 +46,7 @@ class MatchCountyCvrs(val countyInput: CountyInput) {
     }
 
     fun manifestCounts(show: Boolean): ManifestCounts {
-        val manifest: CountyManifestEntries = countyInput.readCountyManifest()
+        val manifest: ManifestEntries = countyInput.readManifestEntries()
         return if (show) {
             val report = mutableListOf<String>()
             val mc = manifest.manifestCounts(corlaCvrs, report)

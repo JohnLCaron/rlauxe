@@ -9,6 +9,8 @@ import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.corla.ManifestCounts
+import org.cryptobiotic.rlauxe.corla.ManifestEntry
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
 import org.cryptobiotic.rlauxe.corlacvr.cleanCsvString
 import org.cryptobiotic.rlauxe.estimate.VunderPool
@@ -20,6 +22,7 @@ import org.cryptobiotic.rlauxe.util.tabulateCards
 import kotlin.math.max
 import kotlin.random.Random
 
+// probably out of date
 private val logger = KotlinLogging.logger("CvrsFromManifest")
 
 // TODO try not converting to canonical.
@@ -54,7 +57,7 @@ class CvrsFromManifest(
     init {
         val corlaCvrs = countyInput.readCorlaCvrs()
 
-        val manifest = countyInput.readCountyManifest()
+        val manifest = countyInput.readManifestEntries()
         manifestIds = manifest.manifestCounts(corlaCvrs)
 
         converter = CorlaCvrConverter(countyInput.countyName, corlaCvrs, infosByName, stateInput, startingPoolId)

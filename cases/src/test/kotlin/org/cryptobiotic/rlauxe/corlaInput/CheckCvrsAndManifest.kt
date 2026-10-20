@@ -5,9 +5,9 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
+import org.cryptobiotic.rlauxe.corla.ManifestCounts
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corlaCounty.ManifestCounts
 import org.cryptobiotic.rlauxe.corlacvr.CardStyleId
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
@@ -68,7 +68,7 @@ class CheckCvrsAndManifest(
             println()
         }
 
-        val manifest = countyInput.readCountyManifest()
+        val manifest = countyInput.readManifestEntries()
         manifestCounts = manifest.manifestCounts(corlaCvrs)
 
         converter = CorlaCvrConverter(countyInput.countyName, corlaCvrs, infosByName, stateInput, startingPoolId)

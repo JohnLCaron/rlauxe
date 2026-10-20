@@ -31,9 +31,9 @@ data class CvrRow(
 
     fun contests() = contestVotes.map { it.contestId }.sorted().toSet()
 
-    fun contestVotesFor(contestId: Int): ContestVotes? {
-        return contestVotes.find { it.contestId == contestId}
-    }
+    fun votes() = contestVotes.associate { it.contestId to it.votedFor.toIntArray() }
+
+    fun voteFor(contest: Int): ContestVotes? = contestVotes.find { it.contestId == contest }
 
     fun candVote(contestId: Int, candId: Int): Int? {
         val contestVote = contestVotes.find{ it.contestId == contestId}
@@ -63,20 +63,22 @@ data class CvrRow(
         return this
     }
 
-    fun findNonNull(schema: CvrSchema, line: CSVRecord): CvrRow {
-        var colidx = schema.nheaders // skip over the first n columns
+    fun findNonNull(schema: CvrSchema, line: CSVRecord): Boolean {
+        var nonNull = false
+        var colidx = schema.nheaders + 1 // skip over the first n columns, plus one for the first vote column
         while (colidx < schema.columns.size && colidx < line.size()) {
             if (line.get(colidx).isNotEmpty()) {
                 val useContestIdx = schema.columns[colidx].contestIdx
-                val useContest: SchemaContestInfo = schema.contests[useContestIdx]
-                // record that the contest was on this redacted row
+                nonNull = true
+                // record that the contest was non-null on this redacted row
                 contestVotes.add(ContestVotes(useContestIdx, emptyList()))
-                colidx += useContest.ncols
+                if (useContestIdx+1 == schema.contests.size) break
+                colidx = schema.contests[useContestIdx+1].startCol // skip to next contest
             } else {
                 colidx++
             }
         }
-        return this
+        return nonNull
     }
 
     // assume a vote is 0 or 1
@@ -86,13 +88,13 @@ data class CvrRow(
         for (idx in 0 until exportContest.ncols) { // so i in [0..ncands)
             val colno = exportContest.startCol + idx
             if (!schema.writeIns.contains(colno)) { // dont record write-ins
-                val colValueS = line.get(colno)
                 try {
+                    val colValueS = line.get(colno)
                     val colValue = colValueS.toInt()
                     if (colValue > 0) votes.add(idx)
-                } catch (e: NumberFormatException) {
+                } catch (e: Exception) {
                     logger.warn {
-                        "Cant parse '$colValueS' at col $colno line $lineno; probably didnt catch the redacted line; " +
+                        "Exception '${e.message}' at col $colno line $lineno; maybe didnt catch the redacted line; " +
                                 "\nfilename=${schema.inputSource}\n       $line" }
                     return emptyList()
                 }
@@ -122,8 +124,6 @@ data class CvrRow(
         }
         return ranked
     }
-
-    fun voteFor(contest: Int): ContestVotes? = contestVotes.find { it.contestId == contest }
 
     fun show() = buildString {
         append("$cvrNumber, ")

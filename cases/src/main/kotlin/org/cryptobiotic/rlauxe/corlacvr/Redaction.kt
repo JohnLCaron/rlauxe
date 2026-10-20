@@ -25,15 +25,54 @@ class EmptyRedaction: RedactionIF {
     override fun cardCountByContest() = emptyMap<Int, Int> ()
 }
 
-// default is our anonymizer
-data class RedactionStrategy(val redactedRowsAlsoAggregated: Boolean = true,)
+// default is what our anonymizer needs
+data class RedactionStrategy(
+    val justGroups: Boolean = false, // for count redacted, just count the group(s) nsize, else just count the rows
+    val noStyle: Boolean = false,  // override style detection, set to no style
+)
+// 1. one aggregated group and redacted rows with ids and styles (our redactor)
+// 1.1 older version: rows have unique ballotType but missing unredacted example, no style (LaPlata 2026p)
+// 1.2 older version: rows have unique ballotType but missing unredacted example, no style, no precincts (Morgan 2026p)
+// -> if we have one group and rows with styles, the group is the agg pool; the rows use their own style
+// -> if we also have rows without styles, put them in the missing pool with subtotal missing votes - agg pool
+// we have no examples (yet) of previous redaction having row styles, and also needed further redaction
 
-// just gather the raw info
-open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(true), val show: Boolean = false): RedactionIF {
-    var nRedactedRows = 0
+// multiple redaction groups
+// 2.1 aggregated groups by ballotType (derive style), no rows (Boulder 2020)
+//     ncards in group is unknown.
+// 2.2 aggregated groups by ballotType (has style), no rows (Boulder 2023)
+//     ncards in group is unknown.
+// 2.3 aggregated groups by ballotType A/B (has style), no rows (Boulder 2024) (TODO use BallotStyles)
+//     ncards in group is unknown.
+// 2.4 aggregated groups by unique ballotType, rows with no ids with BallotStyle (Boulder 2025/6)
+//     the rows are aggregated by ballotType into groups, not kept as rows. ncards in group = nlines
+// -> if we have one or more groups and no rows, get the rows from the manifest missing cvrs
+// since we dont know which rows belong to which group, we combine the groups into the missing pool.
+// the group sum should equals the missing votes
+
+// 3. redacted rows with ids with ballotType
+// 3.1 no style (2020: Adams, Arapahoe, Eagle, El Paso, Larimer, Logan, Morgan, Pueblo, Rio Blanco, Summit, Weld, )
+// 3.1.1 Broomfield 2025 redacted all of type 1, no unredacted rows with that type
+// 3.1.2 Larimer 2025 type 20 split A/B but redacted row only shows type 20
+// 3.1.3 Weld 2026p redacted all of several types, no style
+// 3.2 has style (2020: Douglas, Jefferson, Pitkin)
+// -> if we have rows but no groups, all rows go into the missing pool using missing votes
+// use the style for the individual rows, else use the missing pool style
+
+// -> use row style if exists, then try ballotStyle
+// -> if ballotTypes are unique, then we know the row style if it references one or hasStyle, otherwise not
+// -> aggregated group is not exact unless it contains a single style
+
+// Questions:
+//   do rows have style information: yes if votes != emptyMap
+//   do ballot types have unique styles: check BallotStyles.ballotTypes list.size == 1
+
+open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(false), val show: Boolean = false): RedactionIF {
+    var linesIgnored = 0
     val redactedGroups = mutableMapOf<String, RedactedGroup>()
     val redactedGroupsSet = mutableMapOf<Set<Int>, RedactedGroup>()
-    val redacted = mutableListOf<CvrRow>()
+    val redacted = mutableListOf<CvrRow>() // the rows must have imprintedId
+    var noStyle = strategy.noStyle
 
     private var redactionExtensions = 1
     private val showDontMatch = true
@@ -61,15 +100,17 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(true), 
     // number of redacted cvrs given in CVR file
     // here you have to know if the redactedRows are also in an aggregation
     override fun nredactedCvrs(): Int {
-        val groupRows = groups().sumOf{ it.ncards()}
-        return if (!strategy.redactedRowsAlsoAggregated) redactedRows().size + groupRows
-               else { if (groupRows > 0) groupRows else redactedRows().size }
+        val groupRows = groups().sumOf{ it.ncards() }
+        return if (strategy.justGroups) groupRows else redactedRows().size
     }
 
-    fun addRedactedLine(line: CSVRecord, corlaCvrs: CorlaCountyCvrs, findNonNull: Boolean = true) {
+    // TODO keep original line? Anonomicer should output them. also keep which group they belong to?
+    // 27136,5,22,63,5-22-63,6260303153 (6260303153 - 49),49,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+    fun addRedactedLine(line: CSVRecord, corlaCvrs: CorlaCountyCvrsIF) {
         val cvr = corlaCvrs.parseHeader(line)
-        if (findNonNull) cvr.findNonNull(corlaCvrs.schema, line)
-            else cvr.addVotes(corlaCvrs.schema, line, -1)
+        if (!noStyle) {
+            cvr.findNonNull(corlaCvrs.schema, line)
+        }
         redacted.add(cvr) // now the redacted rows know which contests they hold (maybe)
     }
 
@@ -95,14 +136,14 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(true), 
         }
     }
 
-    open fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaCountyCvrs): Boolean {
+    open fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaCountyCvrsIF): Boolean {
         val ballotType = corlaRawCvrs.getBallotType(line)
 
         if (line.get(0).startsWith("AGGREGATED") || line.get(0).startsWith("AGGREGATION")) {
             if (show) println("  ** AGGREGATED: $line")
             val redactedGroup = RedactedGroup(ballotType, line, corlaRawCvrs.schema)
             addGroup(redactedGroup)
-            nRedactedRows++
+            linesIgnored++
             return true
 
         } else if (line.get(0).isEmpty()) { // (2020) Dolores, Phillips: these are subtotals, not redactions
@@ -119,7 +160,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(true), 
             // El Paso
             //  [42220, 30, 69, 90, 30-69-90, 5091421250 - 45 (5091421250 - 45), 45, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *]]
             addRedactedLine(line, corlaRawCvrs)
-            nRedactedRows++
+            linesIgnored++
             return true
         }
 
@@ -130,12 +171,12 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(true), 
             // ballot ids and ballot style, no vote info
             // Eagle
             //   [9220, 2, 197, 34, 2-197-34, Mail, 2052619019 - 2 (2052619019 - 2), 2, Redacted per 24-27-205.5 (4)(b)(III) C.R.S. , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ]]
-            // Jefferson
+            // Jefferson has Style
             //   [5415, 5, 23, 52, 5/23/1952, , 1222230030 - 35 (1222230030 - 35), 35, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, , , , , , , , , , , Redacted, Redacted, Redacted, Redacted, , , , , , , , , , , Redacted, Redacted, Redacted, , , , , , , , , , , , , , , , , Redacted, Redacted, , , Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, , , , , , , , , , , , , , , , , , ]]
             // Larimer
             //   [8470, 6, 9, 79, 6/9/1979, 2234935805 - 21 (2234935805 - 21), 21, REDACTED, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ]]
             addRedactedLine(line, corlaRawCvrs)
-            nRedactedRows++
+            linesIgnored++
             return true
         }
 
@@ -148,7 +189,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(true), 
             // Pitkin
             //   [3, 201, 1, 13, 201-1-13, 3056149010 - CFPD (3056149010 - CFPD), CFPD, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , , X, X, X, X]]
             addRedactedLine(line, corlaRawCvrs)
-            nRedactedRows++
+            linesIgnored++
             return true
         }
 
@@ -161,7 +202,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(true), 
             // Pitkin
             //   [3, 201, 1, 13, 201-1-13, 3056149010 - CFPD (3056149010 - CFPD), CFPD, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , , X, X, X, X]]
             addRedactedLine(line, corlaRawCvrs)
-            nRedactedRows++
+            linesIgnored++
             return true
         }
 
@@ -170,14 +211,14 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(true), 
             if (show) println("  ** redact novotes: $line")
             // ballot ids and ballot style, no vote info
             addRedactedLine(line, corlaRawCvrs)
-            nRedactedRows++
+            linesIgnored++
             return true
         }
         return false
     }
 
     override fun toString() = buildString {
-        appendLine("${this@Redaction.javaClass.simpleName}: nredactedRows=${redacted.size}, nredactedGroups=${redactedGroups.size}, nredactedCvrs=${nredactedCvrs()}")
+        appendLine("${this@Redaction.javaClass.simpleName}: linesIgnored=${redacted.size}, nredactedGroups=${redactedGroups.size}, nredactedCvrs=${nredactedCvrs()}")
         redactedGroups.forEach { appendLine("    $it")}
     }
 
@@ -189,7 +230,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(true), 
 // these are using local contest ids, candidate ids
 // comes from a subtotal line in the redacted cvrs
 data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val schema: CvrSchema) {
-    // why not ContestTabulation ?? becaue we dont have info ??
+    // why not ContestTabulation ?? because we dont have info ??
     val candVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
 
     var nlines = 0  // used by the accumulating group

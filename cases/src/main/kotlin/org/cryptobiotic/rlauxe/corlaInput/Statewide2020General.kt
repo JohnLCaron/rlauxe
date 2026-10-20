@@ -12,6 +12,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInputWithCvrs(
     tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
     mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
 ) {
+    override val year = "2020"
     val manifestDir = "$ac/2020/general/round_1"
 
     override fun manifestFile(county: String): String {

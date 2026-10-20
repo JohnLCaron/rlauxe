@@ -18,7 +18,7 @@ class County2020Input(
     override val manifestSource = if (countyName == "Gunnison") "$manifestDir/Manifest-${countyNameZ}.csv"
                                   else "$manifestDir/manifest-${countyNameZ}.csv"
     override val cvrsSource = votedatabase[countyName]!!
-    override val year = 2020
+    override val year = "2020"
 
     override fun readCountyManifest(): CountyManifestEntries {
         if (countyName == "Garfield") {

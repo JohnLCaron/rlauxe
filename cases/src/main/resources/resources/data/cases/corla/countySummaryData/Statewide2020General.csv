@@ -16,7 +16,7 @@ county, manifestCount, unredactedCvrs, redactedCvrs, cvrInManifest, cvrNoManifes
                Delta,   19553,   19553,       0,   19553,       0,     0,     0, 0, true, 1016, 40
               Denver, 1181464, 1181464,       0, 1181464,       0,     0,     0, 0, false, 2, 281
              Dolores,    1500,    1500,       0,    1500,       0,     0,     0, 0, true, 37, 37
-             Douglas,  234272,  234216,      56,  234216,       0,    56,    56, 0, true, 13, 13
+             Douglas,  234272,  234216,      56,  234086,     130,   186,    56, 0, true, 13, 13
                Eagle,   58589,   58571,      20,   58569,       2,    20,     9, 0, false, 14, 26
              El Paso,  382583,  383160,      44,  382424,     736,   159,     8, 0, true, 12, 12
               Elbert,   19150,   19150,       0,   19150,       0,     0,     0, 0, true, 19, 19

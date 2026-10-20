@@ -1,0 +1,221 @@
+package org.cryptobiotic.rlauxe.corlaCounty
+
+import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput
+import org.cryptobiotic.rlauxe.corlacvr.BallotStyles
+import org.cryptobiotic.rlauxe.corlacvr.CardStyleId
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
+import org.cryptobiotic.rlauxe.corlacvr.CvrRow
+import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
+import org.cryptobiotic.rlauxe.corlacvr.cleanCsvString
+import org.cryptobiotic.rlauxe.corlacvr.tabulateCvrRows
+import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
+
+// Match manifest and Cvrs without reference to the state files
+class CountyCardsFromManifest(val countyInput: CountyInput) {
+    val show = false
+    val corlaCvrs: CorlaCountyCvrsIF = countyInput.readCorlaCvrs()
+    val county = countyInput.countyName
+
+    val infos: Map<Int, ContestInfo>
+
+    val cvrTabs : Map<Int, ContestTabulation>
+    val groupTabs : Map<Int, ContestTabulation> // sum of aggGroup if exists, else sum of all groups
+    val aggGroup: RedactedGroup?
+
+    // imprintedId -> CvrRow
+    val cvrMap: Map<String, CvrRow>
+    val redactedWithStyle = mutableMapOf<String, CvrRow>()
+    val redactedNoStyle = mutableMapOf<String, CvrRow>()
+
+    val allBallotStyles = BallotStyles()
+
+
+    // assumes manifest iterator doesnt terminate early
+    var missingCount = 0
+    var manifestCount = 0
+
+    init {
+        // infos local to the county (not converted to canonical)
+        infos = corlaCvrs.makeContestInfo().map {
+            ContestInfo(
+                it.name, it.id, it.candidateNames,
+                if (it.isIrv) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY,
+                it.nwinners
+            )
+        }.associateBy { it.id }
+        cvrTabs = tabulateCvrRows(corlaCvrs.cvrs().iterator(), infos)
+
+        aggGroup = corlaCvrs.redaction().groups().find { it.groupName.lowercase() == "aggregated"}
+        groupTabs = if (aggGroup != null) {
+            val tabs = mutableMapOf<Int, ContestTabulation>()
+            aggGroup.candVotes.forEach { (scontestId, candVotes) ->
+                tabs.sumContestTabulationsFromCandVotes(infos[scontestId]!!, candVotes)
+            }
+            tabs
+        } else {
+            // TODO boulder special case
+            val sumAccum = mutableMapOf<Int, ContestTabulation>()
+            corlaCvrs.redaction().groups().forEach { group ->
+                group.candVotes.forEach { (scontestId, candVotes) ->
+                    sumAccum.sumContestTabulationsFromCandVotes(infos[scontestId]!!, candVotes)
+                }
+            }
+            sumAccum
+        }
+
+        cvrMap = corlaCvrs.cvrs().associateBy { it.imprintedId }
+
+        // allBallotStyles are the union of unredacted and redacted cvrs; dont change the original!
+        val unredactedBallotStyles = corlaCvrs.ballotStyles()
+        allBallotStyles.cardStyleMap.putAll(unredactedBallotStyles.cardStyleMap)
+        allBallotStyles.ballotTypes.putAll(unredactedBallotStyles.ballotTypes)
+
+        // do rows have style information: yes if contestVotes != emptyList
+        corlaCvrs.redaction().redactedRows().forEach { row ->
+            if (row.contestVotes.isNotEmpty()) {
+                allBallotStyles.add(row)
+                redactedWithStyle[row.imprintedId] = row
+            } else {
+                redactedNoStyle[row.imprintedId] = row
+            }
+        }
+    }
+
+    // local contest Ids
+    fun getCountyStyles(): List<CvrCardStyle> {
+        return allBallotStyles.cardStyles()
+    }
+
+    // TODO boulder special case
+    // local contest, candidate Ids
+    fun getCountyAccumulation(): Map<Int, ContestTabulation> {
+        return aggTabs
+    }
+
+// 1. one aggregated group and redacted rows with ids and styles (our redactor)
+// 1.1 older version: rows have unique ballotType but missing unredacted example, no style (LaPlata 2026p)
+// 1.2 older version: rows have unique ballotType but missing unredacted example, no style, no precincts (Morgan 2026p)
+// -> if we have one group and rows with styles, the group is the agg pool; the rows use their own style
+// -> if we also have rows without styles, put them in the missing pool with subtotal missing votes - agg pool
+// we have no examples (yet) of previous redaction having row styles, and also needed further redaction
+
+// multiple redaction groups
+// 2.1 aggregated groups by ballotType (derive style), no rows (Boulder 2020)
+//     ncards in group is unknown.
+// 2.2 aggregated groups by ballotType (has style), no rows (Boulder 2023)
+//     ncards in group is unknown.
+// 2.3 aggregated groups by ballotType A/B (has style), no rows (Boulder 2024) (TODO use BallotStyles)
+//     ncards in group is unknown.
+// 2.4 aggregated groups by unique ballotType, rows with no ids with BallotStyle (Boulder 2025/6)
+//     the rows are aggregated by ballotType into groups, not kept as rows. ncards in group = nlines
+// -> if we have one or more groups and no rows, get the rows from the manifest missing cvrs
+// since we dont know which rows belong to which group, we combine the groups into the missing pool.
+// the group sum should equals the missing votes
+
+// 3. redacted rows with ids with ballotType
+// 3.1 no style (2020: Adams, Arapahoe, Eagle, El Paso, Larimer, Logan, Morgan, Pueblo, Rio Blanco, Summit, Weld, )
+// 3.1.1 Broomfield 2025 redacted all of type 1, no unredacted rows with that type
+// 3.1.2 Larimer 2025 type 20 split A/B but redacted row only shows type 20
+// 3.1.3 Weld 2026p redacted all of several types, no style
+// 3.2 has style (2020: Douglas, Jefferson, Pitkin)
+// -> if we have rows but no groups, all rows go into the missing pool using missing votes
+// use the style for the individual rows, else use the missing pool style
+
+// -> use row style if exists, then try ballotStyle
+// -> if ballotTypes are unique, then we know the row style if it references one or hasStyle, otherwise not
+// -> aggregated group is not exact unless it contains a single style
+
+// Questions:
+//   do rows have style information: yes if votes != emptyMap
+//   do ballot types have unique styles: check BallotStyles.ballotTypes list.size == 1
+
+    data class RowForManifest(val row: CvrRow, val style: CvrCardStyle, val poolName: String?)
+
+    fun getRowAndStyle(manifestEntry: ManifestEntry): RowForManifest? {
+        var row = cvrMap[manifestEntry.imprintedId()]
+        if (row != null) {
+            val cleanBallotType = cleanCsvString(row.ballotType) // no commas
+            val cvrStyleId = CardStyleId(cleanBallotType, row.contests())
+            val cardStyle = allBallotStyles.cardStyleMap[cvrStyleId]
+            return RowForManifest(row, cardStyle!!, null)
+        }
+
+        val redactedWithStyle = redactedWithStyle[manifestEntry.imprintedId()]
+        if (redactedWithStyle != null) {
+            val cleanBallotType = cleanCsvString(redactedWithStyle.ballotType) // no commas
+            val cvrStyleId = CardStyleId(cleanBallotType, redactedWithStyle.contests())
+            val cardStyle = allBallotStyles.cardStyleMap[cvrStyleId]
+            // if we have one group and rows with styles, the group is the agg pool; the rows use their own style
+            return RowForManifest(redactedWithStyle, cardStyle!!, aggGroup?.groupName ?: "missing")
+        }
+
+        val redactedNoStyle = redactedNoStyle[manifestEntry.imprintedId()]
+        if (redactedNoStyle != null) {
+            // use the ballotType
+            val cardStyleList = allBallotStyles.ballotTypes[redactedNoStyle.ballotType]
+            if (cardStyleList != null) {
+                // this is the union in case there is more than one
+                val useStyle = cardStyleList.find { it.cardType == redactedNoStyle.ballotType }
+                if (useStyle != null ) return RowForManifest(redactedNoStyle, useStyle, "missing")
+                throw Exception("expected union already exists")
+            }
+            // it has an unknown ballotType. call it missing.
+            return null // dunno
+        }
+        // if theres no match for a manifest entry, its "missing"
+        return null
+    }
+
+    fun iterator() : Iterator<CountyCard> = ManifestCardIterator()
+
+    inner class ManifestCardIterator: Iterator<CountyCard> {
+        val iter = countyInput.readCountyManifest().iterator()
+        init {
+            missingCount = 0
+            manifestCount = 0
+        }
+
+        override fun next(): CountyCard {
+            val manifestEntry: ManifestEntry = iter.next()
+            manifestCount++
+
+            val rowForManifest = getRowAndStyle(manifestEntry)
+            val result = if (rowForManifest == null) { // then its missing
+                missingCount++
+                CountyCard(
+                    imprintedId = manifestEntry.imprintedId(),
+                    location = manifestEntry.location(),
+                    style = "missing",
+                    votes = emptyMap(),
+                    poolName = "missing",
+                )
+
+            } else {
+
+                // data class CountyCard (
+                //    val imprintedId: String,
+                //    val location: String,
+                //    val styleName: String, // must have a style or missing
+                //    val votes: Map<Int, IntArray>, contest -> votedFor
+                //    val poolName: String?, // must be set if its in a OneAudit CardPool
+                //)
+
+                CountyCard(
+                    imprintedId = manifestEntry.imprintedId(),
+                    location = manifestEntry.location(),
+                    style = rowForManifest.style.cardType,
+                    votes = rowForManifest.row.votes(),
+                    poolName = rowForManifest.poolName,
+                )
+            }
+            return result
+        }
+
+        override fun hasNext() = iter.hasNext()
+    }
+}

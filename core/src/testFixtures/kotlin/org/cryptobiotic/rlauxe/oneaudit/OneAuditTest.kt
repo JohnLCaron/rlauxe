@@ -127,7 +127,7 @@ fun makeOneAuditTest(
     info1.metadata["PoolPct"] = (100.0 * poolNcards / Nc).toString()
 
     val mvrs = makeMvrs(contest, cvrNc, cvrVotes, cvrUndervotes, pool, extraInPool)
-    val cardManifest = makeCardManifest2(mvrs, pool)
+    val cardManifest = makeCardManifest2(infos, mvrs, pool)
 
     // switch to OneAuditPoolFromCvrs; why ? they appear to be identical
     val (oaUA, cardPools) = makeOneAuditTestContests(infos, listOf(contest), listOf(pool), cardManifest, mvrs)
@@ -185,9 +185,9 @@ fun makeMvrs(
     return mvrs
 }
 
-private fun makeCardManifest2(mvrs: List<Cvr>, pool: CardPool): List<AuditableCard> {
+private fun makeCardManifest2(infos: Map<Int, ContestInfo>, mvrs: List<Cvr>, pool: CardPool): List<AuditableCard> {
     // the union of the first two styles
-    val expandedContestIds = pool.infos.keys.toList().toIntArray()
+    val expandedContestIds = infos.keys.toList().toIntArray()
     val expanded = CardStyle("expanded", 42, expandedContestIds, false)
 
     // make the cards with the expanded card style

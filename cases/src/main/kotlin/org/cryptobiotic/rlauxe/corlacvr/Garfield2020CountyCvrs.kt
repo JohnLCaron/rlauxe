@@ -10,6 +10,7 @@ import java.io.File
 import java.io.InputStreamReader
 import java.io.Reader
 import java.nio.charset.Charset
+import kotlin.text.ifEmpty
 
 // this reads csv files from a "Dominion CVR export files", for Garfield County, Colorado 2020 General election.
 // perhaps some earlier version of the export file ??
@@ -40,7 +41,8 @@ private val showLines = false
 
 // modified cvr2 and renamed as cvr
 
-class Garfield2020CountyCvrs(override val inputSource: String, showHeaders: Boolean = false): CorlaCountyCvrsIF {
+class Garfield2020CountyCvrs(override val inputSource: String, showHeaders: Boolean = false,
+                             val redaction: Redaction = Redaction()): CorlaCountyCvrsIF {
 
     override val electionName = "Garfield2020"
     override val versionName = "unknown"
@@ -147,9 +149,10 @@ class Garfield2020CountyCvrs(override val inputSource: String, showHeaders: Bool
         }
     }
 
-    override fun redaction() = EmptyRedaction()
+    override fun redaction() = redaction
     override fun cardStyleMap() = ballotStyles.cardStyleMap
     override fun cardStyles() = ballotStyles.cardStyles()
+    override fun ballotStyles() = ballotStyles
     override fun cvrs() = cvrs
     override fun nrows() = lineno
     override fun unredactedCvrs() = cvrs.size
@@ -165,25 +168,27 @@ class Garfield2020CountyCvrs(override val inputSource: String, showHeaders: Bool
             if (line.isEmpty()) break
             lineno++
 
-            // 3) use header name matching
-            val cvr = CvrRow(
-                line.values().take(schema.nheaders),
-                cvrNumber = line.get(cvrNumberIdx).toInt(),
-                tabulatorNum = 1,
-                batchId = line.get(batchIdIdx),
-                recordId = line.get(recordIdIdx).toInt(),
-                imprintedId = line.get(imprintedIdIdx),
-                ballotType = line.get(ballotTypeIdx),
-                precinctPortion = line.get(precinctIdx),
-            ).addVotes(schema, line, lineno)
+            if (!redaction.isRedaction(line, this)) {
+                // 3) use header name matching
+                val cvr = CvrRow(
+                    line.values().take(schema.nheaders),
+                    cvrNumber = line.get(cvrNumberIdx).toInt(),
+                    tabulatorNum = 1,
+                    batchId = line.get(batchIdIdx),
+                    recordId = line.get(recordIdIdx).toInt(),
+                    imprintedId = line.get(imprintedIdIdx),
+                    ballotType = line.get(ballotTypeIdx),
+                    precinctPortion = line.get(precinctIdx),
+                ).addVotes(schema, line, lineno)
 
-            if (cvr.contestVotes.isNotEmpty()) {
-                cvrs.add(cvr)
-                ballotStyles.add(cvr)
+                if (cvr.contestVotes.isNotEmpty()) {
+                    cvrs.add(cvr)
+                    ballotStyles.add(cvr)
+                }
+
+                if (showFirst != null && lineno < showFirst) println(cvr.show())
+                if (showAfter != null && lineno >= showAfter) println(cvr.show())
             }
-
-            if (showFirst != null && lineno < showFirst) println(cvr.show())
-            if (showAfter != null && lineno >= showAfter) println(cvr.show())
         }
     }
 
@@ -195,7 +200,22 @@ class Garfield2020CountyCvrs(override val inputSource: String, showHeaders: Bool
         }
     }
 
+    override fun getBallotType(line: CSVRecord): String {
+        return line.get(ballotTypeIdx)
+    }
 
+    override fun parseHeader(line: CSVRecord, defCvrNumber: Int): CvrRow {
+        return CvrRow(
+            line.values().take(schema.nheaders),
+            cvrNumber = line.get(cvrNumberIdx).toInt(),
+            tabulatorNum = 1,
+            batchId = line.get(batchIdIdx),
+            recordId = line.get(recordIdIdx).toInt(),
+            imprintedId = line.get(imprintedIdIdx),
+            ballotType = line.get(ballotTypeIdx),
+            precinctPortion = line.get(precinctIdx),
+        )
+    }
 
 
 }

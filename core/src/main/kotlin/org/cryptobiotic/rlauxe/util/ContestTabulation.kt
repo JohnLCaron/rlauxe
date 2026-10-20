@@ -261,7 +261,7 @@ fun MutableMap<Int, ContestTabulation>.subtractContestTabulation(other: Map<Int,
 }
 
 // op1 - op2
-fun subtractContestTabulations(op1: Map<Int, ContestTabulation>, op2: Map<Int, ContestTabulation>): Map<Int, ContestTabulation> {
+fun subtractContestTabulations(op1: Map<Int, ContestTabulationIF>, op2: Map<Int, ContestTabulationIF>): Map<Int, ContestTabulation> {
     val result = mutableMapOf<Int, ContestTabulation>()
     result.sumContestTabulations(op1)
     result.subtractContestTabulation(op2)
@@ -269,7 +269,7 @@ fun subtractContestTabulations(op1: Map<Int, ContestTabulation>, op2: Map<Int, C
 }
 
 // op1 - op2, cant go below 0
-fun subtractContestTabulationsZ(op1: Map<Int, ContestTabulation>, op2: Map<Int, ContestTabulation>): Map<Int, ContestTabulation> {
+fun subtractContestTabulationsZ(op1: Map<Int, ContestTabulationIF>, op2: Map<Int, ContestTabulationIF>): Map<Int, ContestTabulation> {
     val result = mutableMapOf<Int, ContestTabulation>()
     result.sumContestTabulations(op1)
     result.subtractContestTabulationZ(op2)

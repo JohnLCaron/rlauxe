@@ -23,6 +23,8 @@ class Statewide2026PMerged(ac:String?=auditcenter): StatewideInput(
     tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",
     mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv",
 ) {
+    override val year = "2026pm"
+
     override fun skipCounties(countyName: String) = false
     val parent = Statewide2026Primary(ac)
 

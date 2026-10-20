@@ -18,8 +18,10 @@ import kotlin.text.toInt
 
 private val logger = KotlinLogging.logger("ColoradoInput")
 
+// used by viewer
 val statewideInputs = listOf(
     Statewide2020General(),
+    Statewide2020Redacted(),
     Statewide2022Primary(),
     Statewide2023Coordinated(),
     Statewide2024General(),
@@ -33,6 +35,7 @@ interface ColoradoInput {
     fun name(): String
     fun ncontests(): Int
     fun nuncontested(): Int
+    val year: String
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -138,7 +141,7 @@ data class RedactionCount(val pythonNredact: Int, val rlauxeNredact: Int, val fa
             csvReader().read(inputStream) { rows ->
                 rows.withHeader().forEach { untrimmedRow ->
                     val row = untrimmedRow.mapKeys { (key, _) -> key.trim() }
-                    val county = row["county"]!!
+                    val county = row["county"]!!.trim()
                     result[county] = RedactionCount(
                         pythonNredact = parseColAsInt(row["pythonRedactions"]!!),
                         rlauxeNredact = parseColAsInt(row["rlauxeRedactions"]!!),

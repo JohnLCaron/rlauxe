@@ -133,7 +133,7 @@ class CorlaContestBuilder(val info: ContestInfo, val mcontest: MergedContestInfo
 
         var useNc = mcontest.nc
         if (useNc < minCardsNeeded) {
-            logger.warn {"*** Contest '${info.name}' has $minCardsNeeded total cards, but CorlaContestRoundCsv.contestBallotCardCount is ${mcontest.nc} - using totalVotes" }
+            logger.debug {"*** Contest '${info.name}' has $minCardsNeeded total cards, but CorlaContestRoundCsv.contestBallotCardCount is ${mcontest.nc} - using totalVotes" }
             useNc = minCardsNeeded
         }
         Nc = useNc

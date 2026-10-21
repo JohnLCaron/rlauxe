@@ -28,7 +28,7 @@ data class CardPool(
     override val poolName: String,
     override val poolId: Int,
     val hasExactContests: Boolean,    // aka single style
-    val infos: Map<Int, ContestInfo>, // do we really need this ??
+    // val infos: Map<Int, ContestInfo>, // do we really need this ??
     val contestTabs: Map<Int, ContestTabulationIF>,  // contestId -> ContestTabulation
     val totalCards: Int,
 ): CardPoolIF {
@@ -116,7 +116,7 @@ class CardPoolBuilder(
             it.value.ncardsTabulated = ncards()
             it.value
         }
-        return CardPool(this.poolName, this.poolId, this.hasExactContests, this.infos, adjustedTabs, this.ncards())
+        return CardPool(this.poolName, this.poolId, this.hasExactContests, adjustedTabs, this.ncards())
     }
 
     override fun equals(other: Any?): Boolean {

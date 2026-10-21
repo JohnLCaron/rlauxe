@@ -14,6 +14,7 @@ open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput(
     mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv",
 
 ) {
+    override val year = "2026p"
     val manifestDir = "$ac/2026/primary/files"
 
     override fun manifestFile(county: String): String {

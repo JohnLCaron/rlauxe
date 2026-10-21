@@ -1,4 +1,17 @@
 # Sample Populations
+_10/20/2026_
+
+Redacted ballots may know their card style. So use it when doing the assort.
+
+Missing ballots (no cvr) probably need a cardStyle that has all the contests in the county.
+
+Boulder redaction can probably use a pool with styles restricted to the ballot Styles on the aggregations.
+
+Does this only affect clca assorting (bassort) ??
+
+Time to review hasStyle again.
+
+
 _07/13/26_
 
 ## TL;DR

@@ -7,7 +7,7 @@ class Arapahoe2020Redacted: CountyInput {
     override val countyName= "Arapahoe"
     override val cvrsSource = "/home/stormy/Downloads/REDACTED_CVR_Export_20201130085221.csv"
     override val manifestSource = "$manifestDir/manifest-${countyName}.csv"
-    override val year = 2020
+    override val year = "2020"
 
     // or from manifest ??
     override fun countyPopulation() = Statewide2020General().strataPopulation()[countyName]!!

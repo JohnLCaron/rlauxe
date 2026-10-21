@@ -12,6 +12,7 @@ open class Statewide2025Coordinated(ac:String?=auditcenter): StatewideInputWithC
     tabulateCountyFile = "$ac/2025/tabulateCountyPlurality.csv",
     mvrComparisonFile = "$ac/2025/finalReports/contestComparison.csv",
 ) {
+    override val year = "2025"
     val manifestDir = "$ac/2025/files"
 
     override fun manifestFile(county: String): String {
@@ -92,7 +93,7 @@ class CountyInput2025(val county: String): CountyInput {
     override val countyName = county
     override val manifestSource = "$auditcenter/2025/files/${county}Manifest.csv"
     override val cvrsSource: String
-    override val year = 2025
+    override val year = "2025"
 
     init {
         val filename = when (county) {
@@ -114,7 +115,7 @@ class Boulder25Input: BoulderInput  {
     override val manifestSource = "$auditcenter/2025/files/BoulderManifest.csv"
     override val cvrsSource = "$auditcenter/2025/cvrs/2025-boulder-Redacted-CVR-PUBLIC.csv"
     override val sovoSource = "/resources/data/cases/boulder2025/2025C-Boulder-County-Official-Statement-of-Votes.csv"
-    override val year = 2025
+    override val year = "2025"
 
     // or use sovo ??
     override fun countyPopulation(): Int {

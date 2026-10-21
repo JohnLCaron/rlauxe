@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corlacvr
 import org.cryptobiotic.rlauxe.corlaInput.RedactionCount
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
+import org.cryptobiotic.rlauxe.corlaInput.readCorlaCvrs
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
@@ -105,7 +106,9 @@ class TestAnonData {
         val output = "$baseRedactedCount/$county.csv"
 
         val cvrs = countyInput.readCorlaCvrs()
-        Anonomicer(cvrs, styleOnly=false).redact(output)
+        Anonomicer(cvrs, styleOnly=false).writeRedactedFile(output)
+            .verify(readCorlaCvrs(countyInput.year, countyInput.countyName, output))
+
         println("that took $stopwatch")
 
         //println("---------------------------------")
@@ -122,7 +125,9 @@ class TestAnonData {
         val output = "/home/joncifer/tmp/ArapahoeRedacted.csv"
 
         val cvrs = readCountyCvrs("/home/joncifer/Downloads/REDACTED_CVR_Export_20201130085221.csv")
-        Anonomicer(cvrs, styleOnly=false).redact(output)
+        Anonomicer(cvrs, styleOnly=false).writeRedactedFile(output)
+            .verify(readCountyCvrs(output))
+
         println("that took $stopwatch")
     }
 
@@ -141,7 +146,7 @@ class TestAnonData {
                 // val styleOnly = county == "Arapahoe"
                 val output = "$base2020Precinct/$county.csv"
                 val anon = Anonomicer(countyInput.readCorlaCvrs()) // , styleOnly=styleOnly)
-                anon.redact(output)
+                anon.writeRedactedFile(output).verify(readCorlaCvrs(countyInput.year, countyInput.countyName, output))
 
                 println("---------------------------------")
                 println("python vs raire")
@@ -166,7 +171,8 @@ class TestAnonData {
 
             val output = "$base2026Precinct/$county.csv"
             val anon = Anonomicer(countyInput.readCorlaCvrs())
-            anon.redact(output)
+            anon.writeRedactedFile(output)
+                .verify(readCorlaCvrs(countyInput.year, countyInput.countyName, output))
 
             println("---------------------------------")
             println("python vs raire")

@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
+import org.cryptobiotic.rlauxe.corla.GarfieldManifestEntries
+import org.cryptobiotic.rlauxe.corla.ManifestEntries
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifestEntries
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.Garfield2020CountyCvrs
@@ -8,27 +10,15 @@ import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.RedactionStrategy
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 
-// CountyInput has cvrs, presumably redacted, and a CountyManifest.
-// it knows the county's total number of ballots
 interface CountyInput: ColoradoInput {
     val electionName: String
     val countyName: String
     val manifestSource: String
     val cvrsSource: String
-    val year: Int // four digits: eg 1992, 2026
 
     // TODO cache this I think ?? Or does it need to stream ??
     fun readCorlaCvrs(): CorlaCountyCvrsIF {
-        when {
-            (year == 2020) -> return when {
-                (countyName == "Garfield") -> Garfield2020CountyCvrs(cvrsSource)
-                (countyName == "Boulder") -> readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
-                (countyName == "La Plata") -> readCountyCvrs(cvrsSource, redaction = Redaction(RedactionStrategy(true)))
-                (countyName == "Morgan") -> readCountyCvrs(cvrsSource, redaction = Redaction(RedactionStrategy(true)))
-                else -> readCountyCvrs(cvrsSource, redaction = Redaction())
-            }
-        }
-        return readCountyCvrs(cvrsSource, redaction = Redaction())
+        return readCorlaCvrs(year, countyName, cvrsSource)
     }
 
     // TODO useful?
@@ -38,6 +28,11 @@ interface CountyInput: ColoradoInput {
         return CountyManifestEntries(manifestSource)
     }
 
+    fun readManifestEntries(): ManifestEntries {
+        return if (countyName == "Garfield") GarfieldManifestEntries(manifestSource)
+        else ManifestEntries(manifestSource)
+    }
+
     fun countyPopulation(): Int
     fun contestNameCleanup(name: String) = name
     fun candidateNameCleanup(name: String) = name
@@ -45,4 +40,19 @@ interface CountyInput: ColoradoInput {
     override fun name() = electionName
     override fun ncontests() = -1  // unknown at the moment
     override fun nuncontested() = -1 // unknown at the moment
+}
+
+fun readCorlaCvrs(year: String, countyName: String, cvrsSource: String): CorlaCountyCvrsIF {
+    if (year == "2020") {
+        if (countyName == "Larimer") return readCountyCvrs(cvrsSource, redaction = Redaction(RedactionStrategy(hasStyle = false)))
+    }
+
+    if (year.startsWith("2020")) {
+        if (countyName == "Garfield") return Garfield2020CountyCvrs(cvrsSource)
+    }
+
+    return when {
+        (countyName == "Boulder") -> readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
+        else -> readCountyCvrs(cvrsSource)
+    }
 }

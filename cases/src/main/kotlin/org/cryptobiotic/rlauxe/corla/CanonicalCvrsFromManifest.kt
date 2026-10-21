@@ -8,10 +8,7 @@ import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
-import org.cryptobiotic.rlauxe.corlaCounty.CountyManifestEntries
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
-import org.cryptobiotic.rlauxe.corlaCounty.ManifestCounts
-import org.cryptobiotic.rlauxe.corlaCounty.ManifestEntry
 import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -55,11 +52,12 @@ class CanonicalCvrsFromManifest(
         // in order of the CVR file. redacted cvrs are skipped.
         val corlaCvrs = countyInput.readCorlaCvrs()
 
-        val manifest: CountyManifestEntries = countyInput.readCountyManifest()
+        val manifest = countyInput.readManifestEntries()
         manifestCounts = manifest.manifestCounts(corlaCvrs)
 
         val infosByName = infos.mapKeys { it.value.name } //  canonical names
         converter = CorlaCvrConverter(countyInput.countyName, corlaCvrs, infosByName, stateInput, startingStyleId)
+
         cvrStyles = converter.cardStyles.values.toList()
         nextStyleId = startingStyleId + cvrStyles.size
 
@@ -92,7 +90,7 @@ class CanonicalCvrsFromManifest(
             redactedTabs = voteDifference
 
             val poolId = nextStyleId++
-            val onepool = CardPool("$county:UnmatchedManifest", poolId, hasExactContests = false, infos, voteDifference, manifestCounts.unmatched)
+            val onepool = CardPool("$county:UnmatchedManifest", poolId, hasExactContests = false, voteDifference, manifestCounts.unmatched)
             redactedPools = listOf(onepool)
 
         } else {

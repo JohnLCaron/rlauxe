@@ -85,7 +85,6 @@ class CreateGaElection(
                         "${county.countyName}-${batch.name}",
                         poolid++,
                         false,
-                        infos,
                         contestTabs,
                         batch.nballots
                     )

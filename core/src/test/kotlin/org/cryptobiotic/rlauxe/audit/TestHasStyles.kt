@@ -160,8 +160,8 @@ class TestHasStyles {
         )
 
         val pools = listOf(
-            CardPool("poolB", 1, true, infos, tabsB, totalCards = 9 * contestB.Nc/10),
-            CardPool("poolBS", 2, true, infos, tabsBS, totalCards = contestS.Nc),
+            CardPool("poolB", 1, true,tabsB, totalCards = 9 * contestB.Nc/10),
+            CardPool("poolBS", 2, true,tabsBS, totalCards = contestS.Nc),
         )
 
         val testData = MultiContestCombinePools(contest3s, 2 * contestB.Nc, pools)
@@ -196,8 +196,8 @@ class TestHasStyles {
         )
 
         val pools = listOf(
-            CardPool("poolBS", 2, false, infos, tabsBS, totalCards = contestB.Nc),
-            CardPool("poolBT", 3, false, infos, tabsBT, totalCards = contestB.Nc)
+            CardPool("poolBS", 2, false,tabsBS, totalCards = contestB.Nc),
+            CardPool("poolBT", 3, false,tabsBT, totalCards = contestB.Nc)
         )
 
         // TODO can we consolidate all 4 cases into using MultiContestCombinePools ??
@@ -301,8 +301,8 @@ class TestHasStyles {
         )
 
         val pools = listOf(
-            CardPool("poolBS", 2, false, infos, tabsBS, totalCards = contestB.Nc),
-            CardPool("poolBT", 3, false, infos, tabsBT, totalCards = contestB.Nc)
+            CardPool("poolBS", 2, false,tabsBS, totalCards = contestB.Nc),
+            CardPool("poolBT", 3, false,tabsBT, totalCards = contestB.Nc)
         )
 
         val testData = MultiContestCombinePools(contest3s, 2 * contestB.Nc, pools)

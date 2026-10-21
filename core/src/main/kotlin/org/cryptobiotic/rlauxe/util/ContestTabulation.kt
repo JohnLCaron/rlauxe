@@ -72,6 +72,11 @@ class ContestTabulation(
         votes[cand] = accum + vote
     }
 
+    fun setNcards(ncards: Int) {
+        ncardsTabulated = ncards
+        undervotes = ncardsTabulated * voteForN - nvotes()
+    }
+
     fun subtractVoteZ(cand: Int, vote: Int) {
         val accum = votes.getOrPut(cand) { 0 }
         votes[cand] = max(0, accum - vote) // cant go below 0
@@ -233,7 +238,7 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
 fun MutableMap<Int, ContestTabulation>.sumContestTabulationsFromCandVotes(info: ContestInfo, candVotes: Map<Int, Int>, ncards: Int = 1) {
     val contestSum = this.getOrPut(info.id) { ContestTabulation(info) }
     candVotes.forEach { (cand, vote) -> contestSum.addVote(cand, vote)}
-    contestSum.ncardsTabulated += ncards
+    contestSum.setNcards(contestSum.ncardsTabulated + ncards)
 }
 
 fun sumContestTabulations(others: List<Map<Int, ContestTabulationIF>>):Map<Int, ContestTabulationIF>  {
@@ -261,7 +266,7 @@ fun MutableMap<Int, ContestTabulation>.subtractContestTabulation(other: Map<Int,
 }
 
 // op1 - op2
-fun subtractContestTabulations(op1: Map<Int, ContestTabulation>, op2: Map<Int, ContestTabulation>): Map<Int, ContestTabulation> {
+fun subtractContestTabulations(op1: Map<Int, ContestTabulationIF>, op2: Map<Int, ContestTabulationIF>): Map<Int, ContestTabulation> {
     val result = mutableMapOf<Int, ContestTabulation>()
     result.sumContestTabulations(op1)
     result.subtractContestTabulation(op2)
@@ -269,7 +274,7 @@ fun subtractContestTabulations(op1: Map<Int, ContestTabulation>, op2: Map<Int, C
 }
 
 // op1 - op2, cant go below 0
-fun subtractContestTabulationsZ(op1: Map<Int, ContestTabulation>, op2: Map<Int, ContestTabulation>): Map<Int, ContestTabulation> {
+fun subtractContestTabulationsZ(op1: Map<Int, ContestTabulationIF>, op2: Map<Int, ContestTabulationIF>): Map<Int, ContestTabulation> {
     val result = mutableMapOf<Int, ContestTabulation>()
     result.sumContestTabulations(op1)
     result.subtractContestTabulationZ(op2)

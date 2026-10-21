@@ -15,6 +15,7 @@ import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaCounty.createCorlaCountyElection
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput2026
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020Redacted
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import kotlin.test.Test
 
@@ -81,19 +82,19 @@ class CorlaCountyElections {
     }
 
     @Test
-    fun createSummit20() {
-        val stateInput = Statewide2020General()
-        createCorlaCountyVariants("$cases/corlaCounty/summit20",
-            stateInput.corlaCountyInput("Summit")!!,
+    fun createDenver20r() {
+        val stateInput = Statewide2020Redacted()
+        createCorlaCountyVariants("$cases/corlaCounty/denver20r",
+            stateInput.corlaCountyInput("Denver")!!,
             stateInput,
         )
     }
 
     @Test
-    fun createDouglas20() {
-        val stateInput = Statewide2020General()
-        createCorlaCountyVariants("$cases/corlaCounty/douglas20",
-            stateInput.corlaCountyInput("Douglas")!!,
+    fun createEagle20r() {
+        val stateInput = Statewide2020Redacted()
+        createCorlaCountyVariants("$cases/corlaCounty/eagle20r",
+            stateInput.corlaCountyInput("Eagle")!!,
             stateInput,
         )
     }
@@ -123,7 +124,7 @@ class CorlaCountyElections {
     }
 
     fun createCorlaCountyVariants(toptopdir: String, countyInput: CountyInput, stateInput: StatewideInput) {
-        // redacted ballots are simulated
+        /* redacted ballots are simulated
         createCorlaCountyElection(
             countyInput,
             stateInput,
@@ -141,7 +142,7 @@ class CorlaCountyElections {
             creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .03),
             roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.Phantoms,
-        )
+        ) */
 
         // the ballots for each redacted group are placed in one pool
         createCorlaCountyElection(
@@ -153,7 +154,7 @@ class CorlaCountyElections {
             variant = ElectionVariantEnum.OnePool,
         )
 
-        // the ballots for each redacted group are placed in seperate pools.
+        /* the ballots for each redacted group are placed in seperate pools.
         // to use this the redacted ballots would have to be identified by ballot style and identifier.
         createCorlaCountyElection(
             countyInput,
@@ -162,7 +163,7 @@ class CorlaCountyElections {
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.Styles,
-        )
+        ) */
     }
 
     @Test

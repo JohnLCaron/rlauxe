@@ -4,17 +4,20 @@ import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
 import org.cryptobiotic.rlauxe.auditcenter.makeRealContestInfo
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
 import java.io.File
 import kotlin.collections.set
+import kotlin.io.path.Path
+import kotlin.io.path.writeLines
 import kotlin.math.max
 import kotlin.random.Random
 
 class Anonomicer(
-    val corlaCvrs: CorlaCountyCvrsIF,  // should be the unredacted cvr file
+    val corlaCvrs: CorlaCountyCvrsIF,  // should be the unredacted cvr file, but we allow a previous redaction
     val minBallots: Int = MIN_BALLOTS_DEFAULT,
     val styleOnly: Boolean = false,  // use style only, else use precinct/style
     val removePrecinctCol: Boolean = false,
@@ -26,7 +29,8 @@ class Anonomicer(
     val infos: Map<Int, ContestInfo>
     val removeCols = mutableSetOf<CvrHeader>()
     val agg: Aggregate
-    
+    val rpt = Report(true)
+
     init {
         removeCols.add(CvrHeader.countinggroup)
         if (removePrecinctCol || styleOnly) removeCols.add(CvrHeader.precinctportion)
@@ -41,16 +45,16 @@ class Anonomicer(
         val rareStyles = precinctStyles.filter { it.ncards < minBallots }
 
         if (rareStyles.isNotEmpty()) {
-            println("Rare ballot style/precinct combinations (${rareStyles.size} of ${precinctStyles.size} total)")
+            rpt.add("Rare ballot style/precinct combinations (${rareStyles.size} of ${precinctStyles.size} total)")
             rareStyles.forEach {
                 val rare = if (it.ncards < minBallots) "**" else "  "
-                println(" $rare ${it.ncards} ballot(s)  [${it.id()}]")
+                rpt.add(" $rare ${it.ncards} ballot(s)  [${it.id()}]")
             }
             val countRare = rareStyles.sumOf { it.ncards }
-            println("Rare Ballots = ${countRare}")
-            println("Redaction is needed.\n")
+            rpt.add("Rare Ballots = ${countRare}")
+            rpt.add("Redaction is needed.\n")
         }
-        else println("No redaction is needed.\n")
+        else rpt.add("No redaction is needed.\n")
 
         agg = Aggregate(commonStyles, rareStyles)
         if (agg.ncards > 0) {
@@ -59,7 +63,7 @@ class Anonomicer(
         }
     }
 
-    fun redact(outputFile: String) {
+    fun writeRedactedFile(outputFile: String): Anonomicer {
         // Columns that carry no information in the output and should be omitted entirely.
         // CountingGroup is always removed.
         // PrecinctPortion is removed when not redacting on precinct, because every row has it blanked in that case.
@@ -71,13 +75,18 @@ class Anonomicer(
                 bwriter.newLine()
             }
 
-            corlaCvrs.cvrs().forEachIndexed { idx, row ->
+            corlaCvrs.cvrs().forEach { row ->
                 if (agg.isRedacted(row)) {
                     bwriter.write(writeRow(row, true))
                 } else {
                     // write unredacted
                     bwriter.write(writeRow(row, false))
                 }
+            }
+
+            // previously redacted are all at the end
+            corlaCvrs.redaction().redactedRows().forEach { row ->
+                bwriter.write(writeRow(row, true))
             }
 
             if (agg.hasRedaction()) {
@@ -106,8 +115,7 @@ class Anonomicer(
                 bwriter.write(aggrow)
             }
         }
-
-        verify(outputFile)
+        return this
     }
 
     fun writeRow(row: CvrRow, redacted: Boolean) = buildString {
@@ -233,16 +241,16 @@ class Anonomicer(
             }
 
             if (rareContests.isNotEmpty()) {
-                println("Rare Contests:")
+                rpt.add("Rare Contests:")
                 rareContests.forEach { (contest, need) ->
                     val needCards = needContests[contest]
                     val what1 = if (needCards == null) "" else "needs $needCards more ballot(s); "
                     val needVotes = needVoteTrackers[contest]
                     val what2 = if (needVotes == null) "" else "needs ${needVotes.needVotes} more non-leading vote(s)"
 
-                    println("  $contest '${infos[contest]?.name}': $what1 $what2")
+                    rpt.add("  $contest '${infos[contest]?.name}': $what1 $what2")
                 }
-                println()
+                rpt.add("")
             }
             /*
 
@@ -419,15 +427,15 @@ class Anonomicer(
         fun finish() {
             val donorIds = donorRows.map { it.cvrNumber }
             val rareIds = rareStyles.map { it.rows }.flatten().map { it.cvrNumber }
-            println("Ballots borrowed from common styles = ${donorIds.size}")
-            println()
+            rpt.add("Ballots borrowed from common styles = ${donorIds.size}")
+            rpt.add("")
             redactedRowSet = (donorIds + rareIds).toSet()
 
             ////// validate results
             val redactedRows = donorRows + rareStyles.map { it.rows }.flatten()
             val redactTabs = tabulateCvrRows(redactedRows.iterator(), infos)
-            println("Validation")
-            println("  ruleA: redactedRowSet.size (${redactedRowSet!!.size} >= minBallots = ${redactedRowSet!!.size >= minBallots}")
+            rpt.add("Validation")
+            rpt.add("  ruleA: redactedRowSet.size (${redactedRowSet!!.size} >= minBallots = ${redactedRowSet!!.size >= minBallots}")
 
             val ruleB = rareContests.keys.all { contestId ->
                 val redactTab = redactTabs[contestId]!!
@@ -435,7 +443,7 @@ class Anonomicer(
                     print("     contest=${contestId} redactTab.ncards()=${redactTab.ncards()}")
                 redactTab.ncards() >= minBallots
             }
-            println("  ruleB: rareContests.redactedCards >= minBallots = ${ruleB}")
+            rpt.add("  ruleB: rareContests.redactedCards >= minBallots = ${ruleB}")
 
             val ruleC = rareContests.keys.all { contestId ->
                 val redactTab = redactTabs[contestId]!!
@@ -444,17 +452,16 @@ class Anonomicer(
                     val leadingVotes: Map.Entry<Int, Int> = redactTab.votes.maxBy { it.value }
                     val nonleadingVotes = redactTab.nvotes() - leadingVotes.value
                     if (nonleadingVotes <= NEAR_UNANIMOUS_THRESHOLD)
-                        println("    $contestId: nonleadingVotes=$nonleadingVotes")
+                        rpt.add("    $contestId: nonleadingVotes=$nonleadingVotes")
                     nonleadingVotes > NEAR_UNANIMOUS_THRESHOLD
                 } else true
             }
-            println("  ruleC: all rareContests are not close to unanimous = ${ruleC}")
+            rpt.add("  ruleC: all rareContests are not close to unanimous = ${ruleC}")
         }
     }
 
-    fun verify(redactedFile: String) {
+    fun verify(redactedCvrs: CorlaCountyCvrsIF) {
         val unredactedTabs = tabulate(corlaCvrs)
-        val redactedCvrs = readCountyCvrs(redactedFile)
         val redactedTabs = tabulate(redactedCvrs)
         val usum = unredactedTabs.sum()
         val rsum = redactedTabs.sum()
@@ -462,14 +469,14 @@ class Anonomicer(
         usum.forEach { (id, utab) ->
             val rtab = rsum[id]
             if (rtab != null && !checkEquivilentVotes(utab.votes, rtab.votes)) {
-                println(utab)
-                println(rtab)
-                println()
+                rpt.add(utab.toString())
+                rpt.add(rtab.toString())
+                rpt.add("")
                 fail = true
             }
         }
-        if (fail) println("**** Contest tabulations are not the same before and after redaction")
-        else println("Contest tabulations are the same before and after redaction")
+        if (fail) rpt.add("**** Contest tabulations are not the same before and after redaction")
+        else rpt.add("Contest tabulations are the same before and after redaction")
     }
 
     companion object {
@@ -616,4 +623,18 @@ fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boole
     val votes1z = votes1.filter{ (_, vote) -> vote != 0 }
     val votes2z = votes2.filter{ (_, vote) -> vote != 0 }
     return votes1z == votes2z
+}
+
+class Report(val print: Boolean) {
+    val lines = mutableListOf<String>()
+
+    fun add(line: String) {
+        lines.add(line)
+        if (print) println(line)
+    }
+
+    fun writeTo(output: String) {
+        val filePath = Path(output)
+        filePath.writeLines(lines)
+    }
 }

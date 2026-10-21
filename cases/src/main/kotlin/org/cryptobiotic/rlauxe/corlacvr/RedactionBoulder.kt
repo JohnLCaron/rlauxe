@@ -6,7 +6,7 @@ import kotlin.text.startsWith
 
 private val logger = KotlinLogging.logger("RedactionBoulder")
 
-// TODO redaction strtagy may depend on the year ??
+// TODO redaction strategy may depend on the year ??
 // ok start with 2026p
 // Redacted and Consolidated 18 Ballots,,,,,,"01, 19, and 25",8,10,15,13,5,12,5,17,9,4,4,1,8,5,3,9,8,,10,,,,,7,18,17,10,7,16,16,16,16,,,,,,,,,,,,,,,,,,,,,,
 //Redacted and Consolidated 23 Ballots,,,,,,"02, 20, 26, and STATE",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,17,15,2,0,12,11,0,0,18,18,8,14,15,8,5,,,8,,
@@ -14,16 +14,16 @@ private val logger = KotlinLogging.logger("RedactionBoulder")
 //Redacted and Consolidated 9 Ballots,,,,,,32,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,6,3
 //Redacted and Consolidated 9 Ballots,,,,,,STATE,7,2,,6,1,8,1,6,0,7,2,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 //Redacted,,,,,,14,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,1,0,0,1,0,0,0,1,1,0,1,1,,1,,1,,,
-class RedactionBoulder(show: Boolean = false) : Redaction(RedactionStrategy(false), show=show) {
+class RedactionBoulder(show: Boolean = false) : Redaction(RedactionStrategy(justGroups=true, hasStyle = true), show=show) {
 
     // 2020, 2023, 2024
-    override fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaCountyCvrs): Boolean {
+    override fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaCountyCvrsIF): Boolean {
         val ballotType = corlaRawCvrs.getBallotType(line)
 
         if (line.get(0).startsWith("Redacted and Consolidated")) { // 2025, 2026
             val redactedGroup = RedactedGroup(ballotType, line, corlaRawCvrs.schema)
             addGroup(redactedGroup)
-            nRedactedRows++
+            linesIgnored++
             if (show) println("  ** redact and aggregate: $line")
             return true
 
@@ -31,7 +31,7 @@ class RedactionBoulder(show: Boolean = false) : Redaction(RedactionStrategy(fals
             val redactedGroup = RedactedGroup(ballotType, line, corlaRawCvrs.schema)
             addGroup(redactedGroup)
             // addRedactedLine(line, corlaRawCvrs, findNonNull = false)
-            nRedactedRows++
+            linesIgnored++
             return true
 
         } else if (line.get(0).startsWith("Redacted and Aggregated")) { // 2024
@@ -50,7 +50,7 @@ class RedactionBoulder(show: Boolean = false) : Redaction(RedactionStrategy(fals
             val ballotStylePlus = ballotType + if (isA) "-A" else if (isB) "-B" else ""
             val redactedGroup = RedactedGroup(ballotStylePlus, line, corlaRawCvrs.schema)
             addGroup(redactedGroup)
-            nRedactedRows++
+            linesIgnored++
             if (show) println("  ** redact: $line")
             return true
 
@@ -60,7 +60,7 @@ class RedactionBoulder(show: Boolean = false) : Redaction(RedactionStrategy(fals
 //"Redacted & Aggregated",,,,,"DS-03",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,6,28,4,19,10,9,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,24,10,26,13,32,8,30,9,28,11,,,,,,,,,,,19,18,19,18,17,19,,,,,,,,,,,,,,,,,,,
             val redactedGroup = RedactedGroup(ballotType, line, corlaRawCvrs.schema)
             addGroup(redactedGroup)
-            nRedactedRows++
+            linesIgnored++
             if (show) println("  ** redact: $line")
             return true
 
@@ -79,7 +79,7 @@ class RedactionBoulder(show: Boolean = false) : Redaction(RedactionStrategy(fals
             val ballotType = corlaRawCvrs.getBallotType(line)
             val redactedGroup = RedactedGroup(ballotType, line, corlaRawCvrs.schema)
             addGroup(redactedGroup)
-            nRedactedRows++
+            linesIgnored++
             return true
         }
 

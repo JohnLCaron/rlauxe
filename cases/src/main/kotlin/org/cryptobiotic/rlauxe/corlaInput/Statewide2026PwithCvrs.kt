@@ -21,6 +21,7 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInputWithCvrs(
     tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",
     mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv",
 ) {
+    override val year = "2026pc"
     val parent = Statewide2026PMerged(ac)
 
     override fun manifestFile(county: String) = parent.manifestFile(county)
@@ -191,7 +192,7 @@ class CountyInput2026(val county: String): CountyInput {
     val countyZ = county.replace("\\s".toRegex(), "")
     override val manifestSource = "$auditcenter/2026/primary/files/${countyZ}.csv"
     override val cvrsSource: String
-    override val year = 2025
+    override val year = "2026pc"
 
     init {
         val filename = when (county) {
@@ -214,7 +215,7 @@ class Boulder26PInput: BoulderInput  {
     override val cvrsSource = "/resources/data/cases/boulder2026p/2026P-Redacted-CVR-Public.csv"
     override val manifestSource = "$auditcenter/2026/primary/files/Boulder.csv"
     override val sovoSource = "/resources/data/cases/boulder2026p/2026P-Boulder-County-Official-Statement-of-Votes.csv"
-    override val year = 2026 // TODO primary vs general
+    override val year = "2026pc"
 
     // or use sovo ??
     override fun countyPopulation() = Statewide2026Primary().strataPopulation()[countyName]!!

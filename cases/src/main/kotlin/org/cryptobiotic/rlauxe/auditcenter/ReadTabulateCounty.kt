@@ -160,7 +160,7 @@ fun readCountyTabulateCsv(filename: String): Map<String, CountyTabAllContests> {
     // we expect the first line to be the headers
     val headerRecord = records.next()
     val header = headerRecord.toList().joinToString(", ")
-    // println(header)
+    // county_name,contest_name,choice,votes
 
     val counties = mutableMapOf<String, CountyTabAllContests>()
 

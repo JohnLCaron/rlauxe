@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.corlacvr
 
 import org.cryptobiotic.rlauxe.corlaInput.CheckCvrRedaction
 import org.cryptobiotic.rlauxe.corlaInput.RedactionCount
+import org.cryptobiotic.rlauxe.corlaInput.readCorlaCvrs
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import kotlin.test.Test
 
@@ -98,7 +99,9 @@ Done. near_unanimous_fixable.csv files written.
         val output = "$baseOutPrecinct/$scenario.csv"
         validateOutputDirOfFile(output)
 
-        Anonomicer(cvrFile).redact(output)
+        Anonomicer(cvrFile).writeRedactedFile(output)
+            .verify(readCountyCvrs(output))
+
         // println ("------------ CheckCvrRedaction")
         // CheckCvrRedaction(cvrFile, output)
 
@@ -113,7 +116,9 @@ Done. near_unanimous_fixable.csv files written.
             println(scenario)
             val cvrs = "$PYTHON_INPUT_DIR/$scenario.csv"
             val output = "$baseOutPrecinct/$scenario.csv"
-            Anonomicer(cvrs).redact(output)
+            Anonomicer(cvrs).writeRedactedFile(output)
+                .verify(readCountyCvrs(output))
+
             CheckCvrRedaction(cvrs, output)
 
             if (compareTwoRedactions("$PYTHON_OUTPUT_DIR/$scenario.csv", output).fail) countFail++

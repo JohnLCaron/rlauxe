@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.corlaCounty
 
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.util.nfz
 import kotlin.collections.forEach
@@ -78,6 +77,7 @@ data class ManifestId(val tab: Int, val batch: String, val record: Int, val loca
     }
 }
 
+// canonical order of county manifest
 open class CountyManifestEntries(val manifestBatches: List<ManifestBatch>): Iterable<ManifestEntry> {
     val totalCards = manifestBatches.sumOf{ it.nballotCards }
 
@@ -122,6 +122,7 @@ open class CountyManifestEntries(val manifestBatches: List<ManifestBatch>): Iter
         }
     }
 
+    /*
     fun manifestCounts(corlaCvrs: CorlaCountyCvrsIF, report: MutableList<String>? = null, showUnmatched:Boolean = false): ManifestCounts {
         val manifestIdMap = mutableMapOf<String, ManifestEntry>()
         val meiter = MEiterator(manifestBatches.iterator())
@@ -201,15 +202,16 @@ open class CountyManifestEntries(val manifestBatches: List<ManifestBatch>): Iter
         }
         val countCvrsInManifest = totalCards - unmatched
         return ManifestCounts(this.totalCards, unmatched, countCvrsInManifest, countMiss, unmatched, manifestIdMap, redactedIDs)
-    }
+    } */
 }
 
+/*
 data class ManifestCounts(
     val totalEntries: Int,                    // total entries in the manifest
     val unmatched: Int,                       // count of Manifest entries not in the Cvrs; presumed to be == redacted CVRs
     val countCvrsInManifest: Int,             // count of Cvrs that match entries in the Manifest
-    val cvrNoManifest: Int,                 // cvrs without matching manifest entry
-    val manifestNoCvr: Int,                 // manifest entries without matching cvr
+    val cvrNoManifest: Int,                   // cvrs without matching manifest entry
+    val manifestNoCvr: Int,                   // manifest entries without matching cvr
     val match: Map<String, ManifestEntry>,    // imprintedId -> ManifestEntry
     val redactedIds: List<ManifestEntry>      // didnt match a cvr, assume to be in the redactions
-)
+) */

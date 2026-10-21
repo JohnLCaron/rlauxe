@@ -5,13 +5,13 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 
 // builds one AuditableCard
 class AuditableCardBuilder(
-    var id: String,
+    var id: String,         // corla imprintedId
     var location: String?,
-    val index: Int,
-    val prn: Long,
-    val phantom: Boolean,
-    val styleId: Int,
-    val poolId: Int? = null,
+    var index: Int,
+    var prn: Long,
+    var phantom: Boolean,
+    var styleId: Int,  // or style name ??
+    var poolId: Int? = null,
     votesIn: Map<Int, IntArray>?,
     val style: StyleIF? = null,
 ) {
@@ -24,6 +24,14 @@ class AuditableCardBuilder(
     constructor(id: String, location: String?, index: Int, poolId: Int?, styleId: Int):
             this(id, location, index, 0L, false, styleId, poolId, null)
 
+    constructor(id: String, location: String, poolId: Int?, style: StyleIF):
+            this(id, location, 0, 0L, false, style.id(), poolId, null, style=style)
+
+    //              id = manifestEntry.imprintedId(),
+    //                location = manifestEntry.location(),
+    //                poolId = null,
+    //                style = cardStyle
+
     fun replaceContestVotes(contestId: Int, contestVotes: IntArray): AuditableCardBuilder  {
         votes[contestId] = contestVotes
         return this
@@ -34,7 +42,6 @@ class AuditableCardBuilder(
     }
 
     fun build() : AuditableCard {
-
         val cardm = AuditableCard.fromVotes(
             id, location, index, prn, phantom,
             styleId = styleId,
@@ -57,6 +64,5 @@ class AuditableCardBuilder(
             card.votes(),
             style=card.style(),
         )
-
     }
 }

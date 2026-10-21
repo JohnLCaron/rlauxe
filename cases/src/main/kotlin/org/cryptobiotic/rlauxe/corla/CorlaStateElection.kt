@@ -32,7 +32,7 @@ class CorlaStateElection(
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean, // TODO
     variantEnum: ElectionVariantEnum,
-    votedatabase: Map<String, String>? = null,
+    // votedatabase: Map<String, String>? = null,
 ): ElectionBuilder {
     val variant = ElectionVariant(variantEnum)
     val publisher = Publisher(topdir)
@@ -59,7 +59,7 @@ class CorlaStateElection(
         var countyPoolId = 1
 
         stateInput.counties().forEach { countyName ->
-            val countyInput = stateInput.corlaCountyInput(countyName, votedatabase)!!
+            val countyInput = stateInput.corlaCountyInput(countyName)!!
             val countyPopulation = countyInput.countyPopulation()
 
             val cvrsFromManifest = CanonicalCvrsFromManifest(variant, countyInput, stateInput, infos, nextStyleId)
@@ -260,7 +260,7 @@ fun createCorlaStateElection(
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     hasStyle: Boolean = true, // TODO wtf ??
     variant: ElectionVariantEnum,
-    votedatabase: Map<String, String>? = null
+    // votedatabase: Map<String, String>? = null
  ) {
     val stopwatch = Stopwatch()
 
@@ -268,7 +268,7 @@ fun createCorlaStateElection(
     Logging.addFileAppender("cases", "$topdir/logs.log")
     logger.info {"-------------- createCorlaStateElection ${stateInput.javaClass.name} in $topdir"}
 
-    val election = CorlaStateElection(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant, votedatabase)
+    val election = CorlaStateElection(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
 
     createElectionRecord(election, topdir = topdir)
 

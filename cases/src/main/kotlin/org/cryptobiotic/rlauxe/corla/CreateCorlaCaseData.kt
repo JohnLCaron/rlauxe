@@ -30,17 +30,17 @@ fun corlaRoundSettings(sampling: Sampling) = AuditRoundConfig(
         contestSampleCutoff = 5000, auditSampleCutoff = 200000, sampling = sampling),
     ClcaConfig(), null)
 
-fun makeCorla2020ClcaWithCvrs(toptopdir: String, auditcenter: String, votedatabase: String?) {
+fun makeCorla2020ClcaWithCvrs(toptopdir: String, auditcenter: String, votedatabaseDir: String?) {
     val topdir = "$toptopdir/clca"
 
     // uses votedatabase; redacted ballots are simulated; perhaps should be onepool ?
     createCorlaStateElection(
         topdir = topdir,
-        Statewide2020General(auditcenter),
+        Statewide2020General(auditcenter, votedatabaseDir),
         creation = corlaCreationSettings(2020),
         roundConfig = corlaRoundSettings(sampling = Sampling.consistent),
         variant = ElectionVariantEnum.Sim,
-        votedatabase = if (votedatabase != null) votedatabase2020Counties(votedatabase) else null,
+        // votedatabase = if (votedatabase != null) votedatabase2020Counties(votedatabase) else null,
     )
 
     /* createCountyElectionSimCvrs(
@@ -58,7 +58,7 @@ fun makeCorla2020Uniform(toptopdir: String, auditcenter: String)  {
 
     createCountyElectionSimCvrs(
         topdir,
-        Statewide2020General(auditcenter),
+        Statewide2020General(auditcenter, null), // TODO
         corlaCreationSettings(2020),
         corlaRoundSettings(sampling = Sampling.uniform),
         name = "Colorado 2020 uniform",
@@ -66,12 +66,12 @@ fun makeCorla2020Uniform(toptopdir: String, auditcenter: String)  {
     )
 }
 
-fun makeCorla2020Clca(toptopdir: String, auditcenter: String) {
+fun makeCorla2020Clca(toptopdir: String, auditcenter: String, votedatabaseDir: String?) {
     val topdir = "$toptopdir/clca"
 
     createCountyElectionSimCvrs(
         topdir,
-        Statewide2020General(auditcenter),
+        Statewide2020General(auditcenter, votedatabaseDir),
         corlaCreationSettings(2020),
         corlaRoundSettings(sampling = Sampling.consistent),
         name = "Colorado2020 Clca with Cvrs",
@@ -90,11 +90,11 @@ fun makeCorla2020Clca(toptopdir: String, auditcenter: String) {
     ) */
 }
 
-fun makeCorla2020UniformSimCvrs(toptopdir: String, auditcenter: String, votedatabase: String) {
+fun makeCorla2020UniformSimCvrs(toptopdir: String, auditcenter: String, votedatabaseDir: String?) {
     val topdir = "$toptopdir/uniform"
 
     createCountyElectionSimCvrs(
-        topdir, Statewide2020General(auditcenter),
+        topdir, Statewide2020General(auditcenter, votedatabaseDir),
         corlaCreationSettings(2020),
         corlaRoundSettings(sampling = Sampling.uniform),
         name = "Colorado2020 Clca with Cvrs",

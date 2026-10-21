@@ -10,6 +10,9 @@ import org.cryptobiotic.rlauxe.boulder.boulderRoundSettings
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import kotlin.test.Test
 
@@ -18,9 +21,11 @@ class BoulderElections {
     @Test
     fun createBoulder26p() {
         val topdir = "$cases/boulder/boulder2026p"
+        val state = Statewide2026PwithCvrs()
+        val population = state.strataPopulation()["Boulder"]!!
 
         createBoulderElection(
-            input= Boulder26PInput(),
+            input= Boulder26PInput(population),
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
@@ -31,9 +36,11 @@ class BoulderElections {
     @Test
     fun createBoulder25() {
         val topdir = "$cases/boulder/boulder2025"
+        val state = Statewide2025Coordinated()
+        val population = state.strataPopulation()["Boulder"]!!
 
         createBoulderElection(
-            input= Boulder25Input(),
+            input= Boulder25Input(population),
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
@@ -78,9 +85,11 @@ class BoulderElections {
     @Test
     fun createBoulder23() {
         val topdir = "$cases/boulder/boulder2023"
+        val state = Statewide2023Coordinated()
+        val population = state.strataPopulation()["Boulder"]!!
 
         createBoulderElection(
-            input= Boulder23Input(),
+            input= Boulder23Input(population),
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
@@ -97,7 +106,9 @@ class BoulderElections {
     @Test
     fun createBoulder() {
         val toptopdir = "$cases/boulder/boulder2023r"
-        val input= Boulder23Input()
+        val state = Statewide2023Coordinated()
+        val population = state.strataPopulation()["Boulder"]!!
+        val input= Boulder23Input(population)
 
         // redacted ballots are simulated
         createBoulderElection(
@@ -112,7 +123,9 @@ class BoulderElections {
     @Test
     fun createBoulderVariants() {
         val toptopdir = "$cases/boulder/boulder2020r"
-        val input= Boulder26PInput()
+        val state = Statewide2026PwithCvrs()
+        val population = state.strataPopulation()["Boulder"]!!
+        val input= Boulder26PInput(population)
 
         // redacted ballots are simulated
         createBoulderElection(

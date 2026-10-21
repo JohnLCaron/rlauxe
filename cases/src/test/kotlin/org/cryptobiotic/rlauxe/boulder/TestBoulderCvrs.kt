@@ -6,6 +6,11 @@ import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaInput.Boulder23Input
 import org.cryptobiotic.rlauxe.corlaInput.Boulder25Input
 import org.cryptobiotic.rlauxe.corlaInput.Boulder26PInput
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput2026
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.SchemaContestInfo
@@ -22,12 +27,22 @@ class TestBoulderCvrs {
 
     @Test
     fun testBoulder23() {
-        test(Boulder23Input(), 119_643)
+        val stateInput = Statewide2023Coordinated()
+        val population = stateInput.strataPopulation()["Boulder"]!!
+        val countyInput = Boulder23Input(population)
+        test(countyInput, population)
+
+        //         test(Boulder23Input(), 119_643)
     }
 
     @Test
     fun testBoulder24() {
-        test(Boulder24Input(), 396_012)
+        val stateInput = Statewide2024General()
+        val population = stateInput.strataPopulation()["Boulder"]!!
+        val countyInput = Boulder24Input()
+        test(countyInput, population)
+
+        // test(Boulder24Input(), 396_012)
     }
 
     @Test
@@ -36,12 +51,21 @@ class TestBoulderCvrs {
         // Box Tracking System which provides estimates of the number of
         // ballots based on weight of returned ballots. (!)
 
-        test(Boulder25Input(), 121_584)
+        val stateInput = Statewide2025Coordinated()
+        val population = stateInput.strataPopulation()["Boulder"]!!
+        val countyInput = Boulder25Input(population)
+        test(countyInput, population)
+        // test(Boulder25Input(), 121_584)
     }
 
     @Test
     fun testBoulder26() {
-        test(Boulder26PInput(), 100_423)
+        val stateInput = Statewide2026PwithCvrs()
+        val population = stateInput.strataPopulation()["Boulder"]!!
+        val countyInput = Boulder26PInput(population)
+        test(countyInput, population)
+
+        // test(Boulder26PInput(), 100_423)
     }
 
     fun test(input: BoulderInput, sumManifest: Int) {

@@ -601,7 +601,7 @@ class TestRunRoundCli {
 
 **TODO 8/17/2026**
 
-* seems like most US cases have county subtotals, eg Corla (why not GA?)
+* seems like most US cases would have county subtotals, eg Corla (why not GA?)
 * where should countyCvrPools.csv be in the audit record ?? DONE
 * Add JaCoCo Runner?
 
@@ -621,5 +621,26 @@ class TestRunRoundCli {
 * measure performance again for fastSampling and protoCard
 * cant use fast sampling without styles
 * hasStyle wwtf
+
+**TODO 10/21/2026**
+
+* state election
+* each countyInput is in $topdir/county/name/ up to CreateElectionRecord
+* canonical county order
+* anonomicer preserves manifest order
+* ok to change until seed
+* variant
+
+* seed should wait until AuditConfig?
+* can belgium fit in?
+
+* zipped files
+* use bytearrays instead of longs for prn
+* what could we redo with db: JOIN, SORT, WRITETO, FILTER. existing librries? best practice?
+* does uniform sampling imply noStyle? 
+* Are we supporting uniform sampling?
+* Are we supporting polling, batch?
+
+
 
 

@@ -3,14 +3,17 @@ package org.cryptobiotic.rlauxe.corlaInput
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifestEntries
 import org.cryptobiotic.rlauxe.corlaCounty.GarfieldManifestEntries
 
-open class Statewide2020Redacted(ac:String?=auditcenter): StatewideInputWithCvrs(
+open class Statewide2020Redacted(
+        ac:String?=auditcenter,
+        votedatabaseDir: String? = null,
+    ): StatewideInputWithCvrs(
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
     contestRoundFile = "$ac/2020/general/round_1/contest.csv",
     tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
     mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
 ) {
     override val year = "2020r"
-    val parent = Statewide2020General(ac)
+    val parent = Statewide2020General(ac, votedatabaseDir)
     val manifestDir = "$ac/2020/general/round_1"
 
     override fun manifestFile(county: String): String {
@@ -18,9 +21,10 @@ open class Statewide2020Redacted(ac:String?=auditcenter): StatewideInputWithCvrs
         return "$manifestDir/manifest-${noblanks}.csv"
     }
 
-    override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CountyInput? {
+    override fun corlaCountyInput(countyName: String): CountyInput? {
         if (countyName == "Baca") return null
-        return if (counties().contains(countyName)) County2020Redacted(countyName) else null
+        return if (counties().contains(countyName))
+            County2020Redacted(countyName, strataPopulation()[countyName]!!) else null
     }
 
     // if you skip counties, you have to adjust Nc
@@ -36,6 +40,7 @@ open class Statewide2020Redacted(ac:String?=auditcenter): StatewideInputWithCvrs
 
 class County2020Redacted(
     override val countyName: String,
+    val countyPopulation: Int
 ): CountyInput {
     val countyNameZ = countyName.replace(" ", "")
     val cvrdir = "/home/stormy/rla/temp/Anonomice/2020"
@@ -62,7 +67,7 @@ class County2020Redacted(
         return result
     }
 
-    override fun countyPopulation() = Statewide2020General().strataPopulation()[countyName]!!
+    override fun countyPopulation() = countyPopulation
 
     companion object {
         val manifestDir = "$auditcenter/2020/general/round_1"

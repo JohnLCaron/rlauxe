@@ -35,8 +35,7 @@ abstract class StatewideInputWithCvrs(
 ): StatewideInput(
     generalCanonicalFile, contestRoundFile, tabulateCountyFile, mvrComparisonFile)
 {
-    // TODO should not have votedatabase parameter
-    abstract fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>? = null): CountyInput?
+    abstract fun corlaCountyInput(countyName: String): CountyInput?
 }
 
 /*

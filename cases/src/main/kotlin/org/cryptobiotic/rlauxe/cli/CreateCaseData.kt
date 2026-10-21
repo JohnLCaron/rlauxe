@@ -6,7 +6,6 @@ import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.corla.makeCorla2020ClcaWithCvrs
 import org.cryptobiotic.rlauxe.corla.makeCorla2020Clca
-import org.cryptobiotic.rlauxe.corla.makeCorla2020Uniform
 import org.cryptobiotic.rlauxe.corla.makeCorla2022Primary
 import org.cryptobiotic.rlauxe.corla.makeCorla2024
 import org.cryptobiotic.rlauxe.corla.makeCorla2026Pcvrs
@@ -135,7 +134,7 @@ object CreateCaseData {
                 }
 
 
-                "corla2020" -> makeCorla2020Clca(toptopdir = toptopdir, auditcenter = auditcenter!!)
+                "corla2020" -> makeCorla2020Clca(toptopdir = toptopdir, auditcenter = auditcenter!!, votedatabaseDir = input)
                 /* {
                     when (sampleType) {
                         "uniform" -> makeCorla2020Uniform(toptopdir = toptopdir, auditcenter = auditcenter!!)
@@ -151,7 +150,7 @@ object CreateCaseData {
                     makeCorla2024(toptopdir = toptopdir, auditcenter = auditcenter!!)
                 }
 
-                "corla2020withCvrs" -> makeCorla2020ClcaWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!, votedatabase = input)
+                "corla2020withCvrs" -> makeCorla2020ClcaWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!, votedatabaseDir = input)
                 /* {
                     when (sampleType) {
                         "uniform" -> makeCorla2020UniformWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!,

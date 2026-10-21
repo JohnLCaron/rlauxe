@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
 import org.cryptobiotic.rlauxe.boulder.BoulderInput
 import org.cryptobiotic.rlauxe.boulder.BoulderStatementOfVotes
+import org.cryptobiotic.rlauxe.boulder.readBoulderSOVfromResourcePath
 import org.cryptobiotic.rlauxe.boulder.readBoulderStatementOfVotes
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
@@ -22,8 +23,8 @@ open class Statewide2023Coordinated(ac:String?=auditcenter): StatewideInputWithC
         return "$manifestDir/${noblanks}.csv"
     }
 
-    override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CountyInput? {
-        if (countyName == "Boulder") return Boulder23Input()
+    override fun corlaCountyInput(countyName: String): CountyInput? {
+        if (countyName == "Boulder") return Boulder23Input(strataPopulation()[countyName]!!)
         return null
     }
     // missing manifests
@@ -87,7 +88,7 @@ open class Statewide2023Coordinated(ac:String?=auditcenter): StatewideInputWithC
     }
 }
 
-class Boulder23Input: BoulderInput {
+class Boulder23Input(val countyPopulation: Int): BoulderInput {
     override val electionName = "Boulder2023"
     override val manifestSource = "$auditcenter/2023/coordinated/round_1/Boulder.csv"
     override val cvrsSource = "/resources/data/cases/boulder2023/Redacted-2023Coordinated-CVR.csv"
@@ -98,14 +99,11 @@ class Boulder23Input: BoulderInput {
     override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
 
     // or use sovo ??
-    override fun countyPopulation(): Int {
-        val manifests = readCountyManifest()
-        return manifests.totalCards
-    }
+    override fun countyPopulation() = countyPopulation
 
     override fun sovo(): BoulderStatementOfVotes {
-        val sovo = readBoulderStatementOfVotes(sovoSource, "Boulder2023")
-        val sovoRcv = readBoulderStatementOfVotes(sovoRcvSource, "Boulder2023Rcv")
+        val sovo = readBoulderSOVfromResourcePath(sovoSource, "Boulder2023")
+        val sovoRcv = readBoulderSOVfromResourcePath(sovoRcvSource, "Boulder2023Rcv")
         return BoulderStatementOfVotes.combine(listOf(sovoRcv, sovo))
     }
 

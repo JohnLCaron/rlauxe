@@ -4,6 +4,9 @@ import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
 import org.cryptobiotic.rlauxe.corlaInput.Boulder23Input
 import org.cryptobiotic.rlauxe.corlaInput.Boulder25Input
 import org.cryptobiotic.rlauxe.corlaInput.Boulder26PInput
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
@@ -13,7 +16,10 @@ class TestCvrsAndManifests {
 
     @Test
     fun testBoulder23match() {
-        testCvrsAndManifests(Boulder23Input())
+        val stateInput = Statewide2023Coordinated()
+        val population = stateInput.strataPopulation()["Boulder"]!!
+        val countyInput = Boulder23Input(population)
+        testCvrsAndManifests(countyInput)
     }
 
     @Test
@@ -23,12 +29,17 @@ class TestCvrsAndManifests {
 
     @Test
     fun testBoulder25match() {
-        testCvrsAndManifests(Boulder25Input())
+        val stateInput = Statewide2025Coordinated()
+        val population = stateInput.strataPopulation()["Boulder"]!!
+        val countyInput = Boulder25Input(population)
+        testCvrsAndManifests(countyInput)
     }
 
     @Test
     fun testBoulder26match() {
-        testCvrsAndManifests(Boulder26PInput())
+        val stateInput = Statewide2026PwithCvrs()
+        val population = stateInput.strataPopulation()["Boulder"]!!
+        val countyInput = Boulder26PInput(population)
     }
 
     fun testCvrsAndManifests(input: BoulderInput) {

@@ -4,13 +4,16 @@ import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
 import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.corlaInput.Boulder23Input
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
 import kotlin.test.Test
 
 class TestBoulderUndervotes {
-    val input = Boulder23Input()
+    val stateInput = Statewide2023Coordinated()
+    val population = stateInput.strataPopulation()["Boulder"]!!
+    val input = Boulder23Input(population)
     val sovo = input.sovo()
     val corlaCvrs = input.readCorlaCvrs()
 

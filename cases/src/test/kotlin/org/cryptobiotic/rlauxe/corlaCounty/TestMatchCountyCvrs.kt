@@ -7,7 +7,7 @@ class TestMatchCountyCvrs {
 
     @Test
     fun testMatchCountyCvrs() {
-        val testMatchCountyCvrs = MatchCountyCvrs(Arapahoe2020Redacted())
+        val testMatchCountyCvrs = MatchCountyCvrs(Arapahoe2020Redacted(1444))
         testMatchCountyCvrs.showRedactedCvrs()
         testMatchCountyCvrs.manifestCounts(show = true)
         testMatchCountyCvrs.showTabulations()

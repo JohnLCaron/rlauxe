@@ -6,12 +6,16 @@ import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 
+val votedatabaseDirDefault = "/home/stormy/datadrive/votedatabase"
+
 class County2020Input(
     override val countyName: String,
-    votedatabaseIn: Map<String, String>? = null,
+    val countyPopulation : Int,
+    votedatabaseDirIn: String?,
 ): CountyInput {
     val countyNameZ = countyName.replace(" ", "")
-    val votedatabase: Map<String, String> = votedatabaseIn ?: votedatabase2020Counties("/home/stormy/datadrive/votedatabase/cvr/Colorado/")
+    val votedatabaseDir = votedatabaseDirIn ?: votedatabaseDirDefault
+    val votedatabase: Map<String, String> = votedatabase2020Counties("$votedatabaseDir/cvr/Colorado/")
 
     override val electionName = "${countyName}2020"
     // TODO Gunnison has Manifest-Gunnison.csv; but Gunnison is an excluded county in 2020
@@ -34,7 +38,7 @@ class County2020Input(
         return result
     }
 
-    override fun countyPopulation() = Statewide2020General().strataPopulation()[countyName]!!
+    override fun countyPopulation() = countyPopulation
 
     companion object {
         val manifestDir = "$auditcenter/2020/general/round_1"
@@ -48,9 +52,9 @@ fun votedatabase2020Counties(votedatabase: String): Map<String, String> {
     path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202")}.forEach { subdir ->
         val county = subdir.fileName.toString()
         // Baca duplicates Huerfano
-        // Gunnison is missing contest tabulation
-        // Las Animas has only 120 of 8000 cvrs
-        // San Juan is missing
+        // Gunnison is missing contest tabulation (FIXED)
+        // Las Animas has only 120 of 8000 cvrs (OK)
+        // San Juan is excused
         // Monroe, Rooselvelt: no such county in Colorado
         if (county !in listOf("Baca", "San Juan", "Monroe", "Roosevelt")) {
             try {

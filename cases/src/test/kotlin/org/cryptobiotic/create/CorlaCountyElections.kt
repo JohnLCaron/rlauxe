@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.boulder.Boulder24Input
-import org.cryptobiotic.rlauxe.corlaInput.Boulder26PInput
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
@@ -25,8 +24,9 @@ class CorlaCountyElections {
     @Test
     fun createOne() {
         val toptopdir = "$cases/corlaCounty/morgan26p"
-        val countyInput = CountyInput2026("Morgan")
         val stateInput = Statewide2026PwithCvrs()
+        val population = stateInput.strataPopulation()["Morgan"]!!
+        val countyInput = CountyInput2026("Morgan", population)
 
         // fun createCorlaCountyElection(
         //    countyInput: CountyInput,
@@ -49,9 +49,13 @@ class CorlaCountyElections {
 
     @Test
     fun createBoulder26p() {
+        val stateInput = Statewide2026PwithCvrs()
+        val population = stateInput.strataPopulation()["Boulder"]!!
+        val countyInput = CountyInput2026("Boulder", population)
+
         createCorlaCountyVariants("$cases/corlaCounty/boulder26p",
-            Boulder26PInput(),
-        Statewide2026PwithCvrs()
+            countyInput,
+            stateInput,
         )
     }
 
@@ -101,25 +105,35 @@ class CorlaCountyElections {
 
     @Test
     fun createLaPlata26p() {
+        val stateInput = Statewide2026PwithCvrs()
+        val population = stateInput.strataPopulation()["La Plata"]!!
+        val countyInput = CountyInput2026("La Plata", population)
+
         createCorlaCountyVariants("$cases/corlaCounty/laplata26p",
-            CountyInput2026("La Plata"),
-            Statewide2026PwithCvrs()
+            countyInput,
+            stateInput,
         )
     }
 
     @Test
     fun createMorgan26p() {
+        val stateInput = Statewide2026PwithCvrs()
+        val population = stateInput.strataPopulation()["Morgan"]!!
+        val countyInput = CountyInput2026("Morgan", population)
         createCorlaCountyVariants("$cases/corlaCounty/morgan26p",
-            CountyInput2026("Morgan"),
-            Statewide2026PwithCvrs()
+            countyInput,
+            stateInput,
         )
     }
 
     @Test
     fun createWeld26p() {
+        val stateInput = Statewide2026PwithCvrs()
+        val population = stateInput.strataPopulation()["Weld"]!!
+        val countyInput = CountyInput2026("Weld", population)
         createCorlaCountyVariants("$cases/corlaCounty/weld26p",
-            CountyInput2026("Weld"),
-            Statewide2026PwithCvrs()
+            countyInput,
+            stateInput,
         )
     }
 

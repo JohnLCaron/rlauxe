@@ -34,10 +34,10 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInputWithCvrs(
     // should not be needed TODO get from contestRoundFile
     val countyPopulations = mapOf( "Boulder" to 100423, "La Plata" to 16146, "Morgan" to 5220,"Weld" to 69640)
 
-    override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CountyInput? {
+    override fun corlaCountyInput(countyName: String): CountyInput? {
         return when (countyName) {
-            "Boulder" -> Boulder26PInput()
-            "La Plata", "Morgan", "Weld" -> CountyInput2026(countyName)
+            "Boulder" -> Boulder26PInput(strataPopulation()[countyName]!!)
+            "La Plata", "Morgan", "Weld" -> CountyInput2026(countyName, strataPopulation()[countyName]!!)
             else -> null
         }
     }
@@ -186,7 +186,7 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInputWithCvrs(
     }
 }
 
-class CountyInput2026(val county: String): CountyInput {
+class CountyInput2026(val county: String, val population: Int): CountyInput {
     override val electionName = "$county-2026p"
     override val countyName = county
     val countyZ = county.replace("\\s".toRegex(), "")
@@ -204,13 +204,10 @@ class CountyInput2026(val county: String): CountyInput {
         cvrsSource = "$auditcenter/2026/primary/observerfiles/$filename"
     }
 
-    override fun countyPopulation(): Int {
-        val manifests = readCountyManifest()
-        return manifests.totalCards
-    }
+    override fun countyPopulation() = population
 }
 
-class Boulder26PInput: BoulderInput  {
+class Boulder26PInput(val population: Int): BoulderInput  {
     override val electionName= "Boulder2026p"
     override val cvrsSource = "/resources/data/cases/boulder2026p/2026P-Redacted-CVR-Public.csv"
     override val manifestSource = "$auditcenter/2026/primary/files/Boulder.csv"
@@ -218,7 +215,7 @@ class Boulder26PInput: BoulderInput  {
     override val year = "2026pc"
 
     // or use sovo ??
-    override fun countyPopulation() = Statewide2026Primary().strataPopulation()[countyName]!!
+    override fun countyPopulation() = population
 
     override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
 }

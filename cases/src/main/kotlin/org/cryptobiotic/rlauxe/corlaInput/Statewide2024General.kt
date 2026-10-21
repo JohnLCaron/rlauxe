@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.boulder.BoulderInput
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
+import kotlin.Int
 
 class Statewide2024General(ac:String?=auditcenter): StatewideInputWithCvrs(
     generalCanonicalFile = "$ac/2024/general/2024GeneralCanonicalList.csv",
@@ -21,9 +22,9 @@ class Statewide2024General(ac:String?=auditcenter): StatewideInputWithCvrs(
 
     override fun skipCounties(countyName: String) = false
 
-    override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CountyInput? {
+    override fun corlaCountyInput(countyName: String): CountyInput? {
         return when (countyName) {
-            "Boulder" -> Boulder24Input()
+            "Boulder" -> Boulder24Input(strataPopulation()[countyName]!!)
             else -> null
         }
     }
@@ -176,7 +177,7 @@ class Statewide2024General(ac:String?=auditcenter): StatewideInputWithCvrs(
     }
 }
 
-class Boulder24Input: BoulderInput  {
+class Boulder24Input(val population: Int): BoulderInput  {
     override val electionName= "Boulder-2024"
     override val manifestSource = "$auditcenter/2024/general/BoulderBallotManifest.csv"
     override val cvrsSource = "/resources/data/cases/boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
@@ -184,10 +185,7 @@ class Boulder24Input: BoulderInput  {
     override val year = "2024"
 
     // or use sovo ??
-    override fun countyPopulation(): Int {
-        val manifests = readCountyManifest()
-        return manifests.totalCards
-    }
+    override fun countyPopulation() = population
 
     override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
 }

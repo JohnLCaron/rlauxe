@@ -6,7 +6,10 @@ import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
 import org.cryptobiotic.rlauxe.corlacvr.CvrTabulations
 import org.cryptobiotic.rlauxe.corlacvr.tabulate
 
-open class Statewide2020General(ac:String?=auditcenter): StatewideInputWithCvrs(
+open class Statewide2020General(
+        ac:String?=auditcenter,
+        val votedatabaseDir: String? = null,
+    ): StatewideInputWithCvrs(
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
     contestRoundFile = "$ac/2020/general/round_1/contest.csv",
     tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
@@ -20,10 +23,11 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInputWithCvrs(
         return "$manifestDir/manifest-${noblanks}.csv"
     }
 
-    override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CountyInput? {
-        if (countyName == "Arapahoe") return Arapahoe2020Redacted()
+    override fun corlaCountyInput(countyName: String): CountyInput? {
+        if (countyName == "Arapahoe") return Arapahoe2020Redacted(strataPopulation()[countyName]!!)
         if (countyName == "Baca") return null
-        return if (counties().contains(countyName)) County2020Input(countyName, votedatabase) else null
+        return if (counties().contains(countyName))
+            County2020Input(countyName, strataPopulation()[countyName]!!, votedatabaseDir) else null
     }
 
     // if you skip counties, you have to adjust Nc

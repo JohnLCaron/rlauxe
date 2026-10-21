@@ -20,10 +20,10 @@ open class Statewide2025Coordinated(ac:String?=auditcenter): StatewideInputWithC
         return "$manifestDir/${noblanks}Manifest.csv"
     }
 
-    override fun corlaCountyInput(countyName: String, votedatabase: Map<String, String>?): CountyInput? {
+    override fun corlaCountyInput(countyName: String): CountyInput? {
         return when (countyName) {
-            "Boulder" -> Boulder25Input()
-            "Broomfield", "Larimer" -> CountyInput2025(countyName)
+            "Boulder" -> Boulder25Input(strataPopulation()[countyName]!!)
+            "Broomfield", "Larimer" -> CountyInput2025(countyName, strataPopulation()[countyName]!!)
             else -> null
         }
     }
@@ -88,7 +88,7 @@ open class Statewide2025Coordinated(ac:String?=auditcenter): StatewideInputWithC
     }
 }
 
-class CountyInput2025(val county: String): CountyInput {
+class CountyInput2025(val county: String, val countyPopulation: Int): CountyInput {
     override val electionName = "$county-2025"
     override val countyName = county
     override val manifestSource = "$auditcenter/2025/files/${county}Manifest.csv"
@@ -104,24 +104,18 @@ class CountyInput2025(val county: String): CountyInput {
         cvrsSource = "$auditcenter/2025/cvrs/$filename"
     }
 
-    override fun countyPopulation(): Int {
-        val manifests = readCountyManifest()
-        return manifests.totalCards
-    }
+    override fun countyPopulation() = countyPopulation
 }
 
-class Boulder25Input: BoulderInput  {
-    override val electionName= "Boulder-2025"
+class Boulder25Input(val countyPopulation: Int): BoulderInput  {
+    override val electionName= "Boulder2025"
     override val manifestSource = "$auditcenter/2025/files/BoulderManifest.csv"
     override val cvrsSource = "$auditcenter/2025/cvrs/2025-boulder-Redacted-CVR-PUBLIC.csv"
     override val sovoSource = "/resources/data/cases/boulder2025/2025C-Boulder-County-Official-Statement-of-Votes.csv"
     override val year = "2025"
 
     // or use sovo ??
-    override fun countyPopulation(): Int {
-        val manifests = readCountyManifest()
-        return manifests.totalCards
-    }
+    override fun countyPopulation() = countyPopulation
 
     override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
 }

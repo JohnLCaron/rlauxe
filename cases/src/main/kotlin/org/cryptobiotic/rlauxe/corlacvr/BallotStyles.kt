@@ -29,8 +29,8 @@ data class CvrCardStyle(val cardType: String, val contestIds: Set<Int>) {
     //    val possibleContests: IntArray,      // the list of possible contests.
     //    val hasExactContests: Boolean,       // aka hasStyle: if all cards have exactly the contests in possibleContests;
     //)
-    fun toCardStyle(): CardStyle {
-        return CardStyle(cardType, 0, contestIds.toList().toIntArray(), hasExactContests=true)
+    fun toCardStyle(styleId: Int): CardStyle {
+        return CardStyle(cardType, styleId, contestIds.toList().toIntArray(), hasExactContests=true)
             .setNcards(ncards)
     }
 }

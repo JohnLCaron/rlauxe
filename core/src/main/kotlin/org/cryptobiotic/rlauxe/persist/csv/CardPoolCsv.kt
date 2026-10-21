@@ -108,6 +108,6 @@ class CardPoolBuilder(
 ) {
     val contestTabs = mutableMapOf<Int, ContestTabulation>()
 
-    fun build() = CardPool(poolName, poolId, hasExactContests, infos, contestTabs, totalCards)
+    fun build() = CardPool(poolName, poolId, hasExactContests, contestTabs, totalCards)
 }
 

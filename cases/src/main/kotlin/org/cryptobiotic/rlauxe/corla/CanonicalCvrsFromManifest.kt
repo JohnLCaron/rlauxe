@@ -90,7 +90,7 @@ class CanonicalCvrsFromManifest(
             redactedTabs = voteDifference
 
             val poolId = nextStyleId++
-            val onepool = CardPool("$county:UnmatchedManifest", poolId, hasExactContests = false, infos, voteDifference, manifestCounts.unmatched)
+            val onepool = CardPool("$county:UnmatchedManifest", poolId, hasExactContests = false, voteDifference, manifestCounts.unmatched)
             redactedPools = listOf(onepool)
 
         } else {

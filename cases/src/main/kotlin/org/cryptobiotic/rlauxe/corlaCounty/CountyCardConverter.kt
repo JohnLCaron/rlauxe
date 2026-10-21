@@ -102,7 +102,7 @@ class CountyCardConverter(val county: String,
         // which is what we just built !!
         // turn those into CardStyle
 
-        cardStyles = cardsFromManifest.getCountyStyles().map { cvrCardStyle ->
+        cardStyles = cardsFromManifest.countyStyles().map { cvrCardStyle ->
             val canonicalContestIdSet = convertExportCardStyleToCanonical(cvrCardStyle)
             val cardStyle = CardStyle("$county-${cvrCardStyle.cardType}", cardStyleId++, canonicalContestIdSet.toIntArray(), true)
             cardStyle.ncards = cvrCardStyle.ncards
@@ -229,8 +229,10 @@ class ExportToCanonLookup(val canonContestId: Int, val candLookup: IntArray ) {
     fun <T> convertCands(inp: Map<Int,T>): Map<Int,T> {
         val result = mutableMapOf<Int, T>()
         inp.forEach {
-            val newCandId = candLookup[it.key]
-            if (newCandId >= 0 ) result[newCandId] = it.value
+            if (it.key < candLookup.size) {
+                val newCandId = candLookup[it.key]
+                if (newCandId >= 0) result[newCandId] = it.value
+            }
         }
         return result
     }

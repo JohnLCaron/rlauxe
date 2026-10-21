@@ -39,15 +39,15 @@ class TestRunoffOA {
     val infos = mapOf(0 to info)
     // now we have 3 pools with avg >,=,< total average
     val cardPool1 = CardPool(
-        "same", 1, false, infos,
+        "same", 1, false,
         mapOf(0 to ContestTabulation(info, mapOf(1 to 5100, 2 to 4900, 3 to 4800), 14800)), 14800
     )
     val cardPool2 = CardPool(
-        "low", 2, false, infos,
+        "low", 2, false,
         mapOf(0 to ContestTabulation(info, mapOf(1 to 4890, 2 to 5300, 3 to 5000), 15000)), 15000
     )
     val cardPool3 = CardPool(
-        "hi", 3, false, infos,
+        "hi", 3, false,
         // constructor(info: ContestInfo, votes: Map<Int, Int>, ncards: Int)
         mapOf(0 to ContestTabulation(info, mapOf(1 to 5565, 2 to 4244, 3 to 4200), 14200)), 14200
     )

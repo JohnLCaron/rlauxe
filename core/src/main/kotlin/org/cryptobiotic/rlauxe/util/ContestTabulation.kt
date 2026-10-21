@@ -72,6 +72,11 @@ class ContestTabulation(
         votes[cand] = accum + vote
     }
 
+    fun setNcards(ncards: Int) {
+        ncardsTabulated = ncards
+        undervotes = ncardsTabulated * voteForN - nvotes()
+    }
+
     fun subtractVoteZ(cand: Int, vote: Int) {
         val accum = votes.getOrPut(cand) { 0 }
         votes[cand] = max(0, accum - vote) // cant go below 0
@@ -233,7 +238,7 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
 fun MutableMap<Int, ContestTabulation>.sumContestTabulationsFromCandVotes(info: ContestInfo, candVotes: Map<Int, Int>, ncards: Int = 1) {
     val contestSum = this.getOrPut(info.id) { ContestTabulation(info) }
     candVotes.forEach { (cand, vote) -> contestSum.addVote(cand, vote)}
-    contestSum.ncardsTabulated += ncards
+    contestSum.setNcards(contestSum.ncardsTabulated + ncards)
 }
 
 fun sumContestTabulations(others: List<Map<Int, ContestTabulationIF>>):Map<Int, ContestTabulationIF>  {

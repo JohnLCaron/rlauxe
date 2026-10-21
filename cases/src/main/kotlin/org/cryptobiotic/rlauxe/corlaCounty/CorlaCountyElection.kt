@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.corlaCounty
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
-import org.cryptobiotic.rlauxe.corlaInput.MergedContestInfo
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corla.CorlaStateContestInfoBuilder
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
@@ -15,7 +14,6 @@ import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.forEach
 import kotlin.collections.map
-import kotlin.collections.plus
 import kotlin.collections.set
 import kotlin.io.path.Path
 import kotlin.math.max
@@ -50,14 +48,17 @@ class CorlaCountyElection(
     val variant = ElectionVariant(variantEnum)
     val county: String = countyInput.countyName
 
-    val contests: Map<Int, ContestIF>
-    val contestsUA: List<ContestWithAssertions>
-    val redactedCvrs: List<AuditableCard>  // redacted cvrs
-    val allCards: List<AuditableCard>
-    val redactedPools: List<CardPool>
-    val mvrs: List<AuditableCard>
-    val ncards: Int
+    val contests: List<ContestIF>
+    val mvrs = mutableListOf<AuditableCard>()
+    val cardPools = mutableListOf<CardPool>()
+    val poolMap = mapOf("aggregation" to 1, "missing" to 2)
     val cardStyles: List<StyleIF>
+
+    val contestsUA: List<ContestWithAssertions>
+    // val redactedCvrs: List<AuditableCard>  // redacted cvrs
+    //val allCards: List<AuditableCard>
+
+    val ncards: Int
 
     init {
         val contestBuilder = CorlaStateContestInfoBuilder(stateInput)
@@ -69,57 +70,65 @@ class CorlaCountyElection(
         val convertedCountyTabs: Map<Int, ContestTabulation> = converter.convertToContestTabulation(countyTab)
 
         val unredactedCvrTabs = converter.convertTabs(countyCards.cvrTabs)
-        val groupTabs = converter.convertTabs(countyCards.groupTabs)
-        // aggregated tabs arent missing
-        val notmissing = if (countyCards.aggGroup != null) unredactedCvrTabs else sumContestTabulations(listOf(unredactedCvrTabs, groupTabs))
+        val groupTabs = converter.convertTabs(countyCards.groupTabs) // should be aggregated when exists
 
-        // TODO not sure about filtering on zero. probably should filter on ncards == 0 ?? Could have no votes and still need to be on
-        val missing: Map<Int, ContestTabulation> = subtractContestTabulationsZ(convertedCountyTabs, notmissing).filter { it.value.nvotes() > 0 }
+        // aggregated tabs arent missing
+        val notmissing = if (countyCards.aggGroup == null) unredactedCvrTabs else sumContestTabulations(listOf(unredactedCvrTabs, groupTabs))
+
+        // TODO not sure about filtering on zero. probably should filter on ncards == 0 ?? Could have no votes and still need to be in
+        val missingTabs: Map<Int, ContestTabulation> = subtractContestTabulationsZ(convertedCountyTabs, notmissing).filter { it.value.nvotes() > 0 }
+
+        var styleId = 3
+        cardStyles = countyCards.countyStyles().map {
+            it.toCardStyle(styleId++)
+        }
+        val cardStyleMap = cardStyles.associateBy { it.name }
+
+        // need to iterate over CountyCards to fill in counts
+        val npops = mutableMapOf<Int, Int>() // count contests' population size
+        var index = 1
+        countyCards.iterator().forEach { countyCard ->
+            val card = AuditableCard.fromVotes(
+                countyCard.imprintedId,
+                countyCard.location,
+                index++, 0, false,
+                styleId = cardStyleMap[countyCard.style]?.id ?: throw RuntimeException(" cant find style name '${countyCard.style}'"),
+                votes = countyCard.votes,
+                poolId = poolMap[countyCard.poolName],
+            )
+            convertedCountyTabs.keys.forEach { contestId ->
+                if (card.hasContest(contestId)) {
+                    val pop = npops.getOrDefault(contestId, 0)
+                    npops[contestId] = pop + 1
+                }
+            }
+            mvrs.add(card)
+        }
+        ncards = countyCards.manifestCount
 
         if (countyCards.aggGroup != null) {
-            // data class CardPool(
-            //    override val poolName: String,
-            //    override val poolId: Int,
-            //    val hasExactContests: Boolean,    // aka single style
-            //    val infos: Map<Int, ContestInfo>, // do we really need this ??
-            //    val contestTabs: Map<Int, ContestTabulationIF>,  // contestId -> ContestTabulation
-            //    val totalCards: Int,
-            //)
-            val aggPool = CardPool(countyCards.aggGroup.groupName, 1, false, groupTabs, countyCards.aggGroup.nlines)
+            val hasExactContests = false // unless it has a single Style
+            val groupNcards = countyCards.aggGroup.ncards() // only an estimation based on min needed for vote count
+            val aggCount = countyCards.aggCount // count of redacted cards with style; non-style goes into missing
+            groupTabs.values.forEach{ it.setNcards(countyCards.aggCount) } // finally know the ncards
+            cardPools.add(CardPool(countyCards.aggGroup.groupName, 1, hasExactContests, groupTabs, countyCards.aggCount))
         }
 
-        // we havent yet iterated over CountyCards
-        // countyTab doesnt know ncards per contest. notmissing knows, but not missing, so here is an estimation
-        val estNcardsByContest = estNcardsByContest(notmissing, missing, countyCards.manifestCount, countyCards.missingCount)
+        // countyTab doesnt know ncards per contest. notmissing knows, but missing doesnt know, so here is an estimation
+        // TODO if no missing, can use notmissing ncards
+        val estNcardsByContest = estNcardsByContest(notmissing, missingTabs, countyCards.manifestCount)
+        contests = makeContests(contestBuilder.infos, convertedCountyTabs, estNcardsByContest) // .associate { it.id to it }
 
-        contests = makeContests(contestBuilder.infos, convertedCountyTabs, estNcardsByContest).associate { it.id to it }
-
-        redactedPools = cvrsFromManifest.redactedPools
-        cardStyles = cvrsFromManifest.countyCardStyles()
-
-        // these are mvrs
-        redactedCvrs = cvrsFromManifest.makeSimulatedCards()
-
-        // need to know the phantoms to calculate allCards and Npops
-        val phantoms = makePhantomCards(contests, 1)
-        logger.info { "made ${phantoms.size} phantom cards" }
-
-        allCards = cvrsFromManifest.convertedCvrs + redactedCvrs + phantoms // in memory
-        this.ncards = allCards.size
-        val npops = tabulateNpops(allCards, infoList)
-
-        // TODO cvrTabs dont have the irv part, so will fail in the raire library
-        // val allCardsTabs = tabulateCards(allCards.iterator(), infos)
+        if (countyCards.missingCount > 0) {
+            val hasExactContests = false // unless it has a single Style
+            cardPools.add(CardPool("missing", 2, hasExactContests, missingTabs, countyCards.missingCount))
+        }
 
         contestsUA = makeContestWAs(
-            contests, npops, emptyMap(), redactedPools,
+            contests, npops, emptyMap(), cardPools,
             variant, hasStyle
         )
-        mvrs = addIndexToMvrs(allCards)
-        logger.info { "made ${mvrs.size} mvrs" }
 
-        //val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
-        //logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPoolBuilders.size} cardPools"}
     }
 
     override fun electionInfo() =
@@ -135,7 +144,7 @@ class CorlaCountyElection(
     override fun contestsUA() = contestsUA
 
     override fun cardStyles() = cardStyles
-    override fun cardPools() = redactedPools
+    override fun cardPools() = cardPools
     override fun unsortedMvrsInternal() = mvrs
     override fun unsortedMvrsExternal() = null
 
@@ -216,6 +225,35 @@ class CorlaCountyElection(
         return contests
     }
 }
+
+fun makeContestWAs(
+    contests: List<ContestIF>,
+    npopMap: Map<Int, Int>,
+    allIrvTabs: Map<Int, ContestTabulation>, // all tabs for IRV contests
+    oneAuditPools: List<CardPool>,
+    variant: ElectionVariant,
+    hasStyle: Boolean,
+): List<ContestWithAssertions> {
+    val contestsUAs = mutableListOf<ContestWithAssertions>()
+
+    val regular = ContestWithAssertions.make(contests.filter { !it.isIrv() }, npopMap, true, hasStyle)
+    if (variant.isOA()) setPoolAssorterAverages(regular, oneAuditPools)
+    contestsUAs.addAll(regular)
+
+    // TODO
+    contests.filter { it.isIrv() }.forEach {
+        // assumes contestTab.irvVotes are present
+        val irvContest = if (!variant.isOA())
+            makeRaireContest(it.info(), allIrvTabs[it.id]!!, it.Nc(), Nbin=npopMap[it.id]!!)
+        else
+            makeRaireOneAuditContest(it.info(), allIrvTabs[it.id]!!, it.Nc(), Nbin=npopMap[it.id]!!, oneAuditPools)
+
+        contestsUAs.add(irvContest)
+    }
+
+    return contestsUAs
+}
+
         /*
         val mergedContestMap = stateInput.mergedContestMap
 
@@ -247,31 +285,6 @@ class CorlaCountyElection(
             contestBuilder.build(info)
         }
     }
-}
-
-fun makeContestWAs(
-    contests: List<ContestIF>,
-    npopMap: Map<Int, Int>,
-    allIrvTabs: Map<Int, ContestTabulation>, // all tabs for IRV contests
-    oneAuditPools: List<CardPool>,
-    variant: ElectionVariant,
-    hasStyle: Boolean,
-): List<ContestWithAssertions> {
-    val contestsUAs = mutableListOf<ContestWithAssertions>()
-
-    val regular = ContestWithAssertions.make(contests.filter { !it.isIrv() }, npopMap, true, hasStyle)
-    if (variant.isOA()) setPoolAssorterAverages(regular, oneAuditPools)
-    contestsUAs.addAll(regular)
-
-    contests.filter { it.isIrv() }.forEach {
-        // assumes contestTab.irvVotes are present
-        val irvContest = if (!variant.isOA())
-            makeRaireContest(it.info(), allIrvTabs[it.id]!!, it.Nc(), Nbin=npopMap[it.id]!!)
-        else
-            makeRaireOneAuditContest(it.info(), allIrvTabs[it.id]!!, it.Nc(), Nbin=npopMap[it.id]!!, oneAuditPools)
-        contestsUAs.add(irvContest)
-    }
-    return contestsUAs
 }
 
 class CCContestBuilder(
@@ -346,7 +359,7 @@ class CCContestBuilder(
 // meanwhile, down the rabbit hole again
 // estimate ncards(county, contest), return contestId -> ncards
 // are we adding in the unredactedCvrTabs ? cause we have an exact count there
-fun estNcardsByContest(notmissing: Map<Int, ContestTabulationIF>, missing: Map<Int, ContestTabulation>, manifestCount: Int, missingCount: Int): Map<Int, Int> {
+fun estNcardsByContest(notmissing: Map<Int, ContestTabulationIF>, missing: Map<Int, ContestTabulation>, manifestCount: Int): Map<Int, Int> {
     val ncardsByContest = mutableMapOf<Int, Int>() // contestId, adjust
     notmissing.forEach { ncardsByContest[it.key] = it.value.ncards() }
 
@@ -361,7 +374,7 @@ fun estNcardsByContest(notmissing: Map<Int, ContestTabulationIF>, missing: Map<I
         // but it cant use more cards then there are
         // (tab.nvotes + tab.undervotes) / tab.voteForN < totalCvrs
         // tab.nvotes(1 + pct) < (totalCvrs * tab.voteForN)
-        val maxPct = (manifestCounts.totalEntries * tab.voteForN) / tab.nvotes().toDouble() - 1.0
+        val maxPct = (manifestCount * tab.voteForN) / tab.nvotes().toDouble() - 1.0
         val usePct = max(0.0, min(pct, maxPct))
 
         // we are munging redactedTab directly

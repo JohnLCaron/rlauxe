@@ -79,7 +79,7 @@ class CreateGa2Election(
                     println("Cant find '${adjname}'")
                 }
             }
-            pools.add(CardPool(countyia.county, poolid++, hasExactContests = false, infos, contestTabs, countyNcards))
+            pools.add(CardPool(countyia.county, poolid++, hasExactContests = false, contestTabs, countyNcards))
         }
         this.cardPools = pools.toList()
 

@@ -219,6 +219,7 @@ abstract class StatewideInput(
     //    val countyMvrs: Int,
     //    val statewideMvrs: Int,
     //)
+    // TODO remove the elided countys' contests
     val mergedContestMap: Map<String, MergedContestInfo> by lazy {
         mergedInfo().mergedContestInfo.associateBy { it.contestName }
     }

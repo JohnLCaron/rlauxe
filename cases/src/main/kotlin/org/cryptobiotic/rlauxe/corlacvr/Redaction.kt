@@ -28,7 +28,7 @@ class EmptyRedaction: RedactionIF {
 // default is what our anonymizer needs
 data class RedactionStrategy(
     val justGroups: Boolean = false, // for count redacted, just count the group(s) nsize, else just count the rows
-    val noStyle: Boolean = false,  // override style detection, set to no style
+    val hasStyle: Boolean?,  // override style detection, null mean we dont know a-priori
 )
 // 1. one aggregated group and redacted rows with ids and styles (our redactor)
 // 1.1 older version: rows have unique ballotType but missing unredacted example, no style (LaPlata 2026p)
@@ -67,12 +67,12 @@ data class RedactionStrategy(
 //   do rows have style information: yes if votes != emptyMap
 //   do ballot types have unique styles: check BallotStyles.ballotTypes list.size == 1
 
-open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(false), val show: Boolean = false): RedactionIF {
+open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(false, null), val show: Boolean = false): RedactionIF {
     var linesIgnored = 0
     val redactedGroups = mutableMapOf<String, RedactedGroup>()
     val redactedGroupsSet = mutableMapOf<Set<Int>, RedactedGroup>()
-    val redacted = mutableListOf<CvrRow>() // the rows must have imprintedId
-    var noStyle = strategy.noStyle
+    val redacted = mutableListOf<CvrRow>() // the rows must have imprintedId to match an mvr
+    var hasStyle = strategy.hasStyle
 
     private var redactionExtensions = 1
     private val showDontMatch = true
@@ -104,14 +104,12 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(false),
         return if (strategy.justGroups) groupRows else redactedRows().size
     }
 
-    // TODO keep original line? Anonomicer should output them. also keep which group they belong to?
-    // 27136,5,22,63,5-22-63,6260303153 (6260303153 - 49),49,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
     fun addRedactedLine(line: CSVRecord, corlaCvrs: CorlaCountyCvrsIF) {
         val cvr = corlaCvrs.parseHeader(line)
-        if (!noStyle) {
+        if (hasStyle != false) {
             cvr.findNonNull(corlaCvrs.schema, line)
         }
-        redacted.add(cvr) // now the redacted rows know which contests they hold (maybe)
+        redacted.add(cvr) // now the redacted rows know if they have styles or not, except for the ambiguous case of "all"
     }
 
     // if you have a group, you expect that the redactedRows have contest info in them
@@ -121,6 +119,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(false),
         if (existingGroup == null) {
             redactedGroups[rname] = redacted
         } else {
+            // consider sending redacted rows into BallotStyles...
             if (existingGroup.contests() == redacted.contests()) {
                 existingGroup.merge(redacted)
             } else {
@@ -145,22 +144,14 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(false),
             addGroup(redactedGroup)
             linesIgnored++
             return true
+        }
 
-        } else if (line.get(0).isEmpty()) { // (2020) Dolores, Phillips: these are subtotals, not redactions
+        if (line.get(0).isEmpty()) { // (2020) Dolores, Phillips: these are subtotals, not redactions
             if (show) println("  ** discard (subtotal): $line")
             // Dolores
             //   ** discard: isEmpty CSVRecord [comment='null', recordNumber=1505, values=[, , , , , , , 341, 1089, 5, 1, 1, 0, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 3, 0, 0, 0, 0, 338, 1064, 4, 4, 17, 0, 1, 0, 0, 1063, 319, 16, 16, 316, 1057, 316, 1067, 1077, 1117, 787, 578, 645, 542, 647, 537, 636, 534, 621, 547, 633, 733, 554, 808, 1147, 264, 631, 712, 588, 822, 407, 1005, 302, 1119, 826, 568, 960, 438, 751, 583, 505, 877, 189, 39, 144, 87, 340, 576]]
             // Phillips
             //   ** discard: isEmpty CSVRecord [comment='null', recordNumber=2566, values=[, , , , , , , 486, 1958, 3, 1, 7, 0, 24, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 463, 1980, 6, 0, 22, 0, 0, 0, 0, 402, 1965, 46, 12, 2006, 1964, 2056, 2039, 340, 312, 369, 247, 203, 558, 791, 383, 492, 1343, 644, 1279, 676, 1310, 641, 1300, 649, 1575, 425, 2002, 312, 1051, 1292, 1212, 1113, 2096, 322, 1103, 1233, 1166, 1247, 537, 1873, 541, 1853, 1665, 742, 1759, 635, 1398, 888, 764, 1608, 428, 135, 800, 206, 794, 746, 1032, 1190]]
-            return true
-
-        } else if (line.get(corlaRawCvrs.schema.nheaders).startsWith("*")) { // El Paso, our new redactions
-            if (show) println("  ** redact *: $line")
-            // ballot ids and ballot style, no vote info
-            // El Paso
-            //  [42220, 30, 69, 90, 30-69-90, 5091421250 - 45 (5091421250 - 45), 45, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *]]
-            addRedactedLine(line, corlaRawCvrs)
-            linesIgnored++
             return true
         }
 
@@ -168,12 +159,11 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(false),
         val hasRedacted = values.any { it.lowercase().startsWith("redacted") || it.lowercase().startsWith("redaction") }
         if (hasRedacted) {
             if (show) println("  ** hasRedacted: $line")
-            // ballot ids and ballot style, no vote info
-            // Eagle
+            // Eagle no style
             //   [9220, 2, 197, 34, 2-197-34, Mail, 2052619019 - 2 (2052619019 - 2), 2, Redacted per 24-27-205.5 (4)(b)(III) C.R.S. , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ]]
             // Jefferson has Style
             //   [5415, 5, 23, 52, 5/23/1952, , 1222230030 - 35 (1222230030 - 35), 35, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, , , , , , , , , , , Redacted, Redacted, Redacted, Redacted, , , , , , , , , , , Redacted, Redacted, Redacted, , , , , , , , , , , , , , , , , Redacted, Redacted, , , Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, Redacted, , , , , , , , , , , , , , , , , , ]]
-            // Larimer
+            // Larimer no style
             //   [8470, 6, 9, 79, 6/9/1979, 2234935805 - 21 (2234935805 - 21), 21, REDACTED, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ]]
             addRedactedLine(line, corlaRawCvrs)
             linesIgnored++
@@ -183,10 +173,9 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(false),
         val hasanX = values.any { it.startsWith("X") }
         if (hasanX) { // Douglas, Pitkin
             if (show) println("  ** redact X: $line")
-            // ballot ids and ballot style, no vote info
-            // Douglas
+            // Douglas has style
             //   [11377, 1, GEN-0130, 10, 1-GEN-0130-10, 74, 359 [05], X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , X, X, X, , , , , , , , , X, X, X, X, X, , , , , , X, X, X, X, X, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , ]]
-            // Pitkin
+            // Pitkin has style
             //   [3, 201, 1, 13, 201-1-13, 3056149010 - CFPD (3056149010 - CFPD), CFPD, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , , X, X, X, X]]
             addRedactedLine(line, corlaRawCvrs)
             linesIgnored++
@@ -194,13 +183,10 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(false),
         }
 
         val hasanAsterisk = values.any { it.startsWith("*") }
-        if (hasanAsterisk) { // anonymize_cvr
+        if (hasanAsterisk) { // El Paso, our anonymizer
             if (show) println("  ** redact *: $line")
-            // ballot ids and ballot style, no vote info
-            // Douglas
-            //   [11377, 1, GEN-0130, 10, 1-GEN-0130-10, 74, 359 [05], X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , X, X, X, , , , , , , , , X, X, X, X, X, , , , , , X, X, X, X, X, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , ]]
-            // Pitkin
-            //   [3, 201, 1, 13, 201-1-13, 3056149010 - CFPD (3056149010 - CFPD), CFPD, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, X, , , , , , , , , X, X, X, X]]
+            // El Paso has * in every column
+            //  [42220, 30, 69, 90, 30-69-90, 5091421250 - 45 (5091421250 - 45), 45, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *, *]]
             addRedactedLine(line, corlaRawCvrs)
             linesIgnored++
             return true

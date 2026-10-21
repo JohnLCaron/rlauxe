@@ -6,7 +6,7 @@ import kotlin.text.startsWith
 
 private val logger = KotlinLogging.logger("RedactionBoulder")
 
-// TODO redaction strtagy may depend on the year ??
+// TODO redaction strategy may depend on the year ??
 // ok start with 2026p
 // Redacted and Consolidated 18 Ballots,,,,,,"01, 19, and 25",8,10,15,13,5,12,5,17,9,4,4,1,8,5,3,9,8,,10,,,,,7,18,17,10,7,16,16,16,16,,,,,,,,,,,,,,,,,,,,,,
 //Redacted and Consolidated 23 Ballots,,,,,,"02, 20, 26, and STATE",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,17,15,2,0,12,11,0,0,18,18,8,14,15,8,5,,,8,,
@@ -14,7 +14,7 @@ private val logger = KotlinLogging.logger("RedactionBoulder")
 //Redacted and Consolidated 9 Ballots,,,,,,32,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,6,3
 //Redacted and Consolidated 9 Ballots,,,,,,STATE,7,2,,6,1,8,1,6,0,7,2,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 //Redacted,,,,,,14,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,1,1,0,0,1,0,0,0,1,1,0,1,1,,1,,1,,,
-class RedactionBoulder(show: Boolean = false) : Redaction(RedactionStrategy(justGroups=true), show=show) {
+class RedactionBoulder(show: Boolean = false) : Redaction(RedactionStrategy(justGroups=true, hasStyle = true), show=show) {
 
     // 2020, 2023, 2024
     override fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaCountyCvrsIF): Boolean {

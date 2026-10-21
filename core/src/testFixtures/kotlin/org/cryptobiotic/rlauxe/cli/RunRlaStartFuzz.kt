@@ -304,7 +304,7 @@ fun makeOnePool(poolId: Int, contests: List<Contest>, cvrs: List<Cvr>): CardPool
 
     // can just use contest totals. a contest can generate a Vunder
     val contestTabs = tabulateCvrs(cvrs.iterator(), infos)
-    return CardPool("all", poolId, hasExactContests=true, infos, contestTabs, cvrs.size)
+    return CardPool("all", poolId, hasExactContests=true, contestTabs, cvrs.size)
 }
 
 ////////////////////////////////

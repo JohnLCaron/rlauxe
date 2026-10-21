@@ -60,7 +60,7 @@ data class BallotPool(
             val tabs = cardStyle.possibleContests.associate { it to contestTabs[it]!! }
             CardPool(
                 cardStyle.name, cardStyle.id, cardStyle.hasExactContests,
-                infos, tabs, totalCards = ballotStyle.nballots
+                tabs, totalCards = ballotStyle.nballots
             )
         }
     }

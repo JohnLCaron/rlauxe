@@ -268,7 +268,6 @@ class CountyPoolsSimCvrs(
                     "${countyName}-${nfz(style.id, 2)}",
                     nextPoolId,
                     hasExactContests = true,
-                    infosByName.mapKeys { it.value.id },
                     contestTabs = votesForStyle,
                     style.ncards()
                 )

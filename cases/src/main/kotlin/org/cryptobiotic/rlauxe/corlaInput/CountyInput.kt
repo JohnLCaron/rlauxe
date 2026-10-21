@@ -44,7 +44,7 @@ interface CountyInput: ColoradoInput {
 
 fun readCorlaCvrs(year: String, countyName: String, cvrsSource: String): CorlaCountyCvrsIF {
     if (year == "2020") {
-        if (countyName == "Larimer") return readCountyCvrs(cvrsSource, redaction = Redaction(RedactionStrategy(noStyle = true)))
+        if (countyName == "Larimer") return readCountyCvrs(cvrsSource, redaction = Redaction(RedactionStrategy(hasStyle = false)))
     }
 
     if (year.startsWith("2020")) {

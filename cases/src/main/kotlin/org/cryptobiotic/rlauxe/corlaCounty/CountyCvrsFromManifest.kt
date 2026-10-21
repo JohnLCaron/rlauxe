@@ -34,8 +34,8 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
 
     val allBallotStyles = BallotStyles()
 
-
     // assumes manifest iterator doesnt terminate early
+    var aggCount = 0
     var missingCount = 0
     var manifestCount = 0
 
@@ -51,10 +51,11 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
         cvrTabs = tabulateCvrRows(corlaCvrs.cvrs().iterator(), infos)
 
         aggGroup = corlaCvrs.redaction().groups().find { it.groupName.lowercase() == "aggregated"}
-        groupTabs = if (aggGroup != null) {
+        groupTabs = if (aggGroup != null) { // if agg grup exists, ignore other groups. may have to change this if someone else is adding
+            // group subtotals and rows with ids.
             val tabs = mutableMapOf<Int, ContestTabulation>()
             aggGroup.candVotes.forEach { (scontestId, candVotes) ->
-                tabs.sumContestTabulationsFromCandVotes(infos[scontestId]!!, candVotes)
+                tabs.sumContestTabulationsFromCandVotes(infos[scontestId]!!, candVotes) // problem is you dont know ncards until you read through the rows
             }
             tabs
         } else {
@@ -87,14 +88,8 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
     }
 
     // local contest Ids
-    fun getCountyStyles(): List<CvrCardStyle> {
+    fun countyStyles(): List<CvrCardStyle> {
         return allBallotStyles.cardStyles()
-    }
-
-    // TODO boulder special case
-    // local contest, candidate Ids
-    fun getCountyAccumulation(): Map<Int, ContestTabulation> {
-        return aggTabs
     }
 
 // 1. one aggregated group and redacted rows with ids and styles (our redactor)
@@ -134,10 +129,14 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
 //   do rows have style information: yes if votes != emptyMap
 //   do ballot types have unique styles: check BallotStyles.ballotTypes list.size == 1
 
+// cards in the agg group go into the agg pool; they always have styles for version 0.3
+// all other redacted cards go into the missing pool
+// cards missing from the manifest go into the missing pool
+
     data class RowForManifest(val row: CvrRow, val style: CvrCardStyle, val poolName: String?)
 
     fun getRowAndStyle(manifestEntry: ManifestEntry): RowForManifest? {
-        var row = cvrMap[manifestEntry.imprintedId()]
+        val row = cvrMap[manifestEntry.imprintedId()]
         if (row != null) {
             val cleanBallotType = cleanCsvString(row.ballotType) // no commas
             val cvrStyleId = CardStyleId(cleanBallotType, row.contests())
@@ -151,6 +150,9 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
             val cvrStyleId = CardStyleId(cleanBallotType, redactedWithStyle.contests())
             val cardStyle = allBallotStyles.cardStyleMap[cvrStyleId]
             // if we have one group and rows with styles, the group is the agg pool; the rows use their own style
+            // -> if we have rows but no groups, all rows go into the missing pool using missing votes
+            // use the style for the individual rows, else use the missing pool style
+            if (aggGroup == null) missingCount++ else aggCount++
             return RowForManifest(redactedWithStyle, cardStyle!!, aggGroup?.groupName ?: "missing")
         }
 
@@ -161,7 +163,10 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
             if (cardStyleList != null) {
                 // this is the union in case there is more than one
                 val useStyle = cardStyleList.find { it.cardType == redactedNoStyle.ballotType }
-                if (useStyle != null ) return RowForManifest(redactedNoStyle, useStyle, "missing")
+                if (useStyle != null ) {
+                    missingCount++
+                    return RowForManifest(redactedNoStyle, useStyle, "missing")
+                }
                 throw Exception("expected union already exists")
             }
             // it has an unknown ballotType. call it missing.
@@ -178,6 +183,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
         init {
             missingCount = 0
             manifestCount = 0
+            aggCount = 0
         }
 
         override fun next(): CountyCard {

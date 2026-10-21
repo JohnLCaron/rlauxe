@@ -118,7 +118,6 @@ data class OneAuditPoolFromCvrs(
             this.poolName,
             this.poolId,
             this.hasExactContests,
-            this.infos,
             this.contestTabs,
             this.totalCards
         )

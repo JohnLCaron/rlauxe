@@ -132,7 +132,7 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
         // define W the set of parties that have at least one reported winner
         // define L the set of parties that have at least one reported loser
         val winningParties = parties.filter { it.lastSeatWon > 0 }.toSet()
-        val losingParties = parties.filter { it.firstSeatLost > 0 }.toSet()
+        val losingParties = parties.filter { it.isBelowMin || it.firstSeatLost > 0 }.toSet()
 
         val assorters = mutableListOf<AssorterIF>()
 
@@ -256,7 +256,7 @@ fun btOrBh(info: ContestInfo, winner: DhondtParty, winnerDivisor: Int, loser: Dh
 // create enough candidate scores to include all losing parties. exclude parties below threshold. sort by score.
 // set isBelowMin for each party
 fun createCandidateScores(
-    parties: List<DhondtPartyBuilder>,
+    parties: List<DhondtPartyBuilder>,  // these are changed
     nseats: Int,
     validVotes: Int,        // denominator for calculation of theshold is validVotes, excluding undervotes
     minFraction: Double,

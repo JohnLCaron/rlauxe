@@ -7,7 +7,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.round
 
-val version = "0.10.3.0" // TODO auto update
+val currentVersion = "0.10.4.9" // TODO auto update
 
 val secureRandom = SecureRandom.getInstanceStrong()!!
 const val doublePrecision = 1.0e-8

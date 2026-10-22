@@ -72,7 +72,7 @@ class PlotRelaxedAssertions {
 
         makeRelaxedSeatsPlot(
             writeFile = "$dirName/$name",
-            title="Belgium 2020 Relaxed Assertions at 5% risk",
+            title="Belgium 2024 Relaxed Assertions at 5% risk",
             subtitle="Party Seat ranges vs number of samples",
             madeSeats = madeSeatsWithMvrs,
             scaleType=ScaleType.Linear,

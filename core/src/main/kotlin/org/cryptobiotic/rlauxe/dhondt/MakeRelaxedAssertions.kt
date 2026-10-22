@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder.Companion.makeDhAssorterFromDivisors
+import kotlin.text.appendLine
 
 private val logger = KotlinLogging.logger("MakeRelaxedAssertions")
 
@@ -81,9 +82,6 @@ class MakeRelaxedAssertions(override val orgContest: DhondtContest,
 
     // push to interface ??
     override fun show() = buildString {
-        appendLine("Original Seat Ordering")
-        append(showCandidateSeatOrder(orgContest, orgAssorters, nsamples, alpha))
-
         appendLine("Failures")
         appendLine(DhondtFailure.header())
         failuresIn.forEach { appendLine(it) }
@@ -103,6 +101,11 @@ class MakeRelaxedAssertions(override val orgContest: DhondtContest,
         append(showTable5(orgContest, failuresIn))
         appendLine()
     }
+}
+
+fun showCandidateSeatOrder(orgContest: DhondtContest, nsamples: Int, alpha: Double) = buildString {
+    appendLine("Original Seat Ordering")
+    append(showCandidateSeatOrder(orgContest, orgContest.assorters, nsamples, alpha))
 }
 
 // 4.3. Relaxing in the case that a DH assertion is infeasible

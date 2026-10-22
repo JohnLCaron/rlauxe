@@ -21,11 +21,11 @@ class MakeBelgiumElections {
 
     @Test
     fun createOneBelgiumElection() {
-        val name = "Namur"
+        val name = "BrabantWallon"
         createAndRunOneBelgiumElection(
             name,
             toptopdir,
-            contestId = 9
+            contestId = 11
         )
     }
 

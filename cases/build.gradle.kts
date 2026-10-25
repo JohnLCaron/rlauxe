@@ -25,11 +25,11 @@ dependencies {
 
     testImplementation(testFixtures(project(":rlauxe-core")))
     testImplementation(kotlin("test"))
-    testImplementation(libs.kotest.property)
+    // testImplementation(libs.kotest.property)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.commons.poi)
-    testImplementation(libs.commons.poi.ooxml)
-    testImplementation(libs.bundles.xmlutil)
+    // testImplementation(libs.commons.poi)
+    // testImplementation(libs.commons.poi.ooxml)
+    // testImplementation(libs.bundles.xmlutil)
 }
 
 tasks.test {

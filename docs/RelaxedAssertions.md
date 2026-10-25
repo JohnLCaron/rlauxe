@@ -13,7 +13,7 @@ The plots below shows the range of seats as error bars, as well as the reported 
 RLAs](papers/DhondtRelaxedAssertions.1001.pdf). Each time another assertion is "failed", we run the complete _RelaxedAssertions_ algorithm to calculate bounds on all partys' winning seat count. 
 
 The tables below shows the initial and final samples needed by each constituency after removing the first six most-impact assertions, which in both years brings
-the total number of samples needed below 10,000.
+the total number of samples needed below 10,116 and 9,210 in 2024 and 2019 respectively.
 
 Note that this is the "best case" scenario where no discrepencies are found between the sampled ballots and the CVRs. 
 In the presence of discrepencies, the sample sizes will be higher.

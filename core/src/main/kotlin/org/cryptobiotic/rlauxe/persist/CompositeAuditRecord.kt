@@ -45,13 +45,13 @@ data class CompositeAuditRecord(
     }
 
     val electionName : String by lazy {
-        val (name, _) = readPartyTxtFile("$topdir/parties.txt")
+        val (name, _) = readCanonicalPartyTxtFile("$topdir/$canonicalPartiesFilename")
         name
     }
 
-    // used by viewer TODO read from resource
+    // used by viewer
     fun readPartyNames(): Map<Int, String> {
-        return readCanonicalPartyTxtFile("$topdir/$canonicalPartiesFilename")
+        return readCanonicalPartyTxtFile("$topdir/$canonicalPartiesFilename").second
     }
 
     fun readSampleLimits(): List<SampleLimit> {
@@ -102,7 +102,6 @@ data class CompositeAuditRecord(
         private val logger = KotlinLogging.logger("CompositeRecord")
         val limitsFilename = "sampleLimits.txt"
         val canonicalPartiesFilename = "canonicalParties.txt"
-        val coalitionFilename = "coalitions.txt"
 
         // used by viewer
         // look for subdirectories with an audit subdirectory
@@ -285,9 +284,10 @@ fun readLimitsTxtFile(filename: String): List<SampleLimit> {
 }
 
 // return id -> name
-fun readCanonicalPartyTxtFile(filename: String): Map<Int, String> {
+fun readCanonicalPartyTxtFile(filename: String): Pair<String, Map<Int, String>> {
     val reader: BufferedReader = File(filename).bufferedReader()
     reader.readLine() // header line
+    val electionName = reader.readLine().trim()
 
     val parties = mutableListOf<Pair<Int, String>>()
     while (true) {
@@ -299,7 +299,7 @@ fun readCanonicalPartyTxtFile(filename: String): Map<Int, String> {
         parties.add(Pair(id, name))
     }
     reader.close()
-    return parties.toMap()
+    return Pair(electionName, parties.toMap())
 }
 
 // return Pair(electionName, nameToID) = party name variant -> party id

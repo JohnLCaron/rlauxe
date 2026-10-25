@@ -1,6 +1,6 @@
 package org.cryptobiotic.create
 
-import org.cryptobiotic.rlauxe.belgium.belgiumJsonInputResource
+import org.cryptobiotic.rlauxe.belgium.belgiumInput
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import kotlin.test.Test
@@ -110,9 +110,9 @@ class TestVerifyUseCases {
     }
 
     @Test
-    fun testRunVerifyDHondt() {
+    fun testRunVerifyBelgium2024() {
         val topdir = "${cases}/belgium/belgium2024"
-        belgiumJsonInputResource.keys.forEach {
+        belgiumInput(2024).contests.keys.forEach {
             val subdir = "$topdir/$it"
             println("-------------------verify $it")
             val results = RunVerifyContests.runVerifyContests(subdir, null, show = show)

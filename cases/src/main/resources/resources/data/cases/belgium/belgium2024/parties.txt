@@ -1,31 +1,31 @@
 Belgique 2024 – Chambre des représentants
-1, Agora
-2, BELG.UNIE-BUB
-21, BLANCO
-4, CD&V
-5, CHEZ NOUS
-6, COLLECTIF CITOYEN
-7, DierAnimal
-8, DéFI
-9, ECOLO
-10, GROEN
-11, GV-GEZOND VERSTAND
-12, LES ENGAGÉS
-13, LUTTE OUVRIERE
-14, MR
-15, N-VA
-16, PS
-19, PTB
-19, PTB-PVDA
-19, PVDA
-21, Parti.j BLANCO
-21, Partij BLANCO
-22, RMC
-23, Team Fouad Ahidar
-24, VLAAMS BELANG
-25, Volt Europa
-26, Voor U
-26, Voor U / Pour Vous
-28, Vooruit
-29, l'Unie
-30, open vld
+N-VA, 1
+VLAAMS BELANG, 2
+MR, 3
+PVDA, 4
+Vooruit, 5
+PS, 6
+CD&V, 7
+LES ENGAGÉS, 8
+open vld, 9
+GROEN, 10
+ECOLO, 11
+DéFI, 12
+Partij BLANCO, 13
+CHEZ NOUS, 14
+Voor U, 15
+COLLECTIF CITOYEN, 16
+Team Fouad Ahidar, 17
+BELG.UNIE-BUB, 18
+DierAnimal, 19
+Volt Europa, 20
+LUTTE OUVRIERE, 21
+l'Unie, 22
+RMC, 23
+Agora, 24
+GV-GEZOND VERSTAND, 25
+PTB-PVDA, 4
+Voor U / Pour Vous, 15
+Parti.j BLANCO, 13
+PTB, 4
+BLANCO, 13

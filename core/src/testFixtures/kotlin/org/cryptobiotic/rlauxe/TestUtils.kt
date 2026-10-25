@@ -11,8 +11,12 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-val testdataDir = "/home/stormy/rla"
-val cases = "/home/stormy/datadrive/rla/cases"
+// TODO
+//val testdataDir = "/home/stormy/rla"
+//val cases = "/home/stormy/datadrive/rla/cases"
+
+val testdataDir = "/home/joncifer/rla"
+val cases = "$testdataDir/cases"
 
 fun doublesAreClose(a: List<Double>, b: List<Double>, rtol: Double=1.0e-5, atol:Double=1.0e-8): Boolean {
     //    For finite values, isclose uses the following equation to test whether

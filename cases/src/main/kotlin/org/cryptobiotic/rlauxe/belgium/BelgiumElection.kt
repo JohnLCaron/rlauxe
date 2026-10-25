@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DhondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtPartyBuilder
 import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
+import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
@@ -56,13 +57,12 @@ class BelgiumElection (
 }
 
 ////////////////////////////////////////////////////////////////////
-fun createBelgiumElection(
+fun createBelgiumElectionForOneContest(
     topdir: String,
     contestd: DhondtContest,
     creationConfig: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
-    ): Result<AuditRoundIF, ErrorMessages>
-{
+): Result<AuditRoundIF, ErrorMessages> {
     val stopwatch = Stopwatch()
     val election = BelgiumElection(contestd, MvrSource.testPrivateMvrs)
 
@@ -79,17 +79,17 @@ fun createBelgiumElection(
     return result
 }
 
-// create election from the Json files
-// taken from https://resultatselection.belgium.be/fr/search/chambre-des-repr%C3%A9sentants/2024/circonscription-%C3%A9lectorale
+// create one contest and optionally run all rounds
 // return ntotalVotes from Json and finalRound.nmvrs
-fun createBelgiumAndRunAllRounds(electionName: String,
-                                 belgiumElectionJson: BelgiumElectionJson,
-                                 toptopdir: String,
-                                 contestId: Int,
-                                 runRounds:Boolean = true,
-                                 stopRound:Int=0,
-                                 showVerify:Boolean = false,
-                                 clear: Boolean = true,
+fun createOneContestFromJson(electionName: String,
+                             belgiumElectionJson: BelgiumElectionJson,
+                             partyIds: Map<String, Int>,
+                             toptopdir: String,
+                             contestId: Int,
+                             runRounds:Boolean = true,
+                             stopRound:Int=0,
+                             showVerify:Boolean = false,
+                             clear: Boolean = true,
 ): Pair<Int, Int> {
     println("\n======================================================")
     println("electionName $electionName")
@@ -98,14 +98,9 @@ fun createBelgiumAndRunAllRounds(electionName: String,
     if (clear) clearDirectory(Path(topdir))
     Logging.addFileAppender("cases", "$topdir/logs.log")
     logger.info {"-------------- createBelgiumElection ${electionName} in $topdir"}
-
-    val partyIds = readPartyTxtResource("$belgiumData/parties.txt") // includes aliases
     validateOutputDir(Path.of(toptopdir))
-    copyResourceFile("$belgiumData/canonicalParties.txt", "$toptopdir/canonicalParties.txt")
-    copyResourceFile("$belgiumData/parties.txt", "$toptopdir/parties.txt")
 
     val nwinners = belgiumElectionJson.ElectionLists.sumOf { it.NrOfSeats }
-    val fieldedCandidates = belgiumElectionJson.ElectionLists.sumOf { it.NrOfSeats }
     val totalVotes = belgiumElectionJson.NrOfValidVotes + belgiumElectionJson.NrOfBlankVotes // TODO undervotes = belgiumElection.NrOfBlankVotes
 
     val dhondtParties = belgiumElectionJson.ElectionLists.map {
@@ -125,7 +120,7 @@ fun createBelgiumAndRunAllRounds(electionName: String,
         ContestSampleControl.NONE,
         ClcaConfig(), null)
 
-    createBelgiumElection(topdir=topdir, dcontest, creation, round)
+    createBelgiumElectionForOneContest(topdir=topdir, dcontest, creation, round)
 
     if (showVerify) {
         val results = RunVerifyContests.runVerifyContests(topdir, null, show = showVerify)
@@ -153,14 +148,38 @@ fun createBelgiumAndRunAllRounds(electionName: String,
     } else Pair(0, 0)
 }
 
-fun makeBelgium2024Data(toptopdir: String) {
+fun createOneContestFromInputs(year: Int, electionName: String, toptopdir: String, contestId: Int): Pair<Int, Int> {
+    val inputs = belgiumInput(year)
+    val resourcePath = inputs.contests[electionName]!!
+    val partyIds = readPartyTxtResource(inputs.parties) // includes aliases
+
+    val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(resourcePath)
+    val belgiumElectionJson = if (result.isOk) result.unwrap() else throw RuntimeException("$result")
+
+    return createOneContestFromJson(electionName, belgiumElectionJson, partyIds, toptopdir,
+        contestId = contestId, runRounds=false)
+}
+
+fun makeAllBelgiumContests(year: Int, toptopdir: String) {
     val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
-    belgiumJsonInputResource.keys.forEachIndexed { idx, name ->
-        val resourcePath = belgiumJsonInputResource[name]!!
-        val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(resourcePath)
+    val inputs = belgiumInput(year)
+
+    // someone has to create the canonicalParties file
+    validateOutputDir(Path.of(toptopdir))
+    // this is used during creation
+    val partyIds = readPartyTxtResource(inputs.parties) // includes aliases
+
+    // this is used by the readers: party id -> canonical name map
+    val outputFile = "$toptopdir/${CompositeAuditRecord.canonicalPartiesFilename}"
+    val canonicalParties = writeCanonicalParties(year, partyIds, outputFile)
+
+    inputs.contests.entries.forEachIndexed { idx, entry ->
+        val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(entry.value)
         val belgiumElectionJson = if (result.isOk) result.unwrap() else throw RuntimeException("$result")
 
-        allmvrs[name] = createBelgiumAndRunAllRounds(name, belgiumElectionJson, toptopdir,
+        validateOutputDir(Path.of(toptopdir))
+
+        allmvrs[entry.key] = createOneContestFromJson(entry.key, belgiumElectionJson, partyIds, toptopdir,
                 contestId = idx+1, runRounds=false)
     }
     println("============================================================")
@@ -172,16 +191,9 @@ fun makeBelgium2024Data(toptopdir: String) {
     // showAllBelgiumElection()
 }
 
-fun createAndRunOneBelgiumElection(electionName: String, toptopdir: String, contestId: Int): Pair<Int, Int> {
-    val resourcePath = belgiumJsonInputResource[electionName]!!
-    val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(resourcePath)
-    val belgiumElectionJson = if (result.isOk) result.unwrap() else throw RuntimeException("$result")
 
-    return createBelgiumAndRunAllRounds(electionName, belgiumElectionJson, toptopdir,
-        contestId = contestId, runRounds=false)
-}
 
-// taken from https://resultatselection.belgium.be/fr/search/chambre-des-repr%C3%A9sentants/2024/circonscription-%C3%A9lectorale
+/* taken from https://resultatselection.belgium.be/fr/search/chambre-des-repr%C3%A9sentants/2024/circonscription-%C3%A9lectorale
 val belgiumData = "/resources/data/cases/belgium/belgium2024"
 val belgiumJsonInputResource = mapOf(
     "Anvers" to "$belgiumData/2024_chambre-des-représentants_Circonscription d'Anvers.json",
@@ -195,6 +207,7 @@ val belgiumJsonInputResource = mapOf(
     "Namur" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Namur.json",
     "BrabantFlamant" to "$belgiumData/2024_chambre-des-représentants_Circonscription du Brabant flamand.json",
     "BrabantWallon" to "$belgiumData/2024_chambre-des-représentants_Circonscription du Brabant wallon.json",
-)
+) */
+
 
 

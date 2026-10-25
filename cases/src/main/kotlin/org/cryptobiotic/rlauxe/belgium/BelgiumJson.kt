@@ -40,7 +40,8 @@ data class ElectionList(
     val Candidates: List<Candidate>,
 ) {
     override fun toString() = buildString {
-        appendLine("  ElectionList(NrOfSeats=$NrOfSeats, NrOfVotes=$NrOfVotes, PartyLabel='$PartyLabel'")
+        val ncandidates = Candidates.filter{ !it.IsSuccessor }.count()
+        appendLine("  ElectionList(PartyLabel='$PartyLabel', NrOfSeats=$NrOfSeats, NrOfVotes=$NrOfVotes, ncandidates=$ncandidates")
         // Candidates.forEach { appendLine("    $it") }
     }
 }

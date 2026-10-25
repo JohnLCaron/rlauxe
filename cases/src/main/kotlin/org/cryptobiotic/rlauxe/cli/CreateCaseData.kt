@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.corla.makeCorla2024
 import org.cryptobiotic.rlauxe.corla.makeCorla2026Pcvrs
 import org.cryptobiotic.rlauxe.corla.makeCorla2026p
 import org.cryptobiotic.rlauxe.corla.makeCorla2026pm
-import org.cryptobiotic.rlauxe.belgium.makeBelgium2024Data
+import org.cryptobiotic.rlauxe.belgium.makeAllBelgiumContests
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionClca
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionOA
 import org.cryptobiotic.rlauxe.ga.makeGa2026
@@ -28,7 +28,7 @@ object CreateCaseData {
         val case by parser.option(
             ArgType.String, // enum ??
             shortName = "case",
-            description = "belgium | boulder2024 | corla2020 | corla2020withCvrs | corla2022p | corla2024 | corla2026p | corla2026pm | corla2026Pcvrs " +
+            description = "belgium2024, belgium2019 | boulder2024 | corla2020 | corla2020withCvrs | corla2022p | corla2024 | corla2026p | corla2026pm | corla2026Pcvrs " +
                     "ga26p | sf2024"
         ).required()
         val toptopdir by parser.option(
@@ -110,9 +110,8 @@ object CreateCaseData {
             println("log=$toptopdir/logs.log")
 
             when (case) {
-                "belgium" -> {
-                    makeBelgium2024Data(toptopdir)
-                }
+                "belgium2019" -> makeAllBelgiumContests(2019, toptopdir)
+                "belgium2024" -> makeAllBelgiumContests(2024, toptopdir)
 
                 "boulder2024" -> {
                     when (auditType) {

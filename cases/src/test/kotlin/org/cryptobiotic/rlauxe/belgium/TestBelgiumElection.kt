@@ -16,7 +16,7 @@ class TestBelgiumElection {
 
     @Test
     fun testReadBelgiumElection() {
-        val resourcePath = belgiumJsonInputResource["Namur"]!!
+        val resourcePath = belgiumInput(2024).contests["Namur"]!!
         val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(resourcePath)
         val belgiumElection = if (result .isOk) result.unwrap()
             else throw RuntimeException("Cannot read belgiumElection from ${resourcePath} err = $result")
@@ -25,13 +25,13 @@ class TestBelgiumElection {
 
     @Test
     fun testBelgiumContest() {
-        testBelgiumContest("Namur")
+        testBelgiumContest(2024, "Namur")
     }
 
-    fun testBelgiumContest(electionName: String) {
+    fun testBelgiumContest(year: Int, contest: String) {
         println("======================================================")
-        println("ElectionName $electionName")
-        val filename = belgiumJsonInputResource[electionName]!!
+        println("Belgium Contest $contest $year")
+        val filename = belgiumInput(year).contests[contest]!!
         val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(filename)
         val belgiumElection = if (result .isOk) result.unwrap()
         else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")
@@ -44,7 +44,7 @@ class TestBelgiumElection {
         val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
         val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes
 
-        val builder = DhondtBuilder(electionName, 1, dhondtParties, nwinners, totalVotes, belgiumElection.NrOfBlankVotes,.05)
+        val builder = DhondtBuilder("$contest-$year", 1, dhondtParties, nwinners, totalVotes, belgiumElection.NrOfBlankVotes,.05)
         println("Scores")
         builder.sortedScores.forEach {
             println("  ${it}")

@@ -1,0 +1,35 @@
+Belgique 2019 – Chambre des représentants
+N-VA, 1
+VLAAMS BELANG, 2
+PS, 3
+CD&V, 4
+PVDA, 5
+open vld, 6
+MR, 7
+SP.A, 8
+ECOLO, 9
+GROEN, 10
+CDH, 11
+DéFI, 12
+Parti Populaire, 13
+DierAnimal, 14
+LISTES DESTEXHE, 15
+COLLECTIF CITOYEN, 16
+LA DROITE, 17
+NATION, 18
+LES BELGES D'ABORD, 19
+AGIR, 20
+Piratenpartij, 21
+D-SA, 22
+Lutte Ouvrière, 23
+PRO, 24
+WALLONIE INSOUMISE, 25
+BUB Belgische Unie, 26
+PV&S, 27
+B.U.B, 28
+de coöperatie, 29
+Volt, 30
+PCB, 31
+Turquoise, 32
+PTB*PVDA, 5
+PTB, 5

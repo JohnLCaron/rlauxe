@@ -1,6 +1,6 @@
 # rlauxe ("r-lux")
 
-WORK IN PROGRESS
+WORK IN 25
 _last changed: 10/12/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
@@ -675,6 +675,7 @@ Specify amounts in dollars, but the main result would be relative costs, eg the 
 * [Dhondt](docs/Dhondt.md)
 * [Instant Runoff Voting (Raire)](docs/Raire.md)
 * [Redactions with Style-based sampling](docs/RedactionsWithStyles.md)
+* [Relaxed Assertions](docs/RelaxedAssertions.md)
 * [Sample Populations](docs/SamplePopulations.md)
 
 ### Pending Review

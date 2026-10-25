@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.dhondt
 
-import io.mockk.InternalPlatformDsl.toArray
 import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.cases
@@ -21,7 +20,8 @@ private val alpha = .05
 private val show = false
 
 class PlotRelaxedAssertions {
-    val topdir = "$cases/belgium/belgium2024/"
+    val year = 2019
+    val topdir = "$cases/belgium/belgium$year/"
     val auditRecord = AuditRecord.read(topdir)!! as CompositeAuditRecord
     val contests = auditRecord.contests
     val lastRound = auditRecord.rounds.last()
@@ -41,7 +41,7 @@ class PlotRelaxedAssertions {
         println("totalMvrsNeeded=${nfn(startSeats.mvrsUsed, 6)} (all)")
         madeSeatsWithMvrs.add(startSeats)
 
-        repeat(20) {
+        repeat(6) {
             val largestDelta = ctrackers.map { it.getDelta() }.maxBy { it.delta }
             largestDelta.largest.ctracker.setFailed(largestDelta)
 
@@ -66,13 +66,13 @@ class PlotRelaxedAssertions {
             println("|${it.contestRound.name} | ${initialSamples[it.id]} | ${it.sampleLimit} | ${it.failures} |") }
         println("| Total | ${initialSamples.values.sum() } | ${ctrackers.sumOf{it.sampleLimit} } | ${ctrackers.sumOf { it.failures }} |")
 
-        val name = "RelaxedSeats"
+        val name = "RelaxedSeats$year"
         val dirName = "$testdataDir/plots/dhondt/$name"
         validateOutputDir(Path(dirName))
 
         makeRelaxedSeatsPlot(
             writeFile = "$dirName/$name",
-            title="Belgium 2024 Relaxed Assertions at 5% risk",
+            title="Belgium $year Relaxed Assertions at 5% risk",
             subtitle="Party Seat ranges vs number of samples",
             madeSeats = madeSeatsWithMvrs,
             scaleType=ScaleType.Linear,

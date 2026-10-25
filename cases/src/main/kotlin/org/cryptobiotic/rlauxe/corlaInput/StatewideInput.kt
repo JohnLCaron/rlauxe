@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.auditcenter.readColoradoContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.readContestComparisonCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
+import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
 import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
@@ -22,6 +22,7 @@ import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.collections.forEach
 
+val defaultCharset = "ISO-8859-1" // TODO something
 val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
 // val auditcenter = "/home/joncifer/IdeaProjects/auditcenter"
 
@@ -149,7 +150,7 @@ abstract class StatewideInput(
     //    var ncards = 0
     open fun countyTabsAllContests(): Map<String, CountyTabAllContests> = countyTabsAllContests
     private val countyTabsAllContests: Map<String, CountyTabAllContests> by lazy {
-        readCountyTabulateCsv(tabulateCountyFile) // county -> CountyTabAllContests
+        readCountyTabulateCsvFromFile(tabulateCountyFile) // county -> CountyTabAllContests
     }
 
     // data class ContestTabAllCounties(val contestName: String) {
@@ -373,6 +374,9 @@ fun mergeContestInfo(input: StatewideInput): MergedInfo {
     val mergedContestInfo = canonical.values.map {
         val round = roundContests[it.contestName]
         val compare = compareMap[it.contestName]
+
+        if (it.contestName.startsWith ("Gunnison County Commissioner - District 1"))
+            print("")
 
         MergedContestInfo(
             it,

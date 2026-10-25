@@ -12,6 +12,8 @@ import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.cases
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corla.createCorlaStateElection
+import org.cryptobiotic.rlauxe.corla.createCorlaStateElection2
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020Redacted
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInputWithCvrs
 import kotlin.test.Test
@@ -21,15 +23,17 @@ class CorlaStateElections {
     val top2026pdir = "$cases/corlaState/2026p"
 
     @Test
-    fun createOne() {
-        val stateInput = Statewide2026PwithCvrs()
+    fun createVersion2() {
+        val top2020dir2 = "$cases/corlaState2/2020"
+        val stateInput = Statewide2020Redacted()
 
-        createCorlaStateElection(
-            topdir = "$top2026pdir/onepool",
+        createCorlaStateElection2(
+            topdir = top2020dir2,
             stateInput=stateInput,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.OnePool,
+            alreadyMadeCounties = false,
         )
     }
 

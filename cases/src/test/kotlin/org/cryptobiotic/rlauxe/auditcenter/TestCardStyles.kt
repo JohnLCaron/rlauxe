@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
 import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
+import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2022Primary
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
@@ -22,7 +23,6 @@ class TestCardStyles {
     fun compareCvrSchemaVscoloradoInput(filename: String, statewideInput: StatewideInput) {
         // println(CastVoteRecord.header)
         val export = readCountyCvrs(filename)
-        val exportContestInfos = export.makeContestInfo().associateBy { it.id }
 
         // these contest id's are internal to the export.
         println("export.CardStyles")

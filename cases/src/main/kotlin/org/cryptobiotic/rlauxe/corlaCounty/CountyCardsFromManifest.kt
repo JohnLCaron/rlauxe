@@ -1,28 +1,24 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
-import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
-import org.cryptobiotic.rlauxe.corlacvr.BallotStyles
 import org.cryptobiotic.rlauxe.corlacvr.CardStyleId
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
 import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
 import org.cryptobiotic.rlauxe.corlacvr.cleanCsvString
+import org.cryptobiotic.rlauxe.corlacvr.sumContestTabulationsFromCandVotes
 import org.cryptobiotic.rlauxe.corlacvr.tabulateCvrRows
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
 
 // Match manifest and Cvrs without reference to the state files
 class CountyCardsFromManifest(val countyInput: CountyInput) {
     val show = false
-    val corlaCvrs: CorlaCountyCvrsIF = countyInput.readCorlaCvrs()
     val county = countyInput.countyName
+    val corlaCvrs: CorlaCountyCvrsIF = countyInput.readCorlaCvrs() // this populates BallotStyles
+    val allBallotStyles = corlaCvrs.ballotStyles()
 
-    val infos: Map<Int, ContestInfo>
-
+    val infos: Map<Int, CorlaContestInfo>
     val cvrTabs : Map<Int, ContestTabulation>
     val groupTabs : Map<Int, ContestTabulation> // sum of aggGroup if exists, else sum of all groups
     val aggGroup: RedactedGroup?
@@ -32,8 +28,6 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
     val redactedWithStyle = mutableMapOf<String, CvrRow>()
     val redactedNoStyle = mutableMapOf<String, CvrRow>()
 
-    val allBallotStyles = BallotStyles()
-
     // assumes manifest iterator doesnt terminate early
     var aggCount = 0
     var missingCount = 0
@@ -41,13 +35,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
 
     init {
         // infos local to the county (not converted to canonical)
-        infos = corlaCvrs.makeContestInfo().map {
-            ContestInfo(
-                it.name, it.id, it.candidateNames,
-                if (it.isIrv) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY,
-                it.nwinners
-            )
-        }.associateBy { it.id }
+        infos = corlaCvrs.makeContestInfo()
         cvrTabs = tabulateCvrRows(corlaCvrs.cvrs().iterator(), infos)
 
         aggGroup = corlaCvrs.redaction().groups().find { it.groupName.lowercase() == "aggregated"}
@@ -72,14 +60,16 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
         cvrMap = corlaCvrs.cvrs().associateBy { it.imprintedId }
 
         // allBallotStyles are the union of unredacted and redacted cvrs; dont change the original!
-        val unredactedBallotStyles = corlaCvrs.ballotStyles()
-        allBallotStyles.cardStyleMap.putAll(unredactedBallotStyles.cardStyleMap)
-        allBallotStyles.ballotTypes.putAll(unredactedBallotStyles.ballotTypes)
+        // actually I think we could add redacted ballots to BallotStyles in Redaction(), but still keep
+        // redacted ballots separate
+        //allBallotStyles.cardStyleMap.putAll(unredactedBallotStyles.cardStyleMap)
+        //allBallotStyles.ballotTypes.putAll(unredactedBallotStyles.ballotTypes)
 
         // do rows have style information: yes if contestVotes != emptyList
+        // but this isnt looking at valid ballotType styles...
         corlaCvrs.redaction().redactedRows().forEach { row ->
             if (row.contestVotes.isNotEmpty()) {
-                allBallotStyles.add(row)
+                // allBallotStyles.add(row)
                 redactedWithStyle[row.imprintedId] = row
             } else {
                 redactedNoStyle[row.imprintedId] = row
@@ -130,6 +120,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
 //   do ballot types have unique styles: check BallotStyles.ballotTypes list.size == 1
 
 // cards in the agg group go into the agg pool; they always have styles for version 0.3
+// I think we can let "all" be the style for version 0.2
 // all other redacted cards go into the missing pool
 // cards missing from the manifest go into the missing pool
 
@@ -153,7 +144,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
             // -> if we have rows but no groups, all rows go into the missing pool using missing votes
             // use the style for the individual rows, else use the missing pool style
             if (aggGroup == null) missingCount++ else aggCount++
-            return RowForManifest(redactedWithStyle, cardStyle!!, aggGroup?.groupName ?: "missing")
+            return RowForManifest(redactedWithStyle, cardStyle!!, if (aggGroup == null) "missing" else "aggregated")
         }
 
         val redactedNoStyle = redactedNoStyle[manifestEntry.imprintedId()]
@@ -162,7 +153,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
             val cardStyleList = allBallotStyles.ballotTypes[redactedNoStyle.ballotType]
             if (cardStyleList != null) {
                 // this is the union in case there is more than one
-                val useStyle = cardStyleList.find { it.cardType == redactedNoStyle.ballotType }
+                val useStyle = cardStyleList.find { it.cardStyle == redactedNoStyle.ballotType }
                 if (useStyle != null ) {
                     missingCount++
                     return RowForManifest(redactedNoStyle, useStyle, "missing")
@@ -197,7 +188,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
                     imprintedId = manifestEntry.imprintedId(),
                     location = manifestEntry.location(),
                     style = "missing",
-                    votes = emptyMap(),
+                    votes = emptyList(),
                     poolName = "missing",
                 )
 
@@ -214,8 +205,8 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
                 CountyCard(
                     imprintedId = manifestEntry.imprintedId(),
                     location = manifestEntry.location(),
-                    style = rowForManifest.style.cardType,
-                    votes = rowForManifest.row.votes(),
+                    style = rowForManifest.style.cardStyle,
+                    votes = rowForManifest.row.contestVotes,
                     poolName = rowForManifest.poolName,
                 )
             }

@@ -1,5 +1,5 @@
 county, manifestCount, unredactedCvrs, redactedCvrs, cvrInManifest, cvrNoManifest, manifestNoCvr, minCards, countBlankPrecincts, ballotStylesUnique, ballotStyleMin, precinctStyleMin
              Boulder,  100423,   97457,    2966,   97457,       0,  2966,  2087, 97457, true, 11, 11
-            La Plata,   16146,   16137,       9,   16137,       0,     9,     9, 0, true, 30, 30
-              Morgan,    5220,    5195,      25,    5195,       0,    25,    10, 5220, true, 1519, 1519
+            La Plata,   16146,   16137,       9,   16137,       0,     9,     9, 0, true, 1, 30
+              Morgan,    5220,    5195,      25,    5195,       0,    25,    10, 5220, false, 1, 1519
                 Weld,   69640,   69620,      20,   69620,       0,    20,    11, 0, true, 15, 15

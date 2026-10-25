@@ -144,7 +144,7 @@ class CheckCanonicalNames( val input: StatewideInput) {
 
     fun checkCountyTabulateAndCanonicalContests() {
         println("\n-------------------------- checkCountyTabulateAndCanonicalContests")
-        val countyTabs: Map<String, CountyTabAllContests> = readCountyTabulateCsv(input.tabulateCountyFile)
+        val countyTabs: Map<String, CountyTabAllContests> = input.countyTabsAllContests()
         val countiesFromTab = countyTabs.keys.toSet().toList()
         compareLists(input.counties(), countiesFromTab, "canonical", "countyTabulateCsv")
     }

@@ -41,19 +41,35 @@ data class CvrRow(
         return if (contestVote.candVotes().contains(candId)) 1 else 0
     }
 
+    // TODO test
+    fun addVotes2(schema: CvrSchema, line: CSVRecord, lineno: Int): CvrRow {
+        schema.contests.forEach { contest ->
+            if (line.get(contest.startCol).trim().isNotEmpty()) { // assume all candidates are non blank, or none
+                if (contest.isIRV) {
+                    // cvr.raw = makeRaw(line, useContest.startCol, useContest.ncols)
+                    val candVotes = makeIrvVotes(schema, line, lineno, contest)
+                    contestVotes.add(ContestVotes(contest.contestIdx, candVotes))
+                } else {
+                    val candVotes = makeRegularVotes(schema, line, lineno, contest)
+                    contestVotes.add(ContestVotes(contest.contestIdx, candVotes))
+                }
+            }
+        }
+        return this
+    }
+
     fun addVotes(schema: CvrSchema, line: CSVRecord, lineno: Int): CvrRow {
         var colidx = schema.nheaders // skip over the first n columns
-        while (colidx < schema.columns.size && colidx < line.size()) {
+        while (colidx < line.size()) {
             if (line.get(colidx).isNotEmpty()) {
-                val useContestIdx = schema.columns[colidx].contestIdx
-                val useContest: SchemaContestInfo = schema.contests[useContestIdx]
+                val useContest = schema.getContestAt(colidx)
                 if (useContest.isIRV) {
                     // cvr.raw = makeRaw(line, useContest.startCol, useContest.ncols)
                     val candVotes = makeIrvVotes(schema, line, lineno, useContest)
-                    contestVotes.add(ContestVotes(useContestIdx, candVotes))
+                    contestVotes.add(ContestVotes(useContest.contestIdx, candVotes))
                 } else {
                     val candVotes = makeRegularVotes(schema, line, lineno, useContest)
-                    contestVotes.add(ContestVotes(useContestIdx, candVotes))
+                    contestVotes.add(ContestVotes(useContest.contestIdx, candVotes))
                 }
                 colidx += useContest.ncols
             } else {
@@ -63,17 +79,32 @@ data class CvrRow(
         return this
     }
 
+    // TODO test
+    fun findNonNull2(schema: CvrSchema, line: CSVRecord, lineno: Int): Boolean {
+        var nonNull = false
+
+        schema.contests.forEach { contest ->
+            if (line.get(contest.startCol).trim().isNotEmpty()) { // assume all candidates are non blank, or none
+                nonNull = true
+                // record that the contest was non-null on this redacted row
+                contestVotes.add(ContestVotes(contest.contestIdx, emptyList()))
+            }
+        }
+        return nonNull
+    }
+
+    // for Redaction - find which columns are non blank
     fun findNonNull(schema: CvrSchema, line: CSVRecord): Boolean {
         var nonNull = false
         var colidx = schema.nheaders + 1 // skip over the first n columns, plus one for the first vote column
-        while (colidx < schema.columns.size && colidx < line.size()) {
+        while (colidx < line.size()) {
             if (line.get(colidx).isNotEmpty()) {
-                val useContestIdx = schema.columns[colidx].contestIdx
+                val useContest = schema.getContestAt(colidx)
                 nonNull = true
                 // record that the contest was non-null on this redacted row
-                contestVotes.add(ContestVotes(useContestIdx, emptyList()))
-                if (useContestIdx+1 == schema.contests.size) break
-                colidx = schema.contests[useContestIdx+1].startCol // skip to next contest
+                contestVotes.add(ContestVotes(useContest.contestIdx, emptyList()))
+                if (useContest.contestIdx+1 == schema.contests.size) break
+                colidx = schema.contests[useContest.contestIdx+1].startCol // skip to next contest
             } else {
                 colidx++
             }
@@ -83,19 +114,21 @@ data class CvrRow(
 
     // assume a vote is 0 or 1
     // return list of candidates voted for; the candidates are numbered within this contest
-    fun makeRegularVotes(schema: CvrSchema, line: CSVRecord, lineno: Int, exportContest: SchemaContestInfo): List<Int> {
+    fun makeRegularVotes(schema: CvrSchema, line: CSVRecord, lineno: Int, schemaContest: SchemaContestInfo): List<Int> {
         val votes = mutableListOf<Int>()
-        for (idx in 0 until exportContest.ncols) { // so i in [0..ncands)
-            val colno = exportContest.startCol + idx
-            if (!schema.writeIns.contains(colno)) { // dont record write-ins
+        schema.columnsFor(schemaContest).forEachIndexed { idx, colInfo ->
+        //for (idx in 0 until schemaContest.ncols) { // so i in [0..ncands)
+            //val colno = schemaContest.startCol + idx
+            if (!schema.writeIns.contains(colInfo.colIdx)) { // dont record write-ins
                 try {
-                    val colValueS = line.get(colno)
+                    val colValueS = line.get(colInfo.colIdx)
                     val colValue = colValueS.toInt()
                     if (colValue > 0) votes.add(idx)
                 } catch (e: Exception) {
                     logger.warn {
-                        "Exception '${e.message}' at col $colno line $lineno; maybe didnt catch the redacted line; " +
+                        "Exception '${e.message}' at col ${colInfo.colIdx} (${line.get(colInfo.colIdx)}) line $lineno; maybe didnt catch the redacted line; " +
                                 "\nfilename=${schema.inputSource}\n       $line" }
+                    val wtf = schema.columnsFor(schemaContest)
                     return emptyList()
                 }
             }

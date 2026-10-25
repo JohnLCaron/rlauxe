@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.Garfield2020CountyCvrs
-import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
+import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrsFromFile
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
@@ -118,7 +118,7 @@ class CompareVoteDatabaseAndAuditCenter {
         println("county=$county csvfile = $exportFile")
 
         val export: CorlaCountyCvrsIF = readCvrExportsFromFile(county, exportFile)
-        val sinfoList = export.makeContestInfo()
+        val sinfoList = export.makeContestInfo().values.toList()
         var errs = 0
 
         // test every export contest has a match in canon, along with each choice

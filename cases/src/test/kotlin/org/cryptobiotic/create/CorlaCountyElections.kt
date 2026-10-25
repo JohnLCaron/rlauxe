@@ -23,10 +23,12 @@ class CorlaCountyElections {
 
     @Test
     fun createOne() {
-        val toptopdir = "$cases/corlaCounty/morgan26p"
-        val stateInput = Statewide2026PwithCvrs()
-        val population = stateInput.strataPopulation()["Morgan"]!!
-        val countyInput = CountyInput2026("Morgan", population)
+        val top2020dir2 = "$cases/corlaState2/2020"
+        val countydir2 = "$top2020dir2/county/Boulder"
+
+        val stateInput = Statewide2020Redacted()
+        val population = stateInput.strataPopulation()["Boulder"]!!
+        val countyInput = CountyInput2026("Boulder", population)
 
         // fun createCorlaCountyElection(
         //    countyInput: CountyInput,
@@ -40,10 +42,10 @@ class CorlaCountyElections {
         createCorlaCountyElection(
             countyInput,
             stateInput,
-            topdir = "$toptopdir/styles",
+            topdir = countydir2,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = corlaRoundSettings(),
-            variant = ElectionVariantEnum.Styles,
+            variant = ElectionVariantEnum.OnePool,
         )
     }
 

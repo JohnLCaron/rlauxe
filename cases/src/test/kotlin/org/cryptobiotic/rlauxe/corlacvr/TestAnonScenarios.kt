@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
+import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.CheckCvrRedaction
 import org.cryptobiotic.rlauxe.corlaInput.RedactionCount
-import org.cryptobiotic.rlauxe.corlaInput.readCorlaCvrs
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import kotlin.test.Test
 
@@ -159,8 +159,8 @@ fun compareTwoRedactions(expectFile: String?, actualFile: String, show: Boolean 
         }
 
         if (show) {
-            println("\nexpect\n${tabulate(expect)}")
-            println("\nactual\n${tabulate(actual)}")
+            println("\nexpect\n${tabulate(expect, expect.makeContestInfo())}")
+            println("\nactual\n${tabulate(actual, actual.makeContestInfo())}")
         }
         return RedactionCount(expect.redaction().nredactedCvrs(), actual.redaction().nredactedCvrs(), fail)
     }

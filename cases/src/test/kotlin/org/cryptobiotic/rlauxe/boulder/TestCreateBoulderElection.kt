@@ -47,7 +47,7 @@ class TestCreateBoulderElection {
         val maker = CreateBoulderElection( "parseBoulder24cvrs", AuditType.ONEAUDIT, corlaCvrs,  sovo, hasStyle = true,
             variantEnum = ElectionVariantEnum.Styles
         )
-        val infos = maker.makeContestInfo()
+        val infos = maker.infoList
         println("ncontests with info = ${infos.size}")
 
         val countCvrTabs = mutableMapOf<Int, ContestTabulation>()

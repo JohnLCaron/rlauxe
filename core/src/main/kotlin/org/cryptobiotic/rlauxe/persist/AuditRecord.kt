@@ -6,16 +6,20 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import com.github.michaelbull.result.unwrapError
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestRound
+import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.CountyPools
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
+import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.persist.bin.FastSamplingCardIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -217,6 +221,101 @@ open class AuditRecord(
             val auditRoundProtoConfig = if (auditRoundConfigResult.isOk) auditRoundConfigResult.unwrap() else {
                 errs.addNested(auditRoundConfigResult.unwrapError())
                 null
+            }
+
+            val contestsResults = readContestsJsonFile(publisher.contestsFile())
+            val contests = if (contestsResults.isOk) contestsResults.unwrap()  else {
+                errs.addNested(contestsResults.unwrapError())
+                null
+            }
+            if (errs.hasErrors()) return Err(errs)
+
+            var countMvrsUsed = 0
+
+            var lastRoundConfig: AuditRoundConfig? = null
+            var prevAuditRound : AuditRound? = null
+            val rounds = mutableListOf<AuditRound>()
+            for (roundIdx in 1..publisher.currentRound()) {
+                val samplePrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(roundIdx))
+                val samplePrns = if (samplePrnsResult.isOk) samplePrnsResult.unwrap() else {
+                    errs.addNested(samplePrnsResult.unwrapError())
+                    null
+                }
+                if (errs.hasErrors()) return Err(errs)
+
+                // AuditStateFile doesnt exist until audit is run
+                val auditStateFile = publisher.auditFile(roundIdx)
+                if (Files.exists(Path.of(auditStateFile))) {
+                    val auditRound = readAuditRoundJsonFile(
+                        auditStateFile,
+                        contests!!,
+                        samplePrns!!,
+                        prevAuditRound,
+                    )
+                    if (auditRound.isOk) {
+                        prevAuditRound = auditRound.unwrap() as AuditRound
+                        rounds.add(prevAuditRound)
+                        countMvrsUsed += prevAuditRound.newmvrs
+                    } else {
+                        errs.addNested(auditRound.unwrapError())
+                    }
+                } else {
+                    val auditEstFile = publisher.auditEstFile(roundIdx)
+                    if (Files.exists(Path.of(auditEstFile))) {
+                        val auditEstRound = readAuditRoundJsonFile(
+                            auditEstFile,
+                            contests!!,
+                            samplePrns!!,
+                            prevAuditRound,
+                        )
+                        if (auditEstRound.isOk) {
+                            prevAuditRound = auditEstRound.unwrap() as AuditRound
+                            rounds.add(auditEstRound.unwrap() as AuditRound)
+                            countMvrsUsed += prevAuditRound.newmvrs  // nonzero ?
+
+                        } else {
+                            errs.addNested(auditEstRound.unwrapError())
+                        }
+                    }
+                }
+
+                // new way of storing config
+                // readAuditRoundConfigJsonFile(filename: String): Result<AuditRoundConfig, ErrorMessages>
+                val auditRoundConfigResult = readAuditRoundConfigJsonFile(publisher.auditRoundConfigFile(roundIdx))
+                val auditRoundConfig = if (auditRoundConfigResult.isOk) auditRoundConfigResult.unwrap() else {
+                    errs.addNested(auditRoundConfigResult.unwrapError())
+                    null
+                }
+                if (auditRoundConfig != null) lastRoundConfig = auditRoundConfig
+            }
+            val roundConfig = lastRoundConfig?: auditRoundProtoConfig!!
+
+            return if (errs.hasErrors()) Err(errs) else {
+                val config = Config(electionInfo!!, auditCreationConfig!!, roundConfig)
+                Ok(AuditRecord(topdir, config, contests!!, rounds, countMvrsUsed))
+            }
+        }
+
+        // reads an AuditRecord, tolerates missing stages
+        fun readPartialResult(topdir: String): Result<AuditRecord, ErrorMessages> {
+            val errs = ErrorMessages("readPartialResult from '${topdir}'")
+
+            val publisher = Publisher(topdir)
+            val electionInfoResult = readElectionInfoJsonFile(publisher.electionInfoFile())
+            val electionInfo = if (electionInfoResult.isOk) electionInfoResult.unwrap() else {
+                errs.addNested(electionInfoResult.unwrapError())
+                null
+            }
+            if (electionInfo == null) return Err(errs)
+
+            val auditCreationConfigResult = readAuditCreationConfigJsonFile(publisher.auditCreationConfigFile())
+            val auditCreationConfig = if (auditCreationConfigResult.isOk) auditCreationConfigResult.unwrap() else {
+                AuditCreationConfig(electionInfo.auditType, seed = 0)
+            }
+
+            val auditRoundConfigResult = readAuditRoundConfigJsonFile(publisher.auditRoundProtoFile())
+            val auditRoundProtoConfig = if (auditRoundConfigResult.isOk) auditRoundConfigResult.unwrap() else {
+                AuditRoundConfig(SimulationControl(), ContestSampleControl(), ClcaConfig())
             }
 
             val contestsResults = readContestsJsonFile(publisher.contestsFile())

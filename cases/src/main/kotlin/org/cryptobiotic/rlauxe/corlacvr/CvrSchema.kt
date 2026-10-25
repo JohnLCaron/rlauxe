@@ -10,13 +10,13 @@ enum class CvrHeader { cvrnumber, tabulatornum, batchid, recordid, imprintedid, 
 
 class CvrSchema(val inputSource: String,
                 val headers: List<String>, // header names, lowercase
-                val columns: List<SchemaColumnInfo>,
+                private val columns: List<SchemaColumnInfo>, // choice columns only
                 val contests: List<SchemaContestInfo>,
                 val voteForNs: Map<Int, Int>) {
 
     val nheaders = headers.size
-    val nchoices = columns.size - nheaders
-    val writeIns : Set<Int> = columns.filter{ it.choiceName.lowercase().contains("write-in") }.map { it.colno }.toSet()
+    val ncolumns = columns.size
+    val writeIns : Set<Int> = columns.filter{ it.choiceName.lowercase().contains("write-in") }.map { it.colIdx }.toSet()
 
     val headerAt = mutableMapOf<Int, CvrHeader>() // idx -> header
     val headerIdx = mutableMapOf<CvrHeader, Int>()  // header -> idx
@@ -45,7 +45,16 @@ class CvrSchema(val inputSource: String,
         return result
     }
 
-    // given a choice name, what is its index in the contest, aka id ?
+    fun getContestAt(colIdx: Int): SchemaContestInfo {
+        val col = columns.find { it.colIdx == colIdx }!!
+        return contests[col.contestIdx]
+    }
+
+    fun columnsFor(contest: SchemaContestInfo): List<SchemaColumnInfo> {
+        return columns.subList(contest.startCol - nheaders, contest.startCol + contest.ncols - nheaders)
+    }
+
+    /* given a choice name, what is its index in the contest, aka id ?
     fun choiceIdx(choiceName: String): Int {
         val column = columns.find { it.choiceName == choiceName }
         if (column == null)
@@ -56,22 +65,22 @@ class CvrSchema(val inputSource: String,
             if (it.startCol <= column.colno) startCol = it.startCol
         }
         return column.colno - startCol
-    }
+    } */
 
     fun voteFor(contestId: Int, cvr: CvrRow): List<String> {
         val choices = choices(contestId)
         val contestVotes = cvr.voteFor(contestId)
         val result = mutableListOf<String>()
         contestVotes?.votedFor?.forEach { result.add( choices[it]) } // could barf if malformed
-        return result
+        return result.sorted()
     }
 
     fun showColumns() = buildString {
         println(SchemaColumnInfo.header)
-        for (colidx in 0 until nheaders) { println("  ${ columns[colidx].showHeader() }") }
+        headers.forEach { println("  ${it}") }
         println()
         println(SchemaColumnInfo.colHeader)
-        for (colidx in nheaders until columns.size ) { println("  ${ columns[colidx].showColumn() }") }
+        columns.forEach { println("  ${ it.showColumn() }") }
     }
 
     fun showContests() = buildString {
@@ -87,39 +96,30 @@ class CvrSchema(val inputSource: String,
 
 private val contestWidth = 60
 private val choiceWidth = 40
-data class SchemaColumnInfo(val colno:Int, val contest: String, val choiceName: String, val headerName: String) {
-    var contestIdx: Int = -1
+data class SchemaColumnInfo(val contestIdx: Int, val colIdx:Int, val contest: String, val choiceName: String, val partyName: String) {
     fun showHeader(): String {
-        return "${nfn(colno, 3)}, ${trunc(headerName, 20)}"
+        return "${nfn(colIdx, 3)}, ${trunc(partyName, 20)}"
     }
     fun showColumn(): String {
-        return "${nfn(colno, 3)}, ${trunc(contest, contestWidth)}, ${nfn(contestIdx, 3)}, " +
-                "${trunc(choiceName, choiceWidth)}, ${trunc(headerName, 5)}"
+        return "${nfn(colIdx, 3)}, ${trunc(contest, contestWidth)}, ${nfn(contestIdx, 3)}, " +
+                "${trunc(choiceName, choiceWidth)}, ${trunc(partyName, 5)}"
     }
 
     companion object {
-        val header = "colno,          header name"
-        val colHeader = "colno, ${trunc("contest", contestWidth)}, idx, ${trunc("choice", choiceWidth)}, party"
+        val header = "colIdx,          header name"
+        val colHeader = "colIdx, ${trunc("contest", contestWidth)}, idx, ${trunc("choice", choiceWidth)}, party"
     }
 }
 
-data class SchemaContestInfo(val contestIdx: Int, val orgName: String, val startCol: Int, val ncols: Int) {
-    val isIRV: Boolean
+data class SchemaContestInfo(val contestIdx: Int, val contestName: String, val startCol: Int, val ncols: Int,
+    val voteForN: Int, val isIRV: Boolean) {
     val nchoices: Int
-    val voteForN: Int
-    val contestName: String
 
     init {
-        isIRV = orgName.contains("Number of ranks=") // Boulder 2023 IRV
         nchoices = if (!isIRV) ncols else {
             // val pos = contestName.("Number of ranks=") + "Number of ranks=".length
-            sqrt(ncols.toDouble()).toInt() // WTF sqrt?
+            sqrt(ncols.toDouble()).toInt() // WTF sqrt? Idiot Dominion format for IRV
         }
-
-        // replace the contest name here
-        val (parsedName, nwinners) = if (isIRV) parseIrvContestName(orgName) else parseContestNameAndVoteFor(orgName)
-        contestName = parsedName
-        voteForN = nwinners
     }
 
     fun show(): String {
@@ -128,10 +128,57 @@ data class SchemaContestInfo(val contestIdx: Int, val orgName: String, val start
 
     companion object {
         val header = "contestIdx, ${trunc("contestName", contestWidth-3)}, startCol, ncols, isIRV, voteForN"
+
+        fun fromOrgName(contestIdx: Int, orgName: String, startCol: Int, ncols: Int,): SchemaContestInfo  {
+            val isIRV = orgName.contains("Number of ranks=") // Boulder 2023 IRV
+            val (parsedName, nwinners) = if (isIRV) parseIrvContestName(orgName) else parseContestNameAndVoteFor(orgName)
+            return SchemaContestInfo(contestIdx, parsedName, startCol, ncols, nwinners, isIRV)
+        }
     }
 }
 
-// firstRow for debugging
+fun makeSchemaFromDominionHeaders(inputSource: String, contests: CSVRecord, choices: CSVRecord, headerLine: CSVRecord): CvrSchema {
+    require(contests.size() <= choices.size())
+    require(headerLine.size() == choices.size())
+
+    val nheaders = contests.toList().indexOfFirst { !it.trim().isEmpty() }
+    val headers = headerLine.values().take(nheaders).map { it.trim().lowercase() }
+
+    var currContestName = ""
+    var currContestIdx = 0
+    var currContestStart = nheaders
+
+    val ccontests = mutableListOf<SchemaContestInfo>()
+    val columns = mutableListOf<SchemaColumnInfo>()
+
+    for (colidx in nheaders until contests.size()) {
+        val contestName = contests.get(colidx).trim()
+        val choiceName = cleanChoiceName(choices.get(colidx))
+        val partyName = headerLine.get(colidx).trim()
+
+        if (currContestName.isEmpty()) currContestName = contestName
+
+        // running through munge to try to detect minor typos in the contest names
+        if (munge(contestName) != munge(currContestName)) {
+            // save the old contest
+            ccontests.add( SchemaContestInfo.fromOrgName(currContestIdx, currContestName, currContestStart, colidx-currContestStart) )
+            // start the new contest
+            currContestName = contestName
+            currContestStart = colidx
+            currContestIdx++
+        }
+
+        val colInfo = SchemaColumnInfo(currContestIdx, colidx, contestName, choiceName, partyName)
+        columns.add(colInfo)
+    }
+    // save the last contest
+    ccontests.add( SchemaContestInfo.fromOrgName(currContestIdx, currContestName, currContestStart, headerLine.size()-currContestStart) )
+
+    val voteForNs = ccontests.associate { it.contestIdx to it.voteForN }
+    return CvrSchema(inputSource, headers, columns, ccontests, voteForNs)
+}
+
+/* firstRow for debugging
 fun makeCvrSchema(inputSource: String, contests: CSVRecord, choices: CSVRecord, headerLine: CSVRecord): CvrSchema {
     require(contests.size() <= choices.size())
     require(headerLine.size() == choices.size())
@@ -142,7 +189,7 @@ fun makeCvrSchema(inputSource: String, contests: CSVRecord, choices: CSVRecord, 
         val partyName = if (idx < headerLine.size()) headerLine.get(idx).trim() else ""
         columns.add( SchemaColumnInfo(idx, contests.get(idx).trim(), choiceName, partyName))
     }
-    val nheaders = columns.first { it.contest.isNotEmpty() }.colno
+    val nheaders = columns.first { it.contest.isNotEmpty() }.colIdx
     val headers = headerLine.values().take(nheaders).map { it.lowercase() }
 
     val skipIdx = nheaders
@@ -154,18 +201,18 @@ fun makeCvrSchema(inputSource: String, contests: CSVRecord, choices: CSVRecord, 
         val col = columns.get(colidx)
         // running through munge to try to detect minor typos in the contest names
         if (colidx != skipIdx && munge(col.contest) != munge(currContestName)) {
-            ccontests.add( SchemaContestInfo(currContestIdx, currContestName, startIdx,colidx-startIdx) )
+            ccontests.add( SchemaContestInfo.fromOrgName(currContestIdx, currContestName, startIdx, colidx-startIdx))
             startIdx = colidx
             currContestIdx++
         }
         col.contestIdx = currContestIdx
         currContestName = col.contest
     }
-    ccontests.add( SchemaContestInfo(currContestIdx, currContestName, startIdx, columns.size-startIdx) )
+    ccontests.add( SchemaContestInfo.fromOrgName(currContestIdx, currContestName, startIdx, columns.size-startIdx))
 
     val voteForNs = ccontests.associate { it.contestIdx to it.voteForN }
     return CvrSchema(inputSource, headers, columns, ccontests, voteForNs)
-}
+} */
 
 // TODO maybe have to pass this function in ??
 //   is it ok not to clean anything here??

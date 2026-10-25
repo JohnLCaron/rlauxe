@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
+import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
 import org.cryptobiotic.rlauxe.corlacvr.RedactionIF
@@ -40,8 +41,8 @@ class CreateBoulderElection(
     val hasStyle: Boolean = true, // TODO
     variantEnum: ElectionVariantEnum = ElectionVariantEnum.Sim,
 ): ElectionBuilder {
-    val infoList = makeContestInfo().sortedBy{ it.id }
-    val infos = infoList.associateBy { it.id }
+    val infos = mutableMapOf<Int, ContestInfo>() // TODO corlaCvrs.makeContestInfo().associateBy { it.id }
+    val infoList = infos.values.toList()
 
     val contestBuilders: Map<Int, BoulderContestBuilderIF> // make visible for debugging
     val contests: List<ContestIF>
@@ -79,7 +80,7 @@ class CreateBoulderElection(
 
         allCards = exportCvrs + redactedCvrs + phantoms // in memory
         this.ncards = allCards.size
-        val npops = tabulateNpops(allCards, infoList)
+        val npops = emptyMap<Int, Int>() // TODO tabulateNpops(allCards, infoList)
 
         // TODO cvrTabs dont have the irv part, so will fail in the raire library
         contestsUA = makeContestWAs(contests, npops, cvrTabs, redactedPools, )
@@ -98,9 +99,9 @@ class CreateBoulderElection(
         mvrs = addIndexToMvrs(allCards)
     }
 
-    // make ContestInfo from BoulderStatementOfVotes, and matching export.schema.contests
+    /* make ContestInfo from BoulderStatementOfVotes, and matching export.schema.contests
     fun makeContestInfo(): List<ContestInfo> {
-        val columns = corlaCvrs.schema.columns
+        // val columns = corlaCvrs.schema.columns
 
         val result = mutableListOf<ContestInfo>()
         sovo.contests.forEach { sovoContest ->
@@ -109,14 +110,23 @@ class CreateBoulderElection(
             if (exportContest != null) {
                 val candidateMap = if (!exportContest.isIRV) {
                     val candidateMap1 = mutableMapOf<String, Int>()
-                    var candIdx = 0
-                    for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
+                    // var candIdx = 0
+                    corlaCvrs.schema.columns.forEach {
+
+                    }
+                    corlaCvrs.schema.columns.forEach { colInfo ->
+                        if (!isWriteIn(colInfo.choiceName)) { // remove write-ins
+                            candidateMap1[colInfo.choiceName] = colInfo.colIdx
+                        }
+                    }
+
+                    /* for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
                         if (columns[col].choiceName != "Write-in") { // remove write-ins
                             candidateMap1[columns[col].choiceName] = candIdx
                             candidateMap1[columns[col].choiceName] = candIdx
                         }
                         candIdx++
-                    }
+                    } */
                     candidateMap1
 
                 } else { // there are ncand x ncand columns, so need something different here
@@ -141,7 +151,7 @@ class CreateBoulderElection(
             }
         }
         return result
-    }
+    } */
 
     private fun convertRedactedToCardPool(redaction: RedactionIF): List<CardPoolBuilder> {
         var id = 1

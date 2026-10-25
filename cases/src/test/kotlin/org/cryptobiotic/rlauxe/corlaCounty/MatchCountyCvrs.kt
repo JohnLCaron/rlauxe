@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
-import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.corla.ManifestCounts
 import org.cryptobiotic.rlauxe.corla.ManifestEntries
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
+import org.cryptobiotic.rlauxe.corlacvr.sumContestTabulationsFromCandVotes
 import org.cryptobiotic.rlauxe.corlacvr.tabulateCvrRows
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
@@ -20,19 +20,12 @@ class MatchCountyCvrs(val countyInput: CountyInput) {
     val corlaCvrs = countyInput.readCorlaCvrs()
     val county = countyInput.countyName
 
-    val infos: Map<Int, ContestInfo>
+    val infos: Map<Int, CorlaContestInfo>
     val cvrTabs : Map<Int, ContestTabulation>
     val redactTabs : Map<Int, ContestTabulation>
 
     init {
-        infos = corlaCvrs.makeContestInfo().map { it ->
-            ContestInfo(
-                it.name, it.id, it.candidateNames,
-                if (it.isIrv) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY,
-                it.nwinners
-            )
-        }.associateBy { it.id }
-        val infosByName = infos.mapKeys { it.value.name }
+        infos = corlaCvrs.makeContestInfo()
 
         cvrTabs = tabulateCvrRows(corlaCvrs.cvrs().iterator(), infos)
 

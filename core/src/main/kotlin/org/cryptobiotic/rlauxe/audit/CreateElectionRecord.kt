@@ -62,7 +62,7 @@ fun createElectionRecord(election: ElectionBuilder, topdir: String, control: Con
 
     val publisher = Publisher(topdir)
     val electionInfo = election.electionInfo()
-    val version = ElectionBuilder::class.java.getPackage().getImplementationVersion() ?: org.cryptobiotic.rlauxe.util.version
+    val version = ElectionBuilder::class.java.getPackage().getImplementationVersion() ?: org.cryptobiotic.rlauxe.util.currentVersion
     electionInfo.addMetadata("version", version)
     electionInfo.addMetadata("date created", datetime())
     writeElectionInfoJsonFile(electionInfo, publisher.electionInfoFile())

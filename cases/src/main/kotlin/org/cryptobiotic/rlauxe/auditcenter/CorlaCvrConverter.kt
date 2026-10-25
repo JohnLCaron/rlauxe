@@ -6,13 +6,12 @@ import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlacvr.ContestVotes
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
 import org.cryptobiotic.rlauxe.corlacvr.CvrRow
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
-import org.cryptobiotic.rlauxe.corlacvr.truncateCommas
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.collections.set
@@ -38,7 +37,7 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCountyCvrsIF, va
 
     init {
         // val infosByName: Map<String, ContestIF> = contests.associateBy { it.name }
-        val schemaContestInfos = corlaCvrs.makeContestInfo() // specific to this cvr file
+        val schemaContestInfos = corlaCvrs.makeContestInfo().values.toList() // specific to this cvr file
 
         val gotCanon = mutableMapOf<Int, String>()  // canon contest id -> export contest name
         // each contest in the schema must be matched to a ContestIF by name
@@ -97,7 +96,7 @@ class CorlaCvrConverter(val county: String, val corlaCvrs: CorlaCountyCvrsIF, va
 
         cardStyles = corlaCvrs.cardStyleMap().map { (_, cvrCardStyle) ->
             val canonicalContestIdSet = convertExportCardStyleToCanonical(cvrCardStyle)
-            val cardStyle = CardStyle("$county-${cvrCardStyle.cardType}", cardStyleId++, canonicalContestIdSet.toIntArray(), true)
+            val cardStyle = CardStyle("$county-${cvrCardStyle.cardStyle}", cardStyleId++, canonicalContestIdSet.toIntArray(), true)
             cardStyle.ncards = cvrCardStyle.ncards
             Pair(canonicalContestIdSet, cardStyle)
         }.toMap()
@@ -222,12 +221,12 @@ class ExportToCanonLookup(val canonContestId: Int, val candLookup: IntArray ) {
 /////////////////////////////////////////////////////////////////////////
 // make schema specific ContestInfo from export.schema.contests; uses local contestId and candidateId
 // keep seperate from ContestInfo to avoid confusion
-data class CorlaContestInfo(
+/* data class CorlaContestInfo(
     val name: String,
     val id: Int,
     val candidateNames: Map<String, Int>,
     val isIrv: Boolean,
-    val nwinners: Int) {
+    val voteForN: Int) {
         val candidateIdToName: Map<Int, String> = candidateNames.entries.associate {(k,v) -> v to k }
 }
 
@@ -242,45 +241,52 @@ data class CorlaContestInfo(
 //)
 
 fun CorlaCountyCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
-    val columns = this.schema.columns
+    // val columns = this.schema.columns
 
-    return this.schema.contests.map { exportContest ->
+    return this.schema.contests.map { schemaContest ->
 
-        val candidateMap = if (!exportContest.isIRV) {
+        val candidateMap = if (!schemaContest.isIRV) {
             val candidateMap1 = mutableMapOf<String, Int>()
-            var candIdx = 0
-            for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
+            // var candIdx = 0
+
+            this.schema.columnsFor(schemaContest).forEach { colInfo ->
+                if (!isWriteIn(colInfo.choiceName)) { // remove write-ins
+                    candidateMap1[colInfo.choiceName] = colInfo.colIdx
+                }
+            }
+
+            /* for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
                 if (!isWriteIn(columns[col].choiceName)) { // remove write-ins
                     candidateMap1[columns[col].choiceName] = candIdx
                 }
                 candIdx++
-            }
+            } */
             candidateMap1
 
         } else { // isIRV: there are ncand x ncand columns,
             val candidates = mutableListOf<String>()
-            for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
-                candidates.add(columns[col].choiceName)
+            this.schema.columnsFor(schemaContest).forEach { colInfo ->
+                candidates.add(colInfo.choiceName)
             }
             val pairs = mutableListOf<Pair<String, Int>>()
-            repeat(exportContest.nchoices) { idx ->
+            repeat(schemaContest.nchoices) { idx ->
                 pairs.add(Pair(candidates[idx], idx))
             }
             pairs.toMap()
         }
 
         // val (name, nwinners) = if (exportContest.isIRV) parseIrvContestName(exportContest.contestName) else parseContestNameAndVoteFor(exportContest.contestName)
-        CorlaContestInfo( exportContest.contestName, exportContest.contestIdx, candidateMap, exportContest.isIRV,
-            exportContest.voteForN)
+        CorlaContestInfo( schemaContest.contestName, schemaContest.contestIdx, candidateMap, schemaContest.isIRV,
+            schemaContest.voteForN)
     }
 }
 
-fun CorlaCountyCvrsIF.makeRealContestInfo(): Map<Int, ContestInfo> {
+fun CorlaCountyCvrsIF.makeRealContestInfoBad(): Map<Int, ContestInfo> {
     return this.makeContestInfo().map { it ->
         ContestInfo(
             it.name, it.id, it.candidateNames,
             if (it.isIrv) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY,
-            it.nwinners
+            it.voteForN
         )
     }.associateBy { it.id }
-}
+} */

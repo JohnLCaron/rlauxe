@@ -20,23 +20,33 @@ class TestAnonomize {
 
     @Test
     fun testOneStateOrCounty() {
-        testAnonomize(Statewide2020General(), county = "Larimer")
+        testAnonomize(Statewide2020General(), county = "Jackson")
+    }
+
+    @Test
+    fun compare2026withPython() {
+        testAnonomize(Statewide2026PwithCvrs(), python="/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testData/2026") // , county = "Boulder")
+    }
+
+    @Test
+    fun compare2020withPython() {
+        testAnonomize(Statewide2020General(), python="/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testData/2020") // , county = "Boulder")
     }
 
     @Test
     fun testAllStatewideInput() {
-        val compare = true
-        testAnonomize(Statewide2020General(), compare=compare)
-        //testAnonStatewideInput(Statewide2022Primary(), compare=compare)
-        testAnonomize(Statewide2023Coordinated(), compare=compare)
-        testAnonomize(Statewide2024General(), compare=compare)
-        testAnonomize(Statewide2025Coordinated(), compare=compare)
-        //testAnonStatewideInput(Statewide2026Primary(), compare=compare)
-        //testAnonStatewideInput(Statewide2026PMerged(), compare=compare)
-        testAnonomize(Statewide2026PwithCvrs(), compare=compare)
+        val python = null
+        // testAnonomize(Statewide2020General(), python=python)
+        //testAnonStatewideInput(Statewide2022Primary(), python=python)
+        testAnonomize(Statewide2023Coordinated(), python=python)
+        testAnonomize(Statewide2024General(), python=python)
+        testAnonomize(Statewide2025Coordinated(), python=python)
+        //testAnonStatewideInput(Statewide2026Primary(), python=python)
+        //testAnonStatewideInput(Statewide2026PMerged(), python=python)
+        testAnonomize(Statewide2026PwithCvrs(), python=python)
     }
 
-    fun testAnonomize(input: StatewideInputWithCvrs, compare: Boolean = false, county: String? = null) {
+    fun testAnonomize(input: StatewideInputWithCvrs, python:String?=null, county: String? = null) {
         val stopwatch = Stopwatch()
         val countNredacted = mutableMapOf<String, RedactionCount>()
         val baseOutput = "$outputBase/${input.year}"
@@ -52,34 +62,37 @@ class TestAnonomize {
                 println("County $county from ${countyInput.cvrsSource} to $output")
 
                 if (county == "Boulder") {
-                    val sourceFile = File(countyInput.cvrsSource)
-                    val targetFile = File(output)
+                    val sourceFile = if (input.year != "2026pc") countyInput.cvrsSource else
+"/home/stormy/dev/github/rla/rlauxe/cases/src/main/resources/resources/data/cases/boulder2026p/2026P-Redacted-CVR-Public.csv"
+                    val targetFile = output
 
                     try {
-                        // Copies source to target; fails if destination already exists
-                        sourceFile.copyTo(targetFile, overwrite = false)
+                        File(sourceFile).copyTo(File(targetFile), overwrite = true)
                     } catch(e: Exception) {
                         e.printStackTrace()
                     }
-                    continue
+
+                } else {
+                    val anon = Anonomicer(countyInput.readCorlaCvrs()) // , styleOnly=styleOnly)
+                    anon.writeRedactedFile(output)
+                        .verify(readCorlaCvrs(countyInput.year, countyInput.countyName, output))
+                    anon.rpt.writeTo("$baseOutput/${county}-Report.txt")
+                    println("write and verify Redaction to $output")
                 }
 
-                val anon = Anonomicer(countyInput.readCorlaCvrs()) // , styleOnly=styleOnly)
-                anon.writeRedactedFile(output)
-                    .verify(readCorlaCvrs(countyInput.year, countyInput.countyName, output))
+                println("---------------------------------")
+                println("python vs raire")
+                val pythonFile = if (python != null) "$python/$county.csv" else null
+                // countNredacted[county] = compareTwoRedactions(pythonFile, output, show = true)
 
-                anon.rpt.writeTo("$baseOutput/${county}-Report.txt")
-
-                if (compare) {
-                    println("---------------------------------")
-                    println("python vs raire")
-                    countNredacted[county] = compareTwoRedactions(null, output, show = true)
-                }
             } catch (e: Throwable) {
                 println("failed on $county: ${e.message}")
             }
         }
-        if (compare) writeRedactionCount("$baseRedactedCount/${input.name()}.csv", countNredacted)
+        if (county == null) {
+            writeRedactionCount("$baseRedactedCount/${input.name()}.csv", countNredacted)
+            println("writeRedactionCount to $baseRedactedCount/${input.name()}.csv")
+        }
         println("that took $stopwatch")
     }
 }

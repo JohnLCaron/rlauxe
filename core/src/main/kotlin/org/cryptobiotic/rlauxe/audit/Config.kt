@@ -2,13 +2,14 @@ package org.cryptobiotic.rlauxe.audit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.TausRates
+import org.cryptobiotic.rlauxe.util.currentVersion
 import org.cryptobiotic.rlauxe.util.secureRandom
 
 data class Config(
     val election: ElectionInfo,
     val creation: AuditCreationConfig,
     val round: AuditRoundConfig,
-    val version: String = "0.8.4",  // how do we get library version ??
+    val version: String = currentVersion,  // how do we get library version from file ??
 ) {
     val auditType = election.auditType
     val isClca = auditType == AuditType.CLCA

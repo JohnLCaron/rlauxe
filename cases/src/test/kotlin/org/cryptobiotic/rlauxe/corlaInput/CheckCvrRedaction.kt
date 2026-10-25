@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.auditcenter.makeRealContestInfo
+import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlacvr.Anonomicer
 import org.cryptobiotic.rlauxe.corlacvr.Anonomicer.Companion.NEAR_UNANIMOUS_THRESHOLD
 import org.cryptobiotic.rlauxe.corlacvr.checkEquivilentVotes
@@ -47,7 +47,7 @@ class CheckCvrRedaction(
         println(redactedFile)
         val unredactedCvrs = readCountyCvrsFromFile(unredactedfile, showHeaders = false, showSchema = false)
 
-        val infos = unredactedCvrs.makeRealContestInfo()
+        val infos = unredactedCvrs.makeContestInfo()
         val unredactedGroups = findPrecinctStyles(unredactedCvrs, infos)
         if (show) {
             println("unredacted precinctStyles")
@@ -90,8 +90,8 @@ class CheckCvrRedaction(
 
 
         ///////////////////////////////////////////////////////
-        val unredactedTabs = tabulate(unredactedCvrs)
-        val redactedTabs = tabulate(redactedCvrs)
+        val unredactedTabs = tabulate(unredactedCvrs, infos)
+        val redactedTabs = tabulate(redactedCvrs, infos)
         val usum = unredactedTabs.sum()
         val rsum = redactedTabs.sum()
         var fail = false
@@ -117,7 +117,7 @@ class CheckCvrRedaction(
         // println("all rare contests have ncards >= $MIN_BALLOTS_DEFAULT") */
 
         redactedTabs.redactedTabs.values.forEach { tab ->
-            if (infos[tab.contestId]!!.candidateIds.size > 1) {
+            if (infos[tab.contestId]!!.candidateNames.size > 1) {
                 val leadingVotes: Map.Entry<Int, Int> = tab.votes.maxBy { it.value }
                 val nonleadingVotes = tab.nvotes() - leadingVotes.value
                 if (nonleadingVotes < NEAR_UNANIMOUS_THRESHOLD)

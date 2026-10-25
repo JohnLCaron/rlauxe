@@ -23,12 +23,13 @@ open class Statewide2020Redacted(
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
         if (countyName == "Baca") return null
+        if (countyName == "Gunnison") return County2020Input(countyName, 11332, null)
         return if (counties().contains(countyName))
             County2020Redacted(countyName, strataPopulation()[countyName]!!) else null
     }
 
     // if you skip counties, you have to adjust Nc
-    private val skipCounties = listOf("San Juan")
+    private val skipCounties = listOf("Baca", "San Juan") // TODO Baca
     override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
 
     // add Gunnison cvr totals to countyTabsAllContests, since those are missing from the tabulateCountyFile file
@@ -43,10 +44,9 @@ class County2020Redacted(
     val countyPopulation: Int
 ): CountyInput {
     val countyNameZ = countyName.replace(" ", "")
-    val cvrdir = "/home/stormy/rla/temp/Anonomice/2020"
+    val cvrdir = "/home/stormy/rla/temp/Anonomice/2020"  // TODO move to zip ??
 
     override val electionName = "${countyName}2020"
-    // TODO Gunnison has Manifest-Gunnison.csv; but Gunnison is an excluded county in 2020
     override val manifestSource = if (countyName == "Gunnison") "$manifestDir/Manifest-${countyNameZ}.csv"
     else "$manifestDir/manifest-${countyNameZ}.csv"
 

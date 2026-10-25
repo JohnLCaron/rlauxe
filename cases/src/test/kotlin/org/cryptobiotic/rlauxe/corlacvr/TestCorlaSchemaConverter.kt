@@ -4,7 +4,7 @@ package org.cryptobiotic.rlauxe.corlacvr
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
-import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
+import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
@@ -43,7 +43,7 @@ class TestCorlaSchemaConverter {
     // this tests coverting all of the cvrs and checking them against the ExportCvr
     fun testCorlaConverterCvrs(county: String, filename: String, statewideInput: StatewideInput) {
         val export = readCountyCvrs(filename)
-        val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
+        val schemaInfoMap = export.makeContestInfo()
 
         val contestBuilder = BuildCorlaContests(statewideInput)
         val contests = contestBuilder.contests(emptyMap())

@@ -43,7 +43,7 @@ class TestRedactedCvrs {
         val electionSimCvrs = CreateBoulderElection("boulder2024", AuditType.CLCA,  export, sovo, hasStyle = true,
             variantEnum = ElectionVariantEnum.Styles
         )
-        val infos = electionSimCvrs.makeContestInfo()
+        val infos = electionSimCvrs.infoList
         println("ncontests with info = ${infos.size}")
 
         testRedactedCvrTabulation(export, electionSimCvrs)

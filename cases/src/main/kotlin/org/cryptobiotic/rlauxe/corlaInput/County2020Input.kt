@@ -10,7 +10,7 @@ val votedatabaseDirDefault = "/home/stormy/datadrive/votedatabase"
 
 class County2020Input(
     override val countyName: String,
-    val countyPopulation : Int,
+    val countyPopulation : Int, // TODO change to use manifest so its self contained
     votedatabaseDirIn: String?,
 ): CountyInput {
     val countyNameZ = countyName.replace(" ", "")

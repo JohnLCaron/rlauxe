@@ -2,9 +2,9 @@ package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
-import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
-import org.cryptobiotic.rlauxe.corlacvr.CvrTabulations
-import org.cryptobiotic.rlauxe.corlacvr.tabulate
+import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
+import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromResource
+import kotlin.collections.plus
 
 open class Statewide2020General(
         ac:String?=auditcenter,
@@ -26,8 +26,12 @@ open class Statewide2020General(
     override fun corlaCountyInput(countyName: String): CountyInput? {
         if (countyName == "Arapahoe") return Arapahoe2020Redacted(strataPopulation()[countyName]!!)
         if (countyName == "Baca") return null
-        return if (counties().contains(countyName))
-            County2020Input(countyName, strataPopulation()[countyName]!!, votedatabaseDir) else null
+        if (countyName == "Gunnison") return County2020Input(countyName, 11332, votedatabaseDir)
+        return if (counties().contains(countyName)) {
+            val pop = strataPopulation()[countyName]
+                print("")
+            County2020Input(countyName, strataPopulation()[countyName]!!, votedatabaseDir)
+        } else null
     }
 
     // if you skip counties, you have to adjust Nc
@@ -37,28 +41,13 @@ open class Statewide2020General(
     // add Gunnison cvr totals to countyTabsAllContests, since those are missing from the tabulateCountyFile file
     override fun countyTabsAllContests(): Map<String, CountyTabAllContests> = countyTabsAllContests
     private val countyTabsAllContests: Map<String, CountyTabAllContests> by lazy {
-        val countyTabs = readCountyTabulateCsv(tabulateCountyFile)
-        val gunnisonCvrs = corlaCountyInput("Gunnison")!!.readCorlaCvrs()
-        val gunnisonTabulate: CvrTabulations = tabulate(gunnisonCvrs)
+        // Gunnison not in round file; hack in from the cvrs and merge
+        // resources/resources/data/cases/corla/augmentedData/GunnisonTabs.csv
+        val gunnisonTabs = readCountyTabulateCsvFromResource("resources/data/cases/corla/augmentedData/GunnisonTabs.csv")
 
-        val gunnisonCountyTab = CountyTabAllContests("Gunnison")
-        val infos = gunnisonTabulate.infos.mapValues { it.value.copy(name = contestNameCleanup("Gunnison", it.value.name)) }
-        gunnisonCountyTab.addContestTabulations(gunnisonTabulate.sum(), infos)
-
-        countyTabs + mapOf("Gunnison" to gunnisonCountyTab)
+        val countyTabs = readCountyTabulateCsvFromFile(tabulateCountyFile)
+        countyTabs + gunnisonTabs
     }
-
-    /* override fun contestTabsAllCounties(): Map<String, ContestTabAllCounties>  = contestTabsAllCounties
-    private val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
-        val tabs = mutableMapOf<String, ContestTabAllCounties>()
-        countyTabsAllContests().values.forEach { countyTabAllContests ->
-            countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
-                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties(contestName) }
-                tab.add(countyTabAllContests.countyName, countyContestVotes)
-            }
-        }
-        tabs.toMap()
-    } */
 
     // canonical contests and choices
     override fun canonicalContests() = canonicalContests
@@ -284,6 +273,7 @@ open class Statewide2020General(
             }
 
             "Garfield" -> when (name) {
+                "Princess Khadijah Maryam Jacob-Fambro/Khadijah Maryam Jacob" -> "Princess Khadijah Maryam Jacob-Fambro / Khadijah Maryam Jacob Sr"
                 "Representative to the 117th US Congress Dist 3" -> "Representative to the 117th United States Congress - District 3"
                 "Board of Education District 3" -> "State Board of Education Member - Congressional District 3"
                 "State Senate District 8" -> "State Senator - District 8"

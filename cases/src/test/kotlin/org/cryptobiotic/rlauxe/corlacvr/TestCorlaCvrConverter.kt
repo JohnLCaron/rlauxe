@@ -3,12 +3,11 @@ package org.cryptobiotic.rlauxe.corlacvr
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
-import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
+import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
-import org.cryptobiotic.rlauxe.corlaInput.munge
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
@@ -114,7 +113,7 @@ fun testCorlaConverterCvrs(county: String, filename: String, statewideInput: Sta
 
 fun testCorlaConverterCvrs(county: String, export: CorlaCountyCvrsIF, statewideInput: StatewideInput) {
 
-    val schemaInfoMap = export.makeContestInfo().associateBy { it.id }
+    val schemaInfoMap = export.makeContestInfo()
 
     val contestBuilder = BuildCorlaContests(statewideInput)
     val contests = contestBuilder.contests(emptyMap())

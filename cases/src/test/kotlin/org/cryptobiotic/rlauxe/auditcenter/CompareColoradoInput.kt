@@ -29,8 +29,8 @@ class CompareContestInput {
 
     @Test
     fun compareGeneralCountyTabulate() {
-        val countyTab1 = readCountyTabulateCsv(input1.tabulateCountyFile)
-        val countyTab2 = readCountyTabulateCsv(input2.tabulateCountyFile)
+        val countyTab1 = readCountyTabulateCsvFromFile(input1.tabulateCountyFile)
+        val countyTab2 = readCountyTabulateCsvFromFile(input2.tabulateCountyFile)
 
         println("compare countyTab contest names")
         compareLists(

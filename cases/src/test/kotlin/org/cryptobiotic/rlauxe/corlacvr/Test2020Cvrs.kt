@@ -29,7 +29,7 @@ class Test2020Cvrs {
     fun testEagleCardStyles() {
         val countyInput = input.corlaCountyInput("Eagle")!!
         val corlaCvrs = countyInput.readCorlaCvrs()
-        corlaCvrs.cardStyles().sortedBy{it.cardType}.forEach {
+        corlaCvrs.cardStyles().sortedBy{it.cardStyle}.forEach {
             println(it)
         }
     }

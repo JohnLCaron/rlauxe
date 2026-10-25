@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.audit.CardStyle
 import kotlin.collections.flatten
 import kotlin.text.isEmpty
 
@@ -15,23 +14,13 @@ import kotlin.text.isEmpty
 // 12,1,1,12,1-1-12,P1, 2, 0,1,0,1
 // 19,1,1,19,1-1-19,P1, 1, 1,0,,
 
-data class CvrCardStyle(val cardType: String, val contestIds: Set<Int>) {
+// cardStyle is unique
+data class CvrCardStyle(val cardStyle: String, val contestIds: Set<Int>) {
     var ncards: Int = 0 // not part of equals
     fun contains(contestId: Int) = contestIds.contains(contestId)
     fun setNcards(n:Int): CvrCardStyle {
         this.ncards = n
         return this
-    }
-
-    // data class CardStyle(
-    //    val name: String,
-    //    val id: Int,
-    //    val possibleContests: IntArray,      // the list of possible contests.
-    //    val hasExactContests: Boolean,       // aka hasStyle: if all cards have exactly the contests in possibleContests;
-    //)
-    fun toCardStyle(styleId: Int): CardStyle {
-        return CardStyle(cardType, styleId, contestIds.toList().toIntArray(), hasExactContests=true)
-            .setNcards(ncards)
     }
 }
 
@@ -58,7 +47,7 @@ class BallotStyles {
     fun add(cvr: CvrRow) {
         val cleanBallotType = cleanCsvString(cvr.ballotType) // no commas
         val cvrStyleId = CardStyleId(cleanBallotType, cvr.contests())
-        val cardStyle = cardStyleMap.getOrPut(cvrStyleId) {
+        val cvrCardStyle = cardStyleMap.getOrPut(cvrStyleId) {
             // if already exists, then there are duplicate contestId sets for this ballotType
             val cardList = ballotTypes[cleanBallotType]
             if (cardList == null) {
@@ -70,12 +59,11 @@ class BallotStyles {
                 val newStyle = CvrCardStyle(cleanBallotType, cvr.contests())
                 val oldStyles = cardList + listOf(newStyle)
                 val newStyles = createCardStylesAndUnion(cleanBallotType, oldStyles)
-                //val newStyles = if (oldStyles.size == 2) renameSortedCardStyles(cleanBallotType, oldStyles)
-                //    else renameCardStylesWithUnion(cleanBallotType, oldStyles)
 
                 ballotTypes[cleanBallotType] = newStyles
 
                 // replace the old ones in cardStyleMap
+                // this means the cardStyles arent finished (may change names) until all cards have been read
                 newStyles.filter { it.contestIds != cvr.contests() }.forEach { replace ->
                     cardStyleMap[CardStyleId(cleanBallotType, replace.contestIds)] = replace
                 }
@@ -85,7 +73,7 @@ class BallotStyles {
             }
         }
 
-        cardStyle.ncards++
+        cvrCardStyle.ncards++
     }
 }
 
@@ -134,7 +122,7 @@ fun renameSortedCardStyles(cleanBallotType: String, allStyles: List<CvrCardStyle
     val allStylesSorted : List<CvrCardStyle> = sortOnIntArray(allStyles)
     // val firstChar = 'A'
     val newStyles= allStylesSorted.mapIndexed { idx, it ->
-        it.copy(cardType = cleanBallotType + "-${firstChar+idx}").setNcards(it.ncards)
+        it.copy(cardStyle = cleanBallotType + "-${firstChar+idx}").setNcards(it.ncards)
     }
     return newStyles
 }

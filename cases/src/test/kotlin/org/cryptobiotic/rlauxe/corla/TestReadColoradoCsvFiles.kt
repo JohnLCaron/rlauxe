@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
-import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsv
+import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
 import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
@@ -67,7 +67,7 @@ class TestReadColoradoCsvFiles {
             readTargetedContestsCsv("src/test/data/corla/2024audit/targetedContests.csv") { it }
 
         val countyTabAllContests: Map<String, CountyTabAllContests> =
-            readCountyTabulateCsv("src/test/data/corla/2024audit/tabulateCounty.csv")
+            readCountyTabulateCsvFromFile("src/test/data/corla/2024audit/tabulateCounty.csv")
 
         val contestTabAllCounties: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties()
 

@@ -143,7 +143,7 @@ fun findPrecinctStyleMin(corlaCvrs: CorlaCountyCvrsIF): Int {
         var styleMap = emptyMap<String, Int>()
 
         fun convert(ballotType:String, cardStyleMap: Map<CardStyleId, CvrCardStyle>) {
-            styleMap = contests.mapKeys { cardStyleMap[CardStyleId(ballotType, it.key)]?.cardType ?: "unknown" }
+            styleMap = contests.mapKeys { cardStyleMap[CardStyleId(ballotType, it.key)]?.cardStyle ?: "unknown" }
         }
     }
 
@@ -171,44 +171,3 @@ fun showTabDiffs(diff: Map<Int, ContestTabulation>) {
         }
     }
 }
-
-/*
-///////////////////////////////////////////////////////////////
-fun compareCvrsAndManifests(input: CountyInput, corlaRawCvrs: CorlaCountyCvrsIF, showMissed: Boolean = true, showUnmatched: Boolean = false) {
-    val allCvrs = corlaRawCvrs.cvrs() + corlaRawCvrs.redactedCvrs()
-
-    val nCvrs = allCvrs.size
-    println("${input.cvrsSource}: cvrs = ${corlaRawCvrs.cvrs().size} redactedCvrs= ${corlaRawCvrs.redactedCvrs().size}")
-
-    val redactedGroupSize = corlaRawCvrs.redactedGroups().size
-    val redactedNCards = corlaRawCvrs.redactedGroups().sumOf { it.ncards() }
-    println("\nRedacted groups (${redactedGroupSize})")
-    corlaRawCvrs.redactedGroups().forEach { println("  $it") }
-
-    println("redacted group ncards = ${redactedNCards}")
-    val totalCvrs = nCvrs + redactedNCards
-    println("cvrs + redacted ncards = ${totalCvrs}")
-
-    val manifestBatches = input.readCountyManifest()
-    val manifestNCards = manifestBatches.totalCards
-    println("\n${input.manifestSource}")
-    println("  manifestNCards = $manifestNCards")
-
-    val estRedactedNcards = manifestNCards - corlaRawCvrs.cvrs().size
-    println("  est redacted ncards= ${estRedactedNcards}")
-    val missingNcards = manifestNCards - totalCvrs
-    print("  sumManifest - totalCvrs = ${missingNcards}; ")
-    if (missingNcards == 0) print(" AGREE!")
-    else if (missingNcards < 0) print(" manifest not up to date ??")
-    else if (redactedGroupSize == 1) print(" single group should be set to $estRedactedNcards, currently $redactedNCards ")
-    else print(" need $missingNcards more redacted cards")
-    println()
-
-    /////////////////////////////////////////////////////////////////
-    val manifest = input.readCountyManifest()
-    val report = mutableListOf<String>()
-    manifest.manifestCounts(corlaRawCvrs, report)
-    report.forEach { println(it) }
-} */
-
-

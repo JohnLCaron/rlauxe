@@ -72,7 +72,7 @@ class CorlaCountyCvrs(override val inputSource: String,
             }
 
             // make the schema out of those 3 lines
-            schema = makeCvrSchema(inputSource, contestLine, choiceLine, headerLine)
+            schema = makeSchemaFromDominionHeaders(inputSource, contestLine, choiceLine, headerLine)
             if (showSchema) {
                 println()
                 println(schema.showColumns())
@@ -116,9 +116,6 @@ class CorlaCountyCvrs(override val inputSource: String,
                     try {
                         val cvr = parseHeader(line, rowCount)
                         cvr.addVotes(schema, line, rowCount)
-
-                        if (!cvr.contests().contains(0))
-                            print("")
                         cvrs.add(cvr)
                         ballotStyles.add(cvr)
 

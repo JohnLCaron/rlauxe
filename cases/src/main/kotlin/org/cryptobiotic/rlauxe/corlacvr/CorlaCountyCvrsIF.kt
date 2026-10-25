@@ -54,7 +54,7 @@ fun readCountyCvrsFromResource(resourcePath: String, showHeaders: Boolean = fals
 
 private fun getCsvStreamFromResource(resourcePath: String): InputStream {
     var resourceStream =
-        object {}.javaClass.getResourceAsStream(resourcePath) ?: throw IOException("$resourcePath does not exist")
+        object {}.javaClass.getClassLoader().getResourceAsStream(resourcePath) ?: throw IOException("$resourcePath does not exist")
     if (resourcePath.endsWith(".zip")) {
         val innerStream = getZippedCsvResourceStream(resourcePath, resourceStream)
         if (innerStream == null) throw IOException("zipped $resourcePath does not have the csv file inside")

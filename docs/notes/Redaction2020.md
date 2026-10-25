@@ -121,88 +121,87 @@ Using this algorithm on the 2020 General election, the following table shows whi
 * Boulder is reather a special case (see Corla2020notes)[Corla2020notes.md]).
 * nredacted is the result of running the CVR file (as is) through anonymize_cvr.py.
 
-The column "missing" is the number of cards in each county's redacted pool:
+The column "missing" is the number of cards in the manifest without a corresponding (redacted or unredacted) cvr:
 
-| county      | phantoms | population | manifestCount | cvrUnredacted | cvrRedacted | missing | manifestNoCvr | minCardsForVote | cvrInManifest | cvrNoManifest | nredacted |
-|-------------|----------|------------|---------------|---------------|-------------|---------|---------------|-----------------|---------------|---------------|-----------|
-| Adams       | 0        | 239425     | 239425        | 239409        | 0           | 16      | 16            | 16              | 239409        | 0             | 0         |
-| Alamosa     | 0        | 7923       | 7923          | 7923          | 0           | 0       | 0             | 0               | 7923          | 0             | 0         |
-| Arapahoe    | 0        | 354347     | 354347        | 354247        | 0           | 100     | 100           | 115             | 354247        | 0             | 84        |
-| Archuleta   | 0        | 9404       | 9404          | 9404          | 0           | 0       | 0             | 0               | 9404          | 0             | 0         |
-| Bent        | 0        | 2295       | 2295          | 2295          | 0           | 0       | 0             | 0               | 2295          | 0             | 0         |
-| Boulder     | 0        | 208445     | 208445        | 205796        | 0           | 2649    | 2649          | 2628            | 205796        | 0             | 0         |
-| Broomfield  | 0        | 47103      | 47103         | 47103         | 0           | 0       | 0             | 0               | 47103         | 0             | 0         |
-| Chaffee     | 0        | 13862      | 13862         | 13862         | 0           | 0       | 0             | 0               | 13862         | 0             | 0         |
-| Cheyenne    | 0        | 1146       | 1146          | 1146          | 0           | 0       | 0             | 0               | 1146          | 0             | 0         |
-| Clear Creek | 0        | 6608       | 6608          | 6608          | 0           | 0       | 0             | 0               | 6608          | 0             | 0         |
-| Conejos     | 0        | 4404       | 4404          | 4404          | 0           | 0       | 0             | 0               | 4404          | 0             | 0         |
-| Costilla    | 0        | 2139       | 2139          | 2139          | 0           | 0       | 0             | 0               | 2139          | 0             | 0         |
-| Crowley     | 0        | 1769       | 1769          | 1769          | 0           | 0       | 0             | 0               | 1769          | 0             | 0         |
-| Custer      | 0        | 3670       | 3670          | 3670          | 0           | 0       | 0             | 0               | 3670          | 0             | 0         |
-| Delta       | 0        | 19553      | 19553         | 19553         | 0           | 0       | 0             | 0               | 19553         | 0             | 0         |
-| Denver      | 0        | 1181464    | 1181464       | 1181464       | 0           | 0       | 0             | 0               | 1181464       | 0             | 34        |
-| Dolores     | 0        | 1500       | 1500          | 1500          | 0           | 0       | 0             | 0               | 1500          | 0             | 0         |
-| Douglas     | 0        | 234272     | 234272        | 234216        | 56          | 0       | 56            | 56              | 234216        | 0             | 0         |
-| Eagle       | 0        | 58589      | 58589         | 58571         | 20          | -2      | 20            | 9               | 58569         | 2             | 0         |
-| El Paso     | 0        | 382583     | 382583        | 383160        | 44          | -621    | 159           | 8               | 382424        | 736           | 0         |
-| Elbert      | 0        | 19150      | 19150         | 19150         | 0           | 0       | 0             | 0               | 19150         | 0             | 0         |
-| Fremont     | 0        | 26289      | 26289         | 26289         | 0           | 0       | 0             | 0               | 26289         | 0             | 0         |
-| Garfield    | 0        | 31245      | 31245         | 30544         | 0           | 701     | 701           | 690             | 30544         | 0             | 0         |
-| Gilpin      | 0        | 4239       | 4239          | 4240          | 0           | -1      | 0             | 0               | 4239          | 1             | 0         |
-| Grand       | 0        | 10483      | 10483         | 10483         | 0           | 0       | 0             | 0               | 10483         | 0             | 0         |
-| Hinsdale    | 0        | 640        | 640           | 640           | 0           | 0       | 0             | 0               | 640           | 0             | 0         |
-| Huerfano    | 0        | 4459       | 4459          | 4459          | 0           | 0       | 0             | 0               | 4459          | 0             | 0         |
-| Jackson     | 0        | 889        | 889           | 886           | 0           | 3       | 3             | 3               | 886           | 0             | 0         |
-| Jefferson   | 0        | 381834     | 381834        | 381793        | 47          | -6      | 47            | 32              | 381787        | 6             | 0         |
-| Kiowa       | 0        | 909        | 909           | 909           | 0           | 0       | 0             | 0               | 909           | 0             | 0         |
-| Kit Carson  | 0        | 3892       | 3892          | 3893          | 0           | -1      | 0             | 0               | 3892          | 1             | 0         |
-| La Plata    | 0        | 35995      | 35995         | 35995         | 0           | 0       | 0             | 0               | 35995         | 0             | 20        |
-| Lake        | 0        | 4010       | 4010          | 4010          | 0           | 0       | 0             | 0               | 4010          | 0             | 0         |
-| Larimer     | 0        | 226896     | 226896        | 226844        | 57          | -5      | 57            | 52              | 226839        | 5             | 40        |
-| Lincoln     | 0        | 2665       | 2665          | 2665          | 0           | 0       | 0             | 0               | 2665          | 0             | 0         |
-| Logan       | 0        | 10685      | 10685         | 10664         | 21          | 0       | 21            | 21              | 10664         | 0             | 0         |
-| Mesa        | 0        | 91506      | 91506         | 91506         | 0           | 0       | 0             | 0               | 91506         | 0             | 56        |
-| Mineral     | 0        | 767        | 767           | 767           | 0           | 0       | 0             | 0               | 767           | 0             | 0         |
-| Moffat      | 0        | 7074       | 7074          | 7074          | 0           | 0       | 0             | 0               | 7074          | 0             | 0         |
-| Montezuma   | 0        | 15631      | 15631         | 15631         | 0           | 0       | 0             | 0               | 15631         | 0             | 0         |
-| Montrose    | 0        | 25159      | 25159         | 25159         | 0           | 0       | 0             | 0               | 25159         | 0             | 0         |
-| Morgan      | 0        | 13860      | 13860         | 13855         | 5           | 0       | 5             | 5               | 13855         | 0             | 0         |
-| Otero       | 0        | 9704       | 9704          | 9704          | 0           | 0       | 0             | 0               | 9704          | 0             | 0         |
-| Ouray       | 0        | 4050       | 4050          | 4050          | 0           | 0       | 0             | 0               | 4050          | 0             | 0         |
-| Park        | 0        | 12406      | 12406         | 12406         | 0           | 0       | 0             | 0               | 12406         | 0             | 0         |
-| Phillips    | 0        | 2561       | 2561          | 2561          | 0           | 0       | 0             | 0               | 2561          | 0             | 0         |
-| Pitkin      | 0        | 12089      | 12089         | 12063         | 26          | 0       | 26            | 23              | 12063         | 0             | 0         |
-| Prowers     | 0        | 5601       | 5601          | 5601          | 0           | 0       | 0             | 0               | 5601          | 0             | 0         |
-| Pueblo      | 0        | 89155      | 89155         | 89108         | 47          | 0       | 47            | 46              | 89108         | 0             | 0         |
-| Rio Blanco  | 0        | 3709       | 3709          | 3705          | 4           | 0       | 4             | 4               | 3705          | 0             | 0         |
-| Rio Grande  | 0        | 6451       | 6451          | 6451          | 0           | 0       | 0             | 0               | 6451          | 0             | 0         |
-| Routt       | 0        | 33008      | 33008         | 33008         | 0           | 0       | 0             | 0               | 33008         | 0             | 18        |
-| Saguache    | 0        | 6821       | 6821          | 6821          | 0           | 0       | 0             | 0               | 6821          | 0             | 31        |
-| San Miguel  | 0        | 5189       | 5189          | 5190          | 0           | -1      | 0             | 0               | 5189          | 1             | 0         |
-| Sedgwick    | 0        | 1496       | 1496          | 1496          | 0           | 0       | 0             | 0               | 1496          | 0             | 17        |
-| Summit      | 0        | 18943      | 18943         | 18788         | 169         | -14     | 169           | 154             | 18774         | 14            | 0         |
-| Teller      | 91       | 17178      | 17087         | 17087         | 0           | 91      | 0             | 91              | 17087         | 0             | 0         |
-| Washington  | 0        | 3028       | 3028          | 3028          | 0           | 0       | 0             | 0               | 3028          | 0             | 0         |
-| Weld        | 0        | 169080     | 169080        | 169061        | 41          | -22     | 41            | 27              | 169039        | 22            | 0         |
-| Yuma        | 0        | 5029       | 5029          | 5029          | 0           | 0       | 0             | 0               | 5029          | 0             | 0         |
-
+| county      | total   | manifest | cvrUnredacted | cvrRedacted | missing | extraRedact | totalRedact | blankPrecinct |
+|-------------|---------|----------|---------------|-------------|---------|-------------|-------------|---------------|
+| Denver      | 1181464 | 1181464  | 1181464       | 0           | 0       | 475         | 475         | 0             |
+| Weld        | 169080  | 169080   | 169061        | 41          | -22     | 151         | 192         | 0             |
+| Eagle       | 58589   | 58589    | 58571         | 20          | -2      | 84          | 104         | 0             |
+| Mesa        | 91506   | 91506    | 91506         | 0           | 0       | 67          | 67          | 113           |
+| Larimer     | 226896  | 226896   | 226844        | 57          | -5      | 43          | 100         | 0             |
+| Arapahoe    | 354347  | 354347   | 354231        | 16          | 100     | 40          | 56          | 0             |
+| Otero       | 9704    | 9704     | 9704          | 0           | 0       | 29          | 29          | 0             |
+| La Plata    | 35995   | 35995    | 35995         | 0           | 0       | 24          | 24          | 0             |
+| Saguache    | 6821    | 6821     | 6821          | 0           | 0       | 24          | 24          | 0             |
+| Montrose    | 25159   | 25159    | 25159         | 0           | 0       | 16          | 16          | 0             |
+| Sedgwick    | 1496    | 1496     | 1496          | 0           | 0       | 16          | 16          | 0             |
+| Las Animas  | 8062    | 8062     | 106           | 0           | 7956    | 15          | 15          | 0             |
+| Routt       | 33008   | 33008    | 33008         | 0           | 0       | 15          | 15          | 0             |
+| Archuleta   | 9404    | 9404     | 9404          | 0           | 0       | 11          | 11          | 0             |
+| Grand       | 10483   | 10483    | 10483         | 0           | 0       | 11          | 11          | 0             |
+| Rio Grande  | 6451    | 6451     | 6451          | 0           | 0       | 10          | 10          | 0             |
+| Yuma        | 5029    | 5029     | 5029          | 0           | 0       | 10          | 10          | 0             |
+| Adams       | 239425  | 239425   | 239409        | 0           | 16      | 0           | 0           | 0             |
+| Alamosa     | 7923    | 7923     | 7923          | 0           | 0       | 0           | 0           | 0             |
+| Baca        | 2244    | 0        | 0             | 0           | 0       | 0           | 0           | N/A           |
+| Bent        | 2295    | 2295     | 2295          | 0           | 0       | 0           | 0           | 0             |
+| Boulder     | 208445  | 208445   | 205796        | 2634        | 15      | 0           | 0           | 205796        |
+| Broomfield  | 47103   | 47103    | 47103         | 0           | 0       | 0           | 0           | 0             |
+| Chaffee     | 13862   | 13862    | 13862         | 0           | 0       | 0           | 0           | 0             |
+| Cheyenne    | 1146    | 1146     | 1146          | 0           | 0       | 0           | 0           | 0             |
+| Clear Creek | 6608    | 6608     | 6608          | 0           | 0       | 0           | 0           | 0             |
+| Conejos     | 4404    | 4404     | 4404          | 0           | 0       | 0           | 0           | 0             |
+| Costilla    | 2139    | 2139     | 2139          | 0           | 0       | 0           | 0           | 0             |
+| Crowley     | 1769    | 1769     | 1769          | 0           | 0       | 0           | 0           | 0             |
+| Custer      | 3670    | 3670     | 3670          | 0           | 0       | 0           | 0           | 0             |
+| Delta       | 19553   | 19553    | 19553         | 0           | 0       | 0           | 0           | 0             |
+| Dolores     | 1500    | 1500     | 1500          | 0           | 0       | 0           | 0           | 0             |
+| Douglas     | 234272  | 234272   | 234216        | 56          | 0       | 0           | 56          | 0             |
+| El Paso     | 382583  | 382583   | 383160        | 44          | -621    | 0           | 44          | 0             |
+| Elbert      | 19150   | 19150    | 19150         | 0           | 0       | 0           | 0           | 0             |
+| Fremont     | 26289   | 26289    | 26289         | 0           | 0       | 0           | 0           | 26289         |
+| Garfield    | 31245   | 31245    | 30544         | 0           | 701     | 0           | 0           | 0             |
+| Gilpin      | 4239    | 4239     | 4240          | 0           | -1      | 0           | 0           | 0             |
+| Hinsdale    | 640     | 640      | 640           | 0           | 0       | 0           | 0           | 0             |
+| Huerfano    | 4459    | 4459     | 4459          | 0           | 0       | 0           | 0           | 0             |
+| Jackson     | 889     | 889      | 886           | 0           | 3       | 0           | 0           | 0             |
+| Jefferson   | 381834  | 381834   | 381793        | 47          | -6      | 0           | 47          | 0             |
+| Kiowa       | 909     | 909      | 909           | 0           | 0       | 0           | 0           | 0             |
+| Kit Carson  | 3892    | 3892     | 3893          | 0           | -1      | 0           | 0           | 0             |
+| Lake        | 4010    | 4010     | 4010          | 0           | 0       | 0           | 0           | 0             |
+| Lincoln     | 2665    | 2665     | 2665          | 0           | 0       | 0           | 0           | 0             |
+| Logan       | 10685   | 10685    | 10664         | 21          | 0       | 0           | 21          | 0             |
+| Mineral     | 767     | 767      | 767           | 0           | 0       | 0           | 0           | 0             |
+| Moffat      | 7074    | 7074     | 7074          | 0           | 0       | 0           | 0           | 0             |
+| Montezuma   | 15631   | 15631    | 15631         | 0           | 0       | 0           | 0           | 0             |
+| Morgan      | 13860   | 13860    | 13855         | 5           | 0       | 0           | 5           | 0             |
+| Ouray       | 4050    | 4050     | 4050          | 0           | 0       | 0           | 0           | 0             |
+| Park        | 12406   | 12406    | 12406         | 0           | 0       | 0           | 0           | 0             |
+| Phillips    | 2561    | 2561     | 2561          | 0           | 0       | 0           | 0           | 0             |
+| Pitkin      | 12089   | 12089    | 12063         | 26          | 0       | 0           | 26          | 0             |
+| Prowers     | 5601    | 5601     | 5601          | 0           | 0       | 0           | 0           | 0             |
+| Pueblo      | 89155   | 89155    | 89108         | 47          | 0       | 0           | 47          | 0             |
+| Rio Blanco  | 3709    | 3709     | 3705          | 4           | 0       | 0           | 4           | 0             |
+| San Miguel  | 5189    | 5189     | 5190          | 0           | -1      | 0           | 0           | 0             |
+| Summit      | 18943   | 18943    | 18788         | 169         | -14     | 0           | 169         | 0             |
+| Teller      | 17178   | 17087    | 17087         | 0           | 0       | 0           | 0           | 0             |
+| Washington  | 3028    | 3028     | 3028          | 0           | 0       | 0           | 0           | 0             |
+| Gunnison    | 0       | 11332    | 11332         | 0           | 0       | 0           | 0           | 0             |
 
 where
 
-|           field | example |                                           description |
-| --------------- | ------- | ----------------------------------------------------- |
-|          county | Larimer |                                           county name |
-|        phantoms |       0 |                            population - manifestCount |
-|      population |  226896 |          county population from round.ballotCardCount |
-|   manifestCount |  226896 |                     number of entries in the manifest |
-|   cvrUnredacted |  226844 |                              count of unredacted Cvrs |
-|     cvrRedacted |      57 |                                count of redacted Cvrs |
-|         missing |      -5 |         manifestCount - (cvrUnredacted + cvrRedacted) |
-|   manifestNoCvr |      57 |        count of Manifest entries that dont match cvrs |
-| minCardsForVote |      52 |                minimum cards needed for missing votes |
-|   cvrInManifest |  226839 |      count of Cvrs that match entries in the Manifest |
-|   cvrNoManifest |       5 | count of Cvrs that dont match entries in the Manifest |
-|       nredacted |      40 |           number of redacted rows added by Anonymizer |
+|         field | example |                                       description |
+| ------------- | ------- | ------------------------------------------------- |
+|        county |  Denver |                                       county name |
+|         total | 1181464 |     county total cards from round.ballotCardCount |
+|      manifest | 1181464 |                 number of entries in the manifest |
+| cvrUnredacted | 1181464 |                          count of unredacted Cvrs |
+|   cvrRedacted |       0 |           count of redacted Cvrs in existing file |
+|       missing |       0 |     manifestCount - (cvrUnredacted + cvrRedacted) |
+|   extraRedact |     475 | number of additional redaction made by anonimizer |
+|   totalRedact |     475 |               total number of redactions expected |
+| blankPrecinct |       0 |         number of rows with blank precinct column |
 
 
 ## Compare redaction variants

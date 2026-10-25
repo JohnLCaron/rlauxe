@@ -77,9 +77,10 @@ class ContestTabulation(
         undervotes = ncardsTabulated * voteForN - nvotes()
     }
 
+    // subtract this - cond: cant go below 0
     fun subtractVoteZ(cand: Int, vote: Int) {
         val accum = votes.getOrPut(cand) { 0 }
-        votes[cand] = max(0, accum - vote) // cant go below 0
+        votes[cand] = max(0, accum - vote)
     }
 
     fun subtractVote(cand: Int, vote: Int) {
@@ -114,7 +115,7 @@ class ContestTabulation(
         // this.overvotes += other.overvotes
     }
 
-    // for summing multiple tabs into this one. not for IRV
+    // subtract this - other, votes cant go below 0. not for IRV
     fun subtractZ(other: ContestTabulationIF) {
         require (contestId == other.contestId)
         if (this.isIrv) {
@@ -249,7 +250,7 @@ fun sumContestTabulations(others: List<Map<Int, ContestTabulationIF>>):Map<Int, 
     return result
 }
 
-// this - other, cant go below 0
+// this - other, votes cant go below 0
 fun MutableMap<Int, ContestTabulation>.subtractContestTabulationZ(other: Map<Int, ContestTabulationIF>) {
     other.forEach { (contestId, otherTab) ->
         val contestSum = this.getOrPut(contestId) { ContestTabulation(otherTab) }
@@ -273,11 +274,11 @@ fun subtractContestTabulations(op1: Map<Int, ContestTabulationIF>, op2: Map<Int,
     return result
 }
 
-// op1 - op2, cant go below 0
-fun subtractContestTabulationsZ(op1: Map<Int, ContestTabulationIF>, op2: Map<Int, ContestTabulationIF>): Map<Int, ContestTabulation> {
+// tab1 - tab2, votes cant go below 0
+fun subtractContestTabulationsZ(tab1: Map<Int, ContestTabulationIF>, tab2: Map<Int, ContestTabulationIF>): Map<Int, ContestTabulation> {
     val result = mutableMapOf<Int, ContestTabulation>()
-    result.sumContestTabulations(op1)
-    result.subtractContestTabulationZ(op2)
+    result.sumContestTabulations(tab1)
+    result.subtractContestTabulationZ(tab2)
     return result
 }
 

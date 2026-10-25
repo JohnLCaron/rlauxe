@@ -5,10 +5,14 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.corlaInput.defaultCharset
 import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
 import java.io.File
+import java.io.IOException
+import java.io.InputStreamReader
+import java.io.Reader
 import java.nio.charset.Charset
 import kotlin.Int
 import kotlin.String
@@ -138,7 +142,11 @@ data class CountyContestVotes(override val countyName: String, override val cont
     companion object {
         fun fromContestTab(county: String, contestTab: ContestTabulation, info: ContestInfo): CountyContestVotes {
             val ccv = CountyContestVotes(county, info.name)
-            contestTab.votes.forEach { (candId, candVote) -> ccv.addChoice(info.candidateIdToName[candId]!!, candVote) }
+            contestTab.votes.forEach { (candId, candVote) ->
+                if (info.candidateIdToName[candId] == null)
+                    print("")
+                ccv.addChoice(info.candidateIdToName[candId]!!, candVote)
+            }
             return ccv
         }
     }
@@ -152,9 +160,21 @@ data class ChoiceVote(
     val countyVote: Int,
 )
 
-fun readCountyTabulateCsv(filename: String): Map<String, CountyTabAllContests> {
+fun readCountyTabulateCsvFromFile(filename: String): Map<String, CountyTabAllContests> {
     val file = File(filename)
-    val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
+    val parser = CSVParser.parse(file, Charset.forName(defaultCharset), CSVFormat.DEFAULT)
+    return readCountyTabulateCsvFromParser(parser)
+}
+
+fun readCountyTabulateCsvFromResource(resourcePath: String): Map<String, CountyTabAllContests> {
+    val resourceStream =
+        object {}.javaClass.getClassLoader().getResourceAsStream(resourcePath) ?: throw IOException("$resourcePath does not exist")
+    val reader: Reader = InputStreamReader(resourceStream, defaultCharset)
+    val parser =  CSVParser.parse(reader, CSVFormat.DEFAULT)
+    return readCountyTabulateCsvFromParser(parser)
+}
+
+fun readCountyTabulateCsvFromParser(parser: CSVParser): Map<String, CountyTabAllContests> {
     val records = parser.iterator()
 
     // we expect the first line to be the headers
@@ -174,7 +194,7 @@ fun readCountyTabulateCsv(filename: String): Map<String, CountyTabAllContests> {
                 line.get(idx++).trim(),
                 line.get(idx++).trim(),
                 line.get(idx++).trim(),
-                line.get(idx).toInt(),
+                line.get(idx).trim().toInt(),
             )
             val county = counties.getOrPut(choiceVote.countyName) { CountyTabAllContests(choiceVote.countyName) }
             county.addChoiceVote( choiceVote)

@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.strata.Strata
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
@@ -72,12 +73,16 @@ class CountyAuditRecord(
 
     // for viewer
     fun readCountyCvrsAndTabulate(countyName: String) : Map<Int, ContestTabulation> {
-        val countyCvrFile = "${publisher.unsortedCountyCvrDirectory()}/$countyName.csv"
-        logger.debug { "readCountyCvrsAndTabulate on $countyCvrFile (exists=${exists(countyCvrFile)}"}
+        val countyPublisher = Publisher("$topdir/county/$countyName")
+        val countyCvrFile = countyPublisher.cardManifestFile()
+        logger.debug { "readCountyCvrsAndTabulate on $countyCvrFile (exists=${exists(countyCvrFile)})"}
         if (!exists(countyCvrFile)) return emptyMap()
 
+        val countyContests = readContestsJsonFileUnwrapped(countyPublisher.contestsFile())
+        if (countyContests == null) return emptyMap()
+        val infos = countyContests.associate{ it.id to it.contest.info() }
+
         val mvrs = readCardsCsvIterator(countyCvrFile, styles = styles)
-        val infos = contests.associate{ it.id to it.contest.info() }
         val tabs =  tabulateAuditableCards(mvrs, infos)
         logger.debug { "got ${tabs.size} tabulations"}
         return tabs

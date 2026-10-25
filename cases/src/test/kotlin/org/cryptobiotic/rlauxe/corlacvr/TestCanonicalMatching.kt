@@ -10,20 +10,23 @@ class TestCanonicalMatching {
 
     @Test
     fun testCanonicalMatching2020() {
-        val input = Statewide2020Redacted()
+        val input = Statewide2020General()
         val county = "Garfield"
         val countyInput = input.corlaCountyInput(county)!!
         val corlaCvrs = countyInput.readCorlaCvrs()
         val schema = corlaCvrs.schema
         schema.contests.forEach { scontest: SchemaContestInfo ->
             val canon = input.matchCanonicalContest(county, scontest.contestName)
-            if (canon == null) println("no match for ${scontest.contestName}") else {
-                val start = scontest.startCol
-                repeat(scontest.ncols) { idx ->
-                    val colInfo = schema.columns[start + idx]
+            if (canon == null)
+                println("no match for ${scontest.contestName}")
+            else {
+                schema.columnsFor(scontest).forEach { colInfo ->
                     if (!isWriteIn(colInfo.choiceName)) {
                         val cchoice = input.matchCanonicalCandidate(county, canon, colInfo.choiceName)
-                        if (cchoice == null) println("    no match for ${canon.contestName} ${colInfo.choiceName}")
+                        if (cchoice == null) {
+                            println("    no match for contest='${canon.contestName}' choice='${colInfo.choiceName}'")
+                            input.matchCanonicalCandidate(county, canon, colInfo.choiceName)
+                        }
                     }
                 }
             }
@@ -43,12 +46,11 @@ class TestCanonicalMatching {
         schema.contests.forEach { scontest: SchemaContestInfo ->
             val canon = input.matchCanonicalContest(county, scontest.contestName)
             if (canon == null) println("no match for ${scontest.contestName}") else {
-                val start = scontest.startCol
-                repeat(scontest.ncols) { idx ->
-                    val colInfo = schema.columns[start + idx]
+                schema.columnsFor(scontest).forEach { colInfo ->
                     if (!isWriteIn(colInfo.choiceName)) {
                         val cchoice = input.matchCanonicalCandidate(county, canon, colInfo.choiceName)
-                        if (cchoice == null) println("    no match for ${canon.contestName} ${colInfo.choiceName}")
+                        if (cchoice == null)
+                            println("    no match for contest='${canon.contestName}' choice='${colInfo.choiceName}'")
                     }
                 }
             }

@@ -1,4 +1,4 @@
 county, manifestCount, unredactedCvrs, redactedCvrs, cvrInManifest, cvrNoManifest, manifestNoCvr, minCards, countBlankPrecincts, ballotStylesUnique, ballotStyleMin, precinctStyleMin
              Boulder,  121584,  120529,    1056,  120529,       0,  1055,  1021, 120529, true, 14, 14
           Broomfield,   29678,   29669,       9,   29619,      50,    59, 28404, 0, true, 821, 821
-             Larimer,  191186,  191085,     101,  191085,       0,   101,    80, 0, false, 36, 10
+             Larimer,  191186,  191085,     101,  191085,       0,   101,    80, 0, false, 0, 10

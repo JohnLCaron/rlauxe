@@ -1,14 +1,10 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
-import org.cryptobiotic.rlauxe.auditcenter.makeContestInfo
-import org.cryptobiotic.rlauxe.auditcenter.makeRealContestInfo
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.corlaInput.CountyInput
+import org.cryptobiotic.rlauxe.corlaCounty.CorlaContestInfo
+import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
-import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
 import java.io.File
 import kotlin.collections.set
 import kotlin.io.path.Path
@@ -16,6 +12,7 @@ import kotlin.io.path.writeLines
 import kotlin.math.max
 import kotlin.random.Random
 
+// works with the cvr rows using local contest and candidate ids. do not convert to canonical at this point.
 class Anonomicer(
     val corlaCvrs: CorlaCountyCvrsIF,  // should be the unredacted cvr file, but we allow a previous redaction
     val minBallots: Int = MIN_BALLOTS_DEFAULT,
@@ -26,7 +23,7 @@ class Anonomicer(
     constructor(input: String) : this( readCountyCvrs(input), MIN_BALLOTS_DEFAULT)
 
     val schema = corlaCvrs.schema
-    val infos: Map<Int, ContestInfo>
+    val infos: Map<Int, CorlaContestInfo>
     val removeCols = mutableSetOf<CvrHeader>()
     val agg: Aggregate
     val rpt = Report(true)
@@ -36,7 +33,7 @@ class Anonomicer(
         if (removePrecinctCol || styleOnly) removeCols.add(CvrHeader.precinctportion)
         if (removeBallotTypeCol) removeCols.add(CvrHeader.ballottype)
 
-        infos = corlaCvrs.makeRealContestInfo()
+        infos = corlaCvrs.makeContestInfo()
 
         val precinctStyles: List<UniqueStyle> = if (styleOnly) findUniqueStyles(corlaCvrs, infos)
                              else findPrecinctStyles(corlaCvrs, infos).map { it.uniques.values }.flatten()
@@ -91,7 +88,7 @@ class Anonomicer(
 
             if (agg.hasRedaction()) {
                 val aggTabs = agg.redactedAggregation()
-                val last = schema.nchoices
+                val last = schema.ncolumns
                 val aggrow = buildString {
                     append("AGGREGATED,")
                     repeat(schema.nheaders - 2) { append(",") }
@@ -120,7 +117,7 @@ class Anonomicer(
 
     fun writeRow(row: CvrRow, redacted: Boolean) = buildString {
         append(corlaCvrs.rowHeaderCols(row, removeCols))
-        val last = schema.nchoices
+        val last = schema.ncolumns
         val rowMap: Map<Int, List<Int>> = row.contestVotes.map { Pair(it.contestId, it.votedFor) }.toMap()
         var count = 0
         schema.contests.forEach { scontest ->
@@ -448,7 +445,7 @@ class Anonomicer(
             val ruleC = rareContests.keys.all { contestId ->
                 val redactTab = redactTabs[contestId]!!
                 val info = infos[redactTab.contestId]!!
-                if (info.candidateIds.size > 1) {
+                if (info.candidateNames.size > 1) {
                     val leadingVotes: Map.Entry<Int, Int> = redactTab.votes.maxBy { it.value }
                     val nonleadingVotes = redactTab.nvotes() - leadingVotes.value
                     if (nonleadingVotes <= NEAR_UNANIMOUS_THRESHOLD)
@@ -461,8 +458,8 @@ class Anonomicer(
     }
 
     fun verify(redactedCvrs: CorlaCountyCvrsIF) {
-        val unredactedTabs = tabulate(corlaCvrs)
-        val redactedTabs = tabulate(redactedCvrs)
+        val unredactedTabs = tabulate(corlaCvrs, infos)
+        val redactedTabs = tabulate(redactedCvrs, infos)
         val usum = unredactedTabs.sum()
         val rsum = redactedTabs.sum()
         var fail = false
@@ -487,7 +484,7 @@ class Anonomicer(
     }
 }
 
-open class UniqueStyle(val contests: Set<Int>, val infos: Map<Int, ContestInfo>) {
+open class UniqueStyle(val contests: Set<Int>, val infos: Map<Int, CorlaContestInfo>) {
     // will contain all rows for rare styles, and enough rows for common style donations
     val rows = mutableListOf<CvrRow>()
     val contestTabs = mutableMapOf<Int, ContestTabulation>()
@@ -509,7 +506,7 @@ open class UniqueStyle(val contests: Set<Int>, val infos: Map<Int, ContestInfo>)
 }
 
 // class PrecinctUniqueStyle(val precinct: String, val ballotType: String, val uniqueStyle: Set<Int>, val infos: Map<Int, ContestInfo>) {
-class PrecinctUniqueStyle(val precinct: String, contests: Set<Int>, infos: Map<Int, ContestInfo>): UniqueStyle(contests, infos) {
+class PrecinctUniqueStyle(val precinct: String, contests: Set<Int>, infos: Map<Int, CorlaContestInfo>): UniqueStyle(contests, infos) {
 
     override fun id() = "$precinct / $contests"
 
@@ -519,7 +516,7 @@ class PrecinctUniqueStyle(val precinct: String, contests: Set<Int>, infos: Map<I
 }
 
 // unique precinct/ballotType. But we cant rely on ballotType to have unique contestSet
-class PrecinctCardStyle(val precinctPortion: String, val infos: Map<Int, ContestInfo>) {
+class PrecinctCardStyle(val precinctPortion: String, val infos: Map<Int, CorlaContestInfo>) {
     val uniques = mutableMapOf<Set<Int>, PrecinctUniqueStyle>() // track tabulation for unique contests within the precinct
     var ncards = 0
     // var styleMap = emptyMap<String, PrecinctUniqueStyle>()
@@ -544,7 +541,7 @@ class PrecinctCardStyle(val precinctPortion: String, val infos: Map<Int, Contest
     }
 }
 
-fun findPrecinctStyles(corlaCvrs: CorlaCountyCvrsIF, infos: Map<Int, ContestInfo>): List<PrecinctCardStyle> {
+fun findPrecinctStyles(corlaCvrs: CorlaCountyCvrsIF, infos: Map<Int, CorlaContestInfo>): List<PrecinctCardStyle> {
     val styleCounters = mutableMapOf<String, PrecinctCardStyle>()
     corlaCvrs.cvrs().forEach { cvr ->
         // val cvrStyleId = CardStyleId(cvr.ballotType, cvr.contests())
@@ -557,7 +554,7 @@ fun findPrecinctStyles(corlaCvrs: CorlaCountyCvrsIF, infos: Map<Int, ContestInfo
     return styleCounters.values.toList()
 }
 
-fun findUniqueStyles(corlaCvrs: CorlaCountyCvrsIF, infos: Map<Int, ContestInfo>): List<UniqueStyle> {
+fun findUniqueStyles(corlaCvrs: CorlaCountyCvrsIF, infos: Map<Int, CorlaContestInfo>): List<UniqueStyle> {
     val styleCounters = mutableMapOf<Set<Int>, UniqueStyle>()
     corlaCvrs.cvrs().forEach { cvr ->
         val pcStyle = styleCounters.getOrPut(cvr.contests()) { UniqueStyle(cvr.contests(), infos) }
@@ -567,7 +564,7 @@ fun findUniqueStyles(corlaCvrs: CorlaCountyCvrsIF, infos: Map<Int, ContestInfo>)
     return styleCounters.values.toList()
 }
 
-data class CvrTabulations(val infos: Map<Int, ContestInfo>,
+data class CvrTabulations(val infos: Map<Int, CorlaContestInfo>,
                           val cvrTabs: Map<Int, ContestTabulation>,
                           val redactedTabs: Map<Int, ContestTabulation>) {
 
@@ -586,7 +583,7 @@ data class CvrTabulations(val infos: Map<Int, ContestInfo>,
     }
 }
 
-fun tabulateCvrRows(rows: Iterator<CvrRow>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+fun tabulateCvrRows(rows: Iterator<CvrRow>, infos: Map<Int, CorlaContestInfo>): Map<Int, ContestTabulation> {
     val sum = mutableMapOf<Int, ContestTabulation>()
     rows.forEach { row ->
         row.contestVotes.forEach {
@@ -596,15 +593,7 @@ fun tabulateCvrRows(rows: Iterator<CvrRow>, infos: Map<Int, ContestInfo>): Map<I
     return sum
 }
 
-fun tabulate(corlaCvrs: CorlaCountyCvrsIF): CvrTabulations  {
-    val infos = corlaCvrs.makeContestInfo().map { it ->
-        ContestInfo(
-            it.name, it.id, it.candidateNames,
-            if (it.isIrv) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY,
-            it.nwinners
-        )
-    }.associateBy { it.id }
-
+fun tabulate(corlaCvrs: CorlaCountyCvrsIF, infos: Map<Int, CorlaContestInfo>): CvrTabulations  {
     val cvrTabs = tabulateCvrRows(corlaCvrs.cvrs().iterator(), infos)
 
     val sumRedaction = mutableMapOf<Int, ContestTabulation>()
@@ -616,6 +605,15 @@ fun tabulate(corlaCvrs: CorlaCountyCvrsIF): CvrTabulations  {
         }
     }
     return CvrTabulations(infos, cvrTabs, sumRedaction)
+}
+
+fun MutableMap<Int, ContestTabulation>.sumContestTabulationsFromCandVotes(info: CorlaContestInfo, candVotes: Map<Int, Int>, ncards: Int = 1) {
+    val contestSum = this.getOrPut(info.id) {
+        //     constructor(info: ContestInfo) : this(info.id, info.voteForN, info.isIrv, info.candidateIds)
+        ContestTabulation(info.id, info.voteForN, info.isIrv, info.candidateNames.values.toList())
+    }
+    candVotes.forEach { (cand, vote) -> contestSum.addVote(cand, vote)}
+    contestSum.setNcards(contestSum.ncardsTabulated + ncards)
 }
 
 fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boolean {

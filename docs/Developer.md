@@ -624,8 +624,8 @@ class TestRunRoundCli {
 
 **TODO 10/21/2026**
 
+* each countyInput is in $topdir/county/name/ up to CreateElectionRecord DONE
 * state election
-* each countyInput is in $topdir/county/name/ up to CreateElectionRecord
 * canonical county order
 * anonomicer preserves manifest order
 * ok to change until seed

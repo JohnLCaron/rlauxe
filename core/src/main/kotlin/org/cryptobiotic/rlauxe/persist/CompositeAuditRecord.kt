@@ -286,8 +286,7 @@ fun readLimitsTxtFile(filename: String): List<SampleLimit> {
 // return id -> name
 fun readCanonicalPartyTxtFile(filename: String): Pair<String, Map<Int, String>> {
     val reader: BufferedReader = File(filename).bufferedReader()
-    reader.readLine() // header line
-    val electionName = reader.readLine().trim()
+    val electionName = reader.readLine().trim() // header line
 
     val parties = mutableListOf<Pair<Int, String>>()
     while (true) {

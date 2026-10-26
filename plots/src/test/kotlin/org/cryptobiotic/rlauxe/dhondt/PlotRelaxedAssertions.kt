@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.CatOrdering
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericErrorBarPlotter
-import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.nfn
@@ -20,7 +19,7 @@ private val alpha = .05
 private val show = false
 
 class PlotRelaxedAssertions {
-    val year = 2019
+    val year = 2024
     val topdir = "$cases/belgium/belgium$year/"
     val auditRecord = AuditRecord.read(topdir)!! as CompositeAuditRecord
     val contests = auditRecord.contests
@@ -33,22 +32,24 @@ class PlotRelaxedAssertions {
         val stopwatch = Stopwatch()
 
         val ctrackers = lastRound.contestRounds.map { ContestTracker(it) }
+        val ncontests = ctrackers.size
         val madeSeatsWithMvrs = mutableListOf<MadeSeats>()
         val initialSamples: Map<Int, Int> = ctrackers.associate { it.id to it.getEstMvrs() }
 
         val startSeats = MadeSeats(ctrackers)
         if (show) println(startSeats.allSeats.showAllPartySeats(partyNames))
-        println("totalMvrsNeeded=${nfn(startSeats.mvrsUsed, 6)} (all)")
+        println("totalMvrsNeeded=${nfn(startSeats.totalUsed, 6)} (all)")
         madeSeatsWithMvrs.add(startSeats)
 
-        repeat(6) {
+        val nsteps = 20
+        repeat(nsteps) {
             val largestDelta = ctrackers.map { it.getDelta() }.maxBy { it.delta }
             largestDelta.largest.ctracker.setFailed(largestDelta)
 
             println("\n${it+1} remove=$largestDelta")
 
             val makeSeats = MadeSeats(ctrackers)
-            println("${nfn(makeSeats.mvrsUsed, 6)} mvrsUsed")
+            println("${nfn(makeSeats.totalUsed, 6)} mvrsUsed")
             print("  failures = ${makeSeats.failures.filter { it.value > 0 }}")
             println("; tfailures = ${makeSeats.tfailures.filter { it.value > 0 }}")
 
@@ -59,12 +60,40 @@ class PlotRelaxedAssertions {
         }
         println("that took $stopwatch")
 
-
         println("| contest | initialSamples | relaxedSamples | failures |")
         println("| ------ | ------ | ------ |------ |")
         ctrackers.sortedByDescending { it.sampleLimit }. forEach{
             println("|${it.contestRound.name} | ${initialSamples[it.id]} | ${it.sampleLimit} | ${it.failures} |") }
         println("| Total | ${initialSamples.values.sum() } | ${ctrackers.sumOf{it.sampleLimit} } | ${ctrackers.sumOf { it.failures }} |")
+        println()
+
+        var lastRound = mutableMapOf<Int, Int>()
+        val table = buildString {
+            append("| contest | ")
+            repeat(nsteps+1) { append(" step $it |") }
+            appendLine()
+
+            append("| ----- | ")
+            repeat(nsteps+1) { append(" ----- |") }
+            appendLine()
+
+            repeat(ncontests) { contest ->
+                append("| ${ctrackers[contest].contestRound.name} | ")
+                madeSeatsWithMvrs.forEach { madeSeat ->
+                    val contestRoundMvrs = madeSeat.mvrsUsedByContest[contest]
+                    val changed = if ((lastRound[contest] != null) && contestRoundMvrs != lastRound[contest]) "*" else " "
+                    append("$changed $contestRoundMvrs |")
+                    lastRound[contest] = contestRoundMvrs
+                }
+                appendLine()
+            }
+            append("| Total | ")
+            madeSeatsWithMvrs.forEach { madeSeats: MadeSeats ->
+                append(" ${madeSeats.mvrsUsedByContest.sum()} |")
+            }
+            appendLine()
+        }
+        println("\n$table")
 
         val name = "RelaxedSeats$year"
         val dirName = "$testdataDir/plots/dhondt/$name"
@@ -126,7 +155,8 @@ class PlotRelaxedAssertions {
         val failures = mutableMapOf<Int, Int>()
         val tfailures = mutableMapOf<Int, Int>()
         val allSeats: AllSeats
-        var mvrsUsed: Int = 0
+        val mvrsUsedByContest: List<Int>
+        val totalUsed: Int
 
         init {
             val contestRanges = ctrackers.map { ctracker ->
@@ -136,7 +166,8 @@ class PlotRelaxedAssertions {
                 relax.totalContestRange()
             }
             allSeats = AllSeats(contestRanges)
-            mvrsUsed = ctrackers.map { it.getEstMvrs() }.sum()
+            mvrsUsedByContest = ctrackers.map { it.getEstMvrs() }
+            totalUsed = ctrackers.map { it.getEstMvrs() }.sum()
         }
     }
 
@@ -148,7 +179,7 @@ class PlotRelaxedAssertions {
         madeSeats.forEach { madeSeat ->
             madeSeat.allSeats.partySums.forEach { range ->
                 if (range.minSeats > 0) {
-                    data.add(SeatPlot(range.partyName, range.minSeats, range.reportedSeats, range.maxSeats, madeSeat.mvrsUsed))
+                    data.add(SeatPlot(range.partyName, range.minSeats, range.reportedSeats, range.maxSeats, madeSeat.totalUsed))
                 }
             }
         }

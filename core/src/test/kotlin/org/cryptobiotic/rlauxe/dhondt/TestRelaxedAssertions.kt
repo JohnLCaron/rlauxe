@@ -9,7 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestRelaxedAssertions {
-    val topdir = "$cases/belgium/belgium2024/"
+    val topdir = "$cases/belgium/belgium2024"
     val auditRecord = AuditRecord.read(topdir)!! as CompositeAuditRecord
     val contests = auditRecord.contests
     val lastRound = auditRecord.rounds.last()
@@ -139,7 +139,7 @@ class TestRelaxedAssertions {
 
     @Test
     fun testWriteAllContestsJson() {
-        val filename = "/home/stormy/rla/temp/assertions.v10.json"
+        val filename = "/home/joncifer/rla/dhondt/assertions2024.v10.json"
         val contestRounds = lastRound.contestRounds
         val json = writeRelaxedAssertionProofs(filename, contestRounds, config.riskLimit, sampleLimits)
         println(json)

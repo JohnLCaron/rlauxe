@@ -115,7 +115,7 @@ class TestAnonData {
         //CheckCvrRedaction(countyInput.cvrsSource, output)
         println("---------------------------------")
         println("python vs rlauxe")
-        compareTwoRedactions("$python/$county.csv", output, show=true)
+        compareTwoRedactions(input.year, county, "$python/$county.csv", output, show=true)
     }
 
     @Test
@@ -150,7 +150,7 @@ class TestAnonData {
 
                 println("---------------------------------")
                 println("python vs raire")
-                countNredacted[county] = compareTwoRedactions("$python/$county.csv", output, show = true)
+                countNredacted[county] = compareTwoRedactions(input.year, county, "$python/$county.csv", output, show = true)
             } catch (e: Throwable) {
                 println("failed on $county: ${e.message}")
             }
@@ -176,7 +176,7 @@ class TestAnonData {
 
             println("---------------------------------")
             println("python vs raire")
-            countNredacted[county] = compareTwoRedactions(null, output, show = true)
+            countNredacted[county] = compareTwoRedactions(input.year, county, null, output, show = true)
 
         }
         writeRedactionCount("$baseRedactedCount/${input.name()}.csv", countNredacted)

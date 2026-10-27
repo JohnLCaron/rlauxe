@@ -19,14 +19,14 @@ import org.cryptobiotic.rlauxe.util.roundUp
 /* You can transform to Plurality contest with voteForN=nwinners and the candidates are the $candName/$round */
 
 // winner,loser: party ids
-// winnerDivisor: last seat won by winner (aka lastSeatWon)
-// loserDivisor: first seat lost by loser (aka firstSeatLost)
+// winnerDivisor: last seat won by winner (aka lastSeatWon) = s(W)
+// loserDivisor: first seat lost by loser (aka firstSeatLost) = s(L) + 1
 // why do different DHondts have different upper limits ?? = (first/last+1)/2; because of the dividors
 data class DhondtAssorter(val info: ContestInfo, val winnerId: Int, val loserId: Int, val winnerDivisor: Int, val loserDivisor: Int):
     AssorterIF {
     val upperg = 1.0 / winnerDivisor  // upper bound of g = 1/d(WA)  = 1/lastSeatWon   (highest loser)
     val lowerg = -1.0 / loserDivisor  // lower bound of g = -1/d(WB) = -1/firstSeatLost (lowest winner)
-    val c = -1.0 / (2 * lowerg)  // firstloser /2
+    val c = -1.0 / (2 * lowerg)  // firstloser / 2
 
     private var reportedMargin: Double = 0.0
     private var dilutedMargin: Double = 0.0
@@ -38,8 +38,17 @@ data class DhondtAssorter(val info: ContestInfo, val winnerId: Int, val loserId:
     }
 
     // Proportional p.15
-    // gA,B (b) := bA /d(WA ) − bB /d(LB )
+    // g_A,B (b) := b_A /s(A) − b_B /(s(B) + 1)
     // where bA (resp. bB ) is 1 if there is a vote for party A (resp. B), 0 otherwise.
+    // upper bound of g = 1/s(A)
+    // lower bound of g = -1/(s(B) + 1)
+    // c = -1.0 / (2 * lowerg)
+    // c = (s(B) + 1) / 2
+
+
+
+    // paper has g_A,B (b) := b_A / s(A) − b_B / s(B) + 1
+    // h_A,B (b) = b_A · (s(B) + 1) / 2 s(A)  +  (1 − b_B) / 2
 
     fun g(partyVote: Int): Double {
         return if (partyVote == winnerId) upperg
@@ -47,7 +56,12 @@ data class DhondtAssorter(val info: ContestInfo, val winnerId: Int, val loserId:
             else 0.0
     }
 
-    // h(b) = c · g(b) + 1/2
+    // h(b) = g(b) * c + 1/2
+    //      = g(b) * (s(B) + 1) / 2 + 1/2
+    //      = (b_A /s(A) − b_B /(s(B) + 1)) * (s(B) + 1) / 2 + 1/2
+    //      = (b_A * (s(B) + 1) / 2 * s(A)) − b_B / 2 + 1/2
+    //      = b_A * (s(B) + 1) / 2 * s(A)) + (1 − b_B) / 2
+
     fun h(partyVote: Int): Double {
         return c * g(partyVote) + 0.5
     }

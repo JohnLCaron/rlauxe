@@ -94,11 +94,11 @@ interface CorlaCountyCvrsIF {
     fun unredactedCvrs(): Int
     fun redactedCvrs() = redaction().nredactedCvrs()
 
-    fun headers(): List<String>
+    fun headers(skipHeaders:List<CvrHeader>): List<String>
     fun hasBallotType(): Boolean
     fun countBlankPrecincts(): Int
     fun ballotStyleUnique(): Boolean
-    fun rowHeaderCols(row: CvrRow, redact: Set<CvrHeader> = emptySet()): String
+    fun rowHeaderCols(row: CvrRow, redact: List<CvrHeader>): String
 
     fun show() = "$electionName nrows=${nrows()} unredactedRows=${unredactedCvrs()}  redactedRows=${redactedCvrs()}"
     fun getBallotType(line: CSVRecord): String

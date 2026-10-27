@@ -1,5 +1,12 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
+import org.cryptobiotic.rlauxe.audit.MvrSource
+import org.cryptobiotic.rlauxe.corla.CorlaStateContestInfoBuilder
+import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyElection
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
+import org.cryptobiotic.rlauxe.corlacvr.CardStyleId
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
+import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -9,36 +16,18 @@ class WriteCountyInputData {
 
     @Test
     fun testOneCounty() {
-        val county = "Larimer"
+        val county = "Las Platas"
         val stateInput = Statewide2020Redacted()
         val countyInput = stateInput.corlaCountyInput(county)
         if (countyInput != null) {
-            val ccc = CheckCvrsAndManifest(stateInput, countyInput, showMatch = true, showMissingVotes = true, showRedactedCvrs = true)
-            val corlaCvrs = ccc.corlaCvrs
-            val manifestCounts = ccc.manifestCounts
-
-            val data =
-                CountyInputData(
-                    county,
-                    manifestCount = manifestCounts.totalEntries,
-                    unredactedCvrs = corlaCvrs.unredactedCvrs(),
-                    redactedCvrs = corlaCvrs.redactedCvrs(),
-                    cvrInManifest = manifestCounts.countCvrsInManifest,
-                    cvrNoManifest = manifestCounts.cvrNoManifest,
-                    manifestNoCvr = manifestCounts.manifestNoCvr,
-                    minCards = ccc.minCards,
-                    countBlankPrecincts = ccc.countBlankPrecincts,
-                    ballotStylesUnique = ccc.ballotStylesUnique,
-                    ballotStyleMin = ccc.ballotStyleMin,
-                    precinctStyleMin = ccc.precinctStyleMin,
-                )
-            println("wrote $county  ${data}")
+            val data = makeCountyInputData(county, stateInput, countyInput)
+            println("made ${data}")
         }
     }
 
     @Test
     fun writeOneState() {
-        writeCountyData(Statewide2020General())
+        writeCountyData(Statewide2020Redacted())
     }
 
     @Test
@@ -62,36 +51,8 @@ class WriteCountyInputData {
         stateInput.counties().forEach { county ->
             val countyInput = stateInput.corlaCountyInput(county)
             if (countyInput != null) {
-                val ccc = CheckCvrsAndManifest(stateInput, countyInput, showMatch = true, showMissingVotes = true, showRedactedCvrs = true)
-                val corlaCvrs = ccc.corlaCvrs
-                val manifestCounts = ccc.manifestCounts
-
-                // data class ManifestCounts(
-                //    val totalEntries: Int,                    // total entries in the manifest
-                //    val unmatched: Int,                       // count of Manifest entries not in the Cvrs; presumed to be == redacted CVRs
-                //    val countCvrsInManifest: Int,             // count of Cvrs that match entries in the Manifest
-                //    val cvrNoManifest: Int,                  // cvrs without matching manifest entry
-                //    val manifestNoCvr: Int,                  // manifest entries without matching cvr
-                //    val match: Map<String, ManifestEntry>,    // imprintedId -> ManifestEntry
-                //    val redactedIds: List<ManifestEntry>      // didnt match a cvr, assume to be in the redactions
-                //)
-                data.add(
-                    CountyInputData(
-                        county,
-                        manifestCount = manifestCounts.totalEntries,
-                        unredactedCvrs = corlaCvrs.unredactedCvrs(),
-                        redactedCvrs = corlaCvrs.redactedCvrs(),
-                        cvrInManifest = manifestCounts.countCvrsInManifest,
-                        cvrNoManifest = manifestCounts.cvrNoManifest,
-                        manifestNoCvr = manifestCounts.manifestNoCvr,
-                        minCards = ccc.minCards,
-                        countBlankPrecincts = ccc.countBlankPrecincts,
-                        ballotStylesUnique = ccc.ballotStylesUnique,
-                        ballotStyleMin = ccc.ballotStyleMin,
-                        precinctStyleMin = ccc.precinctStyleMin,
-                    )
-                )
-                println("wrote $county  ${data.last()}")
+                data.add(makeCountyInputData(county, stateInput, countyInput))
+                println("made ${data.last()}")
             }
         }
         val filename = "$baseSummaryData/${stateInput.name()}.csv"
@@ -103,5 +64,59 @@ class WriteCountyInputData {
         val roundtrip = readCountyInputData(filename)
         assertEquals(data.sortedBy {it.county} , roundtrip)
     }
+
+    fun makeCountyInputData(county: String, stateInput: StatewideInput, countyInput: CountyInput): CountyInputData {
+        val contestBuilder = CorlaStateContestInfoBuilder(stateInput)
+        val countyElection = CorlaCountyElection(countyInput, stateInput, contestBuilder, MvrSource.testPrivateMvrs,
+            true, ElectionVariantEnum.OnePool)
+
+        val corlaCvrs = countyElection.corlaCvrs
+        val manifest = countyInput.readManifestEntries()
+        val manifestCounts = manifest.manifestCounts(corlaCvrs)
+        println("made manifestCounts for ${countyInput.electionName}")
+
+        // val ccc = CheckCvrsAndManifest(stateInput, countyInput, showMatch = true, showMissingVotes = true, showRedactedCvrs = true)
+        // val manifestCounts = ccc.manifestCounts
+
+        return CountyInputData(
+            county,
+            manifestCount = manifestCounts.totalEntries,
+            unredactedCvrs = corlaCvrs.unredactedCvrs(),
+            redactedCvrs = corlaCvrs.redactedCvrs(),
+            cvrInManifest = manifestCounts.countCvrsInManifest,
+            cvrNoManifest = manifestCounts.cvrNoManifest,
+            manifestNoCvr = manifestCounts.manifestNoCvr,
+            minCards = -1,
+            countBlankPrecincts = corlaCvrs.countBlankPrecincts(),
+            ballotStylesUnique = corlaCvrs.ballotStyleUnique(),
+            ballotStyleMin = corlaCvrs.cardStyles().minOf{ it.ncards },
+            precinctStyleMin = findPrecinctStyleMin(corlaCvrs), // maybe "rare_cards" would be more useful
+        )
+    }
+}
+
+fun findPrecinctStyleMin(corlaCvrs: CorlaCountyCvrsIF): Int {
+
+    class UniqueContests() {
+        val contests = mutableMapOf<Set<Int>, Int>() // count unique contests within the precinct
+        var ncards = 0
+        var styleMap = emptyMap<String, Int>()
+
+        fun convert(ballotType:String, cardStyleMap: Map<CardStyleId, CvrCardStyle>) {
+            styleMap = contests.mapKeys { cardStyleMap[CardStyleId(ballotType, it.key)]?.cardStyle ?: "unknown" }
+        }
+    }
+
+    val styleCounters = mutableMapOf<Pair<String, String>, UniqueContests>()
+    corlaCvrs.cvrs().forEach { cvr ->
+        val id = Pair(cvr.ballotType, cvr.precinctPortion ?: "none")
+        val unique = styleCounters.getOrPut(id) { UniqueContests() }
+        val count = unique.contests.getOrDefault(cvr.contests(), 0)
+        unique.contests[cvr.contests()] = count + 1
+        unique.ncards++
+    }
+    styleCounters.forEach { it.value.convert(it.key.first, corlaCvrs.cardStyleMap()) }
+
+    return styleCounters.values.minOf { it.ncards }
 }
 

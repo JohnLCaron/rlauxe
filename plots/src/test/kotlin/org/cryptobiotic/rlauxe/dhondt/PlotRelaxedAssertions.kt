@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.CatOrdering
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericErrorBarPlotter
+import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.nfn
@@ -19,7 +20,7 @@ private val alpha = .05
 private val show = false
 
 class PlotRelaxedAssertions {
-    val year = 2024
+    val year = 2019
     val topdir = "$cases/belgium/belgium$year/"
     val auditRecord = AuditRecord.read(topdir)!! as CompositeAuditRecord
     val contests = auditRecord.contests
@@ -28,7 +29,7 @@ class PlotRelaxedAssertions {
     val partyNames = auditRecord.readPartyNames()
 
     @Test
-    fun plotRelaxedAssertions() {
+    fun plotRelaxedSeats() {
         val stopwatch = Stopwatch()
 
         val ctrackers = lastRound.contestRounds.map { ContestTracker(it) }
@@ -60,14 +61,82 @@ class PlotRelaxedAssertions {
         }
         println("that took $stopwatch")
 
+        val name = "RelaxedSeats$year"
+        val dirName = "$testdataDir/plots/dhondt/$name"
+        validateOutputDir(Path(dirName))
+
+        makeRelaxedSeatsPlot(
+            writeFile = "$dirName/$name",
+            title="Belgium $year Relaxed Assertions at 5% risk",
+            subtitle="Party Seat ranges vs number of samples",
+            madeSeats = madeSeatsWithMvrs,
+            scaleType=ScaleType.Linear,
+        )
+
         println("| contest | initialSamples | relaxedSamples | failures |")
         println("| ------ | ------ | ------ |------ |")
         ctrackers.sortedByDescending { it.sampleLimit }. forEach{
             println("|${it.contestRound.name} | ${initialSamples[it.id]} | ${it.sampleLimit} | ${it.failures} |") }
         println("| Total | ${initialSamples.values.sum() } | ${ctrackers.sumOf{it.sampleLimit} } | ${ctrackers.sumOf { it.failures }} |")
         println()
+    }
 
-        var lastRound = mutableMapOf<Int, Int>()
+    @Test
+    fun plotRelaxedContests() {
+        val stopwatch = Stopwatch()
+
+        val ctrackers = lastRound.contestRounds.map { ContestTracker(it) }
+        val ncontests = ctrackers.size
+        val madeSeatsWithMvrs = mutableListOf<MadeSeats>()
+
+        val startSeats = MadeSeats(ctrackers)
+        if (show) println(startSeats.allSeats.showAllPartySeats(partyNames))
+        println("totalMvrsNeeded=${nfn(startSeats.totalUsed, 6)} (all)")
+        madeSeatsWithMvrs.add(startSeats)
+
+        val nsteps = 20
+        repeat(nsteps) {
+            val largestDelta = ctrackers.map { it.getDelta() }.maxBy { it.delta }
+            largestDelta.largest.ctracker.setFailed(largestDelta)
+
+            println("\n${it+1} remove=$largestDelta")
+
+            val makeSeats = MadeSeats(ctrackers)
+            println("${nfn(makeSeats.totalUsed, 6)} mvrsUsed")
+            print("  failures = ${makeSeats.failures.filter { it.value > 0 }}")
+            println("; tfailures = ${makeSeats.tfailures.filter { it.value > 0 }}")
+
+            // could show delta
+            if (show) println(makeSeats.allSeats.showAllPartySeats(partyNames))
+
+            madeSeatsWithMvrs.add(makeSeats)
+        }
+        println("that took $stopwatch")
+
+        /*
+        val name = "RelaxedSeats$year"
+        val dirName = "$testdataDir/plots/dhondt/$name"
+        validateOutputDir(Path(dirName))
+
+        makeRelaxedSeatsPlot(
+            writeFile = "$dirName/$name",
+            title="Belgium $year Relaxed Assertions at 5% risk",
+            subtitle="Party Seat ranges vs number of samples",
+            madeSeats = madeSeatsWithMvrs,
+            scaleType=ScaleType.Linear,
+        )
+
+        println("| contest | initialSamples | relaxedSamples | failures |")
+        println("| ------ | ------ | ------ |------ |")
+        ctrackers.sortedByDescending { it.sampleLimit }. forEach{
+            println("|${it.contestRound.name} | ${initialSamples[it.id]} | ${it.sampleLimit} | ${it.failures} |") }
+        println("| Total | ${initialSamples.values.sum() } | ${ctrackers.sumOf{it.sampleLimit} } | ${ctrackers.sumOf { it.failures }} |")
+        println() */
+
+        /////////////////////////////////////////////////////////////////////////
+
+        val data= mutableListOf<RelaxedContest>()
+        val lastRound = mutableMapOf<Int, Int>()
         val table = buildString {
             append("| contest | ")
             repeat(nsteps+1) { append(" step $it |") }
@@ -79,11 +148,12 @@ class PlotRelaxedAssertions {
 
             repeat(ncontests) { contest ->
                 append("| ${ctrackers[contest].contestRound.name} | ")
-                madeSeatsWithMvrs.forEach { madeSeat ->
+                madeSeatsWithMvrs.forEachIndexed { nfailures, madeSeat ->
                     val contestRoundMvrs = madeSeat.mvrsUsedByContest[contest]
                     val changed = if ((lastRound[contest] != null) && contestRoundMvrs != lastRound[contest]) "*" else " "
                     append("$changed $contestRoundMvrs |")
                     lastRound[contest] = contestRoundMvrs
+                    data.add(RelaxedContest(nfailures, contestRoundMvrs, ctrackers[contest].contestRound.name))
                 }
                 appendLine()
             }
@@ -95,16 +165,16 @@ class PlotRelaxedAssertions {
         }
         println("\n$table")
 
-        val name = "RelaxedSeats$year"
-        val dirName = "$testdataDir/plots/dhondt/$name"
-        validateOutputDir(Path(dirName))
+        val name2 = "RelaxedContests$year"
+        val dirName2 = "$testdataDir/plots/dhondt/$name2"
+        validateOutputDir(Path(dirName2))
 
-        makeRelaxedSeatsPlot(
-            writeFile = "$dirName/$name",
+        makeRelaxedContestsPlot(
+            writeFile = "$dirName2/$name2",
             title="Belgium $year Relaxed Assertions at 5% risk",
-            subtitle="Party Seat ranges vs number of samples",
-            madeSeats = madeSeatsWithMvrs,
-            scaleType=ScaleType.Linear,
+            subtitle="Number of samples vs number of Relaxed assertions",
+            data = data,
+            scaleType=ScaleType.LogLinear,
         )
 
     }
@@ -174,7 +244,6 @@ class PlotRelaxedAssertions {
     data class SeatPlot(val party: String, val minSeats: Int, val reportedSeats: Int, val maxSeats: Int, val mvrsUsed: Int)
 
     fun makeRelaxedSeatsPlot(writeFile: String, title: String, subtitle: String, madeSeats: List<MadeSeats>, scaleType: ScaleType) {
-
         val data = mutableListOf<SeatPlot>()
         madeSeats.forEach { madeSeat ->
             madeSeat.allSeats.partySums.forEach { range ->
@@ -200,7 +269,22 @@ class PlotRelaxedAssertions {
             addPoints = true,
             catOrdering = catOrdering,
         )
+    }
 
+    data class RelaxedContest(val nfailures: Int, val nsamples: Int, val cat: String)
+
+    fun makeRelaxedContestsPlot(writeFile: String, title: String, subtitle: String, data: List<RelaxedContest>, scaleType: ScaleType) {
+        genericPlotter(
+            titleS = title,
+            subtitleS = subtitle,
+            writeFile = writeFile,
+            scaleType = scaleType,
+            data = data,
+            xname = "number of failed assertions", xfld = { it.nfailures.toDouble() },
+            yname = "number of samples needed", yfld = { it.nsamples.toDouble() },
+            catName = "Circonscription", catfld = { it.cat },
+            addPoints = true,
+        )
     }
 
 }

@@ -1,5 +1,5 @@
 # Redaction notes for Corla 2020 election
-last changed 9/23/2026
+last changed 10/26/2026
 
 See [Corla2020notes](Corla2020notes.md) for description of the cvr files.
 
@@ -31,6 +31,7 @@ in this case aggregated by style.
 
 This is called "column redaction": the ids are retained and the votes are redacted.
 
+* Dolores: has a summary row that python sees as a rare style
 * Douglas: 56; has 'X' over contest vote, with style
 * Eagle: 20; "Redacted per 24-27-205.5 (4)(b)(III) C.R.S"
 * El Paso 44; * on all columns
@@ -38,6 +39,7 @@ This is called "column redaction": the ids are retained and the votes are redact
 * Larimer 57; "REDACTED": no vote counts
 * Logan 21; empty votes
 * Morgan 5; empty votes
+* Phillips : has a summary row that python sees as a rare style
 * Pitkin 26; has 'X' over contest vote, with style
 * Pueblo 47; empty votes
 * Rio Blanco 4; empty votes
@@ -54,11 +56,9 @@ from the "voteDifference".
 2. Subtract CVR tabulations from reported vote totals = "voteDifference". 
 3. minCardsForVote = minimum ncards needed for voteDifference
 
-* Adams: missing=16, minCardsForVote=16
 * Arapahoe: missing=100, minCardsForVote=115
-* Garfield: missing=3, minCardsForVote=3
-* Jackson: missing=701, minCardsForVote=690
-* Teller: missing=91, minCardsForVote=91
+* Adams: missing=16, minCardsForVote=16
+* Jackson: missing=3
 
 **Arapahoe** has 100 missing cards, but vote difference (reported - cvrs) needs 115.
 The reported population agrees with the manifest, but the reported votes are inconsistent in 3 contests.
@@ -70,16 +70,115 @@ In our simulation, it means that the simulated ballots will be short of the repo
 
 Does anonymize_cvr.py think that redactions are needed? Standard paremenets are minBallots = 10, contest_balancing = true.
 
-**needs redaction**
+**needs extra redaction**
 
-* Arapahoe (68, 92 sec)
-* Denver (18, 10 sec)
-* La Plata(10, 640 ms)
-* Larimer (31, 2 sec)
-* Mesa (31, 2 sec)
-* Routt (13, 409 ms)
-* Saguache (25, 161 ms)
-* Sedgwick(17, 54 ms)
+* Arapahoe (40)  redacted 16
+* Archeluta (11) unredacted
+* Denver (475)   unredacted
+* Eagle (84)     redacted 20
+* Grand (11)     unredacted
+* La Plata(24)   unredacted
+* Larimer (43)   redacted 57
+* Mesa (67)      unredacted
+* Montrose (16)  unredacted
+* Otero (29)     unredacted
+* Rio Grande (10) unredacted
+* Routt (15)     unredacted
+* Saguache (24)  unredacted
+* Sedgwick(16)   unredacted
+* Weld (151)     redacted 41
+* Yuma (10)      unredacted
+
+The number in parenthesis is the estimate of the extra redaction needed, using precinct level redaction. The comment is whether they did any redaction at all.
+
+## Run anomymize_cvr program on 2020 County CVR files as is
+
+
+| county      | manifest | cvrUnredacted | cvrRedacted | pythonNredact | totalRedact | extraRedact |
+|-------------|----------|---------------|-------------|---------------|-------------|-------------|  
+| Denver      | 1181464  | 1181464       | 0           | 475           | 475         | 475         |
+| Weld        | 169080   | 169061        | 41          | 201           | 192         | 151         |
+| Summit      | 18943    | 18788         | 169         | 169           | 169         | 0           |
+| Larimer     | 226896   | 226844        | 57          | 108           | 100         | 43          |
+| Eagle       | 58589    | 58571         | 20          | 106           | 104         | 84          |
+| Douglas     | 234272   | 234216        | 56          | 70            | 56          | 0           |
+| Jefferson   | 381834   | 381793        | 47          | 70            | 47          | 0           |
+| Mesa        | 91506    | 91506         | 0           | 67            | 67          | 67          |
+| Pueblo      | 89155    | 89108         | 47          | 47            | 47          | 0           |
+| El Paso     | 382583   | 383160        | 44          | 44            | 44          | 0           |
+| Arapahoe    | 354347   | 354231        | 16          | 40            | 56          | 40          |
+| Pitkin      | 12089    | 12063         | 26          | 35            | 26          | 0           |
+| Saguache    | 6821     | 6821          | 0           | 31            | 24          | 24          |
+| Otero       | 9704     | 9704          | 0           | 29            | 29          | 29          |
+| La Plata    | 35995    | 35995         | 0           | 27            | 24          | 24          |
+| Logan       | 10685    | 10664         | 21          | 21            | 21          | 0           |
+| Sedgwick    | 1496     | 1496          | 0           | 20            | 16          | 16          |
+| Dolores     | 1500     | 1500          | 0           | 18            | 0           | 0           |
+| Montrose    | 25159    | 25159         | 0           | 18            | 16          | 16          |
+| Phillips    | 2561     | 2561          | 0           | 18            | 0           | 0           |
+| Routt       | 33008    | 33008         | 0           | 18            | 15          | 15          |
+| Grand       | 10483    | 10483         | 0           | 16            | 11          | 11          |
+| Archuleta   | 9404     | 9404          | 0           | 13            | 11          | 11          |
+| Yuma        | 5029     | 5029          | 0           | 13            | 10          | 10          |
+| Rio Grande  | 6451     | 6451          | 0           | 10            | 10          | 10          |
+| Morgan      | 13860    | 13855         | 5           | 5             | 5           | 0           |
+| Rio Blanco  | 3709     | 3705          | 4           | 4             | 4           | 0           |
+| Adams       | 239425   | 239409        | 0           | 0             | 0           | 0           |
+| Alamosa     | 7923     | 7923          | 0           | 0             | 0           | 0           |
+| Baca        | 0        | 0             | 0           | 0             | 0           | 0           |
+| Bent        | 2295     | 2295          | 0           | 0             | 0           | 0           |
+| Boulder     | 208445   | 205796        | 0           | 0             | 0           | 0           |
+| Broomfield  | 47103    | 47103         | 0           | 0             | 0           | 0           |
+| Chaffee     | 13862    | 13862         | 0           | 0             | 0           | 0           |
+| Cheyenne    | 1146     | 1146          | 0           | 0             | 0           | 0           |
+| Clear Creek | 6608     | 6608          | 0           | 0             | 0           | 0           |
+| Conejos     | 4404     | 4404          | 0           | 0             | 0           | 0           |
+| Costilla    | 2139     | 2139          | 0           | 0             | 0           | 0           |
+| Crowley     | 1769     | 1769          | 0           | 0             | 0           | 0           |
+| Custer      | 3670     | 3670          | 0           | 0             | 0           | 0           |
+| Delta       | 19553    | 19553         | 0           | 0             | 0           | 0           |
+| Elbert      | 19150    | 19150         | 0           | 0             | 0           | 0           |
+| Fremont     | 26289    | 26289         | 0           | 0             | 0           | 0           |
+| Garfield    | 31245    | 31245         | 0           | 0             | 0           | 0           |
+| Gilpin      | 4239     | 4240          | 0           | 0             | 0           | 0           |
+| Gunnison    | 11332    | 11332         | 0           | 0             | 0           | 0           |
+| Hinsdale    | 640      | 640           | 0           | 0             | 0           | 0           |
+| Huerfano    | 4459     | 4459          | 0           | 0             | 0           | 0           |
+| Jackson     | 889      | 886           | 0           | 0             | 0           | 0           |
+| Kiowa       | 909      | 909           | 0           | 0             | 0           | 0           |
+| Kit Carson  | 3892     | 3893          | 0           | 0             | 0           | 0           |
+| Lake        | 4010     | 4010          | 0           | 0             | 0           | 0           |
+| Las Animas  | 8062     | 106           | 0           | 0             | 0           | 0           |
+| Lincoln     | 2665     | 2665          | 0           | 0             | 0           | 0           |
+| Mineral     | 767      | 767           | 0           | 0             | 0           | 0           |
+| Moffat      | 7074     | 7074          | 0           | 0             | 0           | 0           |
+| Montezuma   | 15631    | 15631         | 0           | 0             | 0           | 0           |
+| Ouray       | 4050     | 4050          | 0           | 0             | 0           | 0           |
+| Park        | 12406    | 12406         | 0           | 0             | 0           | 0           |
+| Prowers     | 5601     | 5601          | 0           | 0             | 0           | 0           |
+| San Miguel  | 5189     | 5190          | 0           | 0             | 0           | 0           |
+| Teller      | 17087    | 17087         | 0           | 0             | 0           | 0           |
+| Washington  | 3028     | 3028          | 0           | 0             | 0           | 0           | 
+
+where 
+
+|         field |    value |                                   description |
+| ------------- | -------- | --------------------------------------------- |
+|        county | Arapahoe |                                   county name |
+|      manifest |   354347 |             number of entries in the manifest |
+| cvrUnredacted |   354231 |                      count of unredacted Cvrs |
+|   cvrRedacted |       16 |       count of redacted Cvrs in existing file |
+| pythonNredact |       40 | total redactions seen after python anonimizer |
+|   totalRedact |       56 | total redactions seen after rlauxe anonimizer |
+|   extraRedact |       40 | number of additional redaction made by rlauxe |
+
+Notes:
+
+* On unredacted files, python and rlauxe get same number of rare ballots; rlauxe a bit more efficient at finding ballots for contest balancing.
+* Rlauxe can identify previous redactions, python not really. 
+* Dolores, Philips: have a summary row that python sees as a rare style.
+* El Paso: "Error building row index: input file contains already-redacted rows; cannot re-redact a previously anonymized file."
+
 
 ### Summary
 

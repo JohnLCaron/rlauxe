@@ -24,7 +24,8 @@ open class Statewide2020General(
     }
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
-        if (countyName == "Arapahoe") return Arapahoe2020Redacted(strataPopulation()[countyName]!!)
+        // not needed anymore - fixed copy is now in votedatabaase
+        // if (countyName == "Arapahoe") return Arapahoe2020Redacted(strataPopulation()[countyName]!!)
         if (countyName == "Baca") return null
         if (countyName == "Gunnison") return County2020Input(countyName, 11332, votedatabaseDir)
         return if (counties().contains(countyName)) {

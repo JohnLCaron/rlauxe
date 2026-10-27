@@ -375,8 +375,8 @@ fun mergeContestInfo(input: StatewideInput): MergedInfo {
         val round = roundContests[it.contestName]
         val compare = compareMap[it.contestName]
 
-        if (it.contestName.startsWith ("Gunnison County Commissioner - District 1"))
-            print("")
+        //if (it.contestName == "Gunnison County Court Judge - Burgemeister")
+        //    println("mergeContestInfo found ${it.contestName} found")
 
         MergedContestInfo(
             it,

@@ -63,6 +63,7 @@ Lori
 
 
 =========================================
+Draft:
 
 Hi Kevin:
 
@@ -88,6 +89,7 @@ jcaron1129@gmail.com
 PS: we now have an official name: "The Citizen Election Verification Project" and a website: https://sites.google.com/view/auditenhancement/home
 
 =========================================
+Draft two
 
 Hi Kevin:
 
@@ -109,6 +111,7 @@ John Caron
 jcaron1129@gmail.com
 
 ===================================================
+Draft three
 
 Hi Kevin:
 
@@ -119,6 +122,30 @@ I'm sure you are aware of the "observation" part of the project, where observers
 If this is something you would consider, we would love to get volunteers from your county Democratic and Republican parties, and other parties or independents also. Even two or three in total is fine. We can help with finding volunteer observers. A description of the on-premise verifiers is on our new website: https://sites.google.com/view/auditenhancement ; I will send more details if we decide to proceed.
 
 I'm also (almost) ready to send you the latest version of our python redaction program, and hoping that you have time to run it on practice / past unredacted CVR files before the RLA happens, to shake out any issues. The redaction by default does "precinct level" redaction which we think is best for general elections. It needs python to already be installed on the computer, and I can send more instructions on that if you need them.
+
+Have you set a date for your RLA process? The dice roll is the 16th. My plan is to come to Ft. Morgan and be present for the duration of the audit, and help in any way that I can. It's my first time on this project, so I'll be learning from you also!
+
+Let me know your thoughts on all of this.
+
+Kind Regards,
+John Caron
+303-819-2493
+jcaron1129@gmail.com
+
+==============================================
+Draft four
+
+Hi Kevin:
+
+I'm working with Lori Stevens, Michael Raisch, and Neal McBurnett on the modernized audit / observation project for the November election. We are hoping you are up for doing this again in Morgan county. We were all impressed with the job you did in the primary with minimal help from us.
+
+I'm sure you are aware of the "observation" part of the project, where observers are invited to act as "on-premise verifiers" to check that the selected ballot's votes are recorded accurately. Also an optional component for observers and audit board members to choose their own random ballots to be pulled and verified in the same way that the officially selected ballots are verified. We have found that those who are dubious about the whole vote-counting process may become more confident when they see that the process of matching the previously recorded CVR with the physical ballot really does work.
+
+If this is something you would consider, we would love to get volunteers from your county Democratic and Republican parties, and other parties or independents also. We can help with finding volunteer observers. A description of the on-premise verifiers is on our new website: https://sites.google.com/view/auditenhancement ; I will send more details if we decide to proceed.
+
+I'm also (almost) ready to send you the latest version of our python redaction program, and hoping that you have time to run it on practice / past unredacted CVR files before the RLA happens, to shake out any issues. It needs python to already be installed on the computer, and I can send more instructions on that if you need them.
+
+We are wondering how many audit boards you have, so we can tailor the workflow for you.
 
 Have you set a date for your RLA process? The dice roll is the 16th. My plan is to come to Ft. Morgan and be present for the duration of the audit, and help in any way that I can. It's my first time on this project, so I'll be learning from you also!
 

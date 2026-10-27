@@ -50,7 +50,10 @@ class CountyCardConverter(val county: String,
                 countMissing++
             } else {
                 val info = infosByName[canonicalContest.contestName]
-                if (null == info) {
+                if (null == info) {  // we have a canonicalContest that is not in infosByName
+                    // looks like  "County Court Judge - Gunnison County - Burgemeister" got coverted to
+                    //             "Gunnison County Court Judge - Burgemeister" -> null"
+                    // but neither are in infosByName
                     logger.error { " infosByName doesnt have canonicalContest '${canonicalContest.contestName}'" }
                 }
                 require(info != null)

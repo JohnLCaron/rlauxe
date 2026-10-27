@@ -13,7 +13,6 @@ private val logger = KotlinLogging.logger("CorlaStateContestInfoBuilder")
 // Build Corla Contests from StatewideInput. used by CorlaStateElection
 // TODO should add up the county votes, not use the statewide total since some counties are missing
 open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
-    // val corlaContestBuilders: List<CorlaContestBuilder> = makeContestBuilders() // 181
     val infos: Map<Int, ContestInfo> = makeContestInfos().associateBy { it.id }
     val infosByName = infos.mapKeys { it.value.name }
 
@@ -30,43 +29,42 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
         val contestInfos = mutableListOf<ContestInfo>()
 
         // canonical drives the boat
-        mergedContestMap.values.forEach{ mcontest ->
-            val contestTabAllCounties = statewideInput.contestTabsAllCounties()[mcontest.contestName]
-            if (contestTabAllCounties == null) {
-                logger.warn{"*** Cant find contestTab for '${mcontest.contestName}': remove from audit" }
-                // throw RuntimeException()
-            } else {
-                val candidateNames = mcontest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
+        // val contestTabs = statewideInput.contestTabsAllCounties()
+        mergedContestMap.values.forEach { mcontest ->
+            val candidateNames = mcontest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
 
-                val info = ContestInfo(
-                    mcontest.contestName,
-                    contestInfos.size + 1,
-                    candidateNames,
-                    SocialChoiceFunction.PLURALITY, // TODO
-                    mcontest.voteForN
-                )
+            // if (mcontest.contestName == "Gunnison County Court Judge - Burgemeister")
+            //    println("mergedContestMap found ${mcontest.contestName}")
 
-                val strata = when {
-                    (mcontest.counties.size == 1) -> {
-                        val county1 = mcontest.counties.first()
-                        val strata1 = strataMap[county1]
-                        if (strata1 == null) {
-                            strataMap.values.first()
-                        } else strata1
-                    }
-                    else -> computeStrataMinRate(mcontest.contestName, mcontest.counties, strataMap)
+            val info = ContestInfo(
+                mcontest.contestName,
+                contestInfos.size + 1,
+                candidateNames,
+                SocialChoiceFunction.PLURALITY, // TODO
+                mcontest.voteForN
+            )
+
+            val strata = when {
+                (mcontest.counties.size == 1) -> {
+                    val county1 = mcontest.counties.first()
+                    val strata1 = strataMap[county1]
+                    if (strata1 == null) {
+                        strataMap.values.first()
+                    } else strata1
                 }
-                info.metadata["CORLAhaveMvrs"] = strata.nmvrs.toString()
-                info.metadata["CORLAstrataNcards"] = strata.ballotCardCount.toString()
-                info.metadata["CORLAsample"] = mcontest.nsamples.toString()
-                info.metadata["CORLAauditReason"] = mcontest.auditReason.toString()
-                info.metadata["CORLAmarginInVotes"] = mcontest.marginInVotes.toString()
-                info.metadata["CORLAcounties"] = mcontest.counties.toList().toString()
-                info.metadata["CORLAcountyMvrs"] = mcontest.countyMvrs.toString()
-                info.metadata["CORLAstatewideNmvrs"] = mcontest.statewideMvrs.toString()
 
-                contestInfos.add(info)
+                else -> computeStrataMinRate(mcontest.contestName, mcontest.counties, strataMap)
             }
+            info.metadata["CORLAhaveMvrs"] = strata.nmvrs.toString()
+            info.metadata["CORLAstrataNcards"] = strata.ballotCardCount.toString()
+            info.metadata["CORLAsample"] = mcontest.nsamples.toString()
+            info.metadata["CORLAauditReason"] = mcontest.auditReason.toString()
+            info.metadata["CORLAmarginInVotes"] = mcontest.marginInVotes.toString()
+            info.metadata["CORLAcounties"] = mcontest.counties.toList().toString()
+            info.metadata["CORLAcountyMvrs"] = mcontest.countyMvrs.toString()
+            info.metadata["CORLAstatewideNmvrs"] = mcontest.statewideMvrs.toString()
+
+            contestInfos.add(info)
         }
 
         // println("number of contestBuilders = ${contestBuilders.size}")

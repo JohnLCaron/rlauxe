@@ -3,10 +3,10 @@ package org.cryptobiotic.rlauxe.corlacvr
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
+import kotlin.collections.joinToString
 import kotlin.text.isEmpty
 
 // this reads CVRs from "Dominion CVR export files", maybe a standard Dominion csv format.
@@ -27,7 +27,8 @@ class CorlaCountyCvrs(override val inputSource: String,
     override val schema: CvrSchema
     override val versionName: String
 
-    val headers = mutableListOf<String>()
+    val title: String
+    val headerRows = mutableListOf<List<String>>()
     val records: Iterator<CSVRecord>  = parser.iterator()
     val ballotStyles = BallotStyles()
     val cvrs = mutableListOf<CvrRow>()
@@ -39,14 +40,14 @@ class CorlaCountyCvrs(override val inputSource: String,
         try {
             // we expect the first line to be the election name
             val electionLine = records.next()
-            headers.add(escHeaders(electionLine))
+            title = electionLine.toList().joinToString(", ")
             if (showHeaders) showLine("electionName", electionLine)
             electionName = electionLine.get(0).replace("[^ -~]".toRegex(), "")
             versionName = electionLine.get(1).trim()
 
             // the contest names
             val contestLine = records.next()
-            headers.add(escHeaders(contestLine))
+            headerRows.add(escHeaders(contestLine))
             if (showHeaders) {
                 println("contestLine has ${contestLine.toList().size} columns")
                 println("contestLine = ${contestLine.toList().joinToString(", ")}")
@@ -54,11 +55,11 @@ class CorlaCountyCvrs(override val inputSource: String,
 
             // the choice/candidate names
             val choiceLine = records.next()
-            headers.add(choiceLine.values().joinToString(","))
+            headerRows.add(escHeaders(choiceLine))
 
-            // the header for the first columns, then (sometimes) the party affiliation of the candidates
+            // the names for the header columns, then (sometimes) the party affiliation of the candidates
             val headerLine = records.next()
-            headers.add(escHeaders(headerLine))
+            headerRows.add(escHeaders(headerLine))
             if (showHeaders) {
                 println("column headerRecord) has ${headerLine.toList().size} columns")
                 println(headerLine.toList().joinToString(", "))
@@ -95,8 +96,6 @@ class CorlaCountyCvrs(override val inputSource: String,
     override fun nrows() = rowCount
     override fun unredactedCvrs() = cvrs().size
     override fun redactedCvrs() = redaction.nredactedCvrs()
-
-    override fun headers() = headers
     override fun hasBallotType() = schema.headerIdx[CvrHeader.ballottype] != null
     override fun countBlankPrecincts() = countBlankPrecincts
     override fun ballotStyleUnique() = ballotStyles.ballotStylesUnique
@@ -202,7 +201,7 @@ class CorlaCountyCvrs(override val inputSource: String,
     }
 
     // used by anonymizer
-    override fun rowHeaderCols(row: CvrRow, redact: Set<CvrHeader>) = buildString {
+    fun rowHeaderColsOld(row: CvrRow, redact: List<CvrHeader>) = buildString {
         repeat(schema.nheaders) { idx ->
             val header = schema.headerAt[idx]
             val useValue = when (header) {
@@ -212,55 +211,50 @@ class CorlaCountyCvrs(override val inputSource: String,
                 CvrHeader.batchid -> row.batchId
                 CvrHeader.recordid -> row.recordId
                 CvrHeader.imprintedid -> quoteString(row.imprintedId)
-                CvrHeader.countinggroup -> if (redact.contains(CvrHeader.countinggroup)) "" else row.headerValues[idx]
-                CvrHeader.precinctportion -> if (redact.contains(CvrHeader.precinctportion)) "" else row.precinctPortion ?: row.headerValues[idx]
+                CvrHeader.countinggroup -> if (redact.contains(CvrHeader.countinggroup)) "" else row.headerCols[idx]
+                CvrHeader.precinctportion -> if (redact.contains(CvrHeader.precinctportion)) "" else row.precinctPortion ?: row.headerCols[idx]
                 CvrHeader.ballottype -> if (redact.contains(CvrHeader.ballottype)) "" else quoteString(row.ballotType)
-                else -> row.headerValues[idx]
+                else -> row.headerCols[idx]
             }
             append("$useValue,")
         }
     }
 
-    /*
-    inner class CvrRowIterable(val parser: CSVParser): Iterable<CvrRow> {
-        override fun iterator() = CvrRowIterator(parser.iterator())
+    override fun rowHeaderCols(row: CvrRow, redact: List<CvrHeader>): String {
+        return unskipped(redact, row.headerCols)
+    }
 
-        inner class CvrRowIterator(val records: Iterator<CSVRecord>) : Iterator<CvrRow> {
-            var rowCount = 0
-
-            override fun next(): CvrRow {
-                val record = records.next()
-                if (record.isEmpty()) break
-                rowCount++
-
-                //  this is skipping redactions, you could also pass them on with empty votes or someting
-                if (!redaction.isRedaction(record, this)) {
-                    try {
-                        val cvr = parseHeader(record, rowCount)
-                        cvr.addVotes(schema, record, rowCount)
-
-                        return cvr
-                    } catch (e: Throwable) {
-                        logger.error(e) { "rowCount=$rowCount $record" }
-                        throw e
-                    }
-                }
-            }
-
-            override fun hasNext() = records.hasNext()
+    override fun headers(skipHeaders:List<CvrHeader>): List<String> {
+        val result = mutableListOf<String>()
+        result.add(title)
+        headerRows.forEach { headerRow ->
+            result.add(unskipped(skipHeaders, headerRow))
         }
-    } */
+        return result
+    }
+
+    fun unskipped(skipHeaders:List<CvrHeader>, headers: List<String>): String{
+        val qIndex = listOf(schema.headerIdx[CvrHeader.imprintedid], schema.headerIdx[CvrHeader.ballottype])
+        val skipIndex = skipHeaders.map { schema.headerIdx[it] }.filter{ it != null}
+        val notskipped = mutableListOf<String>()
+        headers.forEachIndexed { idx, head ->
+            if (!skipIndex.contains(idx)) {
+                val qhead = if (qIndex.contains(idx)) quoteString(head) else head
+                notskipped.add(qhead)
+            }
+        }
+        return notskipped.joinToString(",")
+    }
 }
 
 fun quoteString(sin: String) : String {
+    if (sin.isEmpty() || sin.startsWith("=")) return sin
     return "\"$sin\""
 }
 
-fun escHeaders(header: CSVRecord) = buildString {
-    val last = header.size()-1
-    header.values().forEachIndexed { idx, col ->
-        if (col.contains(",")) append("\"$col\"") else append("$col")
-        if (idx != last) append(",")
+fun escHeaders(header: CSVRecord): List<String> {
+    return header.values().map { col ->
+        if (col.contains(",")) "\"$col\"" else col
     }
 }
 

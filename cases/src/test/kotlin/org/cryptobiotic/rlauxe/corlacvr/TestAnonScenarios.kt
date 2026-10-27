@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corlacvr
 import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.CheckCvrRedaction
 import org.cryptobiotic.rlauxe.corlaInput.RedactionCount
+import org.cryptobiotic.rlauxe.corlaInput.readCorlaCvrs
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import kotlin.test.Test
 
@@ -105,7 +106,7 @@ Done. near_unanimous_fixable.csv files written.
         // println ("------------ CheckCvrRedaction")
         // CheckCvrRedaction(cvrFile, output)
 
-        compareTwoRedactions("$PYTHON_OUTPUT_DIR/$scenario.csv", output)
+        compareTwoRedactions(null, null, "$PYTHON_OUTPUT_DIR/$scenario.csv", output)
     }
 
     @Test
@@ -121,7 +122,7 @@ Done. near_unanimous_fixable.csv files written.
 
             CheckCvrRedaction(cvrs, output)
 
-            if (compareTwoRedactions("$PYTHON_OUTPUT_DIR/$scenario.csv", output).fail) countFail++
+            if (compareTwoRedactions(null, null, "$PYTHON_OUTPUT_DIR/$scenario.csv", output).fail) countFail++
         }
             /* var fail = false
 
@@ -141,9 +142,10 @@ Done. near_unanimous_fixable.csv files written.
     }
 }
 
-fun compareTwoRedactions(expectFile: String?, actualFile: String, show: Boolean = false): RedactionCount {
+fun compareTwoRedactions(year: String?, countyName: String?, expectFile: String?, actualFile: String, show: Boolean = false): RedactionCount {
     println("expect $expectFile actual $actualFile")
-    val actual = readCountyCvrs(actualFile)
+    val actual = if (year != null && countyName != null) readCorlaCvrs(year, countyName, actualFile) else readCountyCvrs(actualFile)
+
     var fail = false
 
     if (expectFile != null) {

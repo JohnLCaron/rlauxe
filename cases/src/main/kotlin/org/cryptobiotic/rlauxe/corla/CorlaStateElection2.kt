@@ -209,8 +209,6 @@ fun makeCountyElections(
     val contestBuilder = CorlaStateContestInfoBuilder(stateInput)
     stateInput.counties().forEach { countyName ->
         val countyInput = stateInput.corlaCountyInput(countyName)
-        if (countyInput == null)
-            print("")
         val countyElection = CorlaCountyElection(countyInput!!, stateInput, contestBuilder, mvrSource, hasStyle, variantEnum)
         val countyDir = "$topdir/county/$countyName"
 

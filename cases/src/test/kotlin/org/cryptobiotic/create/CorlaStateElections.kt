@@ -24,7 +24,7 @@ class CorlaStateElections {
 
     @Test
     fun createVersion2() {
-        val top2020dir2 = "$cases/corlaState2/2020"
+        val top2020dir2 = "$cases/corlaState2/2020r"
         val stateInput = Statewide2020Redacted()
 
         createCorlaStateElection2(

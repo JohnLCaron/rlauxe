@@ -24,7 +24,7 @@ class Anonomicer(
 
     val schema = corlaCvrs.schema
     val infos: Map<Int, CorlaContestInfo>
-    val removeCols = mutableSetOf<CvrHeader>()
+    val removeCols = mutableListOf<CvrHeader>()
     val agg: Aggregate
     val rpt = Report(true)
 
@@ -64,10 +64,10 @@ class Anonomicer(
         // Columns that carry no information in the output and should be omitted entirely.
         // CountingGroup is always removed.
         // PrecinctPortion is removed when not redacting on precinct, because every row has it blanked in that case.
-
+        var firstRow: CvrRow? = null
         File(outputFile).bufferedWriter(Charsets.UTF_8).use { bwriter ->
-            // leaving the original headers TODO remove some headers??
-            corlaCvrs.headers().forEach {
+            // leaving the original headers
+            corlaCvrs.headers(removeCols).forEach {
                 bwriter.write(it)
                 bwriter.newLine()
             }
@@ -76,6 +76,7 @@ class Anonomicer(
                 if (agg.isRedacted(row)) {
                     bwriter.write(writeRow(row, true))
                 } else {
+                    if (firstRow == null) firstRow = row
                     // write unredacted
                     bwriter.write(writeRow(row, false))
                 }
@@ -87,11 +88,12 @@ class Anonomicer(
             }
 
             if (agg.hasRedaction()) {
+                val nheaders = corlaCvrs.rowHeaderCols(firstRow!!, removeCols).count{ it == ',' }
                 val aggTabs = agg.redactedAggregation()
                 val last = schema.ncolumns
                 val aggrow = buildString {
                     append("AGGREGATED,")
-                    repeat(schema.nheaders - 2) { append(",") }
+                    repeat(nheaders - 1) { append(",") }
                     append("AGGREGATED,")
                     var count = 0
                     schema.contests.forEach { scontest ->
@@ -117,6 +119,7 @@ class Anonomicer(
 
     fun writeRow(row: CvrRow, redacted: Boolean) = buildString {
         append(corlaCvrs.rowHeaderCols(row, removeCols))
+        append(",")
         val last = schema.ncolumns
         val rowMap: Map<Int, List<Int>> = row.contestVotes.map { Pair(it.contestId, it.votedFor) }.toMap()
         var count = 0
@@ -541,6 +544,7 @@ class PrecinctCardStyle(val precinctPortion: String, val infos: Map<Int, CorlaCo
     }
 }
 
+// either one or the other looking for rare styles
 fun findPrecinctStyles(corlaCvrs: CorlaCountyCvrsIF, infos: Map<Int, CorlaContestInfo>): List<PrecinctCardStyle> {
     val styleCounters = mutableMapOf<String, PrecinctCardStyle>()
     corlaCvrs.cvrs().forEach { cvr ->

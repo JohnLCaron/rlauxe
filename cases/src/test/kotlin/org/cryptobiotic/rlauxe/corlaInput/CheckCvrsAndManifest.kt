@@ -18,6 +18,7 @@ import org.cryptobiotic.rlauxe.util.subtractContestTabulationsZ
 import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
 import org.cryptobiotic.rlauxe.util.tabulateCards
 
+// for a specific county
 class CheckCvrsAndManifest(
     val stateInput: StatewideInput,
     val countyInput: CountyInput,
@@ -133,31 +134,6 @@ class CheckCvrsAndManifest(
             // compareCvrsAndManifests(countyInput, corlaRawCvrs)
         }
     }
-}
-
-fun findPrecinctStyleMin(corlaCvrs: CorlaCountyCvrsIF): Int {
-
-    class UniqueContests() {
-        val contests = mutableMapOf<Set<Int>, Int>() // count unique contests within the precinct
-        var ncards = 0
-        var styleMap = emptyMap<String, Int>()
-
-        fun convert(ballotType:String, cardStyleMap: Map<CardStyleId, CvrCardStyle>) {
-            styleMap = contests.mapKeys { cardStyleMap[CardStyleId(ballotType, it.key)]?.cardStyle ?: "unknown" }
-        }
-    }
-
-    val styleCounters = mutableMapOf<Pair<String, String>, UniqueContests>()
-    corlaCvrs.cvrs().forEach { cvr ->
-        val id = Pair(cvr.ballotType, cvr.precinctPortion ?: "none")
-        val unique = styleCounters.getOrPut(id) { UniqueContests() }
-        val count = unique.contests.getOrDefault(cvr.contests(), 0)
-        unique.contests[cvr.contests()] = count + 1
-        unique.ncards++
-    }
-    styleCounters.forEach { it.value.convert(it.key.first, corlaCvrs.cardStyleMap()) }
-
-    return styleCounters.values.minOf { it.ncards }
 }
 
 fun showTabDiffs(diff: Map<Int, ContestTabulation>) {

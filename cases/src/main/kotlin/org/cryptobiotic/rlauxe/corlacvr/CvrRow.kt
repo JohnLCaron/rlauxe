@@ -17,7 +17,7 @@ data class ContestVotes(val contestId: Int, val votedFor: List<Int>) {
 
 // CvrNumber,TabulatorNum,BatchId,RecordId,ImprintedId,PrecinctPortion,BallotType
 data class CvrRow(
-    val headerValues: List<String>, // first schema.nheaders
+    val headerCols: List<String>, // first schema.nheaders
     val cvrNumber: Int,
     val tabulatorNum: Int,
     val batchId: String,

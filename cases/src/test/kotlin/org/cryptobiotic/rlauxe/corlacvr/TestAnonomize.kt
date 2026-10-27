@@ -20,7 +20,7 @@ class TestAnonomize {
 
     @Test
     fun testOneStateOrCounty() {
-        testAnonomize(Statewide2020General(), county = "Jackson")
+        testAnonomize(Statewide2020General(), county = "Grand")
     }
 
     @Test
@@ -51,7 +51,7 @@ class TestAnonomize {
         val countNredacted = mutableMapOf<String, RedactionCount>()
         val baseOutput = "$outputBase/${input.year}"
         validateOutputDir(Path(baseOutput))
-
+        // slow - could parellelize ??
         val counties = if (county != null) listOf(county) else input.counties()
         for (county in counties) {
             try {
@@ -83,7 +83,7 @@ class TestAnonomize {
                 println("---------------------------------")
                 println("python vs raire")
                 val pythonFile = if (python != null) "$python/$county.csv" else null
-                // countNredacted[county] = compareTwoRedactions(pythonFile, output, show = true)
+                countNredacted[county] = compareTwoRedactions(input.year, county, pythonFile, output, show = true)
 
             } catch (e: Throwable) {
                 println("failed on $county: ${e.message}")

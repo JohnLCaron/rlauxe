@@ -67,7 +67,7 @@ class CheckCvrRedaction(
 
         val redaction = redactedCvrs.redaction()
         println("  nredacted Cvrs (${redaction.redactedRows().size})")
-        if (show) redaction.redactedRows().forEach { println("    headerValues=${it.headerValues}") }
+        if (show) redaction.redactedRows().forEach { println("    headerValues=${it.headerCols}") }
         println("  aggregations")
         redaction.groups().forEach { println("       ${it.firstCsv}") }
         println()

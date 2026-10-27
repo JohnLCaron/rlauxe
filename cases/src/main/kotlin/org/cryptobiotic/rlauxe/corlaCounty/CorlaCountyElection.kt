@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corla.CorlaStateContestInfoBuilder
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
+import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.irv.IrvContest
 import org.cryptobiotic.rlauxe.irv.makeRaireContest
 import org.cryptobiotic.rlauxe.irv.makeRaireOneAuditContest
@@ -48,6 +49,7 @@ class CorlaCountyElection(
 ): ElectionBuilder {
     val variant = ElectionVariant(variantEnum)
     val county: String = countyInput.countyName
+    val corlaCvrs: CorlaCountyCvrsIF
 
     val contests: List<ContestIF>
     val mvrs = mutableListOf<AuditableCard>()
@@ -61,6 +63,7 @@ class CorlaCountyElection(
 
     init {
         val countyCards = CountyCardsFromManifest(countyInput)
+        corlaCvrs = countyCards.corlaCvrs
         val converter = CountyCardConverter(countyInput.countyName, countyCards, stateInput, stateContestBuilder.infosByName)
 
         val countyTab = stateInput.countyTabsAllContests()[county]!!

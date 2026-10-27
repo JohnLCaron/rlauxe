@@ -47,7 +47,10 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val cor
                 } else {
                     val candidateVotes = candVotes.getOrPut(useContest.contestIdx, { mutableMapOf() })
                     for (candIdx in 0 until useContest.ncols) {
-                        val nvotes = line.get(useContest.startCol + candIdx).toInt()
+                        val nvotestr = line.get(useContest.startCol + candIdx)
+                        if (nvotestr.startsWith("AGG"))
+                            print("")
+                        val nvotes = nvotestr.toInt()
                         val prev = candidateVotes[candIdx] ?: 0
                         candidateVotes[candIdx] = prev + nvotes
                         if (nvotes > 1)

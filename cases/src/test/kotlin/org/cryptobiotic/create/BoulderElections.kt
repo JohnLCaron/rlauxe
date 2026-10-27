@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.corlaInput.Boulder25Input
 import org.cryptobiotic.rlauxe.corlaInput.Boulder26PInput
 import org.cryptobiotic.rlauxe.boulder.boulderRoundSettings
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated

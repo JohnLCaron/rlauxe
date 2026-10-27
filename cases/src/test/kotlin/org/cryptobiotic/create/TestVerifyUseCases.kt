@@ -1,7 +1,7 @@
 package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.belgium.belgiumInput
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import kotlin.test.Test
 import kotlin.test.fail

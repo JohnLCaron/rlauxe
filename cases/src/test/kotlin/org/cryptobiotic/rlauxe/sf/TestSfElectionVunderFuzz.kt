@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.sf
 
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
 import org.cryptobiotic.rlauxe.oneaudit.*

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.dominion
 
 import org.cryptobiotic.rlauxe.sf.readContestManifestFromZip
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import kotlin.test.Test

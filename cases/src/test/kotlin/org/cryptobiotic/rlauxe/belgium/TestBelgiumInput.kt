@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.belgium
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.persist.readCanonicalPartyTxtFile
 import org.cryptobiotic.rlauxe.persist.readLimitsTxtFile
 import org.cryptobiotic.rlauxe.util.ErrorMessages

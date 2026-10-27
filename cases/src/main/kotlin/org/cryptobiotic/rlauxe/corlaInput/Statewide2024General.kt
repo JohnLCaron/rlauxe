@@ -4,6 +4,8 @@ import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.boulder.BoulderInput
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
+
 import kotlin.Int
 
 class Statewide2024General(ac:String?=auditcenter): StatewideInputWithCvrs(

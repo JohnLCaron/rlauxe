@@ -23,14 +23,14 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
 
     // all contests
     fun makeContestInfos(): List<ContestInfo> {
-        val mergedContestMap = statewideInput.mergedContestMap
         val strataMap = statewideInput.strataMap
 
         val contestInfos = mutableListOf<ContestInfo>()
 
-        // canonical drives the boat
-        // val contestTabs = statewideInput.contestTabsAllCounties()
-        mergedContestMap.values.forEach { mcontest ->
+        // this determines the ordering of the contest ids
+        val contestmSorted = statewideInput.mergedContestMap.toList().sortedBy { it.second.npop }.toMap()
+
+        contestmSorted.values.forEach { mcontest ->
             val candidateNames = mcontest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
 
             // if (mcontest.contestName == "Gunnison County Court Judge - Burgemeister")

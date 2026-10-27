@@ -4,11 +4,11 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.resampleAndSaveResults
 import org.cryptobiotic.rlauxe.audit.runRound
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.cli.RunRlaRoundCli
 import org.cryptobiotic.rlauxe.cli.StartAuditFirstRoundCli
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import kotlin.test.Test
 
 // DO NOT put into Unit Tests

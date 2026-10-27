@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
 import org.cryptobiotic.rlauxe.boulder.BoulderInput
 import org.cryptobiotic.rlauxe.boulder.BoulderStatementOfVotes
 import org.cryptobiotic.rlauxe.boulder.readBoulderSOVfromResourcePath
-import org.cryptobiotic.rlauxe.boulder.readBoulderStatementOfVotes
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 

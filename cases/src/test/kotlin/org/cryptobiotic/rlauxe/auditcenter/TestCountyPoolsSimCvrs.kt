@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.corla.CountyElectionSimCvrs
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import kotlin.test.Test

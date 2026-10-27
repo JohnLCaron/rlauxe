@@ -1,6 +1,6 @@
 package org.cryptobiotic.create
 
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.cli.RunRlaStartFuzz
 import org.cryptobiotic.rlauxe.cli.RunVerifyAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests

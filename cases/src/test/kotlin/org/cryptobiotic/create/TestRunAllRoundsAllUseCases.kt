@@ -1,7 +1,7 @@
 package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.audit.runAllRoundsAndVerify
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import kotlin.test.Test
 
 class TestRunAllRoundsAllUseCases {

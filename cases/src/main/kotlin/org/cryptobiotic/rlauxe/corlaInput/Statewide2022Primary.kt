@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
-import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
 class Statewide2022Primary(ac:String?=auditcenter): StatewideInput(
     generalCanonicalFile = "$ac/2022/primary/2022PrimaryRLACounty-CandidateList.csv",

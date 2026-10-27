@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromResource
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import kotlin.collections.plus
 
 open class Statewide2020General(

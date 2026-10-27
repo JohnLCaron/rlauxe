@@ -15,6 +15,7 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.util.TransformingIterator
 import kotlin.collections.forEach
@@ -119,7 +120,7 @@ class CorlaStateElection2(
                 if (stateStyleIdMap[org.styleId] == null)
                     print("")
                 org.copy(
-                    location = "$countyName-${org.location}}",
+                    location = "$countyName-${org.location}",
                     index = stateCardIndex++,
                     styleId = stateStyleIdMap[org.styleId]!!,
                     poolId = statePoolIdMap[org.poolId],
@@ -238,7 +239,8 @@ fun createCorlaStateElection2(
     logger.info {"-------------- createCorlaStateElection ${stateInput.javaClass.name} in $topdir"}
 
     if (!alreadyMadeCounties) {
-        clearDirectory(Path(topdir))
+        validateOutputDir(Path(topdir))
+        // clearDirectory(Path(topdir))
         makeCountyElections(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
     }
 

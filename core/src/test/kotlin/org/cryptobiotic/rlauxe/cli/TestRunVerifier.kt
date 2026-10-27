@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.cli
 
 import org.cryptobiotic.rlauxe.cli.RunVerifyAuditRecord.runVerifyAuditRecord
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import kotlin.test.Test
 import kotlin.test.fail
 

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
-import org.cryptobiotic.rlauxe.corlaInput.auditcenter
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

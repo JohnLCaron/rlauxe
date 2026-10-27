@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.dominion
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolTest
 import org.cryptobiotic.rlauxe.persist.csv.CardHeader

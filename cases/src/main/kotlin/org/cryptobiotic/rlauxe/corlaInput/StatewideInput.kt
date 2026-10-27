@@ -23,7 +23,7 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.collections.forEach
 
 val defaultCharset = "ISO-8859-1" // TODO something
-val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
+// val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
 // val auditcenter = "/home/joncifer/IdeaProjects/auditcenter"
 
 private val logger = KotlinLogging.logger("StatewideInput")

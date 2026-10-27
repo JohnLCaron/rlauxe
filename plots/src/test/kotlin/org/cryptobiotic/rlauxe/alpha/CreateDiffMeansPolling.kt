@@ -17,7 +17,7 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.betting.runAlphaMartRepeated
 
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.plots.createPctRatio
 import org.cryptobiotic.rlauxe.plots.plotPctRatio

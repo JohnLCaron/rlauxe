@@ -1,8 +1,7 @@
 package org.cryptobiotic.cli
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.util.makeDeciles

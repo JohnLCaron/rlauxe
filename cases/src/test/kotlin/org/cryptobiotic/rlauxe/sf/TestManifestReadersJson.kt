@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.sf
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import kotlin.test.assertTrue
 import kotlin.collections.component1

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.cases
 
-import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.cases
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
 import org.cryptobiotic.rlauxe.util.makeDeciles

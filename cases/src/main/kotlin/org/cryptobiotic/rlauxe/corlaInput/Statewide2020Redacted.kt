@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifestEntries
 import org.cryptobiotic.rlauxe.corlaCounty.GarfieldManifestEntries
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
+import org.cryptobiotic.rlauxe.util.Locations.cases
 
 open class Statewide2020Redacted(
         ac:String?=auditcenter,
@@ -23,7 +25,7 @@ open class Statewide2020Redacted(
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
         if (countyName == "Baca") return null
-        if (countyName == "Gunnison") return County2020Input(countyName, 11332, null)
+        if (countyName == "Gunnison") return County2020Redacted(countyName, 11332) // TODO read from manifest
         return if (counties().contains(countyName))
             County2020Redacted(countyName, strataPopulation()[countyName]!!) else null
     }
@@ -44,7 +46,7 @@ class County2020Redacted(
     val countyPopulation: Int
 ): CountyInput {
     val countyNameZ = countyName.replace(" ", "")
-    val cvrdir = "/home/stormy/rla/temp/Anonomice/2020"  // TODO move to zip ??
+    val cvrdir = "$cases/corla/2020r/cvrs"
 
     override val electionName = "${countyName}2020"
     override val manifestSource = if (countyName == "Gunnison") "$manifestDir/Manifest-${countyNameZ}.csv"

@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
 import org.cryptobiotic.rlauxe.boulder.BoulderInput
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
 open class Statewide2025Coordinated(ac:String?=auditcenter): StatewideInputWithCvrs(
     generalCanonicalFile = "$ac/2025/canonicalList.csv", // Needs ISO-8859-1

@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals

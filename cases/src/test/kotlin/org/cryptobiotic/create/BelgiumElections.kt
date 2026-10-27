@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.belgium.belgiumInput
 import org.cryptobiotic.rlauxe.belgium.createOneContestFromInputs
 import org.cryptobiotic.rlauxe.belgium.makeAllBelgiumContests
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.util.dfn

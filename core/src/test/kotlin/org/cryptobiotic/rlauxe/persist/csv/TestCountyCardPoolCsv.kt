@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.CountyPools
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.makeContestsWithUndervotesAndPhantoms
 import org.cryptobiotic.rlauxe.util.tabulateCvrs

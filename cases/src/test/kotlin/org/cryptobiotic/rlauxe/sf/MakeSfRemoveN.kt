@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.sf
 
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.audit.runAllRoundsAndVerify
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.collections.List
 import kotlin.collections.forEach

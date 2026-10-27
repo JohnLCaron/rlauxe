@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.alpha
 
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.concur.RunRepeatedTasks
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean

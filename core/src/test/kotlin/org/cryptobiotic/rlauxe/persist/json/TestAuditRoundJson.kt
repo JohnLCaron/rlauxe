@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DhondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtPartyBuilder

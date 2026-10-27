@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.sf
 
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.dominion.CvrExportCsvHeader
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportJsonSummary
 import org.cryptobiotic.rlauxe.dominion.convertCvrExportJsonToCsv

@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
 import kotlin.collections.forEach
 import kotlin.test.Test

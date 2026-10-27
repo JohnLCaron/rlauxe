@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
-import org.cryptobiotic.rlauxe.corlaInput.auditcenter
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
 class Boulder24Input: BoulderInput {
     override val electionName= "Boulder2024"

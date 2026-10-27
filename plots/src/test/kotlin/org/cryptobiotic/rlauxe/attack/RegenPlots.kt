@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.attack
 
 import kotlin.test.Test
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 
 
 class RegenPlots {

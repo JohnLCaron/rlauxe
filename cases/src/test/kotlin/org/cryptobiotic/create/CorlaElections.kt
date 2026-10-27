@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PMerged
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
-import org.cryptobiotic.rlauxe.corlaInput.auditcenter
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.corla.auditcenter2026Counties
 import org.cryptobiotic.rlauxe.corla.corlaCreationSettings
 import org.cryptobiotic.rlauxe.corla.corlaRoundSettings
@@ -15,7 +15,7 @@ import org.cryptobiotic.rlauxe.corla.countyElectionWithCvrs
 import org.cryptobiotic.rlauxe.corla.createCountyElectionSimCvrs
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyContestData
 import org.cryptobiotic.rlauxe.corlaInput.votedatabase2020Counties
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020

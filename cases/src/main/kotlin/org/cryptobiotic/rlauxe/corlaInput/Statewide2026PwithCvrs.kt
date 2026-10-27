@@ -12,6 +12,8 @@ import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.boulder.BoulderInput
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
+
 import kotlin.collections.forEach
 
 // we have Boulder, La Plata, Morgan, and Weld CVR_export files

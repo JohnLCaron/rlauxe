@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.workflow.readStyles
 import org.cryptobiotic.rlauxe.workflow.readCardPools
 import kotlin.io.path.createTempFile

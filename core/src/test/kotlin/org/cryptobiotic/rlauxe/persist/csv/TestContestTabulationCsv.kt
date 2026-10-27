@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 import org.cryptobiotic.rlauxe.irv.RaireContestTestData
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.makeContestsWithUndervotesAndPhantoms
 import org.cryptobiotic.rlauxe.util.tabulateCvrs

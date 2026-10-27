@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.cli
 
-import org.cryptobiotic.rlauxe.cases
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.cases
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.test.Test
 

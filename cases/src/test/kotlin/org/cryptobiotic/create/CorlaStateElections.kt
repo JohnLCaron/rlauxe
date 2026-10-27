@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corla.createCorlaStateElection
 import org.cryptobiotic.rlauxe.corla.createCorlaStateElection2
@@ -19,12 +19,12 @@ import org.cryptobiotic.rlauxe.corlaInput.StatewideInputWithCvrs
 import kotlin.test.Test
 
 class CorlaStateElections {
+    val top2020dir2 = "$cases/corla/2020r"
     val top2020dir = "$cases/corlaState/2020"
     val top2026pdir = "$cases/corlaState/2026p"
 
     @Test
     fun createVersion2() {
-        val top2020dir2 = "$cases/corlaState2/2020r"
         val stateInput = Statewide2020Redacted()
 
         createCorlaStateElection2(

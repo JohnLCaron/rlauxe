@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterable
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
-import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterableInline
 import org.cryptobiotic.rlauxe.util.CloseableIterator

@@ -1,6 +1,6 @@
 package org.cryptobiotic.create
 
-import org.cryptobiotic.rlauxe.cases
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.cli.CreateCaseData
 import kotlin.test.Test
 

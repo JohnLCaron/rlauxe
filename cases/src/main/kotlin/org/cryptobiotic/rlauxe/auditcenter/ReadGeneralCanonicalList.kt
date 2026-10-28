@@ -16,6 +16,8 @@ private val logger = KotlinLogging.logger("readGeneralCanonicalList")
 //      CountyName,ContestName,ContestChoices
 //      El Paso,City of Colorado Springs Ballot Question 300,"Yes/For,No/Against"
 
+// canonical contest name and choice names from "canonical list" file
+// sometimes arbitrary, but all variants are canonicalized to it for consistency across counties
 class CanonicalContest(
     val stateInput : StatewideInput,
     val contestName: String,

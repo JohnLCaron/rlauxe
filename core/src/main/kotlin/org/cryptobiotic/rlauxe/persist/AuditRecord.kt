@@ -79,6 +79,7 @@ open class AuditRecord(
         return SortedManifest(mergedCards, electionInfo.totalCardCount)
     }
 
+    // I think cant be null
     override fun readCardStyles(): List<StyleIF>? {
         return if (!Files.exists(Path(publisher.cardStylesFile()))) null else {
             val stylesResult = readCardStylesJsonFile(publisher.cardStylesFile())

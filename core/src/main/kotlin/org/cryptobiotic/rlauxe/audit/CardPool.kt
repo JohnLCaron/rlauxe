@@ -170,7 +170,7 @@ class CardPoolBuilder(
 }
 
 // CountyPool: for one county, a pool of cards with multiple CardStyles.
-// votes equal the County's subtotal, and ncards equals the county population.
+// we use it to record the auditcenter's county tab, and the county cvr's tab
 data class CountyPools (
     val countyName: String,
     val countyPoolId: Int,

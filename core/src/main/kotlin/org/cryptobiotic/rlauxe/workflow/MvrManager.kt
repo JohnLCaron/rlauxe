@@ -16,7 +16,9 @@ interface MvrManager {
     fun sortedManifest(): SortedManifest
     fun pools(): List<CardPool>?
     fun styles(): List<StyleIF>?
-    fun countyPools(): List<CountyPools>? = null
+
+    // for viewer
+    fun countyAcPools(): List<CountyPools>? = null
     fun countyCvrPools(): List<CountyPools>? = null
 
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  // Pair(mvr, cvr)

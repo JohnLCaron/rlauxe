@@ -30,9 +30,9 @@ open class Statewide2020General(
         if (countyName == "Baca") return null
         if (countyName == "Gunnison") return County2020Input(countyName, 11332, votedatabaseDir)
         return if (counties().contains(countyName)) {
-            val pop = strataPopulation()[countyName]
+            if (null == strataPopulation()[countyName])
                 print("")
-            County2020Input(countyName, strataPopulation()[countyName]!!, votedatabaseDir)
+            County2020Input(countyName, strataPopulation()[countyName] ?: -1, votedatabaseDir)
         } else null
     }
 
@@ -41,6 +41,7 @@ open class Statewide2020General(
     override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
 
     // add Gunnison cvr totals to countyTabsAllContests, since those are missing from the tabulateCountyFile file
+    // Gunnison is in canonical list, just missing from county tabs for some reasson.
     override fun countyTabsAllContests(): Map<String, CountyTabAllContests> = countyTabsAllContests
     private val countyTabsAllContests: Map<String, CountyTabAllContests> by lazy {
         // Gunnison not in round file; hack in from the cvrs and merge

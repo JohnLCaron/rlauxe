@@ -191,7 +191,7 @@ class TestReadAuditCenterFiles {
         println("\n${trunc("contest", -50)}    Npop,      Nc, voteMargin, countyMvrs, stateMvrs, Ncounties, auditReason")
         mergedContestInfo.forEach {
             print("${trunc(it.contestName, -50)} ")
-            print("${nfn(it.npop, 7)}, ${nfn(it.nc, 7)}, ${nfn(it.marginInVotes, 7)},")
+            print("${nfn(it.corlaPop, 7)}, ${nfn(it.nc, 7)}, ${nfn(it.marginInVotes, 7)},")
             print("   ${nfn(it.countyMvrs, 7)},  ${nfn(it.statewideMvrs, 7)}, ")
             println("         ${nfn(it.counties.size, 3)},   ${it.auditReason}")
         }

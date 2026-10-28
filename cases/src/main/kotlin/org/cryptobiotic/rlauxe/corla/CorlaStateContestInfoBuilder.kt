@@ -11,15 +11,9 @@ import kotlin.String
 private val logger = KotlinLogging.logger("CorlaStateContestInfoBuilder")
 
 // Build Corla Contests from StatewideInput. used by CorlaStateElection
-// TODO should add up the county votes, not use the statewide total since some counties are missing
 open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
     val infos: Map<Int, ContestInfo> = makeContestInfos().associateBy { it.id }
     val infosByName = infos.mapKeys { it.value.name }
-
-    /* TODO set Ncast ??
-    fun contests(ncast: Map<Int, Int>): List<Contest> {
-        return corlaContestBuilders.map { it.build( ncast[it.contestId] ?: it.Nc) }
-    } */
 
     // all contests
     fun makeContestInfos(): List<ContestInfo> {
@@ -28,13 +22,12 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
         val contestInfos = mutableListOf<ContestInfo>()
 
         // this determines the ordering of the contest ids
-        val contestmSorted = statewideInput.mergedContestMap.toList().sortedBy { it.second.npop }.toMap()
+        // val contestmSorted = statewideInput.mergedContestMap.toList().sortedByDescending { it.second.corlaPop }.toMap()
 
-        contestmSorted.values.forEach { mcontest ->
+        // mergedContestInfo in canonical list order, which seems to be alphabetic; this determines contest id ordering.
+        // mergedContestMap include info from canonical, round and compare file. but not contestTabs.
+        statewideInput.mergedContestMap.values.forEach { mcontest ->
             val candidateNames = mcontest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
-
-            // if (mcontest.contestName == "Gunnison County Court Judge - Burgemeister")
-            //    println("mergedContestMap found ${mcontest.contestName}")
 
             val info = ContestInfo(
                 mcontest.contestName,
@@ -57,10 +50,11 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
             }
             info.metadata["CORLAhaveMvrs"] = strata.nmvrs.toString()
             info.metadata["CORLAstrataNcards"] = strata.ballotCardCount.toString()
-            info.metadata["CORLAsample"] = mcontest.nsamples.toString()
+            info.metadata["CORLAballotCardCount"] = mcontest.corlaPop.toString()
+            info.metadata["CORLAcontestBallotCardCount"] = mcontest.nc.toString()
             info.metadata["CORLAauditReason"] = mcontest.auditReason.toString()
             info.metadata["CORLAmarginInVotes"] = mcontest.marginInVotes.toString()
-            info.metadata["CORLAcounties"] = mcontest.counties.toList().toString()
+            info.metadata["CanonicalCounties"] = mcontest.counties.toList().toString()
             info.metadata["CORLAcountyMvrs"] = mcontest.countyMvrs.toString()
             info.metadata["CORLAstatewideNmvrs"] = mcontest.statewideMvrs.toString()
 
@@ -72,7 +66,7 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
     }
 
     // Neals algorithm: use the minimum rate across strata
-    // depends only on the set of counties, could make common one
+    // depends only on the set of counties used by the contest and the StrataIno for those contests
     fun computeStrataMinRate(name: String, counties: Set<String>, strataMap: Map<String, StrataInfo>): StrataInfo {
         var orgSamples = 0
         val minRate = counties.map {

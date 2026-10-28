@@ -35,24 +35,22 @@ class ElectionVariant(variantEnum: ElectionVariantEnum) {
     fun isOA() = auditType.isOA()
 }
 
-// in order to do missing correctly, we need the countyTabs from stateInput,
-// which probably means we need to convert to canonical.
-
 // create election out of a single county. Creates AuditRecord, not CountyAuditRecord.
+// by writing to disk, we can redo individual counties if needed, befire we do the state
 class CorlaCountyElection(
     val countyInput: CountyInput,
-    val stateInput: StatewideInput,
-    val stateContestBuilder: CorlaStateContestInfoBuilder,
+    val stateInput: StatewideInput, // in order to do missing correctly, we need the countyTabs from stateInput,
+    val stateContestInfoBuilder: CorlaStateContestInfoBuilder, // infos consistent across counties
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean, // TODO
-    variantEnum: ElectionVariantEnum,
+    variantEnum: ElectionVariantEnum, // TODO
 ): ElectionBuilder {
     val variant = ElectionVariant(variantEnum)
     val county: String = countyInput.countyName
     val corlaCvrs: CorlaCountyCvrsIF
 
     val contests: List<ContestIF>
-    val mvrs = mutableListOf<AuditableCard>()
+    val cards = mutableListOf<AuditableCard>()
     val cardPools = mutableListOf<CardPool>()
     val poolMap = mapOf("AGGREGATED" to 1, "missing" to 2)
     val cardStyles: List<StyleIF>
@@ -64,10 +62,10 @@ class CorlaCountyElection(
     init {
         val countyCards = CountyCardsFromManifest(countyInput)
         corlaCvrs = countyCards.corlaCvrs
-        val converter = CountyCardConverter(countyInput.countyName, countyCards, stateInput, stateContestBuilder.infosByName)
+        val converter = CountyCardConverter(countyInput.countyName, countyCards, stateInput, stateContestInfoBuilder.infosByName)
 
-        val countyTab = stateInput.countyTabsAllContests()[county]!!
-        val convertedCountyTabs: Map<Int, ContestTabulation> = converter.convertToContestTabulation(countyTab)
+        val countyAcTab = stateInput.countyTabsAllContests()[county]!!
+        val convertedCountyAcTabs: Map<Int, ContestTabulation> = converter.convertToContestTabulation(countyAcTab)
 
         val convertedCvrTabs = converter.convertTabs(countyCards.cvrTabs) // unredacted
         val convertedGroupTabs = converter.convertTabs(countyCards.groupTabs) // should be aggregated when exists
@@ -75,8 +73,8 @@ class CorlaCountyElection(
         // aggregated tabs arent missing
         val notmissing = if (countyCards.aggGroup == null) convertedCvrTabs else sumContestTabulations(listOf(convertedCvrTabs, convertedGroupTabs))
 
-        // convertedCountyTabs - notmissing: votes cant go below zero
-        val missingTabs: Map<Int, ContestTabulation> = subtractContestTabulationsZ(convertedCountyTabs, notmissing)
+        // missingTabs = convertedCountyAcTabs - notmissing: votes cant go below zero
+        val missingTabs: Map<Int, ContestTabulation> = subtractContestTabulationsZ(convertedCountyAcTabs, notmissing)
 
         var styleId = 3
         cardStyles = countyCards.countyStyles().map { county ->
@@ -86,12 +84,12 @@ class CorlaCountyElection(
         }
         val cardStyleMap = cardStyles.associate { it.name to it.id } + poolMap
 
+        // TODO these arent the mvrs, this is the card manifest; mvrs must simulate the pool subtotals
         // need to iterate over CountyCards to fill in the counts
+        // transform to canonical AuditableCards, all are in memory in cards
         val npops = mutableMapOf<Int, Int>() // count contests' population size
         var index = 1
         countyCards.iterator().forEach { countyCard ->
-            if (null == cardStyleMap[countyCard.style])
-                print("")
             val card = AuditableCard.fromVotes(
                 countyCard.imprintedId,
                 countyCard.location,
@@ -100,14 +98,15 @@ class CorlaCountyElection(
                 votes = converter.convertCountyVotes(countyCard.votes),
                 poolId = poolMap[countyCard.poolName],
             )
+
             // keep track of the contest populations
-            convertedCountyTabs.keys.forEach { contestId ->
+            convertedCountyAcTabs.keys.forEach { contestId ->
                 if (card.hasContest(contestId)) {
                     val pop = npops.getOrDefault(contestId, 0)
                     npops[contestId] = pop + 1
                 }
             }
-            mvrs.add(card)
+            cards.add(card)
         }
         ncards = countyCards.manifestCount
 
@@ -118,9 +117,9 @@ class CorlaCountyElection(
         }
 
         // countyTab doesnt know ncards per contest: notmissing knows, but missing doesnt know, so here is an estimation
-        // TODO if no missing, can just use notmissing ncards
+        // TODO if no missing, can just use notmissing ncards?
         val estNcardsByContest = estNcardsByContest(notmissing, missingTabs, countyCards.manifestCount)
-        contests = makeContests(stateContestBuilder.infos, convertedCountyTabs, estNcardsByContest) // .associate { it.id to it }
+        contests = makeContests(stateContestInfoBuilder.infos, convertedCountyAcTabs, estNcardsByContest) // .associate { it.id to it }
 
         if (countyCards.missingCount > 0) {
             val hasExactContests = false // unless it has a single Style
@@ -131,7 +130,6 @@ class CorlaCountyElection(
             contests, npops, emptyMap(), cardPools,
             variant, hasStyle
         )
-
     }
 
     override fun electionInfo() =
@@ -145,25 +143,13 @@ class CorlaCountyElection(
         )
 
     override fun contestsUA() = contestsUA
-
     override fun cardStyles() = cardPools + cardStyles // cardPools are also styleIFs
     override fun cardPools() = cardPools
-    override fun unsortedMvrsInternal() = mvrs
+    override fun unsortedMvrsInternal() = null
     override fun unsortedMvrsExternal() = null
 
-    override fun cards() = createCardsFromMvrs(mvrs)
+    override fun cards() = Closer(cards.iterator())
     override fun ncards() = ncards
-
-    // TODO doesnt someone else add the indices ??
-    fun addIndexToMvrs(mvrs: List<AuditableCard>): List<AuditableCard> {
-        var cardIndex = 1 // 1 based index
-        val result = mutableListOf<AuditableCard>()
-        mvrs.forEach { org ->
-            result.add(org.copy(index = cardIndex))
-            cardIndex++
-        }
-        return result
-    }
 
     fun createCardsFromMvrs(mvrs: List<AuditableCard>): CloseableIterator<AuditableCard> {
         // remove cvrs for cards in the pools
@@ -172,37 +158,6 @@ class CorlaCountyElection(
             if (org.poolId != null && variant.isOA()) AuditableCard.removeVotes(org) else org
         }
         return transformer
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    //// contest building TODO why so complicated ?? state uses BuildCorlaContests. how differ?
-
-    private fun makeContestInfo(): List<ContestInfo> {
-        val mergedContestMap = stateInput.mergedContestMap
-        val infos = mutableListOf<ContestInfo>()
-
-        // use canonical contests for the contest and candidate names
-        mergedContestMap.values.forEach { mcontest ->
-            if (mcontest.counties.contains(countyInput.countyName)) {
-                val contestTabAllCounties = stateInput.contestTabsAllCounties()[mcontest.contestName] // needed ?
-                if (contestTabAllCounties == null) {
-                    logger.warn { "*** Cant find contestTab for '${mcontest.contestName}': remove from audit" }
-                } else {
-                    val candidateNames = mcontest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
-
-                    val info = ContestInfo(
-                        mcontest.contestName,
-                        infos.size + 1, // TODO here we are changing the Ids
-                        candidateNames,     // canonical
-                        SocialChoiceFunction.PLURALITY, // TODO
-                        mcontest.voteForN
-                    )
-                    info.metadata["CORLAcontestCardCount"] = mcontest.nc.toString()
-                    infos.add(info)
-                }
-            }
-        }
-        return infos
     }
 
     fun makeContests(
@@ -259,7 +214,6 @@ fun makeContestWAs(
 
 ///////////////////////////////////////////////////////////////////////////
 // TODO sometimes we know the redacted styles, so can calculate ncards directlry
-
 // meanwhile, down the rabbit hole again
 // estimate ncards(county, contest), return contestId -> ncards
 // are we adding in the unredactedCvrTabs ? cause we have an exact count there

@@ -23,9 +23,6 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.collections.forEach
 
 val defaultCharset = "ISO-8859-1" // TODO something
-// val auditcenter = "/home/stormy/datadrive/github/nealmcb/auditcenter"
-// val auditcenter = "/home/joncifer/IdeaProjects/auditcenter"
-
 private val logger = KotlinLogging.logger("StatewideInput")
 
 abstract class StatewideInputWithCvrs(
@@ -69,6 +66,7 @@ abstract class StatewideInputWithCvrs(
    subclasses provide contestNameCleanup and candidateNameCleanup
  */
 
+// could call it AuditCenterInput
 abstract class StatewideInput(
     val generalCanonicalFile: String,
     val contestRoundFile: String,
@@ -116,7 +114,7 @@ abstract class StatewideInput(
         result[contestName] = CanonicalContest(current.stateInput, current.contestName, choicesIn = achoices).addCounties(current.counties.toList())
     }
 
-    // in canonical manifest order
+    // in canonical manifest order TODO perhaps read the file with county ids ContestIdsByCounties (20216)
     open fun counties(): List<String>  = canonicalContests().values.map { it.counties }
         .flatten()
         .filter { !skipCounties(it) }
@@ -176,17 +174,20 @@ abstract class StatewideInput(
         readContestComparisonCsv(mvrComparisonFile)
     }
 
+    // TODO needed ?
     // for each contest, total mvrs over all counties
     // data class ContestMvrCount(val contestName: String) {
     //    var countMvr = 0
     //    var countStatewide = 0
     val contestsFromMvrs: List<ContestMvrCount> by lazy { cardComparison().contestMvrs }
 
+    // TODO needed ?
     // for each county, over all contests
     // data class CountyMvrCount(val countyName: String) {
     //    var countMvr = 0
     val countiesFromMvrs: List<CountyMvrCount> by lazy { cardComparison().countyMvrs }
 
+    // TODO needed ?
     // data class CountyStylesFromMvrs(
     //    val countyName: String
     //    val styles = Map<Set<String>, MvrStyle>
@@ -201,27 +202,11 @@ abstract class StatewideInput(
         mergeContestInfo(this)
     } // mergedContestInfo, strataInfo, statewideContests
 
-    // data class MergedContestInfo(
-    //    // canonical
-    //    val contestName: String,
-    //    val choices: List<String>,
-    //    val counties: Set<String>,
-    //
-    //    // contestRound
-    //    val auditReason: AuditReason,
-    //    val npop:Int,       // ballotCardCount
-    //    val nc:Int,         // contestBallotCardCount
-    //    val voteForN: Int,  // nwinners
-    //    val nsamples: Int,  // optimisticSamplesToAudit
-    //    val marginInVotes: Int, // minMargin
-    //
-    //    // mvr file
-    //    val countyMvrs: Int,
-    //    val statewideMvrs: Int,
-    //)
-    // TODO remove the elided countys' contests
     val mergedContestMap: Map<String, MergedContestInfo> by lazy {
         mergedInfo().mergedContestInfo.associateBy { it.contestName }
+    }
+    val contestNc: Map<String, Int> by lazy {
+        mergedInfo().mergedContestInfo.associate { it.contestName to it.nc }
     }
 
     // strata ~= county
@@ -233,7 +218,6 @@ abstract class StatewideInput(
     val strataMap: Map<String, StrataInfo> by lazy { mergedInfo().strataInfo.associateBy { it.strataName } }
     open fun strataPopulation() = strataPopulation
     private val strataPopulation: Map<String, Int> by lazy { mergedInfo().strataInfo.associate { it.strataName to it.ballotCardCount } } // county name to population
-    val statewideContests: List<CorlaContestRoundCsv> by lazy { mergedInfo().statewideContests }
 
     //// TODO all StatewideInput classes should be consistent already
     //// needed to match the export contest/candidata names, all StatewideInput classes should be consistent already
@@ -340,7 +324,7 @@ data class MergedContestInfo(
     //    val estimatedSamplesToAudit: Int,
     //)
     val auditReason: AuditReason,
-    val npop:Int,       // ballot_card_count
+    val corlaPop:Int,   // ballot_card_count = corla population
     val nc:Int,         // contest_ballot_card_count
     val voteForN: Int,  // winners_allowed
     val nsamples: Int,  // optimistic_samples_to_audit
@@ -371,22 +355,20 @@ fun mergeContestInfo(input: StatewideInput): MergedInfo {
     val compareMap: Map<String, ContestMvrCount> = input.contestsFromMvrs.associateBy { it.contestName }
     val countyMap: Map<String, CountyMvrCount>  = input.countiesFromMvrs.associateBy { it.countyName }
 
-    val mergedContestInfo = canonical.values.map {
-        val round = roundContests[it.contestName]
-        val compare = compareMap[it.contestName]
-
-        //if (it.contestName == "Gunnison County Court Judge - Burgemeister")
-        //    println("mergeContestInfo found ${it.contestName} found")
+    // mergedContestInfo in canonical list order, which seems to be alphabetic; this determines contest id ordering.
+    val mergedContestInfo = canonical.values.map { cc: CanonicalContest ->
+        val round = roundContests[cc.contestName]
+        val compare = compareMap[cc.contestName]
 
         MergedContestInfo(
-            it,
-            it.contestName,
-            it.choices,
-            it.counties,
+            cc,
+            cc.contestName,
+            cc.choices,
+            cc.counties,
 
-            // TODO can we really tolerate missing the roundContest ??
+            // TODO can we really tolerate missing the contestRound ?? nc ?
             round?.auditReason ?: AuditReason.none,
-            npop = round?.ballotCardCount ?: 0,
+            corlaPop = round?.ballotCardCount ?: 0,
             nc = round?.contestBallotCardCount ?: 0,
             round?.nwinners ?: 1,
             round?.optimisticSamplesToAudit ?: 0,

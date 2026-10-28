@@ -26,16 +26,13 @@ interface ElectionBuilder {
 
     // if you immediately write to disk, you only need one pass through the cards iterator
     // this is the cardManifest, must have styleId matching cardStyles so style can be added when read back
-    // should not include the votes unless the cvr exists.
+    // does not include the votes unless the cvr exists.
     fun cards() : CloseableIterator<AuditableCard> // not sorted, dont need styles added yet
     fun ncards(): Int
 
-    // TODO this is bullshit we need the full styles to rehydrate the card styles when reading
-    // WRONG In EstimateAudit, we want to use pools to estimate with, if they exist. So the merging needs to merge pools, not the styles.
-    //        So dont write styles if there are pools. Also its up to the reader to prefer pools.
     fun cardStyles(): List<StyleIF>?
     fun cardPools(): List<CardPoolIF>?
-    fun countyCardPools(): List<CountyPools>? = null
+    fun countyAuditcenterPools(): List<CountyPools>? = null
     fun countyCvrPools(): List<CountyPools>? = null // for debugging
 
     // if (config.election.mvrSource == MvrSource.testPrivateMvrs), supply one or the other:
@@ -80,7 +77,7 @@ fun createElectionRecord(election: ElectionBuilder, topdir: String, control: Con
         logger.info { "createElectionRecord write ${cardPools.size} cardPools to ${publisher.cardPoolsFile()}" }
     }
 
-    val countyCardPools = election.countyCardPools()
+    val countyCardPools = election.countyAuditcenterPools()
     if (!countyCardPools.isNullOrEmpty()) {
         writeCountyCardPoolCsvFile(countyCardPools, publisher.countyCardPoolsFile())
         logger.info { "createElectionRecord write ${countyCardPools.size} countyCardPoolsFile to ${publisher.countyCardPoolsFile()}" }

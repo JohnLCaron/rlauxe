@@ -1,9 +1,7 @@
 package org.cryptobiotic.rlauxe.persist
 
 import org.cryptobiotic.rlauxe.util.Locations.cases
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,7 +23,7 @@ class TestCountyAuditRecord {
         println("manifest.ncards = ${manifest.ncards}")
         assertEquals(4166526, manifest.ncards)
 
-        val countyPools = manager.countyPools()
+        val countyPools = manager.countyAcPools()
         println("countyPools size = ${ countyPools?.size ?: 0 }")
         assertEquals(60, countyPools?.size ?: 0)
 

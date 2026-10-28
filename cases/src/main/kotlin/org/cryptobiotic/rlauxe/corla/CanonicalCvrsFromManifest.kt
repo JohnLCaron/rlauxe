@@ -18,6 +18,8 @@ import org.cryptobiotic.rlauxe.util.tabulateCards
 import kotlin.math.max
 import kotlin.math.min
 
+// obsolete
+
 private val logger = KotlinLogging.logger("CanonicalCvrsFromManifest")
 
 // TODO seems like you need to truly make the cards from the manifest, and then attach the cvrs ??

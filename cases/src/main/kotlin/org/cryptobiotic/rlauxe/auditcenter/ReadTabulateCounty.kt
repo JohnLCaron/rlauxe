@@ -209,6 +209,7 @@ fun readCountyTabulateCsvFromParser(parser: CSVParser): Map<String, CountyTabAll
 
 /////////////////////////////////////////////////
 // this is derived from CountyTabAllContests
+// TODO what if the contest or choice names are different across counties ??
 data class ContestTabAllCounties(override val contestName: String): ContestTabAllCountiesIF {
     override val choices = mutableMapOf<String, Int>() // original choice name -> votes
     override val counties = mutableSetOf<String>()     // countyNames

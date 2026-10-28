@@ -13,6 +13,8 @@ import kotlin.String
 
 private val logger = KotlinLogging.logger("CountyContestBuilder")
 
+// obsolete
+
 // Build Corla Contests from StatewideInput. used by CorlaStateElection
 // TODO should add up the county votes, not use the statewide total since some counties may be missing, eg San Juan
 open class BuildCorlaContests(val statewideInput: StatewideInput) {

@@ -18,10 +18,9 @@ import kotlin.Int
 import kotlin.String
 import kotlin.io.path.Path
 
-// TODO modify CorlaStateElection to work without CVRS ??? or maybe this is it ????
+// obsolete
 
 // A Corla state election with simulated CVRS. Creates a CountyAuditRecord.
-// A Corla state election with simulated CVRS
 // We want to synthesis cvrs and use them as the cvrPools, using CountyPoolsSimCvrs.
 open class CountyElectionSimCvrs (
     val statewideInput: StatewideInput,
@@ -115,7 +114,7 @@ open class CountyElectionSimCvrs (
 
     override fun cardStyles(): List<StyleIF>? = allStyles
     override fun cardPools(): List<CardPoolIF>? = null
-    override fun countyCardPools(): List<CountyPools>? = countyPools
+    override fun countyAuditcenterPools(): List<CountyPools>? = countyPools
     override fun countyCvrPools(): List<CountyPools>? = cvrPools
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards

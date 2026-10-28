@@ -23,6 +23,8 @@ import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 
+// obsolete
+
 private val logger = KotlinLogging.logger("CorlaStateElection")
 
 // A Corla state election with CVRS. Creates a CountyAuditRecord.
@@ -153,7 +155,7 @@ class CorlaStateElection(
     override fun cardStyles() = allStyles
     override fun cardPools() = allPools
 
-    override fun countyCardPools(): List<CountyPools> = countyPools
+    override fun countyAuditcenterPools(): List<CountyPools> = countyPools
     override fun countyCvrPools(): List<CountyPools> = cvrPools
 
     override fun unsortedMvrsInternal() = null
@@ -174,31 +176,7 @@ class CorlaStateElection(
     }
 }
 
-// all cards, including phantoms are already in the iterator
-fun writeUnsortedMvrs(
-    county: String,
-    publisher: Publisher,
-    countyMvrs: CloseableIterator<AuditableCard>,
-): Int {
-    val dir = publisher.unsortedMvrsDirectory()
-    validateOutputDir(Path(dir))
-    val outfile = "$dir/${county}.csv"
-
-    val cardsWritten = writeCardCsvFile(countyMvrs, outfile)
-    logger.info { "write $cardsWritten UnsortedMvrs for $county to ${outfile}" }
-
-    return cardsWritten
-}
-
-// remove votes for cards in the pools
-fun removeVotesFromMvrs(mvrs: CloseableIterator<AuditableCard>, variant: ElectionVariant): CloseableIterator<AuditableCard> {
-    val transformer = TransformingIterator<AuditableCard, AuditableCard>(mvrs) { org ->
-        if (org.poolId != null && variant.isOA()) AuditableCard.removeVotes(org) else org
-    }
-    return transformer
-}
-
-fun writeUnsortedCountyCvrs(
+private fun writeUnsortedCountyCvrs(
     county: String,
     publisher: Publisher,
     countyMvrs: CloseableIterator<AuditableCard>,
@@ -213,37 +191,6 @@ fun writeUnsortedCountyCvrs(
     logger.info { "write $cardsWritten UnsortedCountyCvrs for $county to ${outfile}" }
 
     return cardsWritten
-}
-
-// create an iterator over all the cards unsortedMvrsDirectory
-class CardIteratorfromCountyMvrs(
-    publisher: Publisher,
-    val styles: List<StyleIF>
-) : CloseableIterator<AuditableCard> {
-
-    val dir = publisher.unsortedMvrsDirectory()
-    val path = Path(dir)
-    val countyPaths: List<Path> = path.listDirectoryEntries().filter { !it.isDirectory() && it.fileName.toString().endsWith(".csv")}
-
-    val counties = countyPaths.iterator()
-    var innerIter = readCardsCsvIterator(counties.next().toString(), styles = styles)  // TODO do we need styles ??
-
-    override fun next(): AuditableCard {
-        return innerIter.next()
-    }
-
-    override fun hasNext(): Boolean {
-        if (innerIter.hasNext()) return true
-        if (counties.hasNext()) {
-            innerIter = readCardsCsvIterator(counties.next().toString(), styles = styles)
-            return hasNext()
-        }
-        return false
-    }
-
-    override fun close() {
-        // NOOP
-    }
 }
 
 ////////////////////////////////////////////////////////////////////

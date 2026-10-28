@@ -147,7 +147,7 @@ open class CountyElectionWithCvrs (
     override fun cardStyles(): List<StyleIF> = cvrCardStyles
 
     override fun cardPools() = null
-    override fun countyCardPools(): List<CountyPools> = countyPools
+    override fun countyAuditcenterPools(): List<CountyPools> = countyPools
     override fun countyCvrPools(): List<CountyPools> = cvrPools
 
     override fun unsortedMvrsInternal() = null

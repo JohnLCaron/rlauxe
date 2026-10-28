@@ -24,6 +24,8 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
+// obsolete ??
+
 private val logger = KotlinLogging.logger("CountyPoolsSimCvrs")
 
 // cards are partitioned by county; make a CountyPools for each County; cvrs are generated independently for each CountyPools.

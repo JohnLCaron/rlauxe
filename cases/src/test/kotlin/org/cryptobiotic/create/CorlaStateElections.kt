@@ -20,11 +20,11 @@ import kotlin.test.Test
 
 class CorlaStateElections {
     val top2020dir2 = "$cases/corla/2020r"
-    val top2020dir = "$cases/corlaState/2020"
+    val top2020dir = "$cases/corla/2020"
     val top2026pdir = "$cases/corlaState/2026p"
 
     @Test
-    fun createVersion2() {
+    fun create2020r() {
         val stateInput = Statewide2020Redacted()
 
         createCorlaStateElection2(
@@ -34,6 +34,20 @@ class CorlaStateElections {
             roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.OnePool,
             alreadyMadeCounties = false,
+        )
+    }
+
+    @Test
+    fun create2020() {
+        val stateInput = Statewide2020General()
+
+        createCorlaStateElection2(
+            topdir = top2020dir,
+            stateInput=stateInput,
+            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
+            roundConfig = corlaRoundSettings(),
+            variant = ElectionVariantEnum.OnePool,
+            alreadyMadeCounties = true,
         )
     }
 

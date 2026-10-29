@@ -110,6 +110,9 @@ class CorlaCountyElection(
         }
         ncards = countyCards.manifestCount
 
+         if (county == "San Miguel")
+             print("")
+
         if (countyCards.aggGroup != null) {
             val hasExactContests = false // unless it has a single Style
             convertedGroupTabs.values.forEach { it.setNcards(countyCards.aggCount) } // finally know the ncards after reading county Cvr file

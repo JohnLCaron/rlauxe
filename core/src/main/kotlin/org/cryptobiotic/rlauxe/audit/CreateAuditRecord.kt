@@ -22,7 +22,7 @@ private val logger = KotlinLogging.logger("CreateAuditRecord")
 
 // fastSampling requires every card has a style; all styles must be in styleMap when reading (no fromCvr or phantoms)
 fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String, externalSortDir: String? = null,
-                      validate: Boolean = false, sortManifest: Boolean = true, fastSampling: Boolean = true) {
+                      verify: Boolean = false, sortManifest: Boolean = true, fastSampling: Boolean = true) {
     val publisher = Publisher(topdir)
 
     writeAuditCreationConfigJsonFile(config.creation, publisher.auditCreationConfigFile())
@@ -45,28 +45,33 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String,
         // save Mvrs for testing and diagnostics
         // cant write the sorted mvrs until after sortedCards is written
         if (config.election.mvrSource == MvrSource.testPrivateMvrs) {
-            val unsortedMvrs = election.unsortedMvrsInternal() // make electionBuilder add the batches ??
-            if (unsortedMvrs != null) {
-                writePrivateMvrsInternal(publisher, unsortedMvrs, election.cardStyles(), seed = config.creation.seed)
+            val transform = election.cardToMvrTransformer()
+            if (transform != null) {
+                transformCvrsToMvrs(publisher, transform)
             } else {
-                val unsortedCards = election.unsortedMvrsExternal()
-                if (unsortedCards != null && externalSortDir != null) {
-                    // TODO we are doing two external sorts, one for cvrs and one for mvrs. seems wasteful
-                    writeSortedCardsExternal(
-                        externalSortDir,
-                        publisher.sortedMvrsFile(),
-                        unsortedCards,
-                        seed = config.creation.seed
-                    )
-                    logger.info { "createAuditRecord wrotePrivateMvrs to ${publisher.sortedMvrsFile()}" }
+                val unsortedMvrs = election.unsortedMvrsInternal() // make electionBuilder add the batches ??
+                if (unsortedMvrs != null) {
+                    writePrivateMvrsInternal(publisher, unsortedMvrs, election.cardStyles(), seed = config.creation.seed)
                 } else {
-                    logger.warn { "createAuditRecord did not create private mvrs; not available for ${election.javaClass} auditType ${config.auditType}" }
+                    val unsortedCards = election.unsortedMvrsExternal()
+                    if (unsortedCards != null && externalSortDir != null) {
+                        // TODO we are doing two external sorts, one for cvrs and one for mvrs. seems wasteful
+                        writeSortedCardsExternal(
+                            externalSortDir,
+                            publisher.sortedMvrsFile(),
+                            unsortedCards,
+                            seed = config.creation.seed
+                        )
+                        logger.info { "createAuditRecord wrotePrivateMvrs to ${publisher.sortedMvrsFile()}" }
+                    } else {
+                        logger.warn { "createAuditRecord did not create private mvrs; not available for ${election.javaClass} auditType ${config.auditType}" }
+                    }
                 }
             }
         }
     }
 
-    if (validate) {
+    if (verify) {
         val verifyACResults = VerifyAuditCommitment(topdir).verify()
         if (verifyACResults.hasErrors) {
             logger.error { "createAuditRecord VerifyAuditCommitment failed: ${verifyACResults}" }
@@ -116,6 +121,13 @@ fun makeFastCards(publisher: Publisher, styles: List<StyleIF>): Int {
 
     logger.info{"makeFastCards ${ncards} took ${stopwatch}"}
     return ncards
+}
+
+fun transformCvrsToMvrs(publisher: Publisher, transform: ((AuditableCard) -> AuditableCard)): Int {
+    val transformedIter = readCardsCsvIterator(publisher.cardManifestFile(), transform = transform)
+    val countCards = writeCardCsvFile(Closer(transformedIter.iterator()), publisher.sortedMvrsFile())
+    logger.info{"transformCvrsToMvrs ${countCards} cards to ${publisher.sortedMvrsFile()}"}
+    return countCards
 }
 
 fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCard>, seed: Long) {

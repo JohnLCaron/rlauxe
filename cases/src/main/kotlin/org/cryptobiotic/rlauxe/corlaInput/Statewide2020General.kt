@@ -37,7 +37,7 @@ open class Statewide2020General(
     }
 
     // if you skip counties, you have to adjust Nc
-    private val skipCounties = listOf("San Juan")
+    private val skipCounties = listOf("Baca", "San Juan") // TODO Baca
     override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
 
     // add Gunnison cvr totals to countyTabsAllContests, since those are missing from the tabulateCountyFile file

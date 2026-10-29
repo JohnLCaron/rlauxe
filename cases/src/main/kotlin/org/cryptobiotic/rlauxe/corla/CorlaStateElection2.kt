@@ -11,14 +11,20 @@ import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaCounty.makeContestWAs
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInputWithCvrs
+import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.persist.csv.CardHeader
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
+import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.util.TransformingIterator
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 import java.nio.file.Path
 import kotlin.collections.forEach
 import kotlin.collections.map
@@ -43,12 +49,21 @@ class CorlaStateElection2(
 
     val statePools = mutableListOf<CardPool>()
     val stateStyles = mutableListOf<CardStyle>()
+    val stateStyleMap: Map<Int, StyleIF>
     val countyAcPools = mutableListOf<CountyPools>()
+    val vunderPoolMap: Map<Int, VunderPool>
 
     val contestsUA: List<ContestWithAssertions>
     val ncards: Int
 
     init {
+        // write the card manifest here
+        // TODO put inside a use clause ??
+        val publisher = Publisher(topdir)
+        validateOutputDirOfFile(publisher.cardManifestFile())
+        val cardManifestWriter: OutputStreamWriter = FileOutputStream(publisher.cardManifestFile()).writer()
+        cardManifestWriter.write(CardHeader)
+
         val stateContests = mutableMapOf<Int, MutableList<Pair<String, Contest>>>() // contestId -> countyName, countyContest
 
         var totalCvrCardCount = 0
@@ -60,6 +75,9 @@ class CorlaStateElection2(
         val npopMap = mutableMapOf<Int, Int>()
 
         for (countyName in stateInput.counties()) {
+            println(countyName)
+            if (countyName == "Adams")
+                print("")
             val countyDir = "$topdir/county/$countyName"
             val result = AuditRecord.readPartialResult(countyDir)
             if (result.isErr) {
@@ -96,7 +114,7 @@ class CorlaStateElection2(
             // TODO this is the card manifest; for the mvrs, we need to simulate the cvrs when they dont exist...
             val countyPublisher = Publisher(countyDir)
             val orgIter = readCardsCsvIterator(countyPublisher.cardManifestFile(), styles = null)
-            val transformer = TransformingIterator(orgIter) { org ->
+            val countyCardsIter = TransformingIterator(orgIter) { org ->
                 // convenient to count population here; pools can make pop > ncards
                 if (countyStyleMap[org.styleId] == null)
                     logger.error{"cant find ${org.styleId} in countyStyleMap"}
@@ -113,23 +131,27 @@ class CorlaStateElection2(
                     location = "$countyName-${org.location}",
                     index = stateCardIndex++,
                     styleId = stateStyleIdMap[org.styleId]!!,
-                    poolId = statePoolIdMap[org.poolId], // not sure if theers a poolId
+                    poolId = statePoolIdMap[org.poolId], // TODO make sure if theres a poolId in dounty cardManifestFile
                 )
             }
 
-            // TODO could we just keep appending to the cardManifest, keeping the file open ??
-            //      and add the mvr simulations by reading the cardManifest ??
-            //      see VunderBatches CreateCardsForCountyPools used by CountyElectionSimCvrs
-            //      see VunderPool used by CanonicalCvrsFromManifest
-            // TODO if these are the mvrs, we need to simulate the cvrs when they dont exist...
-            val countyCardCount = writeUnsortedMvrs(countyName, statePublisher, transformer)
+            // append county cards to the cardManifest
+            var countyCardCount = 0
+            countyCardsIter.use { cardIter ->
+                while (cardIter.hasNext()) {
+                    cardManifestWriter.write(writeCardCsv(cardIter.next()))
+                    countyCardCount++
+                }
+            }
             totalCvrCardCount += countyCardCount
 
-            // is this the ac or the cvr tabs ??
+            // these are the ac tabs
             val countyContestTabs = mutableMapOf<Int, ContestTabulation>()
             countyAuditRecord.contests.map { it.contest as Contest }.forEach { contest ->
                 val contestList = stateContests.getOrPut(contest.id) { mutableListOf() }
                 contestList.add(Pair(countyName, contest))
+                if (contest.name.startsWith("Adams"))
+                    print("")
                 countyContestTabs.sumContestTabulationsFromCandVotes(contest.info, contest.votes, contest.Ncast)
             }
 
@@ -141,7 +163,8 @@ class CorlaStateElection2(
                 cardCount = countyCardCount,
                 styles = countyStyles,
             ))
-        }
+        } // end loop over counties
+        cardManifestWriter.close()
 
         val contests = stateContests.map { (contestId, countyList) ->
             var Ncast = 0
@@ -168,9 +191,12 @@ class CorlaStateElection2(
                 val phantomsForContest = statePhantoms[info.id] ?: 0
                 info.metadata["PhantomPct"] = if (Nc == 0) "" else (100.0 * phantomsForContest / Nc).toInt().toString()
             } */
-            // TODO Nc should be from auditcenter, mcontest.nc = round.contestBallotCardCount
+            // Nc should be from auditcenter, mcontest.nc = round.contestBallotCardCount
             var Nc = stateInput.contestNc[info.name]!!
             if (Ncast > Nc) {
+                if (info.name.startsWith("Adams"))
+                    print("")
+                // why is Ncast > Nc ??
                 logger.warn{"${info.name} (${info.id}): Ncast $Ncast > $Nc Nc; set Nc = Ncast for now"}
                 Nc = Ncast
             }
@@ -184,6 +210,13 @@ class CorlaStateElection2(
         // if (variant.phantoms) println("phantomsByContest = ${statePhantoms}")
         require(totalCvrCardCount == stateCardIndex - 1)
         this.ncards = totalCvrCardCount // or totalPoolCardCount? */
+
+        stateStyleMap = stateStyles.associateBy { it.id }
+        // this can only be use once, else must be reinitialized....
+        vunderPoolMap = statePools.map { cardPool ->
+            val vunders = cardPool.possibleContests().associate { Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
+            VunderPool(vunders, cardPool.poolName, cardPool.poolId, cardPool.hasExactContests)
+        }.associateBy{ it.poolId }
     }
 
     override fun electionInfo() =
@@ -196,11 +229,26 @@ class CorlaStateElection2(
     override fun countyAuditcenterPools(): List<CountyPools> = countyAcPools // used by viewer
     //override fun countyCvrPools(): List<CountyPools> = cvrPools
 
+    //      and add the mvr simulations by reading the cardManifest ??
+    //      see VunderBatches CreateCardsForCountyPools used by CountyElectionSimCvrs
+    //      see VunderPool used by CanonicalCvrsFromManifest
+    // TODO if these are the mvrs, we need to simulate the cvrs when they dont exist...
     override fun unsortedMvrsInternal() = null
-    override fun unsortedMvrsExternal() = CardIteratorfromCountyMvrs(statePublisher, styles = stateStyles)
+    override fun unsortedMvrsExternal() = null // CardIteratorfromCountyMvrs(statePublisher, styles = stateStyles)
 
-    // TODO do we need to munge the mvrs for the card manifest? Add the card styles ??
-    override fun cards() = removeVotesFromMvrs(unsortedMvrsExternal(), variant)
+    // convert cvr to mvr on the fly
+    override fun cardToMvrTransformer(): ((AuditableCard) -> AuditableCard) {
+        return { card ->
+            if (card.poolId == null) card else {
+                val style = stateStyleMap[card.styleId]!!
+                card.setStyle(style)
+                val vunderPool = vunderPoolMap[card.poolId]!! // the poolId should match a VunderPool
+                vunderPool.simulatePooledCard(card)
+            }
+        }
+    }
+
+    override fun cards() = null // removeVotesFromMvrs(unsortedMvrsExternal(), variant)
     override fun ncards() = ncards
 }
 
@@ -269,6 +317,10 @@ fun makeCountyElections(
     val contestBuilder = CorlaStateContestInfoBuilder(stateInput)
     stateInput.counties().forEach { countyName ->
         val countyInput = stateInput.corlaCountyInput(countyName)
+        if (countyInput == null) {
+            stateInput.corlaCountyInput(countyName)
+            logger.error { "cant find countyInput for $countyName"}
+        }
         val countyElection = CorlaCountyElection(countyInput!!, stateInput, contestBuilder, mvrSource, hasStyle, variantEnum)
         val countyDir = "$topdir/county/$countyName"
 
@@ -297,8 +349,8 @@ fun createCorlaStateElection2(
     Logging.addFileAppender("cases", "$topdir/logs.log")
     logger.info {"-------------- createCorlaStateElection ${stateInput.javaClass.name} in $topdir"}
 
+    validateOutputDir(Path(topdir))
     if (!alreadyMadeCounties) {
-        validateOutputDir(Path(topdir))
         // clearDirectory(Path(topdir))
         makeCountyElections(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
     }

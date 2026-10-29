@@ -188,7 +188,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
                     imprintedId = manifestEntry.imprintedId(),
                     location = manifestEntry.location(),
                     style = "missing",
-                    votes = emptyList(), // must simulate for mvrs
+                    votes = emptyList(), // TODO must simulate for mvrs
                     poolName = "missing",
                 )
 

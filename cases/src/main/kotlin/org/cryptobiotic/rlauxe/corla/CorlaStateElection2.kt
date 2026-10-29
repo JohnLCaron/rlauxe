@@ -93,7 +93,7 @@ class CorlaStateElection2(
             val countyStyleMap = countyStyles.associateBy { it.id() }
 
             // read county cvrs (already canonicalized) and write out unsorted card manifest
-            // TODO this is the card manifest, for the mvrs, we need to simulate the cvrs when they dont exist...
+            // TODO this is the card manifest; for the mvrs, we need to simulate the cvrs when they dont exist...
             val countyPublisher = Publisher(countyDir)
             val orgIter = readCardsCsvIterator(countyPublisher.cardManifestFile(), styles = null)
             val transformer = TransformingIterator(orgIter) { org ->
@@ -113,9 +113,14 @@ class CorlaStateElection2(
                     location = "$countyName-${org.location}",
                     index = stateCardIndex++,
                     styleId = stateStyleIdMap[org.styleId]!!,
-                    poolId = statePoolIdMap[org.poolId],
+                    poolId = statePoolIdMap[org.poolId], // not sure if theers a poolId
                 )
             }
+
+            // TODO could we just keep appending to the cardManifest, keeping the file open ??
+            //      and add the mvr simulations by reading the cardManifest ??
+            //      see VunderBatches CreateCardsForCountyPools used by CountyElectionSimCvrs
+            //      see VunderPool used by CanonicalCvrsFromManifest
             // TODO if these are the mvrs, we need to simulate the cvrs when they dont exist...
             val countyCardCount = writeUnsortedMvrs(countyName, statePublisher, transformer)
             totalCvrCardCount += countyCardCount
@@ -188,7 +193,7 @@ class CorlaStateElection2(
     override fun cardStyles() = stateStyles
     override fun cardPools() = statePools
 
-    override fun countyAuditcenterPools(): List<CountyPools> = countyAcPools
+    override fun countyAuditcenterPools(): List<CountyPools> = countyAcPools // used by viewer
     //override fun countyCvrPools(): List<CountyPools> = cvrPools
 
     override fun unsortedMvrsInternal() = null
@@ -315,3 +320,34 @@ fun createCorlaStateElection2(
 
     logger.info{"createCorlaCountyElection took $stopwatch"}
 }
+
+/*
+auditrecord/
+    round1/ (runAudit)
+        samplePrns1.json        prns chosen for round1
+        sampleMvrs1.csv         mvrs chosen for round1
+    cardManifest.csv            card manifest for state                             2.7 G
+    sortedCards.csv             card manifest sorted by PRN (createAudit)           2.8 G
+    ...
+county/                                                                              .855 G
+    countyName/
+        auditrecord/
+            cardManifest.csv    card manifest for county; no prn pr poolId, redacted have style no votes
+           ...
+cvrs/                                                                               1.1G (100 M zipped)
+    countyName-Redacted.csv     original cvr file from county
+    countyName-Report.txt
+    ...
+private/                                                                            3.7 G
+    countyName.csv              mvr file for county ** probably wrong and not needed **
+    ...
+    sortedMvrs.csv              all mvrs, sorted by PRN (createAudit)               2.8 G
+sortChunks/                                                                         2.8 G
+    sorted-cards-part-k.csv
+countyContestData.csv
+countyData.csv
+fastSampling.bin                fastest for what-if sampling (createAudit)           .141 G
+logs.logs
+sortedCards.proto               faster to read (createAudit)                        2.6 G
+
+ */

@@ -9,10 +9,13 @@ See [Corla2020notes](Corla2020notes.md) for description of the cvr files.
     * [Style and Aggregated votes, no Ids](#style-and-aggregated-votes-no-ids)
     * [Individual cards with Style and IDs, no vote counts](#individual-cards-with-style-and-ids-no-vote-counts)
     * [No Redactions, but can infer from reported votes and manifest](#no-redactions-but-can-infer-from-reported-votes-and-manifest)
+  * [Run Redaction program on 2020 County CVR files as is](#run-redaction-program-on-2020-county-cvr-files-as-is)
+  * [Run anomymize_cvr program on 2020 County CVR files as is](#run-anomymize_cvr-program-on-2020-county-cvr-files-as-is)
     * [Summary](#summary)
   * ["Trust the manifest" CVR redaction reading algorithm](#trust-the-manifest-cvr-redaction-reading-algorithm)
-  * [Experiments with Redaction programs](#experiments-with-redaction-programs)
   * [Compare redaction variants](#compare-redaction-variants)
+  * [Precinct Portion](#precinct-portion)
+    * [Summary of Redaction for trial counties 2026](#summary-of-redaction-for-trial-counties-2026)
 <!-- TOC -->
 
 
@@ -325,7 +328,7 @@ read the cardManifest and tabulate npops. Alos, could add that to CorlaStateElec
 Boulder has no precinct portion. It also has 1600 redacted ballots. I suspect they used precincts in their redaction, and then removed that column.
 
 
-### Summary pf Redaction for trial counties
+### Summary of Redaction for trial counties 2026
 
 Ok heres what I know: none of La Plata, Weld or Morgan had the problem with CVRs (where the same ballotType had different contests, aka card styles), in either the 2026 primary or the 2020 general election. Douglas also did not have that problem in its 2020 CVRs.
 

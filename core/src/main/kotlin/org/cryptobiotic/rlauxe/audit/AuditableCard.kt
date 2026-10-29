@@ -92,6 +92,8 @@ data class AuditableCard (
     fun location() = location ?: id()
     fun index() = index
     fun possibleContests() : IntArray {
+        if (style == null)
+            print("")
         return when {
             (!useCvr && style != null) -> style!!.possibleContests()
             else -> votes!!.keys.toList().sorted().toIntArray() // assumes cvrsContainUndervotes, set style if not.

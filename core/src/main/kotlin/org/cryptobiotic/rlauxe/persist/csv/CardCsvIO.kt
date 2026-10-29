@@ -130,6 +130,9 @@ fun readCardCsv(line: String): AuditableCard {
 
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// replace
+
 class IteratorCardsCsvStream(input: InputStream, bufferSize: Int, val styles: List<StyleIF>?): CloseableIterator<AuditableCard> {
     val styleMap = if (styles == null) null else styles.associateBy { it.id() }
     val reader = BufferedReader(InputStreamReader(input),bufferSize)
@@ -173,7 +176,6 @@ class CardCsvReader(filename: String, val styles: List<StyleIF>?): CloseableIter
     }
 }
 
-// replace readCardsCsvIterator
 fun readCardsCsvIterator(csvFile: String, styles: List<StyleIF>?): CloseableIterator<AuditableCard> {
     val useFilename: String = if (Files.exists(Path(csvFile))) csvFile
     else if (Files.exists(Path("$csvFile.zip"))) "$csvFile.zip" // TODO unzip
@@ -192,12 +194,70 @@ fun readCardsCsvIterator(csvFile: String, styles: List<StyleIF>?): CloseableIter
     }
 }
 
-
 fun readCardsAndMergeToList(filename: String, styles: List<StyleIF>?): List<AuditableCard> {
     val mergedMvrIter = readCardsCsvIterator(filename, styles)
     val mvrCards = mutableListOf<AuditableCard>()
     while (mergedMvrIter.hasNext()) { mvrCards.add(mergedMvrIter.next())}
     return mvrCards
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// replace readCardsCsvIterator: pass in transformer always
+
+class AddStyle(val styles: List<StyleIF>): (AuditableCard) -> AuditableCard {
+    val styleMap = styles.associateBy { it.id() }
+    override fun invoke(card: AuditableCard): AuditableCard {
+        val style = styleMap.get(card.styleId)
+        if (style != null) card.setStyle(style)
+        return card
+    }
+}
+
+fun readCardsCsvIterator(csvFile: String, transform: (AuditableCard) -> AuditableCard): CloseableIterator<AuditableCard> {
+    val useFilename: String = if (Files.exists(Path(csvFile))) csvFile
+    else if (Files.exists(Path("$csvFile.zip"))) "$csvFile.zip" // TODO unzip
+    else {
+        println("readAndMergeCards $csvFile or $csvFile.zip does not exist")
+        return emptyCloseableIterator()
+    }
+
+    // TODO time with and without zip
+    return if (useFilename.endsWith(".zip")) {
+        val reader = ZipReader(useFilename)
+        val input = reader.inputStream()
+        IteratorCardStreamTransform(input, 8192, transform)
+    } else {
+        IteratorCardStreamTransform(File(useFilename).inputStream(), 8192, transform)
+    }
+}
+
+class IteratorCardStreamTransform(input: InputStream, bufferSize: Int, val transform: (AuditableCard) -> AuditableCard): CloseableIterator<AuditableCard> {
+    val reader = BufferedReader(InputStreamReader(input),bufferSize)
+    var nextLine: String? = null
+    var countLines  = 0
+
+    init {
+        reader.readLine() // get rid of header line
+    }
+
+    override fun hasNext() : Boolean {
+        if (nextLine == null) {
+            countLines++
+            nextLine = reader.readLine()
+        }
+        return nextLine != null
+    }
+
+    override fun next(): AuditableCard {
+        if (!hasNext()) throw NoSuchElementException()
+        val inputCard: AuditableCard =  readCardCsv(nextLine!!)
+        nextLine = null
+        return transform(inputCard)
+    }
+
+    override fun close() {
+        reader.close()
+    }
 }
 
 

@@ -29,6 +29,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
     val redactedNoStyle = mutableMapOf<String, CvrRow>()
 
     // assumes manifest iterator doesnt terminate early
+    val manifestEntries = countyInput.readCountyManifest()
     var aggCount = 0
     var missingCount = 0
     var manifestCount = 0
@@ -36,7 +37,6 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
     init {
         // infos local to the county (not converted to canonical)
         infos = corlaCvrs.makeContestInfo()
-        cvrTabs = tabulateCvrRows(corlaCvrs.cvrs().iterator(), infos)
 
         aggGroup = corlaCvrs.redaction().groups().find { it.groupName.lowercase() == "aggregated"}
         groupTabs = if (aggGroup != null) { // if agg grup exists, ignore other groups. may have to change this if someone else is adding
@@ -57,7 +57,10 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
             sumAccum
         }
 
-        cvrMap = corlaCvrs.cvrs().associateBy { it.imprintedId }
+        // filter out non included in manifest
+        val cvrsInManifest = corlaCvrs.cvrs().filter{ manifestEntries.contains(it.tabulatorNum, it.batchId, it.recordId) }
+        cvrMap = cvrsInManifest.associateBy { it.imprintedId }
+        cvrTabs = tabulateCvrRows(cvrsInManifest.iterator(), infos)
 
         // allBallotStyles are the union of unredacted and redacted cvrs; dont change the original!
         // actually I think we could add redacted ballots to BallotStyles in Redaction(), but still keep
@@ -75,6 +78,8 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
                 redactedNoStyle[row.imprintedId] = row
             }
         }
+
+
     }
 
     // local contest Ids
@@ -188,7 +193,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
                     imprintedId = manifestEntry.imprintedId(),
                     location = manifestEntry.location(),
                     style = "missing",
-                    votes = emptyList(), // must simulate for mvrs
+                    votes = emptyList(), // TODO must simulate for mvrs
                     poolName = "missing",
                 )
 

@@ -1,9 +1,13 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.rlauxe.corla.CorlaStateContestInfoBuilder
+import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyElection
 import org.cryptobiotic.rlauxe.corlaCounty.CountyCardConverter
 import org.cryptobiotic.rlauxe.corlaCounty.CountyCardsFromManifest
+import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
@@ -74,6 +78,33 @@ class TestReadTabulateCounty {
         println(gunnisonCountyTab)
 
         val result = input.countyTabsAllContests() + mapOf("Gunnison" to gunnisonCountyTab)
+    }
+
+    @Test
+    fun testCountyCardsFromManifest() {
+        val countyInput = input.corlaCountyInput("Adams")!!
+        val countyCards = CountyCardsFromManifest(countyInput)
+        println("cvrs = ${countyCards.corlaCvrs.nrows()}")
+
+        val cvrTabs = countyCards.cvrTabs
+        println("cvrTabs ncards = ${cvrTabs.values.maxOf{ it.ncards() }}")
+
+        val iter = countyCards.iterator()
+        var count = 0
+        while (iter.hasNext()) {
+            val cc = iter.next()
+            count++
+        }
+        println("iterator = $count")
+
+        val cce = CorlaCountyElection(
+            countyInput,
+            input, // in order to do missing correctly, we need the countyTabs from stateInput,
+            CorlaStateContestInfoBuilder(input), // infos consistent across counties
+            MvrSource.testPrivateMvrs,
+            true,
+            ElectionVariantEnum.OnePool
+        )
     }
 
     @Test

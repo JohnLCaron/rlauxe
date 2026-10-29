@@ -24,10 +24,12 @@ interface ElectionBuilder {
     fun electionInfo(): ElectionInfo
     fun contestsUA(): List<ContestWithAssertions>
 
+    // only used in CreateElectionRecord to write to cardManifest.
     // if you immediately write to disk, you only need one pass through the cards iterator
-    // this is the cardManifest, must have styleId matching cardStyles so style can be added when read back
+    // this is the unsorted cardManifest, must have styleIds and poolIds; dont need styles added yet
     // does not include the votes unless the cvr exists.
-    fun cards() : CloseableIterator<AuditableCard> // not sorted, dont need styles added yet
+    // null means it was already written
+    fun cards() : CloseableIterator<AuditableCard>?
     fun ncards(): Int
 
     fun cardStyles(): List<StyleIF>?
@@ -35,10 +37,15 @@ interface ElectionBuilder {
     fun countyAuditcenterPools(): List<CountyPools>? = null
     fun countyCvrPools(): List<CountyPools>? = null // for debugging
 
+    // only used in CreateAuditRecord to write to cardManifest.
     // if (config.election.mvrSource == MvrSource.testPrivateMvrs), supply one or the other:
     // these are the mvrs, they must map 1-1 to cards(), and contain the votes
     fun unsortedMvrsInternal(): List<AuditableCard>? // for in-memory case, poolId used also as batch name?
     fun unsortedMvrsExternal(): CloseableIterator<AuditableCard>? // for out-of-memory case
+
+    // TODO use sortedCards and transform to mvrs by adding simulated cvrs where neeeded
+    //  can only be used once
+    fun cardToMvrTransformer(): ((AuditableCard) -> AuditableCard)? = null
 }
 
 private val logger = KotlinLogging.logger("CreateElectionRecord")
@@ -90,9 +97,11 @@ fun createElectionRecord(election: ElectionBuilder, topdir: String, control: Con
     }
 
     val cards = election.cards()
-    val countCvrs = writeCardCsvFile(cards, publisher.cardManifestFile())
-    // createZipFile(publisher.cardManifestFile(), delete = true)
-    logger.info { "createElectionRecord write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
+    if (cards != null) { // null means it was already written
+        val countCvrs = writeCardCsvFile(cards, publisher.cardManifestFile())
+        // createZipFile(publisher.cardManifestFile(), delete = true)
+        logger.info { "createElectionRecord write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
+    }
 
     // by calling preAuditContestCheck here, we change the contest.preAuditStatus before the contests are written
     // but we dont have the ContestSampleControl yet.

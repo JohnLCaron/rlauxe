@@ -16,7 +16,7 @@ class WriteCountyInputData {
 
     @Test
     fun testOneCounty() {
-        val county = "Las Platas"
+        val county = "Otero"
         val stateInput = Statewide2020Redacted()
         val countyInput = stateInput.corlaCountyInput(county)
         if (countyInput != null) {
@@ -70,6 +70,8 @@ class WriteCountyInputData {
         val countyElection = CorlaCountyElection(countyInput, stateInput, contestBuilder, MvrSource.testPrivateMvrs,
             true, ElectionVariantEnum.OnePool)
 
+        if (county == "Otero")
+            print("")
         val corlaCvrs = countyElection.corlaCvrs
         val manifest = countyInput.readManifestEntries()
         val manifestCounts = manifest.manifestCounts(corlaCvrs)

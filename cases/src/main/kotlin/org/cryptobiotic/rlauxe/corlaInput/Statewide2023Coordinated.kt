@@ -100,7 +100,7 @@ class Boulder23Input(): BoulderInput {
 
     override fun countyPopulation() = countyPopulation
     private val countyPopulation by lazy {
-        readCountyManifest().totalCards
+        readManifestEntries().totalCards
     }
 
     override fun sovo(): BoulderStatementOfVotes {

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
@@ -26,7 +25,7 @@ class Boulder24Input: BoulderInput {
 
     override fun countyPopulation() = countyPopulation
     private val countyPopulation by lazy {
-        readCountyManifest().totalCards
+        readManifestEntries().totalCards
     }
 
     companion object {

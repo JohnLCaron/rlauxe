@@ -15,11 +15,9 @@ import org.cryptobiotic.rlauxe.corlaInput.StatewideInputWithCvrs
 import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.CardHeader
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
-import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
@@ -37,7 +35,7 @@ private val logger = KotlinLogging.logger("CorlaStateElection")
 
 // A Corla state election with CVRS. Builds on the CountyElection, which have already been written.
 // We want to be able to update the county elections individually, then run this again to recreate the state election
-class CorlaStateElection2(
+class CorlaStateElection(
     val topdir: String,
     val stateInput: StatewideInputWithCvrs,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
@@ -328,7 +326,7 @@ fun createCorlaStateElection2(
         makeCountyElections(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
     }
 
-    val election = CorlaStateElection2(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
+    val election = CorlaStateElection(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
 
     createElectionRecord(election, topdir = topdir)
 

@@ -60,7 +60,7 @@ class TestReadManifests {
         val countyInput = input.corlaCountyInput(county)
         if (countyInput != null) {
             println(countyInput.manifestSource)
-            println(countyInput.readCountyManifest().totalCards)
+            println(countyInput.readManifestEntries().totalCards)
         }
 
         val countyTabs = input.countyTabsAllContests()

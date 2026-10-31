@@ -107,7 +107,7 @@ class CountyInput2025(val county: String): CountyInput {
 
     override fun countyPopulation() = countyPopulation
     private val countyPopulation by lazy {
-        readCountyManifest().totalCards
+        readManifestEntries().totalCards
     }
 }
 
@@ -120,7 +120,7 @@ class Boulder25Input(): BoulderInput  {
 
     override fun countyPopulation() = countyPopulation
     private val countyPopulation by lazy {
-        readCountyManifest().totalCards
+        readManifestEntries().totalCards
     }
 
     override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())

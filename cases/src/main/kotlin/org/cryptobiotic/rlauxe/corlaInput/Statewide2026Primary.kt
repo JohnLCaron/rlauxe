@@ -3,10 +3,9 @@ package org.cryptobiotic.rlauxe.corlaInput
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
-import org.cryptobiotic.rlauxe.util.ContestIDsByCounty
+import org.cryptobiotic.rlauxe.auditcenter.ContestIDsByCounty
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
 

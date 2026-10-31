@@ -6,20 +6,10 @@ import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corla.CorlaStateContestInfoBuilder
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
-import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.irv.IrvContest
-import org.cryptobiotic.rlauxe.irv.makeRaireContest
-import org.cryptobiotic.rlauxe.irv.makeRaireOneAuditContest
 import org.cryptobiotic.rlauxe.oneaudit.*
-import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.forEach
-import kotlin.collections.get
-import kotlin.collections.map
-import kotlin.collections.set
-import kotlin.io.path.Path
-import kotlin.math.max
-import kotlin.math.min
 
 private val logger = KotlinLogging.logger("CorlaCountyElectionNoCvrs")
 
@@ -50,7 +40,7 @@ class CorlaCountyElectionNoCvrs(
         val allContestIds = convertedCountyAcTabs.keys.toList()
 
         var index = 1
-        countyInput.readCountyManifest().forEach { manifestEntry ->
+        countyInput.readManifestEntries().forEach { manifestEntry ->
 
             // data class AuditableCard (
             //    val id: String, // enough info to find the card for a manual audit.

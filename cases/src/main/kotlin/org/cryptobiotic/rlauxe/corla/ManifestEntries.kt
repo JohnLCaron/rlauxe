@@ -78,10 +78,25 @@ data class ManifestId(val tab: Int, val batch: String, val record: Int, val loca
     }
 }
 
+// canonical order of county manifest
 open class ManifestEntries(val manifestBatches: List<ManifestBatch>): Iterable<ManifestEntry> {
     val totalCards = manifestBatches.sumOf{ it.nballotCards }
+    val batchMap: Map<Pair<Int, String>, ManifestBatch>
 
     constructor(manifestSource: String): this( readCountyManifestCsv(manifestSource) )
+
+    init {
+        batchMap = manifestBatches.associate{ Pair(it.tabulatorNum, it.batchId) to it}
+    }
+
+    fun contains(row: CvrRow): Boolean {
+        return contains(row.tabulatorNum, row.batchId, row.recordId)
+    }
+
+    fun contains(tab: Int, batch:String, record: Int): Boolean {
+        val mb = batchMap[Pair(tab, batch)] ?: return false
+        return record > 0 && record <= mb.nballotCards
+    }
 
     fun uppercase(): ManifestEntries{
         val upperBatches = manifestBatches.map { it.copy( batchId = it.batchId.uppercase() ) }

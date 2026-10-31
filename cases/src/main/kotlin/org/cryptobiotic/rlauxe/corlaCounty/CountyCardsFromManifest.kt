@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
+import org.cryptobiotic.rlauxe.corla.ManifestEntry
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.corlacvr.CardStyleId
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
@@ -29,7 +30,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
     val redactedNoStyle = mutableMapOf<String, CvrRow>()
 
     // assumes manifest iterator doesnt terminate early
-    val manifestEntries = countyInput.readCountyManifest()
+    val manifestEntries = countyInput.readManifestEntries()
     var aggCount = 0
     var missingCount = 0
     var manifestCount = 0
@@ -175,7 +176,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
     fun iterator() : Iterator<CountyCard> = ManifestCardIterator()
 
     inner class ManifestCardIterator: Iterator<CountyCard> {
-        val iter = countyInput.readCountyManifest().iterator()
+        val iter = countyInput.readManifestEntries().iterator()
         init {
             missingCount = 0
             manifestCount = 0

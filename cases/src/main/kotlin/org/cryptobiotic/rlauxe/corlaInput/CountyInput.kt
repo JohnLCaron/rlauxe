@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.corla.GarfieldManifestEntries
 import org.cryptobiotic.rlauxe.corla.ManifestEntries
-import org.cryptobiotic.rlauxe.corlaCounty.CountyManifestEntries
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.Garfield2020CountyCvrs
 import org.cryptobiotic.rlauxe.corlacvr.Redaction
@@ -23,10 +22,6 @@ interface CountyInput: ColoradoInput {
 
     // TODO useful?
     fun hasABgroups() = false
-
-    fun readCountyManifest(): CountyManifestEntries {
-        return CountyManifestEntries(manifestSource)
-    }
 
     fun readManifestEntries(): ManifestEntries {
         return if (countyName == "Garfield") GarfieldManifestEntries(manifestSource)

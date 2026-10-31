@@ -14,7 +14,6 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.corla.CountyElectionSimCvrs
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapter
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.irv.makeRaireOneAuditContest
@@ -375,7 +374,6 @@ fun createSfElection(
 
     clearDirectory(Path(topdir))
     Logging.addFileAppender("cases", "$topdir/logs.log")
-    CountyElectionSimCvrs.logger.info {"-------------- createSfElection $topdir"}
 
     val election = CreateSfElection(
         castVoteRecordZip,

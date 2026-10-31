@@ -4,13 +4,6 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
-import org.cryptobiotic.rlauxe.corla.makeCorla2020ClcaWithCvrs
-import org.cryptobiotic.rlauxe.corla.makeCorla2020Clca
-import org.cryptobiotic.rlauxe.corla.makeCorla2022Primary
-import org.cryptobiotic.rlauxe.corla.makeCorla2024
-import org.cryptobiotic.rlauxe.corla.makeCorla2026Pcvrs
-import org.cryptobiotic.rlauxe.corla.makeCorla2026p
-import org.cryptobiotic.rlauxe.corla.makeCorla2026pm
 import org.cryptobiotic.rlauxe.belgium.makeAllBelgiumContests
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionClca
 import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionOA
@@ -119,7 +112,7 @@ object CreateCaseData {
                         else -> makeBoulderElectionOA(toptopdir = toptopdir)
                     }
                 }
-
+/*
                 "corla2026p" -> {
                     makeCorla2026p(toptopdir = toptopdir, auditcenter = auditcenter!!)
                 }
@@ -134,12 +127,12 @@ object CreateCaseData {
 
 
                 "corla2020" -> makeCorla2020Clca(toptopdir = toptopdir, auditcenter = auditcenter!!)
-                /* {
+                 {
                     when (sampleType) {
                         "uniform" -> makeCorla2020Uniform(toptopdir = toptopdir, auditcenter = auditcenter!!)
                         else -> makeCorla2020Clca(toptopdir = toptopdir, auditcenter = auditcenter!!)
                     }
-                } */
+                }
 
                 "corla2022p" -> {
                     makeCorla2022Primary(toptopdir = toptopdir, auditcenter = auditcenter!!)
@@ -150,7 +143,7 @@ object CreateCaseData {
                 }
 
                 "corla2020withCvrs" -> makeCorla2020ClcaWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!)
-                /* {
+                 {
                     when (sampleType) {
                         "uniform" -> makeCorla2020UniformWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!,
                             votedatabase = input!!)

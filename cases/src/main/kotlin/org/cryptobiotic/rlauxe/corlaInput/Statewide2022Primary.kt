@@ -17,6 +17,7 @@ class Statewide2022Primary(ac:String?=auditcenter): StatewideInput(
         return "$manifestDir/${noblanks}.csv"
     }
 
+    override fun corlaCountyInput(countyName: String): CountyInput? = null
     override fun skipCounties(countyName: String) = false
 
     // canonical contests and choices

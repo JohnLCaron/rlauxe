@@ -33,6 +33,8 @@ class Statewide2026PMerged(ac:String?=auditcenter): StatewideInput(
     override fun manifestFile(county: String) = parent.manifestFile(county)
     override fun statewideManifest() = parent.statewideManifest
 
+    override fun corlaCountyInput(countyName: String): CountyInput? = null
+
     override fun canonicalContests() = canonicalContests
     private val canonicalContests: Map<String, CanonicalContest> by lazy {
         val ccmap = mutableMapOf<String, CanonicalContest>()

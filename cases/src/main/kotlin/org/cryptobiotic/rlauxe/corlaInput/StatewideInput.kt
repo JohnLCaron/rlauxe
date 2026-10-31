@@ -25,17 +25,6 @@ import kotlin.collections.forEach
 val defaultCharset = "ISO-8859-1" // TODO something
 private val logger = KotlinLogging.logger("StatewideInput")
 
-abstract class StatewideInputWithCvrs(
-    generalCanonicalFile: String,
-    contestRoundFile: String,
-    tabulateCountyFile: String,
-    mvrComparisonFile: String,
-): StatewideInput(
-    generalCanonicalFile, contestRoundFile, tabulateCountyFile, mvrComparisonFile)
-{
-    abstract fun corlaCountyInput(countyName: String): CountyInput?
-}
-
 /*
    1. Identify the following 4 files in auditcenter
 
@@ -94,6 +83,7 @@ abstract class StatewideInput(
     }
 
     //////////////////////////////////////////////////////
+    abstract fun corlaCountyInput(countyName: String): CountyInput?
     abstract fun skipCounties(countyName: String): Boolean
 
     //

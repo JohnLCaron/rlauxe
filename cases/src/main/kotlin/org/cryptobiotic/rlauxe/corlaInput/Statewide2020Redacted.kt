@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.util.Locations.cases
 
 open class Statewide2020Redacted(
         ac:String?=auditcenter,
-    ): StatewideInputWithCvrs(
+    ): StatewideInput (
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
     contestRoundFile = "$ac/2020/general/round_1/contest.csv",
     tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",

@@ -45,7 +45,7 @@ class WriteCountyInputData {
     }
 
     // ourRedactByPrecinct written by TestAnonScenarios
-    fun writeCountyData(stateInput: StatewideInputWithCvrs) { // }, ourRedactByPrecinct: Map<String, RedactionCount>) {
+    fun writeCountyData(stateInput: StatewideInput) { // }, ourRedactByPrecinct: Map<String, RedactionCount>) {
         // stateInput.counties().forEach { county -> println("'$county',")}
         val stopwatch = Stopwatch()
         val data = mutableListOf<CountyInputData>()

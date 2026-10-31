@@ -7,9 +7,9 @@ import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 
-val votedatabaseDirDefault = "/home/stormy/datadrive/votedatabase"
+private val votedatabaseDirDefault = "/home/stormy/datadrive/votedatabase"
 
-class County2020Input(
+class County2020InputVotedatabase(
     override val countyName: String,
     val countyPopulation : Int, // TODO change to use manifest so its self contained
     votedatabaseDirIn: String?,

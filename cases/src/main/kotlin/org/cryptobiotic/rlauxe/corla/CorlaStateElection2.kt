@@ -76,8 +76,6 @@ class CorlaStateElection2(
 
         for (countyName in stateInput.counties()) {
             println(countyName)
-            if (countyName == "Adams")
-                print("")
             val countyDir = "$topdir/county/$countyName"
             val result = AuditRecord.readPartialResult(countyDir)
             if (result.isErr) {
@@ -150,8 +148,6 @@ class CorlaStateElection2(
             countyAuditRecord.contests.map { it.contest as Contest }.forEach { contest ->
                 val contestList = stateContests.getOrPut(contest.id) { mutableListOf() }
                 contestList.add(Pair(countyName, contest))
-                if (contest.name.startsWith("Adams"))
-                    print("")
                 countyContestTabs.sumContestTabulationsFromCandVotes(contest.info, contest.votes, contest.Ncast)
             }
 
@@ -194,10 +190,9 @@ class CorlaStateElection2(
             // Nc should be from auditcenter, mcontest.nc = round.contestBallotCardCount
             var Nc = stateInput.contestNc[info.name]!!
             if (Ncast > Nc) {
-                if (info.name.startsWith("Adams"))
-                    print("")
                 // why is Ncast > Nc ??
                 logger.warn{"${info.name} (${info.id}): Ncast $Ncast > $Nc Nc; set Nc = Ncast for now"}
+                // should actually be Ncast = Nc, but only if you exclude Gunnison
                 Nc = Ncast
             }
             Contest(info, voteTabulation.votes, Nc, Ncast) // phantoms = Nc - Ncast
@@ -250,30 +245,6 @@ class CorlaStateElection2(
 
     override fun cards() = null // removeVotesFromMvrs(unsortedMvrsExternal(), variant)
     override fun ncards() = ncards
-}
-
-// all cards, including phantoms are already in the iterator
-fun writeUnsortedMvrs(
-    county: String,
-    publisher: Publisher,
-    countyMvrs: CloseableIterator<AuditableCard>,
-): Int {
-    val dir = publisher.unsortedMvrsDirectory()
-    validateOutputDir(Path(dir))
-    val outfile = "$dir/${county}.csv"
-
-    val cardsWritten = writeCardCsvFile(countyMvrs, outfile)
-    logger.info { "write $cardsWritten UnsortedMvrs for $county to ${outfile}" }
-
-    return cardsWritten
-}
-
-// remove votes for cards in the pools
-fun removeVotesFromMvrs(mvrs: CloseableIterator<AuditableCard>, variant: ElectionVariant): CloseableIterator<AuditableCard> {
-    val transformer = TransformingIterator<AuditableCard, AuditableCard>(mvrs) { org ->
-        if (org.poolId != null && variant.isOA()) AuditableCard.removeVotes(org) else org
-    }
-    return transformer
 }
 
 // create an iterator over all the cards unsortedMvrsDirectory
@@ -384,15 +355,13 @@ auditrecord/
 county/                                                                              .855 G
     countyName/
         auditrecord/
-            cardManifest.csv    card manifest for county; no prn pr poolId, redacted have style no votes
+            cardManifest.csv    card manifest for county; no prn or poolId, redacted have style no votes
            ...
 cvrs/                                                                               1.1G (100 M zipped)
     countyName-Redacted.csv     original cvr file from county
     countyName-Report.txt
     ...
 private/                                                                            3.7 G
-    countyName.csv              mvr file for county ** probably wrong and not needed **
-    ...
     sortedMvrs.csv              all mvrs, sorted by PRN (createAudit)               2.8 G
 sortChunks/                                                                         2.8 G
     sorted-cards-part-k.csv

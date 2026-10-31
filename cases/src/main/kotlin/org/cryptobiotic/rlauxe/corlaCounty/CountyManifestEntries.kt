@@ -89,6 +89,10 @@ open class CountyManifestEntries(val manifestBatches: List<ManifestBatch>): Iter
         batchMap = manifestBatches.associate{ Pair(it.tabulatorNum, it.batchId) to it}
     }
 
+    fun contains(row: CvrRow): Boolean {
+        return contains(row.tabulatorNum, row.batchId, row.recordId)
+    }
+
     fun contains(tab: Int, batch:String, record: Int): Boolean {
         val mb = batchMap[Pair(tab, batch)] ?: return false
         return record > 0 && record <= mb.nballotCards

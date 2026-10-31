@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.util.Locations.cases
 
 open class Statewide2020Redacted(
         ac:String?=auditcenter,
-        votedatabaseDir: String? = null,
     ): StatewideInputWithCvrs(
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
     contestRoundFile = "$ac/2020/general/round_1/contest.csv",
@@ -15,7 +14,7 @@ open class Statewide2020Redacted(
     mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
 ) {
     override val year = "2020r"
-    val parent = Statewide2020General(ac, votedatabaseDir)
+    val parent = Statewide2020General(ac)
     val manifestDir = "$ac/2020/general/round_1"
 
     override fun manifestFile(county: String): String {
@@ -24,14 +23,13 @@ open class Statewide2020Redacted(
     }
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
-        if (countyName == "Baca") return null
+        if (skipCounties.contains(countyName)) return null
         if (countyName == "Gunnison") return County2020Redacted(countyName, 11332) // TODO read from manifest
         return if (counties().contains(countyName))
             County2020Redacted(countyName, strataPopulation()[countyName]!!) else null
     }
 
-    // if you skip counties, you have to adjust Nc
-    private val skipCounties = listOf("Baca", "San Juan") // TODO Baca
+    private val skipCounties = listOf("Baca", "Las Animas", "San Juan")
     override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
 
     // add Gunnison cvr totals to countyTabsAllContests, since those are missing from the tabulateCountyFile file
@@ -50,7 +48,7 @@ class County2020Redacted(
 
     override val electionName = "${countyName}2020"
     override val manifestSource = if (countyName == "Gunnison") "$manifestDir/Manifest-${countyNameZ}.csv"
-    else "$manifestDir/manifest-${countyNameZ}.csv"
+                                  else "$manifestDir/manifest-${countyNameZ}.csv"
 
     override val cvrsSource = "$cvrdir/$countyName-Redacted.csv"
     override val year = "2020r"

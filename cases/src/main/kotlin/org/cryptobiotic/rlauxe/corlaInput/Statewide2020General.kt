@@ -4,12 +4,14 @@ import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromResource
+import org.cryptobiotic.rlauxe.corlaCounty.CountyManifestEntries
+import org.cryptobiotic.rlauxe.corlaCounty.GarfieldManifestEntries
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import kotlin.collections.plus
 
 open class Statewide2020General(
         ac:String?=auditcenter,
-        val votedatabaseDir: String? = null,
     ): StatewideInputWithCvrs(
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
     contestRoundFile = "$ac/2020/general/round_1/contest.csv",
@@ -28,16 +30,15 @@ open class Statewide2020General(
         // not needed anymore - fixed copy is now in votedatabaase
         // if (countyName == "Arapahoe") return Arapahoe2020Redacted(strataPopulation()[countyName]!!)
         if (countyName == "Baca") return null
-        if (countyName == "Gunnison") return County2020Input(countyName, 11332, votedatabaseDir)
+        if (countyName == "Gunnison") return County2020Input(countyName, 11332)
         return if (counties().contains(countyName)) {
             if (null == strataPopulation()[countyName])
                 print("")
-            County2020Input(countyName, strataPopulation()[countyName] ?: -1, votedatabaseDir)
+            County2020Input(countyName, strataPopulation()[countyName] ?: -1)
         } else null
     }
 
-    // if you skip counties, you have to adjust Nc
-    private val skipCounties = listOf("Baca", "San Juan") // TODO Baca
+    private val skipCounties = listOf("Baca", "Las Animas", "San Juan")
     override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
 
     // add Gunnison cvr totals to countyTabsAllContests, since those are missing from the tabulateCountyFile file
@@ -635,5 +636,40 @@ open class Statewide2020General(
             }
             else -> name
         }
+    }
+}
+
+class County2020Input(
+    override val countyName: String,
+    val countyPopulation : Int, // TODO change to use manifest so its self contained
+): CountyInput {
+    val countyNameZ = countyName.replace(" ", "")
+    val cvrdir = "$cases/corla/2020/cvrs"
+
+    override val electionName = "${countyName}2020"
+    // TODO Gunnison has Manifest-Gunnison.csv; but Gunnison is an excluded county in 2020
+    override val manifestSource = if (countyName == "Gunnison") "$manifestDir/Manifest-${countyNameZ}.csv"
+    else "$manifestDir/manifest-${countyNameZ}.csv"
+    override val cvrsSource = "$cvrdir/$countyName.csv"
+    override val year = "2020"
+
+    override fun readCountyManifest(): CountyManifestEntries {
+        if (countyName == "Garfield") {
+            return GarfieldManifestEntries(manifestSource)
+        }
+
+        var result = super.readCountyManifest()
+        if (countyName == "Douglas") {
+            // Douglas,1,Gen-2026,30,295 must be Douglas,1,GEN-2026,30,295
+            // Douglas,1,GEn-2045,100,299
+            result = result.uppercase()
+        }
+        return result
+    }
+
+    override fun countyPopulation() = countyPopulation
+
+    companion object {
+        val manifestDir = "$auditcenter/2020/general/round_1"
     }
 }

@@ -133,7 +133,7 @@ object CreateCaseData {
                 }
 
 
-                "corla2020" -> makeCorla2020Clca(toptopdir = toptopdir, auditcenter = auditcenter!!, votedatabaseDir = input)
+                "corla2020" -> makeCorla2020Clca(toptopdir = toptopdir, auditcenter = auditcenter!!)
                 /* {
                     when (sampleType) {
                         "uniform" -> makeCorla2020Uniform(toptopdir = toptopdir, auditcenter = auditcenter!!)
@@ -149,7 +149,7 @@ object CreateCaseData {
                     makeCorla2024(toptopdir = toptopdir, auditcenter = auditcenter!!)
                 }
 
-                "corla2020withCvrs" -> makeCorla2020ClcaWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!, votedatabaseDir = input)
+                "corla2020withCvrs" -> makeCorla2020ClcaWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!)
                 /* {
                     when (sampleType) {
                         "uniform" -> makeCorla2020UniformWithCvrs(toptopdir = toptopdir, auditcenter = auditcenter!!,

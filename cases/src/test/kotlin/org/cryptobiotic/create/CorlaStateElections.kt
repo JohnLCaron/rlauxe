@@ -33,7 +33,7 @@ class CorlaStateElections {
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.OnePool,
-            alreadyMadeCounties = false,
+            alreadyMadeCounties = true,
         )
     }
 

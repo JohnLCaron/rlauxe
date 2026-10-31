@@ -25,7 +25,7 @@ class ContestTabulation(
     constructor(info: ContestInfo, votes: Map<Int, Int>, ncards: Int): this(info) {
         votes.forEach{ this.addVote(it.key, it.value) }
         this.ncardsTabulated = ncards
-        this.undervotes = ncards - nvotes()
+        this.undervotes = ncards * info.voteForN - nvotes()
     }
     constructor(info: ContestInfo, votes: Map<Int, Int>): this(info) {
         votes.forEach{ this.addVote(it.key, it.value) }

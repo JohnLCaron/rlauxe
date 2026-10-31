@@ -137,7 +137,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(false, 
     open fun isRedaction(line: CSVRecord, corlaRawCvrs: CorlaCountyCvrsIF): Boolean {
         val ballotType = corlaRawCvrs.getBallotType(line)
 
-        if (line.get(0).startsWith("AGGREGATED") || line.get(0).startsWith("AGGREGATION")) {
+        if (line.get(0).startsWith("AGGREGATED") || line.get(0).startsWith("AGGREGATION")) { // our aggregations
             if (show) println("  ** AGGREGATED: $line")
             val redactedGroup = RedactedGroup(ballotType, line, corlaRawCvrs)
             addGroup(redactedGroup)

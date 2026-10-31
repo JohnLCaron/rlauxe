@@ -110,9 +110,6 @@ class CorlaCountyElection(
         }
         ncards = countyCards.manifestCount
 
-         if (county == "San Miguel")
-             print("")
-
         if (countyCards.aggGroup != null) {
             val hasExactContests = false // unless it has a single Style
             convertedGroupTabs.values.forEach { it.setNcards(countyCards.aggCount) } // finally know the ncards after reading county Cvr file
@@ -216,33 +213,45 @@ fun makeContestWAs(
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// TODO sometimes we know the redacted styles, so can calculate ncards directlry
+// TODO sometimes we know the redacted styles, so can calculate ncards directly
 // meanwhile, down the rabbit hole again
 // estimate ncards(county, contest), return contestId -> ncards
 // are we adding in the unredactedCvrTabs ? cause we have an exact count there
-fun estNcardsByContest(notmissing: Map<Int, ContestTabulationIF>, missing: Map<Int, ContestTabulation>, manifestCount: Int): Map<Int, Int> {
+fun estNcardsByContest(notmissing: Map<Int, ContestTabulationIF>, missing: Map<Int, ContestTabulation>,
+                       manifestCount: Int): Map<Int, Int> {
     val ncardsByContest = mutableMapOf<Int, Int>() // contestId, adjust
     notmissing.forEach { ncardsByContest[it.key] = it.value.ncards() }
 
     // estimate redacted cards by assuming that the undervote Pct in the redacted Groups is the same as in the unredacted CVRs
     val undervotePct: Map<Int, Double> = notmissing.mapValues {
         // assume that the undervote Pct in the redacted Groups is the same as in the unredacted CVRs
-        if (it.value.nvotes() == 0) 0.0 else it.value.undervotes() / it.value.nvotes().toDouble()
+        if (it.value.nvotes() == 0) 0.0 else it.value.undervotes() / (it.value.ncards().toDouble() * it.value.voteForN)
     }
 
     missing.forEach { (id, tab) ->
-        val pct = undervotePct[id] ?: 0.1  // what if there are no cvrs for this contest ?
+        val pct = undervotePct[id] ?: 0.0
+        val notmiss = notmissing[id]?.ncards() ?: 0
+
         // but it cant use more cards then there are
-        // (tab.nvotes + tab.undervotes) / tab.voteForN < totalCvrs
-        // tab.nvotes(1 + pct) < (totalCvrs * tab.voteForN)
-        val maxPct = (manifestCount * tab.voteForN) / tab.nvotes().toDouble() - 1.0
+        // notmissing.cards + (missing.nvotes + missing.undervotes) / tab.voteForN < totalCvrs
+        // (missing.nvotes + missing.undervotes) < (totalCvrs - notmissing.cards) * tab.voteForN
+        // (1 + pct) < ((totalCvrs - notmissing.cards) * tab.voteForN) / missing.nvotes
+        // pct < ((totalCvrs - notmissing.cards) * tab.voteForN) / missing.nvotes - 1
+        val missingVotes = tab.nvotes().toDouble()
+        val maxPct = ((manifestCount - notmiss) * tab.voteForN) / missingVotes - 1.0
         val usePct = max(0.0, min(pct, maxPct))
 
-        // we are munging redactedTab directly
-        tab.undervotes = roundToClosest(tab.nvotes() * usePct)
-        tab.ncardsTabulated = roundToClosest((tab.nvotes() + tab.undervotes) / tab.voteForN.toDouble())
-        val accum = ncardsByContest.getOrDefault(id, 0)
+        // we are changing the redactedTab directly
+        val nv = tab.nvotes()
+        val uvd = tab.nvotes() * usePct
+        tab.undervotes = roundDown(tab.nvotes() * usePct)
+        val nvd = (tab.nvotes() + uvd) / tab.voteForN.toDouble() // rounding down so we dont go over nc
+        tab.ncardsTabulated = roundDown(nvd)
+        val accum = ncardsByContest.getOrDefault(id, 0) // dont think we need to accum?
         ncardsByContest[id] = tab.ncardsTabulated + accum
+        if (ncardsByContest[id]!!  > manifestCount) {
+            logger.warn { "$id: ncards ${ncardsByContest[id]}  > ${manifestCount} manifestCount"}
+        }
     }
 
     return ncardsByContest

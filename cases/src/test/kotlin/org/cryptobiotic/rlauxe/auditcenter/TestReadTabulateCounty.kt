@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020Redacted
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
@@ -21,13 +22,14 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestReadTabulateCounty {
-    val input = Statewide2020General()
+    val input = Statewide2020Redacted()
 
     @Test
     fun writeGunnisonAddendum() {
         val county = "Gunnison"
         // Gunnison not in round file; hack in from the cvrs
         val countyInput = input.corlaCountyInput("Gunnison")!!
+
         val gunnisonCvrs = countyInput.readCorlaCvrs()
         val infos = gunnisonCvrs.makeContestInfo()
         val cvrTabulation: CvrTabulations = tabulate(gunnisonCvrs, infos)
@@ -82,12 +84,13 @@ class TestReadTabulateCounty {
 
     @Test
     fun testCountyCardsFromManifest() {
-        val countyInput = input.corlaCountyInput("Adams")!!
+        val countyInput = input.corlaCountyInput("Weld")!!
         val countyCards = CountyCardsFromManifest(countyInput)
-        println("cvrs = ${countyCards.corlaCvrs.nrows()}")
+        println("testCountyCardsFromManifest from ${countyInput.countyName}")
+        println("corlaCvrs.nrows = ${countyCards.corlaCvrs.nrows()}")
 
         val cvrTabs = countyCards.cvrTabs
-        println("cvrTabs ncards = ${cvrTabs.values.maxOf{ it.ncards() }}")
+        println("countyCards.cvrTabs max ncards needed for votes = ${cvrTabs.values.maxOf{ it.ncards() }}")
 
         val iter = countyCards.iterator()
         var count = 0
@@ -95,7 +98,12 @@ class TestReadTabulateCounty {
             val cc = iter.next()
             count++
         }
-        println("iterator = $count")
+        println("CountyCardsFromManifest iterator count = $count")
+    }
+
+    @Test
+    fun testCorlaCountyElection() {
+        val countyInput = input.corlaCountyInput("Weld")!!
 
         val cce = CorlaCountyElection(
             countyInput,
@@ -105,6 +113,7 @@ class TestReadTabulateCounty {
             true,
             ElectionVariantEnum.OnePool
         )
+        println(cce)
     }
 
     @Test

@@ -193,6 +193,30 @@ private fun writeUnsortedCountyCvrs(
     return cardsWritten
 }
 
+// all cards, including phantoms are already in the iterator
+fun writeUnsortedMvrs(
+    county: String,
+    publisher: Publisher,
+    countyMvrs: CloseableIterator<AuditableCard>,
+): Int {
+    val dir = publisher.unsortedMvrsDirectory()
+    validateOutputDir(Path(dir))
+    val outfile = "$dir/${county}.csv"
+
+    val cardsWritten = writeCardCsvFile(countyMvrs, outfile)
+    logger.info { "write $cardsWritten UnsortedMvrs for $county to ${outfile}" }
+
+    return cardsWritten
+}
+
+// remove votes for cards in the pools
+fun removeVotesFromMvrs(mvrs: CloseableIterator<AuditableCard>, variant: ElectionVariant): CloseableIterator<AuditableCard> {
+    val transformer = TransformingIterator<AuditableCard, AuditableCard>(mvrs) { org ->
+        if (org.poolId != null && variant.isOA()) AuditableCard.removeVotes(org) else org
+    }
+    return transformer
+}
+
 ////////////////////////////////////////////////////////////////////
 // variant.Sim: CLCA with simulated cvrs for the redacted groups
 // variant.Styles: OneAudit with redacted cards in a multiple pools by style

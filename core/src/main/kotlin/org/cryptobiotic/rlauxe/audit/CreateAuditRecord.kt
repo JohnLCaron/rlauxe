@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.persist.json.writeAuditCreationConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
@@ -16,6 +17,7 @@ import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.SortMerge
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.verify.VerifyAuditCommitment
+import kotlin.io.path.Path
 import kotlin.use
 
 private val logger = KotlinLogging.logger("CreateAuditRecord")
@@ -47,7 +49,7 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String,
         if (config.election.mvrSource == MvrSource.testPrivateMvrs) {
             val transform = election.cardToMvrTransformer()
             if (transform != null) {
-                transformCvrsToMvrs(publisher, transform)
+                transformSortedCvrsToMvrs(publisher, transform)
             } else {
                 val unsortedMvrs = election.unsortedMvrsInternal() // make electionBuilder add the batches ??
                 if (unsortedMvrs != null) {
@@ -123,8 +125,10 @@ fun makeFastCards(publisher: Publisher, styles: List<StyleIF>): Int {
     return ncards
 }
 
-fun transformCvrsToMvrs(publisher: Publisher, transform: ((AuditableCard) -> AuditableCard)): Int {
-    val transformedIter = readCardsCsvIterator(publisher.cardManifestFile(), transform = transform)
+fun transformSortedCvrsToMvrs(publisher: Publisher, transform: ((AuditableCard) -> AuditableCard)): Int {
+    val dir = publisher.unsortedMvrsDirectory()
+    validateOutputDir(Path(dir))
+    val transformedIter = readCardsCsvIterator(publisher.sortedCardsFile(), transform = transform)
     val countCards = writeCardCsvFile(Closer(transformedIter.iterator()), publisher.sortedMvrsFile())
     logger.info{"transformCvrsToMvrs ${countCards} cards to ${publisher.sortedMvrsFile()}"}
     return countCards

@@ -1,5 +1,5 @@
 # Corla2020 Using votedatabase for Cvrs
-9/24/26
+10/30/26
 
 We obtained the cvr data from https://votedatabase.com for the Colorado 2020 General elections, and used it to run
 a real audit. This is for testing purposes only: the data is not official.
@@ -396,3 +396,109 @@ county_id,county_name,contest_name,contest_id
 ````
 
 that dont seem to relate to anything.
+
+# 2020 Redaction
+
+run anonomicer of all cvrs, to looks for additional redactions needed.
+
+total of 4486 cards redacted using precinct/style.
+total cards = 4115517
+4486/4115517 = .001, 1 in 1000.
+
+Boulder has 2946, should be more like 200, so would expect 4486 - 2946 + 200 = 1740 = .0004
+
+2020 CVrs as is have 3436/4115517 redactions = .0083
+
+## with Gunnison
+````
+2026-10-30T12:05:48 WARN  CorlaStateElection: Presidential Electors (380): Ncast 3279246 > 3279180 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: United States Senator (649): Ncast 3279194 > 3279180 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Attorney - 17th Judicial District (155): Ncast 286160 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Adams County Commissioner - District 1 (4): Ncast 239057 > 239056 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Adams County Commissioner - District 5 (6): Ncast 239057 > 239056 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Crespin (175): Ncast 286160 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Datz (176): Ncast 286161 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Finn (177): Ncast 286161 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Kiesnowski (178): Ncast 286161 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Loew (179): Ncast 286161 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Ramirez (180): Ncast 286161 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Warner (181): Ncast 286161 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Adams County Court Judge - Flaum (7): Ncast 239057 > 239056 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Adams County Court Judge - Kirby (8): Ncast 239057 > 239056 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Representative to the 117th United States Congress - District 3 (443): Ncast 439857 > 428703 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: State Board of Education Member - Congressional District 3 (479): Ncast 439854 > 428703 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: State Representative - District 59 (535): Ncast 55045 > 49912 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: State Representative - District 61 (538): Ncast 54215 > 48089 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Attorney - 7th Judicial District (167): Ncast 65892 > 54591 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 7th Judicial District - Deganhart (220): Ncast 65892 > 54591 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 7th Judicial District - Jackson (221): Ncast 65892 > 54591 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 7th Judicial District - Patrick (222): Ncast 65892 > 54591 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Colorado River Water Conservation District Ballot Issue 7A (119): Ncast 279786 > 268753 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Northeast Teller County Fire Protection District Ballot Issue 7A (362): Ncast 8740 > 8735 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 9th Judicial District - Lynch (227): Ncast 47041 > 47040 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Carbondale and Rural Fire Protection District Ballot Issue 7B (47): Ncast 8569 > 8266 Nc; set Nc = Ncast for now
+
+2026-10-30T12:05:48 WARN  CorlaStateElection: Gunnison County Commissioner - District 1 (278): Ncast 11316 > 0 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Gunnison County Commissioner - District 2 (279): Ncast 11316 > 0 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Town of Marble - Board of Trustees (619): Ncast 105 > 0 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Gunnison County Court Judge - Burgemeister (280): Ncast 11316 > 0 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Town of Marble Ballot Issue 2A (620): Ncast 105 > 0 Nc; set Nc = Ncast for now
+
+2026-10-30T12:05:48 WARN  CorlaStateElection: Logan County Commissioner - District 2 (335): Ncast 10607 > 10606 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 10th Judicial District - Alexander (170): Ncast 89155 > 89154 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: District Court Judge - 10th Judicial District - Ernst (171): Ncast 89155 > 89154 Nc; set Nc = Ncast for now
+2026-10-30T12:05:48 WARN  CorlaStateElection: Pueblo County Court Judge - Silva (393): Ncast 89155 > 89154 Nc; set Nc = Ncast for now
+````
+
+## without Gunnison
+
+if you remove gunnison, you get only diffs of 1, which for the moement we can blame on estNcardsByContest() overpredicting undervotes.
+
+````
+2026-10-30T12:21:10 WARN  CorlaStateElection: District Attorney - 17th Judicial District (155): Ncast 286160 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: Adams County Commissioner - District 1 (4): Ncast 239057 > 239056 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: Adams County Commissioner - District 5 (6): Ncast 239057 > 239056 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Crespin (175): Ncast 286160 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Datz (176): Ncast 286161 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Finn (177): Ncast 286161 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Kiesnowski (178): Ncast 286161 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Loew (179): Ncast 286161 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Ramirez (180): Ncast 286161 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: District Court Judge - 17th Judicial District - Warner (181): Ncast 286161 > 286159 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: Adams County Court Judge - Flaum (7): Ncast 239057 > 239056 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: Adams County Court Judge - Kirby (8): Ncast 239057 > 239056 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: Northeast Teller County Fire Protection District Ballot Issue 7A (362): Ncast 8740 > 8735 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: District Court Judge - 9th Judicial District - Lynch (227): Ncast 47041 > 47040 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: Logan County Commissioner - District 2 (335): Ncast 10607 > 10606 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: District Court Judge - 10th Judicial District - Alexander (170): Ncast 89155 > 89154 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: District Court Judge - 10th Judicial District - Ernst (171): Ncast 89155 > 89154 Nc; set Nc = Ncast for now
+2026-10-30T12:21:10 WARN  CorlaStateElection: Pueblo County Court Judge - Silva (393): Ncast 89155 > 89154 Nc; set Nc = Ncast for now
+````
+except for
+````
+2026-10-30T12:21:10 WARN  CorlaStateElection: Northeast Teller County Fire Protection District Ballot Issue 7A (362): Ncast 8740 > 8735 Nc; set Nc = Ncast for now
+````
+
+in El Paso (30), Teller (8146)
+
+So its clear that round.contestBallotCardCount doesnt include Gunnison.
+
+mvrs in
+Baca, 29
+Gunnison, 0
+Las Animas, 32
+San Juan, 0
+
+## Do over
+
+````
+Statewide audits like the presidential contest did not include Gunnison. The correct way to handle this would have been to create 11,190 phantoms cards to take the place of Gunnison, 
+include those in the state manifest, and do a uniform sample across all of it. Probably the same for San Juan.
+
+(11190+462)/4114582 = 0.002831879 ~ .3 % probably wouldnt have tanked the audit.
+````
+
+We are missing 3 counties: "Baca", "Las Animas", and "San Juan". For each, make a OneAuditPool and include in the audit.
+
+To include San Juan we need to get the vote count in the county...
+

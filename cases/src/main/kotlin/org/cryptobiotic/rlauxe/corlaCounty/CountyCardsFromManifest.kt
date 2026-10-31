@@ -39,7 +39,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
         infos = corlaCvrs.makeContestInfo()
 
         aggGroup = corlaCvrs.redaction().groups().find { it.groupName.lowercase() == "aggregated"}
-        groupTabs = if (aggGroup != null) { // if agg grup exists, ignore other groups. may have to change this if someone else is adding
+        groupTabs = if (aggGroup != null) { // if agg grup exists, ignore other groups. may have to change this if someone else is adding groups
             // group subtotals and rows with ids.
             val tabs = mutableMapOf<Int, ContestTabulation>()
             aggGroup.candVotes.forEach { (scontestId, candVotes) ->
@@ -57,7 +57,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
             sumAccum
         }
 
-        // filter out non included in manifest
+        // filter out non included in manifest. not including redacted
         val cvrsInManifest = corlaCvrs.cvrs().filter{ manifestEntries.contains(it.tabulatorNum, it.batchId, it.recordId) }
         cvrMap = cvrsInManifest.associateBy { it.imprintedId }
         cvrTabs = tabulateCvrRows(cvrsInManifest.iterator(), infos)
@@ -140,28 +140,28 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
             return RowForManifest(row, cardStyle!!, null)
         }
 
-        val redactedWithStyle = redactedWithStyle[manifestEntry.imprintedId()]
-        if (redactedWithStyle != null) {
-            val cleanBallotType = cleanCsvString(redactedWithStyle.ballotType) // no commas
-            val cvrStyleId = CardStyleId(cleanBallotType, redactedWithStyle.contests())
+        val redacted = redactedWithStyle[manifestEntry.imprintedId()]
+        if (redacted != null) {
+            val cleanBallotType = cleanCsvString(redacted.ballotType) // no commas
+            val cvrStyleId = CardStyleId(cleanBallotType, redacted.contests())
             val cardStyle = allBallotStyles.cardStyleMap[cvrStyleId]
             // if we have one group and rows with styles, the group is the agg pool; the rows use their own style
             // -> if we have rows but no groups, all rows go into the missing pool using missing votes
             // use the style for the individual rows, else use the missing pool style
             if (aggGroup == null) missingCount++ else aggCount++
-            return RowForManifest(redactedWithStyle, cardStyle!!, if (aggGroup == null) "missing" else "aggregated")
+            return RowForManifest(redacted, cardStyle!!, if (aggGroup == null) "missing" else "aggregated")
         }
 
-        val redactedNoStyle = redactedNoStyle[manifestEntry.imprintedId()]
-        if (redactedNoStyle != null) {
+        val redactedNo = redactedNoStyle[manifestEntry.imprintedId()]
+        if (redactedNo != null) {
             // use the ballotType
-            val cardStyleList = allBallotStyles.ballotTypes[redactedNoStyle.ballotType]
+            val cardStyleList = allBallotStyles.ballotTypes[redactedNo.ballotType]
             if (cardStyleList != null) {
                 // this is the union in case there is more than one
-                val useStyle = cardStyleList.find { it.cardStyle == redactedNoStyle.ballotType }
+                val useStyle = cardStyleList.find { it.cardStyle == redactedNo.ballotType }
                 if (useStyle != null ) {
                     missingCount++
-                    return RowForManifest(redactedNoStyle, useStyle, "missing")
+                    return RowForManifest(redactedNo, useStyle, "missing")
                 }
                 throw Exception("expected union already exists")
             }

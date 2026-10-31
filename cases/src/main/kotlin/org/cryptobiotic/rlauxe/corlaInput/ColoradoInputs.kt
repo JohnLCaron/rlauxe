@@ -20,8 +20,8 @@ private val logger = KotlinLogging.logger("ColoradoInput")
 
 // used by viewer
 val statewideInputs = listOf(
-    Statewide2020General(votedatabaseDir=null),
-    Statewide2020Redacted(votedatabaseDir=null),
+    Statewide2020General(),
+    Statewide2020Redacted(),
     Statewide2022Primary(),
     Statewide2023Coordinated(),
     Statewide2024General(),

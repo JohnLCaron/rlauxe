@@ -4,8 +4,8 @@ import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromResource
-import org.cryptobiotic.rlauxe.corlaCounty.CountyManifestEntries
-import org.cryptobiotic.rlauxe.corlaCounty.GarfieldManifestEntries
+import org.cryptobiotic.rlauxe.corla.ManifestEntries
+import org.cryptobiotic.rlauxe.corla.GarfieldManifestEntries
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.util.Locations.cases
 import kotlin.collections.plus
@@ -653,12 +653,12 @@ class County2020Input(
     override val cvrsSource = "$cvrdir/$countyName.csv"
     override val year = "2020"
 
-    override fun readCountyManifest(): CountyManifestEntries {
+    override fun readManifestEntries(): ManifestEntries {
         if (countyName == "Garfield") {
             return GarfieldManifestEntries(manifestSource)
         }
 
-        var result = super.readCountyManifest()
+        var result = super.readManifestEntries()
         if (countyName == "Douglas") {
             // Douglas,1,Gen-2026,30,295 must be Douglas,1,GEN-2026,30,295
             // Douglas,1,GEn-2045,100,299
@@ -669,7 +669,7 @@ class County2020Input(
 
     override fun countyPopulation() = countyPopulation
     private val countyPopulation by lazy {
-        readCountyManifest().totalCards
+        readManifestEntries().totalCards
     }
 
     companion object {
@@ -689,11 +689,11 @@ class County2020InputNoCvrs(
     override val cvrsSource = "NONE"
     override val year = "2020"
 
-    override fun readCountyManifest(): CountyManifestEntries {
+    override fun readManifestEntries(): ManifestEntries {
         if (countyName == "Garfield") {
             return GarfieldManifestEntries(manifestSource)
         }
-        var result = super.readCountyManifest()
+        var result = super.readManifestEntries()
         if (countyName == "Douglas") {
             // Douglas,1,Gen-2026,30,295 must be Douglas,1,GEN-2026,30,295
             // Douglas,1,GEn-2045,100,299
@@ -704,7 +704,7 @@ class County2020InputNoCvrs(
 
     override fun countyPopulation() = countyPopulation
     private val countyPopulation by lazy {
-        readCountyManifest().totalCards
+        readManifestEntries().totalCards
     }
 
     companion object {

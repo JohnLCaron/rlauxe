@@ -1,6 +1,3 @@
-package org.cryptobiotic.rlauxe.corlacvr
-
-
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.corla.BuildCorlaContests
 import org.cryptobiotic.rlauxe.auditcenter.CorlaCvrConverter
@@ -8,6 +5,9 @@ import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
+import org.cryptobiotic.rlauxe.corlacvr.ContestVotes
+import org.cryptobiotic.rlauxe.corlacvr.CvrRow
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020

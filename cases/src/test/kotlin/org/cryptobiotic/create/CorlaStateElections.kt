@@ -7,15 +7,11 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
-import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corla.createCorlaStateElection
 import org.cryptobiotic.rlauxe.corla.createCorlaStateElection2
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020Redacted
-import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
-import org.cryptobiotic.rlauxe.corlaInput.StatewideInputWithCvrs
 import kotlin.test.Test
 
 class CorlaStateElections {
@@ -51,82 +47,84 @@ class CorlaStateElections {
         )
     }
 
-    @Test
-    fun createAll2020Variants() {
-        val stateInput = Statewide2020General()
+    /*
+@Test
+fun createAll2020Variants() {
+    val stateInput = Statewide2020General()
 
-        createCorlaStateVariants(
-            toptopdir = top2020dir,
-            stateInput=stateInput,
-            riskLimit=.04,
-        )
-    }
+    createCorlaStateVariants(
+        toptopdir = top2020dir,
+        stateInput=stateInput,
+        riskLimit=.04,
+    )
+}
 
-    @Test
-    fun createAll2026pVariants() {
-        val stateInput = Statewide2026PwithCvrs()
+@Test
+fun createAll2026pVariants() {
+    val stateInput = Statewide2026PwithCvrs()
 
-        createCorlaStateVariants(
-            toptopdir = top2026pdir,
-            stateInput=stateInput,
-            riskLimit=.03,
-        )
-    }
+    createCorlaStateVariants(
+        toptopdir = top2026pdir,
+        stateInput=stateInput,
+        riskLimit=.03,
+    )
+}
 
-    fun createCorlaStateVariants(toptopdir: String, stateInput: StatewideInputWithCvrs, riskLimit: Double) {
-        // redacted ballots are simulated
-        createCorlaStateElection(
-            topdir = "$toptopdir/sim",
-            stateInput,
-            creation = AuditCreationConfig(AuditType.CLCA, riskLimit = riskLimit),
-            roundConfig = corlaRoundSettings(),
-            variant = ElectionVariantEnum.Sim,
-        )
 
-        // redacted ballots are turned into phantoms
-        createCorlaStateElection(
-            topdir = "$toptopdir/phantoms",
-            stateInput,
-            creation = AuditCreationConfig(AuditType.CLCA, riskLimit = riskLimit),
-            roundConfig = corlaRoundSettings(),
-            variant = ElectionVariantEnum.Phantoms,
-        )
+fun createCorlaStateVariants(toptopdir: String, stateInput: StatewideInputWithCvrs, riskLimit: Double) {
+    // redacted ballots are simulated
+    createCorlaStateElection(
+        topdir = "$toptopdir/sim",
+        stateInput,
+        creation = AuditCreationConfig(AuditType.CLCA, riskLimit = riskLimit),
+        roundConfig = corlaRoundSettings(),
+        variant = ElectionVariantEnum.Sim,
+    )
 
-        // the ballots for each redacted group are placed in one pool
-        createCorlaStateElection(
-            topdir = "$toptopdir/onepool",
-            stateInput,
-            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = riskLimit),
-            roundConfig = corlaRoundSettings(),
-            variant = ElectionVariantEnum.OnePool,
-        )
+    // redacted ballots are turned into phantoms
+    createCorlaStateElection(
+        topdir = "$toptopdir/phantoms",
+        stateInput,
+        creation = AuditCreationConfig(AuditType.CLCA, riskLimit = riskLimit),
+        roundConfig = corlaRoundSettings(),
+        variant = ElectionVariantEnum.Phantoms,
+    )
 
-        // the ballots for each redacted group are placed in seperate pools.
-        // to use this the redacted ballots would have to be identified by ballot style and identifier.
-        /* createCorlaStateElection(
-            topdir = "$toptopdir/styles",
-            stateInput,
-            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .04),
-            roundConfig = corlaRoundSettings(),
-            variant = ElectionVariantEnum.Styles,
-        ) */
-    }
+    // the ballots for each redacted group are placed in one pool
+    createCorlaStateElection(
+        topdir = "$toptopdir/onepool",
+        stateInput,
+        creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = riskLimit),
+        roundConfig = corlaRoundSettings(),
+        variant = ElectionVariantEnum.OnePool,
+    )
 
-    @Test
-    fun compareToPhantoms() {
-        compareVariants(top2020dir, "phantoms", listOf("sim", "onepool"))
-    }
+    // the ballots for each redacted group are placed in seperate pools.
+    // to use this the redacted ballots would have to be identified by ballot style and identifier.
+    /* createCorlaStateElection(
+        topdir = "$toptopdir/styles",
+        stateInput,
+        creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .04),
+        roundConfig = corlaRoundSettings(),
+        variant = ElectionVariantEnum.Styles,
+    ) */
+}
 
-    @Test
-    fun compareToSim() {
-        compareVariants(top2020dir, "sim", listOf("phantoms", "onepool"))
-    }
+@Test
+fun compareToPhantoms() {
+    compareVariants(top2020dir, "phantoms", listOf("sim", "onepool"))
+}
 
-    @Test
-    fun testStartNewRound() {
-        val fromtopdir = "$top2020dir/onepool"
-        startFirstRound(fromtopdir)
-    }
+@Test
+fun compareToSim() {
+    compareVariants(top2020dir, "sim", listOf("phantoms", "onepool"))
+}
+
+@Test
+fun testStartNewRound() {
+    val fromtopdir = "$top2020dir/onepool"
+    startFirstRound(fromtopdir)
+} */
 }
 
 fun corlaRoundSettings() = AuditRoundConfig(

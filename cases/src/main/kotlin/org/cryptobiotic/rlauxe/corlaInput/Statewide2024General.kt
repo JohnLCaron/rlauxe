@@ -6,8 +6,6 @@ import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
-import kotlin.Int
-
 class Statewide2024General(ac:String?=auditcenter): StatewideInputWithCvrs(
     generalCanonicalFile = "$ac/2024/general/2024GeneralCanonicalList.csv",
     contestRoundFile = "$ac/2024/general/round1/contest.csv",
@@ -190,6 +188,6 @@ class Boulder24Input(): BoulderInput  {
 
     override fun countyPopulation() = countyPopulation
     private val countyPopulation by lazy {
-        readCountyManifest().totalCards
+        readManifestEntries().totalCards
     }
 }

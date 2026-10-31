@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.corlaCounty.CountyManifestEntries
-import org.cryptobiotic.rlauxe.corlaCounty.GarfieldManifestEntries
+import org.cryptobiotic.rlauxe.corla.ManifestEntries
+import org.cryptobiotic.rlauxe.corla.GarfieldManifestEntries
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.util.Locations.cases
 
@@ -53,12 +53,12 @@ class County2020Redacted(
     override val cvrsSource = "$cvrdir/$countyName-Redacted.csv"
     override val year = "2020r"
 
-    override fun readCountyManifest(): CountyManifestEntries {
+    override fun readManifestEntries(): ManifestEntries {
         if (countyName == "Garfield") {
             return GarfieldManifestEntries(manifestSource)
         }
 
-        var result = super.readCountyManifest()
+        var result = super.readManifestEntries()
         if (countyName == "Douglas") {
             // Douglas,1,Gen-2026,30,295 must be Douglas,1,GEN-2026,30,295
             // Douglas,1,GEn-2045,100,299
@@ -69,7 +69,7 @@ class County2020Redacted(
 
     override fun countyPopulation() = countyPopulation
     private val countyPopulation by lazy {
-        readCountyManifest().totalCards
+        readManifestEntries().totalCards
     }
     companion object {
         val manifestDir = "$auditcenter/2020/general/round_1"

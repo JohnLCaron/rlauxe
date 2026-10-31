@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
-import org.cryptobiotic.rlauxe.util.UploadStatus
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries

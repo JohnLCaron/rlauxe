@@ -1,220 +1,302 @@
 package org.cryptobiotic.rlauxe.corla
 
+import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyContestData
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyData
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyElection
+import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyElectionNoCvrs
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaCounty.makeContestWAs
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInputWithCvrs
+import org.cryptobiotic.rlauxe.estimate.VunderPool
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.persist.csv.CardHeader
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
+import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.util.TransformingIterator
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 import java.nio.file.Path
 import kotlin.collections.forEach
 import kotlin.collections.map
-import kotlin.collections.plus
 import kotlin.io.path.Path
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 
-// obsolete
-
 private val logger = KotlinLogging.logger("CorlaStateElection")
 
-// A Corla state election with CVRS. Creates a CountyAuditRecord.
+// A Corla state election with CVRS. Builds on the CountyElection, which have already been written.
+// We want to be able to update the county elections individually, then run this again to recreate the state election
 class CorlaStateElection(
     val topdir: String,
     val stateInput: StatewideInputWithCvrs,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean, // TODO
     variantEnum: ElectionVariantEnum,
-    // votedatabase: Map<String, String>? = null,
 ): ElectionBuilder {
     val variant = ElectionVariant(variantEnum)
-    val publisher = Publisher(topdir)
+    val statePublisher = Publisher(topdir)
     val electionName = stateInput.javaClass.simpleName
 
-    val allStyles = mutableListOf<StyleIF>()
-    val allPools = mutableListOf<CardPool>()
-    val countyPools = mutableListOf<CountyPools>()
-    val cvrPools = mutableListOf<CountyPools>()
+    val statePools = mutableListOf<CardPool>()
+    val stateStyles = mutableListOf<CardStyle>()
+    val stateStyleMap: Map<Int, StyleIF>
+    val countyAcPools = mutableListOf<CountyPools>()
+    val vunderPoolMap: Map<Int, VunderPool>
+
     val contestsUA: List<ContestWithAssertions>
     val ncards: Int
 
     init {
-        val contestBuilder = CorlaStateContestInfoBuilder(stateInput)
-        val infos = contestBuilder.infos
-        val totalPoolTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
-        val stateNCardsByContest = mutableMapOf<Int, Int>()
-        val statePhantoms = mutableMapOf<Int, Int>()
-        val statePops = mutableMapOf<Int, Int>()
+        // write the card manifest here
+        // TODO put inside a use clause ??
+        val publisher = Publisher(topdir)
+        validateOutputDirOfFile(publisher.cardManifestFile())
+        val cardManifestWriter: OutputStreamWriter = FileOutputStream(publisher.cardManifestFile()).writer()
+        cardManifestWriter.write(CardHeader)
+
+        val stateContests = mutableMapOf<Int, MutableList<Pair<String, Contest>>>() // contestId -> countyName, countyContest
 
         var totalCvrCardCount = 0
-        val stateCvrTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
-        var nextStyleId = 1
+
         var countyPoolId = 1
+        var statePoolId = 1
+        var stateStyleId = 1
+        var stateCardIndex = 1
+        val npopMap = mutableMapOf<Int, Int>()
 
-        stateInput.counties().forEach { countyName ->
-            val countyInput = stateInput.corlaCountyInput(countyName)!!
-            val countyPopulation = countyInput.countyPopulation()
+        for (countyName in stateInput.counties()) {
+            println(countyName)
+            val countyDir = "$topdir/county/$countyName"
+            val result = AuditRecord.readPartialResult(countyDir)
+            if (result.isErr) {
+                logger.error { "$countyName got error ${result}" }
+                continue
+            }
+            val countyAuditRecord = result.unwrap()
 
-            val cvrsFromManifest = CanonicalCvrsFromManifest(variant, countyInput, stateInput, infos, nextStyleId)
-
-            // only needed for (variant.phantoms)
-            val phantomCards = if (variant.phantoms) makePhantomCards(cvrsFromManifest.phantomsByContest, countyName)
-                else emptyList()
-            if (variant.phantoms) logger.info { "phantomsByContest for $countyName\n  ${cvrsFromManifest.phantomsByContest}" }
-            cvrsFromManifest.phantomsByContest.forEach { (id, value) ->
-                statePhantoms.merge(id, value, Int::plus)
+            val statePoolIdMap = mutableMapOf<Int, Int>()
+            val countyCardPools = countyAuditRecord.readCardPools()
+            if (countyCardPools != null) {
+                countyCardPools.forEach { pool ->
+                    statePoolIdMap[pool.poolId] = statePoolId
+                    statePools.add(pool.copy(poolName = "$countyName-${pool.poolName}", poolId = statePoolId))
+                    statePoolId++
+                }
             }
 
-            val totalCountyTabs = mutableMapOf<Int, ContestTabulation>() // total over counties
-            totalCountyTabs.sumContestTabulations(cvrsFromManifest.unredactedCvrTabs)
-            totalCountyTabs.sumContestTabulations(cvrsFromManifest.redactedTabs)
-            stateCvrTabs.sumContestTabulations(totalCountyTabs)
+            val stateStyleIdMap = mutableMapOf<Int, Int>()
+            val countyStyles = countyAuditRecord.readCardStyles()!!
+            countyStyles.forEach { style ->
+                stateStyleIdMap[style.id()] = stateStyleId
+                stateStyles.add(
+                    CardStyle(
+                        name = "$countyName-${style.name()}", id = stateStyleId,
+                        style.possibleContests(), style.hasExactContests()
+                    ).setNcards(style.ncards())
+                )
+                stateStyleId++
+            }
+            val countyStyleMap = countyStyles.associateBy { it.id() }
 
-            cvrsFromManifest.estNcardsByContest.forEach { (id, value) ->
-                stateNCardsByContest.merge(id, value, Int::plus)
+            // read county cvrs (already canonicalized) and write out unsorted card manifest
+            // TODO this is the card manifest; for the mvrs, we need to simulate the cvrs when they dont exist...
+            val countyPublisher = Publisher(countyDir)
+            val orgIter = readCardsCsvIterator(countyPublisher.cardManifestFile(), styles = null)
+            val countyCardsIter = TransformingIterator(orgIter) { org ->
+                // convenient to count population here; pools can make pop > ncards
+                if (countyStyleMap[org.styleId] == null)
+                    logger.error{"cant find ${org.styleId} in countyStyleMap"}
+                val style = countyStyleMap[org.styleId]!!
+                style.possibleContests().forEach {
+                    val accum = npopMap.getOrDefault(it, 0)
+                    npopMap[it] = accum + 1
+                }
+
+                if (stateStyleIdMap[org.styleId] == null)
+                    logger.error{"cant find ${org.styleId} in stateStyleIdMap"}
+
+                org.copy(
+                    location = "$countyName-${org.location}",
+                    index = stateCardIndex++,
+                    styleId = stateStyleIdMap[org.styleId]!!,
+                    poolId = statePoolIdMap[org.poolId], // TODO make sure if theres a poolId in dounty cardManifestFile
+                )
             }
 
-            // TODO make the mvrs/cvrs seperate so can skip that if possible.
-            // TODO do we need to match the corla canonical ordering ??
+            // append county cards to the cardManifest
+            var countyCardCount = 0
+            countyCardsIter.use { cardIter ->
+                while (cardIter.hasNext()) {
+                    cardManifestWriter.write(writeCardCsv(cardIter.next()))
+                    countyCardCount++
+                }
+            }
+            totalCvrCardCount += countyCardCount
 
-            // these are mvrs; for all but phantoms, use simulated mvrs that match the pool totals.
-            // for phantom variant, makeSimulatedMvrs is empty; add phantom cards
-            // TODO all in memory
-            val allCountyMvrs = cvrsFromManifest.unredactedCvrs + cvrsFromManifest.makeSimulatedMvrs() + phantomCards // in memory
-
-            // write them out while we have them in memory
-            writeUnsortedMvrs(countyName, publisher, Closer(allCountyMvrs.iterator()))
-            totalCvrCardCount += allCountyMvrs.size
-
-            // how do the cvrs relate to the mvrs ?? Remove simulated votes in pools
-            writeUnsortedCountyCvrs(countyName, publisher, Closer(allCountyMvrs.iterator()), variant)
-
-            val countyPops = tabulateNpops(allCountyMvrs, infos.values.toList())
-            countyPops.forEach { (id, value) ->
-                statePops.merge(id, value, Int::plus)
+            // these are the ac tabs
+            val countyContestTabs = mutableMapOf<Int, ContestTabulation>()
+            countyAuditRecord.contests.map { it.contest as Contest }.forEach { contest ->
+                val contestList = stateContests.getOrPut(contest.id) { mutableListOf() }
+                contestList.add(Pair(countyName, contest))
+                countyContestTabs.sumContestTabulationsFromCandVotes(contest.info, contest.votes, contest.Ncast)
             }
 
-            // TODO to use fastSampling, all cvrs must have stylesIds (no "fromCvr" or "phantoms")
-            //  styles cant be optional; all styles must be in styleMap when reading
-            val countyCardStyles = cvrsFromManifest.countyCardStyles()
-            allStyles.addAll(countyCardStyles)
-            nextStyleId += countyCardStyles.size
+            // used in viewer
+            countyAcPools.add(CountyPools(
+                countyName = countyName,
+                countyPoolId = countyPoolId++,
+                contestTabs = countyContestTabs,
+                cardCount = countyCardCount,
+                styles = countyStyles,
+            ))
+        } // end loop over counties
+        cardManifestWriter.close()
 
-            // TODO I dont think this is needed ??
-            cvrPools.add(
-                CountyPools(countyName, countyPoolId, cvrsFromManifest.unredactedCvrTabs, cvrsFromManifest.unredactedCvrs.size, countyCardStyles)
-            )
-            countyPools.add(
-                CountyPools(countyName, countyPoolId++, totalCountyTabs, countyPopulation, countyCardStyles)
-            )
+        val contests = stateContests.map { (contestId, countyList) ->
+            var Ncast = 0
+            val counties = mutableListOf<String>()
 
-            allPools.addAll(cvrsFromManifest.redactedPools)
-            // totalPoolTabs.sumContestTabulations(contestTabs)
-        }
+            // heres where we set the statewide contests to the sum of the county contests
+            // may not be the reported vote; eg Baca is missing.
+            // however, we used the reported vote to create a missing pool; I think those will be the same.
+            // TODO track down where they differ ....
 
-        val contests = stateCvrTabs.map { (contestId, contestTab) ->
-            var Nc = stateNCardsByContest[contestId]!!
-            val Ncast = contestTab.ncardsTabulated
-            if (Ncast > Nc) {
-                logger.warn{"$contestId: Ncast $Ncast > $Nc Nc diff = ${Ncast-Nc}"}
-                Nc = Ncast
+            val info = countyList.first().second.info // all infos are identical
+            val voteTabulation = ContestTabulation(info)
+            countyList.forEach { (countyName, contest) ->
+                Ncast += contest.Ncast
+                counties.add(countyName)
+                contest.votes.forEach { (cand, vote) -> voteTabulation.addVote(cand, vote) }
             }
-            val info = infos[contestId]!!
-            if (variant.isOA()) {
+            info.metadata["CvrCounties"] = counties.toList().toString() // could be different than CorlaCounties from countyTabs ??
+            /* if (variant.isOA()) {
                 val poolTotalCards = allPools.filter { it.hasContest(info.id) }.sumOf { it.ncards() }
                 info.metadata["PoolPct"] = if (Nc == 0) "0" else (100.0 * poolTotalCards / Nc).toInt().toString()
             }
             if (variant.phantoms) {
                 val phantomsForContest = statePhantoms[info.id] ?: 0
                 info.metadata["PhantomPct"] = if (Nc == 0) "" else (100.0 * phantomsForContest / Nc).toInt().toString()
+            } */
+            // Nc should be from auditcenter, mcontest.nc = round.contestBallotCardCount
+            var Nc = stateInput.contestNc[info.name]!!
+            if (Ncast > Nc) {
+                // why is Ncast > Nc ??
+                logger.warn{"${info.name} (${info.id}): Ncast $Ncast > $Nc Nc; set Nc = Ncast for now"}
+                // should actually be Ncast = Nc, but only if you exclude Gunnison
+                Nc = Ncast
             }
-            Contest(info, contestTab.votes, Nc, Ncast)
+            Contest(info, voteTabulation.votes, Nc, Ncast) // phantoms = Nc - Ncast
         }
+
         // TODO need Irv tabs
-        contestsUA = makeContestWAs(contests, statePops, emptyMap(), allPools, variant, hasStyle)
+        contestsUA = makeContestWAs(contests, npopMap, emptyMap(), statePools, variant, hasStyle)
 
         // stick all the phantoms at the end? or put them by county ??
-        if (variant.phantoms) println("phantomsByContest = ${statePhantoms}")
+        // if (variant.phantoms) println("phantomsByContest = ${statePhantoms}")
+        require(totalCvrCardCount == stateCardIndex - 1)
+        this.ncards = totalCvrCardCount // or totalPoolCardCount? */
 
-        this.ncards = totalCvrCardCount // or totalPoolCardCount?
+        stateStyleMap = stateStyles.associateBy { it.id }
+        // this can only be use once, else must be reinitialized....
+        vunderPoolMap = statePools.map { cardPool ->
+            val vunders = cardPool.possibleContests().associate { Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
+            VunderPool(vunders, cardPool.poolName, cardPool.poolId, cardPool.hasExactContests)
+        }.associateBy{ it.poolId }
     }
 
     override fun electionInfo() =
-        ElectionInfo(electionName, variant.auditType, ncards(), contestsUA.size, true, mvrSource=mvrSource)
+        ElectionInfo(electionName, variant.auditType, ncards(), contestsUA.size, true, mvrSource = mvrSource)
 
     override fun contestsUA() = contestsUA
-    override fun cardStyles() = allStyles
-    override fun cardPools() = allPools
+    override fun cardStyles() = stateStyles
+    override fun cardPools() = statePools
 
-    override fun countyAuditcenterPools(): List<CountyPools> = countyPools
-    override fun countyCvrPools(): List<CountyPools> = cvrPools
+    override fun countyAuditcenterPools(): List<CountyPools> = countyAcPools // used by viewer
+    //override fun countyCvrPools(): List<CountyPools> = cvrPools
 
+    //      and add the mvr simulations by reading the cardManifest ??
+    //      see VunderBatches CreateCardsForCountyPools used by CountyElectionSimCvrs
+    //      see VunderPool used by CanonicalCvrsFromManifest
+    // TODO if these are the mvrs, we need to simulate the cvrs when they dont exist...
     override fun unsortedMvrsInternal() = null
-    override fun unsortedMvrsExternal() = CardIteratorfromCountyMvrs(publisher, styles = allStyles)
+    override fun unsortedMvrsExternal() = null // CardIteratorfromCountyMvrs(statePublisher, styles = stateStyles)
 
-    // TODO do we need to munge the mvrs for the card manifest? Add the card styles ??
-    override fun cards() = removeVotesFromMvrs(unsortedMvrsExternal(), variant)
-    override fun ncards() = ncards
-
-    fun addIndexToMvrs(mvrs: List<AuditableCard>): List<AuditableCard> {
-        var cardIndex = 1 // 1 based index
-        val result = mutableListOf<AuditableCard>()
-        mvrs.forEach { org ->
-            result.add(org.copy(index = cardIndex ))
-            cardIndex++
+    // convert cvr to mvr on the fly
+    override fun cardToMvrTransformer(): ((AuditableCard) -> AuditableCard) {
+        return { card ->
+            if (card.poolId == null) card else {
+                val style = stateStyleMap[card.styleId]!!
+                card.setStyle(style)
+                val vunderPool = vunderPoolMap[card.poolId]!! // the poolId should match a VunderPool
+                vunderPool.simulatePooledCard(card)
+            }
         }
-        return result
     }
+
+    override fun cards() = null // removeVotesFromMvrs(unsortedMvrsExternal(), variant)
+    override fun ncards() = ncards
 }
 
-private fun writeUnsortedCountyCvrs(
-    county: String,
+// create an iterator over all the cards unsortedMvrsDirectory
+class CardIteratorfromCountyMvrs(
     publisher: Publisher,
-    countyMvrs: CloseableIterator<AuditableCard>,
-    variant: ElectionVariant,
-): Int {
-    val dir = publisher.unsortedCountyCvrDirectory()
-    validateOutputDir(Path(dir))
-    val outfile = "$dir/${county}.csv"
+    val styles: List<StyleIF>
+) : CloseableIterator<AuditableCard> {
 
-    val cvrIter = removeVotesFromMvrs(countyMvrs, variant)
-    val cardsWritten = writeCardCsvFile(cvrIter, outfile)
-    logger.info { "write $cardsWritten UnsortedCountyCvrs for $county to ${outfile}" }
-
-    return cardsWritten
-}
-
-// all cards, including phantoms are already in the iterator
-fun writeUnsortedMvrs(
-    county: String,
-    publisher: Publisher,
-    countyMvrs: CloseableIterator<AuditableCard>,
-): Int {
     val dir = publisher.unsortedMvrsDirectory()
-    validateOutputDir(Path(dir))
-    val outfile = "$dir/${county}.csv"
+    val path = Path(dir)
+    val countyPaths: List<Path> = path.listDirectoryEntries().filter { !it.isDirectory() && it.fileName.toString().endsWith(".csv")}
 
-    val cardsWritten = writeCardCsvFile(countyMvrs, outfile)
-    logger.info { "write $cardsWritten UnsortedMvrs for $county to ${outfile}" }
+    val counties = countyPaths.iterator()
+    var innerIter = readCardsCsvIterator(counties.next().toString(), styles = styles)  // TODO do we need styles ??
 
-    return cardsWritten
+    override fun next(): AuditableCard {
+        return innerIter.next()
+    }
+
+    override fun hasNext(): Boolean {
+        if (innerIter.hasNext()) return true
+        if (counties.hasNext()) {
+            innerIter = readCardsCsvIterator(counties.next().toString(), styles = styles)
+            return hasNext()
+        }
+        return false
+    }
+
+    override fun close() {
+        // NOOP
+    }
 }
 
-// remove votes for cards in the pools
-fun removeVotesFromMvrs(mvrs: CloseableIterator<AuditableCard>, variant: ElectionVariant): CloseableIterator<AuditableCard> {
-    val transformer = TransformingIterator<AuditableCard, AuditableCard>(mvrs) { org ->
-        if (org.poolId != null && variant.isOA()) AuditableCard.removeVotes(org) else org
+fun makeCountyElections(
+    topdir: String,
+    stateInput: StatewideInputWithCvrs,
+    mvrSource: MvrSource = MvrSource.testPrivateMvrs,
+    hasStyle: Boolean, // TODO
+    variantEnum: ElectionVariantEnum,
+) {
+    val contestBuilder = CorlaStateContestInfoBuilder(stateInput)
+    stateInput.counties().forEach { countyName ->
+        val countyDir = "$topdir/county/$countyName"
+        val countyInput = stateInput.corlaCountyInput(countyName)!!
+        val countyElection = if (countyInput.hasCvrs()) {
+                CorlaCountyElection(countyInput, stateInput, contestBuilder, mvrSource, hasStyle, variantEnum)
+        } else {
+            logger.info { "cant find countyInput for $countyName"}
+            // can we still build it without the cvrs ??
+            CorlaCountyElectionNoCvrs(countyInput, stateInput, contestBuilder, mvrSource, hasStyle)
+        }
+        createElectionRecord(countyElection, topdir = countyDir)
     }
-    return transformer
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -223,7 +305,7 @@ fun removeVotesFromMvrs(mvrs: CloseableIterator<AuditableCard>, variant: Electio
 // variant.OnePool: OneAudit with redacted cards in a single pool
 // variant.Phantoms: OneAudit with redacted cards set to isPhantom
 
-fun createCorlaStateElection(
+fun createCorlaStateElection2(
     topdir: String,
     stateInput: StatewideInputWithCvrs,
     creation: AuditCreationConfig,
@@ -231,13 +313,18 @@ fun createCorlaStateElection(
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     hasStyle: Boolean = true, // TODO wtf ??
     variant: ElectionVariantEnum,
-    // votedatabase: Map<String, String>? = null
+    alreadyMadeCounties: Boolean = false,
  ) {
     val stopwatch = Stopwatch()
 
-    clearDirectory(Path(topdir))
     Logging.addFileAppender("cases", "$topdir/logs.log")
     logger.info {"-------------- createCorlaStateElection ${stateInput.javaClass.name} in $topdir"}
+
+    validateOutputDir(Path(topdir))
+    if (!alreadyMadeCounties) {
+        // clearDirectory(Path(topdir))
+        makeCountyElections(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
+    }
 
     val election = CorlaStateElection(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
 
@@ -256,3 +343,32 @@ fun createCorlaStateElection(
 
     logger.info{"createCorlaCountyElection took $stopwatch"}
 }
+
+/*
+auditrecord/
+    round1/ (runAudit)
+        samplePrns1.json        prns chosen for round1
+        sampleMvrs1.csv         mvrs chosen for round1
+    cardManifest.csv            card manifest for state                             2.7 G
+    sortedCards.csv             card manifest sorted by PRN (createAudit)           2.8 G
+    ...
+county/                                                                              .855 G
+    countyName/
+        auditrecord/
+            cardManifest.csv    card manifest for county; no prn or poolId, redacted have style no votes
+           ...
+cvrs/                                                                               1.1G (100 M zipped)
+    countyName-Redacted.csv     original cvr file from county
+    countyName-Report.txt
+    ...
+private/                                                                            3.7 G
+    sortedMvrs.csv              all mvrs, sorted by PRN (createAudit)               2.8 G
+sortChunks/                                                                         2.8 G
+    sorted-cards-part-k.csv
+countyContestData.csv
+countyData.csv
+fastSampling.bin                fastest for what-if sampling (createAudit)           .141 G
+logs.logs
+sortedCards.proto               faster to read (createAudit)                        2.6 G
+
+ */

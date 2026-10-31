@@ -61,11 +61,11 @@ abstract class StatewideInput(
     val contestRoundFile: String,
     val tabulateCountyFile: String,
     val mvrComparisonFile: String,
-): ColoradoInput {
-
-    override fun name() = this.javaClass.simpleName
-    override fun ncontests() = canonicalContests().size
-    override fun nuncontested() = canonicalContests().count() { it.value.choices.size < 2 }
+) {
+    abstract val year: String
+    fun name() = this.javaClass.simpleName
+    fun ncontests() = canonicalContests().size
+    fun nuncontested() = canonicalContests().count() { it.value.choices.size < 2 }
 
     abstract fun manifestFile(county: String): String
 

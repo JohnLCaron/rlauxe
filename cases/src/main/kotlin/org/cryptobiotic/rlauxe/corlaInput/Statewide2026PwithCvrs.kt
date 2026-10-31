@@ -38,8 +38,8 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInputWithCvrs(
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
         return when (countyName) {
-            "Boulder" -> Boulder26PInput(strataPopulation()[countyName]!!)
-            "La Plata", "Morgan", "Weld" -> CountyInput2026(countyName, strataPopulation()[countyName]!!)
+            "Boulder" -> Boulder26PInput()
+            "La Plata", "Morgan", "Weld" -> CountyInput2026(countyName)
             else -> null
         }
     }
@@ -188,7 +188,7 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInputWithCvrs(
     }
 }
 
-class CountyInput2026(val county: String, val population: Int): CountyInput {
+class CountyInput2026(val county: String): CountyInput {
     override val electionName = "$county-2026p"
     override val countyName = county
     val countyZ = county.replace("\\s".toRegex(), "")
@@ -206,18 +206,23 @@ class CountyInput2026(val county: String, val population: Int): CountyInput {
         cvrsSource = "$auditcenter/2026/primary/observerfiles/$filename"
     }
 
-    override fun countyPopulation() = population
+    override fun countyPopulation() = countyPopulation
+    private val countyPopulation by lazy {
+        readCountyManifest().totalCards
+    }
 }
 
-class Boulder26PInput(val population: Int): BoulderInput  {
+class Boulder26PInput(): BoulderInput  {
     override val electionName= "Boulder2026p"
     override val cvrsSource = "/resources/data/cases/boulder2026p/2026P-Redacted-CVR-Public.csv"
     override val manifestSource = "$auditcenter/2026/primary/files/Boulder.csv"
     override val sovoSource = "/resources/data/cases/boulder2026p/2026P-Boulder-County-Official-Statement-of-Votes.csv"
     override val year = "2026pc"
 
-    // or use sovo ??
-    override fun countyPopulation() = population
+    override fun countyPopulation() = countyPopulation
+    private val countyPopulation by lazy {
+        readCountyManifest().totalCards
+    }
 
     override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
 }

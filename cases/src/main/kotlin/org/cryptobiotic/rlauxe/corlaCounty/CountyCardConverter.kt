@@ -220,16 +220,6 @@ data class CorlaContestInfo(
         val candidateIdToName: Map<Int, String> = candidateNames.entries.associate {(k,v) -> v to k }
 }
 
-// data class ContestInfo(
-//    val name: String,
-//    val id: Int,
-//    val candidateNames: Map<String, Int>, // candidate name -> candidate id
-//    val choiceFunction: SocialChoiceFunction,
-//    val nwinners: Int = 1,              // max number of winners; for Dhondt == nseats; for RUNOFF, may be 1 or 2
-//    val voteForN: Int = nwinners,       // how many votes can a user cast in this contest?
-//    val minFraction: Double? = null,    // used in threshold, dhondt, runoff
-//)
-
 fun CorlaCountyCvrsIF.makeContestInfo(): Map<Int, CorlaContestInfo> {
 
     return this.schema.contests.map { schemaContest ->
@@ -265,58 +255,3 @@ fun CorlaCountyCvrsIF.makeContestInfo(): Map<Int, CorlaContestInfo> {
             schemaContest.voteForN)
     }.associateBy { it.id }
 }
-
-/*
-fun CorlaCountyCvrsIF.makeRealContestInfo(): Map<Int, ContestInfo> {
-    return this.makeContestInfo().map { it ->
-        ContestInfo(
-            it.name, it.id, it.candidateNames,
-            if (it.isIrv) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY,
-            it.voteForN
-        )
-    }.associateBy { it.id }
-}
-
-fun CorlaCountyCvrsIF.makeContestInfo(): List<CorlaContestInfo> {
-    val columns = this.schema.columns
-
-    return this.schema.contests.map { exportContest ->
-
-        val candidateMap = if (!exportContest.isIRV) {
-            val candidateMap1 = mutableMapOf<String, Int>()
-            var candIdx = 0
-            for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
-                if (!isWriteIn(columns[col].choiceName)) { // remove write-ins
-                    candidateMap1[columns[col].choiceName] = candIdx
-                }
-                candIdx++
-            }
-            candidateMap1
-
-        } else { // isIRV: there are ncand x ncand columns,
-            val candidates = mutableListOf<String>()
-            for (col in exportContest.startCol..exportContest.startCol + exportContest.ncols - 1) {
-                candidates.add(columns[col].choiceName)
-            }
-            val pairs = mutableListOf<Pair<String, Int>>()
-            repeat(exportContest.nchoices) { idx ->
-                pairs.add(Pair(candidates[idx], idx))
-            }
-            pairs.toMap()
-        }
-
-        // val (name, nwinners) = if (exportContest.isIRV) parseIrvContestName(exportContest.contestName) else parseContestNameAndVoteFor(exportContest.contestName)
-        CorlaContestInfo( exportContest.contestName, exportContest.contestIdx, candidateMap, exportContest.isIRV,
-            exportContest.voteForN)
-    }
-}
-
-fun CorlaCountyCvrsIF.makeRealContestInfo(): Map<Int, ContestInfo> {
-    return this.makeContestInfo().map { it ->
-        ContestInfo(
-            it.name, it.id, it.candidateNames,
-            if (it.isIrv) SocialChoiceFunction.IRV else SocialChoiceFunction.PLURALITY,
-            it.nwinners
-        )
-    }.associateBy { it.id }.toSortedMap()
-} */

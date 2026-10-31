@@ -24,8 +24,10 @@ class Boulder24Input: BoulderInput {
     // "the ballot types may have two cards, A and B, with disjoint contests"
     override fun hasABgroups() = true
 
-    // TODO remove dependence on stateInput
-    override fun countyPopulation() = Statewide2024General().strataPopulation()[countyName]!!
+    override fun countyPopulation() = countyPopulation
+    private val countyPopulation by lazy {
+        readCountyManifest().totalCards
+    }
 
     companion object {
         // from cases/src/test/kotlin/org/cryptobiotic/rlauxe/boulder/TestBoulderUndervotes.kt

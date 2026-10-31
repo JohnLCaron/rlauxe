@@ -19,4 +19,5 @@ interface BoulderInput : CountyInput {
     override fun readCorlaCvrs(): CorlaCountyCvrsIF {
         return readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
     }
+
 }

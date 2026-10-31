@@ -76,3 +76,33 @@ data class UploadStatus(
     }
 }
 
+// 2026/primary/finalReports/ContestIDsByCounty.csv
+// county_id,county_name,contest_name,contest_id
+//1,Adams,United States Senator - DEM,509677
+//1,Adams,Representative to the 120th United States Congress - District 4 - DEM,509679
+data class ContestIDsByCounty(
+    val county_id: Int,
+    val county_name: String,
+    val contest_name:String,
+    val contest_id: Int,
+) {
+    companion object {
+        fun readFromFile(filename: String): List<ContestIDsByCounty> {
+            var result: List<ContestIDsByCounty> = emptyList()
+            val reader = csvReader()
+            reader.readFromFile(filename) { rows ->
+                result = rows.withHeader().map { row ->
+                    ContestIDsByCounty(
+                        county_id = row["county_id"]!!.trim().toInt(),
+                        county_name = row["county_name"]!!.trim(),
+                        contest_name = row["contest_name"]!!.trim(),
+                        contest_id = row["contest_id"]!!.trim().toInt(),
+                    )
+                }.toList()
+            }
+            return result
+        }
+    }
+}
+
+

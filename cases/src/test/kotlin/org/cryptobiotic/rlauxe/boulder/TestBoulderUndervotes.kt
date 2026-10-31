@@ -13,7 +13,7 @@ import kotlin.test.Test
 class TestBoulderUndervotes {
     val stateInput = Statewide2023Coordinated()
     val population = stateInput.strataPopulation()["Boulder"]!!
-    val input = Boulder23Input(population)
+    val input = Boulder23Input()
     val sovo = input.sovo()
     val corlaCvrs = input.readCorlaCvrs()
 

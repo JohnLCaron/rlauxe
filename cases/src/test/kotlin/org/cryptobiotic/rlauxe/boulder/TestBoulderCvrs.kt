@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaInput.Boulder23Input
 import org.cryptobiotic.rlauxe.corlaInput.Boulder25Input
 import org.cryptobiotic.rlauxe.corlaInput.Boulder26PInput
-import org.cryptobiotic.rlauxe.corlaInput.CountyInput2026
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated
@@ -29,7 +28,7 @@ class TestBoulderCvrs {
     fun testBoulder23() {
         val stateInput = Statewide2023Coordinated()
         val population = stateInput.strataPopulation()["Boulder"]!!
-        val countyInput = Boulder23Input(population)
+        val countyInput = Boulder23Input()
         test(countyInput, population)
 
         //         test(Boulder23Input(), 119_643)
@@ -53,7 +52,7 @@ class TestBoulderCvrs {
 
         val stateInput = Statewide2025Coordinated()
         val population = stateInput.strataPopulation()["Boulder"]!!
-        val countyInput = Boulder25Input(population)
+        val countyInput = Boulder25Input()
         test(countyInput, population)
         // test(Boulder25Input(), 121_584)
     }
@@ -62,7 +61,7 @@ class TestBoulderCvrs {
     fun testBoulder26() {
         val stateInput = Statewide2026PwithCvrs()
         val population = stateInput.strataPopulation()["Boulder"]!!
-        val countyInput = Boulder26PInput(population)
+        val countyInput = Boulder26PInput()
         test(countyInput, population)
 
         // test(Boulder26PInput(), 100_423)

@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.corlaInput.writeCountyContestData
 import org.cryptobiotic.rlauxe.corlaInput.writeCountyData
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyElection
+import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyElectionNoCvrs
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaCounty.makeContestWAs
@@ -287,14 +288,15 @@ fun makeCountyElections(
 ) {
     val contestBuilder = CorlaStateContestInfoBuilder(stateInput)
     stateInput.counties().forEach { countyName ->
-        val countyInput = stateInput.corlaCountyInput(countyName)
-        if (countyInput == null) {
-            stateInput.corlaCountyInput(countyName)
-            logger.error { "cant find countyInput for $countyName"}
-        }
-        val countyElection = CorlaCountyElection(countyInput!!, stateInput, contestBuilder, mvrSource, hasStyle, variantEnum)
         val countyDir = "$topdir/county/$countyName"
-
+        val countyInput = stateInput.corlaCountyInput(countyName)!!
+        val countyElection = if (countyInput.hasCvrs()) {
+                CorlaCountyElection(countyInput, stateInput, contestBuilder, mvrSource, hasStyle, variantEnum)
+        } else {
+            logger.info { "cant find countyInput for $countyName"}
+            // can we still build it without the cvrs ??
+            CorlaCountyElectionNoCvrs(countyInput, stateInput, contestBuilder, mvrSource, hasStyle)
+        }
         createElectionRecord(countyElection, topdir = countyDir)
     }
 }

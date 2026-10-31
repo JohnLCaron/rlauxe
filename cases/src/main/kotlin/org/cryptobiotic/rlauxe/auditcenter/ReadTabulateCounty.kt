@@ -80,7 +80,18 @@ interface CountyContestVotesIF {
 
 // for one county, all contests
 data class CountyTabAllContests(override val countyName: String): CountyTabAllContestsIF {
-    override val contests = mutableMapOf<String, CountyContestVotes>() // contestName (canonical I think) -> CountyContestVotes
+    override val contests = mutableMapOf<String, CountyContestVotes>() // contestName (non-canonical) -> CountyContestVotes
+    // TODO can we count on it being canonical contest name or not!!
+    // Add choiceVotes thinks maybe:
+    //         val contest = contests.getOrPut(line.contestName ) { CountyContestVotes(countyName, line.contestName) }
+    // CorlaCvrConverter thinks not:
+    //         countyTab.contests.forEach{ (contestName, contestVotes: CountyContestVotes  ) ->
+    //            val canonicalContest = statewideInput.matchCanonicalContest(county, contestName)!!
+    //            val info = infosByName[canonicalContest.contestName]!!
+    // the confusion comes because you might guess that the tabulateByCounty file uses canonical contest names.
+    // vs compareing to the cvr schema which we know if often non-standard....
+    // But CheckCanonicalNames() checks consistency and sometimes fails.
+    // So, no
 
     fun show() = buildString {
         appendLine("'$countyName' County")

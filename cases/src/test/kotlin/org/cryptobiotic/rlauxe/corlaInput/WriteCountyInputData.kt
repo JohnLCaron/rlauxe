@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.rlauxe.corla.CorlaStateContestInfoBuilder
+import org.cryptobiotic.rlauxe.corla.ManifestCounts
 import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyElection
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlacvr.CardStyleId
@@ -27,7 +28,7 @@ class WriteCountyInputData {
 
     @Test
     fun writeOneState() {
-        writeCountyData(Statewide2020Redacted())
+        writeCountyData(Statewide2020General())
     }
 
     @Test
@@ -66,34 +67,46 @@ class WriteCountyInputData {
     }
 
     fun makeCountyInputData(county: String, stateInput: StatewideInput, countyInput: CountyInput): CountyInputData {
-        val contestBuilder = CorlaStateContestInfoBuilder(stateInput)
-        val countyElection = CorlaCountyElection(countyInput, stateInput, contestBuilder, MvrSource.testPrivateMvrs,
-            true, ElectionVariantEnum.OnePool)
-
-        if (county == "Otero")
-            print("")
-        val corlaCvrs = countyElection.corlaCvrs
         val manifest = countyInput.readManifestEntries()
-        val manifestCounts = manifest.manifestCounts(corlaCvrs)
-        println("made manifestCounts for ${countyInput.electionName}")
 
-        // val ccc = CheckCvrsAndManifest(stateInput, countyInput, showMatch = true, showMissingVotes = true, showRedactedCvrs = true)
-        // val manifestCounts = ccc.manifestCounts
+        return if (countyInput.hasCvrs()) {
+            val contestBuilder = CorlaStateContestInfoBuilder(stateInput)
+            val countyElection = CorlaCountyElection(countyInput, stateInput, contestBuilder, MvrSource.testPrivateMvrs,
+                true, ElectionVariantEnum.OnePool)
 
-        return CountyInputData(
-            county,
-            manifestCount = manifestCounts.totalEntries,
-            unredactedCvrs = corlaCvrs.unredactedCvrs(),
-            redactedCvrs = corlaCvrs.redactedCvrs(),
-            cvrInManifest = manifestCounts.countCvrsInManifest,
-            cvrNoManifest = manifestCounts.cvrNoManifest,
-            manifestNoCvr = manifestCounts.manifestNoCvr,
-            minCards = -1,
-            countBlankPrecincts = corlaCvrs.countBlankPrecincts(),
-            ballotStylesUnique = corlaCvrs.ballotStyleUnique(),
-            ballotStyleMin = corlaCvrs.cardStyles().minOf{ it.ncards },
-            precinctStyleMin = findPrecinctStyleMin(corlaCvrs), // maybe "rare_cards" would be more useful
-        )
+            val corlaCvrs = countyElection.corlaCvrs
+            val manifestCounts = manifest.manifestCounts(corlaCvrs)
+
+            CountyInputData(
+                county,
+                manifestCount = manifestCounts.totalEntries,
+                unredactedCvrs = corlaCvrs.unredactedCvrs(),
+                redactedCvrs = corlaCvrs.redactedCvrs(),
+                cvrInManifest = manifestCounts.countCvrsInManifest,
+                cvrNoManifest = manifestCounts.cvrNoManifest,
+                manifestNoCvr = manifestCounts.manifestNoCvr,
+                minCards = -1,
+                countBlankPrecincts = corlaCvrs.countBlankPrecincts(),
+                ballotStylesUnique = corlaCvrs.ballotStyleUnique(),
+                ballotStyleMin = corlaCvrs.cardStyles().minOf{ it.ncards },
+                precinctStyleMin = findPrecinctStyleMin(corlaCvrs), // maybe "rare_cards" would be more useful
+            )
+        } else {
+            CountyInputData(
+                county,
+                manifestCount = manifest.totalCards,
+                unredactedCvrs = -1,
+                redactedCvrs = -1,
+                cvrInManifest = -1,
+                cvrNoManifest = -1,
+                manifestNoCvr = -1,
+                minCards = -1,
+                countBlankPrecincts = -1,
+                ballotStylesUnique = false,
+                ballotStyleMin = -1,
+                precinctStyleMin = -1
+            )
+        }
     }
 }
 

@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corla.createCorlaStateElection2
+import org.cryptobiotic.rlauxe.corla.createCorlaStateElection
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020Redacted
 import kotlin.test.Test
 
@@ -23,7 +23,7 @@ class CorlaStateElections {
     fun create2020r() {
         val stateInput = Statewide2020Redacted()
 
-        createCorlaStateElection2(
+        createCorlaStateElection(
             topdir = top2020dir2,
             stateInput=stateInput,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
@@ -37,7 +37,7 @@ class CorlaStateElections {
     fun create2020() {
         val stateInput = Statewide2020General()
 
-        createCorlaStateElection2(
+        createCorlaStateElection(
             topdir = top2020dir,
             stateInput=stateInput,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
@@ -71,7 +71,7 @@ fun createAll2026pVariants() {
 }
 
 
-fun createCorlaStateVariants(toptopdir: String, stateInput: StatewideInputWithCvrs, riskLimit: Double) {
+fun createCorlaStateVariants(toptopdir: String, stateInput: StatewideInput, riskLimit: Double) {
     // redacted ballots are simulated
     createCorlaStateElection(
         topdir = "$toptopdir/sim",

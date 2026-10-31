@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
-import org.cryptobiotic.rlauxe.corlaInput.StatewideInputWithCvrs
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.readCorlaCvrs
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -46,7 +46,7 @@ class TestAnonomize {
         testAnonomize(Statewide2026PwithCvrs(), python=python)
     }
 
-    fun testAnonomize(input: StatewideInputWithCvrs, python:String?=null, county: String? = null) {
+    fun testAnonomize(input: StatewideInput, python:String?=null, county: String? = null) {
         val stopwatch = Stopwatch()
         val countNredacted = mutableMapOf<String, RedactionCount>()
         val baseOutput = "$outputBase/${input.year}"

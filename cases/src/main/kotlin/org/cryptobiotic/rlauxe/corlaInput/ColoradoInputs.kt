@@ -31,13 +31,6 @@ val statewideInputs = listOf(
     Statewide2026PwithCvrs(),
 )
 
-interface ColoradoInput {
-    fun name(): String
-    fun ncontests(): Int
-    fun nuncontested(): Int
-    val year: String
-}
-
 //////////////////////////////////////////////////////////////////////////////
 // see WriteCountyInputData
 

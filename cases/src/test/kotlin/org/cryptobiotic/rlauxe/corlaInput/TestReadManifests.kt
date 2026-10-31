@@ -55,7 +55,7 @@ class TestReadManifests {
         println(corlaCvrs.redactedCvrs())
     }
 
-    fun getCountyInput(input: StatewideInputWithCvrs, county: String) {
+    fun getCountyInput(input: StatewideInput, county: String) {
         println(county)
         val countyInput = input.corlaCountyInput(county)
         if (countyInput != null) {

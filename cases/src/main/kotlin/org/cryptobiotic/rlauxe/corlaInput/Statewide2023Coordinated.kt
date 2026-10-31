@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 
-open class Statewide2023Coordinated(ac:String?=auditcenter): StatewideInputWithCvrs(
+open class Statewide2023Coordinated(ac:String?=auditcenter): StatewideInput (
     generalCanonicalFile = "$ac/2023/coordinated/canonicalListFinal.csv",
     contestRoundFile = "$ac/2023/coordinated/round_1/contest.csv",
     tabulateCountyFile = "$ac/2023/coordinated/tabulateCounty.csv",

@@ -9,11 +9,12 @@ import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.RedactionStrategy
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 
-interface CountyInput: ColoradoInput {
+interface CountyInput {
     val electionName: String
     val countyName: String
     val manifestSource: String
     val cvrsSource: String
+    val year: String
 
     // TODO cache this I think ?? Or does it need to stream ??
     fun readCorlaCvrs(): CorlaCountyCvrsIF {
@@ -33,9 +34,9 @@ interface CountyInput: ColoradoInput {
     fun candidateNameCleanup(name: String) = name
     fun hasCvrs() = true
 
-    override fun name() = electionName
-    override fun ncontests() = -1  // unknown at the moment
-    override fun nuncontested() = -1 // unknown at the moment
+    fun name() = electionName
+    fun ncontests() = -1  // unknown at the moment
+    fun nuncontested() = -1 // unknown at the moment
 }
 
 fun readCorlaCvrs(year: String, countyName: String, cvrsSource: String): CorlaCountyCvrsIF {

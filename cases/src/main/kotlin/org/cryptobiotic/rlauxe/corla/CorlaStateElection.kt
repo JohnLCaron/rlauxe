@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyElectionNoCvrs
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaCounty.makeContestWAs
-import org.cryptobiotic.rlauxe.corlaInput.StatewideInputWithCvrs
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -37,7 +37,7 @@ private val logger = KotlinLogging.logger("CorlaStateElection")
 // We want to be able to update the county elections individually, then run this again to recreate the state election
 class CorlaStateElection(
     val topdir: String,
-    val stateInput: StatewideInputWithCvrs,
+    val stateInput: StatewideInput,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     val hasStyle: Boolean, // TODO
     variantEnum: ElectionVariantEnum,
@@ -279,7 +279,7 @@ class CardIteratorfromCountyMvrs(
 
 fun makeCountyElections(
     topdir: String,
-    stateInput: StatewideInputWithCvrs,
+    stateInput: StatewideInput,
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
     hasStyle: Boolean, // TODO
     variantEnum: ElectionVariantEnum,
@@ -305,9 +305,9 @@ fun makeCountyElections(
 // variant.OnePool: OneAudit with redacted cards in a single pool
 // variant.Phantoms: OneAudit with redacted cards set to isPhantom
 
-fun createCorlaStateElection2(
+fun createCorlaStateElection(
     topdir: String,
-    stateInput: StatewideInputWithCvrs,
+    stateInput: StatewideInput,
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,

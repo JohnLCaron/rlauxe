@@ -3,8 +3,10 @@ package org.cryptobiotic.rlauxe.corlaInput
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
+import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
+import org.cryptobiotic.rlauxe.util.ContestIDsByCounty
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
 
@@ -17,6 +19,31 @@ open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput(
 ) {
     override val year = "2026p"
     val manifestDir = "$ac/2026/primary/files"
+    val contestIDsByCountyFile = "$ac/2026/primary/finalReports/ContestIDsByCounty.csv"
+    val canonicalCounties: List<String>
+    val countyContests: Map<String, List<String>>
+
+    init {
+        val cibc = ContestIDsByCounty.readFromFile(contestIDsByCountyFile)
+        canonicalCounties = cibc.map { Pair(it.county_name, it.county_id) }.sortedBy { it.second }.toMap().map{ it.key }
+        val work = mutableMapOf<String, MutableList<String>>()
+        cibc.forEach {
+            val cclist = work.getOrPut(it.county_name) { mutableListOf() }
+            cclist.add(it.contest_name)
+        }
+        countyContests = work
+        /*
+        val ccSet = canonicalCounties.toSet()
+        val cc: List<CanonicalContest> = readGeneralCanonicalList(generalCanonicalFile, this)
+        val alphaSet = cc.map { it.counties }
+            .flatten()
+            .filter { !skipCounties(it) }
+            .toSet()
+            .sortedBy{ it.replace(" ", "").lowercase() } // canonical order has the blanks removed
+            .toSet()
+        println(alphaSet-ccSet)
+        print("") */
+    }
 
     override fun manifestFile(county: String): String {
         val noblanks = county.replace("\\s".toRegex(), "")
@@ -50,17 +77,8 @@ open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput(
     //////////////////////////////////////////////////////
     override fun skipCounties(countyName: String) = false
 
-    // in canonical manifest order
-    override fun counties(): List<String> {
-        val alphaList = canonicalContests().values.map { it.counties }
-            .flatten()
-            .toSet()
-            .sortedBy{ it.replace(" ", "").lowercase() } // tricked again
-            .toMutableList()
-        alphaList.remove("Broomfield")
-        alphaList.add("Broomfield")      // add at end
-        return alphaList.toList()
-    }
+    // in canonical manifest order TODO perhaps read the file with county ids ContestIdsByCounty (2026 only)
+    override fun counties() = canonicalCounties
 
     // canonical contests and choices
     override fun canonicalContests() = canonicalContests

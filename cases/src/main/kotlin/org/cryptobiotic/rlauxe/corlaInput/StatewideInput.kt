@@ -114,13 +114,26 @@ abstract class StatewideInput(
         result[contestName] = CanonicalContest(current.stateInput, current.contestName, choicesIn = achoices).addCounties(current.counties.toList())
     }
 
-    // in canonical manifest order TODO perhaps read the file with county ids ContestIdsByCounties (20216)
-    open fun counties(): List<String>  = canonicalContests().values.map { it.counties }
+    // in canonical manifest order TODO perhaps read the file with county ids ContestIdsByCounty (2026)
+    open fun countiesOld(): List<String>  = canonicalContests().values.map { it.counties }
         .flatten()
         .filter { !skipCounties(it) }
         .toSet()
         .toList()
         .sorted()
+
+    // in canonical manifest order
+    open fun counties(): List<String> {
+        val alphaList = canonicalContests().values.map { it.counties }
+            .flatten()
+            .filter { !skipCounties(it) }
+            .toSet()
+            .sortedBy{ it.replace(" ", "").lowercase() } // canonical order has the blanks removed
+            .toMutableList()
+        alphaList.remove("Broomfield")
+        alphaList.add("Broomfield")      // add at end
+        return alphaList.toList()
+    }
 
     // data class CorlaContestRoundCsv(
     //    val contestName: String,
@@ -215,7 +228,7 @@ abstract class StatewideInput(
     //    val nmvrs: Int, // countyMvr.countMvr
     //    val ncards: Int,  // round.ballotCardCount
     //)
-    val strataMap: Map<String, StrataInfo> by lazy { mergedInfo().strataInfo.associateBy { it.strataName } }
+    open val strataMap: Map<String, StrataInfo> by lazy { mergedInfo().strataInfo.associateBy { it.strataName } }
     open fun strataPopulation() = strataPopulation
     private val strataPopulation: Map<String, Int> by lazy { mergedInfo().strataInfo.associate { it.strataName to it.ballotCardCount } } // county name to population
 

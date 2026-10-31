@@ -151,15 +151,6 @@ class CorlaCountyElection(
     override fun cards() = Closer(cards.iterator())
     override fun ncards() = ncards
 
-    fun createCardsFromMvrs(mvrs: List<AuditableCard>): CloseableIterator<AuditableCard> {
-        // remove cvrs for cards in the pools
-        val mvrIter = Closer(mvrs.iterator())
-        val transformer = TransformingIterator<AuditableCard, AuditableCard>(mvrIter) { org ->
-            if (org.poolId != null && variant.isOA()) AuditableCard.removeVotes(org) else org
-        }
-        return transformer
-    }
-
     fun makeContests(
         infos: Map<Int, ContestInfo>,
         countyTabs: Map<Int, ContestTabulation>,

@@ -23,8 +23,8 @@ open class Statewide2025Coordinated(ac:String?=auditcenter): StatewideInputWithC
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
         return when (countyName) {
-            "Boulder" -> Boulder25Input(strataPopulation()[countyName]!!)
-            "Broomfield", "Larimer" -> CountyInput2025(countyName, strataPopulation()[countyName]!!)
+            "Boulder" -> Boulder25Input()
+            "Broomfield", "Larimer" -> CountyInput2025(countyName)
             else -> null
         }
     }
@@ -89,7 +89,7 @@ open class Statewide2025Coordinated(ac:String?=auditcenter): StatewideInputWithC
     }
 }
 
-class CountyInput2025(val county: String, val countyPopulation: Int): CountyInput {
+class CountyInput2025(val county: String): CountyInput {
     override val electionName = "$county-2025"
     override val countyName = county
     override val manifestSource = "$auditcenter/2025/files/${county}Manifest.csv"
@@ -106,17 +106,22 @@ class CountyInput2025(val county: String, val countyPopulation: Int): CountyInpu
     }
 
     override fun countyPopulation() = countyPopulation
+    private val countyPopulation by lazy {
+        readCountyManifest().totalCards
+    }
 }
 
-class Boulder25Input(val countyPopulation: Int): BoulderInput  {
+class Boulder25Input(): BoulderInput  {
     override val electionName= "Boulder2025"
     override val manifestSource = "$auditcenter/2025/files/BoulderManifest.csv"
     override val cvrsSource = "$auditcenter/2025/cvrs/2025-boulder-Redacted-CVR-PUBLIC.csv"
     override val sovoSource = "/resources/data/cases/boulder2025/2025C-Boulder-County-Official-Statement-of-Votes.csv"
     override val year = "2025"
 
-    // or use sovo ??
     override fun countyPopulation() = countyPopulation
+    private val countyPopulation by lazy {
+        readCountyManifest().totalCards
+    }
 
     override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
 }

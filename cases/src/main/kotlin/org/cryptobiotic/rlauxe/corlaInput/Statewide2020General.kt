@@ -20,6 +20,7 @@ open class Statewide2020General(
 ) {
     override val year = "2020"
     val manifestDir = "$ac/2020/general/round_1"
+    val cvrsMissing = listOf("Baca", "Las Animas")
 
     override fun manifestFile(county: String): String {
         val noblanks = county.replace("\\s".toRegex(), "")
@@ -27,18 +28,15 @@ open class Statewide2020General(
     }
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
-        // not needed anymore - fixed copy is now in votedatabaase
-        // if (countyName == "Arapahoe") return Arapahoe2020Redacted(strataPopulation()[countyName]!!)
-        if (countyName == "Baca") return null
-        if (countyName == "Gunnison") return County2020Input(countyName, 11332)
+        if (cvrsMissing.contains(countyName)) return County2020InputNoCvrs(countyName)
+        if (countyName == "Gunnison") return County2020Input(countyName)
         return if (counties().contains(countyName)) {
-            if (null == strataPopulation()[countyName])
-                print("")
-            County2020Input(countyName, strataPopulation()[countyName] ?: -1)
+            County2020Input(countyName)
         } else null
     }
 
-    private val skipCounties = listOf("Baca", "Las Animas", "San Juan")
+    // private val skipCounties = listOf("Baca", "Las Animas", "San Juan")
+    private val skipCounties = listOf("San Juan")
     override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
 
     // add Gunnison cvr totals to countyTabsAllContests, since those are missing from the tabulateCountyFile file
@@ -51,6 +49,10 @@ open class Statewide2020General(
 
         val countyTabs = readCountyTabulateCsvFromFile(tabulateCountyFile)
         countyTabs + gunnisonTabs
+    }
+
+    override val strataMap: Map<String, StrataInfo> by lazy {
+        (mergedInfo().strataInfo +listOf( StrataInfo("Gunnison", 34, 11332) )).associateBy { it.strataName }
     }
 
     // canonical contests and choices
@@ -641,15 +643,13 @@ open class Statewide2020General(
 
 class County2020Input(
     override val countyName: String,
-    val countyPopulation : Int, // TODO change to use manifest so its self contained
 ): CountyInput {
     val countyNameZ = countyName.replace(" ", "")
     val cvrdir = "$cases/corla/2020/cvrs"
 
     override val electionName = "${countyName}2020"
-    // TODO Gunnison has Manifest-Gunnison.csv; but Gunnison is an excluded county in 2020
     override val manifestSource = if (countyName == "Gunnison") "$manifestDir/Manifest-${countyNameZ}.csv"
-    else "$manifestDir/manifest-${countyNameZ}.csv"
+                                  else "$manifestDir/manifest-${countyNameZ}.csv"
     override val cvrsSource = "$cvrdir/$countyName.csv"
     override val year = "2020"
 
@@ -668,6 +668,44 @@ class County2020Input(
     }
 
     override fun countyPopulation() = countyPopulation
+    private val countyPopulation by lazy {
+        readCountyManifest().totalCards
+    }
+
+    companion object {
+        val manifestDir = "$auditcenter/2020/general/round_1"
+    }
+}
+
+class County2020InputNoCvrs(
+    override val countyName: String,
+): CountyInput {
+    val countyNameZ = countyName.replace(" ", "")
+    override fun hasCvrs() = false
+
+    override val electionName = "${countyName}2020"
+    override val manifestSource = if (countyName == "Gunnison") "$manifestDir/Manifest-${countyNameZ}.csv"
+                                  else "$manifestDir/manifest-${countyNameZ}.csv"
+    override val cvrsSource = "NONE"
+    override val year = "2020"
+
+    override fun readCountyManifest(): CountyManifestEntries {
+        if (countyName == "Garfield") {
+            return GarfieldManifestEntries(manifestSource)
+        }
+        var result = super.readCountyManifest()
+        if (countyName == "Douglas") {
+            // Douglas,1,Gen-2026,30,295 must be Douglas,1,GEN-2026,30,295
+            // Douglas,1,GEn-2045,100,299
+            result = result.uppercase()
+        }
+        return result
+    }
+
+    override fun countyPopulation() = countyPopulation
+    private val countyPopulation by lazy {
+        readCountyManifest().totalCards
+    }
 
     companion object {
         val manifestDir = "$auditcenter/2020/general/round_1"

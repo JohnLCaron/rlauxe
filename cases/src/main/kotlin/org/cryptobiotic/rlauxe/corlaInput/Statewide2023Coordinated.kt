@@ -24,7 +24,7 @@ open class Statewide2023Coordinated(ac:String?=auditcenter): StatewideInputWithC
     }
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
-        if (countyName == "Boulder") return Boulder23Input(strataPopulation()[countyName]!!)
+        if (countyName == "Boulder") return Boulder23Input()
         return null
     }
     // missing manifests
@@ -88,7 +88,7 @@ open class Statewide2023Coordinated(ac:String?=auditcenter): StatewideInputWithC
     }
 }
 
-class Boulder23Input(val countyPopulation: Int): BoulderInput {
+class Boulder23Input(): BoulderInput {
     override val electionName = "Boulder2023"
     override val manifestSource = "$auditcenter/2023/coordinated/round_1/Boulder.csv"
     override val cvrsSource = "/resources/data/cases/boulder2023/Redacted-2023Coordinated-CVR.csv"
@@ -98,8 +98,10 @@ class Boulder23Input(val countyPopulation: Int): BoulderInput {
 
     override fun readCorlaCvrs() = readCountyCvrs(cvrsSource, redaction = RedactionBoulder())
 
-    // or use sovo ??
     override fun countyPopulation() = countyPopulation
+    private val countyPopulation by lazy {
+        readCountyManifest().totalCards
+    }
 
     override fun sovo(): BoulderStatementOfVotes {
         val sovo = readBoulderSOVfromResourcePath(sovoSource, "Boulder2023")

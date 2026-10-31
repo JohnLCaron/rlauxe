@@ -200,20 +200,6 @@ data class AuditableCard (
 
 }
 
-/*
-fun makeVotes( contestIds: IntArray,  contestStarts: IntArray, candidates: IntArray): Map<Int, IntArray> {
-    val lastIndex = contestIds.size-1
-    val makeVotes = mutableMapOf<Int, IntArray>()
-    contestIds.forEachIndexed { index, contestId ->
-        val start = contestStarts[index]
-        val end = if (index < lastIndex) contestStarts[index+1] else candidates.size
-        if (start > end || end > candidates.size)
-            print("HEY")
-        makeVotes[contestId] = candidates.sliceArray(start until end)
-    }
-    return makeVotes.toMap()
-} */
-
 //         val (contestIds, contestStarts, candidates) = makeFromVotes(cvrExport.votes)
 fun makeFromVotes(votes: Map<Int, IntArray>?): Triple<IntArray, IntArray, IntArray> {
     if (votes == null) return Triple(IntArray(0), IntArray(0), IntArray(0))

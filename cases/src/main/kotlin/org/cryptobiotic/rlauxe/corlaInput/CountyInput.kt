@@ -36,6 +36,7 @@ interface CountyInput: ColoradoInput {
     fun countyPopulation(): Int
     fun contestNameCleanup(name: String) = name
     fun candidateNameCleanup(name: String) = name
+    fun hasCvrs() = true
 
     override fun name() = electionName
     override fun ncontests() = -1  // unknown at the moment

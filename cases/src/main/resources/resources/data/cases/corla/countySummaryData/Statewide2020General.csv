@@ -3,6 +3,7 @@ county, manifestCount, unredactedCvrs, redactedCvrs, cvrInManifest, cvrNoManifes
              Alamosa,    7923,    7923,       0,    7923,       0,     0,    -1, 0, true, 35, 35
             Arapahoe,  354347,  354231,      16,  354231,       0,   116,    -1, 0, true, 12, 2
            Archuleta,    9404,    9404,       0,    9404,       0,     0,    -1, 0, true, 79, 5
+                Baca,    2244,      -1,      -1,      -1,      -1,    -1,    -1, -1, false, -1, -1
                 Bent,    2295,    2295,       0,    2295,       0,     0,    -1, 0, true, 2295, 406
              Boulder,  208445,  205796,       0,  205796,       0,  2649,    -1, 0, true, 42, 42
           Broomfield,   47103,   47103,       0,   47103,       0,     0,    -1, 0, true, 10, 10
@@ -34,7 +35,7 @@ county, manifestCount, unredactedCvrs, redactedCvrs, cvrInManifest, cvrNoManifes
             La Plata,   35995,   35995,       0,   35995,       0,     0,    -1, 0, true, 4, 4
                 Lake,    4010,    4010,       0,    4010,       0,     0,    -1, 0, true, 4010, 417
              Larimer,  226896,  226844,      57,  226839,       5,    57,    -1, 0, true, 1, 1
-          Las Animas,    8062,     106,       0,      44,      62,  8018,    -1, 0, true, 44, 6
+          Las Animas,    8062,      -1,      -1,      -1,      -1,    -1,    -1, -1, false, -1, -1
              Lincoln,    2665,    2665,       0,    2665,       0,     0,    -1, 0, true, 115, 22
                Logan,   10685,   10664,      21,   10664,       0,    21,    -1, 0, true, 64, 16
                 Mesa,   91506,   91506,       0,   91506,       0,     0,    -1, 113, false, 0, 1

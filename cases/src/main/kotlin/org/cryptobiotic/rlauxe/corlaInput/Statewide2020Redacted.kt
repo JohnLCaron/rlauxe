@@ -16,6 +16,7 @@ open class Statewide2020Redacted(
     override val year = "2020r"
     val parent = Statewide2020General(ac)
     val manifestDir = "$ac/2020/general/round_1"
+    val cvrsMissing = listOf("Baca", "Las Animas")
 
     override fun manifestFile(county: String): String {
         val noblanks = county.replace("\\s".toRegex(), "")
@@ -23,13 +24,13 @@ open class Statewide2020Redacted(
     }
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
-        if (skipCounties.contains(countyName)) return null
-        if (countyName == "Gunnison") return County2020Redacted(countyName, 11332) // TODO read from manifest
+        if (cvrsMissing.contains(countyName)) return null
+        if (countyName == "Gunnison") return County2020Redacted(countyName)
         return if (counties().contains(countyName))
-            County2020Redacted(countyName, strataPopulation()[countyName]!!) else null
+            County2020Redacted(countyName,) else null
     }
 
-    private val skipCounties = listOf("Baca", "Las Animas", "San Juan")
+    private val skipCounties = listOf("San Juan")
     override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
 
     // add Gunnison cvr totals to countyTabsAllContests, since those are missing from the tabulateCountyFile file
@@ -41,7 +42,6 @@ open class Statewide2020Redacted(
 
 class County2020Redacted(
     override val countyName: String,
-    val countyPopulation: Int
 ): CountyInput {
     val countyNameZ = countyName.replace(" ", "")
     val cvrdir = "$cases/corla/2020r/cvrs"
@@ -68,7 +68,9 @@ class County2020Redacted(
     }
 
     override fun countyPopulation() = countyPopulation
-
+    private val countyPopulation by lazy {
+        readCountyManifest().totalCards
+    }
     companion object {
         val manifestDir = "$auditcenter/2020/general/round_1"
     }

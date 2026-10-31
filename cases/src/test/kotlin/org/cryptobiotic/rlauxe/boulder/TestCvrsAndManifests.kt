@@ -16,9 +16,7 @@ class TestCvrsAndManifests {
 
     @Test
     fun testBoulder23match() {
-        val stateInput = Statewide2023Coordinated()
-        val population = stateInput.strataPopulation()["Boulder"]!!
-        val countyInput = Boulder23Input(population)
+        val countyInput = Boulder23Input()
         testCvrsAndManifests(countyInput)
     }
 
@@ -29,17 +27,13 @@ class TestCvrsAndManifests {
 
     @Test
     fun testBoulder25match() {
-        val stateInput = Statewide2025Coordinated()
-        val population = stateInput.strataPopulation()["Boulder"]!!
-        val countyInput = Boulder25Input(population)
+        val countyInput = Boulder25Input()
         testCvrsAndManifests(countyInput)
     }
 
     @Test
     fun testBoulder26match() {
-        val stateInput = Statewide2026PwithCvrs()
-        val population = stateInput.strataPopulation()["Boulder"]!!
-        val countyInput = Boulder26PInput(population)
+        val countyInput = Boulder26PInput()
     }
 
     fun testCvrsAndManifests(input: BoulderInput) {

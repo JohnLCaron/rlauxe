@@ -502,3 +502,14 @@ We are missing 3 counties: "Baca", "Las Animas", and "San Juan". For each, make 
 
 To include San Juan we need to get the vote count in the county...
 
+## Gunnison
+
+sampled 34 ballots: 34/11332 = .003
+what was the rest of the statewide sample ?? 
+
+Prez        53/4114582         (margin .134)
+Senate      78/4114582        (margin .092)
+Prop 114    421/4114582 = 0.000102319  which  is 30 times smaller   (margin .017)
+
+11332/4114582 = .002754107 * 421 = 1.15947914  expect to get one sample in Gunnison ...
+

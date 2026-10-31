@@ -25,10 +25,8 @@ class CorlaCountyElections {
     fun createOne() {
         val top2020dir2 = "$cases/corlaState2/2020"
         val countydir2 = "$top2020dir2/county/Boulder"
-
         val stateInput = Statewide2020Redacted()
-        val population = stateInput.strataPopulation()["Boulder"]!!
-        val countyInput = CountyInput2026("Boulder", population)
+        val countyInput = CountyInput2026("Boulder")
 
         // fun createCorlaCountyElection(
         //    countyInput: CountyInput,
@@ -52,8 +50,7 @@ class CorlaCountyElections {
     @Test
     fun createBoulder26p() {
         val stateInput = Statewide2026PwithCvrs()
-        val population = stateInput.strataPopulation()["Boulder"]!!
-        val countyInput = CountyInput2026("Boulder", population)
+        val countyInput = CountyInput2026("Boulder")
 
         createCorlaCountyVariants("$cases/corlaCounty/boulder26p",
             countyInput,
@@ -108,8 +105,7 @@ class CorlaCountyElections {
     @Test
     fun createLaPlata26p() {
         val stateInput = Statewide2026PwithCvrs()
-        val population = stateInput.strataPopulation()["La Plata"]!!
-        val countyInput = CountyInput2026("La Plata", population)
+        val countyInput = CountyInput2026("La Plata")
 
         createCorlaCountyVariants("$cases/corlaCounty/laplata26p",
             countyInput,
@@ -120,8 +116,7 @@ class CorlaCountyElections {
     @Test
     fun createMorgan26p() {
         val stateInput = Statewide2026PwithCvrs()
-        val population = stateInput.strataPopulation()["Morgan"]!!
-        val countyInput = CountyInput2026("Morgan", population)
+        val countyInput = CountyInput2026("Morgan")
         createCorlaCountyVariants("$cases/corlaCounty/morgan26p",
             countyInput,
             stateInput,
@@ -131,8 +126,7 @@ class CorlaCountyElections {
     @Test
     fun createWeld26p() {
         val stateInput = Statewide2026PwithCvrs()
-        val population = stateInput.strataPopulation()["Weld"]!!
-        val countyInput = CountyInput2026("Weld", population)
+        val countyInput = CountyInput2026("Weld")
         createCorlaCountyVariants("$cases/corlaCounty/weld26p",
             countyInput,
             stateInput,

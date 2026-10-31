@@ -21,11 +21,9 @@ class BoulderElections {
     @Test
     fun createBoulder26p() {
         val topdir = "$cases/boulder/boulder2026p"
-        val state = Statewide2026PwithCvrs()
-        val population = state.strataPopulation()["Boulder"]!!
 
         createBoulderElection(
-            input= Boulder26PInput(population),
+            input= Boulder26PInput(),
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
@@ -36,11 +34,9 @@ class BoulderElections {
     @Test
     fun createBoulder25() {
         val topdir = "$cases/boulder/boulder2025"
-        val state = Statewide2025Coordinated()
-        val population = state.strataPopulation()["Boulder"]!!
 
         createBoulderElection(
-            input= Boulder25Input(population),
+            input= Boulder25Input(),
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
@@ -85,11 +81,9 @@ class BoulderElections {
     @Test
     fun createBoulder23() {
         val topdir = "$cases/boulder/boulder2023"
-        val state = Statewide2023Coordinated()
-        val population = state.strataPopulation()["Boulder"]!!
 
         createBoulderElection(
-            input= Boulder23Input(population),
+            input= Boulder23Input(),
             topdir = topdir,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = boulderRoundSettings(),
@@ -106,9 +100,7 @@ class BoulderElections {
     @Test
     fun createBoulder() {
         val toptopdir = "$cases/boulder/boulder2023r"
-        val state = Statewide2023Coordinated()
-        val population = state.strataPopulation()["Boulder"]!!
-        val input= Boulder23Input(population)
+        val input= Boulder23Input()
 
         // redacted ballots are simulated
         createBoulderElection(
@@ -123,9 +115,7 @@ class BoulderElections {
     @Test
     fun createBoulderVariants() {
         val toptopdir = "$cases/boulder/boulder2020r"
-        val state = Statewide2026PwithCvrs()
-        val population = state.strataPopulation()["Boulder"]!!
-        val input= Boulder26PInput(population)
+        val input= Boulder26PInput()
 
         // redacted ballots are simulated
         createBoulderElection(

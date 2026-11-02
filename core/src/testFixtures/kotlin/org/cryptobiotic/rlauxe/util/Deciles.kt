@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.util
 
 import kotlin.math.min
 import kotlin.math.round
+import kotlin.test.assertEquals
 
 //// TODO perhaps combine or replace with Quantiles ??
 
@@ -76,4 +77,28 @@ fun quantile(data: List<Int>, quantile: Double): Int {
     // rounding down
     val p = min((quantile * data.size).toInt(), data.size-1)
     return sortedData[p]
+}
+
+fun testQuantile() {
+    val data = listOf(847, 868, 565, 319, 882, 782, 312, 570, 392, 111)
+    val sdata = data.sorted()
+    println("sorted = $sdata")
+    repeat(10) {
+        val pct = .10 * (it + 1)
+        val q = quantile(data, pct)
+        println(" ${(df(100 * pct))}% quantile = $q")
+        if (it < 9) assertEquals(sdata[it+1], q)
+    }
+}
+
+fun testProbabilityFromRealAudit() {
+    var deciles = listOf(57, 58, 58, 58, 60, 60, 61, 62, 62, 65)
+    val p = probability(deciles, 53)
+    assertEquals(9, p)
+
+    deciles = listOf(55, 55, 55, 57, 58, 58, 60, 63, 65, 66)
+    assertEquals(30, probability(deciles, 55))
+    assertEquals(35, probability(deciles, 56))
+    assertEquals(40, probability(deciles, 57))
+    assertEquals(90, probability(deciles, 65))
 }

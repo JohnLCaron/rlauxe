@@ -43,7 +43,6 @@ class CorlaStateElection(
     variantEnum: ElectionVariantEnum,
 ): ElectionBuilder {
     val variant = ElectionVariant(variantEnum)
-    val statePublisher = Publisher(topdir)
     val electionName = stateInput.javaClass.simpleName
 
     val statePools = mutableListOf<CardPool>()
@@ -51,6 +50,7 @@ class CorlaStateElection(
     val stateStyleMap: Map<Int, StyleIF>
     val countyAcPools = mutableListOf<CountyPools>()
     val vunderPoolMap: Map<Int, VunderPool>
+    val countyPops = mutableMapOf<String, MutableMap<Int,Int>>() // county -> contest -> population
 
     val contestsUA: List<ContestWithAssertions>
     val ncards: Int
@@ -71,7 +71,6 @@ class CorlaStateElection(
         var statePoolId = 1
         var stateStyleId = 1
         var stateCardIndex = 1
-        val npopMap = mutableMapOf<Int, Int>()
 
         for (countyName in stateInput.counties()) {
             println(countyName)
@@ -108,22 +107,25 @@ class CorlaStateElection(
             val countyStyleMap = countyStyles.associateBy { it.id() }
 
             // read county cvrs (already canonicalized) and write out unsorted card manifest
-            // TODO this is the card manifest; for the mvrs, we need to simulate the cvrs when they dont exist...
+            val countyPop = mutableMapOf<Int, Int>()
+            countyPops[countyName] = countyPop
             val countyPublisher = Publisher(countyDir)
             val orgIter = readCardsCsvIterator(countyPublisher.cardManifestFile(), styles = null)
             val countyCardsIter = TransformingIterator(orgIter) { org ->
                 // convenient to count population here; pools can make pop > ncards
                 if (countyStyleMap[org.styleId] == null)
                     logger.error{"cant find ${org.styleId} in countyStyleMap"}
+
                 val style = countyStyleMap[org.styleId]!!
                 style.possibleContests().forEach {
-                    val accum = npopMap.getOrDefault(it, 0)
-                    npopMap[it] = accum + 1
+                    val accum = countyPop.getOrDefault(it, 0)
+                    countyPop[it] = accum + 1
                 }
 
                 if (stateStyleIdMap[org.styleId] == null)
                     logger.error{"cant find ${org.styleId} in stateStyleIdMap"}
 
+                // finally convert style and pool id ....
                 org.copy(
                     location = "$countyName-${org.location}",
                     index = stateCardIndex++,
@@ -165,6 +167,9 @@ class CorlaStateElection(
             var Ncast = 0
             val counties = mutableListOf<String>()
 
+            if (contestId == 641)
+                print("")
+
             // heres where we set the statewide contests to the sum of the county contests
             // may not be the reported vote; eg Baca is missing.
             // however, we used the reported vote to create a missing pool; I think those will be the same.
@@ -197,7 +202,21 @@ class CorlaStateElection(
             Contest(info, voteTabulation.votes, Nc, Ncast) // phantoms = Nc - Ncast
         }
 
+        countyPops.forEach { (county, popMap) ->
+            popMap.forEach { (key, pop) ->
+                if (pop < 0)
+                    print("$key: $pop")
+            }
+        }
+
         // TODO need Irv tabs
+        val npopMap = tabulateNpops(countyPops)
+
+            npopMap.forEach { (key, pop) ->
+                if (pop < 0)
+                    print("$key: $pop")
+            }
+
         contestsUA = makeContestWAs(contests, npopMap, emptyMap(), statePools, variant, hasStyle)
 
         // stick all the phantoms at the end? or put them by county ??
@@ -287,7 +306,10 @@ fun makeCountyElections(
     val contestBuilder = CorlaStateContestInfoBuilder(stateInput)
     stateInput.counties().forEach { countyName ->
         val countyDir = "$topdir/county/$countyName"
-        val countyInput = stateInput.corlaCountyInput(countyName)!!
+        val countyInput = stateInput.corlaCountyInput(countyName)
+        if (countyInput == null)
+            print("")
+        requireNotNull(countyInput)
         val countyElection = if (countyInput.hasCvrs()) {
                 CorlaCountyElection(countyInput, stateInput, contestBuilder, mvrSource, hasStyle, variantEnum)
         } else {
@@ -334,9 +356,9 @@ fun createCorlaStateElection(
     createAuditRecord(config, election, topdir = topdir, externalSortDir = topdir, fastSampling = true)
 
     // TODO maybe just chosen counties ?
-    writeCountyData(topdir, stateInput.strataMap.values.toList())
+    writeCountyData(topdir, stateInput.countyStrataMap.values.toList())
     val contestMap = election.contestsUA.associate { it.contest.info().name to it }
-    writeCountyContestData(topdir, contestMap, stateInput)
+    writeCountyContestData(topdir, contestMap, stateInput, election.countyPops)
 
     val result = startFirstRound(topdir)
     if (result.isErr) logger.error{ result.toString() }

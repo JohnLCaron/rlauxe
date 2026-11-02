@@ -141,8 +141,8 @@ class TestReadAuditCenterFiles {
         println("\nNmvrs by County")
         println("\ncounty,     county nmvrs")
         countyMvrs.sortedBy { it.countyName }.forEach {
-            println("${trunc(it.countyName, -11)}, ${nfn(it.countMvr, 5)}")
-            countMvrs += it.countMvr
+            println("${trunc(it.countyName, -11)}, ${nfn(it.countyMvr, 5)}")
+            countMvrs += it.countyMvr
         }
         println("total mvrs = $countMvrs")
 

@@ -218,7 +218,7 @@ abstract class StatewideInput(
     //    val nmvrs: Int, // countyMvr.countMvr
     //    val ncards: Int,  // round.ballotCardCount
     //)
-    open val strataMap: Map<String, StrataInfo> by lazy { mergedInfo().strataInfo.associateBy { it.strataName } }
+    open val countyStrataMap: Map<String, StrataInfo> by lazy { mergedInfo().strataInfo.associateBy { it.strataName } }
     open fun strataPopulation() = strataPopulation
     private val strataPopulation: Map<String, Int> by lazy { mergedInfo().strataInfo.associate { it.strataName to it.ballotCardCount } } // county name to population
 
@@ -330,7 +330,7 @@ data class MergedContestInfo(
     val corlaPop:Int,   // ballot_card_count = corla population
     val nc:Int,         // contest_ballot_card_count
     val voteForN: Int,  // winners_allowed
-    val nsamples: Int,  // optimistic_samples_to_audit
+    val estSamples: Int,  // estimated_samples_to_audit
     val marginInVotes: Int, // min_margin
     val riskLimit: Double, // risk_limit
 
@@ -398,7 +398,7 @@ fun mergeContestInfo(input: StatewideInput): MergedInfo {
                     logger.warn{"*** contest ${canonicalContest.contestName} county $county has ballotCardCount $old != ${contestRound.ballotCardCount}"}
                 }
             } else {
-                strataMap[county] = StrataInfo(county, countyMvr.countMvr, contestRound.ballotCardCount)
+                strataMap[county] = StrataInfo(county, countyMvr.countyMvr, contestRound.ballotCardCount)
             }
         }
         if (contestRound != null && contestRound.auditReason == AuditReason.state_wide_contest) {

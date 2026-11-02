@@ -5,23 +5,22 @@ import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import kotlin.random.Random
 
-// Used by CountySampling in viewer.
+// Used by CvCountySampling in Colorado viewer.
 // Sample within one county's CVRS, to estimate how many samples would be needed within that county.
-
-fun sampleCountyCvrs(countyAudit: CountyAuditRecord, county: String, wantNmvrs: Map<Int, Int>, maxSamples: Int, ntrials: Int): List<Int> {
-    val cvrs = countyAudit.readCountyCvrs(county) // , limit = 100_000)
-    return sampleCountyCvrs(cvrs, wantNmvrs, maxSamples, ntrials)
+fun sampleCountyCvrs(countyAudit: CountyAuditRecord, county: String, wantNmvrs: Map<Int, Int>, maxSamples: Int?, ntrials: Int): List<Int> {
+    val cvrs = countyAudit.readCountyCvrs(county, maxSamples) // TODO not setting limit here, so read all
+    return sampleCountyCvrs(cvrs, wantNmvrs, ntrials)
 }
 
 // wantNmvrs: contestId -> wantCards
-// truncate cvrs if necessary; could use FastSamplingCard
-fun sampleCountyCvrs(cvrs: List<AuditableCard>, wantNmvrs: Map<Int, Int>, maxSamples: Int, ntrials: Int): List<Int> {
+// truncate cvrs at maxSamples if set; run ntrials to get a distribution
+fun sampleCountyCvrs(cvrs: List<AuditableCard>, wantNmvrs: Map<Int, Int>, ntrials: Int): List<Int> {
     val random = Random.Default
     val mcvrs = cvrs.toMutableList()
     val result = mutableListOf<Int>()
     repeat (ntrials) {
         mcvrs.shuffle(random)
-        val nmvrs = consistentSampling(wantNmvrs, maxSamples, mcvrs.iterator())
+        val nmvrs = consistentSampling(wantNmvrs, mcvrs.iterator())
         result.add(nmvrs)
     }
     return result
@@ -30,7 +29,6 @@ fun sampleCountyCvrs(cvrs: List<AuditableCard>, wantNmvrs: Map<Int, Int>, maxSam
 // return how many were needed
 fun consistentSampling(
     wantNmvrs: Map<Int, Int>,
-    maxSamples: Int,
     samplingCards: Iterator<SamplingCardIF>,
 ): Int {
 
@@ -41,7 +39,6 @@ fun consistentSampling(
     val samplingCardIter = samplingCards.iterator()
     while (
         samplingCardIter.hasNext() &&
-        countCards < maxSamples &&
         needNmvrs.any { it.value > 0 }
     ) {
         // get the next card in sorted order

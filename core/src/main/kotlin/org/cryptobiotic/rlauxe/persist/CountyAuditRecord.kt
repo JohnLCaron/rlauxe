@@ -5,21 +5,35 @@ import com.github.michaelbull.result.unwrapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.Config
+import org.cryptobiotic.rlauxe.audit.CountyPools
+import org.cryptobiotic.rlauxe.audit.StyleIF
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
+import org.cryptobiotic.rlauxe.persist.json.readElectionInfoUnwrapped
 import org.cryptobiotic.rlauxe.strata.Strata
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.TransformingIterator
+import org.cryptobiotic.rlauxe.util.sumContestTabulationsFromCandVotes
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import java.io.BufferedReader
 import java.io.File
 import kotlin.collections.forEach
+import kotlin.collections.get
+import kotlin.collections.set
+import kotlin.math.max
 import kotlin.text.split
+import kotlin.use
 
 private val logger = KotlinLogging.logger("CountyAuditRecord")
 
-// CountyAuditRecord assumes existence of countyDataFile and countyContestDataFile. does not use nested county directories (yet)
+// CountyAuditRecord assumes existence of countyDataFile and countyContestDataFile.
 class CountyAuditRecord(
     topdir: String,
     config: Config,
@@ -59,7 +73,7 @@ class CountyAuditRecord(
         return countyData.toSortedMap()
     }
 
-    // for viewer
+    /* r
     fun readCountyMvrsAndTabulate(countyName: String) : Map<Int, ContestTabulation> {
         val countyMvrFile = "${publisher.unsortedMvrsDirectory()}/$countyName.csv"
         logger.debug { "readCountyMvrsAndTabulate on $countyMvrFile (exists=${exists(countyMvrFile)}"}
@@ -69,7 +83,7 @@ class CountyAuditRecord(
         val tabs =  tabulateAuditableCards(mvrs, infos)
         logger.debug { "got ${tabs.size} tabulations"}
         return tabs
-    }
+    } */
 
     // for viewer
     fun readCountyCvrsAndTabulate(countyName: String) : Map<Int, ContestTabulation> {
@@ -82,26 +96,52 @@ class CountyAuditRecord(
         if (countyContests == null) return emptyMap()
         val infos = countyContests.associate{ it.id to it.contest.info() }
 
+        // TODO styles not mapped ...
         val mvrs = readCardsCsvIterator(countyCvrFile, styles = styles)
+
         val tabs =  tabulateAuditableCards(mvrs, infos)
         logger.debug { "got ${tabs.size} tabulations"}
         return tabs
     }
 
+    // for viewer calling ConsistentCountySampling, for estimating distribution of mvrs needed....
     fun readCountyCvrs(countyName: String, limit: Int? = null) : MutableList<AuditableCard> {
-        val countyCvrFile = "${publisher.unsortedCountyCvrDirectory()}/$countyName.csv"
+        val countyPublisher = Publisher(publisher.countyAuditRecordTopdir(countyName))
+        val countyElectionInfo = readElectionInfoUnwrapped(countyPublisher.electionInfoFile())
+        val ncards = countyElectionInfo?.totalCardCount // we dont have sorted; good idea to mix it the unsorted cards up; we will sample every skip card
+        val skip = when {
+            limit != null && ncards != null -> max(1, ncards/limit)
+            else -> 1
+        }
+
+        val stateStyles = readCardStyles()!!
+        val stateStyleMap = stateStyles.associateBy{ it.name() }
+
+        val countyStyles = this.readCardStyles()!!
+        val stateStyleIdMap = mutableMapOf<Int, Int>()  // countyStyleId -> stateStyleId
+        countyStyles.forEach { countyStyle ->
+            val stateStyle = stateStyleMap["$countyName-${countyStyle.name()}"]!!
+            stateStyleIdMap[countyStyle.id()] = stateStyle.id()
+        }
+
+        val countyCvrFile = countyPublisher.cardManifestFile() // we dont have sorted; good idea to mix it up
         logger.debug { "readCountyCvrs on $countyCvrFile (exists=${exists(countyCvrFile)} limit = $limit"}
         if (!exists(countyCvrFile)) return mutableListOf()
 
-        var useLimit = limit ?: Int.MAX_VALUE
+        val stopwatch  = Stopwatch()
         val result = mutableListOf<AuditableCard>()
         var count = 0
         readCardsCsvIterator(countyCvrFile, styles = styles).use { iter ->
-            while (iter.hasNext() && count < useLimit) {
-                result.add(iter.next())
+            while (iter.hasNext()) {
+                val org = iter.next()
+                if (count % skip == 0) {
+                    val card = org.copy(styleId = stateStyleIdMap[org.styleId]!!) // cant do this ahead, because we dont know the state style id yet
+                    result.add(card)
+                }
                 count++
             }
         }
+        logger.debug { "that took $stopwatch for ${result.size}"}
         return result
     }
 
@@ -169,7 +209,8 @@ fun readCountyData(filename: String): List<Strata> {
     return countyData
 }
 
-data class CountyContestData(val countyName: String, val contestName: String, val id: Int, val voteDiff: Int, val votes: Map<Int, Int>)
+//     writer.write("county, contest, id, nPop, voteDiff, votes,\n")
+data class CountyContestData(val countyName: String, val contestName: String, val id: Int, val nPop: Int, val voteDiff: Int, val votes: Map<Int, Int>)
 
 fun readCountyContestData(filename: String): List<CountyContestData> {
     try {
@@ -186,6 +227,7 @@ fun readCountyContestData(filename: String): List<CountyContestData> {
             val countyName = tokens[idx++].trim()
             val contestName = tokens[idx++].trim()
             val id = tokens[idx++].trim().toInt()
+            val npop = tokens[idx++].trim().toInt()
             val voteDiff = tokens[idx++].trim().toInt()
             val votes = mutableMapOf<Int, Int>()
             while (idx < line.length && tokens[idx].trim().isNotEmpty()) {
@@ -194,7 +236,7 @@ fun readCountyContestData(filename: String): List<CountyContestData> {
                 val vote = inner[1].trim().toInt()
                 votes[id] = vote
             }
-            countyData.add(CountyContestData(countyName, contestName, id, voteDiff, votes))
+            countyData.add(CountyContestData(countyName, contestName, id, npop, voteDiff, votes))
         }
         reader.close()
         return countyData

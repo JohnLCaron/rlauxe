@@ -10,9 +10,7 @@ import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.util.Locations.cases
 import kotlin.collections.plus
 
-open class Statewide2020General(
-        ac:String?=auditcenter,
-    ): StatewideInput (
+open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
     contestRoundFile = "$ac/2020/general/round_1/contest.csv",
     tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
@@ -51,8 +49,11 @@ open class Statewide2020General(
         countyTabs + gunnisonTabs
     }
 
-    override val strataMap: Map<String, StrataInfo> by lazy {
-        (mergedInfo().strataInfo +listOf( StrataInfo("Gunnison", 34, 11332) )).associateBy { it.strataName }
+    override val countyStrataMap: Map<String, StrataInfo> by lazy {
+        (mergedInfo().strataInfo +listOf(
+            StrataInfo("Gunnison", 34, 11332),
+            StrataInfo("San Juan", 0, 571),
+            )).associateBy { it.strataName }
     }
 
     // canonical contests and choices
@@ -671,7 +672,6 @@ class County2020Input(
     private val countyPopulation by lazy {
         readManifestEntries().totalCards
     }
-
     companion object {
         val manifestDir = "$auditcenter/2020/general/round_1"
     }

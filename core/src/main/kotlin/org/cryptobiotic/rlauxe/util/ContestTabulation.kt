@@ -362,6 +362,17 @@ class CardTabulation(cards: CloseableIterator<AuditableCard>, infos: Map<Int, Co
     }
 }
 
+fun tabulateNpops(countyPops: Map<String, Map<Int,Int>>): Map<Int, Int> {
+    val pops = mutableMapOf<Int, Int>()
+    countyPops.values.forEach { contestPops ->
+        contestPops.forEach { contestId, pop ->
+            val accum = pops.getOrDefault(contestId, 0)
+            pops[contestId] = accum + pop
+        }
+    }
+    return pops
+}
+
 fun tabulateNpops(cards: List<AuditableCard>, infos: List<ContestInfo>): Map<Int, Int> {
     return tabulateNpops(Closer(cards.iterator()), infos)
 }

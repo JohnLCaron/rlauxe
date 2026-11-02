@@ -24,10 +24,17 @@ open class Statewide2020Redacted(
     }
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
-        if (cvrsMissing.contains(countyName)) return null
+        if (cvrsMissing.contains(countyName)) return County2020InputNoCvrs(countyName)
         if (countyName == "Gunnison") return County2020Redacted(countyName)
         return if (counties().contains(countyName))
             County2020Redacted(countyName,) else null
+    }
+
+    override val countyStrataMap: Map<String, StrataInfo> by lazy {
+        (mergedInfo().strataInfo +listOf(
+            StrataInfo("Gunnison", 34, 11332),
+            StrataInfo("San Juan", 0, 571),
+        )).associateBy { it.strataName }
     }
 
     private val skipCounties = listOf("San Juan")

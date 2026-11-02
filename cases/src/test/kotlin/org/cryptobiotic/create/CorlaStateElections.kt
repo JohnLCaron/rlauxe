@@ -26,10 +26,10 @@ class CorlaStateElections {
         createCorlaStateElection(
             topdir = top2020dir2,
             stateInput=stateInput,
-            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
+            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .04),
             roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.OnePool,
-            alreadyMadeCounties = false,
+            alreadyMadeCounties = true,
         )
     }
 
@@ -40,7 +40,7 @@ class CorlaStateElections {
         createCorlaStateElection(
             topdir = top2020dir,
             stateInput=stateInput,
-            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
+            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .04),
             roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.OnePool,
             alreadyMadeCounties = true,

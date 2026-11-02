@@ -26,7 +26,7 @@ class CorlaCountyElections {
         val top2020dir2 = "$cases/corlaState2/2020"
         val countydir2 = "$top2020dir2/county/Boulder"
         val stateInput = Statewide2020Redacted()
-        val countyInput = CountyInput2026("Boulder")
+        val countyInput = stateInput.corlaCountyInput("Boulder")!!
 
         // fun createCorlaCountyElection(
         //    countyInput: CountyInput,

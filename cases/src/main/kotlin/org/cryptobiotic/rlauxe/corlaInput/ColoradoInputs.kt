@@ -165,16 +165,18 @@ fun writeCountyData(topdir: String, strataInfo: List<StrataInfo>) {
 //    val contests = mutableMapOf<String, ContestTab>()
 // data class ContestTab(val contestName: String) {
 //    val choices = mutableMapOf<String, Int>()
-
-fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAssertions>, statewideInput: StatewideInput) {
+// TODO review ...
+fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAssertions>, statewideInput: StatewideInput,
+                           countyPops: Map<String, Map<Int,Int>>) {
     val countyTabs = statewideInput.countyTabsAllContests()
     // misc data by county
     val outputFilename = "$topdir/${CountyAuditRecord.countyContestDataFile}"
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
-    writer.write("county, contest, id, voteDiff, votes,\n")
+    writer.write("county, contest, id, nPop, voteDiff, votes,\n")
 
     var count = 0
-    countyTabs.values.forEach { countyTab ->
+    countyTabs.forEach { county, countyTab ->
+        val countyPop = countyPops[county] ?: emptyMap()
         countyTab.contests.values.forEach { ccv: CountyContestVotes ->
             val contestUA = contestMap[ccv.contestName]
             val canonicalContest = statewideInput.canonicalContests()[ccv.contestName]
@@ -183,13 +185,13 @@ fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAs
                 val info = contest.info()
                 val candidateVotes: Map<String, Int> = ccv.canonicalChoices(canonicalContest)
                 val votesByCandId = candidateVotes.mapKeys { info.candidateNames[it.key]!! }
-
+                val contestPop = countyPop[info.id] ?: 0
                 // calculate the vote difference for the minimum assorter
                 val minAssertion = contestUA.minAssertion()
                 val voteDiff = if (minAssertion == null) 0
-                else minAssertion.assorter.calcMarginFromRegVotes(votesByCandId, 1).toInt()
+                    else minAssertion.assorter.calcMarginFromRegVotes(votesByCandId, 1).toInt()
 
-                writer.write("${countyTab.countyName}, ${ccv.contestName}, ${info.id}, $voteDiff, ")
+                writer.write("${countyTab.countyName}, ${ccv.contestName}, ${info.id}, $contestPop, $voteDiff, ")
                 votesByCandId.forEach { (id, vote) ->
                     writer.write("$id:$vote, ")
                 }

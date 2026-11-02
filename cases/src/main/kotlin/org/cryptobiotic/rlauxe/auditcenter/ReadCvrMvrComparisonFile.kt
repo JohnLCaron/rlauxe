@@ -66,8 +66,10 @@ data class ContestMvrCount(val contestName: String) {
 }
 
 // for each county, over all contests
+// TODO 2020 doesnt have "statewide" in this file; could use prn county vs state sequence (!)
 data class CountyMvrCount(val countyName: String) {
-    var countMvr = 0
+    var countyMvr = 0
+    var stateMvr = 0
 }
 
 data class CardComparisonResults(
@@ -184,13 +186,16 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
     cards.values.forEach { card: Card -> card.validate() }
     // println("statewide cards ${cards.values.count { it.statewide() } } total ${cards.size}")
 
-    // accumulate mvr counts by County, skip statewide
+    // accumulate mvr counts by County, segregate staewide
     val countyMvrs = mutableMapOf<String, CountyMvrCount>()
     // cards.values.filter { !it.statewide() }.forEach { card: Card ->
     cards.values.forEach { card: Card ->
         val line = card.lines.first()
         val countyMvrs = countyMvrs.getOrPut(line.countyName) { CountyMvrCount(line.countyName) }
-        countyMvrs.countMvr++
+        if (card.statewide())
+            countyMvrs.stateMvr++
+        else
+            countyMvrs.countyMvr++
     }
 
     // accumulate mvr counts by Contest

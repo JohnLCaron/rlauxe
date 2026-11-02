@@ -84,9 +84,11 @@ class CorlaCountyElection(
         }
         val cardStyleMap = cardStyles.associate { it.name to it.id } + poolMap
 
-        // TODO these arent the mvrs, this is the card manifest; mvrs must simulate the pool subtotals
         // need to iterate over CountyCards to fill in the counts
         // transform to canonical AuditableCards, all are in memory in cards
+        // converting the votes, but not the style or pool ids, because we dont know them yet....
+        // an argument for using names ...
+        // how about countyId * 1000 + poolId ?? Douglas has 226 rows
         val npops = mutableMapOf<Int, Int>() // count contests' population size
         var index = 1
         countyCards.iterator().forEach { countyCard ->

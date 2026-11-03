@@ -103,7 +103,7 @@ class TestCreateBoulderElection {
     fun testMvrs() { // ??
         val topdir = "$testdataDir/cases/boulder2024/oa"
         val publisher = Publisher(topdir)
-        val sortedMvrs = readCardsCsvIterator(publisher.sortedMvrsFile(), null)
+        val sortedMvrs = readCardsCsvIterator(publisher.sortedMvrsFile()) { it }
 
         val tab = ContestTabulation(17, 1, false, listOf(0,1))
 

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.dhondt
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
@@ -224,23 +225,33 @@ class DhondtContest(
         return relax.failures().size
     } */
 
-    //// create a cvr for each vote
-    fun createSimulatedCvrs(): List<Cvr> {
-        val cvrs = mutableListOf<Cvr>()
+    //// create a card for each vote
+    //         fun fromVotes(id: String, // enough info to find the card for a manual audit.
+    //                      county: String, // enough info to find the card for a manual audit.
+    //                      location: String, // enough info to find the card for a manual audit.
+    //                      index: Int,  // index into the original, canonical list of cards
+    //                      prn: Long,   // psuedo random number
+    //                      phantom: Boolean,
+    //                      styleId: Int,
+    //                      votes: Map<Int, IntArray>?,
+    //                      poolId: Int?, // must be set if its from a CardPool
+    //        )
+    fun createSimulatedCards(): List<AuditableCard> {
+        val cvrs = mutableListOf<AuditableCard>()
         var count=0
         this.votes.forEach { (candid, nvotes) ->
             repeat(nvotes) {
                 count++
-                cvrs.add( Cvr("cvr$count", mapOf(id to intArrayOf(candid)), poolId=info.id))
+                cvrs.add( AuditableCard.fromVotes("cvr$count", info.name, "", count, 0, false, styleId=info.id, mapOf(id to intArrayOf(candid)), null))
             }
         }
         repeat(undervotes) {
             count++
-            cvrs.add( Cvr("undervote$count", mapOf(id to IntArray(0)), poolId=info.id))
+            cvrs.add( AuditableCard.fromVotes("undervote$count", info.name, "", count, 0, false, styleId=info.id, null, null))
         }
         repeat(Nphantoms()) {
             count++
-            cvrs.add( Cvr("phantom$count", mapOf(id to IntArray(0)), poolId=info.id, phantom=true))
+            cvrs.add( AuditableCard.fromVotes("phantom$count", info.name, "", count, 0, true, styleId=info.id, null, null))
         }
         cvrs.shuffle()
         return cvrs

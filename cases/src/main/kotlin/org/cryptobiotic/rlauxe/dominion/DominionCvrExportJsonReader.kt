@@ -78,7 +78,7 @@ data class CvrExport(
         val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]  // TODO not general
         // TODO if you want to delete the votes, add an adapter
         val useVotes = if (poolId == null || showPoolVotes) votes else null
-        return AuditableCard.fromVotes(id, null, index, prn, phantom, styleId=ballotStyleId, poolId=poolId, votes=useVotes)
+        return AuditableCard.fromVotes(id, "COUNTY", "", index, prn, phantom, styleId=ballotStyleId, poolId=poolId, votes=useVotes)
     }
 
     fun toCvr(pools: Map<String, Int>? = null , convertId: String) : Cvr {

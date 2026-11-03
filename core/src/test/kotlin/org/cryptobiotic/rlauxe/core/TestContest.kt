@@ -39,7 +39,8 @@ class TestContest {
         }.message
         assertEquals("APPROVAL may not have minFraction", mess3)
 
-        val mess4 = assertFailsWith<IllegalArgumentException> {
+        // 2023 has "Ward II Councilmember" with 2 winners but only one candidate
+        /* val mess4 = assertFailsWith<IllegalArgumentException> {
             ContestInfo(
                 "testContestInfo",
                 0,
@@ -59,7 +60,7 @@ class TestContest {
                 nwinners = 3
             )
         }.message
-        assertEquals("nwinners between 1 and candidateNames.size", mess5)
+        assertEquals("nwinners between 1 and candidateNames.size", mess5) */
 
         val mess6 = assertFailsWith<IllegalArgumentException> {
             ContestInfo(

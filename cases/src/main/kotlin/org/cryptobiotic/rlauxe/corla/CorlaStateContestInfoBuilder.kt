@@ -17,7 +17,7 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
 
     // all contests
     fun makeContestInfos(): List<ContestInfo> {
-        val strataMap = statewideInput.strataMap
+        val countyMap = statewideInput.countyStrataMap
 
         val contestInfos = mutableListOf<ContestInfo>()
 
@@ -40,21 +40,19 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
             val strata = when {
                 (mcontest.counties.size == 1) -> {
                     val county1 = mcontest.counties.first()
-                    val strata1 = strataMap[county1]
-                    if (strata1 == null) {
-                        strataMap.values.first()
-                    } else strata1
+                    countyMap[county1]!!
                 }
+                else -> computeStrataMinRate(mcontest.contestName, mcontest.counties, countyMap)
+            } // strata.nmvrs is calculated from the "min rate" algorithm, or for single county, the count of mvrs in the county from comparison file
 
-                else -> computeStrataMinRate(mcontest.contestName, mcontest.counties, strataMap)
-            }
-            info.metadata["CORLAhaveMvrs"] = strata.nmvrs.toString()
+            info.metadata["StrataNmvrs"] = strata.nmvrs.toString()
             info.metadata["CORLAstrataNcards"] = strata.ballotCardCount.toString()
             info.metadata["CORLAballotCardCount"] = mcontest.corlaPop.toString()
             info.metadata["CORLAcontestBallotCardCount"] = mcontest.nc.toString()
             info.metadata["CORLAauditReason"] = mcontest.auditReason.toString()
             info.metadata["CORLAmarginInVotes"] = mcontest.marginInVotes.toString()
             info.metadata["CanonicalCounties"] = mcontest.counties.toList().toString()
+            info.metadata["CORLAestMvrs"] = mcontest.estSamples.toString()
             info.metadata["CORLAcountyMvrs"] = mcontest.countyMvrs.toString()
             info.metadata["CORLAstatewideNmvrs"] = mcontest.statewideMvrs.toString()
 

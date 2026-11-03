@@ -39,6 +39,7 @@ private val logger = KotlinLogging.logger("CreateGaElection")
 // Ga2026Primary from manifests and candidate_totals
 // all cards are in pools
 
+const val GEORGIA = "Georgia"
 class CreateGaElection(
     val electionName: String,
     val auditType: AuditType,
@@ -62,7 +63,7 @@ class CreateGaElection(
         infos = contests.associate { it.id to it.info }
 
         // only one CardStyle
-        this.cardStyles = listOf(CardStyle(1, infos.keys.toSet(), false))
+        this.cardStyles = listOf(CardStyle(GEORGIA,1, infos.keys.toSet(), false))
         val phantoms = makePhantomCvrs(contests) // i dont think there are any
 
         // each county batch is a pool
@@ -81,7 +82,7 @@ class CreateGaElection(
                 }.toMap()
 
                 pools.add(
-                    CardPool(
+                    CardPool( GEORGIA,
                         "${county.countyName}-${batch.name}",
                         poolid++,
                         false,
@@ -175,7 +176,7 @@ fun makeMvrsFromPools(cardPools: List<CardPool>) : List<AuditableCard> { // cont
         val poolCards = vunderPool.makeCardsForOneAuditPool {
             poolIndex++
             val cvrId = "${cardPool.poolName}-${poolIndex}"
-            AuditableCardBuilder(cvrId, null, cardIndex++, 0, phantom = false, styleId=cardPool.poolId, poolId=cardPool.poolId, votesIn=null)
+            AuditableCardBuilder(cvrId, GEORGIA, "", cardIndex++, 0, phantom = false, styleId=cardPool.poolId, poolId=cardPool.poolId, votesIn=null)
         }
         cards.addAll( poolCards)
     }

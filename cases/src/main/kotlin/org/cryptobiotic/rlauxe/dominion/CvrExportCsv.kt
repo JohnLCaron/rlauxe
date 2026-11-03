@@ -120,7 +120,7 @@ class CvrExportToCardAdapter(
         val style = if (styleMap == null) null else styleMap[ cvrExport.contestIdSet() ]
 
         // TODO this is location. Perhaps we need to also store original id ?? So maybe output card ?
-        val location = if (!convertPoolIds || pool == null) null else {
+        val location = if (!convertPoolIds || pool == null) "" else {
             val poolName = cvrExport.poolKey()
             val poolCount =  poolCounts.getOrPut(poolName) { 0 }
             poolCounts[poolName] = poolCount + 1
@@ -128,6 +128,7 @@ class CvrExportToCardAdapter(
         }
         val result = AuditableCard.fromVotes(
             cvrExport.id,
+            "COUNTY",
             location,
             countIndex,
             0,

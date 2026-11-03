@@ -65,7 +65,7 @@ class Publisher(val topdir: String) {
     fun privateOneshotFile() = "$topdir/private/oneshot.txt"
     fun unsortedMvrsFile() = "$topdir/private/unsortedMvrs.csv"
     fun unsortedMvrsDirectory() = "$topdir/private"
-    fun unsortedCountyCvrDirectory() = "$topdir/county"
+    fun countyAuditRecordTopdir(county:String) = "$topdir/county/$county"
 
     fun auditRoundConfigFile(round: Int): String {
         val dir = "$audit/round$round"

@@ -28,7 +28,7 @@ class WriteCountyInputData {
 
     @Test
     fun writeOneState() {
-        writeCountyData(Statewide2020General())
+        writeCountyData(Statewide2020Redacted())
     }
 
     @Test

@@ -343,6 +343,7 @@ class CardTabulation(cards: CloseableIterator<AuditableCard>, infos: Map<Int, Co
             while (cardIter.hasNext()) {
                 val card = cardIter.next()
                 cvrCount++
+                // TODO this should be using hasContest() ??
                 card.contestIds.forEach { contestId ->
                     val info = infos[contestId]
                     if (info != null) {
@@ -360,6 +361,17 @@ class CardTabulation(cards: CloseableIterator<AuditableCard>, infos: Map<Int, Co
             }
         }
     }
+}
+
+fun tabulateNpops(countyPops: Map<String, Map<Int,Int>>): Map<Int, Int> {
+    val pops = mutableMapOf<Int, Int>()
+    countyPops.values.forEach { contestPops ->
+        contestPops.forEach { contestId, pop ->
+            val accum = pops.getOrDefault(contestId, 0)
+            pops[contestId] = accum + pop
+        }
+    }
+    return pops
 }
 
 fun tabulateNpops(cards: List<AuditableCard>, infos: List<ContestInfo>): Map<Int, Int> {

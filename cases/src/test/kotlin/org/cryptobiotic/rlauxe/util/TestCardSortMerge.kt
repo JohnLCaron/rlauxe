@@ -39,7 +39,7 @@ class TestCardSortMerge {
             toCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )
 
-        val cardIter = readCardsCsvIterator(outputFile, null)
+        val cardIter = readCardsCsvIterator(outputFile) { it }
         var count = 0
         var countPools = 0
         cardIter.forEach {
@@ -65,7 +65,7 @@ class TestCardSortMerge {
             toCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )
 
-        val cardIter = readCardsCsvIterator(outputFile, null)
+        val cardIter = readCardsCsvIterator(outputFile) { it }
         var count = 0
         var countPools = 0
         cardIter.forEach {
@@ -91,7 +91,7 @@ class TestCardSortMerge {
             toCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )
 
-        val cardIter = readCardsCsvIterator(outputFile, null)
+        val cardIter = readCardsCsvIterator(outputFile) { it }
         var count = 0
         var countPools = 0
         cardIter.forEach {

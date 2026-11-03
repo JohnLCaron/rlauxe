@@ -33,6 +33,7 @@ fun CardStylesJson.import(): List<CardStyle> {
 
 @Serializable
 class CardStyleJson(
+    val county: String,
     val name: String,
     val id: Int,
     val possibleContests: IntArray,
@@ -41,6 +42,7 @@ class CardStyleJson(
 )
 
 fun StyleIF.publishJson() = CardStyleJson(
+    this.county(),
     this.name(),
     this.id(),
     this.possibleContests(),
@@ -49,6 +51,7 @@ fun StyleIF.publishJson() = CardStyleJson(
 )
 
 fun CardStyleJson.import() = CardStyle(
+        this.county,
         this.name,
         this.id,
         this.possibleContests,

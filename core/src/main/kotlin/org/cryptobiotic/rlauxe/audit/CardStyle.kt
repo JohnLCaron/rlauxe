@@ -13,6 +13,7 @@ import kotlin.collections.forEach
  * batch.hasExactContests = true if all cards in the batch have a single known CardStyle = "we know exactly what contests are on each card".
  */
 interface StyleIF {
+    fun county(): String
     fun name(): String
     fun id(): Int
     fun possibleContests(): IntArray // the set of contests that might be on any card in the batch
@@ -26,6 +27,7 @@ interface StyleIF {
 }
 
 data class CardStyle(
+    val county: String,
     val name: String,
     val id: Int,
     val possibleContests: IntArray,      // the list of possible contests.
@@ -40,7 +42,8 @@ data class CardStyle(
         possibleContests.forEach { bitset.set(it) }
     }
 
-    constructor(id: Int, contestIds: Set<Int>, hasExactContests: Boolean): this("style$id", id, contestIds.toList().sorted().toIntArray(), hasExactContests)
+    constructor(county:String, id: Int, contestIds: Set<Int>, hasExactContests: Boolean):
+            this(county, "style$id", id, contestIds.toList().sorted().toIntArray(), hasExactContests)
 
     override fun ncards() = ncards
     fun setNcards(ncards:Int): CardStyle {
@@ -48,18 +51,31 @@ data class CardStyle(
         return this
     }
 
+    override fun county() = county
     override fun name() = name
     override fun id() = id
     override fun hasExactContests() = hasExactContests
     override fun hasContest(contestId: Int) = bitset.get(contestId) // optimize bottleneck
     override fun possibleContests() = possibleContests
 
+    fun show(): String {
+        return "${nfn(id, 3)} ${nfn(ncards, 5)} ${possibleContests.contentToString()}"
+    }
+
+    override fun toString(): String {
+        val sortedContests = possibleContests.toList().sorted()
+        return "CardStyle(county=$county, name=$name, id=$id, ncards= $ncards, contests=${sortedContests} exact=$hasExactContests"
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is CardStyle) return false
+        if (javaClass != other?.javaClass) return false
+
+        other as CardStyle
 
         if (id != other.id) return false
         if (hasExactContests != other.hasExactContests) return false
+        if (county != other.county) return false
         if (name != other.name) return false
         if (!possibleContests.contentEquals(other.possibleContests)) return false
 
@@ -69,18 +85,10 @@ data class CardStyle(
     override fun hashCode(): Int {
         var result = id
         result = 31 * result + hasExactContests.hashCode()
+        result = 31 * result + county.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + possibleContests.contentHashCode()
         return result
-    }
-
-    fun show(): String {
-        return "${nfn(id, 3)} ${nfn(ncards, 5)} ${possibleContests.contentToString()}"
-    }
-
-    override fun toString(): String {
-        val sortedContests = possibleContests.toList().sorted()
-        return "CardStyle(name=$name, id=$id, ncards= $ncards, contests=${sortedContests} exact=$hasExactContests"
     }
 
     companion object {
@@ -90,35 +98,16 @@ data class CardStyle(
         // val unknown = CardStyle("unknown", -1, intArrayOf(), true) // kludge
 
         //  assumes cvrsContainUndervotes, use regular batch if not.
-        val fromCvrStyle = CardStyle(fromCvr, -1, intArrayOf(), true)
-        val phantomStyle = CardStyle(phantoms, -2, intArrayOf(), true)
+        val fromCvrStyle = CardStyle("", fromCvr, -1, intArrayOf(), true)
+        val phantomStyle = CardStyle("", phantoms, -2, intArrayOf(), true)
 
         // card must contain votes if fromCvrStyle or phantomStyle
         fun useVotes(styleId: Int): Boolean = styleId == -1 ||  styleId == -2
 
-        fun from(id: Int, contests: Set<Int>) = CardStyle(
+        fun from(county: String, id: Int, contests: Set<Int>) = CardStyle(county,
             "cardStyle$id", id, contests.toList().sorted().toIntArray(), true)
     }
 }
-
-/*
-fun makeCardStylesFromCvrs(cvrs: List<Cvr>, show: Boolean = false): Map<Set<Int>, CardStyle> {
-    val cardStyleMap = mutableMapOf<Set<Int>, CardStyle>()
-    cvrs.forEach { cvr ->
-        val csc = cardStyleMap.getOrPut(cvr.votes.keys) { CardStyle(cardStyleMap.size + 1, cvr.votes.keys) }
-        csc.ncards++
-    }
-
-    if (show) {
-        println("\ncard styles  (${cardStyleMap.size})")
-        println("id  count contests")
-        val sortedCardStyles = cardStyleMap.toList().sortedBy { it.second.ncards }
-        sortedCardStyles.forEach { (_, pv) ->
-            println(pv)
-        }
-    }
-    return cardStyleMap
-} */
 
 /*
 timeConsistentSampling with CardStyle.hasContest using

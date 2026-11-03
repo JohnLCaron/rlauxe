@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.AddStyles
 import org.cryptobiotic.rlauxe.persist.csv.readCardsAndMergeToList
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -24,7 +25,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     val contestsUA = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress } // note: only InProgress
     val publisher = Publisher(auditRecord.topdir)
 
-    val styles by lazy { auditRecord.readCardStyles() ?: auditRecord.readCardPools() } // styles are preferred
+    val styles by lazy { auditRecord.readCardStyles() } // styles are preferred
     val sortedManifest by lazy { auditRecord.readSortedManifest(styles) }
     val auditableCards: CloseableIterator<AuditableCard> by lazy {  sortedManifest.cardIterable.iterator() }
 
@@ -51,8 +52,8 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     override fun styles() = styles
 
     override fun pools() = auditRecord.readCardPools() // could test if batches are cardPools
-    override fun countyAcPools() = if (styles == null) null else auditRecord.readCountyCardPools(styles!!)
-    override fun countyCvrPools() = if (styles == null) null else auditRecord.readCountyCvrPools(styles!!)
+    override fun countyAcPools() = auditRecord.readCountyCardPools(styles)
+    override fun countyCvrPools() = auditRecord.readCountyCvrPools(styles)
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         val mvrsForRound = readMvrsForRound(round)
@@ -86,7 +87,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         require(resultSamples.isOk)
         val sampleNumbers = resultSamples.unwrap()
 
-        val mergedMvrIter = readCardsCsvIterator(publisher.sortedMvrsFile(), styles)
+        val mergedMvrIter = readCardsCsvIterator(publisher.sortedMvrsFile(), AddStyles(styles))
         val sampledMvrs = findSamples(sampleNumbers, mergedMvrIter)
         require(sampledMvrs.size == sampleNumbers.size)
 
@@ -134,7 +135,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     }
 
     fun readCardsAndMerge(filename: String): CloseableIterator<AuditableCard> {
-        return readCardsCsvIterator(filename, styles)
+        return readCardsCsvIterator(filename, AddStyles(styles))
     }
 
     fun readCardsAndMergeList(filename: String): List<AuditableCard> {

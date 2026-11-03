@@ -27,6 +27,8 @@ import kotlin.test.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+const val COUNTY = "county"
+
 class TestAboveThresholdOA {
 
     val f = 0.50
@@ -41,15 +43,15 @@ class TestAboveThresholdOA {
     val contest = Contest(info, mapOf(1 to 15555, 2 to 14444), Nc = 30000, Ncast = 30000)
     val infos = mapOf(0 to info)
     // now we have 3 pools with avg >,=,< total average
-    val cardPool1 = CardPool(
+    val cardPool1 = CardPool( COUNTY,
         "same", 1, false,
         mapOf(0 to ContestTabulation(info, mapOf(1 to 5100, 2 to 4900), 10000)), 10000
     )
-    val cardPool2 = CardPool(
+    val cardPool2 = CardPool( COUNTY,
         "low", 2, false,
         mapOf(0 to ContestTabulation(info, mapOf(1 to 4890, 2 to 5300), 10000)), 10000
     )
-    val cardPool3 = CardPool(
+    val cardPool3 = CardPool( COUNTY,
         "hi", 3, false,
         // constructor(info: ContestInfo, votes: Map<Int, Int>, ncards: Int)
         mapOf(0 to ContestTabulation(info, mapOf(1 to 5565, 2 to 4244), 10000)), 10000
@@ -151,7 +153,7 @@ class TestAboveThresholdOA {
             pools.forEach { pool ->
                 repeat(3) { cand ->
                 val mvr = AuditableCardBuilder(
-                    "cvrId", null, 42, 0, phantom = false, styleId = pool.poolId, poolId = pool.poolId,
+                    "cvrId", COUNTY, "", 42, 0, phantom = false, styleId = pool.poolId, poolId = pool.poolId,
                     votesIn = if (cand == 2) mapOf(0 to intArrayOf()) else mapOf(0 to intArrayOf(cand))
                 ).build()
                 val cvr = AuditableCard.removeVotesReplaceStyle(mvr, 1)
@@ -254,7 +256,7 @@ fun makeMvrsFromPools(cardPools: List<CardPoolIF>) : List<AuditableCard> { // co
         val poolCards = vunderPool.makeCardsForOneAuditPool {
             poolIndex++
             val cvrId = "${cardPool.poolName}-${poolIndex}"
-            AuditableCardBuilder(cvrId, null, cardIndex++, 0, phantom = false, styleId=cardPool.poolId, poolId=cardPool.poolId, votesIn=null)
+            AuditableCardBuilder(cvrId, COUNTY, "", cardIndex++, 0, phantom = false, styleId=cardPool.poolId, poolId=cardPool.poolId, votesIn=null)
         }
         cards.addAll( poolCards)
     }

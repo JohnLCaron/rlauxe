@@ -25,6 +25,7 @@ interface CardPoolIF: StyleIF {
 
 // CardPool is immutable
 data class CardPool(
+    val county: String,
     override val poolName: String,
     override val poolId: Int,
     val hasExactContests: Boolean,    // aka single style
@@ -32,6 +33,7 @@ data class CardPool(
     val contestTabs: Map<Int, ContestTabulationIF>,  // contestId -> ContestTabulation
     val totalCards: Int,
 ): CardPoolIF {
+    override fun county() = county
     override fun name() = poolName
     override fun id() = poolId
     override fun hasExactContests() = hasExactContests
@@ -55,6 +57,7 @@ data class CardPool(
 //   I think? the whole adjust thing is obsolete?
 //  otherwise just get the real ncards(contest) per group, already.
 class CardPoolBuilder(
+    val county: String,
     val poolName: String,
     val poolId: Int,
     val hasExactContests: Boolean,
@@ -116,7 +119,7 @@ class CardPoolBuilder(
             it.value.ncardsTabulated = ncards()
             it.value
         }
-        return CardPool(this.poolName, this.poolId, this.hasExactContests, adjustedTabs, this.ncards())
+        return CardPool(county, poolName, poolId, hasExactContests, adjustedTabs, ncards())
     }
 
     override fun equals(other: Any?): Boolean {
@@ -150,6 +153,7 @@ class CardPoolBuilder(
     companion object {
 
         fun fromMinVotesNeeded(
+            county: String,
             poolName: String,
             poolId: Int,
             hasExactContests: Boolean,    // aka single style
@@ -164,7 +168,7 @@ class CardPoolBuilder(
                 // based on the contest's votes, you need at least this many cards for this contest
                 minCardsNeeded[contestId] = roundUp(voteSum.toDouble() / info.voteForN)
             }
-            return CardPoolBuilder(poolName, poolId, hasExactContests, infos, contestTabs).setMinCardsNeeded(minCardsNeeded)
+            return CardPoolBuilder(county, poolName, poolId, hasExactContests, infos, contestTabs).setMinCardsNeeded(minCardsNeeded)
         }
     }
 }

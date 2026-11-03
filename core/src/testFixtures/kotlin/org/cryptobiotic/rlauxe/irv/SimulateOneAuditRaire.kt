@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.irv
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.estimate.COUNTY
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.random.Random
@@ -32,7 +33,7 @@ fun simulateOneAuditRaire(N: Int, contestId: Int, ncands:Int, minMargin: Double,
     //    val possibleContests: IntArray, // the list of possible contests.
     //    val hasExactContests: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
     //)
-    val pop = CardStyle("simulateOneAuditRaire", 42, intArrayOf(contestId), true)
+    val pop = CardStyle(COUNTY, "simulateOneAuditRaire", 42, intArrayOf(contestId), true)
     val pools = calcOneAuditPoolsFromMvrs(
         infos,
         listOf(pop),

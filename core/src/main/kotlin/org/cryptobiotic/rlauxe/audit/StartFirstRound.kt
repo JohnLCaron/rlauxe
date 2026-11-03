@@ -26,7 +26,7 @@ fun startFirstRound(topdir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvr
         if (notExists(Path.of(topdir))) {
             return errs.add( "audit Directory $topdir does not exist" )
         }
-
+        // TODO should be working on Publisher.audit, not topdir
         // delete any roundX subdirectories
         val topdirFile = File(topdir)
         topdirFile.walkTopDown()
@@ -48,11 +48,22 @@ fun startFirstRound(topdir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvr
         val workflow = PersistedWorkflow(auditRecord)
         val roundIdx = 1
 
-        // TODO not needed here ?? Done in CreateElectionRecord
+        // Done in CreateElectionRecord, but also needed here
         //// heres where we can remove contests as needed
         // this may change the auditStatus to misformed.
         val results = VerifyResults()
         preAuditContestCheck(auditRecord.contests,  config.sampling, results)
+        if (results.hasErrors) {
+            logger.warn{ results.toString() }
+        } else if (results.messes.isNotEmpty()){
+            logger.info{ results.toString() }
+        }
+
+        // in case it changed TODO is this ok ??
+        val publisher = auditRecord.publisher
+        writeContestsJsonFile(auditRecord.contests, publisher.contestsFile())
+        logger.info{"startFirstRound write ${auditRecord.contests.size} contests to ${publisher.contestsFile()}"}
+
 
         if (onlyContests != null) {
             auditRecord.contests.forEach { contest ->
@@ -61,17 +72,6 @@ fun startFirstRound(topdir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvr
                     logger.info { "${contest.id} preAuditStatus set to TestH0Status.AuditorRemoved" }
                 }
             }
-        }
-
-        // in case it changed TODO is this ok ??
-        val publisher = auditRecord.publisher
-        writeContestsJsonFile(auditRecord.contests, publisher.contestsFile())
-        logger.info{"startFirstRound write ${auditRecord.contests.size} contests to ${publisher.contestsFile()}"}
-
-        if (results.hasErrors) {
-            logger.warn{ results.toString() }
-        } else if (results.messes.isNotEmpty()){
-            logger.info{ results.toString() }
         }
 
         // start next round and estimate sample sizes

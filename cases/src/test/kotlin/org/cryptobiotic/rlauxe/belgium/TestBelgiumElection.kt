@@ -62,7 +62,7 @@ class TestBelgiumElection {
 fun testCvrs(contestd: DhondtContest) {
 
     println("testCvrs2 ----------------------------------------")
-    val cvrs = contestd.createSimulatedCvrs()
+    val cvrs = contestd.createSimulatedCards()
     assertEquals(contestd.Nc, cvrs.size)
 
     contestd.assorters.forEach { assorter ->

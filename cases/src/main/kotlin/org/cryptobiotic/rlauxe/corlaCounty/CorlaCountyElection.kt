@@ -77,14 +77,14 @@ class CorlaCountyElection(
         val missingTabs: Map<Int, ContestTabulation> = subtractContestTabulationsZ(convertedCountyAcTabs, notmissing)
 
         var styleId = 3
-        cardStyles = countyCards.countyStyles().map { county ->
-            CardStyle(county.cardStyle, styleId++,
-                converter.convertCountyIdSet(county.contestIds).toList().toIntArray(),
-                hasExactContests=true).setNcards(county.ncards)
+        cardStyles = countyCards.countyStyles().map { cvrCardStyle ->
+            CardStyle(county, cvrCardStyle.cardStyle, styleId++,
+                converter.convertCountyIdSet(cvrCardStyle.contestIds).toList().toIntArray(),
+                hasExactContests=true)
+                .setNcards(cvrCardStyle.ncards)
         }
         val cardStyleMap = cardStyles.associate { it.name to it.id } + poolMap
 
-        // TODO these arent the mvrs, this is the card manifest; mvrs must simulate the pool subtotals
         // need to iterate over CountyCards to fill in the counts
         // transform to canonical AuditableCards, all are in memory in cards
         val npops = mutableMapOf<Int, Int>() // count contests' population size
@@ -92,6 +92,7 @@ class CorlaCountyElection(
         countyCards.iterator().forEach { countyCard ->
             val card = AuditableCard.fromVotes(
                 countyCard.imprintedId,
+                county,
                 countyCard.location,
                 index++, 0, false,
                 styleId = cardStyleMap[countyCard.style] ?: throw RuntimeException(" cant find style name '${countyCard.style}'"),
@@ -113,7 +114,7 @@ class CorlaCountyElection(
         if (countyCards.aggGroup != null) {
             val hasExactContests = false // unless it has a single Style
             convertedGroupTabs.values.forEach { it.setNcards(countyCards.aggCount) } // finally know the ncards after reading county Cvr file
-            cardPools.add(CardPool(countyCards.aggGroup.groupName, 1, hasExactContests, convertedGroupTabs, countyCards.aggCount))
+            cardPools.add(CardPool(county, countyCards.aggGroup.groupName, 1, hasExactContests, convertedGroupTabs, countyCards.aggCount))
         }
 
         // countyTab doesnt know ncards per contest: notmissing knows, but missing doesnt know, so here is an estimation
@@ -123,7 +124,7 @@ class CorlaCountyElection(
 
         if (countyCards.missingCount > 0) {
             val hasExactContests = false // unless it has a single Style
-            cardPools.add(CardPool("missing", 2, hasExactContests, missingTabs, countyCards.missingCount))
+            cardPools.add(CardPool(county, "missing", 2, hasExactContests, missingTabs, countyCards.missingCount))
         }
 
         contestsUA = makeContestWAs(

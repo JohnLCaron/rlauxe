@@ -2,13 +2,14 @@ package org.cryptobiotic.rlauxe.persist
 
 import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestCountyAuditRecord {
-    val corlaData = "$cases/corla/corla2020/sim"
+    val corlaData = "$cases/corla/2020"
 
     @Test
     fun testReadFrom() {
@@ -34,8 +35,7 @@ class TestCountyAuditRecord {
 
     @Test
     fun testRead() {
-        val countyAuditRecord = AuditRecord.read(corlaData)!!
-        assertTrue(countyAuditRecord is CountyAuditRecord)
+        val countyAuditRecord = AuditRecord.read(corlaData)!! as CountyAuditRecord
 
         // when you call this, you have to read through the mvrs !
         val mvrsByCounty = countyAuditRecord.countMvrsByCounty()
@@ -50,5 +50,25 @@ class TestCountyAuditRecord {
         mvrsForCounty.forEach { (nmvrs,  contest)  ->  println("   ${nfn(nmvrs, 5)}, $contest")}
 
         assertEquals(57, mvrsForCounty.size)
+    }
+
+    @Test
+    fun readCountyFiles() {
+        val countyAuditRecord = AuditRecord.read(corlaData)!!
+        assertTrue(countyAuditRecord is CountyAuditRecord)
+
+        // when you call this, you have to read through the mvrs !
+        val countyContestData = countyAuditRecord.countyContestData
+        val contestCounties =  mutableMapOf<Int, MutableList<CountyContestData>>()
+        for (countyContest in countyContestData) {
+            val counties = contestCounties.getOrPut(countyContest.id) { mutableListOf() }
+            counties.add(countyContest)
+        }
+        val counties = contestCounties[382]!!
+        val myCounty = counties.find{ it.countyName == "Chaffee"}!!
+        val sumAll = counties.sumOf { it.nPop }
+        val pct = myCounty.nPop/sumAll.toDouble()
+        val pctn = roundToClosest( pct)
+        println("pct = $pct == $pctn")
     }
 }

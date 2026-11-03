@@ -103,6 +103,7 @@ fun verifySortedCardManifest(
 
     var count = 0
     var lastCard: AuditableCard? = null
+    var duplicateCardLocationCount = 0
 
     cards.iterator().use { cardIter ->
         while (cardIter.hasNext()) {
@@ -113,7 +114,9 @@ fun verifySortedCardManifest(
                 results.addError("$count duplicate card.id ${card.id()}")
             }
             if (!locationSet.add(card.location())) {
-                results.addError("$count duplicate card.location ${card.location()}")
+                duplicateCardLocationCount++
+                if (duplicateCardLocationCount < 10)
+                    results.addError("$count duplicate card.location ${card}")
             }
             if (!indexSet.add(card.index())) {
                 results.addError("$count duplicate card.index ${card.index()}")

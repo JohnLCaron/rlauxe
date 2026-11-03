@@ -700,7 +700,7 @@ fun calcDecilesFromInt(distribution: List<Int>): Map<Int, Int> {
     return raw.mapValues { roundUp(it.value) }
 }
 
-fun calcProbabilityMassFunction(dataset: List<Int>, numBins: Int): Map<Int, Double> {
+fun calcProbabilityMassFunction(dataset: List<Int>, numBins: Int, show: Boolean = true): Map<Pair<Int, Int>, Double> {
     val minVal = dataset.minOrNull() ?: return emptyMap()
     val maxVal = dataset.maxOrNull() ?: return emptyMap()
 
@@ -725,11 +725,17 @@ fun calcProbabilityMassFunction(dataset: List<Int>, numBins: Int): Map<Int, Doub
     binnedPmf.forEach { (binIndex, probability) ->
         val lowerBound = minVal + (binIndex * binWidth)
         val upperBound = lowerBound + binWidth
-        println("Range [${nfn(lowerBound, 4)} to ${nfn(upperBound, 4)}) -> P(X) = ${dfn(probability, 2)}")
+        if (show) println("Range [${nfn(lowerBound, 4)} to ${nfn(upperBound, 4)}) -> P(X) = ${dfn(probability, 2)}")
     }
 
     // convert from binIndex to bin lowerBound
-    return binnedPmf.mapKeys { minVal + (it.key * binWidth) }
+    var binIndex = 0
+    return binnedPmf.mapKeys {
+        val lowerBound = minVal + (binIndex * binWidth)
+        val upperBound = lowerBound + binWidth
+        binIndex++
+        Pair(lowerBound, upperBound)
+    }
 }
 
 // binStart, count

@@ -21,6 +21,7 @@ import org.cryptobiotic.rlauxe.audit.CountyPools
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.persist.bin.FastSamplingCardIterator
+import org.cryptobiotic.rlauxe.persist.csv.AddStyles
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCountyPoolsCsvFile
@@ -39,11 +40,11 @@ interface AuditRecordIF {
     val contests: List<ContestWithAssertions>
     val rounds: List<AuditRoundIF>
 
-    fun readSortedManifest(styles: List<StyleIF>?): SortedManifest
-    fun readSamplingCards(styles: List<StyleIF>?): CloseableIterable<SamplingCardIF>?
+    fun readSortedManifest(styles: List<StyleIF>): SortedManifest
+    fun readSamplingCards(styles: List<StyleIF>): CloseableIterable<SamplingCardIF>?
 
     fun readOneShotMvrs(): Map<Int, Int>
-    fun readCardStyles(): List<StyleIF>?
+    fun readCardStyles(): List<StyleIF>
     fun name(): String
 }
 
@@ -59,8 +60,8 @@ open class AuditRecord(
 
     override fun name() = electionInfo.electionName // it.location.substring(stateRecord.location.length)
 
-    override fun readSamplingCards(styles: List<StyleIF>?): CloseableIterable<SamplingCardIF>? {
-        if (styles == null || !Files.exists(Path(publisher.fastSamplingFile()))) return null
+    override fun readSamplingCards(styles: List<StyleIF>): CloseableIterable<SamplingCardIF>? {
+        if (!Files.exists(Path(publisher.fastSamplingFile()))) return null
         return CloseableIterable {
             logger.info{"readSamplingCards at ${publisher.fastSamplingFile()}"}
             FastSamplingCardIterator(publisher.fastSamplingFile(), styles, bufferSize = 100_000)
@@ -68,32 +69,33 @@ open class AuditRecord(
     }
 
     // TODO should styles be optional ?
-    override fun readSortedManifest(styles: List<StyleIF>?): SortedManifest {
+    override fun readSortedManifest(styles: List<StyleIF>): SortedManifest {
         // first look for sortedCardsProtoFile, use if present, else use sortedCardsFile
         if ( Files.exists(Path(publisher.sortedCardsProtoFile()))) {
             val sortedCardsIter = CloseableIterable { ProtoCardIterator(publisher.sortedCardsProtoFile(), styles = styles) }
             return SortedManifest(sortedCardsIter, electionInfo.totalCardCount)
         }
 
-        val mergedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile(), styles) }
+        val mergedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile(), AddStyles(styles)) }
         return SortedManifest(mergedCards, electionInfo.totalCardCount)
     }
 
     // I think cant be null
-    override fun readCardStyles(): List<StyleIF>? {
-        return if (!Files.exists(Path(publisher.cardStylesFile()))) null else {
+    override fun readCardStyles(): List<StyleIF> {
+        if (Files.exists(Path(publisher.cardStylesFile()))) {
             val stylesResult = readCardStylesJsonFile(publisher.cardStylesFile())
-            if (stylesResult.isOk) stylesResult.unwrap() else {
+            if (stylesResult.isOk) return stylesResult.unwrap() else {
                 logger.error{ "$stylesResult" }
-                null
+                throw RuntimeException(stylesResult.toString())
             }
         }
+        throw RuntimeException("${publisher.cardStylesFile()} does not exist")
     }
 
     fun readCardPools(): List<CardPool>? {
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
         return if (!Files.exists(Path(publisher.cardPoolsFile()))) null
-        else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
+               else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
     }
 
     fun readCountyCardPools(styles: List<StyleIF>): List<CountyPools>? {

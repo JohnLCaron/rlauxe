@@ -19,13 +19,13 @@ import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 // for multiple styles, multiple contests and one "pool" of subtotaled votes
 // used for estimation for OneAudit; generating cards for CountyElectionSansCvrs; genererating cards for redacted pools
 class VunderBatches(val name: String, styles: List<StyleIF>, val onePool: VunderPool) {
-    val styleMap = styles.associateBy { it.id() }
+    val styleMap: Map<Pair<String, Int>, StyleIF> = styles.associate{ Pair(it.county(), it.id()) to it }
 
     // for the given pooled card with no votes, simulate one with votes, using card.styleName
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
         if (card.phantom()) return card
 
-        val style = styleMap[card.styleId]
+        val style = styleMap[Pair(card.county, card.styleId)]
         val cardb = AuditableCardBuilder.fromCard(card)
 
         if (style == null) {

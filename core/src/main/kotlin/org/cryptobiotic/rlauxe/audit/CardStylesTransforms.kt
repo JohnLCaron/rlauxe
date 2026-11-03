@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.util.TransformingIterator
 import kotlin.collections.get
 import kotlin.sequences.plus
 
+// DO NOT USE except testing
 // merge styles and mvrs -> cards list
 fun mvrsToAuditableCardsList(
     mvrs: List<Cvr>,
@@ -28,7 +29,8 @@ fun mvrsToAuditableCardsList(
         val (contestIds, contestStarts, candidates) = makeFromVotes(org.votes)
         AuditableCard(
             org.id,
-            null,
+            "",
+            "",
             cardIndex++,
             0,
             phantom = org.phantom,
@@ -39,6 +41,7 @@ fun mvrsToAuditableCardsList(
     }
 }
 
+// DO NOT USE except testing
 // merge styles and cvrs + phantoms -> cards iterator
 // removes votes for pooled data
 class CvrsToCardStylesIterator(
@@ -78,7 +81,8 @@ class CvrsToCardStylesIterator(
         val (contestIds, contestStarts, candidates) = makeFromVotes(votes)
         val cardm = AuditableCard(
             id = org.id,
-            location = null,
+            county = "",
+            location = "",
             index = cardIndex++,
             prn = 0,
             phantom=org.phantom,
@@ -107,9 +111,9 @@ class MergeStylesIntoCards(
 
 // merge styles into cards iterator, can be iterated once
 fun mergeStylesIntoCards(cardsIter: CloseableIterator<AuditableCard>, styles: List<StyleIF>): CloseableIterator<AuditableCard> {
-    val styleMap = styles.associateBy{ it.id() }
+    val styleMap: Map<Pair<String, Int>, StyleIF> = styles.associate{ Pair(it.county(), it.id()) to it }
     return TransformingIterator(cardsIter) { org ->
-        val style = styleMap[org.styleId]
+        val style = styleMap[Pair(org.county, org.styleId)]
         val cardStyle = when {
             style != null -> style
             org.styleId == CardStyle.phantomStyle.id() -> CardStyle.phantomStyle

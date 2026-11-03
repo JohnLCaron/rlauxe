@@ -6,7 +6,8 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 // builds one AuditableCard
 class AuditableCardBuilder(
     var id: String,         // corla imprintedId
-    var location: String?,
+    var county: String,
+    var location: String,
     var index: Int,
     var prn: Long,
     var phantom: Boolean,
@@ -21,11 +22,11 @@ class AuditableCardBuilder(
         if (votesIn != null) votes.putAll(votesIn)
     }
 
-    constructor(id: String, location: String?, index: Int, poolId: Int?, styleId: Int):
-            this(id, location, index, 0L, false, styleId, poolId, null)
+    constructor(id: String, county: String, location: String, index: Int, poolId: Int?, styleId: Int):
+            this(id, county, location, index, 0L, false, styleId, poolId, null)
 
-    constructor(id: String, location: String, poolId: Int?, style: StyleIF):
-            this(id, location, 0, 0L, false, style.id(), poolId, null, style=style)
+    constructor(id: String, county: String, location: String, poolId: Int?, style: StyleIF):
+            this(id, county, location, 0, 0L, false, style.id(), poolId, null, style=style)
 
     //              id = manifestEntry.imprintedId(),
     //                location = manifestEntry.location(),
@@ -43,7 +44,7 @@ class AuditableCardBuilder(
 
     fun build() : AuditableCard {
         val cardm = AuditableCard.fromVotes(
-            id, location, index, prn, phantom,
+            id, county, location, index, prn, phantom,
             styleId = styleId,
             votes = votes,
             poolId = poolId,
@@ -55,7 +56,8 @@ class AuditableCardBuilder(
     companion object {
         fun fromCard(card: AuditableCard) = AuditableCardBuilder(
             card.id(),
-            if (card.id() == card.location()) null else card.location(),
+            card.county,
+            card.location(),
             card.index(),
             card.prn(),
             card.phantom(),

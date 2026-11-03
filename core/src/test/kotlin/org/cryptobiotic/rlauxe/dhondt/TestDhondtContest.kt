@@ -51,7 +51,7 @@ class TestDhondtContest {
         val contestd: DhondtContest = makeDhondtContest("contest1", 1, parties, 8, Nc, undervotes, minPct)
 
         println("\nContestDHondt.cvrs, AssorterIF")
-        val cvrsIF = contestd.createSimulatedCvrs() // TODO failing on undervotes != 0
+        val cvrsIF = contestd.createSimulatedCards() // TODO failing on undervotes != 0
         println("validVotes = ${contestd.votes.values.sum()} undervotes=${contestd.undervotes} ncvrsIF = ${cvrsIF.size}")
 
         contestd.assorters.forEach { assorter ->

@@ -48,12 +48,12 @@ class TestBoulderUndervotes {
                 } else {
                     Pair(value[1], value[0])
                 }
-                cardStyles[key + "-A"] = CardStyle(key + "-A", styleId, styleA.toIntArray(), true)
-                cardStyles[key + "-B"] = CardStyle(key + "-B", styleId + 1, styleB.toIntArray(), true)
+                cardStyles[key + "-A"] = CardStyle( BOULDER,key + "-A", styleId, styleA.toIntArray(), true)
+                cardStyles[key + "-B"] = CardStyle(BOULDER,key + "-B", styleId + 1, styleB.toIntArray(), true)
                 styleId += 2
             } else {
                 value.forEach { contestIds ->
-                    cardStyles[key] = CardStyle(key, styleId, contestIds.toIntArray(), true)
+                    cardStyles[key] = CardStyle(BOULDER,key, styleId, contestIds.toIntArray(), true)
                     styleId++
                 }
             }
@@ -86,12 +86,12 @@ class TestBoulderUndervotes {
                 } else {
                     Pair(value[1], value[0])
                 }
-                ecardStyles[key + "-A"] = CardStyle(key + "-A", styleId, styleA.contestIds.toIntArray(), true)
-                ecardStyles[key + "-B"] = CardStyle(key + "-B", styleId + 1, styleB.contestIds.toIntArray(), true)
+                ecardStyles[key + "-A"] = CardStyle(BOULDER,key + "-A", styleId, styleA.contestIds.toIntArray(), true)
+                ecardStyles[key + "-B"] = CardStyle(BOULDER,key + "-B", styleId + 1, styleB.contestIds.toIntArray(), true)
                 styleId += 2
             } else {
                 value.forEach { cardStyle ->
-                    ecardStyles[key] = CardStyle(key, styleId, cardStyle.contestIds.toIntArray(), true)
+                    ecardStyles[key] = CardStyle(BOULDER,key, styleId, cardStyle.contestIds.toIntArray(), true)
                     styleId++
                 }
             }

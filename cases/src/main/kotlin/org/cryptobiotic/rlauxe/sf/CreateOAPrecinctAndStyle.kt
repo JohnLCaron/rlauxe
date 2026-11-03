@@ -22,7 +22,7 @@ import kotlin.collections.toList
 
 private val logger = KotlinLogging.logger("CreateSfprecinctOA")
 
-// obsolete ?? TOFO: revive ?? Perhaps can just add a variation thats uses one or the other
+// obsolete ?? TODO: revive ?? Perhaps can just add a variation thats uses one or the other
 // group cards into precincts from the "precinctPortionId", use precincts as the pools
 class CreatePrecinctAndStyle(
     castVoteRecordZip: String,
@@ -95,7 +95,7 @@ class CreatePrecinctAndStyle(
         // TODO cardStyles need to be for all cvrs
         val cardStyles = mutableMapOf<Set<Int>, CardStyle>() // contests.hashCode -> contests
         val precinctPools: MutableMap<String, OneAuditPoolFromCvrs> = mutableMapOf()
-        val unpool = OneAuditPoolFromCvrs("unpool", 0, true, contestInfos)
+        val unpool = OneAuditPoolFromCvrs(SF, "unpool", 0, true, contestInfos)
 
         val allCvrTabs = mutableMapOf<Int, ContestTabulation>()
         var cardCount = 0
@@ -106,10 +106,10 @@ class CreatePrecinctAndStyle(
                 val cvrExport: CvrExport = cvrIter.next()
                 if (cvrExport.group == 1) {
                     poolCount++
-                    val cardStyle = cardStyles.getOrPut(cvrExport.votes.keys) { CardStyle.from(cardStyles.size + 1, cvrExport.votes.keys) }
+                    val cardStyle = cardStyles.getOrPut(cvrExport.votes.keys) { CardStyle.from(SF, cardStyles.size + 1, cvrExport.votes.keys) }
                     val poolName = poolName(cvrExport.precinctPortionId, cardStyle)
                     val pool = precinctPools.getOrPut(poolName) {
-                        OneAuditPoolFromCvrs(poolName, precinctPools.size + 1, poolsHaveOneCardStyle, contestInfos)
+                        OneAuditPoolFromCvrs(SF, poolName, precinctPools.size + 1, poolsHaveOneCardStyle, contestInfos)
                     }
                     pool.accumulateVotes(cvrExport.toCvr(null, cvrExport.id))
                 } else {
@@ -138,7 +138,7 @@ class CreatePrecinctAndStyle(
         mvrSource = mvrSource
     )
 
-    override fun cardStyles() = null // cardStyles
+    override fun cardStyles() = styleMap.values.toList() // cardStyles
     override fun cardPools() = if (auditType.isOA()) cardPoolBuilders else null // always the oa pools ??
     override fun contestsUA() = contestsUA
     override fun cards() = createCards(auditType)
@@ -167,7 +167,7 @@ class CreatePrecinctAndStyle(
             val votes = if (hasCvr) cvrExport.votes else null  // removes votes for pooled data
 
             // Add location as poolName + index
-            val location = if (!convertPoolIds || pool == null) null else {
+            val location = if (!convertPoolIds || pool == null) "" else {
                 val poolCount =  poolCounts.getOrPut(pool.name()) { 0 }
                 poolCounts[pool.name()] = poolCount + 1
                 "${pool.name()} position${poolCount+1}"
@@ -180,6 +180,7 @@ class CreatePrecinctAndStyle(
 
             AuditableCard(
                 cvrExport.id,
+                SF,
                 location,
                 countIndex++,
                 0,

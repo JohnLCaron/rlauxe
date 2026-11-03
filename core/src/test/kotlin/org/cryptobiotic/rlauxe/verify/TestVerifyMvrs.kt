@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.verify
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.COUNTY
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.makeCvr
 import org.cryptobiotic.rlauxe.util.ErrorMessages
@@ -55,11 +56,11 @@ class TestVerifyMvrs {
         }
 
         val rcards = listOf(
-            cards[0].copy(styleId=1).setStyle(style=CardStyle("hasStyle", 1, cards[0].possibleContests(), true)),
-            cards[1].copy(styleId=1).setStyle(style=CardStyle("hasStyle", 1, removeOne(cards[1].possibleContests()), true)),
-            cards[2].copy(styleId=2).setStyle(style=CardStyle("noStyle", 2, removeOne(cards[2].possibleContests()), false)),
-            cards[3].copy(styleId=1).setStyle(style=CardStyle("hasStyle", 1, addOne(cards[3].possibleContests()), true)),
-            cards[4].copy(styleId=2).setStyle(style=CardStyle("noStyle", 2, addOne(cards[4].possibleContests()), false)),
+            cards[0].copy(styleId=1).setStyle(style=CardStyle(COUNTY, "hasStyle", 1, cards[0].possibleContests(), true)),
+            cards[1].copy(styleId=1).setStyle(style=CardStyle(COUNTY, "hasStyle", 1, removeOne(cards[1].possibleContests()), true)),
+            cards[2].copy(styleId=2).setStyle(style=CardStyle(COUNTY, "noStyle", 2, removeOne(cards[2].possibleContests()), false)),
+            cards[3].copy(styleId=1).setStyle(style=CardStyle(COUNTY, "hasStyle", 1, addOne(cards[3].possibleContests()), true)),
+            cards[4].copy(styleId=2).setStyle(style=CardStyle(COUNTY, "noStyle", 2, addOne(cards[4].possibleContests()), false)),
         )
         val errs = ErrorMessages("testHasStyle")
         verifyMvrCardPairs(cards.zip(rcards), errs)

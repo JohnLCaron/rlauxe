@@ -8,6 +8,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class TestCorlaRawCvrsOnTestExamples {
+    val COUNTY = "county"
 
     @Test
     fun testRemoveLeadingChar() {
@@ -67,7 +68,7 @@ class TestCorlaRawCvrsOnTestExamples {
             27 to intArrayOf(1),
         )
         val expected0 = makeCvr(cvr0.imprintedId, expectedVotes0)
-        val actual0 = cvr0.convertToCard().toCvr()
+        val actual0 = cvr0.convertToCard(COUNTY).toCvr()
         assertEquals(expected0, actual0)
 
         val cvr1 = cvrs.next()
@@ -78,7 +79,7 @@ class TestCorlaRawCvrsOnTestExamples {
             24 to intArrayOf(1),
         )
         val expected1 = makeCvr(cvr1.imprintedId, expectedVotes1)
-        val actual1 = cvr1.convertToCard().toCvr()
+        val actual1 = cvr1.convertToCard(COUNTY).toCvr()
         assertEquals(expected1, actual1)
 
         val cvr2 = cvrs.next()
@@ -96,7 +97,7 @@ class TestCorlaRawCvrsOnTestExamples {
             32 to intArrayOf(1),
         )
         val expected2 = makeCvr(cvr2.imprintedId, expectedVotes2)
-        val actual2 = cvr2.convertToCard().toCvr()
+        val actual2 = cvr2.convertToCard(COUNTY).toCvr()
         assertEquals(expected2, actual2)
 
         val cvr3 = cvrs.next()
@@ -116,7 +117,7 @@ class TestCorlaRawCvrsOnTestExamples {
             27 to intArrayOf(1),
         )
         val expected3 = makeCvr(cvr3.imprintedId, expectedVotes3)
-        val actual3 = cvr3.convertToCard().toCvr()
+        val actual3 = cvr3.convertToCard(COUNTY).toCvr()
         assertEquals(expected3, actual3)
     }
 

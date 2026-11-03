@@ -64,7 +64,7 @@ open class BuildCorlaContests(val statewideInput: StatewideInput) {
                 } */
                     else -> computeStrataMinRate(mcontest.contestName, mcontest.counties, strataMap)
                 }
-                info.metadata["CORLAhaveMvrs"] = strata.nmvrs.toString()
+                info.metadata["StrataNmvrs"] = strata.nmvrs.toString()
                 info.metadata["CORLAstrataNcards"] = strata.ballotCardCount.toString()
                 info.metadata["CORLAsample"] = mcontest.nsamples.toString()
                 info.metadata["CORLAauditReason"] = mcontest.auditReason.toString()

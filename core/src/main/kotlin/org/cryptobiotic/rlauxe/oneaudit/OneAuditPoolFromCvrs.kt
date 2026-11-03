@@ -16,6 +16,7 @@ private val logger = KotlinLogging.logger("OneAuditPoolFromCvrs")
 // build pool from CVRs
 // used in makeOneAuditTestContests
 data class OneAuditPoolFromCvrs(
+    val county: String,
     override val poolName: String,
     override val poolId: Int,
     val hasExactContests: Boolean,
@@ -25,6 +26,7 @@ data class OneAuditPoolFromCvrs(
     val contestTabs = mutableMapOf<Int, ContestTabulation>()  // contestId -> ContestTabulation
     var totalCards = 0
 
+    override fun county() = county
     override fun name() = poolName
     override fun id() = poolId
     override fun hasExactContests() = hasExactContests
@@ -115,6 +117,7 @@ data class OneAuditPoolFromCvrs(
 
     fun toOneAuditPool(): CardPool {
         return CardPool(
+            this.county,
             this.poolName,
             this.poolId,
             this.hasExactContests,

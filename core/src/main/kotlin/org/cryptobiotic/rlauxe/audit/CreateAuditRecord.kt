@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.bin.writeFastSamplingCards
+import org.cryptobiotic.rlauxe.persist.csv.AddStyles
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditCreationConfigJsonFile
@@ -39,9 +40,8 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String,
         } else {
             sortManifestExternal(externalSortDir, publisher, config.creation.seed)
         }
-        // TODO styles cant be optional; all styles must be in styleMap when reading (no fromCvr or phantoms)
-        if (fastSampling && election.cardStyles() != null) {
-            makeFastCards(publisher, election.cardStyles()!!)
+        if (fastSampling) {
+            makeFastCards(publisher, election.cardStyles())
         }
 
         // save Mvrs for testing and diagnostics
@@ -58,7 +58,7 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String,
                     val unsortedCards = election.unsortedMvrsExternal()
                     if (unsortedCards != null && externalSortDir != null) {
                         // TODO we are doing two external sorts, one for cvrs and one for mvrs. seems wasteful
-                        writeSortedCardsExternal(
+                        externalSortAndWrite(
                             externalSortDir,
                             publisher.sortedMvrsFile(),
                             unsortedCards,
@@ -83,7 +83,7 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String,
 
 // assumes that the CardManifest has already been written
 fun sortManifestInternal(publisher: Publisher, seed: Long) {
-    val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile(), styles=null)
+    val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile()) { it }
     val sortedCards = createSortedCardsInternal(unsortedCards, seed)
     val countCards = writeCardCsvFile(Closer(sortedCards.iterator()), publisher.sortedCardsFile())
     // createZipFile(publisher.sortedCardsFile(), delete = true)
@@ -105,21 +105,21 @@ fun createSortedCardsInternal(unsortedCards: CloseableIterator<AuditableCard>, s
 
 // assumes that the CardManifest has already been written
 fun sortManifestExternal(topdir: String, publisher: Publisher, seed: Long) {
-    val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile(), styles=null)
-    writeSortedCardsExternal(topdir, publisher.sortedCardsFile(), unsortedCards, seed)
+    val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile()) { it } // no transform needed
+    externalSortAndWrite(topdir, publisher.sortedCardsFile(), unsortedCards, seed)
 }
 
 fun makeFastCards(publisher: Publisher, styles: List<StyleIF>): Int {
     val stopwatch = Stopwatch()
 
     // copy sortedCards csv to sortedCards proto file for better performance
-    val sortedCards = readCardsCsvIterator(publisher.sortedCardsFile(), styles)
+    val sortedCards = readCardsCsvIterator(publisher.sortedCardsFile(), AddStyles(styles))
     writeProtoCards(sortedCards, publisher.sortedCardsProtoFile())
 
-    // extract some info from sorted proto cards for a super compact "samplingCards" binary file
+    // extract info from sorted proto cards for a super compact "samplingCards" binary file
     val bufferSize = 100_000
-    val protoIter = ProtoCardIterator(publisher.sortedCardsProtoFile(), bufferSize, styles)  // dont actually need styles i think
-    val ncards = writeFastSamplingCards(protoIter, publisher.fastSamplingFile())
+    val protoIter = ProtoCardIterator(publisher.sortedCardsProtoFile(), bufferSize, styles)
+    val ncards = writeFastSamplingCards(protoIter, styles, publisher.fastSamplingFile())
 
     logger.info{"makeFastCards ${ncards} took ${stopwatch}"}
     return ncards
@@ -134,7 +134,7 @@ fun transformSortedCvrsToMvrs(publisher: Publisher, transform: ((AuditableCard) 
     return countCards
 }
 
-fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCard>, seed: Long) {
+fun externalSortAndWrite(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCard>, seed: Long) {
     val sorter = SortMerge<AuditableCard>("$topdir/sortChunks", outputFile = outputFile, seed = seed)
     sorter.run(
         cardIter = unsortedCards,

@@ -4,10 +4,12 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.makeFastCards
+import org.cryptobiotic.rlauxe.estimate.COUNTY
 import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -18,39 +20,58 @@ import kotlin.test.assertEquals
 
 // dont run in tests
 class TestFastSamplingCards {
-    val testFastSamplFile = "$testdataDir/temp/fastSampling.bin"
+    val topdir = "${cases}/corla/2020/"
+
+    val testFastSamplingFile = "$testdataDir/fastSampling.bin"
+    val testFastSamplingFile1 = "$testdataDir/fastSampling1.bin"
+    val testFastSamplingFile2 = "$testdataDir/fastSampling2.bin"
 
     @Test
     fun writeSamplingCards() {
-        val topdir = "${testdataDir}/cases/corla/consistent"
-        val publisher = Publisher("$topdir")
-
         val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)
-        val styles = mvrManager.styles()!! // TODO maybe not optional ?
+        val styles = mvrManager.styles()
         val cardManifest = countyAudit.readSortedManifest(styles)
 
-        val cardIter = cardManifest.cardIterable.iterator()
+        var cardIter = cardManifest.cardIterable.iterator()
 
         val stopwatch = Stopwatch()
-        val ncards = writeFastSamplingCards(cardIter, testFastSamplFile)
+        val ncards = writeFastSamplingCards(cardIter, styles, testFastSamplingFile)
         cardIter.close()
 
         println("writeSamplingCards ncards = $ncards, took $stopwatch")
+
+        stopwatch.start()
+        var count = 0
+        cardIter = cardManifest.cardIterable.iterator()
+
+        val fastIter = FastSamplingCardIterator(testFastSamplingFile, styles, 100_000)
+        while (fastIter.hasNext() && cardIter.hasNext()) { //  && ncards < 1000_000) {
+            val card = cardIter.next()
+            val fastCard: FastSamplingCard = fastIter.next()
+            assertEquals(card.style(), fastCard.style)
+            assertEquals(card.prn(), fastCard.prn)
+            count++
+        }
+        assertEquals(ncards, count)
+        fastIter.close()
+        cardIter.close()
+
+        println("read and check FastSamplingCard ncards = $count, took $stopwatch")
     }
 
     @Test
     fun testPhantomCards() {
         val votes = mapOf( 42 to intArrayOf() )
 
-        val phantomCard = AuditableCard.fromVotes(id = "testing123", location = null, index = 0, prn = 666L, phantom = true,
+        val phantomCard = AuditableCard.fromVotes(id = "testing123", COUNTY, location = "", index = 0, prn = 666L, phantom = true,
             styleId=CardStyle.phantomStyle.id, poolId = null, votes=votes).setStyle(CardStyle.phantomStyle)
         val cards = listOf(phantomCard)
 
         val stopwatch = Stopwatch()
-        val ncards = writeFastSamplingCards(Closer(cards.iterator()), testFastSamplFile)
+        val ncards = writeFastSamplingCards(Closer(cards.iterator()), emptyList(), testFastSamplingFile1)
 
-        val cardIter = FastSamplingCardIterator(testFastSamplFile, emptyList<StyleIF>(), 100)
+        val cardIter = FastSamplingCardIterator(testFastSamplingFile1, emptyList<StyleIF>(), 100)
         while (cardIter.hasNext()) { //  && ncards < 1000_000) {
             val card = cardIter.next()
             println(card)
@@ -61,15 +82,13 @@ class TestFastSamplingCards {
 
     @Test
     fun readSamplingCards() {
-        val topdir = "$cases/corla/corla2020/sim"
         val publisher = Publisher(topdir)
 
         val countyAudit = AuditRecord.read(topdir) as CountyAuditRecord
         val mvrManager = PersistedMvrManager(countyAudit)
-        val styles = mvrManager.styles()!! // TODO maybe not optional ?
+        val styles = mvrManager.styles()
 
         val stopwatch = Stopwatch()
-
         var ncards = 0
         val cardIter = FastSamplingCardIterator(publisher.fastSamplingFile(), styles, 100_000)
         while (cardIter.hasNext()) { //  && ncards < 1000_000) {
@@ -81,17 +100,62 @@ class TestFastSamplingCards {
         println("readSamplingCards ncards = $ncards, took $stopwatch")
     }
 
-    // @Test
+    @Test
     fun testMakeFastCards() {
-        val topdir = "${testdataDir}/cases/sf2024/oa"
         val auditRecord = AuditRecord.read(topdir) as AuditRecord
         val mvrManager = PersistedMvrManager(auditRecord)
-        val styles = mvrManager.styles()!!
+        val styles = mvrManager.styles()
+
+        val stopwatch = Stopwatch()
+        val publisher = Publisher(topdir)
+        val bufferSize = 100_000
+        var protoIter = ProtoCardIterator(publisher.sortedCardsProtoFile(), bufferSize, styles)
+        val ncards = writeFastSamplingCards(protoIter, styles, testFastSamplingFile2)
+
+        println("testMakeFastCards ncards = $ncards that took $stopwatch= ${stopwatch.elapsed(TimeUnit.MILLISECONDS)/ncards.toDouble()} ms/card")
+
+        var count = 0
+        val fastIter = FastSamplingCardIterator(testFastSamplingFile2, styles, 100_000)
+        protoIter = ProtoCardIterator(publisher.sortedCardsProtoFile(), bufferSize, styles)
+        while (fastIter.hasNext() && protoIter.hasNext()) { //  && ncards < 1000_000) {
+            val card = protoIter.next()
+            val fastCard: FastSamplingCard = fastIter.next()
+            assertEquals(card.style(), fastCard.style)
+            assertEquals(card.prn(), fastCard.prn)
+            count++
+        }
+        assertEquals(ncards, count)
+        protoIter.close()
+        fastIter.close()
+
+        println("read and check FastSamplingCard ncards = $count, took $stopwatch")
+    }
+
+    // @Test
+    fun remakeFastCards() {
+        val auditRecord = AuditRecord.read(topdir) as AuditRecord
+        val mvrManager = PersistedMvrManager(auditRecord)
+        val styles = mvrManager.styles()
 
         val stopwatch = Stopwatch()
         val publisher = Publisher(topdir)
         val ncards = makeFastCards(publisher, styles)
-        println("ncards = $ncards that took $stopwatch= ${stopwatch.elapsed(TimeUnit.MILLISECONDS)/ncards.toDouble()} ms/card")
+        println("remakeFastCards ncards = $ncards that took $stopwatch= ${stopwatch.elapsed(TimeUnit.MILLISECONDS)/ncards.toDouble()} ms/card")
 
+        var count = 0
+        val fastIter = FastSamplingCardIterator(publisher.fastSamplingFile(), styles, 100_000)
+        val protoIter = ProtoCardIterator(publisher.sortedCardsProtoFile(), 100_00, styles)
+        while (fastIter.hasNext() && protoIter.hasNext()) { //  && ncards < 1000_000) {
+            val card = protoIter.next()
+            val fastCard: FastSamplingCard = fastIter.next()
+            assertEquals(card.style(), fastCard.style)
+            assertEquals(card.prn(), fastCard.prn)
+            count++
+        }
+        assertEquals(ncards, count)
+        protoIter.close()
+        fastIter.close()
+
+        println("read and check remade ccards took $stopwatch")
     }
 }

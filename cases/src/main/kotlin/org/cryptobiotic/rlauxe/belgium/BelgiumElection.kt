@@ -26,33 +26,28 @@ class BelgiumElection (
 
     val infoMap: Map<Int, ContestInfo>
     val contestsUA: List<ContestWithAssertions>
-    val allCvrs: List<Cvr>
+    val allCards: List<AuditableCard>
 
     init {
         val contestUA = ContestWithAssertions(contestd, isClca=true, hasStyle=true).addAssertionsFromAssorters(contestd.assorters)
         contestsUA = listOf(contestUA)
         infoMap = contestsUA.associate { it.id to it.contest.info() }
-        allCvrs = contestd.createSimulatedCvrs()
+        allCards = contestd.createSimulatedCards()
     }
 
     override fun electionInfo() = ElectionInfo(contestd.name, AuditType.CLCA, ncards(), contestsUA.size,
         cvrsContainUndervotes = true, mvrSource = mvrSource)
-    override fun cardStyles() = infoMap.values.map { CardStyle(it.name, it.id, intArrayOf(it.id), true)} // dont really need I think
+    override fun cardStyles() = infoMap.values.map { CardStyle(contestd.name, it.name, it.id, intArrayOf(it.id), true)}
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun cards() = createCards()
-    override fun ncards() = allCvrs.size
+    override fun ncards() = allCards.size
 
-    override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, null)
+    override fun unsortedMvrsInternal() = allCards // TODO merge styles ??
     override fun unsortedMvrsExternal() = null
 
     fun createCards(): CloseableIterator<AuditableCard> {
-        return CvrsToCardStylesIterator(
-            AuditType.CLCA,
-            Closer(allCvrs.iterator()),
-            makePhantomCvrs(contestsUA().map { it.contest }),
-            cardStyles(),
-        )
+        return MergeStylesIntoCards(allCards, cardStyles()).iterator()
     }
 }
 
@@ -81,7 +76,7 @@ fun createBelgiumElectionForOneContest(
 
 // create one contest and optionally run all rounds
 // return ntotalVotes from Json and finalRound.nmvrs
-fun createOneContestFromJson(electionName: String,
+fun createOneContestFromJson(county: String,
                              belgiumElectionJson: BelgiumElectionJson,
                              partyIds: Map<String, Int>,
                              toptopdir: String,
@@ -92,12 +87,12 @@ fun createOneContestFromJson(electionName: String,
                              clear: Boolean = true,
 ): Pair<Int, Int> {
     println("\n======================================================")
-    println("electionName $electionName")
+    println("electionName $county")
 
-    val topdir = "$toptopdir/$electionName"
+    val topdir = "$toptopdir/$county"
     if (clear) clearDirectory(Path(topdir))
     Logging.addFileAppender("cases", "$topdir/logs.log")
-    logger.info {"-------------- createBelgiumElection ${electionName} in $topdir"}
+    logger.info {"-------------- createBelgiumElection ${county} in $topdir"}
     validateOutputDir(Path.of(toptopdir))
 
     val nwinners = belgiumElectionJson.ElectionLists.sumOf { it.NrOfSeats }
@@ -112,7 +107,7 @@ fun createOneContestFromJson(electionName: String,
         )
     }
 
-    val dcontest = makeDhondtContest(electionName, contestId, dhondtParties, nwinners, totalVotes, belgiumElectionJson.NrOfBlankVotes,.05)
+    val dcontest = makeDhondtContest(county, contestId, dhondtParties, nwinners, totalVotes, belgiumElectionJson.NrOfBlankVotes,.05)
 
     val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05)
     val round = AuditRoundConfig(
@@ -143,20 +138,20 @@ fun createOneContestFromJson(electionName: String,
     Logging.removeFileAppender("cases")
 
     return if (finalRound != null) {
-        println("$electionName: ${finalRound.show()}")
+        println("$county: ${finalRound.show()}")
         Pair(totalVotes, finalRound.nmvrs)
     } else Pair(0, 0)
 }
 
-fun createOneContestFromInputs(year: Int, electionName: String, toptopdir: String, contestId: Int): Pair<Int, Int> {
+fun createOneContestFromInputs(year: Int, county: String, toptopdir: String, contestId: Int): Pair<Int, Int> {
     val inputs = belgiumInput(year)
-    val resourcePath = inputs.contests[electionName]!!
+    val resourcePath = inputs.contests[county]!!
     val partyIds = readPartyTxtResource(inputs.parties) // includes aliases
 
     val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumJsonFromResourcePath(resourcePath)
     val belgiumElectionJson = if (result.isOk) result.unwrap() else throw RuntimeException("$result")
 
-    return createOneContestFromJson(electionName, belgiumElectionJson, partyIds, toptopdir,
+    return createOneContestFromJson(county, belgiumElectionJson, partyIds, toptopdir,
         contestId = contestId, runRounds=false)
 }
 

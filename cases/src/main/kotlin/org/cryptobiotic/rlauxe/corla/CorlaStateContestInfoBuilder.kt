@@ -45,7 +45,7 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
                 else -> computeStrataMinRate(mcontest.contestName, mcontest.counties, countyMap)
             } // strata.nmvrs is calculated from the "min rate" algorithm, or for single county, the count of mvrs in the county from comparison file
 
-            info.metadata["CORLAhaveMvrs"] = strata.nmvrs.toString()
+            info.metadata["StrataNmvrs"] = strata.nmvrs.toString()
             info.metadata["CORLAstrataNcards"] = strata.ballotCardCount.toString()
             info.metadata["CORLAballotCardCount"] = mcontest.corlaPop.toString()
             info.metadata["CORLAcontestBallotCardCount"] = mcontest.nc.toString()

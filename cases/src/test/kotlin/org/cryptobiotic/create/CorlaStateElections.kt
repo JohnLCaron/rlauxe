@@ -7,6 +7,8 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.Sampling
 import org.cryptobiotic.rlauxe.audit.SimulationControl
+import org.cryptobiotic.rlauxe.cli.RunRlaRoundCli
+import org.cryptobiotic.rlauxe.cli.StartAuditFirstRoundCli
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
@@ -29,7 +31,7 @@ class CorlaStateElections {
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .04),
             roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.OnePool,
-            alreadyMadeCounties = true,
+            alreadyMadeCounties = false,
         )
     }
 
@@ -43,7 +45,25 @@ class CorlaStateElections {
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .04),
             roundConfig = corlaRoundSettings(),
             variant = ElectionVariantEnum.OnePool,
-            alreadyMadeCounties = true,
+            alreadyMadeCounties = false,
+        )
+    }
+
+    @Test
+    fun startRound() {
+        StartAuditFirstRoundCli.main(
+            arrayOf(
+                "-in", top2020dir,
+            )
+        )
+    }
+
+    @Test
+    fun runRound() {
+        RunRlaRoundCli.main(
+            arrayOf(
+                "-in", top2020dir,
+            )
         )
     }
 

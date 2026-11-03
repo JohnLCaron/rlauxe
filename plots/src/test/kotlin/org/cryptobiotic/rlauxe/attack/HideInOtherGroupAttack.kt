@@ -139,8 +139,8 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         }
         // now change the groups in the cardManifest
         val cardStyles = listOf(
-            CardStyle("group1",  1,intArrayOf(1,2), hasStyle),
-            CardStyle("group2", 2, intArrayOf(2), hasStyle),
+            CardStyle(COUNTY, "group1",  1,intArrayOf(1,2), hasStyle),
+            CardStyle(COUNTY, "group2", 2, intArrayOf(2), hasStyle),
         )
         val modifiedCards = mutableListOf<AuditableCard>()
         val cardAttacker = CardsWithStylesAttack(AuditType.CLCA, cards=Closer(cardsu.iterator()), styles=cardStyles, wantFlips=diff+1)
@@ -236,7 +236,7 @@ class CardsWithStylesAttack(
         val contests = style.possibleContests()
         val votes = if (hasCvr) org.votes() else null
 
-        return AuditableCard.fromVotes(org.id(), org.location(), cardIndex++, 0, phantom=org.phantom(),
+        return AuditableCard.fromVotes(org.id(), COUNTY, org.location(), cardIndex++, 0, phantom=org.phantom(),
             poolId=org.poolId(),
             votes=votes,
             styleId=org.styleId,

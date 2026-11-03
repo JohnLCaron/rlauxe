@@ -100,7 +100,7 @@ class TestAssertions {
         val firstAssertion = assertions.first()
         assertEquals(firstAssertion, firstAssertion)
         assertEquals(firstAssertion.hashCode(), firstAssertion.hashCode())
-        assertEquals("'AvB' (0) AboveThreshold for 'E' (4): reportedMargin=14.2857%  dilutedMargin=14.2857% noerror=53.0303% g= [-0.4 .. 0.6] h = [0.0 .. 1.25]", firstAssertion.toString())
+        assertEquals("'AvB' (0) AT 'E' (4): reportedMargin=14.2857%  dilutedMargin=14.2857% noerror=53.0303% g= [-0.4 .. 0.6] h = [0.0 .. 1.25]", firstAssertion.toString())
     }
 
     @Test

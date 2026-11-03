@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
+import org.cryptobiotic.rlauxe.audit.COUNTY
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -58,7 +59,7 @@ class TestCountyCardPoolCsv {
             candVotes,
             undervotes = undervotes, phantoms = phantoms, voteForNs = voteForNs
         )
-        val style = CardStyle(99, setOf(0, 1, 2), true)
+        val style = CardStyle(COUNTY, 99, setOf(0, 1, 2), true)
 
         val myinfos = contests.associate { Pair(it.id, it.info) }
         val tabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), myinfos)

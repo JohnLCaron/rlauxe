@@ -60,11 +60,11 @@ data class CompositeAuditRecord(
 
     override fun name() = electionName
 
-    override fun readSortedManifest(styles: List<StyleIF>?): SortedManifest {
+    override fun readSortedManifest(styles: List<StyleIF>): SortedManifest {
         return componentRecords.first().readSortedManifest(styles)
     }
 
-    override fun readSamplingCards(styles: List<StyleIF>?): CloseableIterable<SamplingCardIF>? = null
+    override fun readSamplingCards(styles: List<StyleIF>): CloseableIterable<SamplingCardIF>? = null
 
     override fun readOneShotMvrs() = emptyMap<Int, Int>()
 

@@ -160,8 +160,8 @@ class TestHasStyles {
         )
 
         val pools = listOf(
-            CardPool("poolB", 1, true,tabsB, totalCards = 9 * contestB.Nc/10),
-            CardPool("poolBS", 2, true,tabsBS, totalCards = contestS.Nc),
+            CardPool(COUNTY, "poolB", 1, true,tabsB, totalCards = 9 * contestB.Nc/10),
+            CardPool(COUNTY, "poolBS", 2, true,tabsBS, totalCards = contestS.Nc),
         )
 
         val testData = MultiContestCombinePools(contest3s, 2 * contestB.Nc, pools)
@@ -196,8 +196,8 @@ class TestHasStyles {
         )
 
         val pools = listOf(
-            CardPool("poolBS", 2, false,tabsBS, totalCards = contestB.Nc),
-            CardPool("poolBT", 3, false,tabsBT, totalCards = contestB.Nc)
+            CardPool(COUNTY, "poolBS", 2, false,tabsBS, totalCards = contestB.Nc),
+            CardPool(COUNTY, "poolBT", 3, false,tabsBT, totalCards = contestB.Nc)
         )
 
         // TODO can we consolidate all 4 cases into using MultiContestCombinePools ??
@@ -263,11 +263,11 @@ class TestHasStyles {
         val contests = listOf(contestB, contestS3, contestT3)
         val acontests = listOf(contestB, contestS3)
 
-        val card1 = CardStyle("card1", 1, intArrayOf(1), true)
-        val card2 = CardStyle("card2", 2, intArrayOf(2), true)
-        val card3 = CardStyle("card3", 3, intArrayOf(3), true)
-        val ballot12 = BallotStyle("batch1", 4, false, listOf(card1, card2), N/2)
-        val ballot13 = BallotStyle("batch2", 5, false, listOf(card1, card3), N/2)
+        val card1 = CardStyle(COUNTY, "card1", 1, intArrayOf(1), true)
+        val card2 = CardStyle(COUNTY, "card2", 2, intArrayOf(2), true)
+        val card3 = CardStyle(COUNTY, "card3", 3, intArrayOf(3), true)
+        val ballot12 = BallotStyle(COUNTY, "batch1", 4, false, listOf(card1, card2), N/2)
+        val ballot13 = BallotStyle(COUNTY, "batch2", 5, false, listOf(card1, card3), N/2)
 
         val testData = MultiContestFromBallotStyles(contests, listOf(ballot12, ballot13), csd)
         val (testCards, batches) = testData.makeCardsFromContests()
@@ -301,15 +301,15 @@ class TestHasStyles {
         )
 
         val pools = listOf(
-            CardPool("poolBS", 2, false,tabsBS, totalCards = contestB.Nc),
-            CardPool("poolBT", 3, false,tabsBT, totalCards = contestB.Nc)
+            CardPool(COUNTY, "poolBS", 2, false,tabsBS, totalCards = contestB.Nc),
+            CardPool(COUNTY, "poolBT", 3, false,tabsBT, totalCards = contestB.Nc)
         )
 
         val testData = MultiContestCombinePools(contest3s, 2 * contestB.Nc, pools)
         val (testCards, batches) = testData.makeCardsFromContests()
 
         // now fix the batches
-        val all = CardStyle("all", 1, intArrayOf(1,2,3), false)
+        val all = CardStyle(COUNTY, "all", 1, intArrayOf(1,2,3), false)
 
         val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
             Closer( testCards.iterator())) { card:AuditableCard ->

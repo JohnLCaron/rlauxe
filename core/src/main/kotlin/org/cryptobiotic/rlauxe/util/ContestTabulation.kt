@@ -343,6 +343,7 @@ class CardTabulation(cards: CloseableIterator<AuditableCard>, infos: Map<Int, Co
             while (cardIter.hasNext()) {
                 val card = cardIter.next()
                 cvrCount++
+                // TODO this should be using hasContest() ??
                 card.contestIds.forEach { contestId ->
                     val info = infos[contestId]
                     if (info != null) {

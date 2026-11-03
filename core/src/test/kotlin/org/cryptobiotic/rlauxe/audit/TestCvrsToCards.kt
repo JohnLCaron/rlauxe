@@ -35,7 +35,7 @@ class TestCvrsToCards {
         card = target.first()
         testOneTarget("clca hasStyle and poolIds", cvr, card, auditType, hasCardStyles, CardStyle.fromCvrStyle.id)
 
-        val cardStyle = CardStyle("you", 1, intArrayOf(0,1,2,3,4), false)
+        val cardStyle = CardStyle(COUNTY, "you", 1, intArrayOf(0,1,2,3,4), false)
         // doesnt make sense to use; hasStyle means use cvr
         hasCardStyles = true
         cvr = cvrr.copy(poolId=1)
@@ -79,7 +79,7 @@ class TestCvrsToCards {
         }.message!!
         assertEquals("card with style fromCvr or phantom must have non-null votes", message)
 
-        val batch = CardStyle("cardstyle1", 1,intArrayOf(0,1,2,3,4), false)
+        val batch = CardStyle(COUNTY, "cardstyle1", 1,intArrayOf(0,1,2,3,4), false)
 
         // what happens if the poolId doesnt match ??
         cvr = cvrr.copy(poolId=2) // poolId doesnt match
@@ -205,7 +205,7 @@ fun mvrsToAuditableCardsTestM(
 
         AuditableCard.fromVotes(
             org.id,
-            null,
+            COUNTY, "",
             cardIndex++,
             prng?.next() ?: 0,
             phantom = org.phantom,

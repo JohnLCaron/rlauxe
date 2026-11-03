@@ -176,11 +176,11 @@ data class CvrRow(
     }
 
     //// use CorlaCvrConverter when mapping to corla canonical contests
-    fun convertToCard(): AuditableCard {
+    fun convertToCard(county: String): AuditableCard {
         val votes = this.contestVotes.map { cv -> Pair(cv.contestId, cv.votedFor.toIntArray()) }.toMap()
 
         // TODO location
-        return AuditableCard.fromVotes(this.imprintedId, null, 0, 0L, false, styleId = CardStyle.fromCvrStyle.id(),
+        return AuditableCard.fromVotes(this.imprintedId, county, "", 0, 0L, false, styleId = CardStyle.fromCvrStyle.id(),
             votes=votes, poolId=null).setStyle(CardStyle.fromCvrStyle)
     }
 

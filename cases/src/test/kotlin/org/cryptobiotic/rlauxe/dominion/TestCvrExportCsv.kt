@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.estimate.COUNTY
 import org.cryptobiotic.rlauxe.util.createZipFile
 import kotlin.io.path.createTempFile
 
@@ -64,7 +65,7 @@ class TestCvrExportCsv {
         val card = cvr.toAuditableCard(42, 43L, true, mapOf("test1-2" to 99))
 
         val target = AuditableCard.fromVotes (
-            "test1-2-3", null,
+            "test1-2-3", COUNTY, "",
             42,
             43L,
             true,
@@ -88,7 +89,7 @@ class TestCvrExportCsv {
         val card = cvr.toAuditableCard(42, 43L, true, mapOf("test1-2" to 99), showPoolVotes=true)
 
         val target = AuditableCard.fromVotes (
-            "test1-2-3", null,
+            "test1-2-3", COUNTY, "",
             42,
             43L,
             true,

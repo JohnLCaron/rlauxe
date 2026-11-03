@@ -16,6 +16,7 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 
 // multicard ballot
 data class BallotStyle(
+    val county: String,
     val name: String,
     val id: Int,
     val hasExactContests: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
@@ -26,6 +27,7 @@ data class BallotStyle(
     init {
         cardStyles.forEach { cs -> cs.possibleContests.forEach { contests.add(it) } }
     }
+    override fun county() = county
     override fun name() = name
     override fun id() = id
     override fun hasExactContests() = hasExactContests
@@ -41,6 +43,7 @@ data class BallotPool(
     val contestTabs: Map<Int, ContestTabulation>,  // all contests
     val nballots: Int,
 ): CardPoolIF {
+    override fun county() = ballotStyle.county
     override fun name() = ballotStyle.name
     override fun id() = ballotStyle.id
     override fun hasExactContests() = ballotStyle.hasExactContests
@@ -56,9 +59,8 @@ data class BallotPool(
 
     init {
         cardPools = ballotStyle.cardStyles.map { cardStyle ->
-            val infos = cardStyle.possibleContests.associate { it to infos[it]!! }
             val tabs = cardStyle.possibleContests.associate { it to contestTabs[it]!! }
-            CardPool(
+            CardPool( ballotStyle.county,
                 cardStyle.name, cardStyle.id, cardStyle.hasExactContests,
                 tabs, totalCards = ballotStyle.nballots
             )

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
+import org.cryptobiotic.rlauxe.audit.COUNTY
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -23,7 +24,7 @@ class TestCardPoolCsv {
 
         val target = listOf(regPool, irvPool, regPool, irvPool, )
 
-        val csvFile = "$testdataDir/tests/scratch/cardPoolCsvFile.csv"
+        val csvFile = "$testdataDir/cardPoolCsvFile.csv"
         writeCardPoolCsvFile(target, csvFile)
 
         val roundtrip = readCardPoolCsvFile(csvFile,  infos)
@@ -69,7 +70,7 @@ class TestCardPoolCsv {
         //
         //    val contestTabs = mutableMapOf<Int, ContestTabulation>()  // contestId -> ContestTabulation
         //    var totalCards = 0
-        val pool = OneAuditPoolFromCvrs("testRegVotes", 1, true, infos)
+        val pool = OneAuditPoolFromCvrs(COUNTY, "testRegVotes", 1, true, infos)
         pool.totalCards = 42
         pool.contestTabs.putAll(tabs)
         return pool.toOneAuditPool()
@@ -95,7 +96,7 @@ class TestCardPoolCsv {
         infos.putAll(myinfos)
 
         val tabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infos)
-        val pool = OneAuditPoolFromCvrs("testIrvVotes", 2, true, infos)
+        val pool = OneAuditPoolFromCvrs( COUNTY, "testIrvVotes", 2, true, infos)
         pool.totalCards = 99
         pool.contestTabs.putAll(tabs)
 

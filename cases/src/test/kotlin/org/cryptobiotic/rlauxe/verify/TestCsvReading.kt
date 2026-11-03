@@ -18,11 +18,11 @@ class TestCsvReading {
     @Test
     fun testAuditableCardCsvFile() {
         val filenameIn = "$testdataDir/cases/sf2024/oa/$auditdir/sortedCards.csv"
-        val original = readCardsAndMergeToList(filenameIn, null)
+        val original = readCardsAndMergeToList(filenameIn, emptyList())
         val filenameOut = "$tempDir/sfCards.csv"
 
         writeCardCsvFile(original, filenameOut)
-        val roundtrip = readCardsAndMergeToList(filenameOut, null)
+        val roundtrip = readCardsAndMergeToList(filenameOut, emptyList())
         assertEquals(original, roundtrip)
     }
 

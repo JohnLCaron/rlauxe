@@ -32,13 +32,13 @@ class TestAdjustableCardPool {
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
         val cvrTabs = tabulateCvrs(cvrs.iterator(), infos)
 
-        val cardPoolMinVotes = CardPoolBuilder.fromMinVotesNeeded("pool42", 42, false, infos, cvrTabs)
+        val cardPoolMinVotes = CardPoolBuilder.fromMinVotesNeeded(COUNTY,"pool42", 42, false, infos, cvrTabs)
         println(cardPoolMinVotes)
 
         assertEquals(cardPoolMinVotes, cardPoolMinVotes)
         assertEquals(cardPoolMinVotes.hashCode(), cardPoolMinVotes.hashCode())
 
-        val cardPoolMinCards = CardPoolBuilder.fromMinVotesNeeded("pool42", 42, false, infos, cvrTabs)
+        val cardPoolMinCards = CardPoolBuilder.fromMinVotesNeeded(COUNTY,"pool42", 42, false, infos, cvrTabs)
         println(cardPoolMinCards)
 
         val cardPool1 = cardPoolMinVotes.build()

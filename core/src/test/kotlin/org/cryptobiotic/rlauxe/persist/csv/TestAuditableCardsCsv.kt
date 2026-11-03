@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.COUNTY
 import org.cryptobiotic.rlauxe.util.createZipFile
 
 class TestAuditableCardsCsv {
@@ -11,8 +12,9 @@ class TestAuditableCardsCsv {
     @Test
     fun testRoundtrip() {
         val target = AuditableCard.fromVotes (
-            "id to find card",
-            "location to find card",
+            "id",
+            COUNTY,
+            "location",
             42,
             43L,
             true,
@@ -33,6 +35,7 @@ class TestAuditableCardsCsv {
     fun testRoundtripNoVotes() {
         val target = AuditableCard.fromVotes (
             "deets",
+            COUNTY,
             "dots",
             42,
             43L,
@@ -53,21 +56,21 @@ class TestAuditableCardsCsv {
     @Test
     fun testRoundtripIO() {
         val target = listOf(
-            AuditableCard.fromVotes ("deets", "dots", 42, 43L, false, styleId=678, votes=null, null),
-            AuditableCard.fromVotes ("deeks","docs",  42, 43L, false, styleId=678, votes=null, null),
-            AuditableCard.fromVotes ("id", "info to find card", 42, 43L, true,
+            AuditableCard.fromVotes ( COUNTY, "deets", "dots", 42, 43L, false, styleId=678, votes=null, null),
+            AuditableCard.fromVotes (COUNTY, "deeks","docs",  42, 43L, false, styleId=678, votes=null, null),
+            AuditableCard.fromVotes (COUNTY, "id", "info to find card", 42, 43L, true,
                 votes=mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), poolId=11, styleId=678),
-            AuditableCard.fromVotes ("id1", "info2 to find card", 42, 43L, true,
+            AuditableCard.fromVotes (COUNTY, "id1", "info2 to find card", 42, 43L, true,
                 votes=mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), poolId=null, styleId=678),
         )
 
         val scratchFile = kotlin.io.path.createTempFile().toFile()
         writeCardCsvFile(target, scratchFile.toString())
 
-        val roundtrip = readCardsAndMergeToList(scratchFile.toString(), null)
+        val roundtrip = readCardsAndMergeToList(scratchFile.toString(), emptyList())
         assertEquals(target, roundtrip)
 
-        readCardsCsvIterator(scratchFile.toString(), null).use { cardIter ->
+        readCardsCsvIterator(scratchFile.toString()) { it} .use { cardIter ->
             var count = 0
             while (cardIter.hasNext()) {
                 val roundtrip = cardIter.next()
@@ -77,7 +80,7 @@ class TestAuditableCardsCsv {
         }
 
         val zipFile = createZipFile(scratchFile.toString(), delete = true)
-        readCardsCsvIterator(zipFile.toString(), null).use { cardIter ->
+        readCardsCsvIterator(zipFile.toString()){it}.use { cardIter ->
             var count = 0
             while (cardIter.hasNext()) {
                 val roundtrip = cardIter.next()

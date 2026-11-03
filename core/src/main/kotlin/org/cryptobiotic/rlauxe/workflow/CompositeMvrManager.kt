@@ -23,7 +23,7 @@ open class CompositeMvrManager(
 
     val publisher = Publisher(auditRecord.componentRecords.first().topdir)
 
-    override fun styles(): List<StyleIF>? {
+    override fun styles(): List<StyleIF> {
         return readBatchesComposite(publisher)
     }
 
@@ -43,9 +43,10 @@ open class CompositeMvrManager(
         return readPoolsComposite(publisher)
     }
 
-    private fun readBatchesComposite(publisher: Publisher): List<StyleIF>? {
-        return if (!Files.exists(Path(publisher.cardStylesFile()))) null else
+    private fun readBatchesComposite(publisher: Publisher): List<StyleIF> {
+        return if (Files.exists(Path(publisher.cardStylesFile())))
             readCardStylesJsonFileUnwrapped(publisher.cardStylesFile())
+        else throw RuntimeException("${publisher.cardStylesFile()} does not exist")
     }
 
     private fun readPoolsComposite(publisher: Publisher): List<CardPool>? {

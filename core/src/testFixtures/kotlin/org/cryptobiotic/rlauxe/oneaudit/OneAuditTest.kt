@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsList
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.estimate.COUNTY
 import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePoolV
 import org.cryptobiotic.rlauxe.util.*
@@ -107,7 +108,7 @@ fun makeOneAuditTest(
         )
     pool.adjustCards = poolUnderVotes */
 
-    val poolb = CardPoolBuilder.fromMinVotesNeeded("pool42", 42, /* poolId */ hasExactContests = false, infos = infos,
+    val poolb = CardPoolBuilder.fromMinVotesNeeded(COUNTY, "pool42", 42, /* poolId */ hasExactContests = false, infos = infos,
         contestTabs = mapOf(1 to ContestTabulation(info1, votesNoCvr, ncards=noCvrSize)),
         )
     poolb.adjustCards = poolUnderVotes
@@ -188,7 +189,7 @@ fun makeMvrs(
 private fun makeCardManifest2(infos: Map<Int, ContestInfo>, mvrs: List<Cvr>, pool: CardPool): List<AuditableCard> {
     // the union of the first two styles
     val expandedContestIds = infos.keys.toList().toIntArray()
-    val expanded = CardStyle("expanded", 42, expandedContestIds, false)
+    val expanded = CardStyle(COUNTY, "expanded", 42, expandedContestIds, false)
 
     // make the cards with the expanded card style
     return mvrsToAuditableCardsList(mvrs, listOf(expanded))
@@ -225,7 +226,7 @@ fun calcOneAuditPoolsFromMvrs(
 
     // The styles have the name, poolId, and contest list
     val poolsFromCvrs = populations.map { style ->
-        val poolFromCvr = OneAuditPoolFromCvrs(style.name(), style.id(), style.hasExactContests(), infos)
+        val poolFromCvr = OneAuditPoolFromCvrs(COUNTY, style.name(), style.id(), style.hasExactContests(), infos)
         style.possibleContests().forEach { poolFromCvr.contestTabs[it]  = ContestTabulation( infos[it]!!) }
         poolFromCvr
     }.associateBy { it.poolId }
@@ -246,6 +247,7 @@ class CardPoolTest(
     val hasExactContests: Boolean,
     val totalCards: Int,
 ): CardPoolIF, StyleIF {
+    override fun county() = COUNTY
     override fun name() = poolName
     override fun id() = poolId
     override fun hasExactContests() = hasExactContests

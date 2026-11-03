@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariant
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
-import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.RedactedGroup
 import org.cryptobiotic.rlauxe.corlacvr.RedactionIF
@@ -30,6 +29,8 @@ import kotlin.io.path.Path
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger("CreateBoulderElection")
+
+const val BOULDER = "Boulder"
 
 // probably obsoleted by CorlaCountyElection ?
 class CreateBoulderElection(
@@ -71,11 +72,11 @@ class CreateBoulderElection(
         contests = makeContests(contestBuilders)
 
         // these are the mvrs, must have votes and styleIds,
-        exportCvrs  = corlaCvrs.cvrs().map { it.convertToCard() }
+        exportCvrs  = corlaCvrs.cvrs().map { it.convertToCard(BOULDER) }
         redactedCvrs = if (variant.phantoms) emptyList() else makeSimulatedCards(redactedPools)
 
         // need to know the phantoms to calculate allCvrs and Npops
-        val phantoms = makePhantomCards(contests, 1)
+        val phantoms = makePhantomCards(BOULDER, contests, 1)
         logger.debug {"made ${phantoms.size} phantom cards"}
 
         allCards = exportCvrs + redactedCvrs + phantoms // in memory
@@ -163,7 +164,7 @@ class CreateBoulderElection(
             val name = "redacted " + cleanCsvString(redacted.groupName)
             // in this case, nlines == ncards
             val hasExactContests = !redacted.groupName.contains("&") // has multiple card styles
-            CardPoolBuilder.fromMinVotesNeeded(name, id++, hasExactContests=hasExactContests, infos, contestTabs).setNcards(redacted.ncards())
+            CardPoolBuilder.fromMinVotesNeeded(BOULDER,name, id++, hasExactContests=hasExactContests, infos, contestTabs).setNcards(redacted.ncards())
         }
     }
 
@@ -175,7 +176,7 @@ class CreateBoulderElection(
             sumTabs.sumContestTabulations(groupTab)
             ncards += redacted.ncards()
         }
-        return listOf(CardPoolBuilder.fromMinVotesNeeded("RedactedPool", 1, hasExactContests=false, infos, sumTabs)
+        return listOf(CardPoolBuilder.fromMinVotesNeeded(BOULDER,"RedactedPool", 1, hasExactContests=false, infos, sumTabs)
             .setNcards(ncards))
     }
 
@@ -191,7 +192,7 @@ class CreateBoulderElection(
     // make simulated CVRs for one pool, all contests
     private fun makeCardsForOnePool(cardPool: CardPool) : List<AuditableCard> { // contestId -> candidateId -> nvotes
         val poolVunders = cardPool.possibleContests().associate { Pair(it, cardPool.votesAndUndervotes(it)) }
-        val cards = makeCardsForOnePoolV(poolVunders, pool=cardPool)
+        val cards = makeCardsForOnePoolV(poolVunders, BOULDER, pool=cardPool)
 
         // check it
         val cvrTabs: Map<Int, ContestTabulation> = tabulateCards(cards.iterator(), infos)
@@ -317,7 +318,7 @@ class CreateBoulderElection(
         ElectionInfo(electionName, auditType, ncards(), contestsUA.size, true, mvrSource=mvrSource)
     override fun contestsUA() = contestsUA
 
-    override fun cardStyles() = null
+    override fun cardStyles() = redactedPools
     override fun cardPools() = redactedPools
     override fun unsortedMvrsInternal() = mvrs
     override fun unsortedMvrsExternal() = null
@@ -345,7 +346,8 @@ class CreateBoulderElection(
 
             AuditableCard(
                 org.id,
-                null,
+                BOULDER,
+                "",
                 cardIndex++,
                 0,
                 phantom = org.phantom,
@@ -515,6 +517,7 @@ fun createBoulderElectionWithSovo(
 }
 
 ///////////////////////////////////////////////////
+// not used
 
 fun makeClcaContestUAs(
     contests: List<ContestIF>,

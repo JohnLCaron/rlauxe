@@ -35,8 +35,7 @@ class TestCountyAuditRecord {
 
     @Test
     fun testRead() {
-        val countyAuditRecord = AuditRecord.read(corlaData)!!
-        assertTrue(countyAuditRecord is CountyAuditRecord)
+        val countyAuditRecord = AuditRecord.read(corlaData)!! as CountyAuditRecord
 
         // when you call this, you have to read through the mvrs !
         val mvrsByCounty = countyAuditRecord.countMvrsByCounty()

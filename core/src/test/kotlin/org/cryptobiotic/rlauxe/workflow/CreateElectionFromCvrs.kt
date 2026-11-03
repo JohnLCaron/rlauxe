@@ -30,7 +30,7 @@ class CreateElectionFromCvrs (
     )
     override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(cvrs, batches)
     override fun unsortedMvrsExternal() = null
-    override fun cardStyles() = batches
+    override fun cardStyles() = batches ?: cardPools!!
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun cards() = createCards()
@@ -66,7 +66,7 @@ class CreateElectionFromCards (
     }
     override fun unsortedMvrsInternal() = cards
     override fun unsortedMvrsExternal() = null // Closer(createCards().iterator()) // for out-of-memory case
-    override fun cardStyles() = batches
+    override fun cardStyles() = batches ?: cardPools!!
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun cards() = Closer(cards.iterator() )

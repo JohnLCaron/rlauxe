@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.AddStyles
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
@@ -41,6 +42,75 @@ class MvrManagerForTesting(
         val prng = Prng(seed)
         sortedCards = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
         sortedMvrs = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
+    }
+
+    override fun sortedManifest(): SortedManifest {
+        return SortedManifest.createFromAList(sortedCards)
+    }
+
+    override fun pools() = pools
+    override fun styles() = pools
+
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>> {
+        if (mvrsForRound.isEmpty()) {
+            return sortedMvrs.zip(sortedCards) // all of em, for SingleRoundAudit
+        }
+
+        val sampleNumbers = mvrsForRound.map { it.prn() }
+        val sampledCvrs = findSamples(sampleNumbers, Closer(sortedCards.iterator()))
+
+        // prove that sampledCvrs correspond to mvrs
+        require(sampledCvrs.size == mvrsForRound.size)
+        val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsForRound.zip(sampledCvrs)
+        cvruaPairs.forEach { (mvr, cvr) ->
+            require(mvr.location() == cvr.location())
+            require(mvr.index() == cvr.index())
+            require(mvr.prn() == cvr.prn())
+        }
+        return mvrsForRound.zip(sampledCvrs)
+    }
+
+    override fun writeMvrsForRound(round: Int): Int {
+        TODO("Not yet implemented")
+    }
+
+    // MvrManagerTestIF
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard> {
+        val sampledMvrs = findSamples(sampleNumbers, Closer(sortedMvrs.iterator()))
+        require(sampledMvrs.size == sampleNumbers.size)
+
+        // debugging sanity check
+        var lastRN = 0L
+        sampledMvrs.forEach { mvr ->
+            require(mvr.prn() > lastRN)
+            lastRN = mvr.prn()
+        }
+
+        mvrsForRound = sampledMvrs
+        return sampledMvrs
+    }
+
+    override fun toString(): String {
+        return "MvrManagerForTesting(pools=${pools?.size}, sortedCards=${sortedCards.size}, sortedMvrs=${sortedMvrs.size}, mvrsRound=${mvrsForRound.size})"
+    }
+}
+
+class MvrManagerForTestingA(
+    cvrs: List<AuditableCard>,
+    mvrs: List<AuditableCard>,
+    seed: Long,
+    val pools: List<CardPool>? = null,
+) : MvrManager, MvrManagerTestIF {
+
+    val sortedCards: List<AuditableCard>
+    val sortedMvrs: List<AuditableCard> // the mvrs in the same order as the sorted cards
+    private var mvrsForRound: List<AuditableCard> = emptyList()
+
+    init {
+        // the order of the sortedCards cannot be changed once set.
+        val prng = Prng(seed)
+        sortedCards = cvrs.mapIndexed { idx, it -> it.copy( index=idx, prn = prng.next()) }.sortedBy { it.prn }
+        sortedMvrs = sortedCards.map { mvrs[it.index].copy(index = it.index, prn = it.prn) }
     }
 
     override fun sortedManifest(): SortedManifest {
@@ -142,7 +212,7 @@ fun readSortedManifest(publisher: Publisher, infos: Map<Int, ContestInfo>, ncard
         return SortedManifest(sortedCardsIter, ncards)
     }
 
-    val mergedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile(), styles) }
+    val mergedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile(), AddStyles(styles)) }
     return SortedManifest(mergedCards, ncards)
 }
 

@@ -11,7 +11,7 @@ import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 
 class TestSamplePrnsJson {
-    val filename = "$testdataDir/tests/scratch/TestSampleIndices.json"
+    val filename = "$testdataDir/TestSampleIndices.json"
 
     @Test
     fun testRoundtrip() {

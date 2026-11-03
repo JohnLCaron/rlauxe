@@ -60,6 +60,7 @@ data class MvrStyle(val id: Int, val contests: Set<String>) {
 ///////////////////////////////////////////////////////////////
 
 // for each contest, total mvrs over all counties
+// mvr count for this contest in any county
 data class ContestMvrCount(val contestName: String) {
     var countMvr = 0
     var countStatewide = 0

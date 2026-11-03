@@ -151,6 +151,7 @@ class TestClcaElection(
 ): ElectionBuilder {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val allCvrs = mutableListOf<Cvr>()
+    val testData:  MultiContestTestData
 
     init {
         val maxMargin = .10
@@ -158,7 +159,7 @@ class TestClcaElection(
         val phantomPctRange: ClosedFloatingPointRange<Double> =
             if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
 
-        val testData =
+        testData =
             MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
         println("$testData")
 
@@ -185,7 +186,7 @@ class TestClcaElection(
     override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, cardStyles()) // for in-memory case
     override fun unsortedMvrsExternal() = null
 
-    override fun cardStyles() = null
+    override fun cardStyles() = testData.cardStyles
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun ncards() = allCvrs.size
@@ -304,7 +305,7 @@ fun makeOnePool(poolId: Int, contests: List<Contest>, cvrs: List<Cvr>): CardPool
 
     // can just use contest totals. a contest can generate a Vunder
     val contestTabs = tabulateCvrs(cvrs.iterator(), infos)
-    return CardPool("all", poolId, hasExactContests=true, contestTabs, cvrs.size)
+    return CardPool("county", "all", poolId, hasExactContests=true, contestTabs, cvrs.size)
 }
 
 ////////////////////////////////
@@ -380,7 +381,7 @@ class TestOneAuditElection(
     )
     override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(fuzzedMvrs, cardStyles()) // for in-memory case
     override fun unsortedMvrsExternal() = null
-    override fun cardStyles() = null
+    override fun cardStyles() = cardPools
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun ncards() = cards.size

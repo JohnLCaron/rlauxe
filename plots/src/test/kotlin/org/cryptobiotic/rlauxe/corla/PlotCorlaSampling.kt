@@ -110,7 +110,7 @@ class CompareCorlaSampling {
         countyAudit.contests.forEach {
             val noerror = it.minNoerror()
             if (noerror != null) {
-                val haveMvrss: String = it.contest.info().metadata.get("CORLAhaveMvrs")!!
+                val haveMvrss: String = it.contest.info().metadata.get("StrataNmvrs")!!
                 val haveMvrs = haveMvrss.toInt()
                 val estRisk = estRiskStandardBet(it.Npop, noerror, haveMvrs)
                 plotData.add(PlotData(it.id, noerror, estRisk, cat)) // TODO margin vs noerror ??

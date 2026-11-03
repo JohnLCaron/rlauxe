@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.corla.CorlaStateContestInfoBuilder
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.irv.IrvContest
-import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.forEach
 
@@ -57,6 +56,7 @@ class CorlaCountyElectionNoCvrs(
 
             val card = AuditableCard(
                 manifestEntry.imprintedId(),
+                county,
                 manifestEntry.location(),
                 index++, 0, false,
                 styleId = 1,
@@ -71,9 +71,9 @@ class CorlaCountyElectionNoCvrs(
         // transform to canonical AuditableCards, all are in memory in cards
         val npops = mutableMapOf<Int, Int>() // count contests' population size
         ncards = cards.size
-        cardStyle = CardStyle(county, 1,allContestIds.toIntArray(), hasExactContests=false).setNcards(ncards)
+        cardStyle = CardStyle(county, "Style", 1,allContestIds.toIntArray(), hasExactContests=false).setNcards(ncards)
 
-        cardPool = CardPool("${county}Pool", 2, hasExactContests=false, convertedCountyAcTabs, ncards)
+        cardPool = CardPool(county, "Pool", 2, hasExactContests=false, convertedCountyAcTabs, ncards)
 
         contests = makeContests(stateContestInfoBuilder.infos, convertedCountyAcTabs, ncards)
 

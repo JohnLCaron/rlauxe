@@ -93,7 +93,7 @@ data class MultiContestTestData(
             val contestIds = contestsForThisBs.map { it.info.id }
             val ncards = ballotStylePartition[idx]!!
             countBallots += ncards
-            CardStyle("style$idx", idx, contestIds.toIntArray(), hasExactContests).setNcards(ncards)
+            CardStyle(COUNTY, "style$idx", idx, contestIds.toIntArray(), hasExactContests).setNcards(ncards)
         }
         require(countBallots == totalBallots)
         countCards()
@@ -198,13 +198,13 @@ data class MultiContestTestData(
             }
         }
 
-        result.addAll(makePhantomCards(contests, startIdx = result.size))
+        result.addAll(makePhantomCards(COUNTY, contests, startIdx = result.size))
         result.shuffle(Random)
         return result
     }
 
     private fun makeCard(nextCardId: Int, fcontests: List<ContestTestDataBuilder>, poolId: Int?, styleId: Int): AuditableCard {
-        val cardBuilder = AuditableCardBuilder("card${nextCardId}", null, nextCardId, poolId=poolId, styleId=styleId)
+        val cardBuilder = AuditableCardBuilder("card${nextCardId}", COUNTY, "", nextCardId, poolId=poolId, styleId=styleId)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build()
     }

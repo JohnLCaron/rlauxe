@@ -32,7 +32,7 @@ fun makePhantomCards(
     contestNphantoms.forEach { (contestId, nphantoms) ->
         val votes = mapOf( contestId to intArrayOf() )
         repeat(nphantoms) {
-            val card = AuditableCard.fromVotes(id = "$county:${prefix}${idx}", location = county, index = idx, prn = 0L, phantom = true,
+            val card = AuditableCard.fromVotes(id = "${prefix}${idx}", county, "", index = idx, prn = 0L, phantom = true,
                 styleId=CardStyle.phantomStyle.id, poolId = null, votes=votes).setStyle(CardStyle.phantomStyle)
             phantoms.add(card)
             idx++
@@ -55,6 +55,7 @@ fun makePhantomCvrs(
 }
 
 fun makePhantomCards(
+    county: String,
     contests: List<ContestIF>,
     startIdx: Int,
     prefix: String = "phantom-",
@@ -65,7 +66,7 @@ fun makePhantomCards(
     contests.forEach { contest ->
         val votes = mapOf( contest.id to intArrayOf() )
         repeat(contest.Nphantoms()) {
-            val card = AuditableCard.fromVotes(id = "${prefix}${idx}", location = null, index = idx, prn = 0L, phantom = true,
+            val card = AuditableCard.fromVotes(id = "${prefix}${idx}", county, location = "", index = idx, prn = 0L, phantom = true,
                     styleId=CardStyle.phantomStyle.id, poolId = null, votes=votes).setStyle(CardStyle.phantomStyle)
             phantoms.add(card)
             idx++

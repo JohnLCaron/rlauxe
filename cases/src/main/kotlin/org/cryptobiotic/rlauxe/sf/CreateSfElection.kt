@@ -33,6 +33,7 @@ import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("CreateSfElection")
 
+const val SF = "sf"
 // SanFrancisco 2024 General Election.
 
 // group cards into pools using the first part of the cvr id.
@@ -137,7 +138,7 @@ class CreateSfElection(
 
                 // pools
                 val pool = allCardPools.getOrPut(cvrExport.poolKey()) {
-                    OneAuditPoolFromCvrs(
+                    OneAuditPoolFromCvrs(SF,
                         cvrExport.poolKey(),
                         allCardPools.size + 1,
                         poolsHaveOneCardStyle,
@@ -148,7 +149,7 @@ class CreateSfElection(
 
                 // all cards will have one of these styles
                 val csc =
-                    cardStyles.getOrPut(cvrExport.votes.keys) { CardStyle(cardStyles.size + 1, cvrExport.votes.keys, false) }
+                    cardStyles.getOrPut(cvrExport.votes.keys) { CardStyle(SF, cardStyles.size + 1, cvrExport.votes.keys, false) }
                 csc.ncards++
 
                 // tabs

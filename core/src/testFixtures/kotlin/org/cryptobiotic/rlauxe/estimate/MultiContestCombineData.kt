@@ -10,6 +10,8 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.random.Random
 
+const val COUNTY = "county"
+
 // specify the contests with exact number of votes
 data class MultiContestCombineData(
     val contests: List<Contest>,
@@ -18,7 +20,7 @@ data class MultiContestCombineData(
 ) {
     val contestVoteTrackers: List<ContestVoteTracker>
     val style = if (poolId == null) CardStyle.fromCvrStyle
-        else CardStyle("batch$poolId", poolId, contests.map { it.id }.toIntArray(), false)
+        else CardStyle(COUNTY, "batch$poolId", poolId, contests.map { it.id }.toIntArray(), false)
 
     init {
         require(contests.size > 0)
@@ -38,7 +40,7 @@ data class MultiContestCombineData(
             result.add( makeCard(nextCardId++, contestVoteTrackers, cardStyle))
         }
 
-        val phantoms = makePhantomCards(contests, startIdx = result.size)
+        val phantoms = makePhantomCards(COUNTY, contests, startIdx = result.size)
         result.addAll(phantoms)
         // result.shuffle(Random)
         return Pair(result, listOf(style))
@@ -46,7 +48,7 @@ data class MultiContestCombineData(
 
     private fun makeCard(nextCardId: Int, fcontests: List<ContestVoteTracker>, cardStyle:String?): AuditableCard {
         //         constructor(location: String, index: Int, poolId: Int?, cardStyle: String?):
-        val cardBuilder = AuditableCardBuilder("card${nextCardId}", null, nextCardId, 0, false,
+        val cardBuilder = AuditableCardBuilder(COUNTY, "card${nextCardId}", "", nextCardId, 0, false,
             styleId=style.id(), poolId=poolId, votesIn = null, style=style)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build()
@@ -154,7 +156,7 @@ data class MultiContestCombinePools(
             }
         }
 
-        val phantoms = makePhantomCards(contests, startIdx = cards.size)
+        val phantoms = makePhantomCards(COUNTY, contests, startIdx = cards.size)
         cards.addAll(phantoms)
         return Pair(cards, pools)
     }
@@ -163,7 +165,7 @@ data class MultiContestCombinePools(
         val cvrb2 = CvrBuilder2("card${nextCardId}", false, poolId = pool.id())
         vunderPool.simulatePooledCvr(cvrb2)
         val cvr = cvrb2.build()
-        return AuditableCard.fromVotes("card${nextCardId}", null, nextCardId, 0L, false,
+        return AuditableCard.fromVotes("card${nextCardId}", COUNTY, "", nextCardId, 0L, false,
             styleId=pool.id(), poolId=pool.poolId, votes=cvr.votes).setStyle(pool)
 
     }
@@ -224,7 +226,7 @@ data class MultiContestFromBallotStyles(
         //    //    val possibleContests: IntArray,      // the list of possible contests.
         //    //    val hasExactContests: Boolean
         val possibleContests = contests.map { it.id }.sorted().toIntArray()
-        noCardStyle = CardStyle("noCardStyle", 0, possibleContests, false)  // aka "all"
+        noCardStyle = CardStyle(COUNTY, "noCardStyle", 0, possibleContests, false)  // aka "all"
     }
 
     // multicontest cards
@@ -253,7 +255,7 @@ data class MultiContestFromBallotStyles(
             }
         }
 
-        val phantoms = makePhantomCards(contests, startIdx = result.size)
+        val phantoms = makePhantomCards(COUNTY, contests, startIdx = result.size)
         result.addAll(phantoms)
 
         val cardStyles = when (csd) {
@@ -268,7 +270,7 @@ data class MultiContestFromBallotStyles(
         val cvrb2 = CvrBuilder2(cardName, false, poolId = cardStyle.id())
         vunderPool.simulatePooledCvr(cvrb2)
         val cvr = cvrb2.build()
-        return AuditableCard.fromVotes(cardName, null, cardId, 0L, false,
+        return AuditableCard.fromVotes(cardName, COUNTY, "", cardId, 0L, false,
             styleId=cardStyle.id(), poolId=null, votes=cvr.votes).setStyle(cardStyle)
     }
 }

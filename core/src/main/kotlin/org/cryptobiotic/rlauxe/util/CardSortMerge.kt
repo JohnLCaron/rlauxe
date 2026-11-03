@@ -98,7 +98,7 @@ private class ChunkSorter<T>(val workingDirectory: String, val prng: Prng, val m
 }
 
 private class CardMerger(chunkFilenames: List<String>, val writer: CardCsvWriter, val maxChunk: Int) {
-    val nextUps = chunkFilenames.map { NextUp(readCardsCsvIterator(it, styles=null)) }
+    val nextUps = chunkFilenames.map { NextUp(readCardsCsvIterator(it) { it })  }
     val cards = mutableListOf<AuditableCard>()
     var total = 0
 

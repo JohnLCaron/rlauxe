@@ -8,6 +8,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
+const val COUNTY = "county"
+
 // data class AuditableCard (
 //    val location: String, // info to find the card for a manual audit. Aka ballot identifier.
 //    val index: Int,  // index into the original, canonical list of cards
@@ -41,12 +43,12 @@ class TestAuditableCard {
     @Test
     fun testString() {
         val id = Random.nextInt()
-        val card1 = AuditableCard.fromVotes ("cvr$id", null, 42, 4422L, false, // intArrayOf(1,2,3),
+        val card1 = AuditableCard.fromVotes ("cvr$id", COUNTY, "", 42, 4422L, false, // intArrayOf(1,2,3),
             votes=mapOf(2 to intArrayOf(2), 3 to intArrayOf(1,2,3), 4 to intArrayOf(4,5,6), 1 to intArrayOf(1), 42 to IntArray(0), 11 to intArrayOf()), poolId=null, styleId=99)
         assertEquals("""AuditableCard(id='cvr$id', index=42, prn=4422, styleId=99, votes= 1:1, 2:2, 3:[1, 2, 3], 4:[4, 5, 6], 11:[], 42:[],)""",
             card1.toString())
 
-        val card2 = AuditableCard ("cvr$id", "loc$id", 42, 4422L, true, styleId=42,
+        val card2 = AuditableCard ("cvr$id", COUNTY, "loc$id", 42, 4422L, true, styleId=42,
             card1.contestIds, card1.contestStarts, card1.candidates, poolId=422)
         assertEquals("""AuditableCard(id='cvr$id', location='loc$id', index=42, prn=4422, styleId=42, phantom=true, poolId=422, votes= 1:1, 2:2, 3:[1, 2, 3], 4:[4, 5, 6], 11:[], 42:[],)""",
             card2.toString())
@@ -58,9 +60,9 @@ class TestAuditableCard {
     @Test
     fun testEquals() {
         val id = Random.nextInt()
-        val card1 = AuditableCard.fromVotes ("cvr$id", null, 42, 4422L, false, // intArrayOf(1,2,3),
+        val card1 = AuditableCard.fromVotes ("cvr$id", COUNTY, "", 42, 4422L, false, // intArrayOf(1,2,3),
             votes=mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), poolId=1, styleId=678)
-        val card2 = AuditableCard.fromVotes ("cvr$id", null, 42, 4422L, false, // intArrayOf(1,2,3),
+        val card2 = AuditableCard.fromVotes ("cvr$id", COUNTY, "", 42, 4422L, false, // intArrayOf(1,2,3),
             votes=mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), poolId=1, styleId=678)
         assertEquals(card1.toCvr(), card2.toCvr())
         assertEquals(card1.hashCode(), card2.hashCode())

@@ -18,12 +18,12 @@ private val logger = KotlinLogging.logger("CardPoolCsv")
 //    val totalCards: Int,
 //): CardPoolIF {
 
-val CardPoolHeader = "poolId, poolName, hasExactContests, totalCards, contestId, voteForN, cands, ncards, novote, undervotes, overvotes, nphantoms, isIrv, votes:count ... \n"
+val CardPoolHeader = "county, poolId, poolName, hasExactContests, totalCards, contestId, voteForN, cands, ncards, novote, undervotes, overvotes, nphantoms, isIrv, votes:count ... \n"
 
 fun writeCardPoolCsv(pool: CardPoolIF) = buildString {
-    append("${pool.poolId}, ${pool.poolName}, ${pool.hasExactContests()}, ${pool.ncards()}, ")
+    append("${pool.county()}, ${pool.poolId}, ${pool.poolName}, ${pool.hasExactContests()}, ${pool.ncards()}, ")
     pool.possibleContests().forEachIndexed { index, contestId ->
-        if (index > 0) { append("${pool.poolId},,,, ") }
+        if (index > 0) { append("${pool.county()},${pool.poolId},,,, ") }
         val tab = pool.contestTab(contestId)!!
         if (tab is ContestTabulation)
             append(writeContestTabulationCsv(tab))
@@ -49,12 +49,13 @@ fun readCardPoolCsv(line: String, infos: Map<Int, ContestInfo>): CardPoolBuilder
     // var pcontests = intArrayOf()
 
     var idx = 0
-    val poolId = ttokens[idx++].toInt()
-    val poolName = ttokens[idx++]
-    val hasExactContests = ttokens[idx++] == "true"
+    val county = ttokens[idx++].trim()
+    val poolId = ttokens[idx++].trim().toInt()
+    val poolName = ttokens[idx++].trim()
+    val hasExactContests = ttokens[idx++].trim() == "true"
 
-    val totalCards = ttokens[idx].toInt()
-    return CardPoolBuilder(poolName, poolId, hasExactContests, infos, totalCards)
+    val totalCards = ttokens[idx].trim().toInt()
+    return CardPoolBuilder(county, poolName, poolId, hasExactContests, infos, totalCards)
 }
 
 fun readCardPoolContinuation(line: String, current: CardPoolBuilder): Boolean {
@@ -62,8 +63,9 @@ fun readCardPoolContinuation(line: String, current: CardPoolBuilder): Boolean {
     val ttokens = tokens.map { it.trim() }
 
     var idx = 0
-    val poolId = ttokens[idx++].toInt()
-    if (poolId != current.poolId) return false
+    val county = ttokens[idx++].trim()
+    val poolId = ttokens[idx++].trim().toInt()
+    if (county != current.county || poolId != current.poolId) return false
     idx += 3
 
     val tab = readContestTabulationCsv(ttokens.subList(idx, ttokens.size))
@@ -100,6 +102,7 @@ fun readCardPoolCsvFile(filename: String, infos: Map<Int, ContestInfo>): List<Ca
 }
 
 class CardPoolBuilder(
+    val county: String,
     val poolName: String,
     val poolId: Int,
     val hasExactContests: Boolean,
@@ -108,6 +111,6 @@ class CardPoolBuilder(
 ) {
     val contestTabs = mutableMapOf<Int, ContestTabulation>()
 
-    fun build() = CardPool(poolName, poolId, hasExactContests, contestTabs, totalCards)
+    fun build() = CardPool(county, poolName, poolId, hasExactContests, contestTabs, totalCards)
 }
 

@@ -88,7 +88,7 @@ class EstimateAudit(
         // for OneAudit, cvr == mvr and the variation comes from which pool it comes from ??
         val ntrials = if (auditType.isClca()) 1 else config.round.simulation.nsimTrials
         repeat(ntrials) { run ->
-            // each trial gets their own iterator
+            // each trial gets their own card iterator
             tasks.add(AuditTrialTask(topdir, roundIdx, run+1, config, contestsToAudit, pools, styles, sortedManifest.cardIterable.iterator()))
         }
 
@@ -244,9 +244,9 @@ class AuditTrialTask(
                 }
                 // feeding all the contests at once
                 var include = false
-                contestTrials.forEach { contestTrial ->
+                contestTrials.filter{ it.wantsMore() }.forEach { contestTrial ->
                     // does this contest want this card ?
-                    if (contestTrial.wantsMore() && card.hasContest(contestTrial.contest().id) && !contestTrial.skip()) {
+                    if (card.hasContest(contestTrial.contest().id) && !contestTrial.skip()) { // only calls skip if card.hasContest
                         include = true
                         contestTrial.addCard(mvr, card, cardSortedIndex)
                     }
@@ -368,6 +368,9 @@ class ContestClcaTrial(val run: Int,
         }
 
         val mui = populationMeanIfH0(contest.Npop, true, errorTracker)
+        if (mui.isNaN()) {
+            populationMeanIfH0(contest.Npop, true, errorTracker)
+        }
         if (mui > cassorter.upperBound) { // 1  # true mean is certainly less than 1/2
             status = TestH0Status.AcceptNull
             maxIndex = cardSortedIndex

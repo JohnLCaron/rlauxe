@@ -12,7 +12,6 @@ import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
 
@@ -29,7 +28,8 @@ private val showWork = false
 @Serializable
 class ProtoCard (
     val id: String, // enough info to find the card for a manual audit.
-    val location: String? = null, // enough info to find the card for a manual audit.
+    val county: String, // enough info to find the card for a manual audit.
+    val location: String, // enough info to find the card for a manual audit.
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
@@ -59,6 +59,7 @@ fun AuditableCard.publishProto() : ProtoCard {
 
         return ProtoCard(
             this.id(),
+            this.county,
             this.location(),
             this.index(),
             this.prn(),
@@ -72,6 +73,7 @@ fun AuditableCard.publishProto() : ProtoCard {
     } else {
         return ProtoCard(
             this.id(),
+            this.county,
             this.location(),
             this.index(),
             this.prn(),
@@ -85,9 +87,9 @@ fun AuditableCard.publishProto() : ProtoCard {
     }
 }
 
-fun ProtoCard.import(styleMap: Map<Int, StyleIF> ): AuditableCard {
+fun ProtoCard.import(styleMap: Map<Pair<String, Int>, StyleIF> ): AuditableCard {
 
-    var style = styleMap[this.styleId]
+    var style = styleMap[Pair(this.county, this.styleId)]
     if (style == null) {
         if (this.phantom)
             style = CardStyle.phantomStyle
@@ -101,7 +103,8 @@ fun ProtoCard.import(styleMap: Map<Int, StyleIF> ): AuditableCard {
 
     return AuditableCard(
         this.id,
-        if (this.location == this.id) null else this.location,
+        this.county,
+        this.location,
         this.index,
         this.prn,
         this.phantom,
@@ -160,13 +163,13 @@ private fun writeVlenForProto(messageSize: Int, output: OutputStream) {
 }
 
 // see TimeCardReading
-class ProtoCardIterable(val protoFilename: String, val bufferSize: Int = 100_000, val styles: List<StyleIF>?) : CloseableIterable<AuditableCard> {
+class ProtoCardIterable(val protoFilename: String, val bufferSize: Int = 100_000, val styles: List<StyleIF>) : CloseableIterable<AuditableCard> {
     override fun iterator(): CloseableIterator<AuditableCard> =
         ProtoCardIterator(protoFilename, bufferSize, styles)
 }
 
-class ProtoCardIterator(val filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>? = null): CloseableIterator<AuditableCard> {
-    val styleMap: Map<Int, StyleIF> = styles?.associateBy{ it.id() } ?: emptyMap()
+class ProtoCardIterator(val filename: String, bufferSize: Int = 100_000, val styles: List<StyleIF>): CloseableIterator<AuditableCard> {
+    val styleMap: Map<Pair<String, Int>, StyleIF> = styles.associate{ Pair(it.county(), it.id()) to it }
     val inputStream: InputStream
     var nextMessageSize = -1
 

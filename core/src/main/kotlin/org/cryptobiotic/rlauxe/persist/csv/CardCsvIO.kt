@@ -13,10 +13,10 @@ import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("CardCsv")
 
-val CardHeader = "id, location, index, prn, phantom, styleId, poolId, cvr contests, candidates0, candidates1, ...\n"
+val CardHeader = "id, county, location, index, prn, phantom, styleId, poolId, cvr contests, candidates0, candidates1, ...\n"
 
 fun writeCardCsv(card: AuditableCard) = buildString {
-    append("${card.id()}, ")
+    append("${card.id()}, ${card.county}, ")
     if (card.id() == card.location()) append(", ") else append("${card.location()}, ")
     append("${card.index()}, ${card.prn().toString(radix=16)}, ${if(card.phantom()) "yes," else ","} ")
     append("${card.styleId}, ")
@@ -82,14 +82,14 @@ fun readCardCsv(line: String): AuditableCard {
 
     try {
         var idx = 0
-        val id = ttokens[idx++]
-        val locationToken = ttokens[idx++]
-        val location = locationToken.ifEmpty { null }
-        val index = ttokens[idx++].toInt()
-        val sampleNum = ttokens[idx++].toLong(radix = 16)
-        val phantom = ttokens[idx++] == "yes"
+        val id = ttokens[idx++].trim()
+        val county = ttokens[idx++].trim()
+        val location = ttokens[idx++].trim()
+        val index = ttokens[idx++].trim().toInt()
+        val sampleNum = ttokens[idx++].trim().toLong(radix = 16)
+        val phantom = ttokens[idx++].trim() == "yes"
         val styleId = ttokens[idx++].trim().toInt()
-        val poolIdToken = ttokens[idx++]
+        val poolIdToken = ttokens[idx++].trim()
         val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()
 
         // if clca, list of actual contests and their votes
@@ -116,11 +116,11 @@ fun readCardCsv(line: String): AuditableCard {
                 start += cands.size
             }
             return AuditableCard(
-                id, location, index, sampleNum, phantom, styleId,
+                id, county, location, index, sampleNum, phantom, styleId,
                 contestIds.toIntArray(), contestStarts.toIntArray(), candidates.toIntArray(), poolId,
             )
         }
-        return AuditableCard(id, location, index, sampleNum, phantom, styleId,
+        return AuditableCard(id, county, location, index, sampleNum, phantom, styleId,
             intArrayOf(), intArrayOf(), intArrayOf(), poolId,)
 
     } catch (e: Throwable) {
@@ -130,11 +130,20 @@ fun readCardCsv(line: String): AuditableCard {
 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-// replace
+class CardCsvReader(filename: String, val styles: List<StyleIF>): CloseableIterable<AuditableCard> {
+    var useFilename = if (Files.exists(Path(filename))) filename
+    else if (Files.exists(Path("$filename.zip"))) "$filename.zip" // TODO unzip and leave it unzipped
+    else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
 
-class IteratorCardsCsvStream(input: InputStream, bufferSize: Int, val styles: List<StyleIF>?): CloseableIterator<AuditableCard> {
-    val styleMap = if (styles == null) null else styles.associateBy { it.id() }
+    override fun iterator(): CloseableIterator<AuditableCard> {
+        return readCardsCsvIterator(useFilename, AddStyles(styles))
+    }
+}
+
+/*
+
+class IteratorCardsCsvStream(input: InputStream, bufferSize: Int, val styles: List<StyleIF>): CloseableIterator<AuditableCard> {
+    val styleMap: Map<Pair<String, Int>, StyleIF> = styles.associate{ Pair(it.county(), it.id()) to it }
     val reader = BufferedReader(InputStreamReader(input),bufferSize)
     var nextLine: String? = null
     var countLines  = 0
@@ -154,11 +163,9 @@ class IteratorCardsCsvStream(input: InputStream, bufferSize: Int, val styles: Li
     override fun next(): AuditableCard {
         if (!hasNext()) throw NoSuchElementException()
         val cardm: AuditableCard =  readCardCsv(nextLine!!)
-        val style = styleMap?.get(cardm.styleId)
-        if (style != null)
-            cardm.setStyle(style)
+        val style = styleMap[Pair(cardm.county,cardm.styleId)]!!
         nextLine = null
-        return cardm
+        return cardm.setStyle(style)
     }
 
     override fun close() {
@@ -166,17 +173,7 @@ class IteratorCardsCsvStream(input: InputStream, bufferSize: Int, val styles: Li
     }
 }
 
-class CardCsvReader(filename: String, val styles: List<StyleIF>?): CloseableIterable<AuditableCard> {
-    var useFilename = if (Files.exists(Path(filename))) filename
-    else if (Files.exists(Path("$filename.zip"))) "$filename.zip" // TODO unzip and leave it unzipped
-    else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
-
-    override fun iterator(): CloseableIterator<AuditableCard> {
-        return readCardsCsvIterator(useFilename, styles)
-    }
-}
-
-fun readCardsCsvIterator(csvFile: String, styles: List<StyleIF>?): CloseableIterator<AuditableCard> {
+fun readCardsCsvIterator(csvFile: String, styles: List<StyleIF>): CloseableIterator<AuditableCard> {
     val useFilename: String = if (Files.exists(Path(csvFile))) csvFile
     else if (Files.exists(Path("$csvFile.zip"))) "$csvFile.zip" // TODO unzip
     else {
@@ -192,24 +189,20 @@ fun readCardsCsvIterator(csvFile: String, styles: List<StyleIF>?): CloseableIter
     } else {
         IteratorCardsCsvStream(File(useFilename).inputStream(), 8192, styles)
     }
-}
+} */
 
-fun readCardsAndMergeToList(filename: String, styles: List<StyleIF>?): List<AuditableCard> {
-    val mergedMvrIter = readCardsCsvIterator(filename, styles)
+fun readCardsAndMergeToList(filename: String, styles: List<StyleIF>): List<AuditableCard> {
+    val mergedMvrIter = readCardsCsvIterator(filename, AddStyles(styles))
     val mvrCards = mutableListOf<AuditableCard>()
     while (mergedMvrIter.hasNext()) { mvrCards.add(mergedMvrIter.next())}
     return mvrCards
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// replace readCardsCsvIterator: pass in transformer always
-
-class AddStyle(val styles: List<StyleIF>): (AuditableCard) -> AuditableCard {
-    val styleMap = styles.associateBy { it.id() }
+class AddStyles(val styles: List<StyleIF>): (AuditableCard) -> AuditableCard {
+    val styleMap: Map<Pair<String, Int>, StyleIF> = styles.associate{ Pair(it.county(), it.id()) to it }
     override fun invoke(card: AuditableCard): AuditableCard {
-        val style = styleMap.get(card.styleId)
-        if (style != null) card.setStyle(style)
-        return card
+        val style = styleMap[Pair(card.county, card.styleId)]
+        return if (style == null) card else card.setStyle(style)
     }
 }
 

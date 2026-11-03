@@ -32,7 +32,7 @@ interface ElectionBuilder {
     fun cards() : CloseableIterator<AuditableCard>?
     fun ncards(): Int
 
-    fun cardStyles(): List<StyleIF>?
+    fun cardStyles(): List<StyleIF>
     fun cardPools(): List<CardPoolIF>?
     fun countyAuditcenterPools(): List<CountyPools>? = null
     fun countyCvrPools(): List<CountyPools>? = null // for debugging
@@ -73,9 +73,11 @@ fun createElectionRecord(election: ElectionBuilder, topdir: String, control: Con
     logger.info{"createElectionRecord writeElectionInfoJsonFile to ${publisher.electionInfoFile()}\n  $electionInfo"}
 
     val cardStyles = election.cardStyles()
-    if (!cardStyles.isNullOrEmpty()) {
+    if (cardStyles.isNotEmpty()) {
         writeCardStylesJsonFile(cardStyles, publisher.cardStylesFile())
         logger.info { "createElectionRecord write ${cardStyles.size} cardStyles to ${publisher.cardStylesFile()}" }
+    } else {
+        logger.error { "cardStyles cant be empty"}
     }
 
     val cardPools = election.cardPools()

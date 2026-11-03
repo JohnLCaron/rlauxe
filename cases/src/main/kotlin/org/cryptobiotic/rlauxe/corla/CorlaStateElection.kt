@@ -15,21 +15,21 @@ import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.estimate.VunderPool
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.bin.writeFastSamplingCards
+import org.cryptobiotic.rlauxe.persist.csv.AddStyles
 import org.cryptobiotic.rlauxe.persist.csv.CardHeader
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
+import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.util.TransformingIterator
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
-import java.nio.file.Path
 import kotlin.collections.forEach
 import kotlin.collections.map
 import kotlin.io.path.Path
-import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
 
 private val logger = KotlinLogging.logger("CorlaStateElection")
 
@@ -46,9 +46,10 @@ class CorlaStateElection(
     val electionName = stateInput.javaClass.simpleName
 
     val statePools = mutableListOf<CardPool>()
-    val stateStyles = mutableListOf<CardStyle>()
-    val stateStyleMap: Map<Int, StyleIF>
+    val stateStyles = mutableListOf<StyleIF>()
+    val stateStyleMap: Map<Pair<String, Int>, StyleIF>
     val countyAcPools = mutableListOf<CountyPools>()
+    // val countyCvrPools = mutableListOf<CountyPools>()
     val vunderPoolMap: Map<Int, VunderPool>
     val countyPops = mutableMapOf<String, MutableMap<Int,Int>>() // county -> contest -> population
 
@@ -68,70 +69,67 @@ class CorlaStateElection(
         var totalCvrCardCount = 0
 
         var countyPoolId = 1
-        var statePoolId = 1
-        var stateStyleId = 1
         var stateCardIndex = 1
 
         for (countyName in stateInput.counties()) {
             println(countyName)
+            if (countyName == "Baca")
+                print("")
             val countyDir = "$topdir/county/$countyName"
             val result = AuditRecord.readPartialResult(countyDir)
             if (result.isErr) {
                 logger.error { "$countyName got error ${result}" }
                 continue
             }
-            val countyAuditRecord = result.unwrap()
+            val countyAuditrecord = result.unwrap()
 
-            val statePoolIdMap = mutableMapOf<Int, Int>()
-            val countyCardPools = countyAuditRecord.readCardPools()
-            if (countyCardPools != null) {
+            //val statePoolIdMap = mutableMapOf<Int, Int>()
+            val countyCardPools = countyAuditrecord.readCardPools()
+            if (countyCardPools != null) statePools.addAll(countyCardPools)
+            /* if (countyCardPools != null) {
                 countyCardPools.forEach { pool ->
                     statePoolIdMap[pool.poolId] = statePoolId
                     statePools.add(pool.copy(poolName = "$countyName-${pool.poolName}", poolId = statePoolId))
                     statePoolId++
                 }
-            }
+            } */
 
-            val stateStyleIdMap = mutableMapOf<Int, Int>()
-            val countyStyles = countyAuditRecord.readCardStyles()!!
-            countyStyles.forEach { style ->
+            // val stateStyleIdMap = mutableMapOf<Int, Int>()
+            val countyStyles = countyAuditrecord.readCardStyles()!!
+            stateStyles.addAll(countyStyles)
+            /* countyStyles.forEach { style ->
                 stateStyleIdMap[style.id()] = stateStyleId
                 stateStyles.add(
-                    CardStyle(
+                    CardStyle(countyName,
                         name = "$countyName-${style.name()}", id = stateStyleId,
                         style.possibleContests(), style.hasExactContests()
                     ).setNcards(style.ncards())
                 )
                 stateStyleId++
-            }
+            } */
             val countyStyleMap = countyStyles.associateBy { it.id() }
 
             // read county cvrs (already canonicalized) and write out unsorted card manifest
-            val countyPop = mutableMapOf<Int, Int>()
+            // not adding the styles, but existing style and pools ids are correct
+            // need to add styles to tabulate ??
+
+            val countyCvrTabs = mutableMapOf<Int, ContestTabulation>()
+            val countyPop = mutableMapOf<Int, Int>() // contestId -> ncards
             countyPops[countyName] = countyPop
             val countyPublisher = Publisher(countyDir)
-            val orgIter = readCardsCsvIterator(countyPublisher.cardManifestFile(), styles = null)
-            val countyCardsIter = TransformingIterator(orgIter) { org ->
+            val countyCardsIter = readCardsCsvIterator(countyPublisher.cardManifestFile()) { org ->
+
                 // convenient to count population here; pools can make pop > ncards
                 if (countyStyleMap[org.styleId] == null)
                     logger.error{"cant find ${org.styleId} in countyStyleMap"}
-
                 val style = countyStyleMap[org.styleId]!!
-                style.possibleContests().forEach {
-                    val accum = countyPop.getOrDefault(it, 0)
-                    countyPop[it] = accum + 1
+                style.possibleContests().forEach { contestId ->
+                    val accum = countyPop.getOrDefault(contestId, 0)
+                    countyPop[contestId] = accum + 1
                 }
 
-                if (stateStyleIdMap[org.styleId] == null)
-                    logger.error{"cant find ${org.styleId} in stateStyleIdMap"}
-
-                // finally convert style and pool id ....
-                org.copy(
-                    location = "$countyName-${org.location}",
-                    index = stateCardIndex++,
-                    styleId = stateStyleIdMap[org.styleId]!!,
-                    poolId = statePoolIdMap[org.poolId], // TODO make sure if theres a poolId in dounty cardManifestFile
-                )
+                // the only change is to reindex it.
+                org.copy(index = stateCardIndex++)
             }
 
             // append county cards to the cardManifest
@@ -146,20 +144,31 @@ class CorlaStateElection(
 
             // these are the ac tabs
             val countyContestTabs = mutableMapOf<Int, ContestTabulation>()
-            countyAuditRecord.contests.map { it.contest as Contest }.forEach { contest ->
+            countyAuditrecord.contests.map { it.contest as Contest }.forEach { contest ->
                 val contestList = stateContests.getOrPut(contest.id) { mutableListOf() }
                 contestList.add(Pair(countyName, contest))
                 countyContestTabs.sumContestTabulationsFromCandVotes(contest.info, contest.votes, contest.Ncast)
             }
 
             // used in viewer
-            countyAcPools.add(CountyPools(
+            countyAcPools.add( CountyPools(
                 countyName = countyName,
                 countyPoolId = countyPoolId++,
                 contestTabs = countyContestTabs,
                 cardCount = countyCardCount,
                 styles = countyStyles,
             ))
+
+            // could also do the cvr tabulation and output countyCvrPools
+            // but you can only tabulate the unredacted cvrs ....
+            /* countyCvrPools.add( CountyPools(
+                countyName = countyName,
+                countyPoolId = countyPoolId++,
+                contestTabs = countyContestTabs,
+                cardCount = countyCardCount,
+                styles = countyStyles,
+            )) */
+
         } // end loop over counties
         cardManifestWriter.close()
 
@@ -202,20 +211,9 @@ class CorlaStateElection(
             Contest(info, voteTabulation.votes, Nc, Ncast) // phantoms = Nc - Ncast
         }
 
-        countyPops.forEach { (county, popMap) ->
-            popMap.forEach { (key, pop) ->
-                if (pop < 0)
-                    print("$key: $pop")
-            }
-        }
-
+        // sum over counties
         // TODO need Irv tabs
         val npopMap = tabulateNpops(countyPops)
-
-            npopMap.forEach { (key, pop) ->
-                if (pop < 0)
-                    print("$key: $pop")
-            }
 
         contestsUA = makeContestWAs(contests, npopMap, emptyMap(), statePools, variant, hasStyle)
 
@@ -224,7 +222,7 @@ class CorlaStateElection(
         require(totalCvrCardCount == stateCardIndex - 1)
         this.ncards = totalCvrCardCount // or totalPoolCardCount? */
 
-        stateStyleMap = stateStyles.associateBy { it.id }
+        stateStyleMap = stateStyles.associate{ Pair(it.county(), it.id()) to it }
         // this can only be use once, else must be reinitialized....
         vunderPoolMap = statePools.map { cardPool ->
             val vunders = cardPool.possibleContests().associate { Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
@@ -240,7 +238,7 @@ class CorlaStateElection(
     override fun cardPools() = statePools
 
     override fun countyAuditcenterPools(): List<CountyPools> = countyAcPools // used by viewer
-    //override fun countyCvrPools(): List<CountyPools> = cvrPools
+    override fun countyCvrPools() = null // countyCvrPools
 
     //      and add the mvr simulations by reading the cardManifest ??
     //      see VunderBatches CreateCardsForCountyPools used by CountyElectionSimCvrs
@@ -249,11 +247,11 @@ class CorlaStateElection(
     override fun unsortedMvrsInternal() = null
     override fun unsortedMvrsExternal() = null // CardIteratorfromCountyMvrs(statePublisher, styles = stateStyles)
 
-    // convert cvr to mvr on the fly
+    // convert card to mvr on the fly
     override fun cardToMvrTransformer(): ((AuditableCard) -> AuditableCard) {
         return { card ->
             if (card.poolId == null) card else {
-                val style = stateStyleMap[card.styleId]!!
+                val style = stateStyleMap[Pair(card.county, card.styleId)]!!
                 card.setStyle(style)
                 val vunderPool = vunderPoolMap[card.poolId]!! // the poolId should match a VunderPool
                 vunderPool.simulatePooledCard(card)
@@ -265,7 +263,7 @@ class CorlaStateElection(
     override fun ncards() = ncards
 }
 
-// create an iterator over all the cards unsortedMvrsDirectory
+/* create an iterator over all the cards unsortedMvrsDirectory
 class CardIteratorfromCountyMvrs(
     publisher: Publisher,
     val styles: List<StyleIF>
@@ -294,7 +292,7 @@ class CardIteratorfromCountyMvrs(
     override fun close() {
         // NOOP
     }
-}
+} */
 
 fun makeCountyElections(
     topdir: String,
@@ -307,8 +305,6 @@ fun makeCountyElections(
     stateInput.counties().forEach { countyName ->
         val countyDir = "$topdir/county/$countyName"
         val countyInput = stateInput.corlaCountyInput(countyName)
-        if (countyInput == null)
-            print("")
         requireNotNull(countyInput)
         val countyElection = if (countyInput.hasCvrs()) {
                 CorlaCountyElection(countyInput, stateInput, contestBuilder, mvrSource, hasStyle, variantEnum)
@@ -318,6 +314,13 @@ fun makeCountyElections(
             CorlaCountyElectionNoCvrs(countyInput, stateInput, contestBuilder, mvrSource, hasStyle)
         }
         createElectionRecord(countyElection, topdir = countyDir)
+
+        //  write fastCards with the unsorted manifest, for use in estimating county sample sizes
+        val countyPublisher = Publisher(countyDir)
+        val styles = countyElection.cardStyles()
+        val csvIter = readCardsCsvIterator(countyPublisher.cardManifestFile(), AddStyles(styles))
+                // fun writeFastSamplingCards(cards: CloseableIterator<AuditableCard>, styles: List<StyleIF>, filenameOut: String, limit: Int? = null): Int {
+        writeFastSamplingCards(csvIter, styles, countyPublisher.fastSamplingFile())
     }
 }
 
@@ -393,4 +396,46 @@ fastSampling.bin                fastest for what-if sampling (createAudit)      
 logs.logs
 sortedCards.proto               faster to read (createAudit)                        2.6 G
 
+ */
+
+/*
+County contest
+|           field |                       value |                                                                         description |
+| --------------- | --------------------------- | ----------------------------------------------------------------------------------- |
+|          target |                             |                                                         is a Corla targeted contest |
+|       NCounties |                     El Paso |                                  number of counties, or the county name if only one |
+|              id |                         546 |                                                                  contest identifier |
+|            name | State Senator - District 10 |                                                                        contest name |
+|          margin |         0.17389678384442783 |                                   voteMargin / population size (smallest assertion) |
+|     corlaStrata |                      382583 |                         Corla strata size (from contestRoundFile ballot_card_count) |
+|      population |                       88174 |                                                     Nc (hasStyle) or Npop (noStyle) |
+|              nc |                       88174 |                                      trusted upper bound on contest number of cards |
+|    corlaEstMvrs |                          -1 |            Corla estimated nmvrs (from contestRoundFile estimated_samples_to_audit) |
+|   corlaHaveMvrs |                        1195 | single county: count mvrs in county (from comparison file), else min rate algorithm |
+|       corlaRisk |       7.276349262910895E-11 |                                                        estimated Corla uniform risk |
+| corlaVoteMargin |                       15345 |                            Corla margin in votes (from contestRoundFile min_margin) |
+|      voteMargin |                       15345 |                                           (winner-loser) votes (smallest assertion) |
+|        haveMvrs |                         222 |                                   number of mvrs that were sampled for this contest |
+|         estMvrs |                          37 |                                                     estimated number of mvrs needed |
+|      estNewMvrs |                         165 |                                                        estimated new samples needed |
+|         estRisk |        3.429879037949587E-9 |                                                                      estimated risk |
+Contest 'State Senator - District 10' (546) PLURALITY voteForN=1 votes={0=47416, 1=32071, 2=4613} undervotes=4068, winners=[0] Nc=88174 Nphantoms=6 Nu=4068 sumVotes=84100 Npop=88242 hasStyle=true
+   minAssertion= 0/1 votes=47416/32071 diff=15345 dilutedMargin=0.173897 noerror=0.5476
+
+   0 'Larry G. Liston': votes=47416 (56.38%)  (winner)
+   1 'Randi McCallian': votes=32071 (38.13%)
+   2 'Heather Johnson': votes=4613 (5.49%)
+    Total=84100
+Metadata
+  CORLAhaveMvrs=1195
+  CORLAstrataNcards=382583
+  CORLAballotCardCount=382583
+  CORLAcontestBallotCardCount=88174
+  CORLAauditReason=opportunistic_benefits
+  CORLAmarginInVotes=15345
+  CanonicalCounties=[El Paso]
+  CORLAestMvrs=167
+  CORLAcountyMvrs=285
+  CORLAstatewideNmvrs=0
+  CvrCounties=[El Paso]
  */

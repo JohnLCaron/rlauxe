@@ -302,12 +302,12 @@ class TestAuditRoundJson {
         val fuzzMvrs = .01
         val config = Config.from(AuditType.CLCA, nsimTrials = 10)
 
-        val testCvrs = contestd.createSimulatedCvrs()
+        val testCvrs = contestd.createSimulatedCards()
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
-            else makeFuzzedCvrsForClca(listOf(contestd.info), testCvrs, fuzzMvrs)
+            else makeFuzzedCardsForClca(listOf(contestd.info), testCvrs, fuzzMvrs)
 
         val clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
-            MvrManagerForTesting(testCvrs, testMvrs, config.seed))
+            MvrManagerForTestingA(testCvrs, testMvrs, config.seed))
         val nextRound = clcaWorkflow.startNewRound()
         clcaWorkflow.runAuditRound(nextRound)
 

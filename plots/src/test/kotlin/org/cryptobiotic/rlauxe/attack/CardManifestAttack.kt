@@ -32,6 +32,7 @@ import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.util.tabulateOneAuditPools
 import kotlin.test.Test
 
+const val COUNTY = "county"
 // Vanessa's attack
 class CardManifestAttack {
     val name = "cardManifestAttack"
@@ -83,7 +84,7 @@ class CardManifestAttack {
             mcards.add(
                 AuditableCard.fromVotes(
                     "mvr$mvrCount",
-                    null,
+                    COUNTY, "",
                     index,
                     0L,
                     false,
@@ -102,7 +103,7 @@ class CardManifestAttack {
             mcards.add(
                 AuditableCard.fromVotes(
                     "Pool1-$poolCount",
-                    null,
+                    COUNTY, "",
                     index,
                     0L,
                     false,
@@ -123,7 +124,7 @@ class CardManifestAttack {
             // mcards.add(AuditableCard("mvr$mvrCount", mvrCount, 0L, false, intArrayOf(2), votes = mapOf(1 to intArrayOf(1)), poolId=null))
 
             // substitute cards with contest 2 undervotes
-            mcards.add( AuditableCard.fromVotes("mvr$mvrCount", null,
+            mcards.add( AuditableCard.fromVotes("mvr$mvrCount", COUNTY, "",
                 index,
                 0L,
                 false,
@@ -139,14 +140,14 @@ class CardManifestAttack {
         // these are Bobs pooled votes that match the mvrs
         repeat(25) {
             // mvr has Bob's votes
-            mcards.add(AuditableCard.fromVotes("Pool1-$poolCount", null, index, 0L, false, styleId=1, poolId=1, votes=null))
+            mcards.add(AuditableCard.fromVotes("Pool1-$poolCount", COUNTY, "", index, 0L, false, styleId=1, poolId=1, votes=null))
             poolCount++
             index++
         }
         // these are contestB pooled votes that match the mvrs
         repeat(25) {
             // mvr doesnt contain contest 1
-            mcards.add(AuditableCard.fromVotes("Pool1-$poolCount", null, index, 0L, false, styleId=1, poolId=1, votes=null))
+            mcards.add(AuditableCard.fromVotes("Pool1-$poolCount", COUNTY, "", index, 0L, false, styleId=1, poolId=1, votes=null))
             poolCount++
             index++
         }
@@ -185,7 +186,7 @@ class CardManifestAttack {
         println("true Contest totals")
         realcontestUA.forEach { contestUA -> println(contestUA.showSimple())}
 
-        val cardStyle = CardStyle("groupB", 1, groupBcontests, false)
+        val cardStyle = CardStyle(COUNTY, "groupB", 1, groupBcontests, false)
         val realPools = calcOneAuditPoolsFromMvrs(infos, listOf(cardStyle), mvrs)
         realPools.forEach{ println(it) }
         println("--------------------- end truth")
@@ -270,7 +271,7 @@ class CreateElectionForAttack(
     override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(mvrs, populations)
     override fun unsortedMvrsExternal() = null
     override fun contestsUA() = contestsUA
-    override fun cardStyles() = populations
+    override fun cardStyles() = populations ?: cardPools!!
     override fun cards() = Closer( cards.iterator() )
     override fun cardPools() = cardPools
     override fun ncards() = cards.size
@@ -286,6 +287,7 @@ fun ContestWithAssertions.showSimple() = buildString {
 // TODO get rid of
 data class OneAuditPoolForAttack(override val poolName: String, override val poolId: Int, val hasExactContests: Boolean,
                         val ncards: Int, val regVotes: Map<Int, ContestVotes>) : CardPoolIF {
+    override fun county() = COUNTY
     override fun name() = poolName
     override fun id() = poolId
     override fun hasExactContests() = hasExactContests

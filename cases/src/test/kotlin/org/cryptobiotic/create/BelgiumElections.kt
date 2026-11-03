@@ -17,7 +17,7 @@ import kotlin.test.Test
 
 
 class BelgiumElections {
-    val year = 2019
+    val year = 2024
     val toptopdir = "$cases/belgium/belgium$year"
     val belgiumInput = belgiumInput(year)
 

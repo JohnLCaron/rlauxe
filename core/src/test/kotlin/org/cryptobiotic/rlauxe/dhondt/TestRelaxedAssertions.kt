@@ -5,11 +5,13 @@ import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.persist.json.writeRelaxedAssertionProofs
+import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
+import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestRelaxedAssertions {
-    val topdir = "$cases/belgium/belgium2024"
+    val topdir = "$cases/belgium/belgium2019"
     val auditRecord = AuditRecord.read(topdir)!! as CompositeAuditRecord
     val contests = auditRecord.contests
     val lastRound = auditRecord.rounds.last()
@@ -125,14 +127,14 @@ class TestRelaxedAssertions {
     @Test
     fun testWriteOneContestsJson() {
         val contestRound = lastRound.contestRounds.find { it.id == 5 }!!
-        val filename = "/home/stormy/rla/temp/assertionsSingleBT.v3.json"
+        val filename = "$testdataDir/dhondt/assertionsSingleBT.v3.json"
         writeRelaxedAssertionProofs(filename, listOf(contestRound), config.riskLimit, sampleLimits)
     }
 
     @Test
     fun testWriteOneContestsNoFailuresJson() {
         val contestRound = lastRound.contestRounds.find { it.id == 10 }!!
-        val filename = "/home/stormy/rla/temp/nofailures.v5.json"
+        val filename = "$testdataDir/dhondt/nofailures.v5.json"
         val json = writeRelaxedAssertionProofs(filename, listOf(contestRound), config.riskLimit, sampleLimits)
         //println(json)
     }
@@ -140,7 +142,8 @@ class TestRelaxedAssertions {
     @Test
     fun testWriteAllContestsJson() {
         // val filename = "/home/joncifer/rla/dhondt/assertions2024.v10.json"
-        val filename = "/home/stormy/rla/dhondt/assertions2024.v10.json"
+        val filename = "$testdataDir/dhondt/assertions2019.v10.json"
+        validateOutputDirOfFile(filename)
         val contestRounds = lastRound.contestRounds
         val json = writeRelaxedAssertionProofs(filename, contestRounds, config.riskLimit, sampleLimits)
         println(json)
@@ -164,7 +167,7 @@ class TestRelaxedAssertions {
         //val candSeat: ContestSeatsRev = CandSeatRangeBuilderRev(contestRound).partyRanges
         //println(candSeat.showSeatRanges())
 
-        val filename = "/home/stormy/rla/temp/assertionsBruxelle.v5.json"
+        val filename = "$testdataDir/dhondt/assertionsBruxelle.v5.json"
         val json = writeRelaxedAssertionProofs(filename, listOf(contestRound), config.riskLimit, sampleLimits)
         println(json)
     }
@@ -186,7 +189,7 @@ class TestRelaxedAssertions {
         //val candSeat: ContestSeatsRev = CandSeatRangeBuilderRev(contestRound).partyRanges
         //println(candSeat.showSeatRanges())
 
-        val filename = "/home/stormy/rla/temp/assertionsHainut.v5.json"
+        val filename = "$testdataDir/dhondt/assertionsHainut.v5.json"
         writeRelaxedAssertionProofs(filename, listOf(contestRound), config.riskLimit, sampleLimits)
     }
 }

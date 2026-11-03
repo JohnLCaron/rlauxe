@@ -15,7 +15,7 @@ class TestBelgiumInput {
     val year = 2019
     val inputs = belgiumInput(year)
 
-    val topdir = "$cases/belgium/belgium2024"
+    val topdir = "$cases/belgium/belgium2019"
     val limitsFilename = "$topdir/sampleLimits.txt"
     val canonicalPartiesFilename = "$topdir/canonicalParties.txt"
 
@@ -55,6 +55,7 @@ class TestBelgiumInput {
 
     @Test
     fun testReadLimitsTxtFile() {
+        println(limitsFilename)
         val result = readLimitsTxtFile(limitsFilename)
         result.forEach { println(it) }
     }

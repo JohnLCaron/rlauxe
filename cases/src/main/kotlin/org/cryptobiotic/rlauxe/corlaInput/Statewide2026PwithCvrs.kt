@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.boulder.BoulderInput
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
+import org.cryptobiotic.rlauxe.util.Locations.cases
 
 import kotlin.collections.forEach
 
@@ -213,8 +214,9 @@ class CountyInput2026(val county: String): CountyInput {
 }
 
 class Boulder26PInput(): BoulderInput  {
+    val cvrdir = "$cases/corla/2026p/cvrs"
     override val electionName= "Boulder2026p"
-    override val cvrsSource = "/resources/data/cases/boulder2026p/2026P-Redacted-CVR-Public.csv"
+    override val cvrsSource = "$cvrdir/2026P-Redacted-CVR-Public.csv"
     override val manifestSource = "$auditcenter/2026/primary/files/Boulder.csv"
     override val sovoSource = "/resources/data/cases/boulder2026p/2026P-Boulder-County-Official-Statement-of-Votes.csv"
     override val year = "2026pc"

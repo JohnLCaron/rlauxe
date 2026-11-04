@@ -31,7 +31,7 @@ class TestContestTabulationCsv {
         val tabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infos)
         val target = tabs.values.toList()
 
-        val csvFile = "$testdataDir/tests/scratch/contestTabulationCsvFile.csv"
+        val csvFile = "$testdataDir/contestTabulationCsvFile.csv"
         val csv = writeContestTabulationCsvFile(target, csvFile)
         print(ContestTabulationHeader)
         println(csv)
@@ -62,7 +62,7 @@ class TestContestTabulationCsv {
         val tabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infos)
         val target = tabs.values.toList()
 
-        val csvFile = "$testdataDir/tests/scratch/contestTabulationCsvIrv.csv"
+        val csvFile = "$testdataDir/contestTabulationCsvIrv.csv"
         val csv = writeContestTabulationCsvFile(target, csvFile)
         print(ContestTabulationHeader)
         println(csv)

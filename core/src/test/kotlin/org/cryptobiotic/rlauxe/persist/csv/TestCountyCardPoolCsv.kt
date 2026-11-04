@@ -22,7 +22,7 @@ class TestCountyCardPoolCsv {
 
         val target = listOf(makeRegPool(infos), makeRegPool(infos), makeRegPool(infos),)
 
-        val csvFile = "$testdataDir/tests/scratch/countyCardPoolCsvFile.csv"
+        val csvFile = "$testdataDir/countyCardPoolCsvFile.csv"
         writeCountyCardPoolCsvFile(target, csvFile)
 
         val roundtrip = readCountyPoolsCsvFile(csvFile, target.first().styles)

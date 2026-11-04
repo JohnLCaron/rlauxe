@@ -45,15 +45,15 @@ class TestAuditableCard {
         val id = Random.nextInt()
         val card1 = AuditableCard.fromVotes ("cvr$id", COUNTY, "", 42, 4422L, false, // intArrayOf(1,2,3),
             votes=mapOf(2 to intArrayOf(2), 3 to intArrayOf(1,2,3), 4 to intArrayOf(4,5,6), 1 to intArrayOf(1), 42 to IntArray(0), 11 to intArrayOf()), poolId=null, styleId=99)
-        assertEquals("""AuditableCard(id='cvr$id', index=42, prn=4422, styleId=99, votes= 1:1, 2:2, 3:[1, 2, 3], 4:[4, 5, 6], 11:[], 42:[],)""",
+        assertEquals("""AuditableCard(id='cvr$id', county='county', index=42, prn=4422, styleId=99, votes= 1:1, 2:2, 3:[1, 2, 3], 4:[4, 5, 6], 11:[], 42:[],)""",
             card1.toString())
 
         val card2 = AuditableCard ("cvr$id", COUNTY, "loc$id", 42, 4422L, true, styleId=42,
             card1.contestIds, card1.contestStarts, card1.candidates, poolId=422)
-        assertEquals("""AuditableCard(id='cvr$id', location='loc$id', index=42, prn=4422, styleId=42, phantom=true, poolId=422, votes= 1:1, 2:2, 3:[1, 2, 3], 4:[4, 5, 6], 11:[], 42:[],)""",
+        assertEquals("""AuditableCard(id='cvr$id', county='county', location='loc$id', index=42, prn=4422, styleId=42, phantom=true, poolId=422, votes= 1:1, 2:2, 3:[1, 2, 3], 4:[4, 5, 6], 11:[], 42:[],)""",
             card2.toString())
 
-        assertEquals("""AuditableCard(id='99', index=0, prn=0, styleId=678, phantom=true, votes=null)""",
+        assertEquals("""AuditableCard(id='99', county='', index=0, prn=0, styleId=678, phantom=true, votes=null)""",
             AuditableCard.empty("99", true, styleId=678).toString())
     }
 

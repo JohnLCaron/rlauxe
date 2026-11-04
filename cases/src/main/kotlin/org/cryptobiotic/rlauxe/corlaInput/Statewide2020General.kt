@@ -67,47 +67,6 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
         )
         extras.forEach { result[it.contestName] = it }
 
-        // compare canonical contest counties and CountyTabulateCsv
-        //  countyTabulateCsv doesnt have 'Gunnison' from canonical
-        //  countyTabulateCsv doesnt have 'San Juan' from canonical
-
-        // remove these contests: TODO some? are in cvrs; see TestContestNames
-        //countyTabulate missing auditcenter 'Gunnison County Commissioner - District 1'
-        //countyTabulate missing auditcenter 'Gunnison County Commissioner - District 2'
-        //countyTabulate missing auditcenter 'Gunnison County Court Judge - Burgemeister'
-        //countyTabulate missing auditcenter 'Town of Marble - Board of Trustees'
-        //countyTabulate missing auditcenter 'Town of Marble Ballot Issue 2A'
-        //countyTabulate missing auditcenter 'San Juan County Commissioner - District 1'
-        //countyTabulate missing auditcenter 'San Juan County Commissioner - District 2'
-        //countyTabulate missing auditcenter 'San Juan County Court Judge - Edwards'
-
-        /*
-        //// Baca
-        result.remove("Baca County Commissioner - District 1")
-        result.remove("Baca County Commissioner - District 3")
-        result.remove("Springfield School District RE-4 Ballot Issue 4A")
-
-        //// Gunnison
-        // Gunnison had 34 mvrs sampled; commissioner District 1; vote margin 2309; diluted margin 20.376%;
-        // total cvrs 11332. risk limit 4%
-        result.remove("Gunnison County Commissioner - District 1")
-        result.remove("Gunnison County Commissioner - District 2")
-        result.remove("Gunnison County Court Judge - Burgemeister")
-        result.remove("Town of Marble - Board of Trustees")
-        result.remove("Town of Marble Ballot Issue 2A")
-
-        // or some resom there no tabulation for these contests
-        //// Las Animas
-        result.remove("Las Animas County Commissioner - District 1")
-        result.remove("Las Animas County Commissioner - District 2")
-        result.remove("Las Animas County Referred Measure 1A")
-        result.remove("Town of Cokedale Referred Measure 2A")
-
-        //// San Juan
-        result.remove("San Juan County Commissioner - District 1")
-        result.remove("San Juan County Commissioner - District 2")
-        result.remove("San Juan County Court Judge - Edwards")
-*/
         result.toSortedMap()
     }
 

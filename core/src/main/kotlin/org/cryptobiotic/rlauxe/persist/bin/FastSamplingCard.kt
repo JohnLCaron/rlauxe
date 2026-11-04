@@ -69,6 +69,8 @@ fun writeFastSamplingCards(cards: CloseableIterator<AuditableCard>, styles: List
             if (card.phantom && (card.styleId < 0)) {
                 dos.writeShort(-card.contestIds[0]) // phantom has a single contest // TODO ??
             } else {
+                if (styleMap[Pair(card.county, card.styleId)] == null)
+                    print("")
                 dos.writeShort(styleMap[Pair(card.county, card.styleId)]!! )  // 2 bytes
             }
             count++

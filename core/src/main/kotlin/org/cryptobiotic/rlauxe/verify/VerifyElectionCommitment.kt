@@ -132,8 +132,8 @@ fun verifyCardManifest(
             }
 
             // check that batch exists
-            if (!useVotes(card.styleId) && !batchSet.contains(card.style())) {
-                results.addError("card $count ${card.id()} batch ${card.style()} not in batches")
+            if (!useVotes(card.styleId) && !batchSet.contains(card.style)) {
+                results.addError("card $count ${card.id()} batch ${card.style} not in batches")
             }
 
             // the same as tabulateAuditableCards(), replicate so we can do allCvrVotes, nonpooled, pooled

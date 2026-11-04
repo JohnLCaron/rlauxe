@@ -16,7 +16,7 @@ import kotlin.math.ln
 import kotlin.test.Test
 
 class TestCorlaEstimate {
-    val topdir = "$cases/corla/corla2020/sim"
+    val topdir = "$cases/corla/2020"
 
     @Test
     fun showEstimateGentle() {
@@ -27,7 +27,7 @@ class TestCorlaEstimate {
 
     @Test
     fun testCorlaCalc() {
-        val topdir = "$cases/corla/corla2020/uniform"
+        // val topdir = "$cases/corla/corla2020/uniform"
         val auditRecord = AuditRecord.read(topdir)!!
         val sorted = auditRecord.contests.sortedBy { it.Nphantoms }.reversed()
         sorted.forEach { contestUA ->

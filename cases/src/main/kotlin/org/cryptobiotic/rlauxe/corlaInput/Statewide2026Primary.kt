@@ -77,7 +77,7 @@ open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput(
     override fun corlaCountyInput(countyName: String): CountyInput? = null
     override fun skipCounties(countyName: String) = false
 
-    // in canonical manifest order TODO perhaps read the file with county ids ContestIdsByCounty (2026 only)
+    // in canonical manifest order
     override fun counties() = canonicalCounties
 
     // canonical contests and choices

@@ -49,7 +49,7 @@ class TestFastSamplingCards {
         while (fastIter.hasNext() && cardIter.hasNext()) { //  && ncards < 1000_000) {
             val card = cardIter.next()
             val fastCard: FastSamplingCard = fastIter.next()
-            assertEquals(card.style(), fastCard.style)
+            assertEquals(card.style, fastCard.style)
             assertEquals(card.prn(), fastCard.prn)
             count++
         }
@@ -120,7 +120,7 @@ class TestFastSamplingCards {
         while (fastIter.hasNext() && protoIter.hasNext()) { //  && ncards < 1000_000) {
             val card = protoIter.next()
             val fastCard: FastSamplingCard = fastIter.next()
-            assertEquals(card.style(), fastCard.style)
+            assertEquals(card.style, fastCard.style)
             assertEquals(card.prn(), fastCard.prn)
             count++
         }
@@ -148,7 +148,7 @@ class TestFastSamplingCards {
         while (fastIter.hasNext() && protoIter.hasNext()) { //  && ncards < 1000_000) {
             val card = protoIter.next()
             val fastCard: FastSamplingCard = fastIter.next()
-            assertEquals(card.style(), fastCard.style)
+            assertEquals(card.style, fastCard.style)
             assertEquals(card.prn(), fastCard.prn)
             count++
         }

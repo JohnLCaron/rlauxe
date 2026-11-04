@@ -67,7 +67,6 @@ class CountyTabsConverter(val county: String,
 
                 countyContestInfo.candidateNames.filter { !isWriteIn(it.key) }
                     .forEach { (exportCandidate, countyCandId) ->
-                        // use a lookup instead of a map TODO worth the complexity ??
                         val canonCandidateName =
                             stateInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
                         if (canonCandidateName == null) {

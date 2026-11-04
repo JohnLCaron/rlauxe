@@ -9,9 +9,8 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
-// Too slow for unit tests
 class TestWriteFiles {
-    val tempProtoFile = "$testdataDir/temp/sortedCards.proto"
+    val tempProtoFile = "$testdataDir/sortedCards.proto"
 
     @Test
     fun writeProtoFile () {

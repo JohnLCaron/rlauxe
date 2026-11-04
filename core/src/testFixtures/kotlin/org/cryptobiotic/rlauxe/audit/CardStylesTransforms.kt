@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.estimate.COUNTY
+import org.cryptobiotic.rlauxe.persist.csv.AddStyles
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
@@ -29,7 +31,7 @@ fun mvrsToAuditableCardsList(
         val (contestIds, contestStarts, candidates) = makeFromVotes(org.votes)
         AuditableCard(
             org.id,
-            "",
+            COUNTY,
             "",
             cardIndex++,
             0,
@@ -81,7 +83,7 @@ class CvrsToCardStylesIterator(
         val (contestIds, contestStarts, candidates) = makeFromVotes(votes)
         val cardm = AuditableCard(
             id = org.id,
-            county = "",
+            county = COUNTY,
             location = "",
             index = cardIndex++,
             prn = 0,
@@ -105,11 +107,12 @@ class MergeStylesIntoCards(
     val styles: List<StyleIF>,
 ): CloseableIterable<AuditableCard> {
     override fun iterator(): CloseableIterator<AuditableCard> {
-        return mergeStylesIntoCards(Closer(cardsIterable.iterator()), styles)
+        return TransformingIterator(Closer(cardsIterable.iterator()), AddStyles(styles))
+        // return mergeStylesIntoCards(Closer(cardsIterable.iterator()), styles)
     }
 }
 
-// merge styles into cards iterator, can be iterated once
+/* merge styles into cards iterator, can be iterated once
 fun mergeStylesIntoCards(cardsIter: CloseableIterator<AuditableCard>, styles: List<StyleIF>): CloseableIterator<AuditableCard> {
     val styleMap: Map<Pair<String, Int>, StyleIF> = styles.associate{ Pair(it.county(), it.id()) to it }
     return TransformingIterator(cardsIter) { org ->
@@ -118,9 +121,9 @@ fun mergeStylesIntoCards(cardsIter: CloseableIterator<AuditableCard>, styles: Li
             style != null -> style
             org.styleId == CardStyle.phantomStyle.id() -> CardStyle.phantomStyle
             org.styleId == CardStyle.fromCvrStyle.id() -> CardStyle.fromCvrStyle
-            else -> throw RuntimeException()
+            else ->
+                throw RuntimeException()
         }
         org.setStyle(cardStyle)
     }
-}
-
+} */

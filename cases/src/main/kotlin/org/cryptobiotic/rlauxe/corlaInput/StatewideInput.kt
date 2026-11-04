@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
 import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyMvrCount
-import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.auditcenter.readColoradoContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.readContestComparisonCsv
@@ -20,9 +19,10 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import java.nio.charset.Charset
 import kotlin.collections.forEach
 
-val defaultCharset = "ISO-8859-1" // TODO something
+val defaultCharset = Charset.forName("ISO-8859-1") // TODO or UTF-8 ? also see Windows-1252
 private val logger = KotlinLogging.logger("StatewideInput")
 
 /*
@@ -104,14 +104,6 @@ abstract class StatewideInput(
         result[contestName] = CanonicalContest(current.stateInput, current.contestName, choicesIn = achoices).addCounties(current.counties.toList())
     }
 
-    // in canonical manifest order TODO perhaps read the file with county ids ContestIdsByCounty (2026)
-    open fun countiesOld(): List<String>  = canonicalContests().values.map { it.counties }
-        .flatten()
-        .filter { !skipCounties(it) }
-        .toSet()
-        .toList()
-        .sorted()
-
     // in canonical manifest order
     open fun counties(): List<String> {
         val alphaList = canonicalContests().values.map { it.counties }
@@ -177,33 +169,23 @@ abstract class StatewideInput(
         readContestComparisonCsv(mvrComparisonFile)
     }
 
-    // TODO needed ?
     // for each contest, total mvrs over all counties
     // data class ContestMvrCount(val contestName: String) {
     //    var countMvr = 0
     //    var countStatewide = 0
     val contestsFromMvrs: List<ContestMvrCount> by lazy { cardComparison().contestMvrs }
 
-    // TODO needed ?
     // for each county, over all contests
     // data class CountyMvrCount(val countyName: String) {
     //    var countMvr = 0
     val countiesFromMvrs: List<CountyMvrCount> by lazy { cardComparison().countyMvrs }
-
-    // TODO needed ?
-    // data class CountyStylesFromMvrs(
-    //    val countyName: String
-    //    val styles = Map<Set<String>, MvrStyle>
-    // data class MvrStyle(val id: Int, val contests: Set<String>) {
-    //    var cardCount = 0
-    val stylesFromMvrs: List<CountyStylesFromMvrs> by lazy { cardComparison().stylesByCounty }
 
     ///////////////////
     // merge info from all the above, derive the following
     open fun mergedInfo() = mergedInfo
     private val mergedInfo: MergedInfo by lazy {
         mergeContestInfo(this)
-    } // mergedContestInfo, strataInfo, statewideContests
+    }
 
     val mergedContestMap: Map<String, MergedContestInfo> by lazy {
         mergedInfo().mergedContestInfo.associateBy { it.contestName }
@@ -222,8 +204,7 @@ abstract class StatewideInput(
     open fun strataPopulation() = strataPopulation
     private val strataPopulation: Map<String, Int> by lazy { mergedInfo().strataInfo.associate { it.strataName to it.ballotCardCount } } // county name to population
 
-    //// TODO all StatewideInput classes should be consistent already
-    //// needed to match the export contest/candidata names, all StatewideInput classes should be consistent already
+    //// needed to match the export contest/candidata names
     fun matchCanonicalContest(county: String, exportContestName: String): CanonicalContest? {
         val cleaned = contestNameCleanup(county, exportContestName)
         val munged = munge(cleaned)
@@ -313,19 +294,7 @@ data class MergedContestInfo(
     val choices: List<String>, // TODO why cant we convert to canonical choices immediately ??
     val counties: Set<String>,
 
-    // data class CorlaContestRoundCsv(
-    //    val contestName: String,
-    //    val auditReason: AuditReason,
-    //    val nwinners: Int,
-    //    val ballotCardCount: Int,         // population size = eg county size when uniform audit
-    //    val contestBallotCardCount: Int,  // Nc = number of cards with this contest on it
-    //    val winners: String,
-    //    val minMargin: Int,
-    //    val riskLimit: Double,  // TODO use this
-    //    val gamma: Double,      // and this ?? = 1.03905000
-    //    val optimisticSamplesToAudit: Int, // check if these ever differ
-    //    val estimatedSamplesToAudit: Int,
-    //)
+    /// contest round
     val auditReason: AuditReason,
     val corlaPop:Int,   // ballot_card_count = corla population
     val nc:Int,         // contest_ballot_card_count

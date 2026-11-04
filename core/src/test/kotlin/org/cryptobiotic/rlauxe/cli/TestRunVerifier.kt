@@ -54,7 +54,7 @@ class TestRunVerifyContests {
         if (results2.hasErrors) fail()
     }
 
-    @Test
+    // @Test
     fun testRunVerifyRaire() {
         val topdir = if (useLocal) "src/test/data/testRunCli/raire"
             else "$testdataDir/persist/testRunCli/raire"

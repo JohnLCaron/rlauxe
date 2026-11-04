@@ -33,7 +33,7 @@ data class AuditableCard (
     // After construction, ie during the audit, it always has a style. This allows us to delegate "possible contests"
     // to the style or cvr.votes.
     // you can change the style but not null it; could also prevent changing altogether after its set
-    private var style: StyleIF? = null
+    var style: StyleIF? = null
     fun setStyle(style: StyleIF): AuditableCard {
         if (styleId != style.id())
             logger.warn{"AuditableCard.setStyle $styleId != ${style.id()}"}
@@ -41,12 +41,14 @@ data class AuditableCard (
         this.style = style
         return this
     }
+
+    /* deprecated, use hasContest()
     fun style(): StyleIF? {
         return if (style != null) style
         else if (styleId == -1) CardStyle.fromCvrStyle
         else if (styleId == -2) CardStyle.phantomStyle
         else null
-    } // could work harder so its not null
+    } // could work harder so its not null */
 
     private val votes: Map<Int, IntArray>? by lazy {
         if (contestIds.isEmpty()) null else {
@@ -107,7 +109,7 @@ data class AuditableCard (
     fun toCvr() = Cvr(id, votes!!, phantom, poolId())
 
     override fun toString() = buildString {
-        append("AuditableCard(id='$id',county='$county',")
+        append("AuditableCard(id='$id', county='$county',")
         if (location.isNotEmpty()) append(" location='$location',")
         append(" index=$index, prn=$prn, styleId=$styleId,")
         if (phantom) append(" phantom=$phantom,")

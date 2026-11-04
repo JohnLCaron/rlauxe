@@ -49,7 +49,8 @@ class AuditableCardBuilder(
             votes = votes,
             poolId = poolId,
         )
-        if (style != null) cardm.setStyle(style)
+        if (style != null)
+            cardm.setStyle(style)
         return cardm
     }
 
@@ -64,7 +65,7 @@ class AuditableCardBuilder(
             card.styleId,
             card.poolId(),
             card.votes(),
-            style=card.style(),
+            style=card.style,  // dont use style()
         )
     }
 }

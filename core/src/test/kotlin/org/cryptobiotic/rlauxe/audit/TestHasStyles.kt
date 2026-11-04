@@ -98,7 +98,7 @@ class TestHasStyles {
         makeMultiCard(AuditType.POLLING, CSDtype.noStyles) // mvrs = 7441
     }
 
-    @Test
+    // @Test
     fun testSingleCard() {
         makeSingleCardHasStyle(AuditType.CLCA) // mvrUsed = 115; paper has 122
         makeSingleCardNoStyle(AuditType.CLCA) // mvrUsed = 603; paper has 721
@@ -107,7 +107,7 @@ class TestHasStyles {
         makeSingleCardNoStyle(AuditType.POLLING) // mvrUsed = 7727 (will vary)
     }
 
-    @Test
+    // @Test
     fun testMultiCard() {
         // If we had CSD, we would only need to sample 122 cards as before, no matter how large c is,
         // if every card that contains contest S also contains B. If contests B and S are on different

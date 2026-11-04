@@ -34,7 +34,16 @@ class TestCardBuilders {
     fun testConvertCardsRoundtrip() {
         val test = MultiContestTestData(20, 11, 20000)
         val (mvrs, cards, pools, styles) = test.makeMvrCardAndPops()
-        val cardMap = cards.associateBy { it.id }
+
+        // ids not unique
+        val orgMap = mutableMapOf<Int, AuditableCard>()
+        cards.forEach {
+            val already = orgMap[it.index()]
+            if (already == null) orgMap.put(it.index(), it) else
+                print("")
+
+        }
+        // cards.associateBy { it.id }
 
         val cardbs = mutableListOf<AuditableCardBuilder>()
         cards.forEach {
@@ -43,10 +52,16 @@ class TestCardBuilders {
         }
 
         // convert back to Cvr
-        val roundtrip: List<AuditableCard> = cardbs.map { it.build() }
+        val roundtrip: List<AuditableCard> = cardbs.map {
+            val cb = it.build()
+            cb
+        }
         // same order
         roundtrip.forEach{
-            val orgCard = cardMap[it.id]!!
+            val orgCard = orgMap[it.index]!!
+            if (!orgCard.equals(it)) {
+                orgCard.equals(it)
+            }
             assertEquals(orgCard, it)
         }
     }

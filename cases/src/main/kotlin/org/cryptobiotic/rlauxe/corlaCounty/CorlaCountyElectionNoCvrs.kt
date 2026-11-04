@@ -112,7 +112,7 @@ class CorlaCountyElectionNoCvrs(
             if (ncards > 0 && candVotes.values.sum() <= info.voteForN * ncards) {
                 // info.metadata["PoolPct"] = (100.0 * poolTotalCards / useNc).toInt().toString()
                 val contest = if (info.isIrv) // TODO IRV
-                    IrvContest(info, winners = listOf(0), ncards, Ncast = ncards, undervotes = 0) // TODO this is fake...
+                    IrvContest(info, winners = listOf(0), ncards, Ncast = ncards, undervotes = 0) // TODO IRV this is fake...
                 else
                     Contest(info, candVotes, ncards, ncards)
                 contests.add(contest)

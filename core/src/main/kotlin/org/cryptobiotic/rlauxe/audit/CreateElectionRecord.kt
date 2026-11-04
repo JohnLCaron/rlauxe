@@ -37,14 +37,11 @@ interface ElectionBuilder {
     fun countyAuditcenterPools(): List<CountyPools>? = null
     fun countyCvrPools(): List<CountyPools>? = null // for debugging
 
-    // only used in CreateAuditRecord to write to cardManifest.
-    // if (config.election.mvrSource == MvrSource.testPrivateMvrs), supply one or the other:
-    // these are the mvrs, they must map 1-1 to cards(), and contain the votes
-    fun unsortedMvrsInternal(): List<AuditableCard>? // for in-memory case, poolId used also as batch name?
+    // only used in CreateAuditRecord when sourceMvrs=testPrivateMvrs. supply one or these three:
+    // transform mvrs to cardManifest; this iterator must remove the cvrs where needed, styles need not be merged
+    fun unsortedMvrsInternal(): List<AuditableCard>? // for in-memory case
     fun unsortedMvrsExternal(): CloseableIterator<AuditableCard>? // for out-of-memory case
-
-    // TODO use sortedCards and transform to mvrs by adding simulated cvrs where neeeded
-    //  can only be used once
+    // transform sortedCards to mvrs by adding simulated cvrs where neeeded
     fun cardToMvrTransformer(): ((AuditableCard) -> AuditableCard)? = null
 }
 

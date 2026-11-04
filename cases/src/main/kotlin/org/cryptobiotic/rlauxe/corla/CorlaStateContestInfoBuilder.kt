@@ -33,7 +33,7 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
                 mcontest.contestName,
                 contestInfos.size + 1,
                 candidateNames,
-                SocialChoiceFunction.PLURALITY, // TODO
+                SocialChoiceFunction.PLURALITY, // TODO IRV
                 mcontest.voteForN
             )
 

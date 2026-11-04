@@ -28,7 +28,8 @@ class TestPersistedWorkflow {
         val testMvrs = testData.makeCvrsFromContests()
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
-        val election = CreateElectionFromCvrs("testPersistedSingleClca", contestsUA, testMvrs, AuditType.CLCA, mvrSource=MvrSource.testPrivateMvrs)
+        val election = CreateElectionFromCvrs("testPersistedSingleClca", contestsUA, testMvrs, AuditType.CLCA,
+            styles=testData.cardStyles, mvrSource=MvrSource.testPrivateMvrs)
         createElectionRecord(election, topdir = topdir, clear = true)
 
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01)
@@ -54,7 +55,8 @@ class TestPersistedWorkflow {
         val testMvrs = testData.makeCvrsFromContests()
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
-        val election = CreateElectionFromCvrs("testPersistedAuditClca", contestsUA, testMvrs, AuditType.CLCA, mvrSource=MvrSource.testPrivateMvrs)
+        val election = CreateElectionFromCvrs("testPersistedAuditClca", contestsUA, testMvrs, AuditType.CLCA,
+            styles=testData.cardStyles, mvrSource=MvrSource.testPrivateMvrs)
         createElectionRecord(election, topdir = topdir, clear = true)
 
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01)
@@ -90,7 +92,7 @@ class TestPersistedWorkflow {
         val contestsUA = listOf(contestOA)
 
         val election = CreateElectionFromCvrs("testPersistedOneAudit", contestsUA, mvrs, AuditType.ONEAUDIT,
-            cardPools = cardPools, mvrSource=MvrSource.testPrivateMvrs)
+            cardPools = cardPools, styles=cardPools, mvrSource=MvrSource.testPrivateMvrs)
         createElectionRecord(election, topdir = topdir, clear = true)
 
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 20000, simFuzzPct = .01)
@@ -134,7 +136,7 @@ class TestPersistedWorkflow {
         val contestsUA = listOf(contestOA)
 
         val election = CreateElectionFromCvrs("testPersistedOneAudit", contestsUA, mvrs, AuditType.ONEAUDIT,
-            cardPools = pools, mvrSource=MvrSource.testPrivateMvrs)
+            cardPools = pools, styles=pools, mvrSource=MvrSource.testPrivateMvrs)
         createElectionRecord(election, topdir = topdir, clear = true)
 
         createAuditRecord(config, election, topdir = topdir, externalSortDir=topdir, verify=true)

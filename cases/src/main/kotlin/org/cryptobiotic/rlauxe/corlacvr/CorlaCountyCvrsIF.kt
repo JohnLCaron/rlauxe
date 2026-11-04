@@ -31,7 +31,6 @@ fun readCountyCvrsFromFile(filename: String, showHeaders: Boolean = false, showS
         val inputStream = zipReader.inputStream(innerFilename)
         val reader: Reader = InputStreamReader(inputStream, "UTF-8")
         CSVParser.parse(reader, CSVFormat.DEFAULT)
-        // TODO if we could look ahead, we could give them the first row
 
     } else {
         CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)

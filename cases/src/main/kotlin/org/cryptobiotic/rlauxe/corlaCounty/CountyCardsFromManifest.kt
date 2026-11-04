@@ -40,7 +40,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
         infos = corlaCvrs.makeContestInfo()
 
         aggGroup = corlaCvrs.redaction().groups().find { it.groupName.lowercase() == "aggregated"}
-        groupTabs = if (aggGroup != null) { // if agg grup exists, ignore other groups. may have to change this if someone else is adding groups
+        groupTabs = if (aggGroup != null) { // if agg group exists, ignore other groups. may have to change this if someone else is adding groups
             // group subtotals and rows with ids.
             val tabs = mutableMapOf<Int, ContestTabulation>()
             aggGroup.candVotes.forEach { (scontestId, candVotes) ->
@@ -194,7 +194,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
                     imprintedId = manifestEntry.imprintedId(),
                     location = manifestEntry.location(),
                     style = "missing",
-                    votes = emptyList(), // TODO must simulate for mvrs
+                    votes = emptyList(),
                     poolName = "missing",
                 )
 
@@ -212,7 +212,7 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
                     imprintedId = manifestEntry.imprintedId(),
                     location = manifestEntry.location(),
                     style = rowForManifest.style.cardStyle,
-                    votes = rowForManifest.row.contestVotes, // must simulate redactions for cvrs; so these arent the mvrs
+                    votes = rowForManifest.row.contestVotes,
                     poolName = rowForManifest.poolName,
                 )
             }

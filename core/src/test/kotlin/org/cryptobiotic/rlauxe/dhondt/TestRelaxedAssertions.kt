@@ -20,7 +20,9 @@ class TestRelaxedAssertions {
 
     @Test
     fun testOneDHFailures() {
-        val contestRound = lastRound.contestRounds.find { it.id == 4 }!! // FlandresEast
+        // val contestId = 4 // FlandresEast (2024)
+        val contestId = 1 // Anvers (2019)
+        val contestRound = lastRound.contestRounds.find { it.id ==  contestId}!!
         val sampleLimit = sampleLimits[contestRound.id]
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit
@@ -30,7 +32,8 @@ class TestRelaxedAssertions {
         // println(relax.contestRanges().showSeatRanges())
 
         //           Vooruit/3-CD&V/3,          20,  0.5004,     3567,         800, 0.5112, 3567,
-        val expected = mapOf(28 to -1, 4 to 1)
+        // val expected = mapOf(28 to -1, 4 to 1) // 2024
+        val expected = mapOf(4 to -1, 10 to 1) // 2019
         checkExpectedContest(expected, relax.totalContestRange())
         println("-----------------------------------------------------------------------")
         //val candSeat: ContestSeatsRev = CandSeatRangeBuilderRev(contestRound).partyRanges
@@ -91,7 +94,8 @@ class TestRelaxedAssertions {
 
     @Test
     fun testMultipleDHFailures() {
-        val contestRound = lastRound.contestRounds.find { it.id == 1 }!! // Anvers
+        // val contestRound = lastRound.contestRounds.find { it.id == 1 }!! // Anvers (2024)
+        val contestRound = lastRound.contestRounds.find { it.id == 5 }!! // Hainut (2019)
         val sampleLimit = sampleLimits[contestRound.id]
         if (sampleLimit != null) {
             contestRound.haveSampleSize = sampleLimit
@@ -115,7 +119,8 @@ class TestRelaxedAssertions {
         //|                  PVDA 19 |  1  |     2    |  3  |       4   | could gain 1
         //|                  CD&V  4 |  2  |     3    |  3  |       3   | could lose 1
 
-        val expected = mapOf(24 to 1, 28 to -1, 19 to 1, 4 to -1)
+        // val expected = mapOf(24 to 1, 28 to -1, 19 to 1, 4 to -1) // 2024
+        val expected = mapOf(9 to -1, 11 to 1, 7 to 1) // 2019
         checkExpectedContest(expected, relax.totalContestRange())
         println("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV")
         //val relaxv = makeRelaxedAssertions(contestRound, .05, sampleLimit?.limit, useV = true)

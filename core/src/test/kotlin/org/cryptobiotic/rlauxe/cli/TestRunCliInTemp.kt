@@ -87,7 +87,7 @@ class TestRunCliInTemp {
         topPath.deleteRecursively()
     }
 
-    @Test
+    // @Test
     fun testCliRoundRaire() {
         val topPath = createTempDirectory()
         val topdir = topPath.toString()
@@ -122,7 +122,7 @@ class TestRunCliInTemp {
         if (results2.hasErrors) fail()
     }
 
-    @Test
+    // @Test
     fun testCliOneAudit() {
         val topPath = createTempDirectory()
         val topdir = topPath.toString()

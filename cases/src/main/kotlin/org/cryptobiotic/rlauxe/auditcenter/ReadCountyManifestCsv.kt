@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.corlaInput.defaultCharset
 import java.io.File
 import java.nio.charset.Charset
 import kotlin.io.path.Path
@@ -30,7 +31,7 @@ data class ManifestBatch(
 
 fun readCountyManifestCsv(filename: String): List<ManifestBatch> {
     val file = File(filename)
-    val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT) // TODO
+    val parser = CSVParser.parse(file, defaultCharset, CSVFormat.DEFAULT) // TODO
     val records = parser.iterator()
 
     // we expect the first line to be the headers

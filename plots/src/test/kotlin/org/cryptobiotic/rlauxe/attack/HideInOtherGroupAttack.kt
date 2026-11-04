@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.Config
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
@@ -245,3 +246,11 @@ class CardsWithStylesAttack(
 
     override fun close() = cards.close()
 }
+
+// deprecated, use hasContest()
+fun AuditableCard.style(): StyleIF? {
+    return if (this.style != null) this.style
+    else if (this.styleId == -1) CardStyle.fromCvrStyle
+    else if (this.styleId == -2) CardStyle.phantomStyle
+    else null
+} // could work harder so its not null

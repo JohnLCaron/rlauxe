@@ -50,19 +50,7 @@ class Statewide2026PMerged(ac:String?=auditcenter): StatewideInput(
     // Adams County Assessor - DEM,opportunistic_benefits,not_auditable,1,95537,64356,"""Thomas Swingle""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
     // Adams County Clerk and Recorder - DEM,opportunistic_benefits,not_auditable,1,95537,64356,"""Josh Zygielbaum""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
     // Adams County Clerk and Recorder - REP,opportunistic_benefits,not_auditable,1,95537,30876,"""Karen Hoopes""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
-    // data class CorlaContestRoundCsv(
-    //    val contestName: String,
-    //    val auditReason: AuditReason,
-    //    val nwinners: Int,
-    // SUM val ballotCardCount: Int,         // population size = eg county size when uniform audit
-    // SUM val contestBallotCardCount: Int,  // Nc = number of cards with this contest on it
-    //    val winners: String,
-    //    val minMargin: Int,
-    //    val riskLimit: Double,  // TODO use this
-    //    val gamma: Double,      // and this ?? = 1.03905000
-    //    val optimisticSamplesToAudit: Int, // check if these ever differ
-    //    val estimatedSamplesToAudit: Int,
-    //)
+
     override fun roundContests(): Map<String, CorlaContestRoundCsv> = roundContests
     private val roundContests: Map<String, CorlaContestRoundCsv> by lazy {
         val crmap = mutableMapOf<String, CorlaContestRoundAccum>()

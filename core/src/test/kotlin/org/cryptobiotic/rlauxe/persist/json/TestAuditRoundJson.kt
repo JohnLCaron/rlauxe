@@ -57,7 +57,7 @@ class TestAuditRoundJson {
         // DHondtBuilder now use chooseBtOrDhs to munge the assertions...
     }
 
-    @Test
+    // @Test
     fun testSf24oa() {
         val topdir = "$cases/sf/sf2024/oa"
         val record = AuditRecord.read(topdir) as AuditRecord

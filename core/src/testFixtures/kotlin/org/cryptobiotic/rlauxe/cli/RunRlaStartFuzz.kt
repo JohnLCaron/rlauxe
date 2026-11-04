@@ -195,7 +195,7 @@ class TestClcaElection(
         return CvrsToCardStylesIterator(
             AuditType.CLCA,
             Closer(allCvrs.iterator()),
-            null, null,
+            null, cardStyles(),
         )
     }
 }

@@ -51,7 +51,7 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String,
             if (transform != null) {
                 transformSortedCvrsToMvrs(publisher, transform)
             } else {
-                val unsortedMvrs = election.unsortedMvrsInternal() // make electionBuilder add the batches ??
+                val unsortedMvrs = election.unsortedMvrsInternal()
                 if (unsortedMvrs != null) {
                     writePrivateMvrsInternal(publisher, unsortedMvrs, election.cardStyles(), seed = config.creation.seed)
                 } else {

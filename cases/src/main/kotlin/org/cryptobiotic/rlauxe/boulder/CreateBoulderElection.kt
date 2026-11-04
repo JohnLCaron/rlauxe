@@ -83,7 +83,7 @@ class CreateBoulderElection(
         this.ncards = allCards.size
         val npops = emptyMap<Int, Int>() // TODO tabulateNpops(allCards, infoList)
 
-        // TODO cvrTabs dont have the irv part, so will fail in the raire library
+        // TODO IRV cvrTabs dont have the irv part, so will fail in the raire library
         contestsUA = makeContestWAs(contests, npops, cvrTabs, redactedPools, )
 
         //contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true, hasStyle = hasStyle)
@@ -432,8 +432,8 @@ class BoulderContestBuilder(val auditType: AuditType,
     override fun build(info: ContestInfo): ContestIF {
         val candVotes = candVoteTotals.filter { info.candidateIds.contains(it.key) } // remove Write-Ins
         info.metadata["PoolPct"] = (100.0 * poolTotalCards / useNc).toInt().toString()
-        return if (info.isIrv) // TODO
-                IrvContest(info, winners=listOf(0), useNc, Ncast=ncvrs, undervotes=0) // TODO this is fake...
+        return if (info.isIrv)
+                IrvContest(info, winners=listOf(0), useNc, Ncast=ncvrs, undervotes=0) // TODO IRV this is fake...
             else if (variant.phantoms) {
                 val nphantoms = useNc - cvrsTotalCards // the redacted cards arent counted, so become phantoms
                 ContestWithPhantoms(info, candVotes, useNc, ncvrs, nphantoms)

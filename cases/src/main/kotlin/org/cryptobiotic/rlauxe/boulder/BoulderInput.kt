@@ -11,6 +11,7 @@ interface BoulderInput : CountyInput {
         get() = "Boulder"
 
     val sovoSource: String
+    fun hasABgroups() = false
 
     fun sovo(): BoulderStatementOfVotes {
         return readBoulderSOV(this.sovoSource, this.electionName)

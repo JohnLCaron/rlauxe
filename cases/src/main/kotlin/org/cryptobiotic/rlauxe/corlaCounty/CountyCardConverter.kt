@@ -68,7 +68,7 @@ class CountyCardConverter(val county: String,
                 val candPairs = mutableListOf<Pair<Int, Int>>()
 
                 schemaContestInfo.candidateNames.filter { !isWriteIn(it.key) }.forEach { (exportCandidate, schemaCandId) ->
-                    // use a lookup instead of a map TODO worth the complexity ??
+                    // TODO use a lookup instead of a map: worth the complexity ??
                     val canonCandidateName = stateInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
                     if (canonCandidateName == null) {
                         logger.error{"no match on exportCandidateName '$exportCandidate' from county $county contest ${schemaContestInfo.name}"}

@@ -68,7 +68,7 @@ class TestMultiContestTestData {
 
     @Test
     fun testMakeCardLocationManifest() {
-        val ( mvrs, testCards, pools, styles) = test.makeMvrCardAndPops()
+        val ( _, testCards, _, _) = test.makeMvrCardAndPops()
 
         val tabs = tabulateAuditableCards(Closer(testCards.iterator()), infos).toSortedMap() // contestId -> candidateId -> nvotes
         tabs.forEach { id, tab ->

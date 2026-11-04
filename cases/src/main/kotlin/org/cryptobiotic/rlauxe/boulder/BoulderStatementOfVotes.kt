@@ -244,7 +244,7 @@ fun readBoulderStatementOfVotes(filename: String, electionName: String): Boulder
 
 fun readBoulderSOVfromInputStream(input: InputStream, electionName: String, inputSource: String): BoulderStatementOfVotes {
     val parser = CSVParser.parse(input, Charset.forName("UTF-8"), CSVFormat.DEFAULT)
-    // val parser = CSVParser.parse(File(filename), Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
+    // val parser = CSVParser.parse(File(filename), defaultCharset, CSVFormat.DEFAULT)
 
     val records = parser.iterator()
 

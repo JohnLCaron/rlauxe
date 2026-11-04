@@ -61,7 +61,7 @@ class CountyAuditRecord(
         return countyData.toSortedMap()
     }
 
-    fun readCountyMvrsAndTabulate(countyName: String) : Map<Int, ContestTabulation> {
+    /* fun readCountyMvrsAndTabulate(countyName: String) : Map<Int, ContestTabulation> {
         val countyMvrFile = "${publisher.unsortedMvrsDirectory()}/$countyName.csv"
         logger.debug { "readCountyMvrsAndTabulate on $countyMvrFile (exists=${exists(countyMvrFile)}"}
         if (!exists(countyMvrFile)) return emptyMap()
@@ -70,7 +70,7 @@ class CountyAuditRecord(
         val tabs =  tabulateAuditableCards(mvrs, infos)
         logger.debug { "got ${tabs.size} tabulations"}
         return tabs
-    }
+    } */
 
     // for viewer
     fun readCountyCvrsAndTabulate(countyName: String) : Map<Int, ContestTabulation> {

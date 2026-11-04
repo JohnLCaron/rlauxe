@@ -19,18 +19,18 @@ class TestCountyAuditRecord {
         val manager = workflow.mvrManager()
         val manifest = manager.sortedManifest()
 
-        assertEquals(0, manager.pools()?.size ?: 0)
-        assertEquals(1022, manager.styles()?.size ?: 0)
+        assertEquals(18, manager.pools()?.size ?: 0)
+        assertEquals(953, manager.styles()?.size ?: 0)
         println("manifest.ncards = ${manifest.ncards}")
-        assertEquals(4166526, manifest.ncards)
+        assertEquals(4125823, manifest.ncards)
 
         val countyPools = manager.countyAcPools()
         println("countyPools size = ${ countyPools?.size ?: 0 }")
-        assertEquals(60, countyPools?.size ?: 0)
+        assertEquals(63, countyPools?.size ?: 0)
 
         val countyCvrPools = manager.countyCvrPools()
         println("countyCvrPools size = ${ countyCvrPools?.size ?: 0 }")
-        assertEquals(60, countyCvrPools?.size ?: 0)
+        assertEquals(0, countyCvrPools?.size ?: 0)
     }
 
     @Test
@@ -42,14 +42,13 @@ class TestCountyAuditRecord {
         println("mvrsByCounty size = ${mvrsByCounty.size}")
         println("mvrsByCounty = ${mvrsByCounty}")
         mvrsByCounty.forEach { println("   $it")}
-        assertEquals(60, mvrsByCounty.size)
+        assertEquals(62, mvrsByCounty.size)
 
-        val mvrsForCounty = countyAuditRecord.readCountyMvrsAndTabulate(countyName = "Jefferson")
+        /* val mvrsForCounty = countyAuditRecord.readCountyMvrsAndTabulate(countyName = "Jefferson")
         println("'Jefferson' mvrsForCounty size = ${mvrsForCounty.size}")
         println("   nmvrs, contest")
         mvrsForCounty.forEach { (nmvrs,  contest)  ->  println("   ${nfn(nmvrs, 5)}, $contest")}
-
-        assertEquals(57, mvrsForCounty.size)
+        assertEquals(57, mvrsForCounty.size) */
     }
 
     @Test

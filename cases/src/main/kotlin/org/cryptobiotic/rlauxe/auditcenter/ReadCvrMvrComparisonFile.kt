@@ -3,8 +3,8 @@ package org.cryptobiotic.rlauxe.auditcenter
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.corlaInput.defaultCharset
 import java.io.File
-import java.nio.charset.Charset
 import kotlin.text.appendLine
 
 // auditcenter 2020 has no "audit reason"
@@ -140,7 +140,7 @@ data class ComparisonMvr(
 
 fun readContestComparisonCsv(filename: String): CardComparisonResults {
     val file = File(filename)
-    val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT) // TODO
+    val parser = CSVParser.parse(file, defaultCharset, CSVFormat.DEFAULT) // TODO
     val records = parser.iterator()
 
     // we expect the first line to be the headers

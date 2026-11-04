@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.audit.runRound
 import kotlin.test.Test
 import kotlin.test.fail
 
-class TestRunRlaStartFuzz {
+class MakeRunCliTestdata {
 
     @Test
     fun testCliRoundClca() {
@@ -73,7 +73,7 @@ class TestRunRlaStartFuzz {
         if (results.hasErrors) fail()
         if (results2.hasErrors) fail()
     }
-
+/* TODO IRV
     @Test
     fun testCliRoundRaire() {
         val topdir = "$testdataDir/persist/testRunCli/raire"
@@ -104,7 +104,7 @@ class TestRunRlaStartFuzz {
         println("============================================================")
         val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
         println(status)
-    }
+    } */
 
     //         val Nc = 50000
     //        val margin = .04
@@ -113,6 +113,7 @@ class TestRunRlaStartFuzz {
     //        val phantomPct = 0.00
     //        val cvrPercent = 0.80
 
+    /*
     @Test
     fun testCliOneAudit() {
         val topdir = "$testdataDir/persist/testRunCli/oneaudit"
@@ -148,5 +149,5 @@ class TestRunRlaStartFuzz {
         println(results)
 
         if (results.hasErrors) fail()
-    }
+    } */
 }

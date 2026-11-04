@@ -34,7 +34,7 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInput (
     override fun skipCounties(countyName: String) = !useCounties.contains(countyName)
     override fun counties(): List<String> = useCounties.toList().sorted()
 
-    // should not be needed TODO get from contestRoundFile
+    // should not be needed
     val countyPopulations = mapOf( "Boulder" to 100423, "La Plata" to 16146, "Morgan" to 5220,"Weld" to 69640)
 
     override fun corlaCountyInput(countyName: String): CountyInput? {

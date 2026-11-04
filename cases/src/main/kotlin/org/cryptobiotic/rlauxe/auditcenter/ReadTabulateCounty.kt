@@ -173,7 +173,7 @@ data class ChoiceVote(
 
 fun readCountyTabulateCsvFromFile(filename: String): Map<String, CountyTabAllContests> {
     val file = File(filename)
-    val parser = CSVParser.parse(file, Charset.forName(defaultCharset), CSVFormat.DEFAULT)
+    val parser = CSVParser.parse(file,defaultCharset, CSVFormat.DEFAULT)
     return readCountyTabulateCsvFromParser(parser)
 }
 

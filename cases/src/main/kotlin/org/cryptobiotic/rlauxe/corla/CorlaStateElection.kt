@@ -95,7 +95,7 @@ class CorlaStateElection(
             } */
 
             // val stateStyleIdMap = mutableMapOf<Int, Int>()
-            val countyStyles = countyAuditrecord.readCardStyles()!!
+            val countyStyles = countyAuditrecord.readCardStyles()
             stateStyles.addAll(countyStyles)
             /* countyStyles.forEach { style ->
                 stateStyleIdMap[style.id()] = stateStyleId
@@ -212,7 +212,7 @@ class CorlaStateElection(
         }
 
         // sum over counties
-        // TODO need Irv tabs
+        // TODO IRV need Irv tabs
         val npopMap = tabulateNpops(countyPops)
 
         contestsUA = makeContestWAs(contests, npopMap, emptyMap(), statePools, variant, hasStyle)
@@ -262,37 +262,6 @@ class CorlaStateElection(
     override fun cards() = null // removeVotesFromMvrs(unsortedMvrsExternal(), variant)
     override fun ncards() = ncards
 }
-
-/* create an iterator over all the cards unsortedMvrsDirectory
-class CardIteratorfromCountyMvrs(
-    publisher: Publisher,
-    val styles: List<StyleIF>
-) : CloseableIterator<AuditableCard> {
-
-    val dir = publisher.unsortedMvrsDirectory()
-    val path = Path(dir)
-    val countyPaths: List<Path> = path.listDirectoryEntries().filter { !it.isDirectory() && it.fileName.toString().endsWith(".csv")}
-
-    val counties = countyPaths.iterator()
-    var innerIter = readCardsCsvIterator(counties.next().toString(), styles = styles)  // TODO do we need styles ??
-
-    override fun next(): AuditableCard {
-        return innerIter.next()
-    }
-
-    override fun hasNext(): Boolean {
-        if (innerIter.hasNext()) return true
-        if (counties.hasNext()) {
-            innerIter = readCardsCsvIterator(counties.next().toString(), styles = styles)
-            return hasNext()
-        }
-        return false
-    }
-
-    override fun close() {
-        // NOOP
-    }
-} */
 
 fun makeCountyElections(
     topdir: String,

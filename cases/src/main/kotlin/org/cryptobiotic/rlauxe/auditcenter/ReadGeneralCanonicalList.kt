@@ -5,6 +5,7 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
+import org.cryptobiotic.rlauxe.corlaInput.defaultCharset
 import org.cryptobiotic.rlauxe.corlaInput.yesnoCanon
 import java.io.File
 import java.nio.charset.Charset
@@ -81,7 +82,7 @@ class CanonicalContest(
 
 fun readGeneralCanonicalList(filename: String, stateInput : StatewideInput): List<CanonicalContest> {
     val file = File(filename)
-    val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
+    val parser = CSVParser.parse(file, defaultCharset, CSVFormat.DEFAULT)
     val records = parser.iterator()
 
     // we expect the first line to be the headers

@@ -144,7 +144,7 @@ fun makeMvrs(
     cvrUndervotes: Int,
     pool: CardPoolIF,
     extraInPool: Int,
-    ): List<Cvr> {
+): List<Cvr> {
 
     val mvrs = mutableListOf<Cvr>()
     val info = contest.info()

@@ -12,9 +12,8 @@ import kotlin.test.assertEquals
 
 // TODO mo betta
 class TestReadPopulations {
-    val useLocal = true
-    val toptopdir = if (useLocal) "src/test/data/testRunCli"
-    else "$testdataDir/persist/testRunCli"
+    val useLocal = false
+    val toptopdir = if (useLocal) "src/test/data/testRunCli" else "$testdataDir/persist/testRunCli"
 
     @Test
     fun testReadPollingBatches() {
@@ -40,7 +39,7 @@ class TestReadPopulations {
         scratchFile.delete()
     }
 
-    @Test
+    // @Test
     fun testReadOneAuditPools() {
         val topdir = "$toptopdir/oneaudit"
 

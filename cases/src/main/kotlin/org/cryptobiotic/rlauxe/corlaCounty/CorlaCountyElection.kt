@@ -65,7 +65,7 @@ class CorlaCountyElection(
         val converter = CountyCardConverter(countyInput.countyName, countyCards, stateInput, stateContestInfoBuilder.infosByName)
 
         val countyAcTab = stateInput.countyTabsAllContests()[county]!!
-        val convertedCountyAcTabs: Map<Int, ContestTabulation> = converter.convertToContestTabulation(countyAcTab)
+        val convertedCountyAcTabs: Map<Int, ContestTabulation> = converter.convertToContestTabulation(countyAcTab) // TODO ncards not set
 
         val convertedCvrTabs = converter.convertTabs(countyCards.cvrTabs) // unredacted
         val convertedGroupTabs = converter.convertTabs(countyCards.groupTabs) // should be aggregated when exists
@@ -166,7 +166,7 @@ class CorlaCountyElection(
             if (ncards > 0 && candVotes.values.sum() <= info.voteForN * ncards) {
                 // info.metadata["PoolPct"] = (100.0 * poolTotalCards / useNc).toInt().toString()
                 val contest = if (info.isIrv) // TODO IRV
-                    IrvContest(info, winners = listOf(0), ncards, Ncast = ncards, undervotes = 0) // TODO this is fake...
+                    IrvContest(info, winners = listOf(0), ncards, Ncast = ncards, undervotes = 0) // TODO IRV this is fake...
                 else
                     Contest(info, candVotes, ncards, ncards)
                 contests.add(contest)
@@ -190,7 +190,7 @@ fun makeContestWAs(
     if (variant.isOA()) setPoolAssorterAverages(regular, oneAuditPools)
     contestsUAs.addAll(regular)
 
-    // TODO
+    // TODO IRV
     contests.filter { it.isIrv() }.forEach {
         // assumes contestTab.irvVotes are present
         val irvContest = if (!variant.isOA())

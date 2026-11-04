@@ -20,7 +20,7 @@ class CreateElectionFromCvrs (
     val cvrs: List<Cvr>, // includes phantoms
     val auditType: AuditType,
     val cardPools: List<CardPool>? = null,
-    val batches: List<StyleIF>? = null,
+    val styles: List<StyleIF>,
     val mvrSource: MvrSource,
 ): ElectionBuilder {
 
@@ -28,9 +28,9 @@ class CreateElectionFromCvrs (
         electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
         mvrSource = mvrSource, pollingMode = PollingMode.withBatches
     )
-    override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(cvrs, batches)
+    override fun unsortedMvrsInternal() = mvrsToAuditableCardsList(cvrs, styles)
     override fun unsortedMvrsExternal() = null
-    override fun cardStyles() = batches ?: cardPools!!
+    override fun cardStyles() = styles ?: cardPools!!
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun cards() = createCards()
@@ -40,7 +40,7 @@ class CreateElectionFromCvrs (
             auditType,
             Closer(cvrs.iterator()),
             phantomCvrs = null,
-            styles = cardPools ?: batches,
+            styles = cardPools ?: styles,
         )
 }
 

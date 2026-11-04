@@ -11,6 +11,8 @@ import org.cryptobiotic.rlauxe.dhondt.DhondtPartyBuilder
 import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
 import org.cryptobiotic.rlauxe.persist.CompositeAuditRecord
 import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.persist.csv.AddStyles
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
@@ -43,11 +45,11 @@ class BelgiumElection (
     override fun cards() = createCards()
     override fun ncards() = allCards.size
 
-    override fun unsortedMvrsInternal() = allCards // TODO merge styles ??
+    override fun unsortedMvrsInternal() = allCards
     override fun unsortedMvrsExternal() = null
 
     fun createCards(): CloseableIterator<AuditableCard> {
-        return MergeStylesIntoCards(allCards, cardStyles()).iterator()
+        return TransformingIterator(Closer(allCards.iterator()), AddStyles(cardStyles()))
     }
 }
 
@@ -96,7 +98,7 @@ fun createOneContestFromJson(county: String,
     validateOutputDir(Path.of(toptopdir))
 
     val nwinners = belgiumElectionJson.ElectionLists.sumOf { it.NrOfSeats }
-    val totalVotes = belgiumElectionJson.NrOfValidVotes + belgiumElectionJson.NrOfBlankVotes // TODO undervotes = belgiumElection.NrOfBlankVotes
+    val totalVotes = belgiumElectionJson.NrOfValidVotes + belgiumElectionJson.NrOfBlankVotes // TODO add undervotes = belgiumElection.NrOfBlankVotes
 
     val dhondtParties = belgiumElectionJson.ElectionLists.map {
         DhondtPartyBuilder(

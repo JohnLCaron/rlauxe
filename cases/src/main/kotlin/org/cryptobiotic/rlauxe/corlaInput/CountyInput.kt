@@ -16,13 +16,9 @@ interface CountyInput {
     val cvrsSource: String
     val year: String
 
-    // TODO cache this I think ?? Or does it need to stream ??
     fun readCorlaCvrs(): CorlaCountyCvrsIF {
         return readCorlaCvrs(year, countyName, cvrsSource)
     }
-
-    // TODO useful?
-    fun hasABgroups() = false
 
     fun readManifestEntries(): ManifestEntries {
         return if (countyName == "Garfield") GarfieldManifestEntries(manifestSource)

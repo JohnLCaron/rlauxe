@@ -255,9 +255,9 @@ class CreateBoulderElection(
         corlaCvrs.cvrs().forEach { cvr ->
             cvr.contestVotes.forEach { contestVote ->
                 val info = infos[contestVote.contestId]
-                if (info == null)
-                    println("cant find ${contestVote.contestId}")
-                else {
+                if (info == null) {
+                    // println("cant find ${contestVote.contestId}")
+                } else {
                     val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation(info) }
                     tab.addVotes(contestVote.votedFor.toIntArray(), phantom = false)
                 }
@@ -272,6 +272,8 @@ class CreateBoulderElection(
 
         corlaCvrs.redaction().groups().forEach { redacted ->
             redacted.candVotes.entries.forEach { (contestId, contestVote) ->
+                if (infos[contestId] == null)
+                    print("")
                 val tab = votes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                 contestVote.forEach { (cand, vote) -> tab.addVote(cand, vote) }
                 // in this case, nlines == ncards

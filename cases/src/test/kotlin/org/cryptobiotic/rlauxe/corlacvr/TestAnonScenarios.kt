@@ -5,8 +5,10 @@ import org.cryptobiotic.rlauxe.corlaInput.CheckCvrRedaction
 import org.cryptobiotic.rlauxe.corlaInput.RedactionCount
 import org.cryptobiotic.rlauxe.corlaInput.readCorlaCvrs
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
+import org.junit.jupiter.api.Disabled
 import kotlin.test.Test
 
+@Disabled("reading from another repo")
 class TestAnonScenarios {
     val PYTHON_INPUT_DIR = "/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testCases/unredacted"
     val PYTHON_OUTPUT_DIR = "/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testCases/redactedByPrecinct"

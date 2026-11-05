@@ -625,9 +625,9 @@ class TestRunRoundCli {
 **TODO 10/21/2026**
 
 * each countyInput is in $topdir/county/name/ up to CreateElectionRecord DONE
-* state election
-* canonical county order
-* anonomicer preserves manifest order
+* state election DONE
+* canonical county order DONE
+* anonomicer preserves manifest order 
 * ok to change until seed
 * variant
 
@@ -641,6 +641,9 @@ class TestRunRoundCli {
 * Are we supporting uniform sampling?
 * Are we supporting polling, batch?
 
+**TODO 11/05/2026**
 
+* move integration tests to cases
+* move unit tests to core
 
 

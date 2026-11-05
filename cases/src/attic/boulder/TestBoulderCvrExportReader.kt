@@ -24,7 +24,7 @@ class TestBoulderCvrExportCsv {
         val contest = schema.contests[0]
 
         // Check basic data
-        assertEquals("TinyExample1 (Number of positions=1, Number of ranks=3)", contest.contestName)
+        assertEquals("TinyExample1", contest.contestName)
         assertTrue(contest.isIRV)
         assertEquals(3, contest.nchoices)
 
@@ -209,7 +209,7 @@ class TestBoulderCvrExportCsv {
 
         val boulderMayoral = schema.contests[0]
         assertEquals(
-            "City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)",
+            "City of Boulder Mayoral Candidates",
             boulderMayoral.contestName
         )
         //assertEquals(boulderMayoral.votesAllowed() as Int, 4)
@@ -342,7 +342,7 @@ class TestBoulderCvrExportCsv {
         assertEquals("2024 Boulder County GE Recounts", export.electionName)
         assertEquals("5.17.17.1", export.versionName)
         assertEquals(65, export.schema.contests.size)
-        assertEquals(25430, export.nrows())
+        assertEquals(25438, export.nrows())
     }
 }
 

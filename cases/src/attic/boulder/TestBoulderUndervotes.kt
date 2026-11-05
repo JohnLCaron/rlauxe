@@ -10,6 +10,8 @@ import kotlin.collections.component2
 import kotlin.collections.set
 import kotlin.test.Test
 
+const val BOULDER = "Boulder"
+
 class TestBoulderUndervotes {
     val stateInput = Statewide2023Coordinated()
     val population = stateInput.strataPopulation()["Boulder"]!!

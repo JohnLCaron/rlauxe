@@ -23,7 +23,7 @@ class TestBelgiumInput {
     fun testReadPartyTxtFile() {
         val result = readPartyTxtResource(inputs.parties)
         result.forEach { (key, value) -> println("'$key': $value") }
-        assertEquals(30, result.size)
+        assertEquals(if (year == 2019) 34 else 30, result.size)
     }
 
     @Test

@@ -2,33 +2,9 @@
   <configuration default="false" name="core tests" type="JUnit" factoryName="JUnit">
     <module name="rlauxe.rlauxe-core.test" />
     <shortenClasspath name="ARGS_FILE" />
-    <extension name="coverage">
+    <extension name="coverage" runner="idea">
       <pattern>
-        <option name="PATTERN" value="org.cryptobiotic.rlauxe.belgium.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-      <pattern>
-        <option name="PATTERN" value="org.cryptobiotic.rlauxe.ga.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-      <pattern>
-        <option name="PATTERN" value="org.cryptobiotic.rlauxe.sf.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-      <pattern>
-        <option name="PATTERN" value="org.cryptobiotic.rlauxe.dominion.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-      <pattern>
-        <option name="PATTERN" value="org.cryptobiotic.rlauxe.corla.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-      <pattern>
-        <option name="PATTERN" value="org.cryptobiotic.rlauxe.boulder.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-      <pattern>
-        <option name="PATTERN" value="org.cryptobiotic.rlauxe.auditcenter.*" />
+        <option name="PATTERN" value="org.cryptobiotic.rlauxe.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

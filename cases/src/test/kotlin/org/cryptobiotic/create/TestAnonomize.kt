@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.corlacvr
+package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.corlaInput.RedactionCount
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
@@ -8,6 +8,8 @@ import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.readCorlaCvrs
+import org.cryptobiotic.rlauxe.corlacvr.Anonomicer
+import org.cryptobiotic.rlauxe.corlacvr.compareTwoRedactions
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.io.File

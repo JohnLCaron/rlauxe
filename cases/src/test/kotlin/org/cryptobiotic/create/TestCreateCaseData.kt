@@ -2,6 +2,7 @@ package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.cli.CreateCaseData
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import kotlin.test.Test
 
 /*
@@ -43,14 +44,14 @@ class TestCreateCaseData {
             arrayOf(
                 "--case", "corla2020",
                 "--toptopdir", "${cases}/corla/corla2020",
-                "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
+                "--auditcenter", auditcenter,
             )
         )
         CreateCaseData.main(
             arrayOf(
                 "--case", "corla2020",
                 "--toptopdir", "${cases}/corla/corla2020",
-                "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
+                "--auditcenter", auditcenter,
                 "-sampling", "uniform"
             )
         )
@@ -92,7 +93,7 @@ class TestCreateCaseData {
             arrayOf(
                 "--case", "corla2020withCvrs",
                 "--toptopdir", "${cases}/corla/corla2020",
-                "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
+                "--auditcenter", auditcenter,
             )
         )
 
@@ -100,7 +101,7 @@ class TestCreateCaseData {
             arrayOf(
                 "--case", "corla2020withCvrs",
                 "--toptopdir", "${cases}/corla/corla2020",
-                "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
+                "--auditcenter", auditcenter,
                 "-sampling", "uniform"
             )
         )
@@ -109,7 +110,7 @@ class TestCreateCaseData {
             arrayOf(
                 "--case", "corla2024",
                 "--toptopdir", "${cases}/corla/corla2024",
-                "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
+                "--auditcenter", auditcenter,
             )
         )
 
@@ -117,7 +118,7 @@ class TestCreateCaseData {
             arrayOf(
                 "--case", "corla2022p",
                 "--toptopdir", "${cases}/corla/corla2022p",
-                "--auditcenter", "/home/stormy/datadrive/github/nealmcb/auditcenter",
+                "--auditcenter", auditcenter,
             )
         )
     }

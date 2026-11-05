@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import kotlin.test.Test
 
 class TestAuditcenterInput {
@@ -34,7 +35,7 @@ class TestAuditcenterInput {
     @Test
     fun testAuditcenterInput2024() {
         test(AuditcenterInput(
-            topdir = "/home/stormy/datadrive/github/nealmcb/auditcenter/2024/general",
+            topdir = "$auditcenter/2024/general",
             manifestdir = "",
             manifestFileTemplate = "namezBallotManifest",
             uploadStatusFile = "uploadStatus.csv",
@@ -45,7 +46,7 @@ class TestAuditcenterInput {
     @Test
     fun testAuditcenterInput2025() {
         test(AuditcenterInput(
-            topdir = "/home/stormy/datadrive/github/nealmcb/auditcenter/2025",
+            topdir = "$auditcenter/2025",
             manifestdir = "files",
             manifestFileTemplate = "namezManifest",
             uploadStatusFile = "uploadStatus.csv",
@@ -56,7 +57,7 @@ class TestAuditcenterInput {
     @Test
     fun testAuditcenterInput2026p() {
         test(AuditcenterInput(
-            topdir = "/home/stormy/datadrive/github/nealmcb/auditcenter/2026/primary",
+            topdir = "$auditcenter/2026/primary",
             manifestdir = "files",
             manifestFileTemplate = "namez",
             uploadStatusFile = "files/uploadStatus.csv",
@@ -67,7 +68,7 @@ class TestAuditcenterInput {
     @Test
     fun testAuditcenterInput2020() {
         test(AuditcenterInput(
-            topdir = "/home/stormy/datadrive/github/nealmcb/auditcenter/2020/general",
+            topdir = "$auditcenter/2020/general",
             manifestdir = "round_1",
             manifestFileTemplate = "manifest-namez",
             uploadStatusFile = "upload_status.csv",

@@ -2,13 +2,15 @@ package org.cryptobiotic.rlauxe.dominion
 
 import org.cryptobiotic.rlauxe.sf.readContestManifestFromZip
 import org.cryptobiotic.rlauxe.util.Locations.testdataDir
+import org.junit.jupiter.api.Disabled
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import kotlin.test.Test
 
 class TestConvertCvrExportJsonToCsv {
 
-    @Test
+    @Disabled("regenerate SF test case")
+
     fun testConvertCvrExportJsonToCsv() {
         val topDir = "$testdataDir/cases/sf2024/test"
         val castVoteRecordZip = "$topDir/CVR_Export_20241202143051.zip"

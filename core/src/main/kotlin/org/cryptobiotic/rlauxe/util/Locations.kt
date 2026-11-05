@@ -10,6 +10,12 @@ object Locations {
     val auditcenter = if (user == "joncifer") "$home/IdeaProjects/nealmcb/auditcenter" else "$home/datadrive/github/nealmcb/auditcenter"
     val testdataDir = if (user == "joncifer") "$home/rla/test" else "$home/rla"
     val cases       = if (user == "joncifer") "$home/rla/cases" else "$home/datadrive/rla/cases"
-    val votedatabase = if (user == "joncifer") "$home/rla/votedatabase" else "$home/datadrive/votedatabase"
+    val redacted2020 = if (user == "joncifer") "$home/rla/cases/corla/2020r/cvrs" else "/home/stormy/rla/temp/Anonomice/2020/"
+
+    fun votedatabase(county: String): String {
+        return if (user == "joncifer") "$home/rla/cases/corla/2020/cvrs/${county}.csv" else
+            "$home/datadrive/votedatabase/$county/cvr.csv"
+    }
+
 }
 

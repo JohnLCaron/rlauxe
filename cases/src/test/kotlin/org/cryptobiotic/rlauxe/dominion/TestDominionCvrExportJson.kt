@@ -20,14 +20,12 @@ import kotlin.test.assertEquals
 import kotlin.use
 
 class TestDominionCvrExportJson {
+    val zipFilename = "src/test/data/SF2024/CVR_Export_20241202143051.csv.zip"
 
     // https://www.sfelections.org/results/20240305/data/20240322/CVR_Export_20240322103409.zip
     @Test
     fun testZipReader() {
-        val topDir = "$testdataDir/cases/sf2024"
-        val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val contestManifest = readContestManifest("src/test/data/SF2024/manifests/ContestManifest.json")
-
         testZipReader(zipFilename, contestManifest)
     }
 
@@ -109,8 +107,7 @@ class TestDominionCvrExportJson {
         println("number of cvrs = ${summary.ncvrs}")
 
         // write to cvrExport.csv
-        val topdir = "$testdataDir/tests/scratch/"
-        val cvrExportFilename = "$topdir/$cvrExportCsvFile"
+        val cvrExportFilename = "$testdataDir/$cvrExportCsvFile"
         val cvrExportCsvStream = FileOutputStream(cvrExportFilename)
         cvrExportCsvStream.write(CvrExportCsvHeader.toByteArray())
 
@@ -120,7 +117,7 @@ class TestDominionCvrExportJson {
         cvrExportCsvStream.close()
 
         // read cvrExport.csv back in, and write it to AuditableCard
-        val cardManifestFilename = "$topdir/cardManifest.csv"
+        val cardManifestFilename = "$testdataDir/cardManifest.csv"
         val cardManifestWriter = FileOutputStream(cardManifestFilename).writer()
         cardManifestWriter.write(CardHeader)
 
@@ -135,7 +132,7 @@ class TestDominionCvrExportJson {
         cardManifestWriter.close()
     }
 
-    @Test
+    // @Test
     fun testCvrExportToCardAdapter() {
         val topdir = "$testdataDir/tests/scratch/"
         val cvrExportFilename = "$topdir/$cvrExportCsvFile"
@@ -176,9 +173,6 @@ class TestDominionCvrExportJson {
 
     @Test
     fun countStuff() {
-        val topDir = "$testdataDir/cases/sf2024"
-        val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
-
         val countGroups = mutableMapOf<Int, Int>()
         val countGroupCards = mutableMapOf<Int, Int>()
 

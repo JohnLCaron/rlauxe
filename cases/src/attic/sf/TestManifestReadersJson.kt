@@ -1,7 +1,18 @@
-package org.cryptobiotic.rlauxe.sf
-
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.sf.BallotTypesContestManifest
+import org.cryptobiotic.rlauxe.sf.BallotTypesManifest
+import org.cryptobiotic.rlauxe.sf.CandidateManifestJson
+import org.cryptobiotic.rlauxe.sf.ContestManifestJson
+import org.cryptobiotic.rlauxe.sf.makeContestInfos
+import org.cryptobiotic.rlauxe.sf.readBallotTypeContestManifestJson
+import org.cryptobiotic.rlauxe.sf.readBallotTypeContestManifestJsonFromZip
+import org.cryptobiotic.rlauxe.sf.readBallotTypesManifest
+import org.cryptobiotic.rlauxe.sf.readCandidateManifestJson
+import org.cryptobiotic.rlauxe.sf.readCandidateManifestJsonFromZip
+import org.cryptobiotic.rlauxe.sf.readContestManifestFromZip
+import org.cryptobiotic.rlauxe.sf.readContestManifestJson
+import org.cryptobiotic.rlauxe.sf.readContestManifestJsonFromZip
 import org.cryptobiotic.rlauxe.util.Locations.testdataDir
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import kotlin.test.assertTrue
@@ -34,11 +45,13 @@ class TestManifestReadersJson {
         val topDir = "$testdataDir/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
 
-        val resultContestM: Result<ContestManifestJson, ErrorMessages> =  readContestManifestJsonFromZip(zipFilename, "ContestManifest.json")
+        val resultContestM: Result<ContestManifestJson, ErrorMessages> =
+            readContestManifestJsonFromZip(zipFilename, "ContestManifest.json")
         val contestManifestJson = if (resultContestM .isOk) resultContestM.unwrap()
         else throw RuntimeException("Cannot read ContestManifestJson from $zipFilename err = $resultContestM")
 
-        val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJsonFromZip(zipFilename, "CandidateManifest.json")
+        val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> =
+            readCandidateManifestJsonFromZip(zipFilename, "CandidateManifest.json")
         val candidateManifest = if (resultCandidateM .isOk) resultCandidateM.unwrap()
         else throw RuntimeException("Cannot read CandidateManifestJson from ${zipFilename} err = $resultCandidateM")
 
@@ -62,7 +75,8 @@ class TestManifestReadersJson {
         val topDir = "$testdataDir/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val ifilename = "BallotTypeContestManifest.json"
-        val result2: Result<BallotTypesContestManifest, ErrorMessages> = readBallotTypeContestManifestJsonFromZip(zipFilename, ifilename)
+        val result2: Result<BallotTypesContestManifest, ErrorMessages> =
+            readBallotTypeContestManifestJsonFromZip(zipFilename, ifilename)
         val manifest2 = if (result2 .isOk) result2.unwrap()
             else throw RuntimeException("Cannot read BallotTypeContestManifest from $zipFilename/$ifilename err = $result")
         // println(manifest2)

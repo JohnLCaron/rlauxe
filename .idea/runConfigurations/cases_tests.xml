@@ -2,11 +2,7 @@
   <configuration default="false" name="cases tests" type="JUnit" factoryName="JUnit">
     <module name="rlauxe.rlauxe-cases.test" />
     <shortenClasspath name="ARGS_FILE" />
-    <extension name="coverage">
-      <pattern>
-        <option name="PATTERN" value="org.cryptobiotic.rlauxe.corla.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
+    <extension name="coverage" runner="idea">
       <pattern>
         <option name="PATTERN" value="org.cryptobiotic.rlauxe.*" />
         <option name="ENABLED" value="true" />

@@ -3,12 +3,14 @@ package org.cryptobiotic.rlauxe.util
 import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
+import org.junit.jupiter.api.Disabled
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Disabled("regenerate SF test case")
 class TestTreeReader {
 
-    // @Test
+    @Test
     fun testTreeReaderIterator() {
         val stopwatch = Stopwatch()
         val topDir = "$cases/sf/sf2024/CVR_Export_20241202143051"

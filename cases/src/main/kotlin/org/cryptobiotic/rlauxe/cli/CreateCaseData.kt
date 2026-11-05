@@ -5,8 +5,8 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.belgium.makeAllBelgiumContests
-import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionClca
-import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionOA
+//import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionClca
+//import org.cryptobiotic.rlauxe.boulder.makeBoulderElectionOA
 import org.cryptobiotic.rlauxe.ga.makeGa2026
 import org.cryptobiotic.rlauxe.sf.createCvrExportCsvFile
 import org.cryptobiotic.rlauxe.sf.makeSFElectionClca
@@ -21,7 +21,7 @@ object CreateCaseData {
         val case by parser.option(
             ArgType.String, // enum ??
             shortName = "case",
-            description = "belgium2024, belgium2019 | boulder2024 | corla2020 | corla2020withCvrs | corla2022p | corla2024 | corla2026p | corla2026pm | corla2026Pcvrs " +
+            description = "belgium2024, belgium2019 | corla2020 | corla2020withCvrs | corla2022p | corla2024 | corla2026p | corla2026pm | corla2026Pcvrs " +
                     "ga26p | sf2024"
         ).required()
         val toptopdir by parser.option(
@@ -106,12 +106,12 @@ object CreateCaseData {
                 "belgium2019" -> makeAllBelgiumContests(2019, toptopdir)
                 "belgium2024" -> makeAllBelgiumContests(2024, toptopdir)
 
-                "boulder2024" -> {
+                /*"boulder2024" -> {
                     when (auditType) {
                         "clca" -> makeBoulderElectionClca(toptopdir = toptopdir)
                         else -> makeBoulderElectionOA(toptopdir = toptopdir)
                     }
-                }
+                } */
 /*
                 "corla2026p" -> {
                     makeCorla2026p(toptopdir = toptopdir, auditcenter = auditcenter!!)

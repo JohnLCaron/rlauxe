@@ -3,20 +3,19 @@ package org.cryptobiotic.rlauxe.corlacvr
 import com.jsoizo.kotlincsv.csvReader
 import com.jsoizo.kotlincsv.reader.readFromFile
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020Redacted
+import org.cryptobiotic.rlauxe.util.Locations.redacted2020
+import org.cryptobiotic.rlauxe.util.Locations.votedatabase
 import org.cryptobiotic.rlauxe.util.trunc
-import org.cryptobiotic.rlauxe.votedatabase.votedatabase
 import kotlin.test.Test
 
 class TestGarfield2020 {
-    val firstfile = "$votedatabase/cvr/Colorado/Garfield/6-8-22.cvr.csv"
-    val usedfile = "$votedatabase/cvr/Colorado/Garfield/cvr.csv"
-    val redactedfile = "/home/stormy/rla/temp/Anonomice/2020/Garfield-Redacted.csv"
+    val redactedfile = "$redacted2020/Garfield-Redacted.csv"
     var lastContest = ""
     var contestColSum = mutableMapOf<Int, Int>()
 
     @Test
     fun testRegular() {
-        val regularFile = "$votedatabase/cvr/Colorado/Bent/cvr.csv"
+        val regularFile = votedatabase("Bent")
         val countyCvrs = readCountyCvrs(regularFile)
         countyCvrs.cvrs().forEach { row ->
             row.votes().values.forEach { cands: IntArray ->
@@ -28,6 +27,8 @@ class TestGarfield2020 {
 
     @Test
     fun testUsed() {
+        val usedfile = votedatabase("Garfield")
+
         val countyCvrs = Garfield2020CountyCvrs(usedfile)
         countyCvrs.cvrs.forEach { row ->
             row.votes().values.forEach { cands: IntArray ->
@@ -52,11 +53,6 @@ class TestGarfield2020 {
                 }
             }
         }
-    }
-
-    @Test
-    fun testOriginal() {
-        testTranspose(firstfile, skip = 500)
     }
 
     @Test

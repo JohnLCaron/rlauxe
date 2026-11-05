@@ -7,23 +7,23 @@ import org.cryptobiotic.rlauxe.corlacvr.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.corlacvr.findPrecinctStyles
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrsFromFile
 import org.cryptobiotic.rlauxe.corlacvr.tabulate
-import org.cryptobiotic.rlauxe.votedatabase.votedatabase
+import org.cryptobiotic.rlauxe.util.Locations.votedatabase
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class TestCvrRedaction {
-    @Test
+    /* @Test
     fun testExcelMacro() {
         CheckCvrRedaction(
-            "$votedatabase/cvr/Colorado/Sedgwick/sedgewickTestCvr.csv",
+            votedatabase("Sedgewick"),
             "$votedatabase/cvr/Colorado/Sedgwick/sedgewickTestCvr_Redacted.csv",
             )
-    }
+    } */
 
     @Test
     fun testAnonymizePython() {
         CheckCvrRedaction(
-            "$votedatabase/cvr/Colorado/Denver/cvr.csv",
+            votedatabase("Denver"),
             "/home/stormy/datadrive/github/nealmcb/anonymize_cvr/testCases/precinct/Denver.csv",
         )
     }
@@ -31,7 +31,7 @@ class TestCvrRedaction {
     @Test
     fun testAnonymizeKotlin() {
         CheckCvrRedaction(
-            "$votedatabase/cvr/Colorado/Denver/cvr.csv",
+            votedatabase("Denver"),
             "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/anon/2020/Denver.csv",
         )
     }

@@ -1,9 +1,7 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
-import org.cryptobiotic.rlauxe.votedatabase.votedatabase2020
-import kotlin.io.path.Path
-import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
+import org.cryptobiotic.rlauxe.util.Locations.votedatabase
 import kotlin.test.Test
 
 class ShowRedactionVotedatabase {
@@ -16,23 +14,23 @@ class ShowRedactionVotedatabase {
 
     @Test
     fun testBoulder() {
-        lookForRedactions("$votedatabase2020/Boulder/cvr.csv")
+        lookForRedactions(votedatabase("Boulder"))
     }
 
     // TODO these arent redactions, these are subtotals (!)
     @Test
     fun testDolores() {
-        lookForRedactions("$votedatabase2020/Dolores/cvr.csv")
+        lookForRedactions(votedatabase("Dolores"))
     }
 
-    // @Test special format
+    @Test // special format
     fun testGarfield20() {
-        lookForRedactions("$votedatabase2020/Garfield/cvr.csv")
+        lookForRedactions(votedatabase("Garfield"))
     }
 
     @Test
     fun testDouglas() { // redaction
-        lookForRedactions("$votedatabase2020/Douglas/cvr.csv")
+        lookForRedactions(votedatabase("Douglas"))
     }
 
     // In the 2020 General, Eagle County had one ballot style where only nine voters returned a ballot.
@@ -63,37 +61,32 @@ class ShowRedactionVotedatabase {
     //  nrows = 58591 redacted lines = 20 redacted groups = 0
     @Test
     fun testEagle() { // redaction
-        lookForRedactions("$votedatabase2020/Eagle/cvr.csv", true)
+        lookForRedactions(votedatabase("Eagle"), true)
     }
 
     @Test
     fun testElPaso() { // redaction
-        lookForRedactions("$votedatabase2020/El Paso/cvr.csv", true)
+        lookForRedactions(votedatabase("El Paso"), true)
     }
     @Test
     fun testJefferson() { // redaction
-        lookForRedactions("$votedatabase2020/Jefferson/cvr.csv")
-    }
-
-    @Test
-    fun testJefferson2() { // redaction
-        lookForRedactions("$votedatabase2020/Jefferson/JeffCO_2020_CVR_Redacted.csv")
+        lookForRedactions(votedatabase("Jefferson"))
     }
 
     @Test
     fun testLarimer() { // redaction
-        lookForRedactions("$votedatabase2020/Larimer/cvr.csv")
+        lookForRedactions(votedatabase("Larimer"))
     }
 
     // TODO these arent redactions, these are subtotals (!)
     @Test
     fun testPhillips() { // redaction
-        lookForRedactions("$votedatabase2020/Phillips/cvr.csv")
+        lookForRedactions(votedatabase("Phillips"))
     }
 
     @Test
     fun testPitkin() { // redaction
-        lookForRedactions("$votedatabase2020/Pitkin/cvr.csv")
+        lookForRedactions(votedatabase("Pitkin"))
     }
 
     // Boulder, Doloros, Pitkin, possibly Jefferson
@@ -101,7 +94,7 @@ class ShowRedactionVotedatabase {
     // $votedatabase2020/Phillips/cvr.csv
     //$votedatabase2020/Phillips/Phillips 2020  cvr phillips county.csv
     //  RedactedGroup('r', ncards=1, contests=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29] totalVotes=62726)
-    @Test
+   /* @Test
     fun allColorado2020Counties() {
         val path = Path(votedatabase2020)
         path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202") }
@@ -124,5 +117,38 @@ class ShowRedactionVotedatabase {
                     }
                 }
             }
+    } */
+
+    @Test
+    fun allColorado2020Counties() {
+        val input = Statewide2020General()
+        val errCount = emptyMap<String, Int>()
+        input.counties().forEach { county ->
+            lookForRedactions(votedatabase(county))
+        }
+    }
+}
+
+fun lookForRedactions(filename: String, showRedaction: Boolean = false, showHeaders: Boolean = false) {
+    println("## Reading cvrs from $filename")
+
+    val redaction = if (filename.lowercase().contains("boulder")) RedactionBoulder(show=showRedaction) else Redaction(show=showRedaction)
+
+    try {
+        val corlaRawCvrs = readCountyCvrs(filename, redaction = redaction, showHeaders = showHeaders)
+
+        println("  nrows = ${corlaRawCvrs.nrows()} redacted cvrs = ${corlaRawCvrs.redaction().redactedRows().size} redacted groups = ${corlaRawCvrs.redaction().groups().size} ")
+
+        if (corlaRawCvrs.redaction().groups().size > 0) {
+            var sumInGroups = 0
+            corlaRawCvrs.redaction().groups().forEach { group ->
+                println("  $group")
+                sumInGroups += group.ncards()
+            }
+            println("sumInGroups = $sumInGroups")
+        }
+
+    } catch (e: Throwable) {
+        e.printStackTrace()
     }
 }

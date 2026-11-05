@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.timing
+package org.cryptobiotic.timing
 
 import org.cryptobiotic.rlauxe.audit.SamplingCardIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord

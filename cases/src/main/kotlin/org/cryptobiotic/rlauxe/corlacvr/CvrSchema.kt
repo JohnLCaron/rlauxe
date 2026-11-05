@@ -34,7 +34,7 @@ class CvrSchema(val inputSource: String,
         //    println("HEY HEY different number of headers for $inputSource")
     }
 
-    fun choices(contestId: Int): List<String> {
+    /* fun choices(contestId: Int): List<String> {
         val contest = contests.find{ it.contestIdx == contestId }
         val result = mutableListOf<String>()
         if (contest != null) {
@@ -43,7 +43,7 @@ class CvrSchema(val inputSource: String,
             }
         }
         return result
-    }
+    } */
 
     fun getContestAt(colIdx: Int): SchemaContestInfo {
         val col = columns.find { it.colIdx == colIdx }!!
@@ -68,7 +68,8 @@ class CvrSchema(val inputSource: String,
     } */
 
     fun voteFor(contestId: Int, cvr: CvrRow): List<String> {
-        val choices = choices(contestId)
+        val contestInfo = contests.get(contestId)
+        val choices = columnsFor(contestInfo).map { it.choiceName }
         val contestVotes = cvr.voteFor(contestId)
         val result = mutableListOf<String>()
         contestVotes?.votedFor?.forEach { result.add( choices[it]) } // could barf if malformed

@@ -2,13 +2,15 @@ package org.cryptobiotic.rlauxe.irv
 
 import org.cryptobiotic.rlauxe.rairejson.readRaireProblemJson
 import org.cryptobiotic.rlauxe.rairejson.readRaireSolutionJson
+import org.junit.jupiter.api.Disabled
 import java.io.File
 import kotlin.test.Test
 
 class TestReadAusElections {
 
-    @Test
+    @Disabled("reading from another repo")
     fun testReadAusElections() {
+        // reading from the raire-jara repo
         val dataDir = "/home/stormy/dev/github/rla/raire-java/Australian Examples/NSW Local Government/2021"
         val dataDirFile = File(dataDir)
         dataDirFile.listFiles().forEach {

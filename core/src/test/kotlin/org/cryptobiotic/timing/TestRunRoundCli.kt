@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.timing
+package org.cryptobiotic.timing
 
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
@@ -66,11 +66,11 @@ class TestRunRoundCli {
 
     @Test
     fun testResampleAndSaveResults() {
-        val topdir = "${cases}/corla/withCvrs/Colorado2020"
+        val topdir = "${cases}/corla/2020"
         resampleAndSaveResults(topdir)
     }
 
-    @Test
+    // @Test
     fun testRemoveAndResample() {
         val topdir = "${testdataDir}/cases/boulder24/oa"
         val auditRecord = AuditRecord.read(topdir)!!

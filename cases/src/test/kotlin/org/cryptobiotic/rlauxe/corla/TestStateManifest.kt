@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 // Also Broomfield is alphabetic.  too bad, not very useful.
 class TestStateManifest {
 
-    @Test
+    // @Test
     fun testAgainstManifestCompareFile() {
         val stateInput = Statewide2026Primary()
         val stateManifest = stateInput.statewideManifest

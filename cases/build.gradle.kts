@@ -35,7 +35,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     minHeapSize = "512m"
-    maxHeapSize = "8g"
+    maxHeapSize = "16g"
     jvmArgs = listOf("-Xss128m")
 
     // Make tests run in parallel

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
-import org.cryptobiotic.rlauxe.votedatabase.votedatabase
+import org.cryptobiotic.rlauxe.util.Locations.votedatabase
 import kotlin.test.Test
 
 class ShowRedactionBoulder {
@@ -8,7 +8,7 @@ class ShowRedactionBoulder {
 
     @Test
     fun testBoulder20() {
-        lookForRedactions("$votedatabase/cvr/Colorado/Boulder/cvr.csv")
+        lookForRedactions(votedatabase("Boulder"))
     }
 
     @Test

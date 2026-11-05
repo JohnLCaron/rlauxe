@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.timing
+package org.cryptobiotic.timing
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditableCard

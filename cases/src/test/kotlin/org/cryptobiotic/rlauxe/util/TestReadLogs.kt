@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.util.Locations.cases
 import java.io.BufferedReader
 import java.io.File
 import kotlin.test.Test
@@ -9,7 +10,7 @@ class TestReadLogs {
 
     @Test
     fun testReadLogs() {
-        val logsFile = "/home/stormy/datadrive/rla/cases/corla/corla2026/primary/logs.log"
+        val logsFile = "$cases/corla/2026p/logs.log"
         val reader: BufferedReader = File(logsFile).bufferedReader()
         reader.readLine() // skip header line
 

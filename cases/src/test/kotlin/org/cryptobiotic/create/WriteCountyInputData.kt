@@ -1,10 +1,21 @@
-package org.cryptobiotic.rlauxe.corlaInput
+package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.rlauxe.corla.CorlaStateContestInfoBuilder
 import org.cryptobiotic.rlauxe.corla.ManifestCounts
 import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyElection
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput
+import org.cryptobiotic.rlauxe.corlaInput.CountyInputData
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020Redacted
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
+import org.cryptobiotic.rlauxe.corlaInput.readCountyInputData
+import org.cryptobiotic.rlauxe.corlaInput.writeCountyInputData
 import org.cryptobiotic.rlauxe.corlacvr.CardStyleId
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.CvrCardStyle
@@ -88,7 +99,7 @@ class WriteCountyInputData {
                 minCards = -1,
                 countBlankPrecincts = corlaCvrs.countBlankPrecincts(),
                 ballotStylesUnique = corlaCvrs.ballotStyleUnique(),
-                ballotStyleMin = corlaCvrs.cardStyles().minOf{ it.ncards },
+                ballotStyleMin = corlaCvrs.cardStyles().minOf { it.ncards },
                 precinctStyleMin = findPrecinctStyleMin(corlaCvrs), // maybe "rare_cards" would be more useful
             )
         } else {

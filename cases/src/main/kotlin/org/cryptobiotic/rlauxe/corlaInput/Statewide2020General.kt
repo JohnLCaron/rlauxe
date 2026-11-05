@@ -17,17 +17,19 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
     mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
 ) {
     override val year = "2020"
-    val manifestDir = "$ac/2020/general/round_1"
     val cvrsMissing = listOf("Baca", "Las Animas")
 
     override fun manifestFile(county: String): String {
+        val countyInput = corlaCountyInput(county)
+        if (countyInput != null) return countyInput.manifestSource
         val noblanks = county.replace("\\s".toRegex(), "")
-        return "$manifestDir/manifest-${noblanks}.csv"
+        return "${County2020InputNoCvrs.manifestDir}/manifest-${noblanks}.csv"
     }
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
         if (cvrsMissing.contains(countyName)) return County2020InputNoCvrs(countyName)
-        if (countyName == "Gunnison") return County2020Input(countyName)
+        // if (countyName == "Gunnison") return County2020Input(countyName)
+        val counties = counties()
         return if (counties().contains(countyName)) {
             County2020Input(countyName)
         } else null

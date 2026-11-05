@@ -1,12 +1,15 @@
 package org.cryptobiotic.rlauxe.ga
 
 import org.cryptobiotic.rlauxe.core.Contest
+import org.junit.jupiter.api.Disabled
 import kotlin.collections.forEach
 import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 import kotlin.test.Test
 
+// reading from another repo
+@Disabled("reading from another repo")
 class TestReadGaInputCsv {
     val topdir = "/home/stormy/datadrive/github/nealmcb/rla-review-arlo/2026-05-19-primary/extracted"
 
@@ -122,6 +125,5 @@ class TestReadGaInputCsv {
                 }
             }
         }
-
     }
 }

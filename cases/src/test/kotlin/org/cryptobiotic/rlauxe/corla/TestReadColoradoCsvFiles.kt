@@ -81,8 +81,8 @@ class TestReadColoradoCsvFiles {
 
             val contestTab = cctContests[contestName]
             if (contestTab == null) {
-                println("*** cant find '${contestName}'")
-                println()
+                // println("*** cant find '${contestName}'")
+                // println()
             } else {
                 val choices = contestTab.choices.map { it.value }.sorted().reversed()
                 //if (choices.size > 2)
@@ -125,8 +125,8 @@ class TestReadColoradoCsvFiles {
 
             val contestTab = cctContests[contestName]
             if (contestTab == null) {
-                println("*** cant find '${contestName}'")
-                println()
+                //println("*** cant find '${contestName}'")
+                //println()
             } else {
                 val choices = contestTab.choices.map { it.value }.sorted().reversed()
                 val contestTabDesc =

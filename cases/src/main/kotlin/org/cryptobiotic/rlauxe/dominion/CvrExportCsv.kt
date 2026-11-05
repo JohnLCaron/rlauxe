@@ -128,7 +128,7 @@ class CvrExportToCardAdapter(
         }
         val result = AuditableCard.fromVotes(
             cvrExport.id,
-            "COUNTY",
+            "county",
             location,
             countIndex,
             0,

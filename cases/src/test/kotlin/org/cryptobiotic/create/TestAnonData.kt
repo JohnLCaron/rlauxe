@@ -1,9 +1,14 @@
-package org.cryptobiotic.rlauxe.corlacvr
+package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.corlaInput.RedactionCount
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.readCorlaCvrs
+import org.cryptobiotic.rlauxe.corlacvr.Anonomicer
+import org.cryptobiotic.rlauxe.corlacvr.CvrRow
+import org.cryptobiotic.rlauxe.corlacvr.Redaction
+import org.cryptobiotic.rlauxe.corlacvr.compareTwoRedactions
+import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
@@ -106,7 +111,7 @@ class TestAnonData {
         val output = "$baseRedactedCount/$county.csv"
 
         val cvrs = countyInput.readCorlaCvrs()
-        Anonomicer(cvrs, styleOnly=false).writeRedactedFile(output)
+        Anonomicer(cvrs, styleOnly = false).writeRedactedFile(output)
             .verify(readCorlaCvrs(countyInput.year, countyInput.countyName, output))
 
         println("that took $stopwatch")

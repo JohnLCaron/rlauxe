@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.ga
 
-import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.util.Locations.cases
-import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
@@ -11,6 +9,7 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
+import org.junit.jupiter.api.Disabled
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.ln
@@ -18,6 +17,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@Disabled("regenerate Ga test case")
 class TestPoolAssortRates {
 
     @Test

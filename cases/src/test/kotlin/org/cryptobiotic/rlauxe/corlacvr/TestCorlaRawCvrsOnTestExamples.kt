@@ -1,309 +1,1 @@
-package org.cryptobiotic.rlauxe.corlacvr
-
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.CvrBuilder2
-import kotlin.test.assertTrue
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-
-class TestCorlaRawCvrsOnTestExamples {
-    val COUNTY = "county"
-
-    @Test
-    fun testRemoveLeadingChar() {
-        val inp = "=\"42\""
-        val result = removeLeadingEquals(inp)
-        assertEquals("42", result)
-    }
-
-    @Test
-    fun parseThreeCandidatesTenVotesSucceeds() {
-        val filename = "src/test/data/corla/1misc/ThreeCandidatesTenVotes.csv"
-        val result = readCountyCvrs(filename,)
-        println(result)
-
-        // There should be one contest, the one we just read in.
-        val schema = result.schema
-        // There should be 38 contests. Check their metadata.
-        assertEquals(1, schema.contests.size)
-        val contest = schema.contests[0]
-
-        // Check basic data
-        assertEquals("TinyExample1 (Number of positions=1, Number of ranks=3)", contest.contestName)
-        assertTrue(contest.isIRV)
-        assertEquals(3, contest.nchoices)
-
-        // Check that the 10 expected votes are there.
-        assertEquals(10, result.nrows())
-    }
-
-    @Test
-    fun test4CvrsWithIRV() {
-        val filename = "src/test/data/Boulder2023/Test4CvrsWithIRV.csv"
-        val export = readCountyCvrs(filename,)
-        println(export)
-
-        assertEquals("src/test/data/Boulder2023/Test4CvrsWithIRV.csv", export.inputSource)
-        assertEquals("2023 Coordinated Election", export.electionName)
-        assertEquals("5.17.17.1", export.versionName)
-        assertEquals(38, export.schema.contests.size)
-        assertEquals(4, export.nrows())
-
-        val cvrs = export.cvrs().iterator()
-        val cvr0 = cvrs.next()
-        val expectedVotes0 = mapOf(
-            0 to intArrayOf(0, 1, 2, 3),
-            1 to intArrayOf(4, 6, 7, 9),
-            11 to intArrayOf(0),
-            12 to intArrayOf(1),
-            13 to intArrayOf(0),
-            14 to intArrayOf(2),
-            21 to intArrayOf(0),
-            22 to intArrayOf(0),
-            23 to intArrayOf(0),
-            24 to intArrayOf(0),
-            25 to intArrayOf(0),
-            26 to intArrayOf(0),
-            27 to intArrayOf(1),
-        )
-        val expected0 = makeCvr(cvr0.imprintedId, expectedVotes0)
-        val actual0 = cvr0.convertToCard(COUNTY).toCvr()
-        assertEquals(expected0, actual0)
-
-        val cvr1 = cvrs.next()
-        val expectedVotes1 = mapOf(
-            21 to intArrayOf(1),
-            22 to intArrayOf(1),
-            23 to intArrayOf(0),
-            24 to intArrayOf(1),
-        )
-        val expected1 = makeCvr(cvr1.imprintedId, expectedVotes1)
-        val actual1 = cvr1.convertToCard(COUNTY).toCvr()
-        assertEquals(expected1, actual1)
-
-        val cvr2 = cvrs.next()
-        val expectedVotes2 = mapOf(
-            3 to intArrayOf(2),
-            4 to intArrayOf(2),
-            6 to intArrayOf(1),
-            20 to intArrayOf(0),
-            21 to intArrayOf(0),
-            22 to intArrayOf(0),
-            23 to intArrayOf(0),
-            24 to intArrayOf(0),
-            30 to intArrayOf(1),
-            31 to intArrayOf(1),
-            32 to intArrayOf(1),
-        )
-        val expected2 = makeCvr(cvr2.imprintedId, expectedVotes2)
-        val actual2 = cvr2.convertToCard(COUNTY).toCvr()
-        assertEquals(expected2, actual2)
-
-        val cvr3 = cvrs.next()
-        val expectedVotes3 = mapOf(
-            0 to intArrayOf(2, 3, 0, 1),
-            1 to intArrayOf(0, 1, 7, 8),
-            11 to intArrayOf(1),
-            12 to intArrayOf(),
-            13 to intArrayOf(),
-            14 to intArrayOf(),
-            21 to intArrayOf(1),
-            22 to intArrayOf(0),
-            23 to intArrayOf(1),
-            24 to intArrayOf(1),
-            25 to intArrayOf(1),
-            26 to intArrayOf(1),
-            27 to intArrayOf(1),
-        )
-        val expected3 = makeCvr(cvr3.imprintedId, expectedVotes3)
-        val actual3 = cvr3.convertToCard(COUNTY).toCvr()
-        assertEquals(expected3, actual3)
-    }
-
-    @Test
-    fun testWithRedactions() {
-        val filename = "src/test/data/Boulder2024/TestWithRedactions.csv"
-        val export = readCountyCvrs(filename, redaction = RedactionBoulder())
-        println(export)
-
-        assertEquals("src/test/data/Boulder2024/TestWithRedactions.csv", export.inputSource)
-        assertEquals("2024 Boulder County GE Recounts", export.electionName)
-        assertEquals("5.17.17.1", export.versionName)
-        assertEquals(65, export.schema.contests.size)
-        assertEquals(8, export.redaction().groups().size)
-        // export.redacted.forEach { println(it.contestVotes.toString()) }
-
-        // RedactedGroup('7', ncards=380, nlines=1, minCards= 380 totalVotes=8855 singleCards = false, contests=[0, 1, 2, 3, 5, 8, 11, 13, 14, 15, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42] )Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5
-        val redactedGroup = export.redaction().groups().first()
-        println(redactedGroup)
-        assertEquals("7", redactedGroup.groupName)
-        var idx = 0
-        assertEquals(
-            listOf(265, 104, 0, 0, 2, 1, 1, 5, 2, 0, 0, 0, 0, 0, 0),
-            redactedGroup.candVotes[idx++]!!.toMap().values.toList()
-        )
-        assertEquals(listOf(228, 74, 6, 2, 5, 0, 0), redactedGroup.candVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(233, 12, 0), redactedGroup.candVotes[idx++]!!.toMap().values.toList())
-        assertEquals(listOf(89, 209, 2, 5), redactedGroup.candVotes[idx++]!!.toMap().values.toList())
-    }
-
-
-    @Test
-    fun parseBoulder23Succeeds() {
-        val filename = "src/test/data/Boulder2023/Boulder-2023-Coordinated-CVR-Redactions-removed.csv"
-        val result = readCountyCvrs(filename,)
-        println(result)
-
-        val schema = result.schema
-        // There should be 38 contests. Check their metadata.
-        assertEquals(38, schema.contests.size)
-
-        val boulderMayoral = schema.contests[0]
-        assertEquals(
-            "City of Boulder Mayoral Candidates",
-            boulderMayoral.contestName
-        )
-        //assertEquals(boulderMayoral.votesAllowed() as Int, 4)
-        //assertEquals(boulderMayoral.winnersAllowed() as Int, 1)
-        val boulderCouncil = schema.contests.get(1)
-        // println(schema.choices(boulderCouncil.contestIdx).forEach{ print("\"${it}\", ")} )
-        /* assertEquals(
-            setOf(
-                "Terri Brncic",
-                "Jenny Robins",
-                "Aaron Gabriel Neyer",
-                "Jacques Decalo",
-                "Silas Atkins",
-                "Waylon Lewis",
-                "Ryan Schuchard",
-                "Tara Winer",
-                "Tina Marquis",
-                "Taishya Adams"
-            ).toSortedSet(),
-            schema.choices(boulderCouncil.contestIdx).toSet().toSortedSet()
-        ) */
-        assertEquals(result.nrows(), 118669)
-
-        // Check that the first cvr was correctly parsed.
-        val cvr1: CvrRow = result.cvrs().first()
-
-        // IRV
-        assertEquals(
-            // listOf("Aaron Brockett", "Nicole Speer", "Bob Yates", "Paul Tweedlie"),
-            listOf("Aaron Brockett", "Nicole Speer", "Bob Yates", "Paul Tweedlie").sorted(),
-            schema.voteFor(boulderMayoral.contestIdx, cvr1),
-        )
-
-        assertNotNull(cvr1.voteFor(boulderCouncil.contestIdx))
-        assertEquals(
-            listOf("David Fridland", "Eric Ryant", "John W. Watson", "Tim Barnes").sorted(),
-            schema.voteFor(boulderCouncil.contestIdx, cvr1),
-        )
-        var cidx = 11
-        assertEquals(
-            listOf("Jason Unger"),
-            schema.voteFor(cidx, cvr1),
-        )
-        cidx++
-        assertEquals(
-            listOf("Alex Medler"),
-            schema.voteFor(cidx, cvr1),
-        )
-        cidx++
-        assertEquals(
-            listOf("Andrew Brandt"),
-            schema.voteFor(cidx, cvr1),
-        )
-        cidx++
-        assertEquals(
-            listOf("Jorge ChÃ¡vez"),
-            schema.voteFor(cidx, cvr1),
-        )
-        cidx = 21
-        assertEquals(
-            listOf("Yes/For"),
-            schema.voteFor(cidx, cvr1),
-        )
-        cidx++
-        assertEquals(
-            listOf("Yes/For"),
-            schema.voteFor(cidx, cvr1),
-        )
-        cidx++
-        assertEquals(
-            listOf("Yes/For"),
-            schema.voteFor(cidx, cvr1),
-        )
-        cidx++
-        assertEquals(
-            listOf("Yes/For"),
-            schema.voteFor(cidx, cvr1),
-        )
-        cidx++
-        assertEquals(
-            listOf("Yes/For"),
-            schema.voteFor(cidx, cvr1),
-        )
-        cidx++
-        assertEquals(
-            listOf("Yes/For"),
-            schema.voteFor(cidx, cvr1),
-        )
-        cidx++
-        assertEquals(
-            listOf("No/Against"),
-            schema.voteFor(cidx, cvr1),
-        )
-
-        /* TODO
-            // Test for the proper reporting of some known invalid votes.
-    final String boulderMayoralName = "City of Boulder Mayoral Candidates";
-    final String cvr = os.toString();
-    assertTrue(StringUtils.contains(cvr,
-        "county,contest,record_type,cvr_number,imprinted_id,raw_vote,valid_interpretation\n"));
-    assertTrue(StringUtils.contains(cvr,
-        "Boulder,"+boulderMayoralName+",UPLOADED,140,108-1-32,\"\"\"Bob Yates(1)\"\"," +
-            "\"\"Bob Yates(2)\"\",\"\"Bob Yates(3)\"\",\"\"Bob Yates(4)\"\"\",\"\"\"Bob Yates\"\""));
-    assertTrue(StringUtils.contains(cvr,
-        "Boulder,"+boulderMayoralName+",UPLOADED,112680,108-100-48,\"\"\"Bob Yates(1)\"\"," +
-            "\"\"Nicole Speer(2)\"\",\"\"Aaron Brockett(3)\"\",\"\"Bob Yates(3)\"\"," +
-            "\"\"Paul Tweedlie(4)\"\"\",\"\"\"Bob Yates\"\",\"\"Nicole Speer\"\"," +
-            "\"\"Aaron Brockett\"\",\"\"Paul Tweedlie\"\""));
-    assertTrue(StringUtils.contains(cvr,
-        "Boulder,"+boulderMayoralName+",UPLOADED,107599,101-178-114,\"\"\"Bob Yates(1)\"\"," +
-            "\"\"Paul Tweedlie(1)\"\",\"\"Aaron Brockett(2)\"\",\"\"Paul Tweedlie(2)\"\"," +
-            "\"\"Paul Tweedlie(3)\"\",\"\"Paul Tweedlie(4)\"\"\","));
-    assertTrue(StringUtils.contains(cvr,
-        "Boulder,"+boulderMayoralName+",UPLOADED,118738,101-190-124," +
-            "\"\"\"Aaron Brockett(1)\"\",\"\"Bob Yates(1)\"\"\","));
-  }
-         */
-    }
-
-
-    @Test
-    fun parseBoulder24Recount() {
-        // redaction lines are present
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"
-        val export = readCountyCvrs(filename, redaction = RedactionBoulder())
-        println(export)
-
-        assertEquals(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv",
-            export.inputSource
-        )
-        assertEquals("2024 Boulder County GE Recounts", export.electionName)
-        assertEquals("5.17.17.1", export.versionName)
-        assertEquals(65, export.schema.contests.size)
-        assertEquals(25430, export.nrows())
-    }
-}
-
-fun makeCvr(id: String, votes: Map<Int, IntArray>): Cvr {
-    val cvrb = CvrBuilder2(id,  false)
-    votes.forEach {
-        cvrb.replaceContestVotes(it.key, it.value)
-    }
-    return cvrb.build()
-}
+package org.cryptobiotic.rlauxe.corlacvrimport org.cryptobiotic.rlauxe.core.Cvrimport org.cryptobiotic.rlauxe.util.CvrBuilder2import kotlin.test.assertTrueimport kotlin.test.Testimport kotlin.test.assertEqualsimport kotlin.test.assertNotNullclass TestCorlaRawCvrsOnTestExamples {    val COUNTY = "county"    @Test    fun testRemoveLeadingChar() {        val inp = "=\"42\""        val result = removeLeadingEquals(inp)        assertEquals("42", result)    }    @Test    fun parseThreeCandidatesTenVotesSucceeds() {        val filename = "src/test/data/corla/1misc/ThreeCandidatesTenVotes.csv"        val result = readCountyCvrs(filename,)        println(result)        // There should be one contest, the one we just read in.        val schema = result.schema        // There should be 38 contests. Check their metadata.        assertEquals(1, schema.contests.size)        val contest = schema.contests[0]        // Check basic data        assertEquals("TinyExample1", contest.contestName)        assertTrue(contest.isIRV)        assertEquals(3, contest.nchoices)        // Check that the 10 expected votes are there.        assertEquals(10, result.nrows())    }    @Test    fun test4CvrsWithIRV() {        val filename = "src/test/data/Boulder2023/Test4CvrsWithIRV.csv"        val export = readCountyCvrs(filename,)        println(export)        assertEquals("src/test/data/Boulder2023/Test4CvrsWithIRV.csv", export.inputSource)        assertEquals("2023 Coordinated Election", export.electionName)        assertEquals("5.17.17.1", export.versionName)        assertEquals(38, export.schema.contests.size)        assertEquals(4, export.nrows())        val cvrs = export.cvrs().iterator()        val cvr0 = cvrs.next()        val expectedVotes0 = mapOf(            0 to intArrayOf(0, 1, 2, 3),            1 to intArrayOf(4, 6, 7, 9),            11 to intArrayOf(0),            12 to intArrayOf(1),            13 to intArrayOf(0),            14 to intArrayOf(2),            21 to intArrayOf(0),            22 to intArrayOf(0),            23 to intArrayOf(0),            24 to intArrayOf(0),            25 to intArrayOf(0),            26 to intArrayOf(0),            27 to intArrayOf(1),        )        val expected0 = makeCvr(cvr0.imprintedId, expectedVotes0)        val actual0 = cvr0.convertToCard(COUNTY).toCvr()        assertEquals(expected0, actual0)        val cvr1 = cvrs.next()        val expectedVotes1 = mapOf(            21 to intArrayOf(1),            22 to intArrayOf(1),            23 to intArrayOf(0),            24 to intArrayOf(1),        )        val expected1 = makeCvr(cvr1.imprintedId, expectedVotes1)        val actual1 = cvr1.convertToCard(COUNTY).toCvr()        assertEquals(expected1, actual1)        val cvr2 = cvrs.next()        val expectedVotes2 = mapOf(            3 to intArrayOf(2),            4 to intArrayOf(2),            6 to intArrayOf(1),            20 to intArrayOf(0),            21 to intArrayOf(0),            22 to intArrayOf(0),            23 to intArrayOf(0),            24 to intArrayOf(0),            30 to intArrayOf(1),            31 to intArrayOf(1),            32 to intArrayOf(1),        )        val expected2 = makeCvr(cvr2.imprintedId, expectedVotes2)        val actual2 = cvr2.convertToCard(COUNTY).toCvr()        assertEquals(expected2, actual2)        val cvr3 = cvrs.next()        val expectedVotes3 = mapOf(            0 to intArrayOf(2, 3, 0, 1),            1 to intArrayOf(0, 1, 7, 8),            11 to intArrayOf(1),            12 to intArrayOf(),            13 to intArrayOf(),            14 to intArrayOf(),            21 to intArrayOf(1),            22 to intArrayOf(0),            23 to intArrayOf(1),            24 to intArrayOf(1),            25 to intArrayOf(1),            26 to intArrayOf(1),            27 to intArrayOf(1),        )        val expected3 = makeCvr(cvr3.imprintedId, expectedVotes3)        val actual3 = cvr3.convertToCard(COUNTY).toCvr()        assertEquals(expected3, actual3)    }    @Test    fun testWithRedactions() {        val filename = "src/test/data/Boulder2024/TestWithRedactions.csv"        val export = readCountyCvrs(filename, redaction = RedactionBoulder())        println(export)        assertEquals("src/test/data/Boulder2024/TestWithRedactions.csv", export.inputSource)        assertEquals("2024 Boulder County GE Recounts", export.electionName)        assertEquals("5.17.17.1", export.versionName)        assertEquals(65, export.schema.contests.size)        assertEquals(8, export.redaction().groups().size)        // export.redacted.forEach { println(it.contestVotes.toString()) }        // RedactedGroup('7', ncards=380, nlines=1, minCards= 380 totalVotes=8855 singleCards = false, contests=[0, 1, 2, 3, 5, 8, 11, 13, 14, 15, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42] )Redacted and Aggregated,,,,,,7,265,104,0,0,2,1,1,5,2,0,0,0,0,0,0,228,74,6,2,5,0,0,233,12,0,89,209,2,5        val redactedGroup = export.redaction().groups().first()        println(redactedGroup)        assertEquals("7", redactedGroup.groupName)        var idx = 0        assertEquals(            listOf(265, 104, 0, 0, 2, 1, 1, 5, 2, 0, 0, 0, 0, 0, 0),            redactedGroup.candVotes[idx++]!!.toMap().values.toList()        )        assertEquals(listOf(228, 74, 6, 2, 5, 0, 0), redactedGroup.candVotes[idx++]!!.toMap().values.toList())        assertEquals(listOf(233, 12, 0), redactedGroup.candVotes[idx++]!!.toMap().values.toList())        assertEquals(listOf(89, 209, 2, 5), redactedGroup.candVotes[idx++]!!.toMap().values.toList())    }    /*    0 Aaron Brockett(1),Nicole Speer(1),Bob Yates(1),Paul Tweedlie(1),Aaron Brockett(2),Nicole Speer(2),Bob Yates(2),Paul Tweedlie(2),Aaron Brockett(3),Nicole Speer(3),Bob Yates(3),Paul Tweedlie(3),Aaron Brockett(4),Nicole Speer(4),Bob Yates(4),Paul Tweedlie(4),    1 Terri Brncic,Jenny Robins,Aaron Gabriel Neyer,Jacques Decalo,Silas Atkins,Waylon Lewis,Ryan Schuchard,Tara Winer,Tina Marquis,Taishya Adams,    2 Tim Barnes,JD Mangat,Eric Ryant,John W. Watson,Gala W. Orba,David Fridland,Crystal Gallegos,    Ethan Augreen,Joan Peck,Terri Goon,    Sean P. McCoy,Steve Altschuler,Beka Venturella,    Nia Wassink,Diane Crist,Harrison Earl,Ron Gallegos,Gary Hodges,Susie Hidalgo-Fahring,Spencer Adams,Sherry Sommer,Chris Leh,Josh Cooperman,J. Caleb Dickinson,Deborah Fahey,George Colbert,Dietrich Hoefner,Barbara Hamlington,Jason Unger,Neil Fishman,Andrew Steffl,Alex Medler,Cynthia Nevison,Andrew Brandt,Lalenia Quinlan Aweida,Anil Kiran Pesaramelli,Stuart Lord,Jorge ChÃ¡vez,Kevin G. Morris,Kyri Cox,Brenda L. Wyss,Brad Shochat,Ryan Wilcken,Dawn Kirk,Nancy Rumfelt,Briah Freeman,Denise Alvine Chapman,Yazmin Navarro,Stu Boyd,Elizabeth Kearney,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Yes/For,No/Against,Dalton Valette,Heather Cracraft,Ryan Hitchler,Claire Dixon,Ryan Welch,Jeff Chu,Sean Maday,Clint Folsom,Chris Hanson,Stephanie Schader,Mike Foster,Yes/For,No/Against,Yes/For,No/Against     */    @Test    fun parseBoulder23Succeeds() {        val filename = "src/test/data/Boulder2023/Boulder-2023-Coordinated-CVR-Redactions-removed.csv"        val result = readCountyCvrs(filename,)        println(result)        val schema = result.schema        // There should be 38 contests. Check their metadata.        assertEquals(38, schema.contests.size)        val boulderMayoral = schema.contests[0]        assertEquals(            "City of Boulder Mayoral Candidates",            boulderMayoral.contestName        )        //assertEquals(boulderMayoral.votesAllowed() as Int, 4)        //assertEquals(boulderMayoral.winnersAllowed() as Int, 1)        val boulderCouncil = schema.contests.get(1)        // println(schema.choices(boulderCouncil.contestIdx).forEach{ print("\"${it}\", ")} )        assertEquals(listOf("Terri Brncic", "Jenny Robins", "Aaron Gabriel Neyer", "Jacques Decalo", "Silas Atkins", "Waylon Lewis", "Ryan Schuchard", "Tara Winer", "Tina Marquis", "Taishya Adams"),            schema.columnsFor(boulderCouncil).map { it.choiceName }        )        assertEquals(result.nrows(), 118669)        // Check that the first cvr was correctly parsed.        val cvr1: CvrRow = result.cvrs().first()        // IRV        assertEquals(            listOf("Aaron Brockett", "Nicole Speer", "Bob Yates", "Paul Tweedlie").toSet(),            schema.voteFor(boulderMayoral.contestIdx, cvr1).toSet(),        )        assertNotNull(cvr1.voteFor(boulderCouncil.contestIdx))        assertEquals(            listOf("Silas Atkins", "Ryan Schuchard", "Tara Winer", "Taishya Adams", ).toSet(),            schema.voteFor(boulderCouncil.contestIdx, cvr1).toSet(),        )        var cidx = 11        assertEquals(            listOf("Jason Unger"),            schema.voteFor(cidx, cvr1),        )        cidx++        assertEquals(            listOf("Alex Medler"),            schema.voteFor(cidx, cvr1),        )        cidx++        assertEquals(            listOf("Andrew Brandt"),            schema.voteFor(cidx, cvr1),        )        cidx++        assertEquals(            listOf("Jorge ChÃ¡vez"),            schema.voteFor(cidx, cvr1),        )        cidx = 21        assertEquals(            listOf("Yes/For"),            schema.voteFor(cidx, cvr1),        )        cidx++        assertEquals(            listOf("Yes/For"),            schema.voteFor(cidx, cvr1),        )        cidx++        assertEquals(            listOf("Yes/For"),            schema.voteFor(cidx, cvr1),        )        cidx++        assertEquals(            listOf("Yes/For"),            schema.voteFor(cidx, cvr1),        )        cidx++        assertEquals(            listOf("Yes/For"),            schema.voteFor(cidx, cvr1),        )        cidx++        assertEquals(            listOf("Yes/For"),            schema.voteFor(cidx, cvr1),        )        cidx++        assertEquals(            listOf("No/Against"),            schema.voteFor(cidx, cvr1),        )        /* TODO            // Test for the proper reporting of some known invalid votes.    final String boulderMayoralName = "City of Boulder Mayoral Candidates";    final String cvr = os.toString();    assertTrue(StringUtils.contains(cvr,        "county,contest,record_type,cvr_number,imprinted_id,raw_vote,valid_interpretation\n"));    assertTrue(StringUtils.contains(cvr,        "Boulder,"+boulderMayoralName+",UPLOADED,140,108-1-32,\"\"\"Bob Yates(1)\"\"," +            "\"\"Bob Yates(2)\"\",\"\"Bob Yates(3)\"\",\"\"Bob Yates(4)\"\"\",\"\"\"Bob Yates\"\""));    assertTrue(StringUtils.contains(cvr,        "Boulder,"+boulderMayoralName+",UPLOADED,112680,108-100-48,\"\"\"Bob Yates(1)\"\"," +            "\"\"Nicole Speer(2)\"\",\"\"Aaron Brockett(3)\"\",\"\"Bob Yates(3)\"\"," +            "\"\"Paul Tweedlie(4)\"\"\",\"\"\"Bob Yates\"\",\"\"Nicole Speer\"\"," +            "\"\"Aaron Brockett\"\",\"\"Paul Tweedlie\"\""));    assertTrue(StringUtils.contains(cvr,        "Boulder,"+boulderMayoralName+",UPLOADED,107599,101-178-114,\"\"\"Bob Yates(1)\"\"," +            "\"\"Paul Tweedlie(1)\"\",\"\"Aaron Brockett(2)\"\",\"\"Paul Tweedlie(2)\"\"," +            "\"\"Paul Tweedlie(3)\"\",\"\"Paul Tweedlie(4)\"\"\","));    assertTrue(StringUtils.contains(cvr,        "Boulder,"+boulderMayoralName+",UPLOADED,118738,101-190-124," +            "\"\"\"Aaron Brockett(1)\"\",\"\"Bob Yates(1)\"\"\","));  }         */    }    @Test    fun parseBoulder24Recount() {        // redaction lines are present        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv"        val export = readCountyCvrs(filename, redaction = RedactionBoulder())        assertEquals(            "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv",            export.inputSource        )        assertEquals("2024 Boulder County GE Recounts", export.electionName)        assertEquals("5.17.17.1", export.versionName)        assertEquals(65, export.schema.contests.size)        assertEquals(25438, export.nrows())    }}fun makeCvr(id: String, votes: Map<Int, IntArray>): Cvr {    val cvrb = CvrBuilder2(id,  false)    votes.forEach {        cvrb.replaceContestVotes(it.key, it.value)    }    return cvrb.build()}

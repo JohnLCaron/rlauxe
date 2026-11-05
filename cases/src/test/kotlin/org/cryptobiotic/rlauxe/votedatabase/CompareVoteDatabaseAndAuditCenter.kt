@@ -7,54 +7,29 @@ import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.Garfield2020CountyCvrs
 import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrsFromFile
-import kotlin.io.path.Path
-import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.text.split
 
 // see Corla2020notes
 
-val votedatabase = "/home/stormy/datadrive/votedatabase"
-val votedatabase2020 = "$votedatabase/cvr/Colorado"
-
 class CompareVoteDatabaseAndAuditCenter {
 
     @Test
     fun testRedactionProblem() {
-        val errs = matchNames("Larimer", "$votedatabase2020/Larimer/cvr.csv", Statewide2020General())
+        val errs = matchNames("Larimer", Statewide2020General())
         assertEquals(0, errs)
     }
 
     @Test
     fun testGarfield() { // also Roosevelt
-        val errs = matchNames("Garfield", "$votedatabase2020/Garfield/cvr.csv", Statewide2020General())
+        val errs = matchNames("Garfield", Statewide2020General())
         assertEquals(0, errs)
     }
 
     @Test
     fun problem() { // redaction
-        // val filename = "$colorado2020/Lincoln/cvr.csv"  had a misquoted quote that commons-csv was barfing on
-        /* val filename = "$colorado2020/Roosevelt/cvr.csv" // might be older version of export file ??
-        val reader: BufferedReader = File(filename).bufferedReader()
-        var idx = 0
-        while (idx < 10) {
-            var line = reader.readLine()
-            if (line == null) break
-            println("$idx ${line.length}")
-
-            val tokens = line.split(",")
-            tokens.forEach {
-                // if (it.contains("\""))
-                    println(it)
-            }
-            idx++
-        }
-        reader.close() */
-
-        matchNames("Douglas", "$votedatabase2020/Douglas/cvr.csv", Statewide2020General())
-        // assertEquals(0, errs)
+        matchNames("Douglas", Statewide2020General())
     }
 
     @Test
@@ -66,58 +41,33 @@ class CompareVoteDatabaseAndAuditCenter {
 
     @Test
     fun allColorado2020Counties() {
-        val path = Path(votedatabase2020)
-        val errCount = emptyMap<String, Int>() // mapOf("La Plata" to 2)
-        path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202")}.forEach { subdir ->
-            val county = subdir.fileName.toString()
-            if (county !in listOf("Monroe", "Roosevelt", "Baca", "Gunnison", "Las Animas") && county > "A") {
-                try {
-                    val filename = "${subdir.toString()}/cvr.csv" // entry.toString()
-                    val errs = matchNames(county, filename, Statewide2020General())
-                    assertEquals(errCount[county] ?: 0, errs)
-                } catch (e: Exception) {
-                    println(e.message)
-                    throw e
-                }
-            }
-            //}
+        val input = Statewide2020General()
+        val errCount = emptyMap<String, Int>()
+        input.counties().forEach { county ->
+            matchNames(county, input)
         }
     }
 
-    @Test
-    fun showAllColorado2020Counties() {
-        val path = Path(votedatabase2020)
-        path.listDirectoryEntries().sorted().filter { it.isDirectory() && !it.fileName.toString().startsWith("202") }
-            .forEach { subdir ->
-                val county = subdir.fileName.toString()
-                println(county)
-                subdir.listDirectoryEntries().filter {
-                    !it.isDirectory() && it.fileName.toString().endsWith(".csv")
-                            && it.fileName.toString() != "summary.csv"
-                            && !it.fileName.toString().contains("Manifest")
-                }.forEach { entry ->
-                    if (county != "Monroe") { // no such county in Colorado && earlier format && Baca has copy of Heurfano
-                        try {
-                            val filename = entry.toString()
-                            val reader: CorlaCountyCvrsIF = readCvrExportsFromFile(county, filename)
-                            val star = if (reader.electionName.contains(county)) "" else "**"
-                            println("  $star ${reader.electionName} : ${filename}")
-                        } catch (e: Exception) {
-                            println(e.message)
-                            throw e
-                        }
-                    }
-                }
-            }
+    fun matchNames(county: String, input: StatewideInput): Int {
+        val countyInput = input.corlaCountyInput(county)
+        if (countyInput == null) {
+            println("\n-----------------------------------")
+            println("$county countyInput is null")
+            return -1
+        }
+        if (!countyInput.hasCvrs()) {
+            println("\n-----------------------------------")
+            println("$county has no cvrs")
+            return -1
+        }
+        return matchNames(county, countyInput.readCorlaCvrs(), input)
     }
 
-    // could allow contained contests to be defined by the county
 
-    fun matchNames(county: String, exportFile: String, input: StatewideInput): Int {
+    fun matchNames(county: String, export: CorlaCountyCvrsIF, input: StatewideInput): Int {
         println("\n-----------------------------------")
-        println("county=$county csvfile = $exportFile")
+        println("county=$county csvfile = ${export.inputSource}")
 
-        val export: CorlaCountyCvrsIF = readCvrExportsFromFile(county, exportFile)
         val sinfoList = export.makeContestInfo().values.toList()
         var errs = 0
 

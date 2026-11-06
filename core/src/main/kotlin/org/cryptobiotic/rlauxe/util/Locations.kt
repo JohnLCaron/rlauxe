@@ -8,7 +8,7 @@ object Locations {
     // TODO allow setting an environment variable for external developers
     val library = if (user == "joncifer") "$home/IdeaProjects/rlauxe/cases/build/libs" else "$home/dev/github/rla/rlauxe/cases/build/libs"
     val auditcenter = if (user == "joncifer") "$home/IdeaProjects/nealmcb/auditcenter" else "$home/datadrive/github/nealmcb/auditcenter"
-    val testdataDir = if (user == "joncifer") "$home/rla/test" else "$home/rla"
+    val testdataDir = "$home/rla/test"
     val cases       = if (user == "joncifer") "$home/rla/cases" else "$home/datadrive/rla/cases"
     val redacted2020 = if (user == "joncifer") "$home/rla/cases/corla/2020r/cvrs" else "/home/stormy/rla/temp/Anonomice/2020/"
 

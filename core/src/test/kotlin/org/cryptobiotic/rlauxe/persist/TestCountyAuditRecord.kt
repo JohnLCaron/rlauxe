@@ -42,7 +42,7 @@ class TestCountyAuditRecord {
         println("mvrsByCounty size = ${mvrsByCounty.size}")
         println("mvrsByCounty = ${mvrsByCounty}")
         mvrsByCounty.forEach { println("   $it")}
-        assertEquals(62, mvrsByCounty.size)
+        assertEquals(63, mvrsByCounty.size)
 
         /* val mvrsForCounty = countyAuditRecord.readCountyMvrsAndTabulate(countyName = "Jefferson")
         println("'Jefferson' mvrsForCounty size = ${mvrsForCounty.size}")

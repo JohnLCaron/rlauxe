@@ -6,39 +6,43 @@
             "id": 0,
             "possibleContests": [
                 0,
+                1,
                 2,
-                3,
                 4,
                 5,
+                7,
                 8,
-                9,
-                10
+                9
             ],
             "hasExactContests": false,
-            "ncards": 645
+            "ncards": 1819
         },
         {
             "county": "county",
             "name": "style1",
             "id": 1,
             "possibleContests": [
-                2,
+                0,
+                1,
                 3,
                 4,
+                6,
                 7,
+                8,
                 9,
                 10
             ],
             "hasExactContests": false,
-            "ncards": 2367
+            "ncards": 2600
         },
         {
             "county": "county",
             "name": "style2",
             "id": 2,
             "possibleContests": [
+                0,
                 1,
-                2,
+                3,
                 4,
                 6,
                 8,
@@ -46,22 +50,21 @@
                 10
             ],
             "hasExactContests": false,
-            "ncards": 1816
+            "ncards": 5489
         },
         {
             "county": "county",
             "name": "style3",
             "id": 3,
             "possibleContests": [
-                2,
+                0,
                 4,
-                5,
-                7,
+                6,
                 8,
-                10
+                9
             ],
             "hasExactContests": false,
-            "ncards": 5172
+            "ncards": 92
         }
     ]
 }

@@ -5,37 +5,36 @@
             "name": "style0",
             "id": 0,
             "possibleContests": [
-                1,
                 2,
-                3
+                3,
+                4
             ],
             "hasExactContests": false,
-            "ncards": 3074
+            "ncards": 9276
         },
         {
             "county": "county",
             "name": "style1",
             "id": 1,
             "possibleContests": [
-                0,
                 1,
-                3,
-                4
+                2
             ],
             "hasExactContests": false,
-            "ncards": 2852
+            "ncards": 4577
         },
         {
             "county": "county",
             "name": "style2",
             "id": 2,
             "possibleContests": [
-                1,
+                0,
                 2,
-                3
+                3,
+                4
             ],
             "hasExactContests": false,
-            "ncards": 1695
+            "ncards": 2985
         },
         {
             "county": "county",
@@ -43,12 +42,11 @@
             "id": 3,
             "possibleContests": [
                 0,
-                1,
                 2,
                 3
             ],
             "hasExactContests": false,
-            "ncards": 12379
+            "ncards": 3162
         }
     ]
 }

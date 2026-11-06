@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 
 // TODO mo betta
 class TestReadPopulations {
-    val useLocal = false
+    val useLocal = true
     val toptopdir = if (useLocal) "src/test/data/testRunCli" else "$testdataDir/persist/testRunCli"
 
     @Test

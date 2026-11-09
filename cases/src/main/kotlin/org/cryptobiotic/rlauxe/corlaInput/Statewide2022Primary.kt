@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
 class Statewide2022Primary(ac:String?=auditcenter): StatewideInput(
+    targetContestsFile = null, // missing
     generalCanonicalFile = "$ac/2022/primary/2022PrimaryRLACounty-CandidateList.csv",
     contestRoundFile = "$ac/2022/primary/round_1/contest.csv",
     tabulateCountyFile = "$ac/2022/primary/tabulate_county.csv",

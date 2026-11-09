@@ -2,7 +2,6 @@ package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.rlauxe.corla.CorlaStateContestInfoBuilder
-import org.cryptobiotic.rlauxe.corla.ManifestCounts
 import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyElection
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
@@ -12,6 +11,7 @@ import org.cryptobiotic.rlauxe.corlaInput.Statewide2020Redacted
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.readCountyInputData
@@ -39,7 +39,7 @@ class WriteCountyInputData {
 
     @Test
     fun writeOneState() {
-        writeCountyData(Statewide2020Redacted())
+        writeCountyData(Statewide2026Primary())
     }
 
     @Test
@@ -47,12 +47,12 @@ class WriteCountyInputData {
         writeCountyData(Statewide2020General())
         writeCountyData(Statewide2020Redacted())
         //writeCountyData(Statewide2022Primary())
-        writeCountyData(Statewide2023Coordinated())
+        // writeCountyData(Statewide2023Coordinated())
         writeCountyData(Statewide2024General())
-        writeCountyData(Statewide2025Coordinated())
-        //writeCountyData(Statewide2026Primary())
+        // writeCountyData(Statewide2025Coordinated())
+        writeCountyData(Statewide2026Primary())
         //writeCountyData(Statewide2026PMerged())
-        writeCountyData(Statewide2026PwithCvrs())
+        // writeCountyData(Statewide2026PwithCvrs())
     }
 
     // ourRedactByPrecinct written by TestAnonScenarios

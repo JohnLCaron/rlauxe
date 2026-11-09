@@ -20,11 +20,9 @@ import org.cryptobiotic.rlauxe.persist.csv.AddStyles
 import org.cryptobiotic.rlauxe.persist.csv.CardHeader
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
-import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.util.TransformingIterator
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import kotlin.collections.forEach
@@ -73,18 +71,16 @@ class CorlaStateElection(
 
         for (countyName in stateInput.counties()) {
             println(countyName)
-            if (countyName == "Baca")
-                print("")
             val countyDir = "$topdir/county/$countyName"
             val result = AuditRecord.readPartialResult(countyDir)
             if (result.isErr) {
                 logger.error { "$countyName got error ${result}" }
                 continue
             }
-            val countyAuditrecord = result.unwrap()
+            val countyAuditRecord = result.unwrap()
 
             //val statePoolIdMap = mutableMapOf<Int, Int>()
-            val countyCardPools = countyAuditrecord.readCardPools()
+            val countyCardPools = countyAuditRecord.readCardPools()
             if (countyCardPools != null) statePools.addAll(countyCardPools)
             /* if (countyCardPools != null) {
                 countyCardPools.forEach { pool ->
@@ -95,7 +91,7 @@ class CorlaStateElection(
             } */
 
             // val stateStyleIdMap = mutableMapOf<Int, Int>()
-            val countyStyles = countyAuditrecord.readCardStyles()
+            val countyStyles = countyAuditRecord.readCardStyles()
             stateStyles.addAll(countyStyles)
             /* countyStyles.forEach { style ->
                 stateStyleIdMap[style.id()] = stateStyleId
@@ -144,7 +140,7 @@ class CorlaStateElection(
 
             // these are the ac tabs
             val countyContestTabs = mutableMapOf<Int, ContestTabulation>()
-            countyAuditrecord.contests.map { it.contest as Contest }.forEach { contest ->
+            countyAuditRecord.contests.map { it.contest as Contest }.forEach { contest ->
                 val contestList = stateContests.getOrPut(contest.id) { mutableListOf() }
                 contestList.add(Pair(countyName, contest))
                 countyContestTabs.sumContestTabulationsFromCandVotes(contest.info, contest.votes, contest.Ncast)

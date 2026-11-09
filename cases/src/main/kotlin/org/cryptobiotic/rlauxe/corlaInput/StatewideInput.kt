@@ -57,6 +57,7 @@ private val logger = KotlinLogging.logger("StatewideInput")
 
 // could call it AuditCenterInput
 abstract class StatewideInput(
+    val targetContestsFile: String?,
     val generalCanonicalFile: String,
     val contestRoundFile: String,
     val tabulateCountyFile: String,
@@ -240,7 +241,7 @@ abstract class StatewideInput(
         return munge(transform)
     }
 
-    ///////// TODO these could be on the CountyInput
+    // exportContestName -> canonical name
     // dont use these directly, use matchCanonicalContest() and matchCanonicalCandidate()
     open fun contestNameCleanup(county: String, name: String) = name
     open fun candidateNameCleanup(county: String, name: String) = name

@@ -19,6 +19,7 @@ import kotlin.collections.forEach
 
 // we have Boulder, La Plata, Morgan, and Weld CVR_export files
 class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInput (
+    targetContestsFile = "$ac/2026/primary/files/targetContestSelections.xlsx", // convert to csv
     generalCanonicalFile = "$ac/2026/primary/finalReports/CanonicalListOfContestsAndChoices.csv",
     contestRoundFile = "$ac/2026/primary/finalReports/ContestsListRound1.csv",
     tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",

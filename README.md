@@ -568,6 +568,8 @@ SliceDice   Dice, but don’t slice: Optimizing the efficiency of ONEAudit
     Spertus, Glazer and Stark, Aug 18 2025
     https://arxiv.org/pdf/2507.22179
     https://github.com/spertus/UI-TS
+
+Feasible Risk Limiting Audits for Belgium](papers/FeasibleBelgiumRLA.1107.pdf)
     
 ````
 Also see [complete list of references](docs/papers/papers.txt).

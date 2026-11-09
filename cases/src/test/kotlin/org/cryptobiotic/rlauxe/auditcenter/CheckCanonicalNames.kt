@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.auditcenter
 
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
-// import org.cryptobiotic.rlauxe.corlaInput.matchCandidateName
 
 // check name consistency in ColoradoInput
 class CheckCanonicalNames( val input: StatewideInput) {

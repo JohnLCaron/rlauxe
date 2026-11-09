@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.util.Locations.cases
 import kotlin.collections.plus
 
 open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
+    targetContestsFile = "$ac/2020/general/targetContests.xlsx", // convert to csv
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
     contestRoundFile = "$ac/2020/general/round_1/contest.csv",
     tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
@@ -29,7 +30,6 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
     override fun corlaCountyInput(countyName: String): CountyInput? {
         if (cvrsMissing.contains(countyName)) return County2020InputNoCvrs(countyName)
         // if (countyName == "Gunnison") return County2020Input(countyName)
-        val counties = counties()
         return if (counties().contains(countyName)) {
             County2020Input(countyName)
         } else null
@@ -294,6 +294,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
                 "Jackson County Commissioner Dist 3" -> "Jackson County Commissioner - District 3"
                 "District Court Judge - 8th Judicial District - Villaseñor" -> "District Court Judge - 8th Judicial District - Villasenor"
                 "Justice of the Colorado Supreme Court - Samour" -> "Jackson - Justice of the Colorado Supreme Court - Samour" // diverted target
+// "Jackson - Justice of the Colorado Supreme Court - Samour" -> "Justice of the Colorado Supreme Court - Samour" // single county target
                 else -> null
             }
 
@@ -322,6 +323,8 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
             "Kiowa" -> when (name) {
                 "2A TOWN OF EADS TABOR QUESTION" -> "Town of Eads Ballot Question 2A,"
                 "Proposition 117 (STATUTORY)" -> "Kiowa - Proposition 117 (STATUTORY)"
+                //                 "Kiowa - Proposition 117 (STATUTORY)" -> "Proposition 117 (STATUTORY)" // single county target
+
                 else -> null
             }
 
@@ -357,6 +360,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
                 "Proposition 117" -> "Proposition 117 (STATUTORY)"
                 "Proposition 118" -> "Proposition 118 (STATUTORY)"
                 "Colorado Supreme Court Justice - Hart" -> "Lincoln - Justice of the Colorado Supreme Court - Hart" // diverted target
+                //                 "Lincoln - Justice of the Colorado Supreme Court - Hart" -> "Justice of the Colorado Supreme Court - Hart"// single county target
                 else -> null
             }
 
@@ -446,6 +450,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
 
             "Prowers" -> when (name) {
                 "Amendment C (CONSTITUTIONAL)" -> "Prowers - Amendment C (CONSTITUTIONAL)" // diverted target
+                //                 "Prowers - Amendment C (CONSTITUTIONAL)" -> "Amendment C (CONSTITUTIONAL)" // single county target
                 else -> null
             }
 
@@ -513,12 +518,15 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
                 "Northeast Teller County Fire Protection District 7A" -> "Northeast Teller County Fire Protection District Ballot Issue 7A"
                 "Amendment C (Constitutional) " -> "Teller - Amendment C (CONSTITUTIONAL)" // diverted target
                 "Amendment 77 (Constitutional)" -> "Teller - Amendment 77 (CONSTITUTIONAL)"
+                //                 "Teller - Amendment C (CONSTITUTIONAL)" -> "Amendment C (Constitutional) " // single county target
+                //                "Teller - Amendment 77 (CONSTITUTIONAL)" -> "Amendment 77 (Constitutional)"
                 else -> null
             }
 
             "Washington" -> when (name) {
                 "Brush RE-2J School District BALLOT ISSUE" -> "Brush RE-2J School District Ballot Issue 3D"
                 "Proposition EE (Statutory)" -> "Washington - Proposition EE (STATUTORY)" // diverted target
+                //                 "Washington - Proposition EE (STATUTORY)" -> "Proposition EE (Statutory)" // single county target
                 else -> null
             }
 

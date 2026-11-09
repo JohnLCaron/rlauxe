@@ -92,10 +92,6 @@ fun readGeneralCanonicalList(filename: String, stateInput : StatewideInput): Lis
     // println(header)
 
     val contests = mutableMapOf<String, CanonicalContest>()
-
-    // contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,
-    //   audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,
-    //   gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
     var line: CSVRecord? = null
     try {
         while (records.hasNext()) {

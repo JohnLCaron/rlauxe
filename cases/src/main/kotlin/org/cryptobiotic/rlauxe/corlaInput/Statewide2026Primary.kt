@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
 
 open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput(
+    targetContestsFile = "$ac/2026/primary/files/targetContestSelections.xlsx", // convert to csv
     generalCanonicalFile = "$ac/2026/primary/finalReports/CanonicalListOfContestsAndChoices.csv",
     contestRoundFile = "$ac/2026/primary/finalReports/ContestsListRound1.csv",
     tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",
@@ -18,7 +19,7 @@ open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput(
 ) {
     override val year = "2026p"
     val manifestDir = "$ac/2026/primary/files"
-    val contestIDsByCountyFile = "$ac/2026/primary/finalReports/ContestIDsByCounty.csv"
+    val contestIDsByCountyFile = "$ac/2026/primary/finalReports/ContestIDsByCounty.csv" // only 2026 primary so far
     val canonicalCounties: List<String>
     val countyContests: Map<String, List<String>>
 
@@ -31,17 +32,6 @@ open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput(
             cclist.add(it.contest_name)
         }
         countyContests = work
-        /*
-        val ccSet = canonicalCounties.toSet()
-        val cc: List<CanonicalContest> = readGeneralCanonicalList(generalCanonicalFile, this)
-        val alphaSet = cc.map { it.counties }
-            .flatten()
-            .filter { !skipCounties(it) }
-            .toSet()
-            .sortedBy{ it.replace(" ", "").lowercase() } // canonical order has the blanks removed
-            .toSet()
-        println(alphaSet-ccSet)
-        print("") */
     }
 
     override fun manifestFile(county: String): String {
@@ -54,9 +44,9 @@ open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput(
         val countyManifests = counties().map { county ->
             val mainfestList = readCountyManifestCsv(manifestFile(county))
             val correctedList = if (county != "Alamosa") mainfestList else
+
             // Our fresh recount of all 63 manifest CSVs 1,444,036
             // Official ballot_card_count column, live ContestsListRound1.csv	1,444,047
-
             // Alamosa: 3,464 ballots in the public Alamosa.csv download vs. 3,475 in CDOS’s own reconciliation. Every other county matches exactly.
             // Alamosa,102,138,30,Box 1
             // Tabulator 102, Batch 139, 11 ballots
@@ -68,14 +58,22 @@ open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput(
                 //    val location: String,
                 //)
                 mainfestList + listOf(ManifestBatch(county, 102, "139", 11, "Box 1"))
+
             CountyManifest(county, correctedList)
         }
         StateManifest(countyManifests)
     }
 
     //////////////////////////////////////////////////////
-    override fun corlaCountyInput(countyName: String): CountyInput? = null
     override fun skipCounties(countyName: String) = false
+
+    override fun corlaCountyInput(countyName: String): CountyInput? {
+        return when (countyName) {
+            "Boulder" -> Boulder26PInput()
+            "La Plata", "Morgan", "Weld" -> CountyInput2026(countyName)
+            else -> CountyInputNoCvrs(countyName, manifestFile(countyName), year)
+        }
+    }
 
     // in canonical manifest order
     override fun counties() = canonicalCounties

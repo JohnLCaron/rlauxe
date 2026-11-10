@@ -14,20 +14,47 @@ import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corla.createCorlaStateElection
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020Redacted
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import kotlin.test.Test
 
 class CorlaStateElections {
-    val top2020dir2 = "$cases/corla/2020r"
-    val top2020dir = "$cases/corla/2020"
-    val top2026pdir = "$cases/corla/2026p"
 
     @Test
     fun create2026p() {
+        val stateInput = Statewide2026Primary()
+
+        createCorlaStateElection(
+            topdir = "$cases/corla/2026p",
+            stateInput=stateInput,
+            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
+            roundConfig = corlaRoundSettings(),
+            variant = ElectionVariantEnum.OnePool,
+            alreadyMadeCounties = false,
+        )
+    }
+
+    @Test
+    fun create2026pm() { // TODO
         val stateInput = Statewide2026PwithCvrs()
 
         createCorlaStateElection(
-            topdir = top2026pdir,
+            topdir = "$cases/corla/2026pm",
+            stateInput=stateInput,
+            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
+            roundConfig = corlaRoundSettings(),
+            variant = ElectionVariantEnum.OnePool,
+            alreadyMadeCounties = false,
+        )
+    }
+
+    @Test
+    fun create2024() {
+        val stateInput = Statewide2024General()
+
+        createCorlaStateElection(
+            topdir = "$cases/corla/2024",
             stateInput=stateInput,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
             roundConfig = corlaRoundSettings(),
@@ -41,7 +68,7 @@ class CorlaStateElections {
         val stateInput = Statewide2020Redacted()
 
         createCorlaStateElection(
-            topdir = top2020dir2,
+            topdir = "$cases/corla/2020r",
             stateInput=stateInput,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .04),
             roundConfig = corlaRoundSettings(),
@@ -55,7 +82,7 @@ class CorlaStateElections {
         val stateInput = Statewide2020General()
 
         createCorlaStateElection(
-            topdir = top2020dir,
+            topdir = "$cases/corla/2020",
             stateInput=stateInput,
             creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .04),
             roundConfig = corlaRoundSettings(),
@@ -68,7 +95,7 @@ class CorlaStateElections {
     fun startRound() {
         StartAuditFirstRoundCli.main(
             arrayOf(
-                "-in", top2020dir,
+                "-in", "$cases/corla/2020",
             )
         )
     }
@@ -77,7 +104,7 @@ class CorlaStateElections {
     fun runRound() {
         RunRlaRoundCli.main(
             arrayOf(
-                "-in", top2020dir,
+                "-in", "$cases/corla/2020",
             )
         )
     }

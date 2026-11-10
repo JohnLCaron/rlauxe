@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
 open class Statewide2025Coordinated(ac:String?=auditcenter): StatewideInput (
+    targetContestsFile = null,
     generalCanonicalFile = "$ac/2025/canonicalList.csv", // Needs ISO-8859-1
     contestRoundFile = "$ac/2025/round1/contest.csv",
     tabulateCountyFile = "$ac/2025/tabulateCountyPlurality.csv",

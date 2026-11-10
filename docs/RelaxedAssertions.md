@@ -9,8 +9,7 @@ The plot shows, starting at the rightmost column which has no failing assertions
 
 The plots below shows the range of seats as error bars, as well as the reported number of seats as points.
 
-**Party Seat Ranges** are calculated from the latest draft of the paper [Ideas for bounding sample sizes for Belgian
-RLAs](papers/DhondtRelaxedAssertions.1001.pdf). Each time another assertion is "failed", we run the complete _RelaxedAssertions_ algorithm to calculate bounds on all partys' winning seat count. 
+**Party Seat Ranges** are calculated from the latest draft of the paper [Feasible Risk Limiting Audits for Belgium](papers/FeasibleBelgiumRLA.1107.pdf). Each time another assertion is "failed", we run the complete _RelaxedAssertions_ algorithm to calculate bounds on all partys' winning seat count. 
 
 The tables below shows the initial and final samples needed by each constituency after removing the first six most-impact assertions, which in both years brings
 the total number of samples needed below 10,116 and 9,210 in 2024 and 2019 respectively.

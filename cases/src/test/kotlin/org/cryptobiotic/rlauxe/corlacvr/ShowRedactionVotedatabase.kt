@@ -129,13 +129,13 @@ class ShowRedactionVotedatabase {
     }
 }
 
-fun lookForRedactions(filename: String, showRedaction: Boolean = false, showHeaders: Boolean = false) {
+fun lookForRedactions(filename: String, showRedaction: Boolean = false) {
     println("## Reading cvrs from $filename")
 
     val redaction = if (filename.lowercase().contains("boulder")) RedactionBoulder(show=showRedaction) else Redaction(show=showRedaction)
 
     try {
-        val corlaRawCvrs = readCountyCvrs(filename, redaction = redaction, showHeaders = showHeaders)
+        val corlaRawCvrs = readCountyCvrs(filename, redaction = redaction)
 
         println("  nrows = ${corlaRawCvrs.nrows()} redacted cvrs = ${corlaRawCvrs.redaction().redactedRows().size} redacted groups = ${corlaRawCvrs.redaction().groups().size} ")
 

@@ -74,7 +74,7 @@ class CountyAuditRecord(
 
     // for viewer
     fun readCountyCvrsAndTabulate(countyName: String) : Map<Int, ContestTabulation> {
-        val countyPublisher = Publisher("$topdir/county/$countyName")
+        val countyPublisher = Publisher(publisher.countyAuditRecordTopdir(countyName))
         val countyCvrFile = countyPublisher.cardManifestFile()
         logger.debug { "readCountyCvrsAndTabulate on $countyCvrFile (exists=${exists(countyCvrFile)})"}
         if (!exists(countyCvrFile)) return emptyMap()
@@ -91,7 +91,7 @@ class CountyAuditRecord(
     }
 
     // for viewer calling ConsistentCountySampling, for estimating distribution of mvrs needed....
-    fun readCountyCvrs(countyName: String, limit: Int? = null) : MutableList<AuditableCard> {
+    fun readCountyCards(countyName: String, limit: Int? = null) : MutableList<AuditableCard> {
         // val countyPublisher = Publisher(publisher.countyAuditRecordTopdir(countyName))
         val countyTopdir = publisher.countyAuditRecordTopdir(countyName)
         val countyRecord = readPartialResult(countyTopdir).unwrap()

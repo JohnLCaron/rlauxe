@@ -15,14 +15,13 @@ import java.util.zip.ZipInputStream
 
 private val logger = KotlinLogging.logger("CorlaCvrs")
 
-fun readCountyCvrs(source: String, redaction: Redaction = Redaction(), showHeaders: Boolean = false): CorlaCountyCvrsIF {
+fun readCountyCvrs(source: String, redaction: Redaction = Redaction(), readRows: Boolean = true): CorlaCountyCvrsIF {
     return if (source.startsWith("/resources/"))
-        readCountyCvrsFromResource(source, redaction = redaction, showHeaders=showHeaders)
-    else readCountyCvrsFromFile(source, redaction = redaction, showHeaders=showHeaders)
+        readCountyCvrsFromResource(source, redaction = redaction, readRows=readRows)
+    else readCountyCvrsFromFile(source, redaction = redaction, readRows=readRows)
 }
 
-fun readCountyCvrsFromFile(filename: String, showHeaders: Boolean = false, showSchema: Boolean = false,
-                           redaction: Redaction = Redaction()): CorlaCountyCvrsIF {
+fun readCountyCvrsFromFile(filename: String, redaction: Redaction = Redaction(), readRows: Boolean = true): CorlaCountyCvrsIF {
     val parser = if (filename.endsWith(".zip")) {
         val zipReader = ZipReader(filename)
         // by convention, the file inside is the filename with zip replaced by csv
@@ -36,18 +35,17 @@ fun readCountyCvrsFromFile(filename: String, showHeaders: Boolean = false, showS
         CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
     }
 
-    val corlaRawCvrs = CorlaCountyCvrs(filename, parser, showHeaders, showSchema, redaction = redaction)
-    corlaRawCvrs.readRows()
+    val corlaRawCvrs = CorlaCountyCvrs(filename, parser, redaction = redaction)
+    if (readRows) corlaRawCvrs.readRows()
     return corlaRawCvrs
 }
 
-fun readCountyCvrsFromResource(resourcePath: String, showHeaders: Boolean = false, showSchema: Boolean = false,
-                               redaction: Redaction = Redaction()): CorlaCountyCvrsIF {
+fun readCountyCvrsFromResource(resourcePath: String, redaction: Redaction = Redaction(), readRows: Boolean = true): CorlaCountyCvrsIF {
     val resourceStream = getCsvStreamFromResource(resourcePath)
     val reader: Reader = InputStreamReader(resourceStream, "UTF-8")
     val parser =  CSVParser.parse(reader, CSVFormat.DEFAULT)
-    val corlaRawCvrs = CorlaCountyCvrs(resourcePath, parser, showHeaders, showSchema, redaction = redaction)
-    corlaRawCvrs.readRows()
+    val corlaRawCvrs = CorlaCountyCvrs(resourcePath, parser, redaction = redaction)
+    if (readRows) corlaRawCvrs.readRows()
     return corlaRawCvrs
 }
 

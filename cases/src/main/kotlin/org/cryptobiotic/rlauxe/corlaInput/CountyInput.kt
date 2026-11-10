@@ -21,7 +21,8 @@ interface CountyInput {
     }
 
     fun readManifestEntries(): ManifestEntries {
-        return if (countyName == "Garfield") GarfieldManifestEntries(manifestSource)
+        // Clear Ballot format; may be the same as Dominion now ?
+        return if (countyName == "Garfield" && (year.startsWith("2020"))) GarfieldManifestEntries(manifestSource)
         else ManifestEntries(manifestSource)
     }
 
@@ -33,6 +34,22 @@ interface CountyInput {
     fun name() = electionName
     fun ncontests() = -1  // unknown at the moment
     fun nuncontested() = -1 // unknown at the moment
+}
+
+class CountyInputNoCvrs(
+    override val countyName: String,
+    override val manifestSource: String,
+    override val year: String,
+): CountyInput {
+    override fun hasCvrs() = false
+
+    override val electionName = "${countyName}2024"
+    override val cvrsSource = "NONE"
+
+    override fun countyPopulation() = countyPopulation
+    private val countyPopulation by lazy {
+        readManifestEntries().totalCards
+    }
 }
 
 fun readCorlaCvrs(year: String, countyName: String, cvrsSource: String): CorlaCountyCvrsIF {

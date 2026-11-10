@@ -17,7 +17,7 @@ fun sampleCountyCvrs(countyAudit: CountyAuditRecord, county: String, wantNmvrs: 
     val sampleDist = sampleFastCvrsFromRecord(result.unwrap(),  wantNmvrs, ntrials)
     if (sampleDist != null) return sampleDist
 
-    val cvrs = countyAudit.readCountyCvrs(county, null) // this only reads ~maxSamples if set
+    val cvrs = countyAudit.readCountyCards(county, null) // this only reads ~maxSamples if set
     return sampleCountyCvrs(cvrs, wantNmvrs, ntrials)
 }
 

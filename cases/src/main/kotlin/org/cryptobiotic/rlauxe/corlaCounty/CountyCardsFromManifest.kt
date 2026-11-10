@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corlaCounty
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.corla.ManifestEntry
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.corlacvr.CardStyleId
@@ -12,7 +13,9 @@ import org.cryptobiotic.rlauxe.corlacvr.sumContestTabulationsFromCandVotes
 import org.cryptobiotic.rlauxe.corlacvr.tabulateCvrRows
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 
-// Match manifest and Cvrs without reference to the state files
+private val logger = KotlinLogging.logger("CountyCardsFromManifest")
+
+// Match manifest and Cvrs without reference to the state files, or an AuditRecord
 class CountyCardsFromManifest(val countyInput: CountyInput) {
     val show = false
     val county = countyInput.countyName
@@ -80,7 +83,8 @@ class CountyCardsFromManifest(val countyInput: CountyInput) {
             }
         }
 
-
+        logger.debug{ "make CountyCardsFromManifest for ${countyInput.countyName}" }
+        // println(Throwable().stackTraceToString())
     }
 
     // local contest Ids

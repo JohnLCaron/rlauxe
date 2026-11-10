@@ -155,3 +155,66 @@ Kind Regards,
 John Caron
 303-819-2493
 jcaron1129@gmail.com
+
+==========================================
+
+Hello Morgan County XXX:
+
+We are inviting you to participate in a project to observe and help verify Morgan County's 2026 risk-limiting audit on November 17th at nine a.m. in the county office at 231 Ensign St, Fort Morgan. We hope to have validators from all of the political parties, and others are invited as well. We will provide training videos for any who would like to participate, and we will also be there to coordinate the process. Kevin Strauch, the county clerk, is working with us to enable this observation and verification.
+
+Post election risk-limiting audits are used in all the counties of Colorado to statistically prove that the outcome of targeted contests is correct, or force a recount if the audit finds discrepancies with the audited ballots.
+
+We are a non-partisan group trying to make elections verifiable by the public, independent of the government, and help restore trust in our elections.  Please see  https://sites.google.com/view/auditenhancement/home for more information.
+
+Thanks for your consideration of this project,
+
+John Caron, Lori Stevens, Neal McBurnett, Michael Raisch
+
+Please contact John for more information or to confirm your participation:
+jcaron1129@gmail.com
+303-819-2493
+
+morgancountycodemocrats@gmail.com
+morgancologop@gmail.com
+
+info@coloradoforwardparty.com   FWD
+info@ApprovalVotingParty.com    APV
+statechair@lpcolorado.org       LBR
+unitypartycolorado.us           UNI
+acp4co@gmail.com                ACN
+
+---------------
+
+This is too much information for this letter, but after people contact you,  you might want to give them a time estimate.  The estimated number of ballots is 94.  At 2 minutes a ballot, that's 3 - 4 hours, plus time for targeted ballots.  Also, if the audit board and staff start pulling ballots at 9 (like they did in La Plata), the observers won't actually start doing verification until around 10. Some of the La Plata observers in July said that they would have wanted to know that and have the option of arriving later. That's something to discuss with Kevin: get an estimate for when observers should arrive if they don't want to watch the whole process of pulling ballots.
+
+=======================
+
+Observer/Coordinater app
+
+1/2/3. Coordinator: upload morgan 2020 manifest from auditcenter, cvrs from votedatabase. has 5 redacted ballots (empty votes). Recognized from not being in the manifest?
+4.Targets: choose Morgan. Pattern: voted for Prohibition party candidates for Pres. (5 ballots) Copy to Clipboard:
+````
+Targeted list 1 for Morgan County
+5 ballots, sent 2026-11-10 (targeted ballots, not part of the RLA sample)
+Extract 31c3bf3560f3; record 03ba6528f8d3670e
+
+#  Imprinted ID  Tabulator  Batch  Position  Storage location  Ballot type
+1  102-59-6      102        59     6         Box 2
+2  102-181-8     102        181    8         Box 6
+3  102-181-15    102        181    15        Box 6
+4  102-311-30    102        311    30        Box 11
+5  102-316-20    102        316    20        Box 11
+````
+10.Apparently I go to step 10 now,  make an observer, open ;copy link to an incognito chrome window.
+Re: "Keep this screen out of sight..." 
+**Im not sure an observer should have access to the right answer. They could subtly communicate to the reader.**
+After observer did all 5 ballots, there didnt seem to be an "exit", or "all done, stop" button.
+
+(Back to step 5)
+5.Data Map: dont understand much of whats being reported here
+6.Coordinator: Lots of things I dont understand. Next step for Morgan: County pull list.
+   **I would be much happier using the county pull list at this point, and checking the "prediction from the seed" later, because of the possibility that a single manifest error in any county would make the prediction wrong**
+   "RLA sample path" seems to be done; I think "Fetch" was already done. Under "counties", Morgan is there with 2 open flags ("changed after roll"). So this implies that the manifest and CVRS are uploaded before the seed. **Whose job is it to upload those?** SOS audit center must already have manifest, a big hole not to also have the redacted CVRs in terms of provenence and security.
+7. Data Map: umm seems ok?
+8. Seed: already done
+9. Extracts: Enter 19 "county sample count" (from actual 2020 election). Choose "Build an Extract". **Error: "the prediction has no draws in Morgan"** Stuck on this.

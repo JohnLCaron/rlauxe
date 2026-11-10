@@ -171,8 +171,11 @@ class CountyCardConverter(val county: String,
     fun convertToContestTabulation(countyTab: CountyTabAllContests): Map<Int, ContestTabulation> {
         val canonTabs = mutableMapOf<Int, ContestTabulation>()
         countyTab.contests.forEach{ (contestName, contestVotes: CountyContestVotes) ->
-            val canonicalContest = stateInput.matchCanonicalContest(county, contestName)!!
-            val info = infosByName[canonicalContest.contestName]!!
+            val canonicalContest = stateInput.matchCanonicalContest(county, contestName)
+            if (canonicalContest == null) {
+                stateInput.matchCanonicalContest(county, contestName)
+            }
+            val info = infosByName[canonicalContest!!.contestName]!!
 
             // TODO where to get ncards ?????
             val contestTabulation = contestVotes.makeContestTabulationCorla(info, canonicalContest, 0)

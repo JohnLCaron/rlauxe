@@ -56,6 +56,7 @@ class Publisher(val topdir: String) {
     fun contestsFile() = "$audit/contests.json"
     fun electionInfoFile() = "$audit/electionInfo.json"
     fun sortedCardsFile() = "$audit/sortedCards.csv" // sorted cardManifest
+    fun unsortedCardsProtoFile() = "$topdir/unsortedCards.proto" // cardManifest
     fun sortedCardsProtoFile() = "$topdir/sortedCards.proto" // cardManifest
     fun fastSamplingFile() = "$topdir/fastSampling.bin" //make sampling fast
     fun logsFile() = "$topdir/logs.log"

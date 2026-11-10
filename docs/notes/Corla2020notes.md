@@ -1,5 +1,5 @@
 # Corla2020 Using votedatabase for Cvrs
-10/30/26
+11/08/26
 
 We obtained the cvr data from https://votedatabase.com for the Colorado 2020 General elections, and used it to run
 a real audit. This is for testing purposes only: the data is not official.
@@ -512,4 +512,10 @@ Senate      78/4114582        (margin .092)
 Prop 114    421/4114582 = 0.000102319  which  is 30 times smaller   (margin .017)
 
 11332/4114582 = .002754107 * 421 = 1.15947914  expect to get one sample in Gunnison ...
+
+
+
+
+
+
 

@@ -15,11 +15,11 @@ import kotlin.text.isEmpty
 // TODO perhaps there should be a separate object using cvrs: CloseableIterable ??
 //      and read through all the cvrs to implement cardStyles, nrows,  redaction, ballotStyleUnique
 private val logger = KotlinLogging.logger("CorlaCountyCvrs")
+private val showHeaders: Boolean = false
+private val showSchema: Boolean = false
 
 class CorlaCountyCvrs(override val inputSource: String,
                       val parser: CSVParser,
-                      showHeaders: Boolean = false,
-                      showSchema: Boolean = false,
                       val redaction: Redaction = Redaction(),
 ): CorlaCountyCvrsIF {
 
@@ -102,8 +102,7 @@ class CorlaCountyCvrs(override val inputSource: String,
 
     // enum class CvrHeader { cvrnumber, tabulatornum, batchid, recordid, imprintedid, precinctportion, ballottype }
 
-    fun readRows(showFirst: Int? = null, showAfter: Int? = null,
-                 showRedactedGroups: Boolean = false) {
+    fun readRows(showFirst: Int? = null, showAfter: Int? = null, showRedactedGroups: Boolean = false) {
 
         try {
             while (records.hasNext()) {
@@ -136,7 +135,9 @@ class CorlaCountyCvrs(override val inputSource: String,
             println("number of Redacted Groups = ${redaction.groups().size}")
             redaction.groups().sortedBy{it.groupName}.forEach { println("  $it") }
         }
-        if (mungedCount > 0) logger.warn { "$inputSource had $mungedCount munged imprintedIds out of $rowCount (now fixed)"}
+        if (mungedCount > 0) {
+            logger.warn { "$inputSource had $mungedCount munged imprintedIds out of $rowCount (now fixed)"}
+        }
     }
 
     override fun parseHeader(line: CSVRecord, defCvrNumber: Int): CvrRow {

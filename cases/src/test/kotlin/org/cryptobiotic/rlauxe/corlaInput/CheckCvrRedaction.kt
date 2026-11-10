@@ -45,7 +45,7 @@ class CheckCvrRedaction(
     init {
         println(unredactedfile)
         println(redactedFile)
-        val unredactedCvrs = readCountyCvrsFromFile(unredactedfile, showHeaders = false, showSchema = false)
+        val unredactedCvrs = readCountyCvrsFromFile(unredactedfile)
 
         val infos = unredactedCvrs.makeContestInfo()
         val unredactedGroups = findPrecinctStyles(unredactedCvrs, infos)
@@ -59,7 +59,7 @@ class CheckCvrRedaction(
         println("  unredacted precinctStyles min cards = $unredactedMinGroupSuze")
         println("  unredacted cardStyle min cards = ${unredactedCvrs.cardStyles().minOf { it.ncards }}")
 
-        val redactedCvrs = readCountyCvrsFromFile(redactedFile, showHeaders = false, showSchema = false)
+        val redactedCvrs = readCountyCvrsFromFile(redactedFile)
         println("\nredactedCvrs")
         println("  countBlankPrecincts = ${redactedCvrs.countBlankPrecincts()}")
         println("  ballotStyleUnique = ${redactedCvrs.ballotStyleUnique()}")

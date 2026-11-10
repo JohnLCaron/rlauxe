@@ -60,11 +60,11 @@ class TimeCardReading {
         val bufferedStream = BufferedInputStream(inputStream, bufferSize)
         while (true) {
             val bytesRead = bufferedStream.read(byteBuffer)
-            totalRead += bytesRead
             if (bytesRead <= 0) break
+            totalRead += bytesRead
         }
 
-        println("timeReadRawBytes with buffer= ($bufferSize), fileLength=$fileLength  fillRead = ${totalRead.equals(fileLength)}, took ${stopwatch.elapsed(
+        println("timeReadRawBytes with buffer= ($bufferSize), fileLength=$fileLength  fullRead = ${totalRead.equals(fileLength)}, took ${stopwatch.elapsed(
             TimeUnit.MILLISECONDS)} msec")
     }
     // timeReadRawBytes with buffer= (100000), fileLength=988329974  fillRead = false, took 124 msec

@@ -176,7 +176,7 @@ class ProtoCardIterator(val filename: String, bufferSize: Int = 100_000, val sty
     init {
         val filepath = Path(filename)
         if (!Files.exists(filepath)) {
-            throw RuntimeException("file does not exist")
+            throw RuntimeException("ProtoCardIterator $filename does not exist")
         }
         val input = Files.newInputStream(filepath, StandardOpenOption.READ)
         inputStream = BufferedInputStream(input, bufferSize)

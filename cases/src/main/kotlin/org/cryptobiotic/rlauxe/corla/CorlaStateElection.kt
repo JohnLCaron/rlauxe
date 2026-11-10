@@ -20,6 +20,7 @@ import org.cryptobiotic.rlauxe.persist.csv.AddStyles
 import org.cryptobiotic.rlauxe.persist.csv.CardHeader
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
+import org.cryptobiotic.rlauxe.persist.protobuf.writeProtoCards
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
@@ -279,13 +280,17 @@ fun makeCountyElections(
             CorlaCountyElectionNoCvrs(countyInput, stateInput, contestBuilder, mvrSource, hasStyle)
         }
         createElectionRecord(countyElection, topdir = countyDir)
-
-        //  write fastCards with the unsorted manifest, for use in estimating county sample sizes
         val countyPublisher = Publisher(countyDir)
         val styles = countyElection.cardStyles()
-        val csvIter = readCardsCsvIterator(countyPublisher.cardManifestFile(), AddStyles(styles))
-                // fun writeFastSamplingCards(cards: CloseableIterator<AuditableCard>, styles: List<StyleIF>, filenameOut: String, limit: Int? = null): Int {
-        writeFastSamplingCards(csvIter, styles, countyPublisher.fastSamplingFile())
+
+        //  write fastCards with the unsorted manifest, for faster reading of county card manifest
+        val csvIter1 = readCardsCsvIterator(countyPublisher.cardManifestFile(), AddStyles(styles))
+        writeProtoCards(csvIter1, countyPublisher.unsortedCardsProtoFile())
+
+        //  write fastCards with the unsorted manifest, for use in estimating county sample sizes
+        // fun writeFastSamplingCards(cards: CloseableIterator<AuditableCard>, styles: List<StyleIF>, filenameOut: String, limit: Int? = null): Int {
+        val csvIter2 = readCardsCsvIterator(countyPublisher.cardManifestFile(), AddStyles(styles))
+        writeFastSamplingCards(csvIter2, styles, countyPublisher.fastSamplingFile())
     }
 }
 

@@ -114,8 +114,13 @@ data class AuditableCard (
         append(" index=$index, prn=$prn, styleId=$styleId,")
         if (phantom) append(" phantom=$phantom,")
         if (poolId != null) append(" poolId=$poolId,")
-        if (votes == null) append(" votes=null") else {
-            append(" votes=")
+        append(" votes=")
+        append(voteString())
+        append(")")
+    }
+
+    fun voteString() = buildString {
+        if (votes == null) append("null") else {
             votes!!.forEach { (key, value) ->
                 if (value.size == 1)
                     append(" $key:${value[0]},") // remove the bracket
@@ -123,7 +128,6 @@ data class AuditableCard (
                     append(" $key:${value.contentToString()},") //show bracket for 0 or > 1
             }
         }
-        append(")")
     }
 
     override fun equals(other: Any?): Boolean {

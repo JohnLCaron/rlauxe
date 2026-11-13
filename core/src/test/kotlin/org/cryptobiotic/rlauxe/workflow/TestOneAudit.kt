@@ -19,7 +19,7 @@ class TestOneAudit {
 
         val config = Config.from(AuditType.ONEAUDIT, nsimTrials=10)
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA),
-            MvrManagerForTesting(mvrs, mvrs, config.creation.seed, pools=pools))
+            MvrManagerForTesting(mvrs, mvrs, config.createPrng(), pools=pools))
 
         runTestAuditToCompletion("testOneAuditContestSmall", workflow)
     }
@@ -36,7 +36,7 @@ class TestOneAudit {
         println(contestOA)
 
         val config = Config.from(AuditType.ONEAUDIT, nsimTrials=10)
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(mvrs, mvrs, config.creation.seed, pools=pools))
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(mvrs, mvrs, config.createPrng(), pools=pools))
 
         runTestAuditToCompletion("testOneAuditContest", workflow)
     }
@@ -53,7 +53,7 @@ class TestOneAudit {
         println(contestOA)
 
         val config = Config.from(AuditType.ONEAUDIT, nsimTrials=10)
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.creation.seed, pools=pools))
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.createPrng(), pools=pools))
 
         runTestAuditToCompletion("testOneAuditContest", workflow)
     }
@@ -71,7 +71,7 @@ class TestOneAudit {
 
         val config = Config.from(AuditType.ONEAUDIT, nsimTrials=10)
 
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.creation.seed, pools=pools))
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.createPrng(), pools=pools))
         runTestAuditToCompletion("testOneAuditContestSmall", workflow)
     }
 

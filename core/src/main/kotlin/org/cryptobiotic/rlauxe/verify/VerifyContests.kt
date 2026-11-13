@@ -214,7 +214,7 @@ fun verifyManifest(
     // 2. Given the seed and the PRNG, check that the PRNs are correct and are assigned sequentially by index.
     var countErrs = 0
     val indexSorted = indexList.sortedBy { it.first }
-    val prng = Prng(config.creation.seed)
+    val prng = config.createPrng()
     indexSorted.forEachIndexed { idx, it ->
         val prn = prng.next()
         if (it.second != prn)

@@ -50,7 +50,7 @@ class VerifyAuditCommitment(val topdir: String, contestId: Int? = null, show: Bo
         if (contests.size == 1) results.addMessage("  ${contests.first()} ")
 
         verifySortedCardManifest(auditType, contests, audit.sortedManifest, infos, batchSet,
-            audit.auditCreationConfig.seed, results)
+            audit.auditCreationConfig.createPrng(), results)
 
         return results
     }
@@ -67,8 +67,6 @@ fun readAuditCommitment(topdir: String): Result<AuditCommitment, ErrorMessages> 
 
     val auditRecord = AuditRecord.read(topdir) as AuditRecord
     val mvrManager = PersistedMvrManager(auditRecord)
-    val publisher = Publisher(topdir)
-
 
     val electionInfo = auditRecord.electionInfo
     val config = auditRecord.config
@@ -87,7 +85,7 @@ fun verifySortedCardManifest(
     cards: CloseableIterable<AuditableCard>,
     infos: Map<Int, ContestInfo>,
     batchSet: Set<StyleIF>,
-    seed: Long,
+    prng: Prng,
     results: VerifyResults,
 ) {
     results.addMessage("verifySortedCardManifest")
@@ -172,7 +170,6 @@ fun verifySortedCardManifest(
 
     // Given the seed and the PRNG, check that the PRNs are correct and are assigned sequentially by index.
     var countErrs = 0
-    val prng = Prng(seed)
     val indexSorted = indexList.sortedBy { it.first }
     indexSorted.forEachIndexed { idx, it ->
         val prn = prng.next()

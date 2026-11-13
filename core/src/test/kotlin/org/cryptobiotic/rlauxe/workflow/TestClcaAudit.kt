@@ -114,7 +114,7 @@ class TestClcaAudit {
         val testMvrs = makeFuzzedCvrsForClca(infoList, testCvrs, mvrFuzzPct)
 
         val workflow = WorkflowTesterClca(config, contests, emptyList(),
-            MvrManagerForTesting(testCvrs, testMvrs, config.creation.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, config.createPrng()))
 
         return runTestAuditToCompletion("testClcaWorkflow", workflow)
     }

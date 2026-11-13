@@ -1,18 +1,18 @@
 # Viewer
 
-## Colorado Input Data
+## Colorado Input Viewer
 
 Original Idea is to show data from StatewideInput and CountyInput, not from AuditRecord
 
 ````
-AuditCenter Input
+AuditCenter Input: ColoradoInputTable
     Available Data - ColoradoInputBean
-        statewideInputs
+        listOf(StatewideInput)
     Canonical Contests - CanonicalContestBean
         StatewideInput.mergedContestMap()
         StatewideInput.contestTabsAllCounties()
 
-Counties
+Counties: CiCounties
     CorlaCountyData - CountyTabBean
         /resources/data/cases/corla/countySummaryData/name.csv  (CountyInputData)
         /resources/data/cases/corla/redactedCount/${input.name()}.csv (RedactionCount)
@@ -21,37 +21,57 @@ Counties
     CountyContestTab - CountyContestTabBean
         countyTabAllContests.CountyContestVotes
 
-MvrSamples - MvrSampleBean
-        stateInput.cardComparison().mvrs - CardComparisonResults from input.mvrComparisonFile (all counties), combine lines into Mvrs
+All Samples: MvrSampleTable
+    MvrSampleBean / ComparisionLineBean
+        CardComparisonResults from stateInput.cardComparison().mvrs (all counties)
 
-MvrComparisons - MvrComparisonBean 
+Mvr Comparisons: MvrComparisonTable
+    MvrComparisonBean 
         low level headers and lines from input.mvrComparisonFile, show each line
 
-CountySchema
+CountySchema: CiSchema
     ContestSchema
     Choices
 
-Redactions
+Redactions: CiRedactions
     Aggregations from Redaction.RedactedGroup
     RedactedRows from Redaction
 
-Styles
+Styles: CiStyles
     PrecinctStyles
         PrecinctCardStyle constructed from corlaCvrs.cvrs()
     Styles
         CvrCardStyle from CorlaCountyCvrs.CvrCardStyle
 
-CountyMvrs
-    MvrSampleTable
-        stateInput.cardComparison().mvrs restricted to this county
+County Samples: MvrSampleTable
+    MvrSampleBean / ComparisionLineBean
+        stateInput.cardComparison().mvrs (restricted to this county)
 
-CountyCards
-    CountyCardBean
+CountyCards: CiCountyCards
+    County Cards - CountyCardBean
         CountyCardsFromManifest manifest and cvrs.csv
-    CountyContestCvrBean
+    County COntest Tabs - CountyContestCvrBean
         ContestTabulation from CountyCard
         CorlaContestInfo from schemaContest
 ````
+
+## Colorado Audit Viewer
+
+````
+Contests
+    stateContests = CvContests
+
+County Sampling
+    CvCounties
+        CvCountySampling
+
+Mvrs
+    
+
+
+````
+
+
 
 ### Reading CountyCardsFromManifest is 16x slower
 

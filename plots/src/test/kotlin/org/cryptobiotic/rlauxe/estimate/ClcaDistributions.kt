@@ -77,7 +77,7 @@ class ClcaDistributions {
         val testCvrs = makeCvrsByExactMean(Nc, margin2mean(margin))
         val contest = makeContestsFromCvrs(testCvrs).first()
 
-        val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, config.seed) // not using the mvrs here
+        val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, config.createPrng()) // not using the mvrs here
         val workflow = WorkflowTesterClca(config, listOf(contest), emptyList(), mvrManager)
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         val auditRound = AuditRound(1, contestRounds = contestRounds, samplePrns = emptyList())
@@ -115,7 +115,7 @@ class ClcaDistributions {
             )
             val testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
-            val ballotCards = MvrManagerForTesting(testCvrs, testMvrs, auditConfig.seed)
+            val ballotCards = MvrManagerForTesting(testCvrs, testMvrs, auditConfig.createPrng())
             val workflow = WorkflowTesterClca(auditConfig, listOf(cu.contest), emptyList(), ballotCards)
 
             // heres the ConsistentSample permutation

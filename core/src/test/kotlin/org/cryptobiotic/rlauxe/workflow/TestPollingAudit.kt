@@ -52,7 +52,7 @@ class TestPollingAudit {
         println()
 
         val testCvrs = test.makeCvrsFromContests()
-        val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong()) // , pools = listOf(pool))
+        val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, auditConfig.createPrng()) // , pools = listOf(pool))
 
         val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
         runTestAuditToCompletion("testPollingWithStyle", workflow)
@@ -86,7 +86,7 @@ class TestPollingAudit {
         val testCvrs = test.makeCvrsFromContests()
 
         val testMvrs =  makeFuzzedCvrsForClca(test.contests.map { it.info} , testCvrs, mvrFuzzPct)
-        val mvrManager = MvrManagerForTesting(testCvrs, testMvrs, Random.nextLong()) // , pools = listOf(pool))
+        val mvrManager = MvrManagerForTesting(testCvrs, testMvrs, auditConfig.createPrng()) // , pools = listOf(pool))
 
         val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
         runTestAuditToCompletion("testPollingWithStyle", workflow)
@@ -122,7 +122,7 @@ class TestPollingAudit {
 
         val auditConfig = Config.from(AuditType.POLLING, nsimTrials = 10)
         val cvrs = multiContestTest.makeCvrsFromContests()
-        val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong()) // , pools = listOf(pool))
+        val mvrManager = MvrManagerForTesting(cvrs, cvrs, auditConfig.createPrng()) // , pools = listOf(pool))
         val workflow = WorkflowTesterPolling(auditConfig, multiContestTest.contests, mvrManager)
 
         runTestAuditToCompletion("testPollingOneContest", workflow)

@@ -351,7 +351,7 @@ class TestHasStyles {
 
         createElectionRecord(election, topdir = topdir, clear = true)
 
-        val creation = AuditCreationConfig(auditType, riskLimit=.05, seed = 123456789L)
+        val creation = AuditCreationConfig(auditType, riskLimit=.05, seed = 123456789L.toHexString())
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 10),
             ContestSampleControl.NONE,

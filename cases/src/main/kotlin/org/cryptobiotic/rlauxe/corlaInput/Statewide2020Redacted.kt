@@ -15,7 +15,9 @@ open class Statewide2020Redacted(
     mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
 ) {
     override val year = "2020r"
-    val parent = Statewide2020General(ac)
+    val parent = Statewide2020General(ac) // TODO why dont we subclass ?
+    override val seed = parent.seed
+
     val manifestDir = "$ac/2020/general/round_1"
     val cvrsMissing = listOf("Baca", "Las Animas")
 
@@ -23,6 +25,8 @@ open class Statewide2020Redacted(
         val noblanks = county.replace("\\s".toRegex(), "")
         return "$manifestDir/manifest-${noblanks}.csv"
     }
+
+    override fun statewideManifest() = parent.statewideManifest
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
         if (cvrsMissing.contains(countyName)) return County2020InputNoCvrs(countyName)
@@ -33,8 +37,8 @@ open class Statewide2020Redacted(
 
     override val countyStrataMap: Map<String, StrataInfo> by lazy {
         (mergedInfo().strataInfo +listOf(
-            StrataInfo("Gunnison", 34, 11332),
-            StrataInfo("San Juan", 0, 571),
+            StrataInfo("Gunnison", 34, 0,11332),
+            StrataInfo("San Juan", 0, 0,571),
         )).associateBy { it.strataName }
     }
 

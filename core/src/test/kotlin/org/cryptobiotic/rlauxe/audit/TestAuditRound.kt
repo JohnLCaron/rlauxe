@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.consistentSampling
+import org.cryptobiotic.rlauxe.util.OurPrng
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.workflow.MvrManagerForTesting
 import kotlin.random.Random
@@ -20,12 +21,12 @@ class TestAuditRound {
             ContestWithAssertions(it, isClca=true, hasStyle=true).addStandardAssertions()
         }
         val (mvrs, cards, pools, styles) = test.makeMvrCardAndPops()
-        val mvrManager = MvrManagerForTesting(mvrs, mvrs, Random.nextLong())
+        val mvrManager = MvrManagerForTesting(mvrs, mvrs, OurPrng(Random.nextLong()))
 
         val contestRounds = contestsUAs.map { contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
 
-        val prng = Prng(Random.nextLong())
+        val prng = OurPrng(Random.nextLong())
         mvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())

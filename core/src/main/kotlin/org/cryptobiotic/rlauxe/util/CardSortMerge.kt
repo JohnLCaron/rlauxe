@@ -15,13 +15,13 @@ private val logger = KotlinLogging.logger("SortMerge")
 class SortMerge<T>(
     val scratchDirectory: String,
     val outputFile: String,
-    val seed: Long,
+    val prng: Prng,
     val maxChunk: Int = maxChunkDefault) {
 
     fun run(cardIter: CloseableIterator<T>, toCard: (from: T, index: Int, prn: Long) -> AuditableCard) {
         val stopwatch = Stopwatch()
         // out of memory sort by sampleNum()
-        sortCards(cardIter, scratchDirectory, seed, toCard)
+        sortCards(cardIter, scratchDirectory, prng, toCard)
         val ncards = mergeCards(scratchDirectory, outputFile)
         logger.info{"External sorting wrote ${ncards} cards to $outputFile took $stopwatch"}
 
@@ -31,13 +31,12 @@ class SortMerge<T>(
     fun sortCards(
         cardIterator: CloseableIterator<T>,
         scratchDirectory: String,
-        seed: Long,
+        prng: Prng,
         toCard: (from: T, index: Int, prn: Long) -> AuditableCard
     ) {
         clearDirectory(Path.of(scratchDirectory))
         validateOutputDir(Path.of(scratchDirectory), ErrorMessages("sortCards"))
 
-        val prng = Prng(seed)
         val cardSorter = ChunkSorter<T>(scratchDirectory, prng, maxChunk, toCard)
 
         cardIterator.use { cardIter ->

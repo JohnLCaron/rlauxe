@@ -16,6 +16,7 @@ import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
 import org.cryptobiotic.rlauxe.persist.protobuf.ProtoCardIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.OurPrng
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.nio.file.Files
@@ -29,7 +30,7 @@ private val logger = KotlinLogging.logger("MvrManagerForTesting")
 class MvrManagerForTesting(
     cvrs: List<Cvr>,
     mvrs: List<Cvr>,
-    seed: Long,
+    prng: Prng,
     val pools: List<CardPool>? = null,
 ) : MvrManager, MvrManagerTestIF {
 
@@ -39,7 +40,6 @@ class MvrManagerForTesting(
 
     init {
         // the order of the sortedCards cannot be changed once set.
-        val prng = Prng(seed)
         sortedCards = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
         sortedMvrs = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
@@ -108,7 +108,7 @@ class MvrManagerForTestingA(
 
     init {
         // the order of the sortedCards cannot be changed once set.
-        val prng = Prng(seed)
+        val prng = OurPrng(seed)
         sortedCards = cvrs.mapIndexed { idx, it -> it.copy( index=idx, prn = prng.next()) }.sortedBy { it.prn }
         sortedMvrs = sortedCards.map { mvrs[it.index].copy(index = it.index, prn = it.prn) }
     }

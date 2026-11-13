@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.TausRates
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,21 +21,21 @@ class TestAuditCreationConfigJson {
 
     @Test
     fun testRoundtrip() {
-        testRoundtrips(AuditCreationConfig(AuditType.CLCA, seed = 12356667890L))
-        testRoundtrips(AuditCreationConfig(AuditType.POLLING, seed = 12356667890L))
-        testRoundtrips(AuditCreationConfig(AuditType.ONEAUDIT, seed = 12356667890L))
+        testRoundtrips(AuditCreationConfig(AuditType.CLCA, seed = 12356667890L.toHexString()))
+        testRoundtrips(AuditCreationConfig(AuditType.POLLING, seed = 12356667890L.toHexString()))
+        testRoundtrips(AuditCreationConfig(AuditType.ONEAUDIT, seed = 12356667890L.toHexString()))
 
         testRoundtrips(
             AuditCreationConfig(
-                AuditType.CLCA, seed = 12356667890L, riskLimit=.03, riskMeasuringSampleLimit=42, other=mapOf("who" to "what"))
+                AuditType.CLCA, seed = 12356667890L.toHexString(), riskLimit=.03, riskMeasuringSampleLimit=42, other=mapOf("who" to "what"))
         )
         testRoundtrips(
             AuditCreationConfig(
-                AuditType.POLLING, seed = 12356667890L, riskLimit=.03, riskMeasuringSampleLimit=4222, other=mapOf("who" to "2.0"))
+                AuditType.POLLING, seed = 12356667890L.toHexString(), riskLimit=.03, riskMeasuringSampleLimit=4222, other=mapOf("who" to "2.0"))
         )
         testRoundtrips(
             AuditCreationConfig(
-                AuditType.ONEAUDIT, seed = 12356667890L, riskLimit=.03, riskMeasuringSampleLimit=4222, other=mapOf("who" to "22"))
+                AuditType.ONEAUDIT, seed = 12356667890L.toHexString(), riskLimit=.03, riskMeasuringSampleLimit=4222, other=mapOf("who" to "22"))
         )
     }
 
@@ -49,7 +48,7 @@ class TestAuditCreationConfigJson {
         val json = target.publishJson()
         val roundtrip = json.import()
         assertNotNull(roundtrip)
-        assertEquals(roundtrip, target)
+        assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))
     }
 

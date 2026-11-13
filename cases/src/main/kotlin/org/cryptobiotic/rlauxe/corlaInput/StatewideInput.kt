@@ -63,7 +63,9 @@ abstract class StatewideInput(
     val tabulateCountyFile: String,
     val mvrComparisonFile: String,
 ) {
+    abstract val seed: String
     abstract val year: String
+
     fun name() = this.javaClass.simpleName
     fun ncontests() = canonicalContests().size
     fun nuncontested() = canonicalContests().count() { it.value.choices.size < 2 }
@@ -311,27 +313,30 @@ data class MergedContestInfo(
 
 data class StrataInfo(
     val strataName: String,
-    val nmvrs: Int, // countyMvr.countMvr
+    val countyMvrs: Int, // countyMvr.countMvr
+    val stateMvrs: Int, // countyMvr.countMvr
     val ballotCardCount: Int,  // round.ballot_card_count
-)
+) {
+    val nmvrs = countyMvrs + stateMvrs
+}
 
 data class MergedInfo(
     val mergedContestInfo: List<MergedContestInfo>,
     val strataInfo: List<StrataInfo>,
-    val statewideContests: List<CorlaContestRoundCsv>,
+    val statewideContests: List<CorlaContestRoundCsv>, // from contest round, not mvrs
 )
 
 fun mergeContestInfo(input: StatewideInput): MergedInfo {
     val canonical: Map<String, CanonicalContest> = input.canonicalContests() // has canonical name
 
     val roundContests: Map<String, CorlaContestRoundCsv> = input.roundContests() // not canonical name
-    val compareMap: Map<String, ContestMvrCount> = input.contestsFromMvrs.associateBy { it.contestName }
-    val countyMap: Map<String, CountyMvrCount>  = input.countiesFromMvrs.associateBy { it.countyName }
+    val mvrContests: Map<String, ContestMvrCount> = input.contestsFromMvrs.associateBy { it.contestName }
+    val mvrCounties: Map<String, CountyMvrCount>  = input.countiesFromMvrs.associateBy { it.countyName }
 
     // mergedContestInfo in canonical list order, which seems to be alphabetic; this determines contest id ordering.
     val mergedContestInfo = canonical.values.map { cc: CanonicalContest ->
         val round = roundContests[cc.contestName]
-        val compare = compareMap[cc.contestName]
+        val mvrContest = mvrContests[cc.contestName]
 
         MergedContestInfo(
             cc,
@@ -348,8 +353,8 @@ fun mergeContestInfo(input: StatewideInput): MergedInfo {
             round?.minMargin ?: 0,
             round?.riskLimit ?: 0.0,
 
-            compare ?. countMvr ?: 0,    // ContestMvrCount.countMvr
-            compare ?. countStatewide ?: 0,   // ContestMvrCount.countStatewide
+            mvrContest ?. countMvr ?: 0,    // ContestMvrCount.countMvr
+            mvrContest ?. countStatewide ?: 0,   // ContestMvrCount.countStatewide
         )
     }
 
@@ -360,7 +365,7 @@ fun mergeContestInfo(input: StatewideInput): MergedInfo {
         val contestRound: CorlaContestRoundCsv? = roundContests[canonicalContest.contestName]
         if (contestRound != null && canonicalContest.counties.size == 1) {
             val county: String = canonicalContest.counties.first() // use the first county
-            val countyMvr: CountyMvrCount = countyMap[county]!!
+            val countyMvr: CountyMvrCount = mvrCounties[county]!!
 
             if (strataMap[county] != null) {
                 val old = strataMap[county]?.ballotCardCount ?: 0
@@ -368,7 +373,7 @@ fun mergeContestInfo(input: StatewideInput): MergedInfo {
                     logger.warn{"*** contest ${canonicalContest.contestName} county $county has ballotCardCount $old != ${contestRound.ballotCardCount}"}
                 }
             } else {
-                strataMap[county] = StrataInfo(county, countyMvr.countyMvr, contestRound.ballotCardCount)
+                strataMap[county] = StrataInfo(county, countyMvr.countyMvr, countyMvr.stateMvr, contestRound.ballotCardCount)
             }
         }
         if (contestRound != null && contestRound.auditReason == AuditReason.state_wide_contest) {
@@ -376,11 +381,11 @@ fun mergeContestInfo(input: StatewideInput): MergedInfo {
         }
     }
 
-    val statewideBallots = if (statewideContests.size > 0) statewideContests.first().ballotCardCount else 0
+    /*val statewideBallots = if (statewideContests.size > 0) statewideContests.first().ballotCardCount else 0
     val stateMvrCount = mergedContestInfo.filter { it.auditReason == AuditReason.state_wide_contest}.maxOf {
         it.statewideMvrs
     }
-    strataMap["Statewide"] = StrataInfo("Statewide", nmvrs = stateMvrCount, ballotCardCount= statewideBallots)
+    strataMap["Statewide"] = StrataInfo("Statewide", nmvrs = stateMvrCount, ballotCardCount= statewideBallots) */
 
     return MergedInfo(mergedContestInfo, strataMap.values.toList(), statewideContests)
 }

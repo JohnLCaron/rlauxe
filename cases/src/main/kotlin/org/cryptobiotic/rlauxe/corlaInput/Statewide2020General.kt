@@ -2,14 +2,19 @@ package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
+import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromResource
 import org.cryptobiotic.rlauxe.corla.ManifestEntries
 import org.cryptobiotic.rlauxe.corla.GarfieldManifestEntries
+import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
+import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.util.Locations.cases
 import kotlin.collections.plus
 
+/// TODO we need the seed and the total manifest size
 open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
     targetContestsFile = "$ac/2020/general/targetContests.xlsx", // convert to csv
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
@@ -17,6 +22,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
     tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
     mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
 ) {
+    override val seed = "92076602804272786701"
     override val year = "2020"
     val cvrsMissing = listOf("Baca", "Las Animas")
 
@@ -35,6 +41,37 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
         } else null
     }
 
+    override fun statewideManifest() = statewideManifest
+    val statewideManifest: StateManifest by lazy {
+        val countyManifests = counties().filter{ it != "Gunnison" }.map { county ->
+            val mainfestList = readCountyManifestCsv(manifestFile(county))
+            val correctedList = when (county) {
+                /*"Douglas" -> mainfestList + listOf( // last is Douglas,1,GEN-2723,55,288
+                    ManifestBatch(county, 1, "GEN-2045", 100, "?"),
+                    ManifestBatch(county, 1, "GEN-2026", 30, "?"),
+                ) */
+                "Teller" ->
+                    // Claude: Teller's posted manifest stops at batch 1-681, four batches (91 cards) short of what CORLA sampled;
+                    // the state's batch_count_comparison.csv lists the missing batches, so we add them.
+                    //    Teller,1,682,25,25,0
+                    //    Teller,1,683,25,25,0
+                    //    Teller,1,684,25,25,0
+                    //    Teller,1,685,16,16,0
+                    mainfestList + listOf(
+                        ManifestBatch(county, 1, "682", 25, "16?"),
+                        ManifestBatch(county, 1, "683", 25, "16?"),
+                        ManifestBatch(county, 1, "684", 25, "16?"),
+                        ManifestBatch(county, 1, "685", 16, "16?"),
+                    )
+
+                else -> mainfestList
+            }
+            CountyManifest(county, correctedList)
+        }
+        StateManifest(countyManifests)
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
     // private val skipCounties = listOf("Baca", "Las Animas", "San Juan")
     private val skipCounties = listOf("San Juan")
     override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
@@ -53,8 +90,8 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
 
     override val countyStrataMap: Map<String, StrataInfo> by lazy {
         (mergedInfo().strataInfo +listOf(
-            StrataInfo("Gunnison", 34, 11332),
-            StrataInfo("San Juan", 0, 571),
+            StrataInfo("Gunnison", 34, 0, 11332), // TODO 0 state mvrs ??
+            StrataInfo("San Juan", 0, 0, 571),
             )).associateBy { it.strataName }
     }
 

@@ -24,7 +24,8 @@ import kotlin.use
 private val logger = KotlinLogging.logger("CreateAuditRecord")
 
 // fastSampling requires every card has a style; all styles must be in styleMap when reading (no fromCvr or phantoms)
-fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String, externalSortDir: String? = null,
+fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String,
+                      externalSortDir: String? = null,
                       verify: Boolean = false, sortManifest: Boolean = true, fastSampling: Boolean = true) {
     val publisher = Publisher(topdir)
 
@@ -36,9 +37,9 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String,
 
     if (sortManifest) { // sortManifest false for uniform sampling
         if (externalSortDir == null) { // TODO make explicit
-            sortManifestInternal(publisher, config.creation.seed)
+            sortManifestInternal(publisher, config.createPrng())
         } else {
-            sortManifestExternal(externalSortDir, publisher, config.creation.seed)
+            sortManifestExternal(externalSortDir, publisher, config.createPrng())
         }
         if (fastSampling) {
             makeFastCards(publisher, election.cardStyles())
@@ -53,7 +54,7 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String,
             } else {
                 val unsortedMvrs = election.unsortedMvrsInternal()
                 if (unsortedMvrs != null) {
-                    writePrivateMvrsInternal(publisher, unsortedMvrs, election.cardStyles(), seed = config.creation.seed)
+                    writePrivateMvrsInternal(publisher, unsortedMvrs, config.createPrng())
                 } else {
                     val unsortedCards = election.unsortedMvrsExternal()
                     if (unsortedCards != null && externalSortDir != null) {
@@ -62,7 +63,7 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String,
                             externalSortDir,
                             publisher.sortedMvrsFile(),
                             unsortedCards,
-                            seed = config.creation.seed
+                            prng = config.createPrng()
                         )
                         logger.info { "createAuditRecord wrotePrivateMvrs to ${publisher.sortedMvrsFile()}" }
                     } else {
@@ -82,16 +83,15 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, topdir: String,
 }
 
 // assumes that the CardManifest has already been written
-fun sortManifestInternal(publisher: Publisher, seed: Long) {
+fun sortManifestInternal(publisher: Publisher, prng: Prng,) {
     val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile()) { it }
-    val sortedCards = createSortedCardsInternal(unsortedCards, seed)
+    val sortedCards = createSortedCardsInternal(unsortedCards, prng)
     val countCards = writeCardCsvFile(Closer(sortedCards.iterator()), publisher.sortedCardsFile())
     // createZipFile(publisher.sortedCardsFile(), delete = true)
-    logger.info{"sortManifestInternal ${countCards} cards to ${publisher.sortedCardsFile()} seed= $seed"}
+    logger.info{"sortManifestInternal ${countCards} cards to ${publisher.sortedCardsFile()} prng= $prng"}
 }
 
-fun createSortedCardsInternal(unsortedCards: CloseableIterator<AuditableCard>, seed: Long) : List<AuditableCard> {
-    val prng = Prng(seed)
+fun createSortedCardsInternal(unsortedCards: CloseableIterator<AuditableCard>, prng: Prng,) : List<AuditableCard> {
     val cards = mutableListOf<AuditableCard>()
     unsortedCards.use { cardIter ->
         while (cardIter.hasNext()) {
@@ -104,9 +104,9 @@ fun createSortedCardsInternal(unsortedCards: CloseableIterator<AuditableCard>, s
 }
 
 // assumes that the CardManifest has already been written
-fun sortManifestExternal(topdir: String, publisher: Publisher, seed: Long) {
+fun sortManifestExternal(topdir: String, publisher: Publisher, prng: Prng) {
     val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile()) { it } // no transform needed
-    externalSortAndWrite(topdir, publisher.sortedCardsFile(), unsortedCards, seed)
+    externalSortAndWrite(topdir, publisher.sortedCardsFile(), unsortedCards, prng)
 }
 
 fun makeFastCards(publisher: Publisher, styles: List<StyleIF>): Int {
@@ -134,8 +134,8 @@ fun transformSortedCvrsToMvrs(publisher: Publisher, transform: ((AuditableCard) 
     return countCards
 }
 
-fun externalSortAndWrite(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCard>, seed: Long) {
-    val sorter = SortMerge<AuditableCard>("$topdir/sortChunks", outputFile = outputFile, seed = seed)
+fun externalSortAndWrite(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCard>, prng: Prng) {
+    val sorter = SortMerge<AuditableCard>("$topdir/sortChunks", outputFile = outputFile, prng = prng)
     sorter.run(
         cardIter = unsortedCards,
         toCard = { from: AuditableCard, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
@@ -143,13 +143,12 @@ fun externalSortAndWrite(topdir: String, outputFile: String, unsortedCards: Clos
 }
 
 // internal sort of unsortedMvrs (must be in canonical order) to sorted by prn
-fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<AuditableCard>, styles: List<StyleIF>?, seed: Long) {
+fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<AuditableCard>, prng: Prng) {
     validateOutputDirOfFile(publisher.sortedMvrsFile())
 
     // val mvrCardIter = MvrsToCardsWithBatchNameIterator( mvrIter, batches ?: emptyList(), phantomCvrs = null, seed = seed)
 
     // add the prn
-    val prng = Prng(seed)
     val mvrIter = unsortedMvrs.iterator()
     val mvrCards = mutableListOf<AuditableCard>()
     while (mvrIter.hasNext()) {

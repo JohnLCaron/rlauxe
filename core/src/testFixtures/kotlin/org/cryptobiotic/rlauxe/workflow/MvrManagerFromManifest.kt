@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.persist.SortedManifest
 import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.OurPrng
 import org.cryptobiotic.rlauxe.util.Prng
 
 // used in OneAuditSingleRoundWithDilutedMargin and attacks
@@ -14,7 +15,7 @@ class MvrManagerFromManifest(
     cardManifest: List<AuditableCard>,
     mvrs: List<Cvr>,
     val infoList: List<ContestInfo>,
-    seed:Long,
+    prng: Prng,
     val simFuzzPct: Double?,
     val pools: List<CardPool>? = null,
 ) : MvrManager {
@@ -27,7 +28,6 @@ class MvrManagerFromManifest(
         require(cardManifest.size == mvrs.size)
 
         val pairs = cardManifest.zip(mvrs)
-        val prng = Prng(seed)
         val cardsWithPrn = mutableListOf<Pair<AuditableCard, Cvr>>()
         pairs.forEach { cardsWithPrn.add(Pair(it.first.copy(prn=prng.next()), it.second)) }
         val sortedPairs = cardsWithPrn.sortedBy { it.first.prn() }

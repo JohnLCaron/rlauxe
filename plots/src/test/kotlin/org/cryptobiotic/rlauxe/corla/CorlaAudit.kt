@@ -40,7 +40,7 @@ class CorlaSingleRoundAuditTaskGenerator(
             makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
         val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(cu.contest), emptyList(),
-                                 MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed))
+                                 MvrManagerForTesting(testCvrs, testMvrs, useConfig.createPrng()))
         return ClcaSingleRoundWorkflowTask(
             name(),
             clcaWorkflow,
@@ -80,7 +80,7 @@ class CorlaContestAuditTaskGenerator(
         val clcaWorkflow = CorlaAudit(
             auditConfig,
             listOf(cu.contest as Contest),
-            MvrManagerForTesting(testCvrs, testMvrs, auditConfig.seed),
+            MvrManagerForTesting(testCvrs, testMvrs, auditConfig.createPrng()),
             quiet = true)
 
         return SingleContestAuditTask(

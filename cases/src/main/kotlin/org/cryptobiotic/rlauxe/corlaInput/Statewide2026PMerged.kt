@@ -30,6 +30,7 @@ class Statewide2026PMerged(ac:String?=auditcenter): StatewideInput(
 
     override fun skipCounties(countyName: String) = false
     val parent = Statewide2026Primary(ac)
+    override val seed = parent.seed
 
     override fun manifestFile(county: String) = parent.manifestFile(county)
     override fun statewideManifest() = parent.statewideManifest
@@ -141,7 +142,7 @@ class Statewide2026PMerged(ac:String?=auditcenter): StatewideInput(
         //     val strataName: String,
         //    val nmvrs: Int, // countyMvr.countMvr
         //    val ballotCardCount: Int,  // round.ballot_card_count
-        val broomfield = StrataInfo("Broomfield", 0, 22906)
+        val broomfield = StrataInfo("Broomfield", 0, 0,22906) // nmvrs ??
         orgInfo.copy(strataInfo = orgStrataInfo + listOf(broomfield))
     } // mergedContestInfo, strataInfo, statewideContests
 

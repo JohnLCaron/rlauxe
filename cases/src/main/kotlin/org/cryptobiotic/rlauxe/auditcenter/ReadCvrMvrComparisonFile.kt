@@ -76,14 +76,14 @@ data class CountyMvrCount(val countyName: String) {
 data class CardComparisonResults(
     val contestMvrs: List<ContestMvrCount>,
     val countyMvrs: List<CountyMvrCount>,
-    val mvrs: Set<ComparisonMvr>,
+    val mvrs: List<ComparisonMvr>,
     val stylesByCounty: List<CountyStylesFromMvrs>
 )
 
 ///////////////////////////////////////////
 // internal
 
-private data class Card(val cvrId: Int) {
+data class ComparisonMvr(val dbId: Int) {
     val lines = mutableListOf<ComparisonLine>()
 
     fun add(line: ComparisonLine) {
@@ -99,12 +99,14 @@ private data class Card(val cvrId: Int) {
             if (it.imprintedId != firstLine.imprintedId) return false
             if (it.countyName != firstLine.countyName) return false
             if (it.ballotType != firstLine.ballotType) return false
-            if (it.cvrId != firstLine.cvrId) return false
+            if (it.dbId != firstLine.dbId) return false
         }
         return true
     }
 
     fun county() = lines.first().countyName
+    fun imprintedId() = lines.first().imprintedId
+    fun ballotType() = lines.first().ballotType
 
     // they only mark the statewide contests "statewide", but the entire ballot must have come from the statewide sampling
     fun statewide() = lines.any { it.statewide }
@@ -119,24 +121,32 @@ private data class Card(val cvrId: Int) {
 // Claude: cvrId is a Postgres GenerationType.SEQUENCE column, assigned at row-insert time during CVR import
 // (DominionCVRExportParser.java:704), in whatever order the 63 counties’ files happened to get uploaded.
 
-private data class ComparisonLine(
+// individual choice
+data class ComparisonLine(
     val countyName: String,
     val contestName: String,
     val imprintedId: String,
     val ballotType: String,
     val cvrChoice: String,
     val mvrChoice: String,
-    val cvrId: Int, // apparently the opaque "db creation id"
+    val dbId: Int, // apparently the opaque "db creation id"
     val statewide: Boolean,
-)
+) {
+    init {
+        if (statewide == true)
+            print("")
+    }
+}
 
+/* applies to entire MVR, using the dbId
 // information for validating CorlaRLA sample sequences
 data class ComparisonMvr(
     val countyName: String,
     val imprintedId: String,
     val dbid: Int,
     val statewide: Boolean,
-)
+    val choiceLines: List<ComparisonLine>,
+) */
 
 fun readContestComparisonCsv(filename: String): CardComparisonResults {
     val file = File(filename)
@@ -148,8 +158,7 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
     val header = headerRecord.toList().joinToString(", ")
     // println("readContestComparisonCsv from $filename")
 
-    val compareMvrs = mutableSetOf<ComparisonMvr>()
-    val cards = mutableMapOf<Int, Card>() // remove duplicate
+    val cards = mutableMapOf<Int, ComparisonMvr>() // remove duplicate
     var count = 0
     var line: CSVRecord? = null
     try {
@@ -167,11 +176,10 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
                     line.get(4).trim(), // choice_per_voting_computer
                     line.get(5).trim(), // audit_board_selection
                     line.get(10).toInt(), // cvr_id
-                    if (line.size() > 11) (line.get(11).trim() == "STATE_WIDE_CONTEST") else false, // audit_reason
+                    if (line.size() > 11) (line.get(11).trim().uppercase() == "STATE_WIDE_CONTEST") else false,
                 )
-                val card = cards.getOrPut(cmpline.cvrId) { Card(cmpline.cvrId) }
+                val card = cards.getOrPut(cmpline.dbId) { ComparisonMvr(cmpline.dbId) }
                 card.add(cmpline)
-                compareMvrs.add(ComparisonMvr(cmpline.countyName, cmpline.imprintedId, cmpline.cvrId, cmpline.statewide))
                 count++
 
             } catch (e: Exception) {
@@ -184,13 +192,21 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
         println(line)
         ex.printStackTrace()
     }
-    cards.values.forEach { card: Card -> card.validate() }
+    cards.values.forEach { card: ComparisonMvr -> card.validate() }
     // println("statewide cards ${cards.values.count { it.statewide() } } total ${cards.size}")
+
+    /* create the separate Mvrs
+    val compareMvrs = mutableSetOf<ComparisonMvr>()
+    cards.values.forEach { card: Card ->
+        val disagree = card.lines.filter { it.cvrChoice != it.mvrChoice }.count()
+        val line = card.lines.first()
+        compareMvrs.add(ComparisonMvr(line.countyName, line.imprintedId, line.dbId, line.statewide, disagree))
+    } */
 
     // accumulate mvr counts by County, segregate staewide
     val countyMvrs = mutableMapOf<String, CountyMvrCount>()
     // cards.values.filter { !it.statewide() }.forEach { card: Card ->
-    cards.values.forEach { card: Card ->
+    cards.values.forEach { card: ComparisonMvr ->
         val line = card.lines.first()
         val countyMvrs = countyMvrs.getOrPut(line.countyName) { CountyMvrCount(line.countyName) }
         if (card.statewide())
@@ -201,7 +217,7 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
 
     // accumulate mvr counts by Contest
     val contestMvrs = mutableMapOf<String, ContestMvrCount>()
-    cards.values.forEach { card: Card ->
+    cards.values.forEach { card: ComparisonMvr ->
         card.lines.forEach { line ->
             val contestMvr = contestMvrs.getOrPut(line.contestName) { ContestMvrCount(line.contestName) }
             if (card.statewide()) contestMvr.countStatewide++
@@ -211,10 +227,10 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
 
     // create the CountyStyles
     val stylesByCounty = mutableMapOf<String, CountyStylesFromMvrs>()
-    cards.values.forEach { card: Card ->
+    cards.values.forEach { card: ComparisonMvr ->
         val countyStyles = stylesByCounty.getOrPut(card.county()) { CountyStylesFromMvrs(card.county()) }
         countyStyles.add(card.contests())
     }
 
-    return CardComparisonResults(contestMvrs.values.toList(), countyMvrs.values.toList(), compareMvrs, stylesByCounty.values.toList())
+    return CardComparisonResults(contestMvrs.values.toList(), countyMvrs.values.toList(), cards.values.toList(), stylesByCounty.values.toList())
 }

@@ -105,4 +105,39 @@ data class ContestIDsByCounty(
     }
 }
 
+// county_name,scanner_id,batch_id,count_per_manifest,count_per_cvr_file,difference
+data class BatchCountComparison(
+    val county_name: String,
+    val scanner_id:Int,
+    val batch_id: String,
+    val count_per_manifest: Int,
+    val count_per_cvr_file: Int,
+    val difference: Int,
+) {
+
+    fun show() = buildString {
+        append("$scanner_id-$batch_id-$count_per_manifest")
+    }
+
+    companion object {
+        fun readFromFile(filename: String): List<BatchCountComparison> {
+            var result: List<BatchCountComparison> = emptyList()
+            val reader = csvReader()
+            reader.readFromFile(filename) { rows ->
+                result = rows.withHeader().map { row ->
+                    BatchCountComparison(
+                        county_name = row["county_name"]!!.trim(),
+                        scanner_id = row["scanner_id"]!!.trim().toInt(),
+                        batch_id = row["batch_id"]!!.trim(),
+                        count_per_manifest = row["count_per_manifest"]!!.trim().toInt(),
+                        count_per_cvr_file = row["count_per_cvr_file"]!!.trim().toInt(),
+                        difference = row["difference"]!!.trim().toInt(),
+                    )
+                }.toList()
+            }
+            return result
+        }
+    }
+}
+
 

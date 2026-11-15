@@ -11,6 +11,19 @@ interface RedactionIF {
     fun redactedRows(): List<CvrRow>  // row redactions given in the CVR file
     fun nredactedCvrs(): Int // number of redacted cvrs given in CVR file
     fun cardCountByContest() : Map<Int, Int> // contestId -> ncards in the redaction
+
+    // TODO its possible this is specific to our redacted format and should be specialized
+    fun show(schema: CvrSchema) = buildString {
+        if (groups().isEmpty())
+            appendLine("No Redaction Groups")
+        else {
+            groups().forEach { appendLine(it.show(schema, cardCountByContest())) }
+        }
+        appendLine("Redacted Rows (${redactedRows().size})")
+        appendLine()
+        appendLine(CvrRow.tableHeader)
+        redactedRows().forEach{ appendLine(it.tableRow()) }
+    }
 }
 
 class EmptyRedaction: RedactionIF {
@@ -62,6 +75,12 @@ data class RedactionStrategy(
 //   do rows have style information: yes if votes != emptyMap
 //   do ballot types have unique styles: check BallotStyles.ballotTypes list.size == 1
 
+// what does a redacted contest look like? I think Npop, Ncast = 0.
+//     So you should leave it in the redaction pool, so Npop is not 0
+//     The aggregation will have ncards= 0 for that contest.
+//     So ElectionBuilder should put the contest in the missing pool using the reported votes and reported ncards.
+//     I think that will make Ncast correct. Maybe double Npop? TODO test that
+
 open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(false, null), val show: Boolean = false): RedactionIF {
     var linesIgnored = 0
     val redactedGroups = mutableMapOf<String, RedactedGroup>()
@@ -81,7 +100,7 @@ open class Redaction(val strategy: RedactionStrategy = RedactionStrategy(false, 
 
     override fun redactedRows() = redacted
 
-    override fun cardCountByContest() : Map<Int, Int> {
+    override fun cardCountByContest() : Map<Int, Int> { // contestId -> card count
         val result = mutableMapOf<Int, Int>()
         redacted.forEach { row ->
             row.contestVotes.forEach { contestVote ->

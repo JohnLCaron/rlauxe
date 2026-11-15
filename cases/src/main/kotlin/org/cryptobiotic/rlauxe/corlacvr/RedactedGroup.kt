@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corlacvr
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.util.roundUp
+import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.math.max
 
 // TODO just keep by (ballotType, contests). can rename at end if needed
@@ -45,16 +46,17 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val cor
                     // "RCV Redacted & Randomly Sorted",,,,,"DS-01",0,0,1,0,0,0,0,1,1,0,0,0,0,1,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
                     logger.warn{"*** IRV RedactedVotes shouldnt get here!"}
                 } else {
+                    // we want redacted contests in candVotes, ie the list of contests in the redacted group
                     val candidateVotes = candVotes.getOrPut(useContest.contestIdx, { mutableMapOf() })
                     for (candIdx in 0 until useContest.ncols) {
                         val nvotestr = line.get(useContest.startCol + candIdx)
-                        if (nvotestr.startsWith("AGG"))
-                            print("")
-                        val nvotes = nvotestr.toInt()
-                        val prev = candidateVotes[candIdx] ?: 0
-                        candidateVotes[candIdx] = prev + nvotes
-                        if (nvotes > 1)
-                            singleCards = false
+                        if (!nvotestr.startsWith("Redacted")) { // "rare contest", dont add to candVotes
+                            val nvotes = nvotestr.toInt()
+                            val prev = candidateVotes[candIdx] ?: 0
+                            candidateVotes[candIdx] = prev + nvotes
+                            if (nvotes > 1)
+                                singleCards = false
+                        } else println("Redacted column ${useContest.startCol + candIdx} contest ${useContest.contestIdx}")
                     }
                     //if (useContestIdx == 31 && candidateVotes.values.sum() == 1)
                     //    logger.debug{"*** contestIdx == 31 votes = ${candidateVotes.values.sum()}"}
@@ -105,6 +107,16 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val cor
         // appendLine(csvRecord.toString())
     }
 
+    fun show(schema: CvrSchema, cardCountByContest:Map<Int, Int>) = buildString {
+        appendLine("RedactedGroup('$groupName', ncards=${ncards()}, totalVotes=${totalVotes()} votes=")
+        candVotes.forEach { (contestId, votedFor) ->
+            val ncards = cardCountByContest[contestId] ?: 0
+            val contestName = schema.contests[contestId].contestName
+            appendLine("  ${trunc("$contestId:$contestName", contestWidth)}: ${votedFor}, ncards=$ncards")
+        }
+        appendLine(")")
+    }
+
     // if we wait until all cards are done, we can us same name as the final CardStyles
     fun rename(rename: String): RedactedGroup {
         val renamed = RedactedGroup(rename, this.firstCsv, this.corlaCvrs)
@@ -119,6 +131,7 @@ data class RedactedGroup(val groupName: String, val firstCsv: CSVRecord, val cor
 
     companion object {
         val logger = KotlinLogging.logger("RedactedGroup")
+        val contestWidth = 55
 
         // method #2: specific to Boulder25,26; "Redacted and Consolidated 10 Ballots"
         // TODO move to RedactionBoulder?

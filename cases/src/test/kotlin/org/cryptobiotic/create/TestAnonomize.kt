@@ -11,18 +11,20 @@ import org.cryptobiotic.rlauxe.corlaInput.readCorlaCvrs
 import org.cryptobiotic.rlauxe.corlacvr.Anonomicer
 import org.cryptobiotic.rlauxe.corlacvr.compareTwoRedactions
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
+import org.cryptobiotic.rlauxe.util.Locations.home
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.test.Test
 
 class TestAnonomize {
-    val outputBase = "/home/stormy/rla/temp/Anonomice"
+    val outputBase = "$home/rla/temp/Anonomice"
+    val pythonBase = "$home/anonymize_cvr"
     val baseRedactedCount = "src/main/resources/resources/data/cases/corla/redactedCount"
 
     @Test
     fun testOneStateOrCounty() {
-        testAnonomize(Statewide2020General(), county = "Grand")
+        testAnonomize(Statewide2020General())
     }
 
     @Test

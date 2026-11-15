@@ -80,7 +80,8 @@ private fun getZippedCsvResourceStream(resourcePath: String, resourceStream: Inp
 interface CorlaCountyCvrsIF {
     val inputSource: String
     val electionName: String
-    val versionName: String
+    val formatVersion: String
+    val redactionVersion: String
     val schema: CvrSchema
     fun cvrs(): Iterable<CvrRow>
     fun redaction(): RedactionIF
@@ -97,7 +98,7 @@ interface CorlaCountyCvrsIF {
     fun ballotStyleUnique(): Boolean
     fun rowHeaderCols(row: CvrRow, redact: List<CvrHeader>): String
 
-    fun show() = "$electionName nrows=${nrows()} unredactedRows=${unredactedCvrs()}  redactedRows=${redactedCvrs()}"
+    fun show() = "'$electionName' formatVersion='$formatVersion' redactionVersion='$redactionVersion' nrows=${nrows()} unredactedRows=${unredactedCvrs()} redactedRows=${redactedCvrs()}"
     fun getBallotType(line: CSVRecord): String
     fun parseHeader(line: CSVRecord, defCvrNumber: Int = -1): CvrRow
 }

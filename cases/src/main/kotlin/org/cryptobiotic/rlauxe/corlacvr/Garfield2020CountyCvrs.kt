@@ -29,7 +29,8 @@ class Garfield2020CountyCvrs(override val inputSource: String, showHeaders: Bool
                              val redaction: Redaction = Redaction()): CorlaCountyCvrsIF {
 
     override val electionName = "Garfield2020"
-    override val versionName = "unknown"
+    override val formatVersion = "N/A"
+    override val redactionVersion = "N/A"
     override val schema: CvrSchema
 
     val cvrNumberIdx: Int

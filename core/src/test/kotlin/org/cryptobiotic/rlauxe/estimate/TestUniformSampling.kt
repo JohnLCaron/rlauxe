@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.betting.estRiskStandardBet
 import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.strata.Strata
+import org.cryptobiotic.rlauxe.util.OurPrng
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -26,7 +27,7 @@ class TestUniformSampling {
             ContestWithAssertions(it, isClca = true, hasStyle = false).addStandardAssertions()
         }
         val testCvrs = test.makeCvrsFromContests()
-        val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
+        val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, OurPrng(Random.nextLong()))
 
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         // contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
@@ -88,7 +89,7 @@ class TestUniformSampling {
             val test = MultiContestTestData(33, 3, 200000, marginRange= .001.rangeTo(.01))
             val contestsUAs: List<ContestWithAssertions> = test.contests.map { ContestWithAssertions(it, isClca = true, hasStyle = false).addStandardAssertions() }
             val testCvrs = test.makeCvrsFromContests()
-            val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
+            val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, OurPrng(Random.nextLong()))
             val config = Config.from(AuditType.CLCA)
 
             val results = VerifyResults()

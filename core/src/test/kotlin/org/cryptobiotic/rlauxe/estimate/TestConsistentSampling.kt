@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.OurPrng
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
 import org.cryptobiotic.rlauxe.workflow.*
@@ -25,7 +26,7 @@ class TestConsistentSampling {
             ContestWithAssertions(it, isClca = true).addStandardAssertions()
         }
         val testCvrs = test.makeCvrsFromContests()
-        val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
+        val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, OurPrng(Random.nextLong()))
 
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
@@ -73,7 +74,7 @@ class TestConsistentSampling {
         contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
 
         val cvrs = test.makeCvrsFromContests()
-        val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong())
+        val mvrManager = MvrManagerForTesting(cvrs, cvrs, OurPrng(Random.nextLong()))
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
         consistentSampling(auditRound, mvrManager.samplingCards())
@@ -109,7 +110,7 @@ class TestConsistentSampling {
             val test = MultiContestTestData(33, 3, 200000, marginRange= .001.rangeTo(.01))
             val contestsUAs: List<ContestWithAssertions> = test.contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
             val testCvrs = test.makeCvrsFromContests()
-            val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
+            val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, OurPrng(Random.nextLong()))
             val config = Config.from(AuditType.CLCA)
 
             val results = VerifyResults()

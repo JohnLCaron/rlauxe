@@ -8,7 +8,7 @@ import java.security.MessageDigest
  * A pseudo-random number generator based on Philip Stark's pseudo-random number
  * generator found at
  * [https://www.stat.berkeley.edu/~stark/Java/Html/sha256Rand.htm](https://www.stat.berkeley.edu/~stark/Java/Html/sha256Rand.htm).
- * 
+ *
  * @author Joey Dodds <jdodds></jdodds>@freeandfair.us>
  * @author Joseph R. Kiniry <kiniry></kiniry>@freeandfair.us>
  * @version 1.0.0
@@ -41,7 +41,7 @@ class CorlaPRNG(
     /**
      * Create a pseudo-random number generator with functionality identical to
      * Rivest's `sampler.py` example implementation in Python of an RLA sampler.
-     * 
+     *
      * @param the_seed The seed to generate random numbers from
      * @param the_with_replacement True if duplicates can be generated
      * @param the_minimum The minimum value to generate
@@ -54,10 +54,10 @@ class CorlaPRNG(
 
     /**
      * Generate the specified list of random numbers.
-     * 
+     *
      * @param the_from the "index" of the first random number to give
      * @param the_to the "index" of the final random number to give
-     * 
+     *
      * @return A list containing the_to - the_from + 1 random numbers
      */
     fun getRandomNumbers(the_from: Int, the_to: Int): List<Int> {

@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.dominion.CvrExport
-import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import kotlin.io.path.ExperimentalPathApi
@@ -31,7 +30,7 @@ class TestCardSortMerge {
         val sorter = SortMerge<CvrExport>(
             "$tempDir/testSortMergeRun",
             outputFile = outputFile,
-            seed = Random.nextLong(),
+            OurPrng(Random.nextLong()),
             maxChunk = 100
         )
         sorter.run(
@@ -56,7 +55,7 @@ class TestCardSortMerge {
         val sorter = SortMerge<CvrExport>(
             "$tempDir/testSortMergeRunZip",
             outputFile = outputFile,
-            seed = Random.nextLong(),
+            prng = OurPrng(Random.nextLong()),
             maxChunk = 100,
         )
 
@@ -82,7 +81,7 @@ class TestCardSortMerge {
         val sorter = SortMerge<CvrExport>(
             "$tempDir/testSortMergeRunZipTree",
             outputFile = outputFile,
-            seed = Random.nextLong(),
+            prng = OurPrng(Random.nextLong()),
             maxChunk = 100,
         )
 

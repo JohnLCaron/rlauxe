@@ -37,7 +37,7 @@ class TestConsistentSamplerFromShangrla {
             .addCvr().addContest("measure_1", "no").done().done()
             .build()
 
-        val prng = Prng(12345678901L)
+        val prng = OurPrng(12345678901L)
         var cards = cvrs.mapIndexed { idx, it ->
             AuditableCard.fromCvr( it, idx, prng.next()) // here we assign sample number deterministically
         }
@@ -52,7 +52,7 @@ class TestConsistentSamplerFromShangrla {
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
 
-        val mvrManager = MvrManagerForTesting(cvrs, cvrs, 12345678901L)
+        val mvrManager = MvrManagerForTesting(cvrs, cvrs, OurPrng(12345678901L))
         consistentSampling(auditRound, mvrManager.samplingCards())
         assertEquals(3, auditRound.samplePrns.size)  // TODO was 5
 
@@ -96,12 +96,12 @@ class TestConsistentSamplerFromShangrla {
         // val ncvrs = makeNcvrsPerContest(contests, cvrs)
         val phantomCVRs = makePhantomCvrs(contests)
 
-        val prng = Prng(123456789012L)
+        val prng = OurPrng(123456789012L)
         val cards = (cvrs + phantomCVRs).mapIndexed { idx, it -> AuditableCard.fromCvr( it, idx, prng.next()) }
         assertEquals(10, cards.size)
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
-        val mvrManager = MvrManagerForTesting(cvrs, cvrs, 123456789012L)
+        val mvrManager = MvrManagerForTesting(cvrs, cvrs, OurPrng(123456789012L))
         consistentSampling(auditRound, mvrManager.samplingCards())
         assertEquals(7, auditRound.samplePrns.size)
     }

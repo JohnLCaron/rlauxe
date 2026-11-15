@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolTest
+import org.cryptobiotic.rlauxe.util.OurPrng
 import org.cryptobiotic.rlauxe.util.Prng
 import kotlin.test.Test
 import kotlin.math.abs
@@ -188,7 +189,7 @@ fun mvrsToAuditableCardsTestM(
 ): List<AuditableCard> {
 
     val styleMap = styles?.associateBy{ it.id() } ?: emptyMap()
-    val prng = if (seed != null) Prng(seed) else null
+    val prng = if (seed != null) OurPrng(seed) else null
 
     var cardIndex = 0 // 0 based index
 

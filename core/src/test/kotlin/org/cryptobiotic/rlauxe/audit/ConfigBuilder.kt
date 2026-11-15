@@ -18,7 +18,7 @@ class AuditConfigBuilder(val electionInfo: ElectionInfo,) {
         creationConfig = AuditCreationConfig(
             auditType=electionInfo.auditType,
             riskLimit=riskLimit,
-            seed=seed,
+            seed.toHexString(),
             riskMeasuringSampleLimit=riskMeasuringSampleLimit,
         )
         return this

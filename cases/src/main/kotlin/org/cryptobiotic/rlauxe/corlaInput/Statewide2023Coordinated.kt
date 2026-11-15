@@ -16,6 +16,7 @@ open class Statewide2023Coordinated(ac:String?=auditcenter): StatewideInput (
     tabulateCountyFile = "$ac/2023/coordinated/tabulateCounty.csv",
     mvrComparisonFile = "$ac/2023/coordinated/round_2/CVRtoAuditBoardInterpretationComparison.csv"
 ) {
+    override val seed = ""
     override val year = "2023"
     val manifestDir = "$ac/2023/coordinated/round_1"
 

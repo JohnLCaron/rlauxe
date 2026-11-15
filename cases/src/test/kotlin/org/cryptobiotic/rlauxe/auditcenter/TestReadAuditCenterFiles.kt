@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
@@ -10,7 +11,7 @@ import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.test.Test
 
 class TestReadAuditCenterFiles {
-    val input: StatewideInput = Statewide2026Primary()
+    val input: StatewideInput = Statewide2020General()
 
     // @Test
     fun problem() {
@@ -185,7 +186,7 @@ class TestReadAuditCenterFiles {
     //)
     @Test
     fun showMergeContestInfo() {
-        val (mergedContestInfo, mergedCountyInfo, statewideContests) = mergeContestInfo(Statewide2024General())
+        val (mergedContestInfo, mergedCountyInfo, statewideContests) = mergeContestInfo(Statewide2020General())
 
         println("\nMerged Contest Info")
         println("\n${trunc("contest", -50)}    Npop,      Nc, voteMargin, countyMvrs, stateMvrs, Ncounties, auditReason")
@@ -204,15 +205,23 @@ class TestReadAuditCenterFiles {
         }
         println()
 
-        println("\n${trunc("statewideContests", -50)}     Npop, Nc,   needSamples, auditReason")
+        // data class CorlaContestRoundCsv(
+        //    val contestName: String,
+        //    val auditReason: AuditReason,
+        //    val nwinners: Int,
+        //    val ballotCardCount: Int,         // population size = eg county size when uniform audit
+        //    val contestBallotCardCount: Int,  // Nc = number of cards with this contest on it
+        //    val winners: String,
+        //    val minMargin: Int,
+        //    val riskLimit: Double,  // TODO use this?
+        //    val gamma: Double,      // and this ?? = 1.03905000
+        //    val optimisticSamplesToAudit: Int, // check if these ever differ
+        //    val estimatedSamplesToAudit: Int,
+        //)
+        println("\n${trunc("statewideContests", -50)}    Npop,    Nc, needSamples, auditReason")
         statewideContests.forEach {
             print("${trunc(it.contestName, -50)} ")
-            print("${nfn(it.ballotCardCount, 7)}, ${
-                nfn(
-                    it.contestBallotCardCount,
-                    7
-                )
-            },  ${nfn(it.optimisticSamplesToAudit, 7)},")
+            print("${nfn(it.ballotCardCount, 7)}, ${nfn(it.contestBallotCardCount, 7)},  ${nfn(it.optimisticSamplesToAudit, 7)},")
             println(" ${it.auditReason}")
         }
     }

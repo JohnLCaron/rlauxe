@@ -70,7 +70,7 @@ and then may not be changed.
 
 The PRNG seed is chosen, and all the cards in the card manifest are assigned a PRN in sequence by the PRNG.
 The cards are then sorted by PRN and written to sortedCards.csv. These are commited to the Audit Record.
-The PRNG seed can only be chosen once and the cards must be immediately committed.
+The PRNG seed can only be chosen once, and the cards must be immediately committed.
 
         auditCreationConfig.json  // AuditCreationConfigJson 
         auditRoundConfig.json     // auditRoundConfigJson ; prototype for auditRoundConfigX

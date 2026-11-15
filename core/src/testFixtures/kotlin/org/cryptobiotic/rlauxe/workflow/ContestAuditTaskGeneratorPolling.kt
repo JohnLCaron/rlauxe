@@ -35,7 +35,7 @@ class PollingContestAuditTaskGenerator(
         )
         val testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
-        val ballotCards = MvrManagerForTesting(testMvrs, testMvrs, useConfig.creation.seed)
+        val ballotCards = MvrManagerForTesting(testMvrs, testMvrs, useConfig.createPrng())
         val pollingWorkflow = WorkflowTesterPolling(useConfig, listOf(cu.contest), ballotCards)
         return SingleContestAuditTask(
             name(),
@@ -73,7 +73,7 @@ class PollingSingleRoundAuditTaskGenerator(
         )
         val testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
-        val ballotCards = MvrManagerForTesting(testCvrs, testMvrs, useConfig.creation.seed)
+        val ballotCards = MvrManagerForTesting(testCvrs, testMvrs, useConfig.createPrng())
         val pollingWorkflow = WorkflowTesterPolling(useConfig, listOf(cu.contest), ballotCards)
 
         return PollingSingleRoundAuditTask(

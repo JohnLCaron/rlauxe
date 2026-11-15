@@ -10,6 +10,7 @@ class Statewide2022Primary(ac:String?=auditcenter): StatewideInput(
     tabulateCountyFile = "$ac/2022/primary/tabulate_county.csv",
     mvrComparisonFile = "$ac/2022/primary/round_2/contest_comparison.csv"
 ) {
+    override val seed = ""
     override val year = "2022p"
     val manifestDir = "$ac/2022/primary/round_1"
 

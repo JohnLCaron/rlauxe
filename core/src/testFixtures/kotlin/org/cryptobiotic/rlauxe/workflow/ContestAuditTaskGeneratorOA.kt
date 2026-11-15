@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
-import kotlin.random.Random
 
 // Generate OA contest with given margin, do full audit with rounds
 class OneAuditContestAuditTaskGenerator(
@@ -41,7 +40,7 @@ class OneAuditContestAuditTaskGenerator(
         val oneaudit = WorkflowTesterOneAudit(
             config=config,
             listOf(contestUA),
-            MvrManagerForTesting(mvrs, oaMvrs, seed=config.creation.seed, pools=pools)
+            MvrManagerForTesting(mvrs, oaMvrs, config.createPrng(), pools=pools)
         )
 
         return SingleContestAuditTask(
@@ -88,7 +87,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
         }
 
         val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestUA),
-            MvrManagerForTesting(mvrs, oaMvrs, seed=config.creation.seed, pools=pools))
+            MvrManagerForTesting(mvrs, oaMvrs, config.createPrng(), pools=pools))
 
         return ClcaSingleRoundWorkflowTask(
             name(),
@@ -133,7 +132,7 @@ class OneAuditSingleRoundWithDilutedMargin(
         val manager =  MvrManagerFromManifest(
             cards,
             mvrs, listOf(contestUA.contest.info()),
-            seed=Random.nextLong(),
+            config.createPrng(),
             simFuzzPct=mvrsFuzzPct,
             pools=pools)
 

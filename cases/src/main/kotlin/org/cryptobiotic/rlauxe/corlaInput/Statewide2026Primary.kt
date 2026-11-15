@@ -17,7 +17,9 @@ open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput(
     mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv",
 
 ) {
+    override val seed = ""
     override val year = "2026p"
+
     val manifestDir = "$ac/2026/primary/files"
     val contestIDsByCountyFile = "$ac/2026/primary/finalReports/ContestIDsByCounty.csv" // only 2026 primary so far
     val canonicalCounties: List<String>

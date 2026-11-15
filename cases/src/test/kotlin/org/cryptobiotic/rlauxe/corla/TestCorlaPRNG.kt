@@ -1,0 +1,141 @@
+package org.cryptobiotic.rlauxe.corla
+
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
+import us.freeandfair.corla.crypto.PseudoRandomNumberGenerator
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+class TestCorlaPRNG {
+    val seed2020 = "92076602804272786701"
+    val alamosaPop = 7923
+    val alamosaNmvrs = 95
+
+    val adamsPop = 239425
+    val adamsNmvrs = 350
+
+    val morganPop = 13860
+    val morganNmvrs = 19
+
+    @Test
+    fun test2020() {
+        val prng = PseudoRandomNumberGenerator(seed2020, false, 1, alamosaPop)
+        val prn = prng.getRandomNumbers(0, alamosaNmvrs-1)
+        println("prn=$prn")
+
+        val corlaPRNG = CorlaPRNG(seed2020, false, 1, alamosaPop) // without replacement (!)
+        val prns = corlaPRNG.getRandomNumbers(0, alamosaNmvrs - 1)
+        println("prns=$prns")
+
+        prns.forEachIndexed { idx, prn ->
+            println("corla=$prn rlauze=${prns[idx]} ${if(prn == prns[idx]) "" else "***"}")
+        }
+    }
+
+    @Test
+    fun testRandomGenerator() {
+        val seed = "3546311556112163624615351222"
+        val gen = PseudoRandomNumberGenerator(seed, false, 1, 876)
+        val numbers = gen.getRandomNumbers(0, 46)
+        val expected = mutableListOf<Int?>(
+            740, 180, 264, 789, 238, 448, 272, 611, 761, 208, 596, 88, 160,
+            113, 766, 427, 184, 816, 653, 411, 779, 331, 339, 487, 594, 235, 65, 527, 821,
+            490, 461, 251, 471, 414, 174, 567, 300, 134, 144, 357, 786, 792, 218, 550, 787,
+            537, 197
+        )
+        assertEquals(numbers, expected)
+    }
+
+    @Test
+    fun testCorlaPrng() {
+        // apparently using BigInteger, not long
+        // ULong.MAX_VALUE = 18446744073709551615
+        //                   49006417086137856424
+        //val seed: ULong = 49006417086137856424UL
+
+        // modulus max - min + 1 = 1_444_047
+        val corlaPRNG = CorlaPRNG("49006417086137856424", true, 1, 1_444_047)
+        val (digest, bigint, pick) = corlaPRNG.digest(1)
+        println("digest = ${digest.contentToString()}")
+        println("bigint = $bigint")
+        println("pick = $pick")
+    }
+
+    @Test
+    fun testCorla2026pPrngStatewide() {
+        val stateInput = Statewide2026Primary()
+        val ccmvrs = stateInput.cardComparison().mvrs.associateBy { "${it.county()}: ${it.imprintedId()}" }
+        println("ccmvrs (${ccmvrs.size})")
+
+        val mvrsByDbid = stateInput.cardComparison().mvrs.associate {
+            it.dbId to it
+        }
+        println("stateIds (${stateIds_2026p.size})")
+        stateIds_2026p.forEach { stateId ->
+            val mvr = mvrsByDbid[stateId]
+            if (mvr == null) {
+                println("stateId $stateId has no mvr")
+            } else if (mvr.county() == "El Paso") {
+                println("  ${mvrsByDbid[stateId]}")
+            }
+        }
+
+        val stateManifest = stateInput.statewideManifest()
+        // modulus max - min + 1 = 1_444_047
+        val corlaPRNG = CorlaPRNG("49006417086137856424", true, 1, 1_444_047)
+
+        val prns = corlaPRNG.getRandomNumbers(0, 250)
+        val ids = prns.map { prn ->
+            stateManifest.idFromIndex(prn)
+        }
+
+        ids.forEachIndexed { idx, id ->
+            val mvr = ccmvrs[id]
+            val python = if (idx < python_ids_2026p.size) python_ids_2026p[idx] else "N/A"
+            print("$idx: ${prns[idx]} -> $id (python= ${python})  == $mvr  ")
+            if (mvr == null)
+                println("  *** MISSS")
+            else println()
+        }
+    }
+
+    @Test
+    fun testCorla2026pPrngCounty() {
+        val county = "El Paso"
+        val stateInput = Statewide2026Primary()
+        // stateInput.counties().forEach { county ->
+        println("-------------- $county")
+        val ccmvrs = stateInput.cardComparison().mvrs.filter { it.county() == county }.map {
+            "${it.county()}: ${it.imprintedId()}"
+        }
+        println("ccmvrs (${ccmvrs.size})")
+
+        // ccmvrs.sorted().forEach { println("  ${it}") }
+        // println()
+
+        val strata = stateInput.countyStrataMap[county]!!
+        val countyManifest = stateInput.countyManifest(county)!!
+        // modulus max - min + 1 = 1_444_047
+        val corlaPRNG = CorlaPRNG("49006417086137856424", true, 1, strata.ballotCardCount)
+
+        val prns = corlaPRNG.getRandomNumbers(1, strata.nmvrs)
+        val ids = prns.map { prn -> countyManifest.idFromIndex(prn) }
+
+        ids.forEachIndexed { idx, id ->
+                print("$idx: ${prns[idx]} -> $id ")
+                if (!ccmvrs.contains(id))
+                    println("$idx: $id *** MISSS")
+                else println()
+                // assertTrue(ccmvrs.contains(id))
+            }
+       // }
+    }
+}
+// 50376,United States Senator - DEM,"[574781,528018,536634,557965,...
+
+// TODO where did these come from? probably an instrumented version of auditcenter_analyze-private ???
+private val python_ids_2026p = listOf("113-11-7", "107-146-93", "103-43-64", "110-6-86", "109-10-73", "102-87-4", "103-189-86", "106-121-72", "105-59-78", "201-189-73", "112-168-91", "104-22-50", "103-98-80", "103-146-20", "101-256-20", "109-102-6", "104-1-47", "102-62-35", "104-125-87", "102-133-28", "104-25-11", "105-230-41", "1-PRI-0557-66", "108-79-10", "106-13-85", "106-76-132", "111-92-69", "107-313-20", "101-230-15", "1-VBM-0083-35", "1-PRI-0846-65", "101-54-27", "104-57-144", "106-46-46", "101-275-14", "104-97-2", "102-166-96", "107-86-56", "102-78-24", "102-108-37", "103-41-18", "1-PRI-0753-79", "401-164-29", "1-PRI-1169-26", "109-177-33", "108-91-42", "107-50-135", "1-PRI-0127-84", "102-16-79", "107-247-79", "102-6-3", "102-27-19", "105-12-65", "402-4232-46", "112-139-76", "104-48-39", "109-113-7",
+    "108-16-118", "104-160-6", "101-44-90", "401-198-78", "107-83-63", "105-104-42", "1-VBM-0034-17", "106-161-50", "401-69-18", "402-4409-95", "109-103-60", "102-124-48", "108-134-91", "107-9-11", "103-167-83", "101-535-55", "104-34-38", "101-67-95", "102-148-8", "108-243-25", "101-207-96", "107-130-48", "1-VBM-0131-49", "102-117-13", "1-PRI-0950-20", "102-229-26", "402-4546-30", "101-2-3", "102-327-7", "104-115-33", "104-182-48", "1-PRI-0131-92", "102-64-120", "103-20-100", "112-38-64", "110-6-3", "103-2-22", "113-74-83", "402-4007-21", "108-46-7", "111-56-23", "101-186-93", "108-124-32", "301-318-53", "108-155-49", "201-161-54", "101-126-63", "104-55-82", "101-65-10", "101-121-5", "301-164-13", "105-145-79", "107-197-66", "104-99-93", "1-PRI-0707-92", "401-143-4", "102-157-9", "104-165-31", "104-82-19",
+    "102-52-15", "112-179-59", "110-65-89", "112-178-40", "301-29-14", "401-245-65", "101-81-6", "113-19-6", "101-32-184", "106-43-62", "108-3-74", "102-142-27", "102-172-19", "104-90-133", "101-188-52", "301-376-44", "107-46-77", "109-93-67", "102-2-7", "301-332-69", "109-33-33", "104-43-46", "102-294-6", "103-11-32", "108-42-64", "107-145-70", "1-PRI-0562-98", "1-VBM-0179-20", "102-13-24", "1-VBM-0154-32", "112-172-21", "106-143-61", "102-99-50", "104-170-81", "102-28-12", "102-137-11", "104-130-85", "112-39-83", "104-37-34", "104-269-17", "104-36-121", "103-14-41", "109-36-115", "101-230-49", "101-132-39", "112-146-31", "108-234-85", "102-207-16", "201-235-4", "106-32-66", "101-59-10", "108-30-46", "110-54-75", "104-146-100", "201-190-18", "1-PRI-0837-51", "402-4422-43", "301-166-73", "1-PRI-0934-41",
+    "111-133-12", "102-82-3", "201-39-97", "103-6-97", "102-132-12", "402-4186-41", "102-2-73", "105-85-9", "102-244-50", "107-105-10", "107-43-32", "112-88-89", "103-20-95", "102-128-7", "109-75-3", "103-38-51", "1-PRI-0829-93", "104-49-7", "112-172-36", "103-52-72", "108-125-20", "109-79-57", "101-183-75", "110-12-1", "102-20-2", "109-59-95", "107-29-48", "107-69-38", "201-228-37", "108-9-173", "104-5-53", "110-108-81", "102-186-17", "1-PRI-0062-79", "103-11-69")
+
+private val stateIds_2026p = setOf(574781,528018,536634,557965,595174,534771,550695,513642,549262,577928,566134,579643,584727,522451,573614,540074,518037,593122,522472,769636,842827,846366,743181,828901,831107,714730,813802,790555,791667,772608,774413,726884,769207,749956,854362,727949,767013,803135,1613562,1534705,1518426,1548945,1599491,1555412,1585305,1563554,1583192,1589646,1522033,1563776,1598185,1553597,1546522,1515822,1552251,1593309,1512415,1515068,347410,1038062,1366511,1372288,1371918,184424,324284,307408,274255,295416,320894,259211,337871,236642,328954,280693,178730,181730,252962,337187,190030,336377,236755,169947,330229,271371,255310,343719,301113,307005,330308,264224,334604,325353,222083,661185,689024,715330,679957,698982,619919,675638,697409,688126,620327,661721,687369,613422,351195,110647,1147000,1146193,1161568,1108243,1143601,1205338,1234798,1139267,1184861,1138705,1154692,1089779,1228223,1209706,1113057,1099427,1165340,1155829,1147335,1093534,1162498,1131328,86528,87252,85902,365499,367913,370284,369046,152500,151834,152275,920914,990937,872345,991189,975456,966803,886778,951709,1019185,860924,904680,1013237,1016657,1003923,867274,900117,924979,941292,863491,917457,24159,1435701,1392277,1455893,1472005,1404547,1418585,1472628,1423338,1381486,1453528,1472669,1420731,1381437,95959,46557,59908,72741,61207,29725,42890,503366,1060361,1063350,1060952,1067014,1062572,148939,149760,9963,1036082,1257550,1281703,1246013,155568,162253,1483359,1484616,81329,1361079,1337236,1352419,1316665,1304377,1338364,1344113,1353087,1344489,1347089,492431)

@@ -313,7 +313,7 @@ open class AuditRecord(
 
             val auditCreationConfigResult = readAuditCreationConfigJsonFile(publisher.auditCreationConfigFile())
             val auditCreationConfig = if (auditCreationConfigResult.isOk) auditCreationConfigResult.unwrap() else {
-                AuditCreationConfig(electionInfo.auditType, seed = 0)
+                AuditCreationConfig(electionInfo.auditType, seed = "12345")
             }
 
             val auditRoundConfigResult = readAuditRoundConfigJsonFile(publisher.auditRoundProtoFile())

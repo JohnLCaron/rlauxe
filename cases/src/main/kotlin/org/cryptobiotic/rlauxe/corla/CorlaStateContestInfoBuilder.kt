@@ -85,6 +85,6 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
                 nmvrs += truncSamples
             }
         }
-        return StrataInfo(name, nmvrs, npop)
+        return StrataInfo(name, nmvrs, 0, npop)
     }
 }

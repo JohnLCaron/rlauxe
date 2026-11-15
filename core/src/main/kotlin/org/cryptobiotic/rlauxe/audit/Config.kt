@@ -2,8 +2,11 @@ package org.cryptobiotic.rlauxe.audit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.TausRates
+import org.cryptobiotic.rlauxe.util.OurPrng
+import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.currentVersion
 import org.cryptobiotic.rlauxe.util.secureRandom
+import kotlin.Double
 
 data class Config(
     val election: ElectionInfo,
@@ -42,8 +45,11 @@ data class Config(
     }
 
     fun replaceSeed(seed: Long): Config {
-        return Config(this.election, this.creation.copy(seed = seed), this.round, this.version)
+        return Config(this.election, this.creation.copy(seed = seed.toHexString()), this.round, this.version)
     }
+
+    // can only use once, then must recreate
+    fun createPrng() = creation.createPrng()
 
     override fun toString() = buildString {
         appendLine("Config(")
@@ -206,13 +212,40 @@ data class ElectionInfo(
 
 data class AuditCreationConfig(
     val auditType: AuditType, // must agree with ElectionInfo
-    val riskLimit: Double = 0.05, // TODO can we allow this to relax ??
+    val riskLimit: Double = 0.05, // TODO eliminate default value
 
-    val seed: Long = secureRandom.nextLong(),
+    // allow OurPrng or CorlaPrng
+    val seed: String = secureRandom.nextLong().toString(radix=16),
+    val prng: String = "OurPrng", // "OurPrng" or "CorlaPrng"
+    val maximum: Int? = null,
+
     val riskMeasuringSampleLimit: Int? = null, // the number of samples we are willing to audit; this turns the audit into a "risk measuring" audit
     val other: Map<String, String> = emptyMap(),    // soft parameters
 ) {
     fun isRiskMeasuringAudit() = riskMeasuringSampleLimit != null
+    fun seed() = seed.toLong(radix=16)
+
+    fun createPrng(): Prng {
+        return when (prng) {
+            "OurPrng" -> OurPrng(this.seed.toLong(radix=16))
+            // class CorlaPrng(
+            //    val seed: String, // at least of length MININUM_SEED_LENGTH and whose contents must only be digits.
+            //    val with_replacement: Boolean, // True if we should "replace" drawn numbers once they are drawn
+            //    val my_minimum: Int,
+            //    val my_maximum: Int
+            //    val corlaPRNG = CorlaPrng("49006417086137856424", true, 1, 1_444_047)
+            // TODO is with_replacement = true going to screw everything up ??
+            // actually, we cant drop this in because Corla uses uniform sampling within the county...
+            // "CorlaPrng" -> CorlaPrng(this.seed, 1, this.maximum!!)
+            else -> throw RuntimeException("Prng $prng is not supported")
+        }
+    }
+
+    companion object {
+        fun fromSeed(auditType: AuditType, // must agree with ElectionInfo
+                     riskLimit: Double,
+                     seed: Long) = AuditCreationConfig(auditType, riskLimit,  )
+    }
 }
 
 //// can configure each round seperately; commit when each round has been audited

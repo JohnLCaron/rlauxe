@@ -27,7 +27,7 @@ class TestSingleRoundClcaAudit {
         val testMvrs = testCvrs // TODO no fuzzing
 
         val workflow = WorkflowTesterClca(config, contests, emptyList(),
-            MvrManagerForTesting(testCvrs, testMvrs, config.creation.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, config.createPrng()))
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
 
         val maxEstMvrs = runClcaSingleRoundAudit(workflow, contestRounds, auditor = ClcaAssertionAuditor(), parameters=emptyMap())

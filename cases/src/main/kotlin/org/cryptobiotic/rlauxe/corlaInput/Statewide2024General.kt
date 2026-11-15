@@ -16,6 +16,7 @@ class Statewide2024General(ac:String?=auditcenter): StatewideInput (
     tabulateCountyFile = "$ac/2024/general/tabulateCounty.csv",
     mvrComparisonFile = "$ac/2024/general/round3/contestComparison.csv"
 ) {
+    override val seed = ""
     override val year = "2024"
     val manifestDir = "$ac/2024/general"
 

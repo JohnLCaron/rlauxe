@@ -32,7 +32,7 @@ class RaireContestAuditTaskGenerator(
 
         val clca = WorkflowTesterClca(
             useConfig, emptyList(), listOf(rcontest),
-            MvrManagerForTesting(cvrs=testCvrs, mvrs=testMvrs, useConfig.creation.seed),
+            MvrManagerForTesting(cvrs=testCvrs, mvrs=testMvrs, useConfig.createPrng()),
         )
         return SingleContestAuditTask(
             name(),
@@ -73,7 +73,7 @@ class RaireSingleRoundAuditTaskGenerator(
 
         val raireAudit = WorkflowTesterClca(
             useConfig, emptyList(), listOf(rcontest),
-            MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed),
+            MvrManagerForTesting(testCvrs, testMvrs, useConfig.createPrng()),
         )
 
         return ClcaSingleRoundWorkflowTask(

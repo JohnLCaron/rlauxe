@@ -27,6 +27,7 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInput (
 ) {
     override val year = "2026pc"
     val parent = Statewide2026PMerged(ac)
+    override val seed = parent.seed
 
     override fun manifestFile(county: String) = parent.manifestFile(county)
     override fun statewideManifest() = parent.statewideManifest()

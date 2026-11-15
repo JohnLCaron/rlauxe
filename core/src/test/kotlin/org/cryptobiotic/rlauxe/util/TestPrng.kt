@@ -8,13 +8,13 @@ import kotlin.test.assertNotEquals
 class TestPrng {
 
     @Test
-    fun testPrng() {
-        val prng1 = Prng(123456787901237890L)
-        val prng2 = Prng(123456787901237890L)
+    fun testOurPrng() {
+        val prng1 = OurPrng(123456787901237890L)
+        val prng2 = OurPrng(123456787901237890L)
         repeat (1000) {
             assertEquals(prng1.next(), prng2.next())
         }
-        val prng3 = Prng(1234567879012378901L)
+        val prng3 = OurPrng(1234567879012378901L)
         repeat (1000) {
             assertNotEquals(prng1.next(), prng3.next())
         }

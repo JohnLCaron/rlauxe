@@ -9,16 +9,25 @@ import javax.crypto.spec.SecretKeySpec
 // The key should be of sufficient length (at least 256 bits, or 32 bytes) and generated using a
 // cryptographically secure pseudo-random number generator (CSPRNG), not java.util.Random.
 
-class Prng(seed: Long) {
+interface Prng {
+    fun next(): Long // TODO switch to ByteArray I think
+}
+
+class OurPrng(seed: Long): Prng {
     val useSeed = if (seed > 0) seed else -seed
     val internalSeed = longToByteArray(useSeed)
     val index = AtomicInteger(0)
 
-    fun next(): Long {
+    override fun next(): Long {
         val hmac = HmacSha256(internalSeed)
         hmac.update(intToByteArray(index.incrementAndGet()))
         return hmac.finish()
     }
+
+    override fun toString(): String {
+        return "OurPrng(seed=$useSeed)"
+    }
+
 }
 
 private class HmacSha256(key : ByteArray) {

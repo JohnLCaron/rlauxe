@@ -70,7 +70,7 @@ class TestConfigJson {
                 //    val seed: Long = secureRandom.nextLong(),
                 //    val riskMeasuringSampleLimit: Int? = null, // the number of samples we are willing to audit; this turns the audit into a "risk measuring" audit
                 //    val other: Map<String, String> = emptyMap(),
-                AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = 3.14159, seed=87346239482746L, riskMeasuringSampleLimit=1111, other=mapOf("truth" to "beauty", "alpha" to "omega")),
+                AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = 3.14159, seed="87346239482746", riskMeasuringSampleLimit=1111, other=mapOf("truth" to "beauty", "alpha" to "omega")),
                 // data class AuditRoundConfig(
                 //    val simulation: SimulationControl,
                 //    val sampling: ContestSampleControl,

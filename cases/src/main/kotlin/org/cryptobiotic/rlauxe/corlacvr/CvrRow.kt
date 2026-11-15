@@ -171,6 +171,24 @@ data class CvrRow(
         }
     }
 
+    fun tableRow() = buildString {
+        append("|")
+        append("$cvrNumber| ")
+        append("$tabulatorNum| ")
+        append("$batchId| ")
+        append("$recordId| ")
+        append("$imprintedId| ")
+        append("$precinctPortion| ")
+        append("$ballotType| ")
+        contestVotes.forEach { (contestId, votedFor) ->
+            if (votedFor.size == 1)
+                append(" $contestId:${votedFor[0]},") // remove the bracket
+            else
+                append(" $contestId:${votedFor},") //show bracket for 0 or > 1
+        }
+        append("|")
+    }
+
     fun testImprintedIdFormat(): Boolean {
         return imprintedId == "${tabulatorNum}-${batchId}-${recordId}"
     }
@@ -185,6 +203,8 @@ data class CvrRow(
     }
 
     companion object {
+        val tableHeader = "|cvrNumber|tabulatorNum|batchId|recordId|imprintedId|ballotType|precinctPortion|contest:votes|\n" +
+            "|---|---|---|---|---|---|---|---|"
         val header = "cvrNumber, tabulatorNum, batchId, recordId, imprintedId, ballotType, contest:votes"
         private val logger = KotlinLogging.logger("CvrRow")
     }

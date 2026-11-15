@@ -4,6 +4,7 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.corlaInput.defaultCharset
+import org.cryptobiotic.rlauxe.corlacvr.reverseMungedDate
 import java.io.File
 import kotlin.text.appendLine
 
@@ -131,12 +132,7 @@ data class ComparisonLine(
     val mvrChoice: String,
     val dbId: Int, // apparently the opaque "db creation id"
     val statewide: Boolean,
-) {
-    init {
-        if (statewide == true)
-            print("")
-    }
-}
+)
 
 /* applies to entire MVR, using the dbId
 // information for validating CorlaRLA sample sequences
@@ -171,7 +167,7 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
                 val cmpline = ComparisonLine(
                     line.get(0).trim(), // county_name
                     line.get(1).trim(), // contest_name
-                    line.get(2).trim(), // imprinted_id
+                    reverseMungedDate(line.get(2).trim()), // imprinted_id
                     line.get(3).trim(), // ballot_type
                     line.get(4).trim(), // choice_per_voting_computer
                     line.get(5).trim(), // audit_board_selection
@@ -193,15 +189,6 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
         ex.printStackTrace()
     }
     cards.values.forEach { card: ComparisonMvr -> card.validate() }
-    // println("statewide cards ${cards.values.count { it.statewide() } } total ${cards.size}")
-
-    /* create the separate Mvrs
-    val compareMvrs = mutableSetOf<ComparisonMvr>()
-    cards.values.forEach { card: Card ->
-        val disagree = card.lines.filter { it.cvrChoice != it.mvrChoice }.count()
-        val line = card.lines.first()
-        compareMvrs.add(ComparisonMvr(line.countyName, line.imprintedId, line.dbId, line.statewide, disagree))
-    } */
 
     // accumulate mvr counts by County, segregate staewide
     val countyMvrs = mutableMapOf<String, CountyMvrCount>()

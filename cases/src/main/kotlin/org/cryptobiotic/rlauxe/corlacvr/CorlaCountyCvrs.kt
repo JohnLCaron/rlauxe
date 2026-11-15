@@ -9,11 +9,10 @@ import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.collections.joinToString
 import kotlin.text.isEmpty
 
-// this reads CVRs from "Dominion CVR export files", maybe a standard Dominion csv format.
+// this reads CVRs from "Dominion CVR export files", which may be a standard Dominion csv format.
 // This class stays low-level and tries not to muck with the data.
 // However, it does remove the redacted rows, which are available in Redaction.redactedRows().
-// TODO perhaps there should be a separate object using cvrs: CloseableIterable ??
-//      and read through all the cvrs to implement cardStyles, nrows,  redaction, ballotStyleUnique
+
 private val logger = KotlinLogging.logger("CorlaCountyCvrs")
 private val showHeaders: Boolean = false
 private val showSchema: Boolean = false
@@ -25,7 +24,8 @@ class CorlaCountyCvrs(override val inputSource: String,
 
     override val electionName: String
     override val schema: CvrSchema
-    override val versionName: String
+    override val formatVersion: String
+    override val redactionVersion: String
 
     val title: String
     val headerRows = mutableListOf<List<String>>()
@@ -43,7 +43,8 @@ class CorlaCountyCvrs(override val inputSource: String,
             title = electionLine.toList().joinToString(", ")
             if (showHeaders) showLine("electionName", electionLine)
             electionName = electionLine.get(0).replace("[^ -~]".toRegex(), "")
-            versionName = electionLine.get(1).trim()
+            formatVersion = if (electionLine.size() > 1) electionLine.get(1).trim() else "N/A"
+            redactionVersion = if (electionLine.size() > 2) electionLine.get(2).trim() else "N/A"
 
             // the contest names
             val contestLine = records.next()
@@ -156,7 +157,7 @@ class CorlaCountyCvrs(override val inputSource: String,
         if (parseColAsString(CvrHeader.precinctportion, line).trim().isEmpty()) countBlankPrecincts++
 
         if (!cvr.testImprintedIdFormat()) {
-            val munged = reverseMungeDate(cvr.imprintedId)
+            val munged = reverseMungedDate(cvr.imprintedId)
             val mungedCvr = cvr.copy(imprintedId=munged)
             if (mungedCvr.testImprintedIdFormat()) {
                 // if (mungedCount % 1000 == 0)
@@ -198,26 +199,6 @@ class CorlaCountyCvrs(override val inputSource: String,
         val elems: List<String> = line.toList()
         elems.forEachIndexed { idx, it ->
             if (it.isNotEmpty()) println("  ${nfn(idx, 3)}: $it")
-        }
-    }
-
-    // used by anonymizer
-    fun rowHeaderColsOld(row: CvrRow, redact: List<CvrHeader>) = buildString {
-        repeat(schema.nheaders) { idx ->
-            val header = schema.headerAt[idx]
-            val useValue = when (header) {
-                // cvrnumber, tabulatornum, batchid, recordid, imprintedid, countinggroup, precinctportion, ballottype
-                CvrHeader.cvrnumber -> row.cvrNumber
-                CvrHeader.tabulatornum -> row.tabulatorNum
-                CvrHeader.batchid -> row.batchId
-                CvrHeader.recordid -> row.recordId
-                CvrHeader.imprintedid -> quoteString(row.imprintedId)
-                CvrHeader.countinggroup -> if (redact.contains(CvrHeader.countinggroup)) "" else row.headerCols[idx]
-                CvrHeader.precinctportion -> if (redact.contains(CvrHeader.precinctportion)) "" else row.precinctPortion ?: row.headerCols[idx]
-                CvrHeader.ballottype -> if (redact.contains(CvrHeader.ballottype)) "" else quoteString(row.ballotType)
-                else -> row.headerCols[idx]
-            }
-            append("$useValue,")
         }
     }
 
@@ -281,7 +262,7 @@ fun truncateCommas(originalString: String): String {
 
 // Boulder2020:  9/1/1986 != 9-1-86; went through Excel spreadsheet and got munged
 // spreadsheet saved the imprintedId as a date. jeesh
-fun reverseMungeDate(id: String): String {
+fun reverseMungedDate(id: String): String {
     val count = id.count { it == '/' }
     return if (count != 2) id else {
         val tokens = id.split("/")

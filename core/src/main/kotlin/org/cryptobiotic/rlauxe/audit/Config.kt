@@ -8,6 +8,8 @@ import org.cryptobiotic.rlauxe.util.currentVersion
 import org.cryptobiotic.rlauxe.util.secureRandom
 import kotlin.Double
 
+// TODO each StatewideInput could set its standard config....
+
 data class Config(
     val election: ElectionInfo,
     val creation: AuditCreationConfig,
@@ -297,7 +299,7 @@ data class ContestSampleControl(
     //// checkContestsCorrectlyFormed: preAuditStatus
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
     val minMargin: Double = 0.0, // do not audit contests less than this margin TODO really it should be noerror for clca?
-    val minSize: Int? = null, // do not audit contests with Nc less than this
+    val minSize: Int? = 10, // do not audit contests with Nc less than this
 
     //// consistentSampling: contestRound.status, depends on having estimation
     val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / Npop) greater than this

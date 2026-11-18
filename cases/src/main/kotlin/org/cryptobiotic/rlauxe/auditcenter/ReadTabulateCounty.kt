@@ -26,8 +26,7 @@ private val logger = KotlinLogging.logger("ReadTabulateCounty")
 
 /////////////////////////////////////////////////////////////
 // maybe should be interfaces ?
-// TODO get rid of ??
-//   trying to remove corla stuff i think
+// TODO get rid of ?? trying to remove corla dependence i think; maybe thats useless
 
 interface ContestTabAllCountiesIF {
     val contestName: String
@@ -81,7 +80,7 @@ interface CountyContestVotesIF {
 // for one county, all contests
 data class CountyTabAllContests(override val countyName: String): CountyTabAllContestsIF {
     override val contests = mutableMapOf<String, CountyContestVotes>() // contestName (non-canonical) -> CountyContestVotes
-    // TODO can we count on it being canonical contest name or not!!
+    // TODO can we count on it being canonical contest name or not?? (!)
     // Add choiceVotes thinks maybe:
     //         val contest = contests.getOrPut(line.contestName ) { CountyContestVotes(countyName, line.contestName) }
     // CorlaCvrConverter thinks not:

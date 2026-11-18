@@ -1,6 +1,6 @@
 # CORLA Verification notes
 
-_last changed 06/02/2026_
+_last changed 11/18/2026_
 
 See   https://docs.google.com/document/d/1bAZCWKFRmo6W3K2zC604IKoMrVNvETx3muyo_U_ENuI/edit?tab=t.0#heading=h.1lgfbw97qzhb
 
@@ -85,7 +85,7 @@ The hash-chained event log is published, so anyone can recompute the dashboard's
 
 _Append-only logger?_
 
------------------------
+## observer app
 What it is: a website that follows the audit for observers. 
 
 1. It shows each ballot the audit board will read, with its imprinted ID large and the votes the county's CVR recorded for it. As the board reads each ballot, the observer taps to record a match or types what they heard instead. 
@@ -100,3 +100,34 @@ Behind the scenes it also:
 - flags any manifest or CVR that changes after the roll, as La Plata's did in July
 
 The practice data is the real, public July 2026 primary data: La Plata (127 ballots), Morgan (87) and Weld (316).
+
+## Plan
+
+We could reproduce the Corla results without unredacted CVRs in the following sense: 
+
+0. generalCanonicalFile + contestRound1File gives canonical contests and choice names
+1. tabulateCountyFile gives us reported vote counts by county (but not ncards !!). _trusting the reported counts_
+2. manifests give us total cards in each county. _trusting the manifests_
+3. For each round:
+   1. contestRoundFile gives ncards, reported margin in the county for targeted contests. _trusting the reported margin and ncards_.
+   2. contestSelection gives Corla sampling sequence; manifests + hash -> verify Corla sequence
+   3. mvrComparisonFile shows us both the cvr and the mvr of samples -> verify Corla risk calculation
+
+_In this scenario we would be trusting tabulateCountyFile, contestRoundFile, manifests, and mvrComparisonFile._
+
+If we have properly redacted CVRs, we could 
+* validate vote counts
+* validate unredacted sample cvrs
+* If we had the audit observer's results, we could verify the sample mvrs.
+
+_We are still trusting manifests._
+
+Limitations: We are operating within the limits of Cora's sampling, which targets only ~10% of contests, and none of the multicounty contests.
+
+What could Rlauxe add:
+
+* Alternative sample by style, compare contests' risk limits and nmvrs.
+* Allow choosing what contest to audit, and at what risk limit.
+* Both counties and state could participate in choosing contests.
+* Run the audit with error rates the same as those empirically found with Corla.
+* Show distribution of results, so that the variance is clear.

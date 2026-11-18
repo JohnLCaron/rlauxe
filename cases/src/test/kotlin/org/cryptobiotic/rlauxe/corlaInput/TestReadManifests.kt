@@ -7,7 +7,12 @@ import kotlin.test.assertNotNull
 class TestReadManifests {
 
     @Test
-    fun testReadManifests() {
+    fun testReadOneManifest() {
+        testReadManifests(Statewide2026General())
+    }
+
+    @Test
+    fun testReadAllManifests() {
         testReadManifests(Statewide2020General())
         testReadManifests(Statewide2022Primary())
         testReadManifests(Statewide2023Coordinated())
@@ -16,6 +21,7 @@ class TestReadManifests {
         testReadManifests(Statewide2026Primary())
         testReadManifests(Statewide2026PMerged())
         testReadManifests(Statewide2026PwithCvrs(), 4, 191429)
+        testReadManifests(Statewide2026General())
     }
 
     fun testReadManifests(input: StatewideInput, expectCounties: Int? = null, expectCards: Int? = null) {

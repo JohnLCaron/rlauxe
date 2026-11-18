@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corlaCounty.createCorlaCountyElection
-import org.cryptobiotic.rlauxe.corlaInput.CountyInput2026
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput2026p
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020Redacted
 import org.cryptobiotic.rlauxe.persist.AuditRecord
@@ -50,7 +50,7 @@ class CorlaCountyElections {
     @Test
     fun createBoulder26p() {
         val stateInput = Statewide2026PwithCvrs()
-        val countyInput = CountyInput2026("Boulder")
+        val countyInput = CountyInput2026p("Boulder")
 
         createCorlaCountyVariants("$cases/corlaCounty/boulder26p",
             countyInput,
@@ -105,7 +105,7 @@ class CorlaCountyElections {
     @Test
     fun createLaPlata26p() {
         val stateInput = Statewide2026PwithCvrs()
-        val countyInput = CountyInput2026("La Plata")
+        val countyInput = CountyInput2026p("La Plata")
 
         createCorlaCountyVariants("$cases/corlaCounty/laplata26p",
             countyInput,
@@ -116,7 +116,7 @@ class CorlaCountyElections {
     @Test
     fun createMorgan26p() {
         val stateInput = Statewide2026PwithCvrs()
-        val countyInput = CountyInput2026("Morgan")
+        val countyInput = CountyInput2026p("Morgan")
         createCorlaCountyVariants("$cases/corlaCounty/morgan26p",
             countyInput,
             stateInput,
@@ -126,7 +126,7 @@ class CorlaCountyElections {
     @Test
     fun createWeld26p() {
         val stateInput = Statewide2026PwithCvrs()
-        val countyInput = CountyInput2026("Weld")
+        val countyInput = CountyInput2026p("Weld")
         createCorlaCountyVariants("$cases/corlaCounty/weld26p",
             countyInput,
             stateInput,

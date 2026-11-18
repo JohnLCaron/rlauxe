@@ -1,16 +1,14 @@
-package org.cryptobiotic.rlauxe.corla
+package org.cryptobiotic.rlauxe.boulder
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import java.io.File
-import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
-import java.nio.charset.Charset
 
-// Parse the 2024GeneralPrecinctLevelResults.csv file
+// Parse the 2024GeneralPrecinctLevelResults.csv file.
+// Is this from Boulder ??
 
 data class ContestChoice(val choice: String, val totalVotes: Int)
 

@@ -2,7 +2,10 @@ package org.cryptobiotic.rlauxe.auditcenter
 
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
+import org.cryptobiotic.rlauxe.corlaInput.compareLists
+import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 // compare two sources of StatewideInput supposedly identical
 class CompareContestInput {
@@ -73,6 +76,35 @@ class CompareContestInput {
             mvr1.stylesByCounty.map { it.countyName },
             mvr2.stylesByCounty.map { it.countyName },
         )
+    }
+
+    @Test
+    fun compareCountyRounds() {
+        val countyRound1 = readColoradoContestRoundCsv("$auditcenter/2020/general/round_1/contest.csv")
+        val countyRound2 = readColoradoContestRoundCsv("$auditcenter/2020/general/round_2/contest.csv")
+        val countyRound3 = readColoradoContestRoundCsv("$auditcenter/2020/general/round_3/contest.csv")
+
+        println("compare contestRound contest names")
+        compareLists(
+            countyRound1.map { it.key },
+            countyRound3.map { it.key },
+        )
+        compareLists(
+            countyRound1.map { it.key },
+            countyRound2.map { it.key },
+        )
+
+        countyRound1.forEach { (contestName, round1) ->
+            val round2 = countyRound2[contestName]!!
+            val round3 = countyRound3[contestName]!!
+            if (round1.audited_sample_count != round2.audited_sample_count || round1.audited_sample_count != round3.audited_sample_count) {
+                println("$contestName 1=${round1.audited_sample_count} 2=${round2.audited_sample_count} 3=${round3.audited_sample_count}")
+                println(round1)
+                println(round2)
+                println(round3)
+                println()
+            }
+        }
     }
 }
 

@@ -218,3 +218,103 @@ After observer did all 5 ballots, there didnt seem to be an "exit", or "all done
 7. Data Map: umm seems ok?
 8. Seed: already done
 9. Extracts: Enter 19 "county sample count" (from actual 2020 election). Choose "Build an Extract". **Error: "the prediction has no draws in Morgan"** Stuck on this.
+===================================================
+### 11/16/26
+
+https://github.com/nealmcb/anonymize_cvr/blob/main/docs/QUICKSTART.md
+
+Download anonymize_cvr.py from the release page:
+
+https://github.com/nealmcb/anonymize_cvr/releases/latest
+
+* goes to https://github.com/nealmcb/anonymize_cvr/releases/tag/v0.4.0
+* Put "what changed" into Release note link for this version. This document just for downloading
+* anonomize_cvr.py link points to https://github.com/nealmcb/anonymize_cvr/releases/download/v0.4.0/anonymize_cvr.py. 
+* standard thing is to go to Download page, perhaps put version on that download name, since there may already be a file with that name.
+* Checking the file you downloaded with sha: give instructions for Mac and Linux. Repeated here and in QUICKSTART
+* "See docs/RELEASE.md for checking the signatures." consolidate in one place, probably here, so they dont have to be jumping all over.
+
+sha256sum anonymize_cvr.py
+0bfb5f5381c00223553299f51f0e4ad5eaa36bb03d8d09c882f5799715ea0971  anonymize_cvr.py
+
+from SHA256SUMS
+0bfb5f5381c00223553299f51f0e4ad5eaa36bb03d8d09c882f5799715ea0971  anonymize_cvr.py
+
+what is SHA256SUMS.asc ? is that standard file extendion for PGP ?
+
+3. Start it
+
+linux: in Properties, choose "Executable as Program". 
+Then Right-click "Run as Program".
+
+Shell message:
+
+"No command-line arguments were given, so the graphical interface was requested,
+but tkinter is not available: No module named 'tkinter'.
+Install tkinter (for example the python3-tk package), or run anonymize_cvr.py
+from the command line; try --help for the options.
+"
+
+sudo apt update
+sudo apt install python3-tk
+
+Then Right-click "Run as Program".
+
+Increate Tk window size, some of the text is obscured [here](screenshots/tk1.png)
+check boxes too small [here](screenshots/tk2.png)
+Consider leaving off the style column option.
+In the report, put DONE or FINISHED at the end.
+
+5. Redact
+
+"Publish the copy you upload to the RLA tool, which leaves out the CountingGroup column. That column shows how each ballot was cast (by mail, in person), and can identify a voter."
+
+to the RLA tool -> to the SOS ??
+That column shows how each ballot was cast (by mail, in person), and can identify a voter. -> That column shows how each ballot was cast (by mail, in person), which can identify a voter.
+
+Why not write the file anyway, and use that?
+
+6. Excel
+
+Don't open the redacted CVR in Excel and save it again: Excel can silently change ballot IDs such as 3-19-7 into dates (3/19/2007), damaging the file. ->
+
+You can open in Excel to look at it, but be sure not to change it or save it. Public verifiers need the redacted file as it was written. Even if you dont change it, 
+Excel can silently change ballot IDs such as 3-19-7 into dates (3/19/2007), damaging the file.
+
+
+Add instructions to run verify
+
+> verify_redaction.py /home/joncifer/rla/cases/corla/2026/cvrs/Morgan-unredact.csv /home/joncifer/rla/cases/corla/2026/cvrs/Morgan-unredact-redacted.csv
+
+2 vote column(s) in 1 contest(s) say "Redacted" in the aggregation line; their totals are unknown and are not compared, and every ballot row must leave them empty:
+'Buffalo School District RE-4J Referred Ballot Issue 5A (Vote For=1)'
+Verification passed: 20,870 rows checked, all known vote totals match.
+
+Note that we do have their vote totals from the reported totals.
+
+=============================
+
+CVR upload
+
+on status of Upload Morgan-CVR_Export_20261113104631-redacted.csv:
+
+Rows read  20871
+Ballots grouped  20820    ->  Rows unredacted
+Rows already redacted  50 ->  Rows redacted
+Aggregate rows  1
+
+Seed
+
+Enter the seed again; A new entry replaces the seed in effect; a different value is flagged as a change.
+
+seems kind of dangerous..
+
+
+
+
+
+
+
+
+
+

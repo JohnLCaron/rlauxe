@@ -42,7 +42,7 @@ fun sampleFastCvrsFromRecord(auditRecord: AuditRecord, wantNmvrs: Map<Int, Int>,
 }
 
 // wantNmvrs: contestId -> wantCards
-// run ntrials to get a distribution
+// run ntrials, return distribution of nmvrs
 fun sampleCountyCvrs(cvrs: List<SamplingCardIF>, wantNmvrs: Map<Int, Int>, ntrials: Int): List<Int> {
     val random = Random.Default
     val mcvrs = cvrs.toMutableList()

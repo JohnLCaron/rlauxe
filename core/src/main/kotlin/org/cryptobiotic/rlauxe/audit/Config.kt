@@ -302,7 +302,7 @@ data class ContestSampleControl(
     val minSize: Int? = 10, // do not audit contests with Nc less than this
 
     //// consistentSampling: contestRound.status, depends on having estimation
-    val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / Npop) greater than this
+    val maxSamplePct: Double = 0.25, // do not audit contests with (estimated nmvrs / Npop) greater than this
     val contestSampleCutoff: Int? = null, // max number of cvrs for any one contest, set to null to use all
     val auditSampleCutoff: Int? = null, // max number of cvrs in the audit, set to null to use all
 

@@ -87,7 +87,8 @@ fun estSampleSize(Npop: Int, bet:Double, noerror: Double, alpha: Double): Int {
         val mj = populationMeanIfH0(N = Npop, withoutReplacement = true, tracker)
         val payoff = 1.0 + bet * (noerror - mj)
         Twor *= payoff
-        if (Twor >= Tneeded) return n
+        if (Twor >= Tneeded)
+            return n
     }
     return 0
 }
@@ -107,19 +108,6 @@ fun estRisk(Npop: Int, bet:Double, noerror: Double, nsamples: Int): Double {
     val tracker = TrackerImpl()
     var Twor = 1.0
     repeat (nsamples) {
-        tracker.update(noerror)
-        val mj = populationMeanIfH0(N = Npop, withoutReplacement = true, tracker)
-        val payoff = 1.0 + bet * (noerror - mj)
-        Twor *= payoff
-    }
-    return 1.0/Twor
-}
-
-fun estRiskOld(Npop: Int, bet:Double, noerror: Double, nsamples: Int): Double {
-    val tracker = TrackerImpl()
-    var Twor = 1.0
-    for (idx in 0..nsamples) { // this does nsamples+1 samples
-        val n = idx + 1 // not used
         tracker.update(noerror)
         val mj = populationMeanIfH0(N = Npop, withoutReplacement = true, tracker)
         val payoff = 1.0 + bet * (noerror - mj)

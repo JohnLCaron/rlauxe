@@ -1,10 +1,7 @@
-package org.cryptobiotic.rlauxe.corla
+package org.cryptobiotic.rlauxe.auditcenter
 
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
-import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
-import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
-import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
 import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
@@ -13,39 +10,60 @@ import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.math.abs
 import kotlin.test.Test
 
-class TestReadColoradoCsvFiles {
+// targetedContests.csv
+// compare targetedContests with tabulateCounty.csv
+// compare targetedContests with contestRound, eg round_1/contest.csv
+
+class TestReadTargetedContests {
     val input: StatewideInput = Statewide2024General()
 
-    // data class ResultsReportContest(
-    //        val contestName: String,
-    //        val targeted: Boolean,
-    //        val winner: String,
-    //        val risk: Double,
-    //        val margin: Double,
-    //        val mvrCount: Int,  // "audited sample count"
-    //        val ballotCount: Int, // "ballot count"
-    //        val voteMargin: Int, // test winner - loser
-    //        val winnerVotes: Int,
-    //        val loserVotes: Int,
-    //        val totalVotes: Int, // just the sum of the winner and loser
-    //    )
+    // data class TargetedContestsCsv(
+    //    val countyName: String,
+    //    val contestName: String,
+    //    val nwinners: Int,
+    //    val lowestWinner: Int,
+    //    val highestLoser: Int,
+    //    val voteMargin: Int,
+    //    val dilutedMargin: Double,
+    //    val riskLimit: Double,
+    //    val estimatedSamplesToAudit: Int,
+    //    val numberOfCvrs: Int,
+    //)
 
     @Test
-    fun readResultsReportContest() {
-        val filename = "src/test/data/corla/2024audit/round1/ResultsReportSummary.csv"
-        val contests = readResultsReportContest(filename) { it }
-        println("read ${contests.size} contests from $filename")
-        println("\n${trunc("contest", -50)} margin, mvrCount, ballotCount,")
+    fun readTargetedContests2026() {
+        val filename = "/home/joncifer/rla/cases/corla/2026/cvrs/2026GeneralRLAContestList.csv"
+        val targets = readTargetedContestsCsv(filename) { it }
+        println()
+        println("${TargetedContestsCsv.header}, calcNeeded, diff")
+        targets.forEach {
+            val noerror = noerror(it.dilutedMargin / 100, 1.0)
+            val calcNeeded = estSampleSizeStandardBet(it.numberOfCvrs, noerror, it.riskLimit / 100)
+            println("$it,     ${nfn(calcNeeded,4)},  ${it.estimatedSamplesToAudit - calcNeeded}")
+        }
+        println()
+        println("totalSamples=${targets.sumOf { it.estimatedSamplesToAudit } } totalCvrs=${targets.sumOf { it.numberOfCvrs }}")
+        println("read ${targets.size} targetedContests from $filename")
 
-        contests.sortedBy { it.contestName }.forEach {
-            val star = if (it.targeted) "*" else " "
-            print("${trunc("$star${it.contestName}", -50)}   ${trunc(dfn(it.margin, 2), 4)}, ")
-            println("${nfn(it.mvrCount, 7)},    ${nfn(it.ballotCount, 7)},")
+        println()
+        println("${TargetedContestsCsv.header}, calcNeeded, diff")
+        targets.sortedBy{ it.dilutedMargin }.forEach {
+            val noerror = noerror(it.dilutedMargin / 100, 1.0)
+            val calcNeeded = estSampleSizeStandardBet(it.numberOfCvrs, noerror, it.riskLimit / 100)
+            println("$it,     ${nfn(calcNeeded,4)},  ${it.estimatedSamplesToAudit - calcNeeded}")
         }
     }
 
+    // El Paso, Representative to the 120th United States Congress - District 5        , 1,  140713,  127946,  12767,   0.0222,   3.0,     327,    566056,      327,  0
+    // Arapahoe, Arapahoe County Commissioner - District 2                             , 1,   31327,   19435,  11892,   0.0278,   3.0,     262,    105986,      260,  2
+    // Jefferson, State Senator - District 20                                          , 1,   50117,   33081,  17036,   0.0301,   3.0,     242,    174578,      241,  1
+
+    // from Colorado Election Results:
+    // congress 5: Crank = 141,984; Killin = 157,799; vote margin = 15815, pop = 566056 what is ncards?
+    // state senate 20: Mancuso = 36,535, Lieder = 54,579, diff = 18044, pop = 174578
+
     @Test
-    fun readTargetedContests() {
+    fun readTargetedContests2024() {
         val filename = "src/test/data/corla/2024audit/targetedContests.csv"
         val targets = readTargetedContestsCsv(filename) { it }
         println()
@@ -98,7 +116,6 @@ class TestReadColoradoCsvFiles {
         println()
     }
 
-
     @Test
     fun compareTabulateCountyAndRoundContest() {
         // use targetedContests only for the county and contest name
@@ -107,8 +124,6 @@ class TestReadColoradoCsvFiles {
             { it })
 
         val roundContests = input.roundContests()
-
-        val contestTabsByCounty = input.contestTabsAllCounties()
         val countyTabAllContests: Map<String, CountyTabAllContests> = input.countyTabsAllContests()
 
         println()

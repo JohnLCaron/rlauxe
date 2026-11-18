@@ -2,11 +2,10 @@ package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.BatchCountComparison
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
-import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import kotlin.test.Test
 
-class CheckManifests {
+class CheckBatchCountAgainstManifests {
     val check = "$auditcenter/2020/general/batch_count_comparison.csv"
 
     @Test

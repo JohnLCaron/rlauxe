@@ -1,14 +1,10 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
-import org.cryptobiotic.rlauxe.corlaInput.Statewide2023Coordinated
-import org.cryptobiotic.rlauxe.corlaInput.Statewide2025Coordinated
-import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import kotlin.test.Test
 
 // check name consistency in StatewideInput
 class ShowStatewideInput {
-    val input: StatewideInput = Statewide2020General()
+    val input: StatewideInput = Statewide2026General()
     val canonical = input.canonicalContests()
 
     @Test
@@ -19,7 +15,7 @@ class ShowStatewideInput {
 
     @Test
     fun showCanonicalCounties() {
-        val counties = canonical.values.map { it.counties }.flatten().toSet().toList().sorted()
+        val counties = input.counties()
         counties.forEach { println( it )}
         println("there are ${counties.size} auditcenter counties")
 
@@ -96,7 +92,7 @@ class ShowStatewideInput {
 
     @Test
     fun checkCanonicalNames() {
-        CheckCanonicalNames(input)
+        CheckCanonicalNames(Statewide2026General())
     }
 
 }

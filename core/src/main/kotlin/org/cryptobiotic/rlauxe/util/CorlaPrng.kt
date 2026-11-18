@@ -32,6 +32,7 @@ class CorlaPrng(
 ) {
     private val sha256_digest = MessageDigest.getInstance("SHA-256")!!
     private var my_count = 0
+    val duplicates = mutableListOf<Int>()
 
     /** The maximum index that can be generated without replacement. */
     private val my_maximum_index: Int
@@ -58,7 +59,11 @@ class CorlaPrng(
         val in_range = int_output.mod(BigInteger.valueOf((my_maximum - my_minimum + 1).toLong()))
         val pick = my_minimum + in_range.intValueExact()
 
-        if (!prnIds.add(pick)) return next()
+        if (!prnIds.add(pick)) {
+            println("duplicate pick $pick")
+            duplicates.add(pick)
+            return next()
+        }
         return pick
     }
 

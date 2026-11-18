@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.corla
+package org.cryptobiotic.rlauxe.auditcenter
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
@@ -42,9 +42,9 @@ data class TargetedContestsCsv(
 ) {
     override fun toString() = buildString {
         val ss = "$countyName, $contestName"
-        append("${trunc(ss, -60)}, $nwinners, ${nfn(lowestWinner, 7)}, ${nfn(highestLoser, 7)}, ${nfn(voteMargin, 6)}, ")
+        append("${trunc(ss, -contestWidth)}, $nwinners, ${nfn(lowestWinner, 7)}, ${nfn(highestLoser, 7)}, ${nfn(voteMargin, 6)}, ")
         append("  ${trunc(dfn(.01*dilutedMargin, 4), 6)},   ${dfn(riskLimit, 1)}, ")
-        append("${nfn(estimatedSamplesToAudit,7)}, ${nfn(numberOfCvrs, 7)}")
+        append("${nfn(estimatedSamplesToAudit,7)}, ${nfn(numberOfCvrs, 9)}")
     }
 
     fun short() = buildString {
@@ -53,7 +53,8 @@ data class TargetedContestsCsv(
 }
 
     companion object {
-        val header = "${trunc("contestName, countyName", -53)}, nwinners,  winner, loser, voteMargin, margin, risk%, nsamples, cvrs"
+        val contestWidth = 80
+        val header = "${trunc("contestName, countyName", contestWidth-7)}, nwinners,  winner, loser, voteMargin, margin, risk%, nsamples,   cvrs"
     }
 }
 

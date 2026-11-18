@@ -7,19 +7,17 @@ class TestReadCountyCvrs {
 
     @Test
     fun testReadMorganRedactedCvrs() {
-        val filename1 = "CVR_Export_20261113104631- Redacted- No balance.csv"
-        val filename2 = "CVR_Export_20261113104631-Redacted.csv"
-        val filename3 = "CVR_Export_20261113104631-Redacted-v0.4-rebuilt.csv"
-        val corlaCvrs = readCountyCvrs("/home/joncifer/Downloads/$filename3")
-        println(filename3)
+        val filename = "/home/joncifer/rla/cases/corla/2026/cvrs/CVR_Export_20261113104631-Morgan-redacted.csv"
+        val corlaCvrs = readCountyCvrs(filename)
+        println(filename)
         println(corlaCvrs.show())
         println(corlaCvrs.redaction().show(corlaCvrs.schema))
 
-        val output = "/home/joncifer/Downloads/Morgan.anon.csv"
+        /* val output = "/home/joncifer/Downloads/Morgan.anon.csv"
         val anon = Anonomicer(corlaCvrs) // , styleOnly=styleOnly)
         anon.writeRedactedFile(output)
         anon.rpt.writeTo("/home/joncifer/Downloads/Morgan-Report.txt")
-        println("write and verify Redaction to $output")
+        println("write and verify Redaction to $output") */
     }
 
     @Test
@@ -39,10 +37,11 @@ class TestReadCountyCvrs {
 
     @Test
     fun testPythonOutput() {
-        val filename = "/home/joncifer/rla/temp/python/Morgan-Redacted.csv"
+        val filename = "/home/joncifer/rla/cases/corla/2026/cvrs/Morgan-unredact-redacted.csv"
         val corlaCvrs = readCountyCvrs(filename)
         println(filename)
         println(corlaCvrs.show())
         println(corlaCvrs.redaction().show(corlaCvrs.schema))
     }
+    // verify_redaction.py /home/joncifer/rla/cases/corla/2026/cvrs/Morgan-unredact.csv /home/joncifer/rla/cases/corla/2026/cvrs/Morgan-unredact-redacted.csv
 }

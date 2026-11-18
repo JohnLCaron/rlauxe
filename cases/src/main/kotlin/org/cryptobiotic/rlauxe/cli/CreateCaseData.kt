@@ -57,7 +57,7 @@ object CreateCaseData {
         val sampleType by parser.option(
             ArgType.String, // enum ??
             shortName = "sampling",
-            description = "style | uniform" // TODO reimplement uniform
+            description = "style | uniform" // TODO reimplement uniform? not sure we want to support that
         )
 
         try {

@@ -7,7 +7,7 @@ class TestReadCountyCvrs {
 
     @Test
     fun testReadMorganRedactedCvrs() {
-        val filename = "/home/joncifer/rla/cases/corla/2026/cvrs/CVR_Export_20261113104631-Morgan-redacted.csv"
+        val filename = "/home/joncifer/rla/cases/corla/2026/cvrs/Morgan-CVR_Export_20261113104631-redacted.csv"
         val corlaCvrs = readCountyCvrs(filename)
         println(filename)
         println(corlaCvrs.show())

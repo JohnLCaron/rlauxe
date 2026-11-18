@@ -80,7 +80,6 @@ class CorlaStateElections {
     @Test
     fun create2020() {
         val stateInput = Statewide2020General()
-
         createCorlaStateElection(
             topdir = "$cases/corla/2020",
             stateInput=stateInput,

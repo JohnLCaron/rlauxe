@@ -18,7 +18,7 @@ data class RaireContestUnderAuditJson(
         val raireContest: ContestIFJson,
         val rassertions: List<RaireAssertionJson>,
         val contestUA: ContestUnderAuditJson,
-        val hasStyle: Boolean = true
+        val hasStyle: Boolean? = null
     )
 
 fun RaireContestWithAssertions.publishRaireJson() = RaireContestUnderAuditJson(
@@ -34,7 +34,6 @@ fun RaireContestUnderAuditJson.import(): RaireContestWithAssertions {
     val result = RaireContestWithAssertions(
         raireContest as IrvContest,
         this.rassertions.map { it.import() },
-        hasStyle,
         contestUA.Npop,
     )
     result.clcaAssertions = contestUA.clcaAssertions // TODO wonky

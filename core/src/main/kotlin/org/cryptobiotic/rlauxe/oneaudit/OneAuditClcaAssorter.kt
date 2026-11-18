@@ -98,7 +98,7 @@ class OneAuditClcaAssorter(
     info: ContestInfo,
     assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs
     val poolAverages: AssortAvgsInPools,
-) : ClcaAssorter(info, assorter, false) { // always use diluted margin
+) : ClcaAssorter(info, assorter) {
 
     override fun classname() = this::class.simpleName
 
@@ -122,7 +122,7 @@ class OneAuditClcaAssorter(
             return 0.0
         }
 
-        val overstatement = overstatementPoolError(mvr, poolAverage) // ωi
+        val overstatement = overstatementPoolError(mvr, poolAverage, cvr.hasStyle()) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
 
         val result =  tau * noerror()  // Bi eq (7)
@@ -134,11 +134,11 @@ class OneAuditClcaAssorter(
         return result
     }
 
-    fun overstatementPoolError(mvr: CvrIF, poolAvgAssortValue: Double): Double {
+    fun overstatementPoolError(mvr: CvrIF, poolAvgAssortValue: Double, hasStyle: Boolean): Double {
         val mvr_assort =
             if (mvr.phantom()) 0.0
             else if (!mvr.hasContest(info.id)) {
-                if (useReportedMargin) 0.0 else 0.5
+                if (hasStyle) 0.0 else 0.5
             }
             else this.assorter.assort(mvr, usePhantoms = false)
 

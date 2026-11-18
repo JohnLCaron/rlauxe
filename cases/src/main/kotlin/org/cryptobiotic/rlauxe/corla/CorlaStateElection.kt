@@ -38,7 +38,7 @@ class CorlaStateElection(
     val topdir: String,
     val stateInput: StatewideInput,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
-    val hasStyle: Boolean, // TODO
+    // val hasStyle: Boolean, // TODO
     variantEnum: ElectionVariantEnum,
 ): ElectionBuilder {
     val variant = ElectionVariant(variantEnum)
@@ -212,7 +212,7 @@ class CorlaStateElection(
         // TODO IRV need Irv tabs
         val npopMap = tabulateNpops(countyPops)
 
-        contestsUA = makeContestWAs(contests, npopMap, emptyMap(), statePools, variant, hasStyle)
+        contestsUA = makeContestWAs(contests, npopMap, emptyMap(), statePools, variant)
 
         // stick all the phantoms at the end? or put them by county ??
         // if (variant.phantoms) println("phantomsByContest = ${statePhantoms}")
@@ -261,7 +261,6 @@ fun makeCountyElections(
     topdir: String,
     stateInput: StatewideInput,
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
-    hasStyle: Boolean, // TODO
     variantEnum: ElectionVariantEnum,
 ) {
     val contestBuilder = CorlaStateContestInfoBuilder(stateInput)
@@ -270,11 +269,11 @@ fun makeCountyElections(
         val countyInput = stateInput.corlaCountyInput(countyName)
         requireNotNull(countyInput)
         val countyElection = if (countyInput.hasCvrs()) {
-                CorlaCountyElection(countyInput, stateInput, contestBuilder, mvrSource, hasStyle, variantEnum)
+                CorlaCountyElection(countyInput, stateInput, contestBuilder, mvrSource, variantEnum)
         } else {
             logger.info { "county $countyName doesnt have cvrs"}
             // TODO can we still build it without the cvrs ??
-            CorlaCountyElectionNoCvrs(countyInput, stateInput, contestBuilder, mvrSource, hasStyle)
+            CorlaCountyElectionNoCvrs(countyInput, stateInput, contestBuilder, mvrSource)
         }
         createElectionRecord(countyElection, topdir = countyDir)
         val countyPublisher = Publisher(countyDir)
@@ -303,7 +302,6 @@ fun createCorlaStateElection(
     creation: AuditCreationConfig,
     roundConfig: AuditRoundConfig,
     mvrSource: MvrSource = MvrSource.testPrivateMvrs,
-    hasStyle: Boolean = true, // TODO wtf ??
     variant: ElectionVariantEnum,
     alreadyMadeCounties: Boolean = false,
  ) {
@@ -315,10 +313,10 @@ fun createCorlaStateElection(
     validateOutputDir(Path(topdir))
     if (!alreadyMadeCounties) {
         // clearDirectory(Path(topdir))
-        makeCountyElections(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
+        makeCountyElections(topdir, stateInput, mvrSource = mvrSource, variant)
     }
 
-    val election = CorlaStateElection(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
+    val election = CorlaStateElection(topdir, stateInput, mvrSource = mvrSource, variant)
 
     createElectionRecord(election, topdir = topdir)
 

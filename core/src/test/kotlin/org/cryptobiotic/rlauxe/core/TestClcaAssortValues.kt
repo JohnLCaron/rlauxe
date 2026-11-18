@@ -28,7 +28,7 @@ class TestClcaAssortValues {
         assertNotEquals(assorter2, assorter)
         assertNotEquals(assorter2.hashCode(), assorter.hashCode())
 
-        val cassorter = ClcaAssorter(info, assorter, true)
+        val cassorter = ClcaAssorter(info, assorter)
         println(cassorter)
 
         val winner = Cvr("winner", mapOf(0 to intArrayOf(0)))
@@ -79,7 +79,7 @@ class TestClcaAssortValues {
         val contest =  Contest(info, votes, 2000, Ncast=2000)
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
         println("assorter margins = ${assorter.reportedMargin} ${assorter.dilutedMargin}")
-        val cassorter = ClcaAssorter(info, assorter, true)
+        val cassorter = ClcaAssorter(info, assorter,) // TODO set hasStyle on card
 
         val winner = Cvr("winner", mapOf(0 to intArrayOf(0)))
         val loser =  Cvr("loser", mapOf(0 to intArrayOf(1)))
@@ -91,7 +91,7 @@ class TestClcaAssortValues {
         println("${taus.values()} * noerror=${cassorter.noerror}")
         println("${taus.names()}")
 
-        val cassorterNo = ClcaAssorter(info, assorter, false)
+        val cassorterNo = ClcaAssorter(info, assorter)
         testAll(cassorterNo, taus, listOf(winner,other,loser, phantom), hasStyle=false)
     }
     /*
@@ -148,8 +148,8 @@ class TestClcaAssortValues {
         val votes = mapOf(0 to 1010, 1 to 990) // Map<Int, Int>
         val contest =  Contest(info, votes, 2000, Ncast=2000)
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-        val cassorter = ClcaAssorter(info, assorter, true)
-        val cassorterNo = ClcaAssorter(info, assorter, false)
+        val cassorter = ClcaAssorter(info, assorter) // TODO set hasStyle on card
+        val cassorterNo = ClcaAssorter(info, assorter)
 
         val winner = Cvr("winner", mapOf(0 to intArrayOf(0)))
         val loser =  Cvr("loser", mapOf(0 to intArrayOf(1)))
@@ -172,7 +172,7 @@ class TestClcaAssortValues {
         val triples = mutableListOf<Triple<Double, Cvr, Cvr>>()
         cvrs.forEach { cvr ->
             cvrs.forEach { mvr ->
-                val bassort = cassorter.bassort(mvr=mvr, cvr=cvr)
+                val bassort = cassorter.bassort(mvr=mvr, cvr=cvr.copy(hasStyle=hasStyle))
                 triples.add(Triple(bassort, cvr, mvr))
             }
         }
@@ -195,13 +195,13 @@ class TestClcaAssortValues {
             else cassorter.assorter.assort(mvr, usePhantoms = false)
 
         val expect = expectV(cvrAssort=cvrValue, mvrAssort=mvrValue, cassorter.assorter().upperBound())
-        val actual = cassorter.bassort(mvr=mvr, cvr=cvr) / cassorter.noerror() // hasStyle ??
+        val actual = cassorter.bassort(mvr=mvr, cvr=cvr.copy(hasStyle=hasStyle)) / cassorter.noerror() // hasStyle ??
         val tauName = taus.nameOf(expect)
         println("  ${sfn(what, 15)} tau= ${df(actual)} '${sfn(tauName,7)}')")
 
         if (expect.isNaN() && actual.isNaN()) return
         if (expect != actual) {
-            cassorter.bassort(mvr=mvr, cvr=cvr) / cassorter.noerror() // hasStyle ??
+            cassorter.bassort(mvr=mvr, cvr=cvr.copy(hasStyle=hasStyle)) / cassorter.noerror() // hasStyle ??
         }
         assertEquals( expect, actual)
     }

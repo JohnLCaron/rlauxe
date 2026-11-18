@@ -104,7 +104,7 @@ class TestConfigJson {
                     //    val sampling: Sampling = Sampling.consistent
                     //)
                     ContestSampleControl(.007, .01, 11, .44, 1111, 11111,
-                        other=mapOf("a" to "z", "1" to "9", "eich" to "I"), Sampling.uniform),
+                        other=mapOf("a" to "z", "1" to "9", "eich" to "I")),
                     // ClcaConfig(
                     //    val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
                     //    val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate

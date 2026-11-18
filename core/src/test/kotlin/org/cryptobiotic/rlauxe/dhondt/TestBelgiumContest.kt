@@ -88,9 +88,9 @@ class TestBelgiumContest {
                     assertEquals(it.dilutedMean(), hmean, 1.0e-5) // why not perfect ??
                 }
 
-                println(" margin = ${it.margin(true)}")
+                println(" margin = ${it.dilutedMargin()}")
                 println(" calcMarginFromRegVotes = ${it.calcMarginFromRegVotes(contestd.votes, contestd.Nc)}")
-                assertEquals(it.margin(true), it.calcMarginFromRegVotes(contestd.votes, contestd.Nc), doublePrecision)
+                assertEquals(it.dilutedMargin(), it.calcMarginFromRegVotes(contestd.votes, contestd.Nc), doublePrecision)
 
                 println("recountMargin = ${contestd.recountMargin(it)}")
                 println("showDifficulty = ${contestd.showAssertionDifficulty(it)}")
@@ -154,9 +154,9 @@ class TestBelgiumContest {
                     //assertEquals(assorter.dilutedMean(), hmean, doublePrecision)
                 }
 
-                println(" margin = ${assorter.margin(contestUA.hasStyle)}")
+                println(" margin = ${assorter.dilutedMargin()}")
                 println(" calcMarginFromRegVotes = ${assorter.calcMarginFromRegVotes(contestd.votes, contestd.Nc)}")
-                assertEquals(assorter.margin(contestUA.hasStyle), assorter.calcMarginFromRegVotes(contestd.votes, contestd.Nc), doublePrecision)
+                assertEquals(assorter.dilutedMargin(), assorter.calcMarginFromRegVotes(contestd.votes, contestd.Nc), doublePrecision)
 
                 println("recountMargin = ${contestd.recountMargin(assorter)}")
                 println("showDifficulty = ${contestd.showAssertionDifficulty(assorter)}")

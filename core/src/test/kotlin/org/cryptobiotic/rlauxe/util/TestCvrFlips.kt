@@ -24,7 +24,7 @@ class TestCvrFlips {
         val cassorter = minClcaAssertion.cassorter
         val assorter = cassorter.assorter
         val calcAssorter = assorter.calcAssorterMargin(0, cvrs)
-        println("margin = $margin margin=${assorter.margin(contestUA.hasStyle)} calcAssorterMargin=${calcAssorter}")
+        println("margin = $margin margin=${assorter.dilutedMargin()} calcAssorterMargin=${calcAssorter}")
 
         var p2o = .01
         var mvrs = makeFlippedMvrs(cvrs, cvrs.size, p2o, null)
@@ -78,7 +78,7 @@ class TestCvrFlips {
         val cassorter = minClcaAssertion.cassorter
         val assorter = cassorter.assorter
         val calcAssorter = assorter.calcAssorterMargin(0, cvrs)
-        println("margin = $margin reportedMargin=${assorter.margin(contestUA.hasStyle)} calcAssorterMargin=${calcAssorter}")
+        println("margin = $margin reportedMargin=${assorter.dilutedMargin()} calcAssorterMargin=${calcAssorter}")
 
         var p2o = .01
         var mvrs = makeFlippedMvrs(cvrs, cvrs.size, p2o, null)

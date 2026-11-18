@@ -159,7 +159,7 @@ class TestCvrFormatting {
     @Test
     fun testFremontEncoding() {
         val counties = listOf("Fremont", "Pitkin", "Jefferson", "Sedgwick")
-        val testfile = "/home/stormy/dev/github/rla/anonymize_cvr/2020cvrs/Fremont.csv"
+        val testfile = "/home/stormy/dev/github/rla/anonymize_cvr/2020/cvrs/Fremont.csv"
         println(testfile)
 
         // UnicodeDecodeError: 'utf-8' codec can't decode byte 0xf1 in position 4008: invalid continuation byte

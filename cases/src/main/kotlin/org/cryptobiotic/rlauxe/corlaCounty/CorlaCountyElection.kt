@@ -42,7 +42,7 @@ class CorlaCountyElection(
     val stateInput: StatewideInput, // in order to do missing correctly, we need the countyTabs from stateInput,
     val stateContestInfoBuilder: CorlaStateContestInfoBuilder, // infos consistent across counties
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
-    val hasStyle: Boolean, // TODO
+    // val hasStyle: Boolean, // TODO
     variantEnum: ElectionVariantEnum, // TODO
 ): ElectionBuilder {
     val variant = ElectionVariant(variantEnum)
@@ -129,7 +129,7 @@ class CorlaCountyElection(
 
         contestsUA = makeContestWAs(
             contests, npops, emptyMap(), cardPools,
-            variant, hasStyle
+            variant
         )
     }
 
@@ -182,11 +182,11 @@ fun makeContestWAs(
     allIrvTabs: Map<Int, ContestTabulation>, // all tabs for IRV contests
     oneAuditPools: List<CardPool>,
     variant: ElectionVariant,
-    hasStyle: Boolean,
+    // hasStyle: Boolean,
 ): List<ContestWithAssertions> {
     val contestsUAs = mutableListOf<ContestWithAssertions>()
 
-    val regular = ContestWithAssertions.make(contests.filter { !it.isIrv() }, npopMap, true, hasStyle)
+    val regular = ContestWithAssertions.make(contests.filter { !it.isIrv() }, npopMap, true)
     if (variant.isOA()) setPoolAssorterAverages(regular, oneAuditPools)
     contestsUAs.addAll(regular)
 
@@ -272,7 +272,7 @@ fun createCorlaCountyElection(
     logger.info {"-------------- createCorlaCountyElection ${countyInput.electionName} in $topdir"}
 
     val stateContestBuilder = CorlaStateContestInfoBuilder(stateInput)
-    val election = CorlaCountyElection(countyInput, stateInput, stateContestBuilder, mvrSource = mvrSource, hasStyle = hasStyle, variant)
+    val election = CorlaCountyElection(countyInput, stateInput, stateContestBuilder, mvrSource = mvrSource, variant)
 
     createElectionRecord(election, topdir = topdir)
 

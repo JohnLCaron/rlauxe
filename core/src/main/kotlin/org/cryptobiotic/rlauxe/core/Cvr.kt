@@ -5,11 +5,13 @@ interface CvrIF {
     fun phantom(): Boolean
     fun poolId(): Int?
     fun hasContest(contestId: Int): Boolean // Cvr: "has contest"; AuditableCard: "may have contest"
+    fun hasStyle(): Boolean // for bassort
 
     fun votes(contestId: Int): IntArray? // contestId -> candidate ids voted for
     fun hasMarkFor(contestId: Int, candidateId: Int): Int
 }
 
+// TODO move to test only
 // core abstraction for both CVR and MVR
 // assumes that a vote is 0 or 1, so we just need the list of candidates that were voted for.
 data class Cvr(
@@ -17,6 +19,7 @@ data class Cvr(
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
     val phantom: Boolean = false,
     val poolId: Int? = null,
+    var hasStyle: Boolean = true
 ): CvrIF {
 
     init {
@@ -34,6 +37,7 @@ data class Cvr(
 
     // OA bassort() uses poolId to branch between pooled and Cvr cards
     override fun poolId() = poolId
+    override fun hasStyle() = hasStyle
 
     // Let 1candidate(bi) = 1 if ballot i has a mark for candidate, and 0 if not; SHANGRLA section 2, page 4
     override fun hasMarkFor(contestId: Int, candidateId: Int): Int {

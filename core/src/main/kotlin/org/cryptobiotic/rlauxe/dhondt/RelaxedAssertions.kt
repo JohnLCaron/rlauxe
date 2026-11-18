@@ -61,7 +61,7 @@ data class DhondtFailure(
     val alpha: Double,
     val round2: Boolean = false
 ) {
-    val noerror = assorter.noerror(true)
+    val noerror = assorter.noerror()
 
     val estSamples = estSampleSizeStandardBet(Npop, noerror, 0.05)
 
@@ -93,7 +93,7 @@ class ThresholdFailure(
     val samplesUsed: Int,
     val alpha: Double
 ) {
-    val noerror = assorter.noerror(true)
+    val noerror = assorter.noerror()
     val nmvrs = samplesUsed
 
     fun estMvrs(): Int {
@@ -121,7 +121,7 @@ class FailureFinder(val Npop: Int, val nsamples: Int, val alpha: Double) {
         val failures = mutableListOf<DhondtFailure>()
         fromAssorters.filter { it is DhondtAssorter }.forEach { assorter ->
             val dassorter = assorter as DhondtAssorter
-            val risk = estRiskStandardBet(Npop, dassorter.noerror(true), nsamples)
+            val risk = estRiskStandardBet(Npop, dassorter.noerror(), nsamples)
             if (risk > alpha) {
                 val winnerId = dassorter.winner()
                 val loserId = dassorter.loser()
@@ -141,7 +141,7 @@ class FailureFinder(val Npop: Int, val nsamples: Int, val alpha: Double) {
     fun findThresholdFailures(dcontest: DhondtContest, fromAssorters: List<AssorterIF>): MutableList<ThresholdFailure> {
         val failures = mutableListOf<ThresholdFailure>()
         fromAssorters.filter { it !is DhondtAssorter }.forEach { assorter ->
-            val risk = estRiskStandardBet(Npop, assorter.noerror(true), nsamples)
+            val risk = estRiskStandardBet(Npop, assorter.noerror(), nsamples)
             if (risk > alpha) {
                 failures.add(ThresholdFailure(dcontest, dcontest.Nc, assorter, risk, nsamples, alpha))
             }

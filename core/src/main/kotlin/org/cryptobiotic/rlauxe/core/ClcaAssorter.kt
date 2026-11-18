@@ -33,12 +33,12 @@ import kotlin.math.ln
 open class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
-    val useReportedMargin: Boolean, // aka useStyle
+    // val useReportedMargin: Boolean, // aka useStyle
     check: Boolean = true,
 ) {
     // in SHANGRLA 3.2, we have "Define v ≡ 2Āc − 1, the reported assorter margin."
     // see docs/notes/clcaNotes.md
-    val assorterMargin = if (useReportedMargin) assorter.reportedMargin() else assorter.dilutedMargin()
+    val assorterMargin = assorter.dilutedMargin()
 
     open fun classname() = this::class.simpleName
 
@@ -207,7 +207,7 @@ open class ClcaAssorter(
         //      f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
         //    )
         // if hasStyle, we use the cvr as the populations, so how did this happen?
-        if (useReportedMargin and !cvr.hasContest(info.id)) {
+        if (cvr.hasStyle() and !cvr.hasContest(info.id)) {
             //val trace = Throwable().stackTraceToString()
             //logger.error { "hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})\n$trace" }
             // TODO if we were using hasStyle in assorter.assort(), it would return 0.0 for cvr_assort, see Issue#552
@@ -227,7 +227,7 @@ open class ClcaAssorter(
         val mvr_assort =
             if (mvr.phantom()) 0.0
             else if (!mvr.hasContest(info.id)) {
-                if (useReportedMargin) 0.0 else 0.5
+                if (cvr.hasStyle()) 0.0 else 0.5
             }
             else this.assorter.assort(mvr, usePhantoms = false)
 
@@ -241,7 +241,7 @@ open class ClcaAssorter(
     }
 
     override fun toString() = buildString {
-        append("${classname()} for contest ${info.name} (${info.id}) useReportedMargin=$useReportedMargin assorterMargin=${assorterMargin}")
+        append("${classname()} for contest ${info.name} (${info.id}) assorterMargin=${assorterMargin}")
         appendLine(" noerror=${dfn(noerror, 8)}")
         appendLine("  assorter=${assorter.desc()}")
     }
@@ -252,7 +252,6 @@ open class ClcaAssorter(
         if (this === other) return true
         if (other !is ClcaAssorter) return false
 
-        if (useReportedMargin != other.useReportedMargin) return false
         if (info != other.info) return false
         if (assorter != other.assorter) return false
 
@@ -260,8 +259,7 @@ open class ClcaAssorter(
     }
 
     override fun hashCode(): Int {
-        var result = useReportedMargin.hashCode()
-        result = 31 * result + info.hashCode()
+        var result = info.hashCode()
         result = 31 * result + assorter.hashCode()
         return result
     }

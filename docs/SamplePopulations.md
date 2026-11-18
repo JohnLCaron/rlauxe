@@ -1,4 +1,16 @@
 # Sample Populations
+
+_11/18/2026_
+
+* always use diluted margin.
+* hasStyle comes from card.hasCvr else style.hasExactContests
+
+Each Card knows what its possible contests are. When we have the CVR, it is exactly those, and hasStyle = true. Otherwise its in a pool of some sort, which knows its possible contests. If all the cards in the pool has the same set of contests, then hasStyle = true, else false.
+
+To find a contest's population, read through all the cards and count how many might have that contest on it.
+A contest's Nc is the trusted upper bound. After adding phantomes it is always <= population.
+
+
 _10/20/2026_
 
 Redacted ballots may know their card style. So use it when doing the assort.

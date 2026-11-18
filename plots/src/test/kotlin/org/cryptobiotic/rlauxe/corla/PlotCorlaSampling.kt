@@ -92,7 +92,7 @@ class CompareCorlaSampling {
         auditRound.contestRounds.forEach {
             val minAssertion = it.contestUA.minAssertion()
             if (minAssertion != null) {
-                val margin = minAssertion.assorter.margin(it.contestUA.hasStyle)
+                val margin = minAssertion.assorter.dilutedMargin()
                 val noerror = it.contestUA.minNoerror()!! // TODO always valid ??
                 val haveMvrs = it.haveSampleSize
                 val estRisk = estRiskStandardBet(it.Npop, noerror, haveMvrs)

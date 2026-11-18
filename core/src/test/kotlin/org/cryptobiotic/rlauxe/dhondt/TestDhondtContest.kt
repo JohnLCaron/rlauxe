@@ -55,7 +55,7 @@ class TestDhondtContest {
         println("validVotes = ${contestd.votes.values.sum()} undervotes=${contestd.undervotes} ncvrsIF = ${cvrsIF.size}")
 
         contestd.assorters.forEach { assorter ->
-            println(" assorterif dilutedMean= ${df(assorter.dilutedMean())} dilutedMargin= ${df(assorter.margin(true))}")
+            println(" assorterif dilutedMean= ${df(assorter.dilutedMean())} dilutedMargin= ${df(assorter.dilutedMargin())}")
 
             val welford = Welford()
             cvrsIF.forEach { cvr ->
@@ -88,7 +88,7 @@ class TestDhondtContest {
                 println(" reportedMean= ${it.reportedMean()}")
                 assertEquals(it.dilutedMean(), setDilutedMean(it, contestd), doublePrecision)
 
-                assertEquals(contestd.difficulty(it), 1.0 / it.reportedMargin(), doublePrecision)
+                assertEquals(contestd.difficulty(it), 1.0 / it.dilutedMargin(), doublePrecision)
 
                 val gmean = contestd.marginInVotes(it)/contestd.Nc.toDouble()
                 println(" gmean = ${gmean}")
@@ -100,7 +100,7 @@ class TestDhondtContest {
             } else if (it is BelowThreshold) {
                 println(" dilutedMean= ${it.dilutedMean()}")
 
-                assertEquals(contestd.difficulty(it), 1.0 / it.reportedMargin(), doublePrecision)
+                assertEquals(contestd.difficulty(it), 1.0 / it.dilutedMargin(), doublePrecision)
 
                 val gmean = contestd.marginInVotes(it)/contestd.Nc.toDouble()
                 val hmean = it.h2(gmean)
@@ -110,7 +110,7 @@ class TestDhondtContest {
             } else if (it is AboveThreshold) {
                 println(" dilutedMean= ${it.dilutedMean()}")
 
-                assertEquals(contestd.difficulty(it), 1.0 / it.reportedMargin(), doublePrecision)
+                assertEquals(contestd.difficulty(it), 1.0 / it.dilutedMargin(), doublePrecision)
 
                 val gmean = contestd.marginInVotes(it)/contestd.Nc.toDouble()
                 println(" gmean = ${gmean}")
@@ -119,9 +119,9 @@ class TestDhondtContest {
                 assertEquals(it.dilutedMean(), hmean, 1.0e-5) // why not perfect ??
             }
 
-            println(" margin = ${it.margin(true)}")
+            println(" margin = ${it.dilutedMargin()}")
             println(" calcMarginFromRegVotes = ${it.calcMarginFromRegVotes(contestd.votes, contestd.Nc)}")
-            assertEquals(it.margin(true), it.calcMarginFromRegVotes(contestd.votes, contestd.Nc), doublePrecision)
+            assertEquals(it.dilutedMargin(), it.calcMarginFromRegVotes(contestd.votes, contestd.Nc), doublePrecision)
 
             println("recountMargin = ${contestd.recountMargin(it)}")
             println("showDifficulty = ${contestd.showAssertionDifficulty(it)}")

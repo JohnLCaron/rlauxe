@@ -110,7 +110,6 @@ class TestReadTabulateCounty {
             input, // in order to do missing correctly, we need the countyTabs from stateInput,
             CorlaStateContestInfoBuilder(input), // infos consistent across counties
             MvrSource.testPrivateMvrs,
-            true,
             ElectionVariantEnum.OnePool
         )
         println(cce)

@@ -29,6 +29,7 @@ val statewideInputs = listOf(
     Statewide2026Primary(),
     Statewide2026PMerged(),
     Statewide2026PwithCvrs(),
+    Statewide2026General(),
 )
 
 //////////////////////////////////////////////////////////////////////////////

@@ -66,10 +66,7 @@ class CorlaCountyElectionNoCvrs(
             cards.add(card)
         }
 
-        // TODO these arent the mvrs, this is the card manifest; mvrs must simulate the pool subtotals
-        // need to iterate over CountyCards to fill in the counts
-        // transform to canonical AuditableCards, all are in memory in cards
-        val npops = mutableMapOf<Int, Int>() // count contests' population size
+        // val npops = mutableMapOf<Int, Int>() // count contests' population size TODO where do we get this ??
         ncards = cards.size
         cardStyle = CardStyle(county, "Style", 1,allContestIds.toIntArray(), hasExactContests=false).setNcards(ncards)
 
@@ -77,7 +74,7 @@ class CorlaCountyElectionNoCvrs(
 
         contests = makeContests(stateContestInfoBuilder.infos, convertedCountyAcTabs, ncards)
 
-        contestsUA = makeContestWAs(contests, npops, emptyMap(), listOf(cardPool), variant, hasStyle)
+        contestsUA = makeContestWAs(contests, emptyMap(), emptyMap(), listOf(cardPool), variant, hasStyle)
     }
 
     override fun electionInfo() =

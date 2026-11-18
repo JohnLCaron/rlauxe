@@ -42,7 +42,7 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInput (
     override fun corlaCountyInput(countyName: String): CountyInput? {
         return when (countyName) {
             "Boulder" -> Boulder26PInput()
-            "La Plata", "Morgan", "Weld" -> CountyInput2026(countyName)
+            "La Plata", "Morgan", "Weld" -> CountyInput2026p(countyName)
             else -> null
         }
     }
@@ -191,7 +191,7 @@ class Statewide2026PwithCvrs(ac:String?=auditcenter): StatewideInput (
     }
 }
 
-class CountyInput2026(val county: String): CountyInput {
+class CountyInput2026p(val county: String): CountyInput {
     override val electionName = "$county-2026p"
     override val countyName = county
     val countyZ = county.replace("\\s".toRegex(), "")

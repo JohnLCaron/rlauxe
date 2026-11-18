@@ -72,7 +72,7 @@ open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput(
     override fun corlaCountyInput(countyName: String): CountyInput? {
         return when (countyName) {
             "Boulder" -> Boulder26PInput()
-            "La Plata", "Morgan", "Weld" -> CountyInput2026(countyName)
+            "La Plata", "Morgan", "Weld" -> CountyInput2026p(countyName)
             else -> CountyInputNoCvrs(countyName, manifestFile(countyName), year)
         }
     }

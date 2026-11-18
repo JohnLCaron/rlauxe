@@ -63,9 +63,15 @@ data class CorlaContestRoundCsv(
     val winners: String,
     val minMargin: Int,
     val riskLimit: Double,  // TODO use this?
+    val audited_sample_count: Int,
+    val two_vote_over_count: Int,
+    val one_vote_over_count: Int,
+    val one_vote_under_count: Int,
+    val two_vote_under_count: Int,
+    // val disagreement_count: Int,
     val gamma: Double,      // and this ?? = 1.03905000
     val optimisticSamplesToAudit: Int, // check if these ever differ
-    val estimatedSamplesToAudit: Int,
+    // val estimatedSamplesToAudit: Int,
 )
 
 class CorlaContestRoundAccum(val round1: CorlaContestRoundCsv) {
@@ -106,9 +112,15 @@ fun readColoradoContestRoundCsv(filename: String): Map<String, CorlaContestRound
                 winners = line.get(6), // winners
                 minMargin = line.get(7).toInt(),    // minMargin
                 riskLimit = line.get(8).toDouble(), // riskLimit
+                audited_sample_count = line.get(9).toInt(), // riskLimit
+                two_vote_over_count = line.get(10).toInt(), // riskLimit
+                one_vote_over_count = line.get(11).toInt(), // riskLimit
+                one_vote_under_count = line.get(12).toInt(), // riskLimit
+                two_vote_under_count = line.get(13).toInt(), // riskLimit
+                // disagreement_count = line.get(14).toInt(), // riskLimit
                 gamma = line.get(16).toDouble(), // gamma
                 optimisticSamplesToAudit = line.get(18).toInt(), // optimistic_samples_to_audit
-                estimatedSamplesToAudit = line.get(19).toInt(), // estimated_samples_to_audit
+                // estimatedSamplesToAudit = line.get(19).toInt(), // estimated_samples_to_audit
             )
             contests[bmi.contestName] = bmi
         }

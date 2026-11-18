@@ -237,10 +237,7 @@ class CorlaStateElection(
     override fun countyAuditcenterPools(): List<CountyPools> = countyAcPools // used by viewer
     override fun countyCvrPools() = null // countyCvrPools
 
-    //      and add the mvr simulations by reading the cardManifest ??
-    //      see VunderBatches CreateCardsForCountyPools used by CountyElectionSimCvrs
-    //      see VunderPool used by CanonicalCvrsFromManifest
-    // TODO if these are the mvrs, we need to simulate the cvrs when they dont exist...
+    // these are the mvrs, we need to simulate the cvrs when they dont exist...
     override fun unsortedMvrsInternal() = null
     override fun unsortedMvrsExternal() = null // CardIteratorfromCountyMvrs(statePublisher, styles = stateStyles)
 
@@ -275,8 +272,8 @@ fun makeCountyElections(
         val countyElection = if (countyInput.hasCvrs()) {
                 CorlaCountyElection(countyInput, stateInput, contestBuilder, mvrSource, hasStyle, variantEnum)
         } else {
-            logger.info { "cant find countyInput for $countyName"}
-            // can we still build it without the cvrs ??
+            logger.info { "county $countyName doesnt have cvrs"}
+            // TODO can we still build it without the cvrs ??
             CorlaCountyElectionNoCvrs(countyInput, stateInput, contestBuilder, mvrSource, hasStyle)
         }
         createElectionRecord(countyElection, topdir = countyDir)

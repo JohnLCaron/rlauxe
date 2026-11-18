@@ -1,7 +1,8 @@
-package org.cryptobiotic.rlauxe.auditcenter
+package org.cryptobiotic.rlauxe.corlaInput
 
-import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
-import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
+import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
+import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
+import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 
 // check name consistency in ColoradoInput
 class CheckCanonicalNames( val input: StatewideInput) {
@@ -14,9 +15,9 @@ class CheckCanonicalNames( val input: StatewideInput) {
         checkContestTabulateHasCanonical()
         // checkCountyTabulateAndCanonicalContests()
         checkContestRoundHasCanonical()
-        checkCanonicalHasMvrComparison()
+        // checkCanonicalHasMvrComparison()
 
-        reportCorrectedCanonicalContests()
+        // reportCorrectedCanonicalContests()
     }
 
 
@@ -56,7 +57,7 @@ class CheckCanonicalNames( val input: StatewideInput) {
         }
 
         if (extras.isNotEmpty() || missingChoices.isNotEmpty()) {
-            println("add the following to statInput.canonicalContests:")
+            println("add the following to e:")
         }
         if (extras.isNotEmpty()) {
             println("   val extras = listOf(")

@@ -191,6 +191,5 @@ fun testStartNewRound() {
 
 fun corlaRoundSettings() = AuditRoundConfig(
     SimulationControl(nsimTrials = 10, estPercentile = listOf(50, 80)),
-    ContestSampleControl(minRecountMargin = .005, minMargin = 0.005, minSize = 10,
-        contestSampleCutoff = 5000, auditSampleCutoff = 200000, sampling = Sampling.consistent),
+    ContestSampleControl(minRecountMargin = .005, minMargin = 0.005, minSize = 10, maxSamplePct = .25),
     ClcaConfig(), null)

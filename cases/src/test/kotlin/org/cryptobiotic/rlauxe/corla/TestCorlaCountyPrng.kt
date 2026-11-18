@@ -188,6 +188,7 @@ class TestCorlaCountyPrng {
         println("countMiss = $countMiss countExtra = $countExtra")
     }
 
+    // Probably the original test
     @Test
     fun testCorlaPRNGstatewide() {
         val population = 4_114_582
@@ -199,10 +200,10 @@ class TestCorlaCountyPrng {
         var countMiss = 0
 
         val stateInput = Statewide2020General()
-        val allMvrs: List<ComparisonMvr> = stateInput.cardComparison().mvrs
+        val allMvrs: List<ComparisonMvr> = stateInput.cardComparison().mvrs // 2020/general/round_3/contestComparison.csv  (round 3)
 
         val countyMap = stateInput.counties().filter{ it != "Gunnison"}.map { county -> CorlaPRNGcounty(stateInput, county) }.associateBy { it.county }
-        val countyMap2 = stateInput.counties().filter{ it != "Gunnison"}.map { county -> CorlaPrngCounty(stateInput, county) }.associateBy { it.county }
+        // val countyMap2 = stateInput.counties().filter{ it != "Gunnison"}.map { county -> CorlaPrngCounty(stateInput, county) }.associateBy { it.county }
         val countyNmvrs = countyMap.map{ it.value.countyMvrs }.sum()
         val expectStateNmvrs = allMvrs.size - countyNmvrs
         // println("expectStateNmvrs=$expectStateNmvrs")
@@ -232,10 +233,10 @@ class TestCorlaCountyPrng {
                 val county = countyMap[mvr.county()]!!
                 if (county.claim(id, mvr)) {
                     countyHits++
-                    val county2 = countyMap2[mvr.county()]!!
+                    /* val county2 = countyMap2[mvr.county()]!!
                     if (!county2.claim(id, mvr)) {
                         println("($count) countyMap2 != countyMap $id db=${mvr.dbId}")
-                    }
+                    } */
 
                 } else {
                     if (allPrnIds.contains(id))

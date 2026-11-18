@@ -67,24 +67,26 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
     // depends only on the set of counties used by the contest and the StrataIno for those contests
     fun computeStrataMinRate(name: String, counties: Set<String>, strataMap: Map<String, StrataInfo>): StrataInfo {
         var orgSamples = 0
-        val minRate = counties.map {
-            val s = strataMap[it]
-            if (s == null) 1.0 else {
-                orgSamples += s.nmvrs
-                s.nmvrs / s.ballotCardCount.toDouble()
+        val rates = counties.map {
+            val strata = strataMap[it]
+            if (strata== null || strata.nmvrs == 0) 1.0 else {
+                orgSamples += strata.nmvrs                              // includes both state and county samples that are in this county
+                strata.nmvrs / strata.ballotCardCount.toDouble()        // but it does seem that the state samples should be added without scaling by min rate, at least for targeted contest ??
             }
-        }.min()
+        }
+        val minRate = rates.min()
 
         var npop = 0
         var nmvrs = 0
         counties.forEach {
             val strata = strataMap[it]
-            if (strata != null) {
+            if (strata != null && strata.nmvrs != 0) {
                 npop += strata.ballotCardCount
                 val truncSamples = roundToClosest(strata.ballotCardCount * minRate)
                 nmvrs += truncSamples
             }
         }
+        // TODO state mvrs
         return StrataInfo(name, nmvrs, 0, npop)
     }
 }

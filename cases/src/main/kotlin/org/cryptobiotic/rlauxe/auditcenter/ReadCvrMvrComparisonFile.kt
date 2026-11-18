@@ -68,7 +68,7 @@ data class ContestMvrCount(val contestName: String) {
 }
 
 // for each county, over all contests
-// TODO 2020 doesnt have "statewide" in this file; could use prn county vs state sequence (!)
+// 2020 doesnt have "statewide" field in this file
 data class CountyMvrCount(val countyName: String) {
     var countyMvr = 0
     var stateMvr = 0
@@ -146,7 +146,7 @@ data class ComparisonMvr(
 
 fun readContestComparisonCsv(filename: String): CardComparisonResults {
     val file = File(filename)
-    val parser = CSVParser.parse(file, defaultCharset, CSVFormat.DEFAULT) // TODO
+    val parser = CSVParser.parse(file, defaultCharset, CSVFormat.DEFAULT) // TODO charset
     val records = parser.iterator()
 
     // we expect the first line to be the headers

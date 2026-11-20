@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.auditcenter.ComparisonMvr
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
-import org.cryptobiotic.rlauxe.util.CorlaPrng
 import kotlin.test.Test
 
 class TestCorlaCountyPrng {

@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.corla.PluralityErrorRates
+import org.cryptobiotic.rlauxe.corla.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
 import kotlin.test.Test

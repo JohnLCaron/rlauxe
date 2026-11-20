@@ -21,6 +21,8 @@ dependencies {
     implementation(libs.bundles.logging)
     implementation("com.jsoizo:kotlin-csv-jvm:2.0.0")
     implementation(libs.commons.csv)
+    implementation(libs.commons.poi)
+    implementation(libs.commons.poi.ooxml)
     implementation(libs.logback.classic)
 
     testImplementation(testFixtures(project(":rlauxe-core")))

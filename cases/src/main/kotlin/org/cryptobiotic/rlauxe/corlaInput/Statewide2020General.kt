@@ -16,7 +16,7 @@ import kotlin.collections.plus
 
 /// TODO we need the seed and the total manifest size
 open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
-    targetContestsFile = "$ac/2020/general/targetContests.xlsx", // convert to csv
+    targetContestsFile = "$ac/2020/general/targetContests.csv",
     generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
     contestRoundFile = "$ac/2020/general/round_1/contest.csv",
     tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",

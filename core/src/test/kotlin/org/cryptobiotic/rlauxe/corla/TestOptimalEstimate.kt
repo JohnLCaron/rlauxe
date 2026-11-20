@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import kotlin.test.Test
 
 class TestOptimalEstimate {

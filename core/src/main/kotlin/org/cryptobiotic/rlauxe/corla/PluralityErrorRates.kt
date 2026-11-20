@@ -1,11 +1,9 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.betting.Tracker
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.util.pfn
-import org.cryptobiotic.rlauxe.util.sfn
 
 // CANDIDATE for removal
 // CLCA assorter errors, where upper = 1 (as in plurality)

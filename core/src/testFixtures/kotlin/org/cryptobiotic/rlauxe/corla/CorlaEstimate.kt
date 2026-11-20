@@ -1,12 +1,9 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.shangrla.OptimalLambda
-import org.cryptobiotic.rlauxe.util.roundUp
 import java.lang.Math.pow
 import kotlin.math.ceil
 import kotlin.math.ln
-import kotlin.math.max
 
 
 // From COBRA ??

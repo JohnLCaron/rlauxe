@@ -15,6 +15,7 @@ import org.cryptobiotic.rlauxe.auditcenter.readContestComparisonCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
 import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
+import org.cryptobiotic.rlauxe.auditcenter.readTargetedContestsCsv
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
@@ -57,7 +58,7 @@ private val logger = KotlinLogging.logger("StatewideInput")
 
 // could call it AuditCenterInput
 abstract class StatewideInput(
-    val targetContestsFile: String?,
+    val targetContestsFile: String? = null,
     val generalCanonicalFile: String,
     val contestRoundFile: String,
     val tabulateCountyFile: String,
@@ -248,8 +249,8 @@ abstract class StatewideInput(
 
     // exportContestName -> canonical name
     // dont use these directly, use matchCanonicalContest() and matchCanonicalCandidate()
-    open fun contestNameCleanup(county: String, name: String) = name
-    open fun candidateNameCleanup(county: String, name: String) = name
+    open fun contestNameCleanup(county: String, exportContestName: String) = exportContestName
+    open fun candidateNameCleanup(county: String, exportCandidateName: String) = exportCandidateName
 }
 
 private val alphnumRE = "[^A-Za-z0-9]".toRegex()
@@ -309,6 +310,9 @@ data class MergedContestInfo(
     val marginInVotes: Int, // min_margin
     val riskLimit: Double, // risk_limit
 
+    // targetContests
+    // val singleCounty: Boolean,
+
     // mvr file
     val countyMvrs: Int,
     val statewideMvrs: Int,
@@ -336,10 +340,16 @@ fun mergeContestInfo(input: StatewideInput): MergedInfo {
     val mvrContests: Map<String, ContestMvrCount> = input.contestsFromMvrs.associateBy { it.contestName }
     val mvrCounties: Map<String, CountyMvrCount>  = input.countiesFromMvrs.associateBy { it.countyName }
 
+    val targetContests = if (input.targetContestsFile == null) emptyList() else
+        readTargetedContestsCsv(input.targetContestsFile) { it }
+    val singleContests = targetContests.filter { it.remarks.startsWith("Single") }.map { "${it.countyName} - ${it.contestName}" }.toSet()
+
     // mergedContestInfo in canonical list order, which seems to be alphabetic; this determines contest id ordering.
     val mergedContestInfo = canonical.values.map { cc: CanonicalContest ->
         val round = roundContests[cc.contestName]
         val mvrContest = mvrContests[cc.contestName]
+        val singleCounty = singleContests.contains(cc.contestName)
+        val auditReason = if (singleCounty) AuditReason.single_county else round?.auditReason ?: AuditReason.none
 
         MergedContestInfo(
             cc,
@@ -347,8 +357,8 @@ fun mergeContestInfo(input: StatewideInput): MergedInfo {
             cc.choices,
             cc.counties,
 
-            // TODO can we really tolerate missing the contestRound ?? nc ?
-            round?.auditReason ?: AuditReason.none,
+            // TODO can we really tolerate missing the contestRound ?? nc ? NO
+            auditReason = auditReason,
             corlaPop = round?.ballotCardCount ?: 0,
             nc = round?.contestBallotCardCount ?: 0,
             round?.nwinners ?: 1,

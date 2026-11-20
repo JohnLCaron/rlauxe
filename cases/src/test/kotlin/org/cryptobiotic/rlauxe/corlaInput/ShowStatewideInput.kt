@@ -4,7 +4,7 @@ import kotlin.test.Test
 
 // check name consistency in StatewideInput
 class ShowStatewideInput {
-    val input: StatewideInput = Statewide2026General()
+    val input: StatewideInput = Statewide2020General()
     val canonical = input.canonicalContests()
 
     @Test

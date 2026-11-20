@@ -83,6 +83,35 @@ open class Statewide2026General(ac:String?=auditcenter): StatewideInput(
     }
 
     override fun cardComparison() = CardComparisonResults(emptyList(), emptyList(), emptyList(), emptyList())
+
+    override fun contestNameCleanup(county: String, exportContestName: String): String {
+        // all from targeted contests
+        when (county) {
+            "Denver" -> {
+                if (exportContestName.contains("Seat B")) return "Councilmember At-Large - Seat B"
+            }
+            "Lincoln" -> {
+                if (exportContestName.contains("Ballot Issue 1A")) return "LINCOLN COUNTY BALLOT ISSUE 1A: LODGING TAX"
+            }
+            "Moffat" -> {
+                if (exportContestName.contains("Hesson")) return "Moffat County Court Judge - Hesson"
+            }
+            "Montrose" -> {
+                if (exportContestName.contains("2B")) return "City of Montrose Term Limits Ballot Question 2B"
+            }
+            "Phillips" -> {
+                if (exportContestName.contains("2B")) return "City of Holyoke Ballot Measure 2B Tax Reallocation"
+            }
+            else -> {}
+        }
+
+        return when {
+            exportContestName.contains("City of Alamosa Ballot Issue 2A") -> "City of Alamosa Ballot Issue 2A - Extension of Streets Trust Fund Sales Tax"
+            exportContestName.contains("Crowley - Boyce") -> "Crowley County Court Judge - Boyce"
+            exportContestName.contains("Robak") -> "Fremont County Court Judge - Robak"
+            else -> exportContestName
+        }
+    }
 }
 
 class CountyYearInput(

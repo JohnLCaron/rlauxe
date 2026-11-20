@@ -44,7 +44,7 @@ import java.nio.charset.Charset
 // county_wide_contest
 // opportunistic_benefits
 
-enum class AuditReason { county_wide_contest, state_wide_contest, opportunistic_benefits, none}
+enum class AuditReason { single_county, county_wide_contest, state_wide_contest, opportunistic_benefits, none}
 fun getAuditReason(s: String): AuditReason {
     val reason = AuditReason.entries.find { it.name == s }
     if (reason == null) println("dont know AuditReason $s")

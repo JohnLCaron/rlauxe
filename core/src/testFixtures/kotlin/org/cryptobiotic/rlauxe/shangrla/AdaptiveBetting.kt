@@ -11,8 +11,8 @@ import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
 import org.cryptobiotic.rlauxe.betting.BettingFn
 import org.cryptobiotic.rlauxe.betting.Tracker
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
-import org.cryptobiotic.rlauxe.core.PluralityErrorRates
-import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
+import org.cryptobiotic.rlauxe.corla.PluralityErrorRates
+import org.cryptobiotic.rlauxe.corla.PluralityErrorTracker
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min

@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.betting.RiskMeasuringFn
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.betting.TestH0Status
-import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.util.roundUp
 import java.lang.Math.pow
 import kotlin.math.ceil

@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.betting.eps
 import org.cryptobiotic.rlauxe.betting.etaToLam
-import org.cryptobiotic.rlauxe.core.PluralityErrorRates
-import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
+import org.cryptobiotic.rlauxe.corla.PluralityErrorRates
+import org.cryptobiotic.rlauxe.corla.PluralityErrorTracker
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

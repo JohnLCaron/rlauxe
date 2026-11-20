@@ -100,6 +100,9 @@ class CorlaPRNG(
         val in_range = int_output.mod(BigInteger.valueOf((my_maximum - my_minimum + 1).toLong()))
         val pick = my_minimum + in_range.intValueExact()
 
+        if (my_random_numbers.contains(pick))
+            println("duplicate $pick")
+
         if (with_replacement || !my_random_numbers.contains(pick)) {
             my_random_numbers.add(pick)
         }

@@ -110,7 +110,8 @@ We could reproduce the Corla results without unredacted CVRs in the following se
 2. manifests give us total cards in each county. _trusting the manifests_
 3. For each round:
    1. contestRoundFile gives ncards, reported margin in the county for targeted contests. _trusting the reported margin and ncards_.
-   2. contestSelection gives Corla sampling sequence; manifests + hash -> verify Corla sequence
+   2. contestSelection gives Corla sampling sequence; round/activityReport.xlsx shows dbid and imprintedId **by contest**
+   3. manifests + hash -> verify Corla sequence
    3. mvrComparisonFile shows us both the cvr and the mvr of samples -> verify Corla risk calculation
 
 _In this scenario we would be trusting tabulateCountyFile, contestRoundFile, manifests, and mvrComparisonFile._

@@ -5,6 +5,7 @@ import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import java.io.File
 import java.nio.charset.Charset
@@ -37,14 +38,15 @@ data class TargetedContestsCsv(
     val voteMargin: Int,
     val dilutedMargin: Double,
     val riskLimit: Double,
-    val estimatedSamplesToAudit: Int,
+    val estimatedSamplesToAudit: Int, // early estimate - do not use
     val numberOfCvrs: Int,
+    val remarks: String, // "Single County Contest", "Audited in all 64 Counties"
 ) {
     override fun toString() = buildString {
         val ss = "$countyName, $contestName"
         append("${trunc(ss, -contestWidth)}, $nwinners, ${nfn(lowestWinner, 7)}, ${nfn(highestLoser, 7)}, ${nfn(voteMargin, 6)}, ")
         append("  ${trunc(dfn(.01*dilutedMargin, 4), 6)},   ${dfn(riskLimit, 1)}, ")
-        append("${nfn(estimatedSamplesToAudit,7)}, ${nfn(numberOfCvrs, 9)}")
+        append("${nfn(estimatedSamplesToAudit,7)}, ${nfn(numberOfCvrs, 9)}, ${sfn(remarks, 15)}")
     }
 
     fun short() = buildString {
@@ -54,10 +56,11 @@ data class TargetedContestsCsv(
 
     companion object {
         val contestWidth = 80
-        val header = "${trunc("contestName, countyName", contestWidth-7)}, nwinners,  winner, loser, voteMargin, margin, risk%, nsamples,   cvrs"
+        val header = "${trunc("contestName, countyName", contestWidth-7)}, nwinners,  winner, loser, voteMargin, margin, risk%, nsamples,   cvrs,   remarks"
     }
 }
 
+// TODO remove cleanup I think
 fun readTargetedContestsCsv(filename: String, cleanupContest: (String) -> String): List<TargetedContestsCsv> {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
@@ -89,6 +92,7 @@ fun readTargetedContestsCsv(filename: String, cleanupContest: (String) -> String
                 riskLimit = clean(line.get(7)).toDouble(), // riskLimit
                 estimatedSamplesToAudit = clean(line.get(8)).toInt(), // estimated_samples_to_audit
                 numberOfCvrs = clean(line.get(9)).toInt(), // estimated_samples_to_audit
+                remarks = line.get(10).trim(),
             )
             contests.add(tcc)
         }

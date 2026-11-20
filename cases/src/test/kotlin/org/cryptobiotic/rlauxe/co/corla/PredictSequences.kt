@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.corlaInput
+package org.cryptobiotic.rlauxe.co.corla
 
 import org.cryptobiotic.rlauxe.auditcenter.ComparisonMvr
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.corla.GarfieldManifestEntries
 import org.cryptobiotic.rlauxe.corla.ManifestEntries
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
-import org.cryptobiotic.rlauxe.corla.CorlaPrng
+import org.cryptobiotic.rlauxe.corlaInput.CountyInput
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import java.io.File
 import kotlin.collections.forEach
@@ -176,7 +176,7 @@ class PredictSequences {
         val prnIdSet: Set<String>
 
         init {
-            val prng = CorlaPrng(seed, 1, population) // without replacement (!)
+            val prng = CorlaPrng(seed, true, 1, population) // without replacement (!)
 
             val prns = mutableListOf<Int>()
             repeat(statewideNmvrs) { prns.add(prng.next()) }
@@ -201,7 +201,7 @@ class PredictSequences {
         init {
             println("-------------- $county")
             // modulus max - min + 1 = 1_444_047
-            val prng = CorlaPrng(seed, 1, countyManifest.nballotCards) // without replacement (!)
+            val prng = CorlaPrng(seed, true, 1, countyManifest.nballotCards) // without replacement (!)
             println("  county population=${countyManifest.nballotCards} nmvrs =${countyMvrs}") // 2020 doesnt know which are statewide
 
             val prns = mutableListOf<Int>()

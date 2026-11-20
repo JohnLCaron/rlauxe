@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.util.Locations.cases
 
 class Statewide2024General(ac:String?=auditcenter): StatewideInput (
-    targetContestsFile = "$ac/2024/general/targetedContests.xlsx", // convert to csv
+    targetContestsFile = "$ac/2024/general/targetedContests.xlsx",
     generalCanonicalFile = "$ac/2024/general/2024GeneralCanonicalList.csv",
     contestRoundFile = "$ac/2024/general/round1/contest.csv",
     tabulateCountyFile = "$ac/2024/general/tabulateCounty.csv",

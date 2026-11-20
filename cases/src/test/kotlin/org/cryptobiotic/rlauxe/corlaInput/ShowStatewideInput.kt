@@ -4,7 +4,7 @@ import kotlin.test.Test
 
 // check name consistency in StatewideInput
 class ShowStatewideInput {
-    val input: StatewideInput = Statewide2020General()
+    val input: StatewideInput = Statewide2026General()
     val canonical = input.canonicalContests()
 
     @Test
@@ -40,6 +40,15 @@ class ShowStatewideInput {
     fun showCountyTabsAllContests() {
         println("there are ${input.countyTabsAllContests().size} countyTabsAllContests")
         input.countyTabsAllContests().forEach { println( it )}
+    }
+
+    @Test
+    fun showMvrs() {
+        val ccr = input.cardComparison()
+        println("there are ${ccr.countyMvrs.size} countyMvrs")
+        println("there are ${ccr.contestMvrs.size} contestMvrs")
+        println("there are ${ccr.mvrs.size} mvrs")
+        println("there are ${ccr.stylesByCounty.size} stylesByCounty")
     }
 
     @Test

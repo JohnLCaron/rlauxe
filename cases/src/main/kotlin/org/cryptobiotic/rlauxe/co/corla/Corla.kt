@@ -1,8 +1,9 @@
-package org.cryptobiotic.rlauxe.corla
+package org.cryptobiotic.rlauxe.co.corla
 
 import org.cryptobiotic.rlauxe.betting.RiskMeasuringFn
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.betting.TestH0Status
+import org.cryptobiotic.rlauxe.corla.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.util.roundUp
 import java.lang.Math.pow
 import kotlin.math.ceil
@@ -93,6 +94,7 @@ class Corla(
     }
 }
 
+// TODO could
 // Kaplan-Markov MACRO P-value (maximum across-contest relative overstatement)
 //
 // The MACRO for ballot p is the largest percentage by which the

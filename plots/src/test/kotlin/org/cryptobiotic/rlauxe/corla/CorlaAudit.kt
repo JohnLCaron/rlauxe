@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
+import org.cryptobiotic.rlauxe.co.corla.Corla
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.*

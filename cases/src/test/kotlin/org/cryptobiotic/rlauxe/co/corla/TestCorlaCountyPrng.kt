@@ -1,6 +1,7 @@
-package org.cryptobiotic.rlauxe.corla
+package org.cryptobiotic.rlauxe.co.corla
 
 import org.cryptobiotic.rlauxe.auditcenter.ComparisonMvr
+import org.cryptobiotic.rlauxe.corla.CorlaPRNG
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import kotlin.test.Test
@@ -11,7 +12,7 @@ class TestCorlaCountyPrng {
 
     @Test
     fun testComparePrng() {
-        val corlaPrng = CorlaPrng(seed2020, 1, 1769)
+        val corlaPrng = CorlaPrng(seed2020, true, 1, 1769)
 
         val corlaPRNG = CorlaPRNG(seed2020, true, 1, 1769)
         val prns = corlaPRNG.getRandomNumbers(0, 60)
@@ -320,7 +321,7 @@ class TestCorlaCountyPrng {
         val prnIdSet: Set<String>
 
         init {
-            val prng = CorlaPrng(stateInput.seed, 1, population) // without replacement (!)
+            val prng = CorlaPrng(stateInput.seed, true, 1, population) // without replacement (!)
 
             val prns = mutableListOf<Int>()
             repeat(statewideNmvrs) { prns.add(prng.next()) }
@@ -376,7 +377,7 @@ class TestCorlaCountyPrng {
             val strata = stateInput.countyStrataMap[county]!!
             val countyManifest = stateInput.countyManifest(county)!!
             // modulus max - min + 1 = 1_444_047
-            val prng = CorlaPrng(seed2020, 1, strata.ballotCardCount) // without replacement (!)
+            val prng = CorlaPrng(seed2020, true, 1, strata.ballotCardCount) // without replacement (!)
             if (verbose) println("  county population=${strata.ballotCardCount} nmvrs =${strata.countyMvrs}") // 2020 doesnt know which are statewide
             countyMvrs = strata.countyMvrs
 

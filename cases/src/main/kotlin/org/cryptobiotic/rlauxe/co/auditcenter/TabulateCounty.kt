@@ -2,10 +2,7 @@ package org.cryptobiotic.rlauxe.co.auditcenter
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
-import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.corlaInput.defaultCharset
-import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.util.trunc
 import java.io.File
 
 // corla/src/test/data/2024audit/tabulateCounty.csv

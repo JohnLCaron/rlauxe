@@ -20,11 +20,11 @@ data class MvrComparison(
     val ballot_type: String,
     val choice_per_voting_computer: String,
     val audit_board_selection: String,
-    val consensus: String, // apparently the opaque "db creation id"
+    val consensus: String,
     val record_type: String,
     val audit_board_comment: String,
     val timestamp: String,
-    val cvr_id: Int,
+    val cvr_id: Int, // apparently the opaque "db creation id"
     val audit_reason: String?,
 ) {
 

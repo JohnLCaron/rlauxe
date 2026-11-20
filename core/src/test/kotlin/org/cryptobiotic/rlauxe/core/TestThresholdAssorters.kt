@@ -78,7 +78,7 @@ class TestThresholdAssorters {
         val assorter = AboveThreshold.makeFromVotes(contest.info, winner, contest.votes, contest.info.minFraction!!, contest.Nc)
         assertEquals(1.0 / (2 * assorter.t), assorter.upperBound())
         val assortAvg = cvrs.map { assorter.assort(it) }.average()
-        assertEquals(margin2mean(assorter.margin(true)), assortAvg, doublePrecision)
+        assertEquals(margin2mean(assorter.dilutedMargin()), assortAvg, doublePrecision)
 
         val n = counts.sum().toDouble()
         val p = counts[winner] / n
@@ -248,7 +248,7 @@ data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double
     override fun shortName() = "AboveThresholdB for ${info.candidateIdToName[winner()]}"
 
     override fun desc() = buildString {
-        append("${shortName()}: reportedMean=${pfn(reportedMean)} noerror=${pfn(noerror(true) )} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
+        append("${shortName()}: reportedMean=${pfn(reportedMean)} noerror=${pfn(noerror() )} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
     }
 
     override fun hashcodeDesc() = "AboveThresholdB ${winLose()} ${info.name}" // must be unique for serialization

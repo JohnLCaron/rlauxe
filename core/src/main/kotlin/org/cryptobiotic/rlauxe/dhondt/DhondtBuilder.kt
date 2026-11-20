@@ -176,11 +176,11 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
         } else {
             val bt = BelowThreshold.makeFromVotes(info, candId = loser.id, votes, this.Nc,)
             // use dhs if their minimum error is larger than BT
-            val minAssert = dhs.minByOrNull { it.noerror(true) }!!
-            if (bt.noerror(true) < minAssert.noerror(true) ) {
+            val minAssert = dhs.minByOrNull { it.noerror() }!!
+            if (bt.noerror() < minAssert.noerror() ) {
                 logger.debug {
-                    "${info.name} Replacing ${bt.shortName()} (noerror = ${bt.noerror(true)}) with " +
-                            "DH assertions (minNoerror = ${minAssert.noerror(true)} for ${minAssert.shortName()})"
+                    "${info.name} Replacing ${bt.shortName()} (noerror = ${bt.noerror()}) with " +
+                            "DH assertions (minNoerror = ${minAssert.noerror()} for ${minAssert.shortName()})"
                 }
                 return dhs
             } else {
@@ -197,7 +197,7 @@ open class DhondtBuilder(  // TODO ok to not be data class ??
             return dh
         } else {
             val bt = BelowThreshold.makeFromVotes(info, candId = loser.id, votes, this.Nc,)
-            if (bt.noerror(true) < dh.noerror(true) ) {
+            if (bt.noerror() < dh.noerror() ) {
                 return dh
             } else {
                 return bt
@@ -245,7 +245,7 @@ fun btOrBh(info: ContestInfo, winner: DhondtParty, winnerDivisor: Int, loser: Dh
         return dh
     } else {
         val bt = BelowThreshold.makeFromVotes(info, candId = loser.id, votes, Nc,)
-        if (bt.noerror(true) < dh.noerror(true) ) {
+        if (bt.noerror() < dh.noerror() ) {
             return dh
         } else {
             return bt

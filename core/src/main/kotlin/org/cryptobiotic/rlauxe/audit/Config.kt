@@ -312,6 +312,13 @@ data class ContestSampleControl(
     val sampling: Sampling = Sampling.consistent
 ) {
 
+    init {
+        if (sampling != Sampling.consistent) {
+            logger.error{"Only supporting consistent sampling right now"}
+            throw RuntimeException("Sampling should be consistent")
+        }
+    }
+
     fun removeMaxContests(): Int? {
         val stringValue = other[removeMaxContests] ?: return null
         try {

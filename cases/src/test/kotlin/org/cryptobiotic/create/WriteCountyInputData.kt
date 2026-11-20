@@ -83,7 +83,7 @@ class WriteCountyInputData {
         return if (countyInput.hasCvrs()) {
             val contestBuilder = CorlaStateContestInfoBuilder(stateInput)
             val countyElection = CorlaCountyElection(countyInput, stateInput, contestBuilder, MvrSource.testPrivateMvrs,
-                true, ElectionVariantEnum.OnePool)
+                ElectionVariantEnum.OnePool)
 
             val corlaCvrs = countyElection.corlaCvrs
             val manifestCounts = manifest.manifestCounts(corlaCvrs)

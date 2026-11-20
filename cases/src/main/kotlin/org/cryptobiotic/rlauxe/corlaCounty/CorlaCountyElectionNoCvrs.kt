@@ -19,7 +19,7 @@ class CorlaCountyElectionNoCvrs(
     val stateInput: StatewideInput, // in order to do missing correctly, we need the countyTabs from stateInput,
     val stateContestInfoBuilder: CorlaStateContestInfoBuilder, // infos consistent across counties
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
-    val hasStyle: Boolean, // TODO
+    // val hasStyle: Boolean, // TODO
 ): ElectionBuilder {
     val variant = ElectionVariant(ElectionVariantEnum.OnePool)
 
@@ -74,7 +74,7 @@ class CorlaCountyElectionNoCvrs(
 
         contests = makeContests(stateContestInfoBuilder.infos, convertedCountyAcTabs, ncards)
 
-        contestsUA = makeContestWAs(contests, emptyMap(), emptyMap(), listOf(cardPool), variant, hasStyle)
+        contestsUA = makeContestWAs(contests, emptyMap(), emptyMap(), listOf(cardPool), variant)
     }
 
     override fun electionInfo() =

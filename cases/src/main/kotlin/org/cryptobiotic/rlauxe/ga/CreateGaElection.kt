@@ -136,7 +136,7 @@ class CreateGaElection(
         wantContests: List<ContestIF>, // the contests you want to audit
     ): List<ContestWithAssertions> {
         return wantContests.filter { !it.isIrv() }.map { contest ->
-            ContestWithAssertions(contest, isClca = false, hasStyle = false).addStandardAssertions()
+            ContestWithAssertions(contest, isClca = false).addStandardAssertions()
         }
     }
 

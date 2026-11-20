@@ -239,7 +239,7 @@ fun createCorlaStateElection(
     Logging.addFileAppender("cases", "$topdir/logs.log")
     logger.info {"-------------- createCorlaStateElection ${stateInput.javaClass.name} in $topdir"}
 
-    val election = CorlaStateElection(topdir, stateInput, mvrSource = mvrSource, hasStyle = hasStyle, variant)
+    val election = CorlaStateElection(topdir, stateInput, mvrSource = mvrSource, variant)
 
     createElectionRecord(election, topdir = topdir)
 

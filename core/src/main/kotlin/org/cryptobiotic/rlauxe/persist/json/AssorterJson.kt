@@ -22,7 +22,7 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 //    assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs: plurality or IRV
 //    hasStyle: Boolean = true,
 //    val poolAverages: AssortAvgsInPools,
-//) : ClcaAssorter(info, assorter, null, hasStyle = hasStyle) {
+//) : ClcaAssorter(info, assorter, null) {
 
 @Serializable
 data class ClcaAssorterJson(
@@ -30,7 +30,7 @@ data class ClcaAssorterJson(
     val assorter: AssorterIFJson, // replicating the passorter
     val poolAverages: AssortAvgsInPoolsJson?, // consider putting these in another file ??
     val oaAssortRates: OneAuditAssortValueRatesJson?, // TODO may be very large, perhaps rehydrate from cardPool.csv ??
-    val useReportedMargin: Boolean,
+    val useReportedMargin: Boolean? = null,
 )
 
 fun ClcaAssorter.publishJson() : ClcaAssorterJson {
@@ -40,7 +40,6 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
             this.assorter.publishJson(),
             poolAverages.publishJson(),
             oaAssortRates.publishJson(),
-            this.useReportedMargin,
         )
 
     } else {
@@ -49,7 +48,6 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
             this.assorter.publishJson(),
             null,
             null,
-            this.useReportedMargin,
         )
     }
 }
@@ -60,7 +58,6 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
             ClcaAssorter(
                 info,
                 this.assorter.import(info),
-                this.useReportedMargin,
             )
 
         "ClcaAssorterOneAudit" -> {

@@ -384,7 +384,7 @@ fun verifyClcaAssortAvg(
         contestUA.assertions.forEach { assertion ->
             val passorter = assertion.assorter
             val assortAvg = cardAssortAvg[passorter.hashcodeDesc()]!!
-            val margin = passorter.margin(contestUA.hasStyle)
+            val margin = passorter.dilutedMargin()
             if (!doubleIsClose(margin, assortAvg.margin())) {
                 result.addError("  verifyClcaAssortAvg margin does not agree for contest ${contestUA.id} assorter='$passorter'")
                 result.addError("     margin= ${pfn(margin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards}")

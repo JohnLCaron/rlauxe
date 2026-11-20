@@ -87,7 +87,7 @@ data class DhondtAssorter(val info: ContestInfo, val winnerId: Int, val loserId:
         return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 
-    override fun desc() = "${shortName()}: noerror=${dfn(noerror(true), 6)}"
+    override fun desc() = "${shortName()}: noerror=${dfn(noerror(), 6)}"
     override fun shortName() = "${winnerNameRound()}-${loserNameRound()}"
     fun reverseName() = "${loserNameRound()}-${winnerNameRound()}"
 

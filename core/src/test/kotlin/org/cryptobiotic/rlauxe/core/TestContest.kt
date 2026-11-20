@@ -278,7 +278,7 @@ class TestContest {
     Total=208""" // .replaceIndent("   ")
         assertEquals(expectedShowCandidates, contestUAc.contest.showCandidates())
 
-        val expectedShow = """Contest 'testContestInfo' (0) PLURALITY voteForN=1 votes={1=108, 0=100, 2=0} undervotes=1, winners=[1] Nc=211 Nphantoms=2 Nu=1 sumVotes=208 Npop=211 hasStyle=true
+        val expectedShow = """Contest 'testContestInfo' (0) PLURALITY voteForN=1 votes={1=108, 0=100, 2=0} undervotes=1, winners=[1] Nc=211 Nphantoms=2 Nu=1 sumVotes=208 Npop=211
    minAssertion= 1/0 votes=108/100 diff=8 dilutedMargin=0.037915 noerror=0.5097
 
    0 'cand0': votes=100 (48.08%) 

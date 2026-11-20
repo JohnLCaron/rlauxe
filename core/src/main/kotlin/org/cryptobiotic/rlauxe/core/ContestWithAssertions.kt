@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 open class ContestWithAssertions(
     val contest: ContestIF,
     val isClca: Boolean = true,  // clca or oneaudit
-    val hasStyle: Boolean = true, // TODO does it matter for polling ??
+    // val hasStyle: Boolean = true, // TODO does it matter for polling ??
     NpopIn: Int? = null,
 ) {
     val id = contest.id
@@ -129,7 +129,7 @@ open class ContestWithAssertions(
     }
 
     fun makeClcaAssorter(assertion: Assertion): ClcaAssorter {
-        return ClcaAssorter(contest.info(), assertion.assorter, hasStyle)
+        return ClcaAssorter(contest.info(), assertion.assorter) // TODO set hasStyle on card
     }
 
     fun assertions(): List<Assertion> {
@@ -148,7 +148,7 @@ open class ContestWithAssertions(
     fun minPollingAssertion(): Assertion? {
         if (assertions.isEmpty()) return null
         val margins = assertions.map {
-            val assorterMargin = if (hasStyle) it.assorter.reportedMargin() else it.assorter.dilutedMargin()
+            val assorterMargin = it.assorter.dilutedMargin()
             Pair(it, assorterMargin)
         }
         val minMargin = margins.sortedBy { it.second }
@@ -161,8 +161,8 @@ open class ContestWithAssertions(
 
     fun minMargin(): Double? {
         return if (isClca) minClcaAssertion()?.cassorter?.assorterMargin
-        else if (hasStyle) minPollingAssertion()?.assorter?.reportedMargin()
         else minPollingAssertion()?.assorter?.dilutedMargin()
+        // else minPollingAssertion()?.assorter?.dilutedMargin()
     }
     
     fun minNoerror(): Double? {
@@ -170,11 +170,11 @@ open class ContestWithAssertions(
             minClcaAssertion()?.cassorter?.noerror
         } else { // is this useful for polling ??
             val assorter = minPollingAssertion()?.assorter ?: return null
-            if (hasStyle) {
-                noerror(assorter.reportedMargin(), assorter.upperBound())
-            } else {
+            //if (hasStyle) {
+            //    noerror(assorter.reportedMargin(), assorter.upperBound())
+            //} else {
                 noerror(assorter.dilutedMargin(), assorter.upperBound())
-            }
+            //}
         }
     }
 
@@ -193,14 +193,14 @@ open class ContestWithAssertions(
         return if (minAssertion != null)  contest.showAssertionDifficulty(minAssertion.assorter) else "N/A"
     }
 
-    fun population() = if (hasStyle) Nc else Npop
+    // fun population() = if (hasStyle) Nc else Npop
 
     fun phantomRate() = contest.Nphantoms() / Npop.toDouble()
 
     override fun toString() = showShort()
 
     open fun show() = buildString {
-        appendLine("${contest::class.simpleName} ${contest.show()} Npop=$Npop hasStyle=$hasStyle")
+        appendLine("${contest::class.simpleName} ${contest.show()} Npop=$Npop")
         val minAssertion = minAssertion()
         if (minAssertion != null) {
             val minAssorter = minAssertion.assorter
@@ -251,18 +251,18 @@ open class ContestWithAssertions(
         private val logger = KotlinLogging.logger("ContestUnderAudit")
 
         // make contestUA from contests, generate Npop by reading cards
-        fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCard>, isClca: Boolean, hasStyle: Boolean): List<ContestWithAssertions> {
+        fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCard>, isClca: Boolean): List<ContestWithAssertions> {
             val infos = contests.map { it.info() }.associateBy { it.id }
             val contestTabs = tabulateAuditableCards(cards, infos)
             val npopMap = contestTabs.mapValues { it.value.ncardsTabulated }
-            return make(contests, npopMap, isClca, hasStyle)
+            return make(contests, npopMap, isClca)
         }
 
         // make contestUA from contests and Nbs.
         // this does not make OneAudit: use makeOneAuditContests
-        fun make(contests: List<ContestIF>, npopMap: Map<Int,Int>, isClca: Boolean, hasStyle: Boolean): List<ContestWithAssertions> {
+        fun make(contests: List<ContestIF>, npopMap: Map<Int,Int>, isClca: Boolean): List<ContestWithAssertions> {
             return contests.map {
-                val cua = ContestWithAssertions(it, isClca, NpopIn=npopMap[it.id], hasStyle=hasStyle) // .addStandardAssertions()
+                val cua = ContestWithAssertions(it, isClca, NpopIn=npopMap[it.id]) // .addStandardAssertions()
                 if (it is DhondtContest) {
                     cua.addAssertionsFromAssorters(it.assorters)
                 } else {

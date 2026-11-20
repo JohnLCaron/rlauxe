@@ -164,7 +164,7 @@ class EstimateAudit(
                 // attach estimationResult to all the other assertions still to be done
                 // TODO kludge
                 contestRound.assertionRounds.filter { it != useAssertionRound }.forEach { round ->
-                    val noerror = round.assertion.assorter.noerror(contestRound.contestUA.hasStyle)
+                    val noerror = round.assertion.assorter.noerror()
                     // val nomargin = 2.0 * noerror - 1.0
                     // fun estSampleSize(Npop: Int, bet:Double, margin: Double, upper: Double, alpha: Double): Int {
                     val estMvrs = estSampleSizeStandardBet(contestRound.contestUA.Npop, noerror, config.creation.riskLimit)
@@ -449,7 +449,7 @@ class ContestPollingTrial(val run: Int,
     val welford = Welford() // use this as the Tracker
 
     init {
-        val eta0 = margin2mean(assorter.margin(contest.hasStyle))
+        val eta0 = margin2mean(assorter.dilutedMargin())
 
         val estimFn = TruncShrinkage(
             N = contest.Npop,

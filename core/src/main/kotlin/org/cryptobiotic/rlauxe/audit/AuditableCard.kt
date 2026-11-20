@@ -77,6 +77,8 @@ data class AuditableCard (
     override fun id() = id
     override fun phantom() = phantom
     override fun poolId(): Int? = poolId
+    override fun hasStyle(): Boolean = if (contestIds.isNotEmpty()) true else style?.hasExactContests() ?: true /// TODO
+
     override fun votes(contestId: Int): IntArray? = votes?.get(contestId) // use instead of votes()
 
     override fun hasContest(contestId: Int): Boolean {
@@ -96,7 +98,7 @@ data class AuditableCard (
     fun index() = index
     fun possibleContests() : IntArray {
         if (style == null)
-            print("")
+            print("") // TODO
         return when {
             (!useCvr && style != null) -> style!!.possibleContests()
             else -> votes!!.keys.toList().sorted().toIntArray() // assumes cvrsContainUndervotes, set style if not.

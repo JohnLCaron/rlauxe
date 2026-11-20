@@ -73,10 +73,10 @@ class TestRelaxedAssertions {
         println("assertions in R:")
         mapr.forEach { (name, dh) ->
             if (mapv[name] == null) print("****") else print("    ")
-            println(" ${dh} ${estSampleSizeStandardBet(Npop, dh.noerror(true), 0.05)} samples")
+            println(" ${dh} ${estSampleSizeStandardBet(Npop, dh.noerror(), 0.05)} samples")
             //println(" ${dh}")
         }
-        val minerror = mapr.values.minOf{ it.noerror(true) }
+        val minerror = mapr.values.minOf{ it.noerror() }
         println(" minerror = ${minerror} ${estSampleSizeStandardBet(Npop, minerror, 0.05)} samples")
 
         println()
@@ -85,10 +85,10 @@ class TestRelaxedAssertions {
         println("assertions in $version:")
         mapv.forEach { (name, dh) ->
             if (mapr[name] == null) print("****") else print("    ")
-            println(" ${dh}, ${estSampleSizeStandardBet(Npop, dh.noerror(true), 0.05)} samples")
+            println(" ${dh}, ${estSampleSizeStandardBet(Npop, dh.noerror(), 0.05)} samples")
             //println(" ${dh}")
         }
-        val minerrorv = mapv.values.minOf{ it.noerror(true) }
+        val minerrorv = mapv.values.minOf{ it.noerror() }
         println(" minerror = ${minerrorv} ${estSampleSizeStandardBet(Npop, minerrorv, 0.05)} samples")
     }
 

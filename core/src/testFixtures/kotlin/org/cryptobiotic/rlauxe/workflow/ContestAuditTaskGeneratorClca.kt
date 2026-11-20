@@ -143,7 +143,7 @@ class ClcaSingleRoundWorkflowTask(
             WorkflowResult(
                 name,
                 contestRound.Npop,
-                assorter.margin(contestUA.hasStyle),
+                assorter.dilutedMargin(),
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
                 parameters,
@@ -153,7 +153,7 @@ class ClcaSingleRoundWorkflowTask(
             WorkflowResult(
                 name,
                 Nc = contestRound.Npop,
-                margin = assorter.margin(contestUA.hasStyle),
+                margin = assorter.dilutedMargin(),
                 status = auditResult.status,
                 nrounds = minAssertion.roundProved.toDouble(),
                 samplesUsed = auditResult.samplesUsed.toDouble(),

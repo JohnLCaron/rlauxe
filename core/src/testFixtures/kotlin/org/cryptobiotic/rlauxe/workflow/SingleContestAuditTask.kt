@@ -62,7 +62,7 @@ class SingleContestAuditTask(
             WorkflowResult(
                 name,
                 contestRound.Npop,
-                assorter.margin(contestRound.contestUA.hasStyle),
+                assorter.dilutedMargin(),
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
                 otherParameters,
@@ -72,7 +72,7 @@ class SingleContestAuditTask(
             WorkflowResult(
                 name,
                 contestRound.Npop,
-                assorter.margin(contestRound.contestUA.hasStyle),
+                assorter.dilutedMargin(),
                 lastRoundResult.status,
                 nrounds = minAssertion.roundProved.toDouble(),
                 samplesUsed = lastRoundResult.samplesUsed.toDouble(),

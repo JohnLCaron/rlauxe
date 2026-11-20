@@ -45,7 +45,8 @@ class TestClcaDilutedVsReportedMargins {
         println(contest)
         assertEquals(cvrs.size, contest.Nc)
         // make dilutedMargin different than reportedMargin by setting NpopIn != contest.Nc
-        val contestUA = ContestWithAssertions(contest, isClca = true, NpopIn = contest.Nc + 2, hasStyle = false).addStandardAssertions()
+        val hasStyle = false
+        val contestUA = ContestWithAssertions(contest, isClca = true, NpopIn = contest.Nc + 2).addStandardAssertions()
         val assertions = contestUA.clcaAssertions
 
         assertions.forEach {
@@ -69,7 +70,7 @@ class TestClcaDilutedVsReportedMargins {
             val assorter = it.assorter
             val cassorter = it.cassorter
             showAverage(plusOtherCvrs, cassorter)
-            val assortAvg = plusOtherCvrs.map { cvr -> cassorter.bassort(cvr, cvr) }.average()
+            val assortAvg = plusOtherCvrs.map { cvr -> cassorter.bassort(cvr, cvr.copy(hasStyle=hasStyle)) }.average()
             println("${cassorter.shortName()}: cvrMean=${assortAvg} noerror = ${cassorter.noerror}")
             assertEquals(assortAvg, cassorter.noerror, doublePrecision)
         }

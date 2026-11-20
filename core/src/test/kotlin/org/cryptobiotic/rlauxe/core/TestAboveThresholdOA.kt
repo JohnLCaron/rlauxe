@@ -83,8 +83,8 @@ class TestAboveThresholdOA {
             assertTrue(assorter is AboveThreshold)
             assertEquals(1, assorter.winner())
             assertEquals(-1, assorter.loser())
-            println("  assorter margin ${assorter.reportedMargin()}")
-            println("  assorter mean ${assorter.reportedMean()}")
+            println("  assorter margin ${assorter.dilutedMargin()}")
+            println("  assorter mean ${assorter.dilutedMean()}")
 
             println("  vote for winner = ${assorter.assort(makeCvr(1))}")
             println("  vote not for Winner = ${assorter.assort(makeCvr(0))}")

@@ -234,7 +234,7 @@ fun makeClcaContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, Contes
 
         val contestUA: ContestWithAssertions = if (!cvrTab.isIrv) {
             val contest = Contest(info, cvrTab.votes, useNc, cvrTab.ncardsTabulated)
-            ContestWithAssertions(contest, NpopIn=contestNbs[contestId], hasStyle=true).addStandardAssertions()
+            ContestWithAssertions(contest, NpopIn=contestNbs[contestId]).addStandardAssertions()
         } else {
             makeRaireContest(info, cvrTab, useNc, Nbin=contestNbs[contestId]!!) // HERE
         }
@@ -276,7 +276,7 @@ fun makePollingContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, Con
             if (!contestSumTab.isIrv) { // cant do IRV
                 val info = infos[contestId]!!
                 val contest = Contest(info, contestSumTab.votes, useNc, contestSumTab.ncardsTabulated)
-                val contestUA = ContestWithAssertions(contest, isClca = false, NpopIn=contestNbs[contestId], hasStyle=true).addStandardAssertions()
+                val contestUA = ContestWithAssertions(contest, isClca = false, NpopIn=contestNbs[contestId]).addStandardAssertions()
                 contestsUAs.add(contestUA)
             }
         }

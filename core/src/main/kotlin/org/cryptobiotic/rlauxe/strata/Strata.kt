@@ -102,7 +102,7 @@ fun calcCountyStrataWant(contestsIncluded: List<ContestRound>, alpha: Double): L
         if (counties != null && counties.size == 1) {
             val county = counties.first()
             val wantFromPool = wantFromPools[county]!!
-            countyStrata.add(Strata( county,wantFromPool, contestRound.contestUA.population()))
+            countyStrata.add(Strata( county,wantFromPool, contestRound.contestUA.Npop))
         }
     }
     return countyStrata
@@ -126,5 +126,5 @@ private fun calcEstMvrs(contestUA: ContestWithAssertions, alpha: Double): Int {
     val minAssertion = contestUA.minClcaAssertion()
     if (minAssertion == null) return 0
     val noerror = minAssertion.noerror // TODO can we use this ??
-    return estSampleSizeStandardBet(contestUA.population(), noerror, alpha)
+    return estSampleSizeStandardBet(contestUA.Npop, noerror, alpha)
 }

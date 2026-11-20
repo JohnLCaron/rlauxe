@@ -108,9 +108,8 @@ data class IrvContest(
 class RaireContestWithAssertions(
     contest: IrvContest,
     val rassertions: List<RaireAssertion>,
-    hasStyle: Boolean = true,
     NpopIn: Int,
-): ContestWithAssertions(contest, isClca=true, hasStyle, NpopIn) {
+): ContestWithAssertions(contest, isClca=true, NpopIn) {
     val candidates =  contest.info.candidateIds
 
     init {
@@ -174,7 +173,7 @@ class RaireContestWithAssertions(
                 undervotes = undervotes,
             )
              // TODO why do we think that hasStyle=true? (jeesh how long will this haunt us)
-            return RaireContestWithAssertions(contest, assertions, hasStyle=true, Npop)
+            return RaireContestWithAssertions(contest, assertions, Npop)
         }
     }
 }

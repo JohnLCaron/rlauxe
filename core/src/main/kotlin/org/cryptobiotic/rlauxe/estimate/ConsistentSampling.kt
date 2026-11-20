@@ -64,7 +64,7 @@ private fun checkSampleLimits(
     // limit contest samples to maxSamplePct
     if (sampleControl.maxSamplePct > 0.0) {
         contestsNotDone.filter{ it.status == TestH0Status.InProgress }.forEach { contestRound ->
-            val pct = contestRound.estMvrs / contestRound.contestUA.population().toDouble()
+            val pct = contestRound.estMvrs / contestRound.contestUA.Npop.toDouble()
             if (pct > sampleControl.maxSamplePct) {
                 contestRound.status = TestH0Status.MaxSamplePct
                 contestRound.included = false

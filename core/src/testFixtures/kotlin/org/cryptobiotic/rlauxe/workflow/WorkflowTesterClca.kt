@@ -30,7 +30,7 @@ class WorkflowTesterClca(
         require (config.auditType == AuditType.CLCA)
 
         val regularContests = contestsToAudit.map {
-            val cua = ContestWithAssertions(it, true, NpopIn=Npops[it.id], hasStyle=true)
+            val cua = ContestWithAssertions(it, true, NpopIn=Npops[it.id])
             if (it is DhondtContest) {
                 cua.addAssertionsFromAssorters(it.assorters)
             } else {

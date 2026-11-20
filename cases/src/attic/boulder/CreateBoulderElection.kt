@@ -86,8 +86,8 @@ class CreateBoulderElection(
         // TODO IRV cvrTabs dont have the irv part, so will fail in the raire library
         contestsUA = makeContestWAs(contests, npops, cvrTabs, redactedPools, )
 
-        //contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true, hasStyle = hasStyle)
-        //    else makeOneAuditContests(contests, npops, redactedPools, hasStyle = hasStyle)
+        //contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true)
+        //    else makeOneAuditContests(contests, npops, redactedPools)
 
         val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPoolBuilders.size} cardPools"}

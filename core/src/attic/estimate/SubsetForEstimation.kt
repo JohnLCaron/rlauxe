@@ -218,7 +218,7 @@ fun estSamplesNeeded(config: Config, contestRound: ContestRound): Int {
         // TODO what to do when estimate is negetive?? Perhaps fail ??
         //val wtf = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
         //throw RuntimeException("est samples $est < 0")
-        logger.warn { " *** getSubsetForEstimation ${contestUA.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.margin(contestUA.hasStyle)} " +
+        logger.warn { " *** getSubsetForEstimation ${contestUA.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.dilutedMargin()} " +
                 "nsamples=${nsamples}, stddev=$stddev" }
 
         val lastPvalue = minAssertionRound.auditResult?.plast ?: config.riskLimit
@@ -231,7 +231,7 @@ fun estSamplesNeeded(config: Config, contestRound: ContestRound): Int {
             logger.info{"*** removeMaxContests contest ${contestRound.id} with status FailMaxSamplesAllowed"}
         }
     } else {
-        logger.info { "getSubsetForEstimation ${contestUA.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.margin(contestUA.hasStyle)} " +
+        logger.info { "getSubsetForEstimation ${contestUA.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.dilutedMargin()} " +
                 "nsamples=${nsamples}, stddev=$stddev" }
     }
     return est

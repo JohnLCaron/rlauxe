@@ -31,7 +31,7 @@ class BelgiumElection (
     val allCards: List<AuditableCard>
 
     init {
-        val contestUA = ContestWithAssertions(contestd, isClca=true, hasStyle=true).addAssertionsFromAssorters(contestd.assorters)
+        val contestUA = ContestWithAssertions(contestd, isClca=true).addAssertionsFromAssorters(contestd.assorters)
         contestsUA = listOf(contestUA)
         infoMap = contestsUA.associate { it.id to it.contest.info() }
         allCards = contestd.createSimulatedCards()

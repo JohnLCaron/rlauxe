@@ -37,14 +37,15 @@ interface AssorterIF {
 
     fun reportedMargin(): Double
     fun dilutedMargin(): Double
-    fun margin(hasStyle: Boolean) = if (hasStyle) reportedMargin() else dilutedMargin()
+    //fun margin(hasStyle: Boolean) = // probably should always be diluted...
+    //    if (hasStyle) reportedMargin() else dilutedMargin()
 
     fun reportedMean(): Double = margin2mean(reportedMargin())
     fun dilutedMean(): Double = margin2mean(dilutedMargin())
 
     // only needed for CLCA, but can still use for polling
-    fun noerror(hasStyle: Boolean): Double {
-        val ratio = margin(hasStyle) / upperBound()
+    fun noerror(): Double {
+        val ratio = dilutedMargin() / upperBound()
         return 1.0 / (2.0 - ratio)
     }
 
@@ -154,9 +155,9 @@ class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int):
             val useVotes = contest.votes()!!
             val winnerVotes = useVotes[winner] ?: 0
             val loserVotes = useVotes[loser] ?: 0
-            val totalVotes = Npop ?: contest.Nc()
+            val pop = Npop ?: contest.Nc()
             val reportedMargin = (winnerVotes - loserVotes) / contest.Nc().toDouble()
-            val dilutedMargin = (winnerVotes - loserVotes) / totalVotes.toDouble()
+            val dilutedMargin = (winnerVotes - loserVotes) / pop.toDouble()
             return PluralityAssorter(contest.info(), winner, loser).setMargins(reportedMargin, dilutedMargin)
         }
     }

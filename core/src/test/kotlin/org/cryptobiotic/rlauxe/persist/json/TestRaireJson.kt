@@ -41,7 +41,7 @@ class TestRaireJson {
     //    contest: RaireContest,
     //    val winner: Int,  // the sum of winner and eliminated must be all the candiates in the contest
     //    val rassertions: List<RaireAssertion>,
-    //): ContestUnderAudit(contest, isComparison=true, hasStyle=true) {
+    //): ContestUnderAudit(contest, isComparison=true) {
     @Test
     fun testContestUARoundtrip() {
         val target = makeRaireUA()
@@ -117,5 +117,5 @@ fun makeRaireUA(): RaireContestWithAssertions {
         // mapOf(1 to 1, 2 to 2, 3 to 3)
     )
 
-    return RaireContestWithAssertions(contest, rassertions=listOf(assert1, assert2), false, contest.Nc)
+    return RaireContestWithAssertions(contest, rassertions=listOf(assert1, assert2), contest.Nc)
 }

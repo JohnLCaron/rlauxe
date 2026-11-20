@@ -45,13 +45,13 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestWithAssertions.make(listOf(contest), cardIterable.iterator(), isClca=true, hasStyle = true)
+        val contestsUA = ContestWithAssertions.make(listOf(contest), cardIterable.iterator(), isClca=true)
         val contestUA= contestsUA.first()
         println("contestUA = ${contestUA.show()}")
 
         val minassert = contestUA.minPollingAssertion()
         println(minassert)
-        assertEquals(minassert!!.assorter.margin(contestUA.hasStyle), contestUA.minMargin())
+        assertEquals(minassert!!.assorter.dilutedMargin(), contestUA.minMargin())
 
         //     cards: CloseableIterator<AuditableCard>,
         //    result: VerifyResults,
@@ -89,13 +89,13 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestWithAssertions.make(listOf(contest), cardIterable.iterator(), isClca=true, hasStyle = true)
+        val contestsUA = ContestWithAssertions.make(listOf(contest), cardIterable.iterator(), isClca=true)
         val contestUA= contestsUA.first()
         println("contestUA = ${contestUA.show()}")
 
         val minassert = contestUA.minPollingAssertion()
         println(minassert)
-        assertEquals(minassert!!.assorter.margin(contestUA.hasStyle), contestUA.minMargin())
+        assertEquals(minassert!!.assorter.dilutedMargin(), contestUA.minMargin())
 
         val results = VerifyResults()
         verifyClcaAssortAvg(contestsUA, cardIterable.iterator(), results, show = true)
@@ -130,7 +130,7 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestWithAssertions.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle = true)
+        val contestsUA = ContestWithAssertions.make(test.contests, cardIterable.iterator(), isClca=true)
 
         val results = VerifyResults()
         verifyClcaAssortAvg(contestsUA, cardIterable.iterator(), results, show = false)
@@ -168,7 +168,7 @@ class TestAvgAssortValues {
         }
 
         //         fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCardIF>, isClca: Boolean, hasStyle: Boolean): List<ContestWithAssertions> {
-        val contestsUA = ContestWithAssertions.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle = true)
+        val contestsUA = ContestWithAssertions.make(test.contests, cardIterable.iterator(), isClca=true)
         contestsUA.forEach {
             println("$it : Npop diff = ${it.Npop != it.Nc}")
         }
@@ -210,7 +210,7 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestWithAssertions.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle = true)
+        val contestsUA = ContestWithAssertions.make(test.contests, cardIterable.iterator(), isClca=true)
         contestsUA.forEach {
             println("$it : Nb diff = ${it.Npop != it.Nc}")
         }

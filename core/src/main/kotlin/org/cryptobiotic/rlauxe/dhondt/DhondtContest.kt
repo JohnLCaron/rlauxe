@@ -146,7 +146,7 @@ class DhondtContest(
 
     // TODO should be the factor from KISS paper
     fun difficulty(assorter: AssorterIF): Double {
-        return 1.0 / assorter.reportedMargin()
+        return 1.0 / assorter.dilutedMargin()
     }
 
     override fun marginInVotes(assorter: AssorterIF): Int {

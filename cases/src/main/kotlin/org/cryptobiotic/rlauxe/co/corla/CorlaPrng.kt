@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.corla
+package org.cryptobiotic.rlauxe.co.corla
 
 import java.math.BigInteger
 import java.nio.charset.StandardCharsets
@@ -26,41 +26,43 @@ import java.security.MessageDigest
 // class PseudoRandomNumberGenerator(
 class CorlaPrng(
     val seed: String, // at least of length MININUM_SEED_LENGTH and whose contents must only be digits.
-    // val with_replacement: Boolean, // True if we should "replace" drawn numbers once they are drawn
-    val my_minimum: Int,
-    val my_maximum: Int
+    val with_replacement: Boolean, // True if we should "replace" drawn numbers once they are drawn
+    val minimumIdx: Int,
+    val maximumIdx: Int
 ) {
     private val sha256_digest = MessageDigest.getInstance("SHA-256")!!
-    private var my_count = 0
-    val duplicates = mutableListOf<Int>()
+    private var seqCount = 0
+    // The maximum index that can be generated without replacement.
+    private val maximumSequenceWO: Int
 
-    /** The maximum index that can be generated without replacement. */
-    private val my_maximum_index: Int
+    val duplicates = mutableListOf<Int>()
     val prnIds = mutableSetOf<Int>()
 
     init {
         assert(MINIMUM_SEED_LENGTH <= seed.length)
-        my_maximum_index = my_maximum - my_minimum + 1
+        maximumSequenceWO = maximumIdx - minimumIdx + 1
     }
 
     fun next(): Int {
-        my_count++
+        seqCount++
         // assert(my_count <= my_maximum_index)
 
         // CORLA's own SHA-256 PRNG draw sequence from the public random seed and the county ballot manifest(s)
         // (SHA256(seed + "," + i) mod domain_size,
-        val hash_input = seed + "," + my_count
+        val hash_input = seed + "," + seqCount
 
         val hash_output = sha256_digest.digest(hash_input.toByteArray(StandardCharsets.UTF_8))
 
         // TODO get rid of BigInteger
         val int_output = BigInteger(1, hash_output)
         // domain size = my_maximum - my_minimum + 1
-        val in_range = int_output.mod(BigInteger.valueOf((my_maximum - my_minimum + 1).toLong()))
-        val pick = my_minimum + in_range.intValueExact()
+        val in_range = int_output.mod(BigInteger.valueOf((maximumIdx - minimumIdx + 1).toLong()))
+        val pick = minimumIdx + in_range.intValueExact()
 
-        if (!prnIds.add(pick)) {
-            println("duplicate pick $pick")
+        if (with_replacement || !prnIds.contains(pick)) {
+            prnIds.add(pick)
+        } else {
+            // println("duplicate pick $pick")
             duplicates.add(pick)
             return next()
         }

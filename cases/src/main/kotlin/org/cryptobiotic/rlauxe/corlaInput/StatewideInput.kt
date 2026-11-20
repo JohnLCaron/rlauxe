@@ -15,7 +15,7 @@ import org.cryptobiotic.rlauxe.auditcenter.readContestComparisonCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
 import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
-import org.cryptobiotic.rlauxe.auditcenter.readTargetedContestsCsv
+import org.cryptobiotic.rlauxe.co.auditcenter.TargetContest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
@@ -340,8 +340,9 @@ fun mergeContestInfo(input: StatewideInput): MergedInfo {
     val mvrContests: Map<String, ContestMvrCount> = input.contestsFromMvrs.associateBy { it.contestName }
     val mvrCounties: Map<String, CountyMvrCount>  = input.countiesFromMvrs.associateBy { it.countyName }
 
-    val targetContests = if (input.targetContestsFile == null) emptyList() else
-        readTargetedContestsCsv(input.targetContestsFile) { it }
+    // is there some other way to find single counties besides targetContestsFile, which has nonstandard names ...
+    val targetContests: List<TargetContest> = if (input.targetContestsFile == null) emptyList() else
+        TargetContest.readFromFile(input.targetContestsFile)
     val singleContests = targetContests.filter { it.remarks.startsWith("Single") }.map { "${it.countyName} - ${it.contestName}" }.toSet()
 
     // mergedContestInfo in canonical list order, which seems to be alphabetic; this determines contest id ordering.

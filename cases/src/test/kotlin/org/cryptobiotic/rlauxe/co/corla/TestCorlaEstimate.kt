@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.corla
+package org.cryptobiotic.rlauxe.co.corla
 
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestRound

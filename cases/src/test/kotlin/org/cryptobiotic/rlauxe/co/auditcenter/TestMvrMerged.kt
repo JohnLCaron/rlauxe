@@ -1,8 +1,7 @@
 package org.cryptobiotic.rlauxe.co.auditcenter
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
-import org.cryptobiotic.rlauxe.corla.CorlaPRNG
-import org.cryptobiotic.rlauxe.corla.CorlaPrng
+import org.cryptobiotic.rlauxe.co.corla.CorlaPrng
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026General
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import kotlin.test.Test
@@ -35,13 +34,6 @@ class TestMvrMerged {
         }
         println()
 
-        results.entries.forEach { entry ->
-            if (null == stateInput.matchCanonicalContest(entry.key)) {
-                println("no canon for activities contest ${entry.key}")
-                fail = true
-            }
-        }
-        println()
 
         rounds.entries.forEach { entry ->
             if (null == stateInput.matchCanonicalContest(entry.key)) {
@@ -49,6 +41,14 @@ class TestMvrMerged {
                 fail = true
             }
         }
+
+        results.entries.forEach { entry ->
+            if (null == stateInput.matchCanonicalContest(entry.key)) {
+                println("no canon for activities contest ${entry.key}")
+                fail = true
+            }
+        }
+        println()
 
         selected.entries.forEach { entry ->
             if (null == stateInput.matchCanonicalContest(entry.key)) {
@@ -67,9 +67,10 @@ class TestMvrMerged {
         if (fail) throw RuntimeException("Failed")
     }
 
-
+/*
     data class MvrMergedInfo(
         val dbId: Int,
+        val county: String,
         val imprintedId: String,
         val prn: Int,
         val seq: Int,
@@ -95,9 +96,9 @@ class TestMvrMerged {
         fun addResults(resultsList: List<ResultsReport>) {
             resultsList.forEach {
                 val mvr = mvrMap[it.dbId]
-                if (mvr == null) mvrMap[it.dbId] = MvrMergedInfo(it.dbId, it.imprintedId, it.randomNumber, it.sequence, it.multiplicity)
+                if (mvr == null) mvrMap[it.dbId] = MvrMergedInfo(it.dbId, it.county, it.imprintedId, it.randomNumber, it.sequence, it.multiplicity)
                 else {
-                    val should = MvrMergedInfo(it.dbId, it.imprintedId, it.randomNumber, it.sequence, it.multiplicity)
+                    val should = MvrMergedInfo(it.dbId, it.county, it.imprintedId, it.randomNumber, it.sequence, it.multiplicity)
                     require (mvr.imprintedId == it.imprintedId)
                     require (mvr.prn == it.randomNumber)
                     // require (mvr.seq == it.sequence)
@@ -138,75 +139,72 @@ class TestMvrMerged {
             if (counties.isEmpty())
                 println("county not set on $contest")
         }
-    }
+    } */
 
     @Test
-    fun testContestMerged() {
+    fun testSequences() {
 
-        // ContestSelection have list of dbids
-        val mcontests = selected.mapValues { (_, select) ->
-            ContestMergedInfo(select.contest_name, select.dbList)
-        }
+        val infos = ContestMergedInfos(stateInput)
 
-        /* Activities have contest name -> mvr // TODO resultsReport
-        activities.forEach { (contestName, activityList) ->
-            val mcontest = mcontests[contestName]!!
-            mcontest.addActivites(activityList)
+        /*
+
+// ContestSelection have list of dbids
+val mcontests = selected.mapValues { (_, select) ->
+    ContestMergedInfo(select.contest_name, select.dbList)
+}
+
+// Results have contest name -> mvr
+results.forEach { (contestName, resultsList) ->
+    val mcontest = mcontests[contestName]!!
+    mcontest.addResults(resultsList)
+}
+
+/* mvrsByContest contest -> county -> lines
+mvrsByContest.forEach { (contestName, countyMap) ->
+    val mcontest = mcontests[contestName]
+    if (null != mcontest) {
+        println("$contestName: mvrsByContest ncounties = ${countyMap.size}")
+        countyMap.values.forEach { mcontest.addMvrComparison(it) }
+    } else {
+        // println("missing $contestName: with ncounties = ${countyMap.size}")
+        /* countyMap.values.forEach {
+            val dbids = it.map { it.cvr_id }
+            println("   dbids = $dbids")
         } */
+    }
+} */
 
-        // Results have contest name -> mvr // TODO resultsReport
-        results.forEach { (contestName, resultsList) ->
-            val mcontest = mcontests[contestName]!!
-            mcontest.addResults(resultsList)
-        }
+rounds.entries.forEach { entry ->
+    val mcontest = mcontests[entry.key]
+    if (null != mcontest) {
+        mcontest.addContestRound(entry.value)
+    }
+}
 
-        /* mvrsByContest contest -> county -> lines
-        mvrsByContest.forEach { (contestName, countyMap) ->
-            val mcontest = mcontests[contestName]
-            if (null != mcontest) {
-                println("$contestName: mvrsByContest ncounties = ${countyMap.size}")
-                countyMap.values.forEach { mcontest.addMvrComparison(it) }
-            } else {
-                // println("missing $contestName: with ncounties = ${countyMap.size}")
-                /* countyMap.values.forEach {
-                    val dbids = it.map { it.cvr_id }
-                    println("   dbids = $dbids")
-                } */
-            }
-        } */
+canon.entries.forEach { entry ->
+    val mcontest = mcontests[entry.key]
+    if (null != mcontest) {
+        val counties = entry.value.counties
+        // if (counties.size != 1) println("mcontest ${entry.key} has counties = ${counties}")
+        mcontest.addCounties(counties)
+    }
+}
 
-        rounds.entries.forEach { entry ->
-            val mcontest = mcontests[entry.key]
-            if (null != mcontest) {
-                mcontest.addContestRound(entry.value)
-            }
-        }
+// activites fail, results pass
+mcontests.values.forEach { it.check() }
 
-        canon.entries.forEach { entry ->
-            val mcontest = mcontests[entry.key]
-            if (null != mcontest) {
-                val counties = entry.value.counties
-                // if (counties.size != 1) println("mcontest ${entry.key} has counties = ${counties}")
-                mcontest.addCounties(counties)
-            }
-        }
+println("ok so far") */
 
-
-        // activites fail, results pass
-        mcontests.values.forEach { it.check() }
-
-        println("ok so far")
-
-        mcontests.values.forEach { mcontest ->
-            if (mcontest.counties.size > 1)
-                print("")
-            println("${mcontest.contest} (${mcontest.mvrMap.size})")
-            val prng = CorlaPRNG(stateInput.seed, with_replacement = true, 1, mcontest.ballotCardCount)
-            val prns = prng.getRandomNumbers(0, mcontest.dbList.size-1)
+        // test sequences for all targeted ballots
+        infos.mcontests.values.filter { it.contest.startsWith("Attorney General") }.forEach { mcontest ->
+            println("${mcontest.contest} mvrs=${mcontest.mvrMap.size} maximumIndex=${mcontest.ballotCardCount}")
+            val prng = CorlaPrng(stateInput.seed, with_replacement = true, 1, mcontest.ballotCardCount)
+            // val prns = prng.getRandomNumbers(0, mcontest.dbList.size-1)
+            val prns = mutableListOf<Int>()
+            repeat(mcontest.dbList.size) { prns.add(prng.next()) }
 
             val mvrMapPrn = mcontest.mvrMap.mapKeys { it.value.prn }
 
-            val mvrs = mcontest.mvrMap.values.sortedBy { it.seq }
             prns.forEachIndexed { idx, prn ->
                 val mvr = mvrMapPrn[prn]
                 if (mvr == null)
@@ -216,9 +214,9 @@ class TestMvrMerged {
                     assertEquals(prn, mvr.prn)
                 }
             }
+            println()
 
         }
-
-
     }
+
 }

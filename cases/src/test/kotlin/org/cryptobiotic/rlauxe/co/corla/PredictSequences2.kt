@@ -1,12 +1,15 @@
-package org.cryptobiotic.rlauxe.corlaInput
+package org.cryptobiotic.rlauxe.co.corla
 
 import org.cryptobiotic.rlauxe.auditcenter.AuditReason
 import org.cryptobiotic.rlauxe.auditcenter.ComparisonMvr
 import org.cryptobiotic.rlauxe.corla.ManifestEntries
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
-import org.cryptobiotic.rlauxe.corla.CorlaPrng
+import org.cryptobiotic.rlauxe.corlaInput.MergedContestInfo
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026General
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import kotlin.collections.forEach
+import kotlin.compareTo
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertNotNull
@@ -187,7 +190,7 @@ class CorlaPrngState(val seed: String, val stateManifest: StateManifest, val pop
     val duplicateIds: List<String>
 
     init {
-        prng = CorlaPrng(seed, 1, population) // without replacement (!)
+        prng = CorlaPrng(seed, true, 1, population) // without replacement (!)
 
         val prns = mutableListOf<Int>()
         repeat(statewideNmvrs) { prns.add(prng.next()) }
@@ -217,7 +220,7 @@ class CorlaPrngCounty(val seed: String, val countyManifest: CountyManifest, val 
     init {
         println("-------------- $county")
         // modulus max - min + 1 = 1_444_047
-        prng = CorlaPrng(seed, 1, countyManifest.nballotCards) // without replacement (!)
+        prng = CorlaPrng(seed, true, 1, countyManifest.nballotCards) // without replacement (!)
         println("  county population=${countyManifest.nballotCards} nmvrs =${countyMvrs}") // 2020 doesnt know which are statewide
 
         val prns = mutableListOf<Int>()

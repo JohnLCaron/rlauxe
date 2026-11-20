@@ -190,7 +190,7 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
     }
     cards.values.forEach { card: ComparisonMvr -> card.validate() }
 
-    // accumulate mvr counts by County, segregate staewide
+    // accumulate mvr counts by County, segregate statewide
     val countyMvrs = mutableMapOf<String, CountyMvrCount>()
     // cards.values.filter { !it.statewide() }.forEach { card: Card ->
     cards.values.forEach { card: ComparisonMvr ->

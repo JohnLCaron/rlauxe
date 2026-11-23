@@ -115,7 +115,7 @@ class TestCorlaPRNG {
         val strata = stateInput.countyStrataMap[county]!!
         val countyManifest = stateInput.countyManifest(county)!!
         // modulus max - min + 1 = 1_444_047
-        val corlaPRNG = CorlaPRNG("49006417086137856424", true, 1, strata.ballotCardCount)
+        val corlaPRNG = CorlaPRNG("49006417086137856424", true, 1, strata.population)
 
         val prns = corlaPRNG.getRandomNumbers(1, strata.nmvrs)
         val ids = prns.map { prn -> countyManifest.idFromIndex(prn) }

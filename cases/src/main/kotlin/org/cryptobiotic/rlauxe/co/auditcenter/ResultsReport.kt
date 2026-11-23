@@ -1,14 +1,20 @@
 package org.cryptobiotic.rlauxe.co.auditcenter
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.apache.poi.openxml4j.util.ZipSecureFile
 import java.io.File
 import java.io.IOException
 
 import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import kotlin.String
 
-// activityReport.xlsx
+private val logger = KotlinLogging.logger("ResultsReport")
+private val show = false
+
+// one line for each target mvr ; ~5K
+
+// resultsReport.xlsx
 // county, imprinted id, scanner id, batch id, record id, db id, round, audit board, record type, discrepancy, consensus, comment, random number, random number sequence position, multiplicity, time of submission
 // county, imprinted id, scanner id, batch id, record id, db id, round, audit board, record type, discrepancy, consensus, comment, revision, re-audit ballot comment, time of submission
 data class ResultsReport(
@@ -30,10 +36,19 @@ data class ResultsReport(
     val timeOfSubmission: String,
 ) {
 
+    // I dont trust that this format wont change
     companion object {
 
-        fun readFromFile(filename: String): Map<String, List<ResultsReport>> { // contest name -> mvr
+        fun readFromFile(filename: String): Map<String, List<ResultsReport>> { // target contest name -> mvr
             val result = mutableMapOf<String, MutableList<ResultsReport>>()
+
+            // "$ac/2024/general/round3/ResultsReport3.xlsx"
+            // org.apache.poi.ooxml.POIXMLException: Zip bomb detected! The file would exceed the max. ratio of compressed file size to the size of the expanded data.
+            //This may indicate that the file is used to inflate memory usage and thus could pose a security risk.
+            //You can adjust this limit via ZipSecureFile.setMinInflateRatio() if you need to work with files which exceed this limit.
+            //Uncompressed size: 206203, Raw/compressed size: 2048, ratio: 0.009932
+            //Limits: MIN_INFLATE_RATIO: 0.010000, Entry: xl/styles.xml
+            ZipSecureFile.setMinInflateRatio(.001)
 
             val excelFile = File(filename)
             val formatter = DataFormatter()
@@ -41,43 +56,45 @@ data class ResultsReport(
             // Passing a File directly uses less memory than FileInputStream
             try {
                 WorkbookFactory.create(excelFile).use { workbook ->
-                    /* repeat(workbook.numberOfSheets ) {
-                        val sheet: Sheet = workbook.getSheetAt(it)
-                        println("$it  ${sheet.sheetName}")
-                    }
-                    println() */
-                    val contestsToSheets = mutableListOf<Pair<String, String>>()  // contest name, sheet name
-                    val sheet: Sheet = workbook.getSheetAt(0) // Contests to Sheets
-                    var rowCount = 0
-                    for (row in sheet) {
-                        val cellValues = row.toList().map{ it.getStringCellValue() }
-                        // println(cellValues)
-                        if (rowCount > 1 && cellValues.size > 1)
-                            contestsToSheets.add(Pair(cellValues[0], cellValues[1]))
-                        rowCount++
-                    }
-
                     var firstHeader = emptyList<String>()
-                    contestsToSheets.forEach { pair ->
-                        val sheetName = if (pair.second == "Governor / Lieutenant Governor") "Governor   Lieutenant Governor" else pair.second // 2026General, sheesh
-                        val sheet: Sheet? = workbook.getSheet(sheetName) //sheet name
-                        if (sheet != null) {
-                            var count = 0
-                            val header = sheet.getRow(1).toList().map { it.getStringCellValue() }
-                            // println("${pair.first}: $header")
-                            val activities = mutableListOf<ResultsReport>()
+                    val contestNames = mutableListOf<String>()
+                    var sheetno = 0
 
-                            if (firstHeader.isEmpty()) firstHeader = header
-                            else if (firstHeader != header) {
-                                println(header)
+                    for (sheet in workbook) {
+                        if (sheet.sheetName.startsWith("Contests to Sheets")) {
+                            val rows = sheet.iterator()
+                            rows.next() // skip first row - its the header
+                            while( rows.hasNext() ) {
+                                val row = rows.next()
+                                if (row.first().getStringCellValue().startsWith("Contest Name")) continue
+                                contestNames.add(row.first().getStringCellValue())
                             }
+                            continue
+                        }
+                        if (sheet.sheetName.startsWith("Summary")) continue
 
-                            for (row in sheet) {
-                                val cellValues = row.toList()
-                                // println(cellValues)
-                                if (count > 1  && cellValues.size > 1) {
-                                    var idx = 0
-                                    activities.add(
+                        var rowno = 0
+                        // find the header
+                        while (true) {
+                            val cellValues = sheet.getRow(rowno).toList().map { it.getStringCellValue() }
+                            if (cellValues.first().lowercase() == "county") break
+                            rowno++
+                        }
+                        val header = sheet.getRow(rowno).toList().map { it.getStringCellValue() }
+                        if (firstHeader.isEmpty()) firstHeader = header
+                        else if (firstHeader != header) {
+                            logger.warn { " changed = $header was ${firstHeader}" }
+                        }
+                        rowno++ // skip the header
+
+                        val results = mutableListOf<ResultsReport>()
+                        while (rowno < sheet.getLastRowNum()) {
+                            val cellValues = sheet.getRow(rowno).toList()
+                            // println(cellValues)
+                            if (cellValues.size >= 15) {
+                                var idx = 0
+                                try {
+                                    results.add(
                                         ResultsReport(
                                             county = cellValues[idx++].getStringCellValue(),
                                             imprintedId = cellValues[idx++].getStringCellValue(),
@@ -95,15 +112,16 @@ data class ResultsReport(
                                             sequence = cellValues[idx++].getStringCellValue().trim().toInt(),
                                             multiplicity = cellValues[idx++].getStringCellValue().trim().toInt(),
                                             timeOfSubmission = cellValues[idx++].getStringCellValue(),
-                                        )
-                                    )
-                                }
-                                count++
+                                        ))
+                                    } catch (e: Exception) {
+                                        println(cellValues)
+                                    }
                             }
-                            result[pair.first] = activities
-
-                        } else
-                            println("ActivityReport FAILed to find sheet '${sheetName}'")
+                            rowno++
+                        }
+                        result[contestNames[sheetno]] = results
+                        if (show) println("ResultsReport sheet '${sheet.sheetName}' with ${results.size} results for contest '${contestNames[sheetno]}'")
+                        sheetno++
                     }
                 }
 

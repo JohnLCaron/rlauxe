@@ -59,12 +59,6 @@ class CompareContestInput {
         val mvr1 = readContestComparisonCsv(input1.mvrComparisonFile)
         val mvr2 = readContestComparisonCsv(input2.mvrComparisonFile)
 
-        println("compare mvr contest names")
-        compareLists(
-            mvr1.contestMvrs.map { it.contestName },
-            mvr2.contestMvrs.map { it.contestName },
-        )
-
         println("compare mvr county names")
         compareLists(
             mvr1.countyMvrs.map { it.countyName },

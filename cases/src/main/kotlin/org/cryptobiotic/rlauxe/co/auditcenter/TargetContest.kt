@@ -1,10 +1,12 @@
 package org.cryptobiotic.rlauxe.co.auditcenter
 
-import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import java.io.File
 import java.io.IOException
+
+// one line for each targeted contest ~ 100
+// contest names are not final, avoild this file if possible
 
 // targetContests.csv; 2026GeneralRLAContestList
 // // "Targeted Contests",,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -32,29 +34,41 @@ data class TargetContest(
             try {
                 WorkbookFactory.create(excelFile).use { workbook ->
                     val sheet: Sheet = workbook.getSheetAt(0)
-                    var count = 0
-                    for (row in sheet) {
-                        val cellValues: List<Cell> = row.toList()
-                        // println(cellValues)
-                        if (count > 0 && cellValues.size > 10 && !cellValues.first().getStringCellValue().startsWith("*")) {
-                            var idx = 0
-                            result.add(
-                                TargetContest(
-                                    countyName = cellValues[idx++].getStringCellValue().trim(),
-                                    contestName = cellValues[idx++].getStringCellValue().trim(),
-                                    nwinners = cellValues[idx++].getNumericCellValue().toInt(),
-                                    lowestWinner = cellValues[idx++].getNumericCellValue().toInt(),
-                                    highestLoser = cellValues[idx++].getNumericCellValue().toInt(),
-                                    voteMargin = cellValues[idx++].getNumericCellValue().toInt(),
-                                    dilutedMargin = cellValues[idx++].getNumericCellValue(),
-                                    riskLimit = cellValues[idx++].getNumericCellValue(),
-                                    estimatedSamplesToAudit = cellValues[idx++].getNumericCellValue().toInt(),
-                                    numberOfCvrs = cellValues[idx++].getNumericCellValue().toInt(),
-                                    remarks = clean(cellValues[idx++].getStringCellValue()).trim(),
+                    var rowno = 0
+                    // skip past the header
+                    while (true) {
+                        val cellValues = sheet.getRow(rowno).toList()
+                        if (cellValues.first().getStringCellValue().lowercase() == "county") break
+                        rowno++
+                    }
+                    rowno++ // skip header
+
+                    while (rowno < sheet.getLastRowNum()) {
+                        val cellValues = sheet.getRow(rowno).toList()
+                        try {
+                            // if (cellValues.first().getStringCellValue().startsWith("The assumption")) break
+                            if (cellValues.size > 10) {
+                                var idx = 0
+                                result.add(
+                                    TargetContest(
+                                        countyName = cellValues[idx++].getStringCellValue().trim(),
+                                        contestName = cellValues[idx++].getStringCellValue().trim(),
+                                        nwinners = cellValues[idx++].getNumericCellValue().toInt(),
+                                        lowestWinner = cellValues[idx++].getNumericCellValue().toInt(),
+                                        highestLoser = cellValues[idx++].getNumericCellValue().toInt(),
+                                        voteMargin = cellValues[idx++].getNumericCellValue().toInt(),
+                                        dilutedMargin = cellValues[idx++].getNumericCellValue(),
+                                        riskLimit = cellValues[idx++].getNumericCellValue(),
+                                        estimatedSamplesToAudit = cellValues[idx++].getNumericCellValue().toInt(),
+                                        numberOfCvrs = cellValues[idx++].getNumericCellValue().toInt(),
+                                        remarks = clean(cellValues[idx++].getStringCellValue()).trim(),
+                                    )
                                 )
-                            )
+                            }
+                        } catch (e: Exception) {
+                            println(cellValues)
                         }
-                        count++
+                        rowno++
                     }
                 }
 

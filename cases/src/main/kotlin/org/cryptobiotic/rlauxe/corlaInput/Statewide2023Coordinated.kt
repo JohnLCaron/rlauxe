@@ -9,16 +9,19 @@ import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 
-open class Statewide2023Coordinated(ac:String?=auditcenter): StatewideInput (
-    targetContestsFile = null, // "$ac/2023/coordinated/targetedContests.pdf",
-    generalCanonicalFile = "$ac/2023/coordinated/canonicalListFinal.csv",
-    contestRoundFile = "$ac/2023/coordinated/round_1/contest.csv",
-    tabulateCountyFile = "$ac/2023/coordinated/tabulateCounty.csv",
-    mvrComparisonFile = "$ac/2023/coordinated/round_2/CVRtoAuditBoardInterpretationComparison.csv"
-) {
+open class Statewide2023Coordinated(ac:String?=auditcenter): StatewideInput () {
     override val seed = ""
     override val year = "2023"
-    val manifestDir = "$ac/2023/coordinated/round_1"
+
+    override val targetContestsFile = null // "$ac/2023/coordinated/targetedContests.pdf",
+    override val generalCanonicalFile = "$ac/2023/coordinated/canonicalListFinal.csv"
+    override val contestRoundFile = "$ac/2023/coordinated/round_2/contest.csv"
+    override val tabulateCountyFile = "$ac/2023/coordinated/tabulateCounty.csv"
+    override val mvrComparisonFile = "$ac/2023/coordinated/round_2/CVRtoAuditBoardInterpretationComparison.csv"
+    override val contestSelectionFile = "$ac/2023/coordinated/round_2/contestSelection.csv"
+    override val resultsReportFile = "$ac/2023/coordinated/round_2/AuditResultsReport.xlsx"
+
+    val manifestDir = "$ac/2023/coordinated/round_1" // 2023/coordinated/round_2/AuditResultsReport.xlsx
 
     override fun manifestFile(county: String): String {
         val noblanks = county.replace("\\s".toRegex(), "")

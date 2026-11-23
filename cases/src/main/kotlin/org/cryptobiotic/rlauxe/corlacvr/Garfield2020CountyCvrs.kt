@@ -4,13 +4,13 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.corlaInput.defaultCharset
 import org.cryptobiotic.rlauxe.corlaInput.munge
 import org.cryptobiotic.rlauxe.util.ZipReader
 import org.cryptobiotic.rlauxe.util.nfn
 import java.io.File
 import java.io.InputStreamReader
 import java.io.Reader
-import java.nio.charset.Charset
 
 // this reads csv files for Garfield County, Colorado 2020 General election.
 // apparently this is from Clear Ballot, not Dominion.
@@ -55,10 +55,10 @@ class Garfield2020CountyCvrs(override val inputSource: String, showHeaders: Bool
             val lastPart = inputSource.substringAfterLast("/")
             val innerFilename = lastPart.replace(".zip", ".csv")
             val inputStream = zipReader.inputStream(innerFilename)
-            val reader: Reader = InputStreamReader(inputStream, "UTF-8")
+            val reader: Reader = InputStreamReader(inputStream, defaultCharset)
             CSVParser.parse(reader, CSVFormat.DEFAULT)
         } else {
-            CSVParser.parse(File(inputSource), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
+            CSVParser.parse(File(inputSource), defaultCharset, CSVFormat.DEFAULT)
         }
 
         records = parser.iterator()

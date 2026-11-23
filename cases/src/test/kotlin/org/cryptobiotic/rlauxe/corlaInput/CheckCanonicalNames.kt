@@ -156,6 +156,7 @@ class CheckCanonicalNames( val input: StatewideInput) {
         compareLists(canonicalContestNames, contestRounds, "canonical", "ContestRoundCsv")
     }
 
+    /*
     fun checkCanonicalHasMvrComparison() {
         println("\n--------------------------------- checkCanonicalHasMvrComparison")
         val contestMvrs = input.contestsFromMvrs.map { it.contestName }
@@ -163,7 +164,7 @@ class CheckCanonicalNames( val input: StatewideInput) {
         contestMvrs.forEach {
             if (!canonical.contains(it)) println("  canonical missing '${it}' in contestsFromMvrs")
         }
-    }
+    } */
 
     // now correct ColoradoInput and then run this:
 
@@ -180,9 +181,10 @@ class CheckCanonicalNames( val input: StatewideInput) {
             if (!inputCanonical.contains(it.key)) println( "canonical missing '${it.key}' from roundContests")
         }
 
+        /*
         input.contestsFromMvrs.forEach {
             if (!inputCanonical.contains(it.contestName)) println("canonical missing '${it.contestName}' from contestMvrs")
-        }
+        } */
 
         inputCanonical.forEach { cc ->
             if (!input.contestTabsAllCounties().contains(cc.key)) println("contestTabsByCounty missing '${cc.key}' from canonical")

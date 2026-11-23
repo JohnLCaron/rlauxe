@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026General
-import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.util.nfn
@@ -16,7 +15,7 @@ class TestReadCountyCvrManifests {
         val manifestDir = "${auditcenter}/2026/primary/files"
         val countySet = stateInput.counties().toSet()
         val manifests = readAuditcenterManifests(manifestDir, countySet)
-        val stratas = stateInput.strataPopulation()
+        val stratas = stateInput.countyPopulation()
 
         println ("${sfn("CountyName", 20)}, sumCards, population, diff")
         var totalPopulation = 0
@@ -44,7 +43,7 @@ class TestReadCountyCvrManifests {
     fun readOneCountyManifest() {
         val manifestFile = "${auditcenter}/2020/general/round_1/manifest-ElPaso.csv"
         val manifestBatches = readCountyManifestCsv(manifestFile)
-        val stratas = stateInput.strataPopulation()
+        val stratas = stateInput.countyPopulation()
 
         val sumCards = manifestBatches.sumOf{ it.nballotCards }
 

@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.co.auditcenter
 
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
+import org.cryptobiotic.rlauxe.auditcenter.getAuditReason
 import org.cryptobiotic.rlauxe.corlaInput.defaultCharset
 import org.cryptobiotic.rlauxe.corlacvr.reverseMungedDate
 import org.cryptobiotic.rlauxe.util.nfn
@@ -9,10 +10,14 @@ import org.cryptobiotic.rlauxe.util.trunc
 import java.io.File
 import kotlin.text.appendLine
 
+// one line for each target mvr and contest on the mvr; ~200K
+// TODO test if stream is faster? avoild associate lookup ??
+
 // auditcenter 2020 has no "audit reason"
 // county_name,contest_name,imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,timestamp,cvr_id
 // county_name,contest_name,imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,timestamp,cvr_id,audit_reason
 
+// TODO are these names canonical ??
 data class MvrComparison(
     val county_name: String,
     val contest_name: String,
@@ -20,12 +25,12 @@ data class MvrComparison(
     val ballot_type: String,
     val choice_per_voting_computer: String,
     val audit_board_selection: String,
-    val consensus: String,
+    val consensus: String,  // ?? Always YES I think ??
     val record_type: String,
     val audit_board_comment: String,
     val timestamp: String,
     val cvr_id: Int, // apparently the opaque "db creation id"
-    val audit_reason: String?,
+    val audit_reason: String?, // 2020 didnt have this field, but 2026 does; apparently its only on some of the ballots ???? I guess its unreliable
 ) {
 
     companion object {
@@ -67,6 +72,7 @@ data class MvrComparison(
             return results
         }
 
+        // TODO are these used ??
         fun mvrByCountyAndContest(lines: List<MvrComparison>): Map<String, Map<String, List<MvrComparison>>> { // county -> contest -> lines
             val results = mutableMapOf<String, MutableMap<String, MutableList<MvrComparison>>>()
             lines.forEach { line ->

@@ -14,7 +14,10 @@ data class ManifestBatch(
     val batchId: String,
     val nballotCards: Int,
     val location: String,
-) {
+)  {
+    fun show() = buildString {
+        append("$tabulatorNum-$batchId-$nballotCards")
+    }
 
     companion object {
 

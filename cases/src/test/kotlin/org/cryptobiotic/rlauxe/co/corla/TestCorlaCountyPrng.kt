@@ -39,7 +39,7 @@ class TestCorlaCountyPrng {
         val strata = stateInput.countyStrataMap[county]!!
         val countyManifest = stateInput.countyManifest(county)!!
         // modulus max - min + 1 = 1_444_047
-        val corlaPRNG = CorlaPRNG(seed2020, true, 1, strata.ballotCardCount)
+        val corlaPRNG = CorlaPRNG(seed2020, true, 1, strata.population)
 
         val prns = corlaPRNG.getRandomNumbers(1, strata.nmvrs)
         val ids = prns.map { prn -> countyManifest.idFromIndex(prn) }
@@ -154,8 +154,8 @@ class TestCorlaCountyPrng {
             val strata = stateInput.countyStrataMap[county]!!
             val countyManifest = stateInput.countyManifest(county)!!
             // modulus max - min + 1 = 1_444_047
-            val corlaPRNG = CorlaPRNG(seed2020, false, 1, strata.ballotCardCount) // without replacement (!)
-            if (verbose) println("  county population=${strata.ballotCardCount} nmvrs =${strata.nmvrs}")
+            val corlaPRNG = CorlaPRNG(seed2020, false, 1, strata.population) // without replacement (!)
+            if (verbose) println("  county population=${strata.population} nmvrs =${strata.nmvrs}")
 
             val prns = corlaPRNG.getRandomNumbers(0, strata.nmvrs - 1)
             if (verbose) println("  prns size=${prns.size} unique=${prns.toSet().size}")
@@ -350,8 +350,8 @@ class TestCorlaCountyPrng {
             val strata = stateInput.countyStrataMap[county]!!
             val countyManifest = stateInput.countyManifest(county)!!
             // modulus max - min + 1 = 1_444_047
-            val corlaPRNG = CorlaPRNG(seed2020, false, 1, strata.ballotCardCount) // without replacement (!)
-            if (verbose) println("  county population=${strata.ballotCardCount} nmvrs =${strata.countyMvrs}") // 2020 doesnt know which are statewide
+            val corlaPRNG = CorlaPRNG(seed2020, false, 1, strata.population) // without replacement (!)
+            if (verbose) println("  county population=${strata.population} nmvrs =${strata.countyMvrs}") // 2020 doesnt know which are statewide
             countyMvrs = strata.countyMvrs
 
             val prns = corlaPRNG.getRandomNumbers(0, strata.nmvrs - 1)
@@ -377,8 +377,8 @@ class TestCorlaCountyPrng {
             val strata = stateInput.countyStrataMap[county]!!
             val countyManifest = stateInput.countyManifest(county)!!
             // modulus max - min + 1 = 1_444_047
-            val prng = CorlaPrng(seed2020, true, 1, strata.ballotCardCount) // without replacement (!)
-            if (verbose) println("  county population=${strata.ballotCardCount} nmvrs =${strata.countyMvrs}") // 2020 doesnt know which are statewide
+            val prng = CorlaPrng(seed2020, true, 1, strata.population) // without replacement (!)
+            if (verbose) println("  county population=${strata.population} nmvrs =${strata.countyMvrs}") // 2020 doesnt know which are statewide
             countyMvrs = strata.countyMvrs
 
             val prns = mutableListOf<Int>()

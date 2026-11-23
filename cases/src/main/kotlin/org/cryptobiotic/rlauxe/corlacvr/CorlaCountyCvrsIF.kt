@@ -4,13 +4,13 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.corlaInput.defaultCharset
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
-import java.nio.charset.Charset
 import java.util.zip.ZipInputStream
 
 private val logger = KotlinLogging.logger("CorlaCvrs")
@@ -28,11 +28,11 @@ fun readCountyCvrsFromFile(filename: String, redaction: Redaction = Redaction(),
         val lastPart = filename.substringAfterLast("/")
         val innerFilename = lastPart.replace(".zip", ".csv")
         val inputStream = zipReader.inputStream(innerFilename)
-        val reader: Reader = InputStreamReader(inputStream, "UTF-8")
+        val reader: Reader = InputStreamReader(inputStream, defaultCharset)
         CSVParser.parse(reader, CSVFormat.DEFAULT)
 
     } else {
-        CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
+        CSVParser.parse(File(filename), defaultCharset, CSVFormat.DEFAULT)
     }
 
     val corlaRawCvrs = CorlaCountyCvrs(filename, parser, redaction = redaction)
@@ -42,7 +42,7 @@ fun readCountyCvrsFromFile(filename: String, redaction: Redaction = Redaction(),
 
 fun readCountyCvrsFromResource(resourcePath: String, redaction: Redaction = Redaction(), readRows: Boolean = true): CorlaCountyCvrsIF {
     val resourceStream = getCsvStreamFromResource(resourcePath)
-    val reader: Reader = InputStreamReader(resourceStream, "UTF-8")
+    val reader: Reader = InputStreamReader(resourceStream, defaultCharset)
     val parser =  CSVParser.parse(reader, CSVFormat.DEFAULT)
     val corlaRawCvrs = CorlaCountyCvrs(resourcePath, parser, redaction = redaction)
     if (readRows) corlaRawCvrs.readRows()

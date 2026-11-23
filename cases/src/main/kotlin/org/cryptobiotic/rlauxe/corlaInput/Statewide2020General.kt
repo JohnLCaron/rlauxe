@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
 import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromResource
+import org.cryptobiotic.rlauxe.co.input.StrataInfo
 import org.cryptobiotic.rlauxe.corla.ManifestEntries
 import org.cryptobiotic.rlauxe.corla.GarfieldManifestEntries
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
@@ -15,15 +16,18 @@ import org.cryptobiotic.rlauxe.util.Locations.cases
 import kotlin.collections.plus
 
 /// TODO we need the seed and the total manifest size
-open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
-    targetContestsFile = "$ac/2020/general/targetContests.xlsx",
-    generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
-    contestRoundFile = "$ac/2020/general/round_1/contest.csv",
-    tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
-    mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
-) {
+open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
     override val seed = "92076602804272786701"
     override val year = "2020"
+
+    override val targetContestsFile = "$ac/2020/general/targetContests.xlsx"
+    override val generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv"
+    override val contestRoundFile = "$ac/2020/general/round_3/contest.csv"
+    override val tabulateCountyFile = "$ac/2020/general/tabulate_county.csv"
+    override val mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
+    override val contestSelectionFile = "$ac/2020/general/round_3/contest_selection.csv"
+    override val resultsReportFile = "$ac/2020/general/round_3/resultsReport.xlsx"
+
     val cvrsMissing = listOf("Baca", "Las Animas")
 
     override fun manifestFile(county: String): String {
@@ -89,7 +93,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
     }
 
     override val countyStrataMap: Map<String, StrataInfo> by lazy {
-        (mergedInfo().strataInfo +listOf(
+        (mergedInfo().countyStrata.values +listOf(
             StrataInfo("Gunnison", 34, 0, 11332), // TODO 0 state mvrs ??
             StrataInfo("San Juan", 0, 0, 571),
             )).associateBy { it.strataName }
@@ -273,6 +277,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput (
                 "Fremont County Board of County Commissioners - District 3" -> "Fremont County Commissioners - District 3"
                 "FREMONT COUNTY - ISSUE 1A - EXTENSION OF 1% SHERIFF'S TAX" -> "Fremont County Ballot Issue 1A"
                 "City of Ca�on City - Question 2A - Black Hills Energy Franchise" -> "City of Canon City Ballot Question 2A"
+                "City of Cañon City Ballot Question 2A" -> "City of Canon City Ballot Question 2A" // better to replace ñ with n ?
                 "DEER MOUNTAIN FIRE PROTECTION DISTRICT - ISSUE 6A - MILL LEVY INCREASE" -> "Deer Mountain Fire Protection District Ballot Issue 6A"
                 else -> null
             }

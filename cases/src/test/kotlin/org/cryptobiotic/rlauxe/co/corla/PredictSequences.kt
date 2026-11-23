@@ -40,7 +40,7 @@ class CountyYearInputs(
         counties = countyManifests.keys.toList().sorted()
     }
 
-    open fun statewideManifest() = statewideManifest
+    fun statewideManifest() = statewideManifest
     private val statewideManifest: StateManifest by lazy {
         val countyManifests = counties.map { county ->
             corlaCountyInput(county)!!.countyManifest

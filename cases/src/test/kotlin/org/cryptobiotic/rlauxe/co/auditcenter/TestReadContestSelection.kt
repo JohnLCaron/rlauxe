@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.co.auditcenter
 
+import org.cryptobiotic.rlauxe.co.input.makeCountyStrata
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026General
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import kotlin.test.Test
 
@@ -24,6 +27,13 @@ class TestReadContestSelection {
             println("${it.show()}, $diff")
         }
         return mcs
+    }
+
+    @Test
+    fun testMakeCountyStrata() {
+        val strata = makeCountyStrata(Statewide2026General())
+        println("\nCounty Strata")
+        strata.forEach{ println(it) }
     }
 
 }

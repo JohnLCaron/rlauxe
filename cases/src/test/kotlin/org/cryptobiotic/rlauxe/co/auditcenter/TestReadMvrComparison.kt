@@ -17,7 +17,6 @@ class TestReadMvrComparison {
         val lines: List<MvrComparison> = MvrComparison.readFromFile(filename)
         val mvrs = MvrComparison.mvrByCountyAndContest(lines)
 
-
         println()
         println(filename)
         // println("${ContestSelection.showHeader}, new")

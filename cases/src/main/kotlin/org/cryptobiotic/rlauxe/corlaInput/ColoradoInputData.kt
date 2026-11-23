@@ -5,6 +5,7 @@ import com.jsoizo.kotlincsv.reader.read
 import com.jsoizo.kotlincsv.reader.withHeader
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
+import org.cryptobiotic.rlauxe.co.input.StrataInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.util.nfn
@@ -21,14 +22,14 @@ private val logger = KotlinLogging.logger("ColoradoInput")
 // used by viewer
 val statewideInputs = listOf(
     Statewide2020General(),
-    Statewide2020Redacted(),
+    // Statewide2020Redacted(),
     Statewide2022Primary(),
     Statewide2023Coordinated(),
     Statewide2024General(),
     Statewide2025Coordinated(),
     Statewide2026Primary(),
-    Statewide2026PMerged(),
-    Statewide2026PwithCvrs(),
+    //Statewide2026PMerged(),
+    //Statewide2026PwithCvrs(),
     Statewide2026General(),
 )
 
@@ -156,7 +157,7 @@ fun writeCountyData(topdir: String, strataInfo: List<StrataInfo>) {
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     writer.write("county,   nmvrs, ballotCardCount\n")
     strataInfo.sortedBy { it.strataName }.forEach {
-        writer.write("${it.strataName}, ${nfn(it.nmvrs, 5)}, ${nfn(it.ballotCardCount, 5)}\n")
+        writer.write("${it.strataName}, ${nfn(it.nmvrs, 5)}, ${nfn(it.population, 5)}\n")
     }
     writer.close()
     logger.info{"wrote ${strataInfo.size} countyData to $outputFilename"}

@@ -7,15 +7,18 @@ import org.cryptobiotic.rlauxe.corlacvr.RedactionBoulder
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
-open class Statewide2025Coordinated(ac:String?=auditcenter): StatewideInput (
-    targetContestsFile = null,
-    generalCanonicalFile = "$ac/2025/canonicalList.csv", // Needs ISO-8859-1
-    contestRoundFile = "$ac/2025/round1/contest.csv",
-    tabulateCountyFile = "$ac/2025/tabulateCountyPlurality.csv",
-    mvrComparisonFile = "$ac/2025/finalReports/contestComparison.csv",
-) {
+open class Statewide2025Coordinated(ac:String?=auditcenter): StatewideInput () {
     override val seed = ""
     override val year = "2025"
+
+    override val targetContestsFile = "$ac/2025/2025CoordinatedRLASelectedContests.xlsx"
+    override val generalCanonicalFile = "$ac/2025/canonicalList.csv" // Needs ISO-8859-1
+    override val contestRoundFile = "$ac/2025/round2/contest.csv"
+    override val tabulateCountyFile = "$ac/2025/tabulateCountyPlurality.csv"
+    override val mvrComparisonFile = "$ac/2025/finalReports/contestComparison.csv"
+    override val contestSelectionFile = "$ac/2025/round2/contestSelection.csv"
+    override val resultsReportFile = "$ac/2025/finalReports/resultsReport.xlsx"
+
     val manifestDir = "$ac/2025/files"
 
     override fun manifestFile(county: String): String {

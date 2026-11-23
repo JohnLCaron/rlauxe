@@ -9,15 +9,17 @@ import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrs
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.util.Locations.cases
 
-class Statewide2024General(ac:String?=auditcenter): StatewideInput (
-    targetContestsFile = "$ac/2024/general/targetedContests.xlsx",
-    generalCanonicalFile = "$ac/2024/general/2024GeneralCanonicalList.csv",
-    contestRoundFile = "$ac/2024/general/round1/contest.csv",
-    tabulateCountyFile = "$ac/2024/general/tabulateCounty.csv",
-    mvrComparisonFile = "$ac/2024/general/round3/contestComparison.csv"
-) {
+class Statewide2024General(ac:String?=auditcenter): StatewideInput () {
     override val seed = ""
     override val year = "2024"
+    override val targetContestsFile = "$ac/2024/general/targetedContests.xlsx"
+    override val generalCanonicalFile = "$ac/2024/general/2024GeneralCanonicalList.csv"
+    override val contestRoundFile = "$ac/2024/general/round3/contest.csv"
+    override val tabulateCountyFile = "$ac/2024/general/tabulateCounty.csv"
+    override val mvrComparisonFile = "$ac/2024/general/round3/contestComparison.csv"
+    override val contestSelectionFile = "$ac/2024/general/round3/contestSelection.csv"
+    override val resultsReportFile = "$ac/2024/general/round3/ResultsReport3.xlsx"
+
     val manifestDir = "$ac/2024/general"
 
     override fun manifestFile(county: String): String {
@@ -53,6 +55,13 @@ class Statewide2024General(ac:String?=auditcenter): StatewideInput (
     }
 
     override fun contestNameCleanup(county: String, name: String): String {
+        when (county) {
+            "Broomfield" -> {
+                if (name == "City and County of Broomfield Ballot Question 2G") return "Broomfield Ballot Question 2G"
+            }
+            else -> {}
+        }
+
         return when (name) {
             "Justice of the Colorado Supreme Court - Berkenkotter" -> "Colorado Supreme Court Justice - Berkenkotter"
             "Justice of the Colorado Supreme Court - Boatright" -> "Colorado Supreme Court Justice - Boatright"

@@ -14,6 +14,7 @@ private val logger = KotlinLogging.logger("ContestMvrMergedInfo")
 
 // Originally to check that the sequence of Draws was correct. Go back to that purpose
 // Count things by contest - move to ContestMvrComparison ....
+// viewer using getMvrsForCounty, but getting duplicates
 
 data class MvrMergedInfo(
     // constructor params are from Activity
@@ -119,6 +120,21 @@ data class ContestMvrMergedInfo(
         }
     }
 
+    fun classifyDiscrepency(mvrChoice: String, cvrChoice: String): ErrorType2? {
+        if (cvrChoice == mvrChoice) return null
+        if (mvrChoice == this.winner) {
+            if (cvrChoice == this.loser) return ErrorType2.p2o
+            else return ErrorType2.p1o
+        } else if (mvrChoice == this.loser) {
+            if (cvrChoice == this.winner) return ErrorType2.p2u
+            else return ErrorType2.p1u
+        } else {
+            if (cvrChoice == this.loser) return ErrorType2.p1u
+            if (cvrChoice == this.winner) return ErrorType2.p1o
+            return null
+        }
+    }
+
     /*
     fun check(): Boolean {
         var failed = false
@@ -210,7 +226,7 @@ class ContestMvrMergedInfos(val stateInput: StatewideInput, minfos: List<Contest
         // add contest tabs
         if (withTabs && (stateInput.tabulateCountyFile() != null)) {
             val countyTabs = TabulateCounty.readFromFile(stateInput.tabulateCountyFile()!!, stateInput )
-            val contestTabs = TabulateContest.fromTabulateCounty(countyTabs.values.toList())
+            val contestTabs = TabulateContest.fromTabulateCounty(countyTabs)
             contestTabs.values.forEach { contestTab ->
                 val mcontest = mcontests[contestTab.contestName]!!
                 mcontest.addContestWinner(contestTab)

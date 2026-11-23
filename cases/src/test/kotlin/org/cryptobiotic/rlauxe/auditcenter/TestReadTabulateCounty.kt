@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
 import org.cryptobiotic.rlauxe.audit.MvrSource
+import org.cryptobiotic.rlauxe.co.auditcenter.TabulateCounty
 import org.cryptobiotic.rlauxe.corla.CorlaStateContestInfoBuilder
 import org.cryptobiotic.rlauxe.corlaCounty.CorlaCountyElection
 import org.cryptobiotic.rlauxe.corlaCounty.CountyCardConverter
@@ -117,8 +118,8 @@ class TestReadTabulateCounty {
 
     @Test
     fun readTabulateCounties() {
-        val countyTabs: Map<String, CountyTabAllContests> = readCountyTabulateCsvFromFile(input.tabulateCountyFile)
-        val countyTabs2: Map<String, CountyTabAllContests> = input.countyTabsAllContests()
+        val countyTabs = TabulateCounty.readFromFile(input.tabulateCountyFile, input)
+        val countyTabs2 = input.countyTabsAllContests()
         countyTabs.forEach {
             val tab2 = countyTabs2[it.key]
             assertEquals(it.value, tab2)
@@ -128,7 +129,7 @@ class TestReadTabulateCounty {
 
     @Test
     fun contestTabAllCounties() {
-        val contestTabAllCounties: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties()
+        val contestTabAllCounties = input.contestTabsAllCounties()
         contestTabAllCounties.forEach {
             assertTrue(!input.skipCounties(it.key))
             println(it)

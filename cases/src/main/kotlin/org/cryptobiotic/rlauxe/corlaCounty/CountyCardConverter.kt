@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corlaCounty
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import org.cryptobiotic.rlauxe.co.auditcenter.TabulateCounty
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
@@ -179,6 +180,21 @@ class CountyCardConverter(val county: String,
 
             // TODO where to get ncards ?????
             val contestTabulation = contestVotes.makeContestTabulationCorla(info, canonicalContest, 0)
+            canonTabs[info.id] = contestTabulation
+        }
+        return canonTabs
+    }
+
+
+    fun convertToContestTabulation(contestTabs: Map<String, TabulateCounty>): Map<Int, ContestTabulation> {
+        val canonTabs = mutableMapOf<Int, ContestTabulation>()
+        contestTabs.forEach{ (contestName, contestTab: TabulateCounty) ->
+            val canonicalContest = stateInput.matchCanonicalContest(county, contestName)!!
+            val info = infosByName[contestName]!!
+
+            val votes = contestTab.choices.mapKeys { info.candidateNames[it.key]!! }
+            // TODO where to get ncards ?????
+            val contestTabulation = ContestTabulation(info, votes, 0)
             canonTabs[info.id] = contestTabulation
         }
         return canonTabs

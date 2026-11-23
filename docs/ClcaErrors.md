@@ -1,12 +1,12 @@
 # CLCA errors
-2/18/2026
+11/23/2026
 
 <!-- TOC -->
 * [CLCA errors](#clca-errors)
-  * [CLCA assort values](#clca-assort-values)
-  * [The effects of CLCA Errors](#the-effects-of-clca-errors)
-  * [Phantom ballots](#phantom-ballots)
-    * [The effect of Phantoms on samples needed](#the-effect-of-phantoms-on-samples-needed)
+    * [CLCA assort values](#clca-assort-values)
+    * [The effects of CLCA Errors](#the-effects-of-clca-errors)
+    * [Phantom ballots](#phantom-ballots)
+        * [The effect of Phantoms on samples needed](#the-effect-of-phantoms-on-samples-needed)
 <!-- TOC -->
 
 Read [BettingRiskFunctions](BettingRiskFunctions.md) for background. Here are necessary definitions:
@@ -126,7 +126,7 @@ To examine this, first we set the margin = .01 and upper = 1.0, and show the dep
 
 Only p2o is strongly dependent on the choice of lamda.
 
-Now we fix lamda = 1.8 and show the dependence on margin for various values of upper:
+Now we fix lamda = 1.82 (the "standard bet = 2.0/gamma") and show the dependence on margin for various values of upper:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/byMargin.html" rel="byMargin">![byLamda](plots2/betting/errorComp/byMargin.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/byUpper2.html" rel="byUpper2">![byUpper2](plots2/betting/errorComp/byUpper2.png)</a>
@@ -137,7 +137,7 @@ Now we fix lamda = 1.8 and show the dependence on margin for various values of u
 
 * Understatement errors have the effect of decreasing the number of samples needed, shown on the plots as negetive numbers.
 
-* It is sobering to see how many extra samples are needed for just one error. For example, for a single p2o error, a plurality contest (upper=1) needs 100 extra samples when the margin is .05, and 500 extra when the margin is .01. (These are absolute numbers, not dependent on the population size.)
+* It is sobering to see how many extra samples are needed for just one error. For example, for a single p2o error, a plurality contest (upper=1) needs 135 extra samples when the margin is .05, and 680 extra when the margin is .01. (These are absolute numbers, not dependent on the population size.)
 
 * The extra samples appear to scale linearly with upper: when upper=10, one needs 1000 and 5000 extra ballots for margins of .05 and .01, and so on.
 

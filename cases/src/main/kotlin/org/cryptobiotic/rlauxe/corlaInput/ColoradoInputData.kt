@@ -5,6 +5,7 @@ import com.jsoizo.kotlincsv.reader.read
 import com.jsoizo.kotlincsv.reader.withHeader
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
+import org.cryptobiotic.rlauxe.co.auditcenter.TabulateCounty
 import org.cryptobiotic.rlauxe.co.input.StrataInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
@@ -170,22 +171,22 @@ fun writeCountyData(topdir: String, strataInfo: List<StrataInfo>) {
 // TODO review ...
 fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAssertions>, statewideInput: StatewideInput,
                            countyPops: Map<String, Map<Int,Int>>) {
-    val countyTabs = statewideInput.countyTabsAllContests()
+    val countyTabs: Map<String, Map<String, TabulateCounty>> = statewideInput.countyTabsAllContests()
     // misc data by county
     val outputFilename = "$topdir/${CountyAuditRecord.countyContestDataFile}"
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     writer.write("county, contest, id, nPop, voteDiff, votes,\n")
 
     var count = 0
-    countyTabs.forEach { county, countyTab ->
-        val countyPop = countyPops[county] ?: emptyMap()
-        countyTab.contests.values.forEach { ccv: CountyContestVotes ->
-            val contestUA = contestMap[ccv.contestName]
-            val canonicalContest = statewideInput.canonicalContests()[ccv.contestName]
+    countyTabs.forEach { countyName, contestTabs ->
+        val countyPop = countyPops[countyName] ?: emptyMap()
+        contestTabs.forEach { (contestName, contestTab) ->
+            val contestUA = contestMap[contestName]
+            val canonicalContest = statewideInput.canonicalContests()[contestName]
             if (contestUA != null && canonicalContest != null) {
                 val contest = contestUA.contest
                 val info = contest.info()
-                val candidateVotes: Map<String, Int> = ccv.canonicalChoices(canonicalContest)
+                val candidateVotes: Map<String, Int> = contestTab.choices
                 val votesByCandId = candidateVotes.mapKeys { info.candidateNames[it.key]!! }
                 val contestPop = countyPop[info.id] ?: 0
                 // calculate the vote difference for the minimum assorter
@@ -193,7 +194,7 @@ fun writeCountyContestData(topdir: String, contestMap: Map<String, ContestWithAs
                 val voteDiff = if (minAssertion == null) 0
                     else minAssertion.assorter.calcMarginFromRegVotes(votesByCandId, 1).toInt()
 
-                writer.write("${countyTab.countyName}, ${ccv.contestName}, ${info.id}, $contestPop, $voteDiff, ")
+                writer.write("${countyName}, ${contestName}, ${info.id}, $contestPop, $voteDiff, ")
                 votesByCandId.forEach { (id, vote) ->
                     writer.write("$id:$vote, ")
                 }

@@ -30,7 +30,7 @@ class CheckCanonicalNames( val input: StatewideInput) {
         val missingChoices = mutableMapOf<String, MutableList<String>>()
 
         // TODO read raw input ??
-        val contestTabs: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties()
+        val contestTabs = input.contestTabsAllCounties()
         contestTabs.values.forEach { contestTab ->
             val cc = input.matchCanonicalContest(contestTab.contestName)
             if (cc == null) {
@@ -79,19 +79,19 @@ class CheckCanonicalNames( val input: StatewideInput) {
         val missing = mutableListOf<String>()
 
         // raw inout
-        val contestTabs: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties()
+        val contestTabs = input.contestTabsAllCounties()
         canonical.values.forEach { cc ->
             if (!contestTabs.contains(cc.contestName)) {
                 if (cc.contestName.startsWith("Springfield")) {
-                    val countyTabs: Map<String, CountyTabAllContests> = input.countyTabsAllContests()
-                    val baca: CountyTabAllContests = countyTabs["Baca"]!!
-                    val bacaContest = baca.contests[cc.contestName]
+                    val countyTabs = input.countyTabsAllContests()
+                    val baca = countyTabs["Baca"]!!
+                    val bacaContest = baca[cc.contestName]
                     print("")
                 }
                 println("contestTabulate missing canonical contest '${cc.contestName}'")
                 missing.add(cc.contestName)
             } else {
-                val contestTab : ContestTabAllCounties = contestTabs[cc.contestName]!!
+                val contestTab = contestTabs[cc.contestName]!!
                 contestTab.choices.forEach { choice ->
                     if (input.matchCanonicalCandidate(contestTab.counties.first(), cc, choice.key) == null)
                         println("    missing choice  '${choice.key}' in contestTab '${cc.contestName}'")
@@ -109,9 +109,9 @@ class CheckCanonicalNames( val input: StatewideInput) {
         var allOk = true
 
         // same as raw input; no mods
-        input.countyTabsAllContests().filter{!input.skipCounties(it.key) }.forEach { (countyName, ct: CountyTabAllContests) ->
+        input.countyTabsAllContests().filter{ !input.skipCounties(it.key) }.forEach { (countyName, contestTabs) ->
             // for each contest in each county; counties have the same contest
-            ct.contests.forEach { (contestName, countyTabAllContests) ->
+            contestTabs.forEach { (contestName, countyTabAllContests) ->
                 val cc = input.canonicalContests()[contestName]
                 // println(canonicalContest)
 
@@ -144,7 +144,7 @@ class CheckCanonicalNames( val input: StatewideInput) {
 
     fun checkCountyTabulateAndCanonicalContests() {
         println("\n-------------------------- checkCountyTabulateAndCanonicalContests")
-        val countyTabs: Map<String, CountyTabAllContests> = input.countyTabsAllContests()
+        val countyTabs = input.countyTabsAllContests()
         val countiesFromTab = countyTabs.keys.toSet().toList()
         compareLists(input.counties(), countiesFromTab, "canonical", "countyTabulateCsv")
     }

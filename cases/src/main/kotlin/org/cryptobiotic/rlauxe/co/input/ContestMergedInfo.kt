@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.auditcenter.AuditReason
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.getAuditReason
 import org.cryptobiotic.rlauxe.co.auditcenter.ContestRound
-import org.cryptobiotic.rlauxe.corlaInput.Statewide2026General
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import kotlin.collections.forEach
 import kotlin.collections.set
@@ -33,6 +32,7 @@ data class ContestMergedInfo(
     val riskLimit: Double, // risk_limit
 ) {
     var strata: StrataInfo? = null
+    var errors = emptyList<Int>()
 
     fun addStrata(statewideMvrCount: Map<String, Int>, countyStrata: Map<String, StrataInfo>) {
         strata = when {
@@ -40,6 +40,11 @@ data class ContestMergedInfo(
             // fun computeStrataMinRate(strataName: String, contestCounties: Set<String>, statewideMvrCount: Map<String, Int>, strataMap: Map<String, StrataInfo>): StrataInfo {
             else -> computeStrataMinRate(contestName, counties, statewideMvrCount, countyStrata)
         }
+    }
+
+    fun addErrors(cmc: ContestMvrComparison?) {
+        if (cmc == null) return
+        errors = listOf(cmc.p2o, cmc.p1o, cmc.p1u, cmc.p2u)
     }
 }
 
@@ -98,12 +103,12 @@ fun makeMergedInfo(input: StatewideInput): MergedInfo {
                     cc.counties,
 
                     auditReason = getAuditReason(round.audit_reason),
-                    corlaPop = round.ballot_card_count ?: 0,
-                    corlaNc = round.contest_ballot_card_count ?: 0,
+                    corlaPop = round.ballot_card_count,
+                    corlaNc = round.contest_ballot_card_count,
                     round.winners_allowed ?: 1,
                     round.optimistic_samples_to_audit ?: 0,
-                    round.min_margin ?: 0,
-                    round.risk_limit ?: 0.0,
+                    round.min_margin,
+                    round.risk_limit,
                 )
             )
         }
@@ -111,17 +116,13 @@ fun makeMergedInfo(input: StatewideInput): MergedInfo {
 
     val strata = makeCountyStrata(input).associateBy { it.strataName }
 
-    // we will need the errors in a sec ....
-    /* create a strata for each county
-    val wtf = ContestMvrComparisons(input, minfos = mergedContestInfos)
-    val countyStrata = wtf.mcounties.mapValues {
-        val mc = it.value
-        StrataInfo(mc.countyName, mc.countyMvrs, mc.statewideMvrs, input.countyPopulation(mc.countyName))
-    } */
+    // all we want i the error counts to put into mergedContestInfos
+    val contestMvrComparison: Map<String, ContestMvrComparison> = ContestMvrComparisons(input, minfos = mergedContestInfos, keepLines = false).mcontests
 
     val statewideMvrCount: Map<String, Int> = strata.mapValues { it.value.stateMvrs }
     mergedContestInfos.forEach { mcontest ->
         mcontest.addStrata(statewideMvrCount, strata)
+        mcontest.addErrors(contestMvrComparison[mcontest.contestName])
     }
     return MergedInfo(mergedContestInfos, strata)
 }

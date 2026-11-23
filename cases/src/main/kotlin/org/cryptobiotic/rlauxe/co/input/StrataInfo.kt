@@ -47,7 +47,7 @@ fun computeStrataMinRate(strataName: String, contestCounties: Set<String>, state
     return StrataInfo(strataName, nmvrs, stateMvrCount, npop)
 }
 
-fun makeCountyStrata(input: StatewideInput): List<StrataInfo> {
+fun makeCountyStrata(input: StatewideInput, show: Boolean = false): List<StrataInfo> {
     val countySamples = mutableMapOf<String, Int>()
     var multi = 0
     //ContestSelection have list of dbids
@@ -64,9 +64,11 @@ fun makeCountyStrata(input: StatewideInput): List<StrataInfo> {
             else multi = max(multi, cs.dbList.size)
         }
     }
-    println()
-    println("counties (${countySamples.size}) total = ${countySamples.values.sum()} multi = $multi")
-    countySamples.toSortedMap().forEach { println("${nfn(it.value,3)} for ${trunc(it.key, -15)}") }
+
+    if (show) {
+        println("counties (${countySamples.size}) total = ${countySamples.values.sum()} multi = $multi")
+        countySamples.toSortedMap().forEach { println("${nfn(it.value, 3)} for ${trunc(it.key, -15)}") }
+    }
 
     // we need to find what county the statewide samples are in
     val stateSamples = mutableMapOf<String, Int>()

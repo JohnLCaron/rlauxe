@@ -3,26 +3,21 @@ package org.cryptobiotic.rlauxe.corlaInput
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.CardComparisonResults
-import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
 import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundCsv
-import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyMvrCount
-import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.auditcenter.readColoradoContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.readContestComparisonCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
 import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
+import org.cryptobiotic.rlauxe.co.auditcenter.TabulateContest
+import org.cryptobiotic.rlauxe.co.auditcenter.TabulateCounty
 import org.cryptobiotic.rlauxe.co.input.ContestMergedInfo
 import org.cryptobiotic.rlauxe.co.input.MergedInfo
 import org.cryptobiotic.rlauxe.co.input.StrataInfo
 import org.cryptobiotic.rlauxe.co.input.makeMergedInfo
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 import java.nio.charset.Charset
-import kotlin.collections.forEach
 
 val defaultCharset = Charset.forName("ISO-8859-1") // TODO or UTF-8 ? also see Windows-1252
 private val logger = KotlinLogging.logger("StatewideInput")
@@ -129,23 +124,21 @@ abstract class StatewideInput {
         result[contestName] = CanonicalContest(current.stateInput, current.contestName, choicesIn = achoices).addCounties(current.counties.toList())
     }
 
-    // data class CountyTabAllContests(val countyName: String) {
-    //    val contests = Map<String, CountyContestVotes>() // contestName (canonical I think) -> CountyContestVotes
-    //    var ncards = 0
-    // data class CountyContestVotes(val contestName: String) {
-    //    val choices = Map<String, Int>() // choice name (not canonical) -> votes in this county and contest
-    //    var ncards = 0
-    open fun countyTabsAllContests(): Map<String, CountyTabAllContests> = countyTabsAllContests
-    private val countyTabsAllContests: Map<String, CountyTabAllContests> by lazy {
-        readCountyTabulateCsvFromFile(tabulateCountyFile) // county -> CountyTabAllContests
+    // county -> contest -> TabulateCounty
+    open fun countyTabsAllContests(): Map<String, Map<String, TabulateCounty>> = countyTabsAllContests
+    private val countyTabsAllContests: Map<String, Map<String, TabulateCounty>> by lazy {
+        TabulateCounty.readFromFile(tabulateCountyFile, this )
+        // readCountyTabulateCsvFromFile(tabulateCountyFile) // county -> CountyTabAllContests
     }
 
-    // data class ContestTabAllCounties(val contestName: String) {
-    //    val choices = Map<String, Int>() // // canonical choice name -> votes
-    //    val counties = Set<String>()
-    //    var totalCardsInContest: Int
-    open fun contestTabsAllCounties(): Map<String, ContestTabAllCounties> = contestTabsAllCounties
-    private val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
+    // contest -> TabulateContest
+    open fun contestTabsAllCounties(): Map<String, TabulateContest> = contestTabsAllCounties
+    private val contestTabsAllCounties: Map<String, TabulateContest> by lazy {
+        TabulateContest.fromTabulateCounty(countyTabsAllContests()) // make sure you call the subttype function
+    }
+
+    /*
+
         val tabs = mutableMapOf<String, ContestTabAllCounties>()
         countyTabsAllContests().values.forEach { countyTabAllContests ->
             countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
@@ -154,7 +147,7 @@ abstract class StatewideInput {
             }
         }
         tabs.toMap()
-    }
+     */
 
     //////////
     // from the list of mvr, cvr comparisions, we derive the following:
@@ -408,7 +401,7 @@ fun mergeContestInfo(input: StatewideInput): MergedInfo {
     return MergedInfo(mergedContestInfo, strataMap.values.toList(), statewideContests)
 } */
 
-fun CountyTabAllContests.makeContestTabs(canonicalContests: Map<String, CanonicalContest>,
+/* fun CountyTabAllContests.makeContestTabs(canonicalContests: Map<String, CanonicalContest>,
                                          infos:Map<String, ContestInfo>, ncardsMap: Map<String, Int>,
 ): List<ContestTabulation> {
 
@@ -429,4 +422,4 @@ fun CountyContestVotes.makeContestTabulation(canonicalContest: CanonicalContest,
     }.toMap()
 
     return ContestTabulation(info, candidateVotes, ncards)
-}
+} */

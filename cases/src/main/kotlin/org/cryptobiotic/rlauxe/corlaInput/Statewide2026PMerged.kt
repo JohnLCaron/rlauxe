@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import org.cryptobiotic.rlauxe.co.auditcenter.TabulateCounty
 import org.cryptobiotic.rlauxe.co.input.StrataInfo
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
@@ -52,8 +53,26 @@ open class Statewide2026PMerged(ac:String?=auditcenter): Statewide2026Primary(ac
         crmap.mapValues { it.value.build() }.toSortedMap()
     }
 
-    override fun countyTabsAllContests(): Map<String, CountyTabAllContests> = countyTabsAllContests
-    private val countyTabsAllContests: Map<String, CountyTabAllContests> by lazy {
+    // dunno if this is worth the trouble ...
+    override fun countyTabsAllContests(): Map<String, Map<String, TabulateCounty>> = countyTabsAllContests
+    private val countyTabsAllContests: Map<String, Map<String, TabulateCounty>> by lazy {
+        val ctmap = mutableMapOf<String, MutableMap<String, TabulateCounty>>()
+        TabulateCounty.readFromFile(tabulateCountyFile, this ).forEach { (county, orgContestMap) ->
+            val contestMap = ctmap.getOrPut(county) { mutableMapOf<String, TabulateCounty>() }
+            orgContestMap.forEach { (contestName, contestTab) ->
+                val key = contestNameMerge(contestName)
+                val ccv = contestMap.getOrPut(key) { TabulateCounty(contestName, key) }
+                contestTab.choices.forEach { (choice, vote) ->
+                    ccv.choices[choice] = vote
+                }
+            }
+        }
+        ctmap.toSortedMap()
+    }
+
+    /*
+    override fun countyTabsAllContests1(): Map<String, CountyTabAllContests> = countyTabsAllContests
+    private val countyTabsAllContests1: Map<String, CountyTabAllContests> by lazy {
         val ctmap = mutableMapOf<String, CountyTabAllContests>()
         super.countyTabsAllContests().values.forEach { org ->
             val ct = ctmap.getOrPut(org.countyName ) { CountyTabAllContests(org.countyName) }
@@ -66,19 +85,7 @@ open class Statewide2026PMerged(ac:String?=auditcenter): Statewide2026Primary(ac
             }
         }
         ctmap.toSortedMap()
-    }
-
-    override fun contestTabsAllCounties(): Map<String, ContestTabAllCounties> = contestTabsAllCounties
-    private val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
-        val tabs = mutableMapOf<String, ContestTabAllCounties>()
-        countyTabsAllContests().values.forEach { countyTabAllContests ->
-            countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
-                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties(contestName) }
-                tab.add(countyTabAllContests.countyName, countyContestVotes)
-            }
-        }
-        tabs.toMap()
-    }
+    } */
 
     // data class CardComparisonResults(
     //    val contestMvrs: List<ContestMvrCount>,

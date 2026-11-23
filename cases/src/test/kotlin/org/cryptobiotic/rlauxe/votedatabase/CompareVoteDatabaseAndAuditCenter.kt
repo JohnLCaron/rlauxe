@@ -102,7 +102,7 @@ class CompareVoteDatabaseAndAuditCenter {
 
         // test every canon contest has a match in export
         val countyContestTabs = input.countyTabsAllContests()[county]!!
-        countyContestTabs.contests.keys.forEach { canonContest ->
+        countyContestTabs.keys.forEach { canonContest ->
             if (match[canonContest] == null) {
                 val match2 = sinfoList.find { it.name == canonContest } // probably not nneeded
                 if (match2 == null) {
@@ -125,7 +125,7 @@ fun suggest(county: String, contest: String, input: StatewideInput): String {
     val countyContestTabs = input.countyTabsAllContests()[county]
     if (countyContestTabs == null) return "unknown"
 
-    for (canonContest in countyContestTabs.contests.keys) {
+    for (canonContest in countyContestTabs.keys) {
         if (canonContest.contains(contest)) return canonContest
         if (canonContest.contains(extractIssueName(contest))) return canonContest
         if (canonContest.contains(mutatis(contest))) return canonContest

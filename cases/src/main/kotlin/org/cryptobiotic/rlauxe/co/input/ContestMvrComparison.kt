@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.co.auditcenter.ResultsReport
 import org.cryptobiotic.rlauxe.co.auditcenter.TabulateContest
 import org.cryptobiotic.rlauxe.co.auditcenter.TabulateCounty
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
+import kotlin.collections.get
 import kotlin.collections.set
 
 private val logger = KotlinLogging.logger("ContestMvrMergedInfo")
@@ -15,6 +16,46 @@ private val logger = KotlinLogging.logger("ContestMvrMergedInfo")
 
 // Originally to check that the sequence of Draws was correct.
 // Not trying to use it to count the errors in all the contests ....
+
+data class CountyMvrComparison(val county: String) {
+    val mvrs = mutableListOf<MvrMergedComparison>() // allows duplicates for sequence chanking
+    val mvrMap = mutableMapOf<Int, MvrMergedComparison>()   // dbid -> MvrMergedInfo
+
+    fun addActivity(activity: ActivityReport, auditReason: AuditReason) {
+        val mvr = MvrMergedComparison(
+            activity.dbId,
+            activity.county,
+            activity.imprintedId,
+            activity.discrepency,
+            activity.revision,
+            auditReason,
+            activity.timeOfSubmission
+        )
+        mvrs.add(mvr)
+        mvrMap[mvr.dbId] = mvr
+    }
+
+    fun addResult(result: ResultsReport) {
+        val mvr = mvrMap[result.dbId]
+        if (mvr != null) {
+            require(mvr.imprintedId == result.imprintedId)
+            require(mvr.dbId == result.dbId)
+            require(mvr.county == result.county)
+            mvr.prn = result.randomNumber
+            mvr.seq = result.sequence
+            mvr.mult = result.multiplicity
+        }
+    }
+
+    fun addLine(line: MvrComparison) {
+        val mvr = mvrMap[line.cvr_id]
+        if (mvr != null) {
+            mvr.lines.add(line)
+        }  else
+            println("dont have line.cvr_id ${line.cvr_id}")
+    }
+}
+
 
 data class MvrMergedComparison(
     // constructor params are from Activity
@@ -42,8 +83,8 @@ data class MvrMergedComparison(
 // one for each contest
 data class ContestMvrComparison(val minfo: ContestMergedInfo) {
     // var dbList = emptyList<Int>() // from target
-    val mvrs = mutableListOf<MvrMergedComparison>() // allows duplicates for sequence chanking
-    val mvrMap = mutableMapOf<Int, MvrMergedComparison>()   // dbid -> MvrMergedInfo
+    //val mvrs = mutableListOf<MvrMergedComparison>() // allows duplicates for sequence chanking
+    //val mvrMap = mutableMapOf<Int, MvrMergedComparison>()   // dbid -> MvrMergedInfo
 
     var winner: String? = null
     var loser: String? = null
@@ -58,48 +99,13 @@ data class ContestMvrComparison(val minfo: ContestMergedInfo) {
         return p2o > 0 || p1o > 0 || p1u > 0 || p2u > 0
     }
 
-    fun addActivities(activityList: List<ActivityReport>) {
-        activityList.forEach {
-            val mvr = MvrMergedComparison(
-                it.dbId,
-                it.county,
-                it.imprintedId,
-                it.discrepency,
-                it.revision,
-                this.minfo.auditReason,
-                it.timeOfSubmission
-            )
-            mvrs.add(mvr)
-            mvrMap[mvr.dbId] = mvr
-        }
-    }
-
-    fun addResults(resultsList: List<ResultsReport>) {
-        resultsList.forEach {
-            val mvr = mvrMap[it.dbId]
-            if (mvr != null) {
-                require(mvr.imprintedId == it.imprintedId)
-                require(mvr.dbId == it.dbId)
-                require(mvr.county == it.county)
-                mvr.prn = it.randomNumber
-                mvr.seq = it.sequence
-                mvr.mult = it.multiplicity
-            }
-        }
-    }
-
     fun addContestWinner(contestTab: TabulateContest) {
         val sortedChoices = contestTab.choices.toList().sortedByDescending { it.second }
         this.winner = sortedChoices[0].first
         if (sortedChoices.size > 1) this.loser = sortedChoices[1].first
     }
 
-    fun processLine(stateInput: StatewideInput, line: MvrComparison, keepLines: Boolean) {
-        if (keepLines) {
-            val mvr = mvrMap[line.cvr_id]
-            if (mvr != null) mvr.lines.add(line) else println("dont have line.cvr_id ${line.cvr_id}")
-        }
-
+    fun processLine(stateInput: StatewideInput, line: MvrComparison) {
         if (this.winner == null || this.loser == null) return
         val county = line.county_name
         val rawCvrChoice = line.choice_per_voting_computer
@@ -142,6 +148,7 @@ private val show = false
 
 class ContestMvrComparisons(val stateInput: StatewideInput, minfos: List<ContestMergedInfo>, keepLines:Boolean) {
     val mcontests: Map<String, ContestMvrComparison>
+    val mcounties = mutableMapOf<String, CountyMvrComparison>() // allows duplicates for sequence chanking
 
     init {
         // use minfos in order to get the canonical names
@@ -154,7 +161,10 @@ class ContestMvrComparisons(val stateInput: StatewideInput, minfos: List<Contest
                 val ccname = stateInput.convertContestName("ActivityReport", contestName)
                 if (ccname != null) {
                     val mcontest = mcontests[ccname]!!
-                    mcontest.addActivities(activityList)
+                    activityList.forEach { activity ->
+                        val mcounty = mcounties.getOrPut(activity.county) { CountyMvrComparison(activity.county) }
+                        mcounty.addActivity(activity, mcontest.minfo.auditReason)
+                    }
                 }
             }
             if (show) println("added ${activities.size} target contests")
@@ -164,10 +174,9 @@ class ContestMvrComparisons(val stateInput: StatewideInput, minfos: List<Contest
         if (stateInput.resultsReportFile != null) {
             val results = ResultsReport.readFromFile(stateInput.resultsReportFile!!)
             results.forEach { (contestName, resultsList) ->
-                val ccname = stateInput.convertContestName("ResultsReport", contestName)
-                if (ccname != null) {
-                    val mcontest = mcontests[ccname]!!
-                    mcontest.addResults(resultsList)
+                resultsList.forEach { result ->
+                    val mcounty = mcounties[result.county]!!
+                    mcounty.addResult(result)
                 }
             }
             if (show) println("added ${results.size} target contests")
@@ -187,23 +196,20 @@ class ContestMvrComparisons(val stateInput: StatewideInput, minfos: List<Contest
             val ccname = stateInput.convertContestName("MvrComparison", line.contest_name) // TODO convert in MvrComparison?
             if (ccname != null) {
                 val mcontest = mcontests[ccname]!!
-                mcontest.processLine(stateInput, line, keepLines)
+                mcontest.processLine(stateInput, line)
             } else {
                 logger.warn{ "cant find contest ${line.contest_name} from ${line.cvr_id}"}
+            }
+            if (keepLines) {
+                val mcounty = mcounties[line.county_name]!!
+                mcounty.addLine(line)
             }
         }
     }
 
     fun getMvrsForCounty(county: String): List<MvrMergedComparison> {
-        val result = mutableMapOf<Int, MvrMergedComparison>()
-        mcontests.values.forEach { mcontest ->
-            if (mcontest.minfo.counties.contains(county)) {
-                mcontest.mvrMap.values.filter { it.county == county }.forEach { mvr ->
-                    result[mvr.dbId] = mvr
-                }
-            }
-        }
-        return result.values.toList()
+        val mcounty = mcounties[county]!!
+        return mcounty.mvrMap.values.toList() // or mvrs ??
     }
 
 }

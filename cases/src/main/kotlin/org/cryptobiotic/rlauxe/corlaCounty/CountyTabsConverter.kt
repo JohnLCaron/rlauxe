@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.corlaCounty
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import org.cryptobiotic.rlauxe.co.auditcenter.TabulateCounty
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.isWriteIn
@@ -21,7 +22,7 @@ private val logger = KotlinLogging.logger("CountyCardConverter")
 //    var ncards = 0
 // infosByName is from canonical contests
 class CountyTabsConverter(val county: String,
-                          val countyTabs: CountyTabAllContests,
+                          val contestTabs: Map<String, TabulateCounty>,
                           val stateInput: StatewideInput,
                           val infosByName: Map<String, ContestInfo>) {
 
@@ -38,9 +39,9 @@ class CountyTabsConverter(val county: String,
     val countyContestCanonId = mutableMapOf<String, Int>() // county contest name to canonical contest id
 
     init {
-        val countyContestInfos = makeContestInfo(countyTabs).values.toList() // specific to county
+        val countyContestInfos = makeContestInfo(contestTabs).values.toList() // specific to county
 
-        val canonIdToScontest = mutableMapOf<Int, String>()  // canon contest id -> countyTabs contest name
+        val canonIdToScontest = mutableMapOf<Int, String>()  // canon contest id -> contestTabs contest name
         // each contest in the county must be matched to a canonicalContest by name
         var countMissing = 0
         countyContestInfos.forEach { countyContestInfo ->
@@ -182,22 +183,36 @@ class CountyTabsConverter(val county: String,
         return canonTabs
     }
 
+    fun convertToContestTabulation(contestTabs: Map<String, TabulateCounty>): Map<Int, ContestTabulation> {
+        val canonTabs = mutableMapOf<Int, ContestTabulation>()
+        contestTabs.forEach{ (contestName, contestTab: TabulateCounty) ->
+            val canonicalContest = stateInput.matchCanonicalContest(county, contestName)!!
+            val info = infosByName[contestName]!!
+
+            val votes = contestTab.choices.mapKeys { info.candidateNames[it.key]!! }
+            // TODO where to get ncards ?????
+            val contestTabulation = ContestTabulation(info, votes, 0)
+            canonTabs[info.id] = contestTabulation
+        }
+        return canonTabs
+    }
+
     // data class CountyTabAllContests(val countyName: String) {
 //    val contests = Map<String, CountyContestVotes>() // contestName (canonical I think) -> CountyContestVotes
 //    var ncards = 0
 // data class CountyContestVotes(val contestName: String) {
 //    val choices = Map<String, Int>() // choice name (not canonical) -> votes in this county and contest
 //    var ncards = 0
-    fun makeContestInfo(tabs: CountyTabAllContests): Map<Int, CorlaContestInfo> {
+    fun makeContestInfo(tabs: Map<String, TabulateCounty>): Map<Int, CorlaContestInfo> {
         var contestIdx = 0
 
-        return tabs.contests.map { (contestName, contestVotes) ->
+        return tabs.map { (contestName, contestTab) ->
             val canonicalContest = stateInput.matchCanonicalContest(county, contestName)!!
             val info = infosByName[canonicalContest.contestName]!!
 
             val candidateMap = mutableMapOf<String, Int>()
             var choiceIdx = 0
-            contestVotes.choices.forEach { (choiceName, _) ->
+            contestTab.choices.forEach { (choiceName, _) ->
                 if (!isWriteIn(choiceName)) { // remove write-ins
                     candidateMap[choiceName] = choiceIdx
                 }

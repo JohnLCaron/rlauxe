@@ -87,7 +87,7 @@ class TestReadTargetedContests {
         val countyTabAllContests: Map<String, CountyTabAllContests> =
             readCountyTabulateCsvFromFile("src/test/data/corla/2024audit/tabulateCounty.csv")
 
-        val contestTabAllCounties: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties()
+        val contestTabAllCounties = input.contestTabsAllCounties()
 
         println()
         println(trunc("from tabulateCounty", 113))
@@ -124,7 +124,7 @@ class TestReadTargetedContests {
             { it })
 
         val roundContests = input.roundContests()
-        val countyTabAllContests: Map<String, CountyTabAllContests> = input.countyTabsAllContests()
+        val countyTabAllContests = input.countyTabsAllContests()
 
         println()
         println("${trunc("---from tabulateCounty---", 100)}     --------from contestRound-----")
@@ -136,7 +136,7 @@ class TestReadTargetedContests {
             val roundContest = roundContests[contestName]
 
             val cct = countyTabAllContests[target.countyName]!!
-            val cctContests = cct.contests.mapKeys { clean(it.key) }
+            val cctContests = cct.mapKeys { clean(it.key) }
 
             val contestTab = cctContests[contestName]
             if (contestTab == null) {

@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
-import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
 import org.cryptobiotic.rlauxe.boulder.BoulderInput
 import org.cryptobiotic.rlauxe.boulder.BoulderStatementOfVotes
 import org.cryptobiotic.rlauxe.boulder.readBoulderSOVfromResourcePath
@@ -65,29 +64,17 @@ open class Statewide2023Coordinated(ac:String?=auditcenter): StatewideInput () {
         result.toSortedMap()
     }
 
-    override fun contestTabsAllCounties(): Map<String, ContestTabAllCounties>  = contestTabsAllCounties
-    private val contestTabsAllCounties: Map<String, ContestTabAllCounties> by lazy {
-        val tabs = mutableMapOf<String, ContestTabAllCounties>()
-        countyTabsAllContests().values.forEach { countyTabAllContests ->
-            countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
-                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties(contestName) }
-                tab.add(countyTabAllContests.countyName, countyContestVotes)
-            }
-        }
-        tabs.toMap()
-    }
-
-    override fun contestNameCleanup(county: String, name: String): String {
+    override fun contestNameCleanup(county: String, exportContestName: String): String {
         val countyInput = corlaCountyInput(county)
-        return countyInput?.contestNameCleanup(name) ?: name
+        return countyInput?.contestNameCleanup(exportContestName) ?: exportContestName
     }
 
-    override fun candidateNameCleanup(county: String, name: String): String {
-        return when (name) {
+    override fun candidateNameCleanup(county: String, exportCandidateName: String): String {
+        return when (exportCandidateName) {
             "Bryon Charles Colvin" -> "Byron Charles Colvin"
             else -> {
                 val countyInput = corlaCountyInput(county)
-                countyInput?.candidateNameCleanup(name) ?: name
+                countyInput?.candidateNameCleanup(exportCandidateName) ?: exportCandidateName
             }
         }
     }

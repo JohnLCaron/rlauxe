@@ -1,9 +1,10 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.util.Locations.testdataDir
+import org.cryptobiotic.rlauxe.util.Locations.home
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
@@ -12,7 +13,7 @@ import kotlin.io.path.Path
 import kotlin.math.ln
 
 class PlotErrorCompensation {
-    val dirName = "$testdataDir/plots/betting/errorComp"
+    val dirName = "$home/rla/plots/betting/errorComp"
     val margins = listOf(.005, .006, .008, .01, .0125, .015, .02, .03, .04, .05, .06, .07, .08, .10)
 
     @Test
@@ -65,7 +66,7 @@ class PlotErrorCompensation {
 
     @Test
     fun plotCompByMargin() {
-        val lamda = 1.8
+        val lamda = 2.0 / 1.03905 // stdBet
         val upper = 1.0
         val taus = Taus(upper)
 
@@ -85,12 +86,12 @@ class PlotErrorCompensation {
                 results.add(BettingPayoffRatio(cat=tauName, payoffRatio=samplesToCompensate, lamda=lamda, margin=margin))  }
         }
 
-        plotByMargin(results, "byMargin", "upper=$upper lamda=$lamda", scale = ScaleType.Linear)
+        plotByMargin(results, "byMargin", "upper=$upper lamda=${df(lamda)}", scale = ScaleType.Linear)
     }
 
     @Test
     fun plotCompByUpper10() {
-        val lamda = 1.8
+        val lamda = 2.0 / 1.03905 // stdBet
         val upper = 10.0
         val taus = Taus(upper)
 
@@ -110,12 +111,12 @@ class PlotErrorCompensation {
                 results.add(BettingPayoffRatio(cat=tauName, payoffRatio=samplesToCompensate, lamda=lamda, margin=margin))  }
         }
 
-        plotByMargin(results, "byUpper10", "upper=$upper (Above 5% Threshold) lamda=$lamda", scale = ScaleType.Linear)
+        plotByMargin(results, "byUpper10", "upper=$upper (Above 5% Threshold) lamda=${df(lamda)}", scale = ScaleType.Linear)
     }
 
     @Test
     fun plotCompByUpper2() {
-        val lamda = 1.8
+        val lamda = 2.0 / 1.03905 // stdBet
         val upper = 2.0
         val taus = Taus(upper)
 
@@ -135,12 +136,12 @@ class PlotErrorCompensation {
                 results.add(BettingPayoffRatio(cat=tauName, payoffRatio=samplesToCompensate, lamda=lamda, margin=margin))  }
         }
 
-        plotByMargin(results, "byUpper2", "upper=$upper lamda=$lamda", scale = ScaleType.Linear)
+        plotByMargin(results, "byUpper2", "upper=$upper lamda=${df(lamda)}", scale = ScaleType.Linear)
     }
 
     @Test
     fun plotCompByUpperUnder1() {
-        val lamda = 1.8
+        val lamda = 2.0 / 1.03905 // stdBet
         val upper = .526
         val taus = Taus(upper)
 
@@ -160,7 +161,7 @@ class PlotErrorCompensation {
                 results.add(BettingPayoffRatio(cat=tauName, payoffRatio=samplesToCompensate, lamda=lamda, margin=margin))  }
         }
 
-        plotByMargin(results, "byUpperUnder1", "upper=$upper (Below 5% Threshold) lamda=$lamda", scale = ScaleType.Linear)
+        plotByMargin(results, "byUpperUnder1", "upper=$upper (Below 5% Threshold) lamda=${df(lamda)}", scale = ScaleType.Linear)
     }
 
     fun plotByMargin(data: List<BettingPayoffRatio>, name: String, subtitle: String, scale: ScaleType = ScaleType.Linear) {
@@ -180,7 +181,7 @@ class PlotErrorCompensation {
 
     @Test
     fun plotPhantomsByUpper() {
-        val lamda = 1.8
+        val lamda = 2.0 / 1.03905 // stdBet
         val uppers = listOf(.526, 1.0, 10.0)
 
         val results = mutableListOf<BettingPayoffRatio>()
@@ -208,12 +209,12 @@ class PlotErrorCompensation {
             }
         }
 
-        plotWithUpper(results, "phantomByUpper", "lamda=$lamda tau=(oth-los), eg cvr and mvr are both phantoms", scale = ScaleType.Linear)
+        plotWithUpper(results, "phantomByUpper", "lamda=${df(lamda)} tau=(oth-los), eg cvr and mvr are both phantoms", scale = ScaleType.Linear)
     }
 
     @Test
     fun plotPhantomMvr() {
-        val lamda = 1.8
+        val lamda = 2.0 / 1.03905 // stdBet
         val uppers = listOf(.526, 1.0, 10.0)
 
         val results = mutableListOf<BettingPayoffRatio>()
@@ -240,7 +241,7 @@ class PlotErrorCompensation {
             }
         }
 
-        plotWithUpper(results, "phantomMvr", "lamda=$lamda cvr is winner and mvr is phantom", scale = ScaleType.Linear)
+        plotWithUpper(results, "phantomMvr", "lamda=${df(lamda)} cvr is winner and mvr is phantom", scale = ScaleType.Linear)
     }
 
 
@@ -268,7 +269,6 @@ data class BettingPayoffRatio(
     val margin: Double = 0.0,
     val noerror: Double = 0.0,
 )
-
 
 fun calcNtau(bet: Double, noerror: Double, tau: Double): Pair<Double, Double> {
     //    payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (µ_i is approximately 1/2)

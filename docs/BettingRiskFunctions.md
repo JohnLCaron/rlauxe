@@ -116,7 +116,7 @@ and error rates of .001 for each of the errors (p2o, p1o, p1u, p2u) = (2 vote ov
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/optimallamda/payoff.html" rel="BettingPayoff">![BettingPayoff](plots2/betting/optimallamda/payoff.png)</a>
 
-The sum of terms is the yellow line. The optimizer finds the value of lamda where eq 1 is at a maximum. Equation 1 is used
+The sum of terms is the blue line. The optimizer finds the value of lamda where eq 1 is at a maximum. Equation 1 is used
 just for finding the optimal lamda; the value of the equation is not used.
 
 If there are no negetive terms or the negetive terms are not large (eg if p2o = 0), then eq 1 is monotonically increasing, and lamda will always be the maximum value allowed.

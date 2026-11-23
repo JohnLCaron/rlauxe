@@ -22,9 +22,9 @@ class TestReadAuditCenterFiles {
         println()
 
         // here we read it from the file
-        val contests: Map<String, ContestTabAllCounties> = input.contestTabsAllCounties()
+        val contestTabs = input.contestTabsAllCounties()
 
-        val pres = contests["Presidential Electors"]!!
+        val pres = contestTabs["Presidential Electors"]!!
         val ctacChoices = pres.choices.map { Pair(it.key, it.value) }.sortedBy { it.first }.toMap()
         println(pres.contestName)
 

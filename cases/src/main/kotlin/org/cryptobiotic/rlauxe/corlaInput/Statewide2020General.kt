@@ -1,11 +1,9 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
-import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 import org.cryptobiotic.rlauxe.auditcenter.ManifestBatch
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromFile
-import org.cryptobiotic.rlauxe.auditcenter.readCountyTabulateCsvFromResource
+import org.cryptobiotic.rlauxe.co.auditcenter.TabulateCounty
 import org.cryptobiotic.rlauxe.co.input.StrataInfo
 import org.cryptobiotic.rlauxe.corla.ManifestEntries
 import org.cryptobiotic.rlauxe.corla.GarfieldManifestEntries
@@ -82,14 +80,13 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
 
     // add Gunnison cvr totals to countyTabsAllContests, since those are missing from the tabulateCountyFile file
     // Gunnison is in canonical list, just missing from county tabs for some reasson.
-    override fun countyTabsAllContests(): Map<String, CountyTabAllContests> = countyTabsAllContests
-    private val countyTabsAllContests: Map<String, CountyTabAllContests> by lazy {
+    override fun countyTabsAllContests(): Map<String, Map<String, TabulateCounty>> = countyTabsAllContests
+    private val countyTabsAllContests: Map<String, Map<String, TabulateCounty>> by lazy {
         // Gunnison not in round file; hack in from the cvrs and merge
         // resources/resources/data/cases/corla/augmentedData/GunnisonTabs.csv
-        val gunnisonTabs = readCountyTabulateCsvFromResource("resources/data/cases/corla/augmentedData/GunnisonTabs.csv")
-
-        val countyTabs = readCountyTabulateCsvFromFile(tabulateCountyFile)
-        countyTabs + gunnisonTabs
+        val gunnisonTabs = TabulateCounty.readFromFile("resources/data/cases/corla/augmentedData/GunnisonTabs.csv", this)
+        val otherTabs = super.countyTabsAllContests()
+        otherTabs + gunnisonTabs
     }
 
     override val countyStrataMap: Map<String, StrataInfo> by lazy {
@@ -113,9 +110,9 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
         result.toSortedMap()
     }
 
-    override fun contestNameCleanup(county: String, name: String): String {
+    override fun contestNameCleanup(county: String, exportContestName: String): String {
         val transform = when (county) {
-            "Adams" -> when (name) {
+            "Adams" -> when (exportContestName) {
                 "Adams County Court - Flaum" -> "Adams County Court Judge - Flaum"
                 "Adams County Court - Kirby" -> "Adams County Court Judge - Kirby"
                 "ISSUE 1A" -> "Adams County Ballot Issue 1A"
@@ -124,19 +121,19 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Alamosa" -> when (name) {
+            "Alamosa" -> when (exportContestName) {
                 "Alamosa County Revenue Protection - 1A" -> "Alamosa County Ballot Question 1A"
                 "Alamosa County Ambulance District Revenue Protection - 6A" -> "Alamosa County Ambulance District Ballot Question 6A"
                 else -> null
             }
 
-            "Archuleta" -> when (name) {
+            "Archuleta" -> when (exportContestName) {
                 "Ballot Issue 7A" -> "Los Pinos Fire Protection District Ballot Issue 7A"
                 "Ballot Issue 6A" -> "Aspen Springs Metropolitan District Ballot Issue 6A"
                 else -> null
             }
 
-            "Arapahoe" -> when (name) {
+            "Arapahoe" -> when (exportContestName) {
                 "Arapahoe County Court - Contiguglia" -> "Arapahoe County Court Judge - Contiguglia"
                 "Arapahoe County Court - Ollada" -> "Arapahoe County Court Judge - Ollada"
                 "Arapahoe County Court - Williford" -> "Arapahoe County Court Judge - Williford"
@@ -154,40 +151,40 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Bent" -> when (name) {
+            "Bent" -> when (exportContestName) {
                 "County Court Judge" -> "Bent County Court Judge - Vigil"
                 else -> null
             }
 
-            "Boulder" -> when (name) {
+            "Boulder" -> when (exportContestName) {
                 "Boulder County Court" -> "Boulder County Court Judge - Martin" // could remove Judge
                 "City of Louisville City Council Ward 3 (1-Year Term)" -> "City of Louisville City Council Ward 3" // could remove after (
                 else -> null
             }
 
-            "Chaffee" -> when (name) {
+            "Chaffee" -> when (exportContestName) {
                 "Sales Tax On Retail Marijuana" -> "Town of Buena Vista Ballot Issue 2A" // could be switched
                 "Allow Retail Marijuana Stores" -> "Town of Buena Vista Ballot Question 2B"
                 else -> null
             }
 
-            "Clear Creek" -> when (name) {
+            "Clear Creek" -> when (exportContestName) {
                 "County Court Judge" -> "Clear Creek County Court Judge - Jones"
                 else -> null
             }
 
-            "Conejos" -> when (name) {
+            "Conejos" -> when (exportContestName) {
                 "Conejos County Commissoiner District 1" -> "Conejos County Commissioner - District 1"
                 "Conejos County Court Judge" -> "Conejos County Court Judge - Cortez"
                 else -> null
             }
 
-            "Crowley" -> when (name) {
+            "Crowley" -> when (exportContestName) {
                 "Crowley County Court" -> "Crowley County Court Judge - Medina"
                 else -> null
             }
 
-            "Delta" -> when (name) {
+            "Delta" -> when (exportContestName) {
                 "Delta County Ballot Issue 1A - Public Safety Improvements Sales Tax (Back the Badge)" -> "Delta County Ballot Issue 1A"
                 "Town of Cedaredge Ballot Issue 2A - Establishment of retail and medical marijuana stores" -> "Town of Cedaredge Ballot Issue 2A"
                 "Town of Cedaredge Ballot Issue 2B - Retail marijuana sales tax" -> "Town of Cedaredge Ballot Issue 2B"
@@ -196,7 +193,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Denver" -> when (name) {
+            "Denver" -> when (exportContestName) {
                 "Court of Appeals Tow" -> "Colorado Court of Appeals Judge - Tow"
                 "Court of Appeals Welling" -> "Colorado Court of Appeals Judge - Welling"
                 "District Judge - 2nd Judicial District Baumann" -> "District Court Judge - 2nd Judicial District - Baumann"
@@ -238,7 +235,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Douglas" -> when (name) {
+            "Douglas" -> when (exportContestName) {
                 "Representative to the United States Congress - District 4" -> "Representative to the 117th United States Congress - District 4"
                 "Representative to the United States Congress - District 6" -> "Representative to the 117th United States Congress - District 6"
                 "Regent University of Colorado - Congressional District 6" -> "Regent of the University of Colorado - Congressional District 6"
@@ -251,7 +248,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Eagle" -> when (name) {
+            "Eagle" -> when (exportContestName) {
                 "Candidates for Town Council" -> "Town of Avon Town Council"
                 "Eagle County Court" -> "Eagle County Court Judge - Olguin-Fresquez"
                 "Ballot Issue 1A - Sustaining Existing Levels of County Revenue from Future State Imposed Reductions in Residential Assessed V..." -> "Eagle County Ballot Issue 1A"
@@ -266,13 +263,13 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "El Paso" -> when (name) {
+            "El Paso" -> when (exportContestName) {
                 "El Paso County Court - Findorff" -> "El Paso County Court Judge - Findorff"
                 "El Paso County Court - Gerhart" -> "El Paso County Court Judge - Gerhart"
                 else -> null
             }
 
-            "Fremont" -> when (name) {
+            "Fremont" -> when (exportContestName) {
                 "Fremont County Board of County Commissioners - District 1" -> "Fremont County Commissioners - District 1"
                 "Fremont County Board of County Commissioners - District 3" -> "Fremont County Commissioners - District 3"
                 "FREMONT COUNTY - ISSUE 1A - EXTENSION OF 1% SHERIFF'S TAX" -> "Fremont County Ballot Issue 1A"
@@ -282,7 +279,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Garfield" -> when (name) {
+            "Garfield" -> when (exportContestName) {
                 "Princess Khadijah Maryam Jacob-Fambro/Khadijah Maryam Jacob" -> "Princess Khadijah Maryam Jacob-Fambro / Khadijah Maryam Jacob Sr"
                 "Representative to the 117th US Congress Dist 3" -> "Representative to the 117th United States Congress - District 3"
                 "Board of Education District 3" -> "State Board of Education Member - Congressional District 3"
@@ -313,7 +310,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Gilpin" -> when (name) {
+            "Gilpin" -> when (exportContestName) {
                 "Gilpin County Issue 1A" -> "Gilpin County Ballot Issue 1A"
                 "Gilpin County Issue 1B" -> "Gilpin County Ballot Issue 1B"
                 "City of Black Hawk Question 2A" -> "City of Black Hawk Ballot Question 2A"
@@ -323,7 +320,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Gunnison" -> when (name) {
+            "Gunnison" -> when (exportContestName) {
                 "Gunnison County Commissioner - District 1" -> "Gunnison County Commissioner - District 1"
                 "Gunnison County Commissioner - District 2" -> "Gunnison County Commissioner - District 2"
                 "Town of Marble - Board of Trustees" -> "Town of Marble - Board of Trustees"
@@ -331,7 +328,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Jackson" -> when (name) {
+            "Jackson" -> when (exportContestName) {
                 "Jackson County Commissioner Dist 2" -> "Jackson County Commissioner - District 2"
                 "Jackson County Commissioner Dist 3" -> "Jackson County Commissioner - District 3"
                 "District Court Judge - 8th Judicial District - Villaseñor" -> "District Court Judge - 8th Judicial District - Villasenor"
@@ -340,7 +337,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Jefferson" -> when (name) {
+            "Jefferson" -> when (exportContestName) {
                 "Jefferson County Court - Burback" -> "Jefferson County Court Judge - Burback"
                 "Jefferson County Court - Carpenter" -> "Jefferson County Court Judge - Carpenter"
                 "Jefferson County Court - Moore" -> "Jefferson County Court Judge - Moore"
@@ -362,7 +359,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Kiowa" -> when (name) {
+            "Kiowa" -> when (exportContestName) {
                 "2A TOWN OF EADS TABOR QUESTION" -> "Town of Eads Ballot Question 2A,"
                 "Proposition 117 (STATUTORY)" -> "Kiowa - Proposition 117 (STATUTORY)"
                 //                 "Kiowa - Proposition 117 (STATUTORY)" -> "Proposition 117 (STATUTORY)" // single county target
@@ -370,17 +367,17 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Lake" -> when (name) {
+            "Lake" -> when (exportContestName) {
                 "County Court Judge - Lake - Shamis" -> "Lake County Court Judge - Shamis"
                 else -> null
             }
 
-            "La Plata" -> when (name) {
+            "La Plata" -> when (exportContestName) {
                 "Durango School District 9-R" -> "Durango School District 9-R Ballot Issue 4A"
                 else -> null
             }
 
-            "Larimer" -> when (name) {
+            "Larimer" -> when (exportContestName) {
                 "County Commissioner - District 2" -> "Larimer County Commissioner - District 2"
                 "County Commissioner - District 3" -> "Larimer County Commissioner - District 3"
                 "County Court Judge - Larimer - Berenato" -> "Larimer County Court Judge - Berenato"
@@ -389,7 +386,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Lincoln" -> when (name) {
+            "Lincoln" -> when (exportContestName) {
                 "Amendment B" -> "Amendment B (CONSTITUTIONAL)"
                 "Amendment C" -> "Amendment C (CONSTITUTIONAL)"
                 "Amendment 76" -> "Amendment 76 (CONSTITUTIONAL)"
@@ -406,19 +403,19 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Logan" -> when (name) {
+            "Logan" -> when (exportContestName) {
                 "County Court Judge - Logan - Brammer" -> "Logan County Court Judge - Brammer"
                 "Frenchman Groundwater Management District Referred Ballot Issue 7A" -> "Frenchman Groundwater Management District Ballot Issue 7A"
                 else -> null
             }
 
             "Mesa" -> {
-                if (name.startsWith("BALLOT ISSUE 6A"))
-                    return "Redlands 360 Metropolitan District No. 1 Ballot Issue ${name.substring(13)}"
-                if (name.startsWith("BALLOT ISSUE 6B"))
-                    return "Redlands 360 Metropolitan District No. 9 Ballot Issue ${name.substring(13)}"
+                if (exportContestName.startsWith("BALLOT ISSUE 6A"))
+                    return "Redlands 360 Metropolitan District No. 1 Ballot Issue ${exportContestName.substring(13)}"
+                if (exportContestName.startsWith("BALLOT ISSUE 6B"))
+                    return "Redlands 360 Metropolitan District No. 9 Ballot Issue ${exportContestName.substring(13)}"
 
-                when (name) {
+                when (exportContestName) {
                     "Mesa County Court - Grattan" -> "Mesa County Court Judge - Grattan"
                     "Mesa County Court - Henderson" -> "Mesa County Court Judge - Henderson"
                     "Ballot Question 6AA Formation of District Redlands 360 Metropolitan District No. 1" -> "Redlands 360 Metropolitan District No. 1 Ballot Question 6AA"
@@ -427,40 +424,40 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 }
             }
 
-            "Mineral" -> when (name) {
+            "Mineral" -> when (exportContestName) {
                 "Mineral County Court" -> "Mineral County Court Judge - Acheson"
                 else -> null
             }
 
-            "Moffat" -> when (name) {
+            "Moffat" -> when (exportContestName) {
                 "Ciyt of Craig Ballot Question 2D" -> "City of Craig Ballot Question 2D"
                 else -> null
             }
 
-            "Montrose" -> when (name) {
+            "Montrose" -> when (exportContestName) {
                 "County Commissioner - District 1" -> "Montrose County Commissioner - District 1"
                 "County Commissioner - District 3" -> "Montrose County Commissioner - District 3"
                 "County Surveyor" -> "Montrose County Surveyor"
                 else -> null
             }
 
-            "Morgan" -> when (name) {
+            "Morgan" -> when (exportContestName) {
                 "Brush RE-2J School District BALLOT ISSUE" -> "Brush RE-2J School District Ballot Issue 3D"
                 else -> null
             }
 
-            "Otero" -> when (name) {
+            "Otero" -> when (exportContestName) {
                 "Ballot Question 2A" -> "City of La Junta Ballot Question 2A"
                 "General Obligation Bonds" -> "Rocky Ford School District R-2 Ballot Question 4A" // probably
                 else -> null
             }
 
-            "Ouray" -> when (name) {
+            "Ouray" -> when (exportContestName) {
                 "Ouray County Court Judge" -> "Ouray County Court Judge - Martin"
                 else -> null
             }
 
-            "Park" -> when (name) {
+            "Park" -> when (exportContestName) {
                 "Amendment B" -> "Amendment B (CONSTITUTIONAL)"
                 "Amendment C" -> "Amendment C (CONSTITUTIONAL)"
                 "Amendment 76" -> "Amendment 76 (CONSTITUTIONAL)"
@@ -475,7 +472,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Phillips" -> when (name) {
+            "Phillips" -> when (exportContestName) {
                 "Mayor, Town of Holyoke" -> "City of Holyoke Mayor,"
                 "City Council Member, Town of Holyoke" -> "City of Holyoke Council Member"
                 "Phillips County Court - Killin" -> "Phillips County Court Judge - Killin"
@@ -483,26 +480,26 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Pitkin" -> when (name) {
+            "Pitkin" -> when (exportContestName) {
                 "Mayor" -> "Town of Snowmass Village Mayor"
                 "Town Council" -> "Town of Snowmass Village Town Council"
                 "City of Aspen - Extension of Existing 0.3% Sales Tax for Educational Purposes Ballot Issue 2B:" -> "City of Aspen Ballot Issue 2B"
                 else -> null
             }
 
-            "Prowers" -> when (name) {
+            "Prowers" -> when (exportContestName) {
                 "Amendment C (CONSTITUTIONAL)" -> "Prowers - Amendment C (CONSTITUTIONAL)" // diverted target
                 //                 "Prowers - Amendment C (CONSTITUTIONAL)" -> "Amendment C (CONSTITUTIONAL)" // single county target
                 else -> null
             }
 
-            "Pueblo" -> when (name) {
+            "Pueblo" -> when (exportContestName) {
                 "Extension of the One-Half Cent Sales Tax for Economic Development Question 2A" -> "City of Pueblo Ballot Issue 2A"
                 "Pueblo County School District 70 Issue 4A" -> "Pueblo County School District 70 Ballot Issue 4A"
                 else -> null
             }
 
-            "Rio Blanco" -> when (name) {
+            "Rio Blanco" -> when (exportContestName) {
                 "Term limits for Assessor Ballot Issue 1A" -> "Rio Blanco County Ballot Issue 1A"
                 "Term limits for Clerk and Recorder Ballot Issue 1B" -> "Rio Blanco County Ballot Issue 1B"
                 "Term limits for County Commissioners Ballot Issue 1C" -> "Rio Blanco County Ballot Issue 1C"
@@ -513,13 +510,13 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Routt" -> when (name) {
+            "Routt" -> when (exportContestName) {
                 "Eagle County School District Ballot Issue 5B" -> "Eagle County School District Re50J Ballot Issue 5B"
                 "South Routt School District Ballot Issue 5A" -> "RE3 South Routt School District Ballot Issue 5A"
                 else -> null
             }
 
-            "San Miguel" -> when (name) {
+            "San Miguel" -> when (exportContestName) {
                 "Amendment B" -> "Amendment B (CONSTITUTIONAL)"
                 "Amendment C" -> "Amendment C (CONSTITUTIONAL)"
                 "Amendment 76" -> "Amendment 76 (CONSTITUTIONAL)"
@@ -534,7 +531,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Sedgwick" -> when (name) {
+            "Sedgwick" -> when (exportContestName) {
                 "Sedgwick County Court" -> "Sedgwick County Court Judge - Dolezal"
                 "Amendment B" -> "Amendment B (CONSTITUTIONAL)"
                 "Amendment C" -> "Amendment C (CONSTITUTIONAL)"
@@ -550,12 +547,12 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Summit" -> when (name) {
+            "Summit" -> when (exportContestName) {
                 "Summit County Court - Casias" -> "Summit County Court Judge - Casias"
                 else -> null
             }
 
-            "Teller" -> when (name) {
+            "Teller" -> when (exportContestName) {
                 "City Councilmember" -> "City of Woodland Park Councilmember"
                 "Northeast Teller County Fire Protection District 7A" -> "Northeast Teller County Fire Protection District Ballot Issue 7A"
                 "Amendment C (Constitutional) " -> "Teller - Amendment C (CONSTITUTIONAL)" // diverted target
@@ -565,18 +562,18 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
                 else -> null
             }
 
-            "Washington" -> when (name) {
+            "Washington" -> when (exportContestName) {
                 "Brush RE-2J School District BALLOT ISSUE" -> "Brush RE-2J School District Ballot Issue 3D"
                 "Proposition EE (Statutory)" -> "Washington - Proposition EE (STATUTORY)" // diverted target
                 //                 "Washington - Proposition EE (STATUTORY)" -> "Proposition EE (Statutory)" // single county target
                 else -> null
             }
 
-            "Weld" -> when (name) {
+            "Weld" -> when (exportContestName) {
                 else -> null
             }
 
-            "Yuma" -> when (name) {
+            "Yuma" -> when (exportContestName) {
                 "County Court Judge - Yuma" -> "Yuma County Court Judge - Jones"
                 "BALLOT ISSUE 5A:  GENERAL OBLIGATION BONDS" -> "Holyoke School District RE-1J Ballot Issue 5A"
                 else -> null
@@ -587,16 +584,16 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
         if (transform != null) return transform
 
         // let counties have first pass as transform, then the general case
-        return when (name) {
+        return when (exportContestName) {
             "Supreme Court Hart",
             "Colorado Supreme Court Justice - Hart" -> "Justice of the Colorado Supreme Court - Hart"
             "Supreme Court Samour",
             "Colorado Supreme Court Justice - Samour" -> "Justice of the Colorado Supreme Court - Samour"
-            else -> name
+            else -> exportContestName
         }
     }
 
-    override fun candidateNameCleanup(county: String, name: String): String {
+    override fun candidateNameCleanup(county: String, exportCandidateName: String): String {
         /* when (name) {
             "Colorado Supreme Court Justice - Hart" -> return "Justice of the Colorado Supreme Court - Hart"
             "Colorado Supreme Court Justice - Samour" -> return "Justice of the Colorado Supreme Court - Samour"
@@ -605,50 +602,50 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
         } */
 
         return when (county) {
-            "Adams" -> when (name) {
+            "Adams" -> when (exportCandidateName) {
                 "Martín Mendez" -> "Martin Mendez"
-                else -> name
+                else -> exportCandidateName
             }
-            "Arapahoe" -> when (name) {
+            "Arapahoe" -> when (exportCandidateName) {
                 "Lisa Escárcega" -> "Lisa Escarcega"
-                else -> name
+                else -> exportCandidateName
             }
-            "Cheyenne" -> when (name) {
+            "Cheyenne" -> when (exportCandidateName) {
                 "Todd Cella / Timothy Byran Cella" -> "Todd Cella / Timothy Bryan Cella"
                 "Danny Skelley" -> "Danny Skelly"
-                else -> name
+                else -> exportCandidateName
             }
-            "Denver" -> when (name) {
+            "Denver" -> when (exportCandidateName) {
                 "Lisa Escárcega" -> "Lisa Escarcega"
-                else -> name
+                else -> exportCandidateName
             }
-            "Douglas" -> when (name) {
+            "Douglas" -> when (exportCandidateName) {
                 "Princess Khadijah Maryam Jacob-Fambro / Khadijah Maryam Jaco" -> "Princess Khadijah Maryam Jacob-Fambro / Khadijah Maryam Jacob Sr."
-                else -> name
+                else -> exportCandidateName
             }
-            "Garfield" -> when (name) {
+            "Garfield" -> when (exportCandidateName) {
                 "Princess Khadijah Maryam Jacob-Fambro/Khadijah Maryam Jacob" -> "Princess Khadijah Maryam Jacob-Fambro / Khadijah Maryam Jacob Sr."
-                else -> name
+                else -> exportCandidateName
             }
-            "Jefferson" -> when (name) {
+            "Jefferson" -> when (exportCandidateName) {
                 "Lisa Escárcega" -> "Lisa Escarcega"
-                else -> name
+                else -> exportCandidateName
             }
-            "San Miguel" -> when (name) {
+            "San Miguel" -> when (exportCandidateName) {
                 "C.\"Kieffer\" Parrino" -> "Chris \"Kieffer\" Parrino"
-                else -> name
+                else -> exportCandidateName
             }
-            "Sedgwick" -> when (name) {
+            "Sedgwick" -> when (exportCandidateName) {
                 "Todd Cella / Bryan Cella" -> "Todd Cella / Timothy Bryan Cella"
-                else -> name
+                else -> exportCandidateName
             }
-            "Teller" -> when (name) {
+            "Teller" -> when (exportCandidateName) {
                 "Kasey Wells" -> "Kasey Wells / Rachel Wells"
                 "Todd Cella" -> "Todd Cella / Timothy Bryan Cella"
                 "Tom Hoefling" -> "Tom Hoefling / Andy Prior"
-                else -> name
+                else -> exportCandidateName
             }
-            else -> name
+            else -> exportCandidateName
         }
     }
 }

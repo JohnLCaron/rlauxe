@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import org.cryptobiotic.rlauxe.co.auditcenter.ContestRound
 import org.cryptobiotic.rlauxe.co.auditcenter.TabulateCounty
 import org.cryptobiotic.rlauxe.co.input.StrataInfo
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
@@ -42,6 +43,11 @@ open class Statewide2026PMerged(ac:String?=auditcenter): Statewide2026Primary(ac
     // Adams County Clerk and Recorder - DEM,opportunistic_benefits,not_auditable,1,95537,64356,"""Josh Zygielbaum""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
     // Adams County Clerk and Recorder - REP,opportunistic_benefits,not_auditable,1,95537,30876,"""Karen Hoopes""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
 
+    /* override fun roundContests(): Map<String, ContestRound> = roundContests // contestName -> CorlaContestRoundCsv
+    private val roundContests: Map<String, ContestRound> by lazy {
+        ContestRound.readFromFile(contestRoundFile, this ).associateBy { it.contest_name }
+    }
+
     override fun roundContests(): Map<String, CorlaContestRoundCsv> = roundContests
     private val roundContests: Map<String, CorlaContestRoundCsv> by lazy {
         val crmap = mutableMapOf<String, CorlaContestRoundAccum>()
@@ -51,7 +57,7 @@ open class Statewide2026PMerged(ac:String?=auditcenter): Statewide2026Primary(ac
             cr.add( it )
         }
         crmap.mapValues { it.value.build() }.toSortedMap()
-    }
+    } */
 
     // dunno if this is worth the trouble ...
     override fun countyTabsAllContests(): Map<String, Map<String, TabulateCounty>> = countyTabsAllContests

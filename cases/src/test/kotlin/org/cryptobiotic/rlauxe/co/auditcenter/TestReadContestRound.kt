@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.co.auditcenter
 
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026General
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.util.nfn
 import kotlin.test.Test
@@ -14,7 +15,7 @@ class TestReadContestRound {
 
     fun TestReadContestRound(round:Int) {
         val filename = "$auditcenter/2026/general/files/round${round}/contest.csv"
-        val rounds: List<ContestRound> = ContestRound.readFromFile(filename)
+        val rounds: List<ContestRound> = ContestRound.readFromFile(filename, Statewide2026General())
 
 
         println()

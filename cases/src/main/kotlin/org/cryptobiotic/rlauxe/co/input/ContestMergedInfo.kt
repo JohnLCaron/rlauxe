@@ -78,7 +78,7 @@ fun makeMergedInfo(input: StatewideInput): MergedInfo {
     //    val optimistic_samples_to_audit: Int, // check if these ever differ
     //    val estimated_samples_to_audit: Int,
     //)
-    val contestRounds: List<ContestRound> = ContestRound.readFromFile(input.contestRoundFile) // one line for each contest
+    val contestRounds: List<ContestRound> = ContestRound.readFromFile(input.contestRoundFile, input) // one line for each contest
     val contestRoundsMap = mutableMapOf<String, ContestRound>()
     contestRounds.forEach {
         val ccname = input.convertContestName("contestRound", it.contest_name)

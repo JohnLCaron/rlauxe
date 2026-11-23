@@ -10,7 +10,18 @@ class ShowStatewideInput {
     @Test
     fun showCanonicalContests() {
         canonical.forEach { println( it )}
-        println("there are ${canonical.size} auditcenter contests")
+        println("there are ${canonical.size} auditcenter contests\n")
+
+        var miss = 0
+        val rounds = input.roundContests()
+        canonical.forEach {
+            val round = rounds[it.key]
+            if (round == null) {
+                println("canon ${it.key} missing round")
+                miss++
+            }
+        }
+            println(" missing total $miss" )
     }
 
     @Test

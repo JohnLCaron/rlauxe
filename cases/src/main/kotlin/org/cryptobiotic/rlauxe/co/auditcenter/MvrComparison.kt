@@ -17,7 +17,7 @@ import kotlin.text.appendLine
 // county_name,contest_name,imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,timestamp,cvr_id
 // county_name,contest_name,imprinted_id,ballot_type,choice_per_voting_computer,audit_board_selection,consensus,record_type,audit_board_comment,timestamp,cvr_id,audit_reason
 
-// TODO are these names canonical ??
+// TODO should these these names be canonical ??
 data class MvrComparison(
     val county_name: String,
     val contest_name: String,

@@ -1,4 +1,4 @@
-# Notes on 2020 General Election
+# Notes on 2026 General Election
 11/22/2026
 
 ## Corla estimated Risk Limit achieved

@@ -24,6 +24,8 @@ dependencies {
     implementation(libs.bundles.logging)
     implementation(libs.lets.plot)
     implementation(libs.lets.plot.statistics)
+    implementation(libs.commons.poi)
+    implementation(libs.commons.poi.ooxml)
 
     testImplementation(libs.bundles.jvmtest)
     testImplementation(libs.kotest.property)

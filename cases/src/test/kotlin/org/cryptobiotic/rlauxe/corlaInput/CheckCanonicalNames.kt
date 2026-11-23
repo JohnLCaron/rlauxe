@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
-import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
-import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
 
 // check name consistency in ColoradoInput
 class CheckCanonicalNames( val input: StatewideInput) {
@@ -151,7 +149,7 @@ class CheckCanonicalNames( val input: StatewideInput) {
 
     fun checkContestRoundHasCanonical() {
         println("\n-------------------------------- checkContestRoundHasCanonical")
-        val contestRounds = input.roundContests().values.map { it.contestName }
+        val contestRounds = input.roundContests().values.map { it.contest_name }
 
         compareLists(canonicalContestNames, contestRounds, "canonical", "ContestRoundCsv")
     }

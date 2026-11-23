@@ -148,12 +148,12 @@ class TestReadTargetedContests {
                     "${nfn(choices[0], 7)}, ${nfn(choices[1], 7)}, ${nfn(choices[0] - choices[1], 6)}"
 
                 val contestRoundDesc = if (roundContest != null) {
-                    val Npop = roundContest.ballotCardCount
-                    val voteMargin = roundContest.minMargin
-                    val nsamples = roundContest.optimisticSamplesToAudit
+                    val Npop = roundContest.ballot_card_count
+                    val voteMargin = roundContest.min_margin
+                    val nsamples = roundContest.optimistic_samples_to_audit
                     val calcMargin = voteMargin / Npop.toDouble()
                     val noerror = noerror(calcMargin, 1.0)
-                    val calcNeeded = estSampleSizeStandardBet(Npop, noerror, roundContest.riskLimit)
+                    val calcNeeded = estSampleSizeStandardBet(Npop, noerror, roundContest.risk_limit)
 
                     "${nfn(voteMargin, 7)}, ${nfn(Npop, 7)}, ${dfn(calcMargin, 3)},     ${nfn(nsamples, 6)},    $calcNeeded"
 

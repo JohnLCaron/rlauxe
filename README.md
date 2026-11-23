@@ -1,7 +1,7 @@
 # rlauxe ("r-lux")
 
-WORK IN 25
-_last changed: 10/25/2026_
+WORK IN PROGRESS
+_last changed:11/23/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -653,6 +653,7 @@ Specify amounts in dollars, but the main result would be relative costs, eg the 
 ## Case Studies
 * [Belgium 2024](docs/cases/Belgium2024.md)
 * [Boulder County 2024](docs/cases/Boulder2024.md)
+* [Colorado 2026 General Election](docs/notes/Corla2026.md)
 * [Colorado 2026 Primary election by Counties](docs/cases/CorlaCounty2026P.md)
 * [Colorado 2024 Statewide election by Counties](docs/cases/CorlaCounty2024.md)
 * [Colorado 2020 Statewide Election using votedatabase for Cvrs](docs/notes/Corla2020notes.md)

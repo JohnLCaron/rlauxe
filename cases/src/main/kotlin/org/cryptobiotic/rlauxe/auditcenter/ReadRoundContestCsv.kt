@@ -45,10 +45,14 @@ import java.nio.charset.Charset
 // opportunistic_benefits
 
 enum class AuditReason { single_county, county_wide_contest, state_wide_contest, opportunistic_benefits, none}
-fun getAuditReason(s: String): AuditReason {
-    val reason = AuditReason.entries.find { it.name == s }
-    if (reason == null) println("dont know AuditReason $s")
-    return reason ?: AuditReason.none
+fun getAuditReason(s: String?): AuditReason {
+    if (s == null || s.trim().isEmpty()) return AuditReason.none
+    val sl = s.lowercase()
+    if (sl.contains("opportun")) return AuditReason.opportunistic_benefits
+    if (sl.contains("state")) return AuditReason.state_wide_contest
+    if (sl.contains("single")) return AuditReason.single_county
+    if (sl.contains("county")) return AuditReason.county_wide_contest
+    return AuditReason.none
 }
 
 // contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit

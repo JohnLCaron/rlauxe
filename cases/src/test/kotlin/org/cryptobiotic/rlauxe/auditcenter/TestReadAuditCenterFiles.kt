@@ -1,10 +1,8 @@
 package org.cryptobiotic.rlauxe.auditcenter
 
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
-import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
-import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
-import org.cryptobiotic.rlauxe.corlaInput.mergeContestInfo
+import org.cryptobiotic.rlauxe.co.input.makeMergedInfo
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -129,7 +127,7 @@ class TestReadAuditCenterFiles {
 
     @Test
     fun readContestComparison() {
-        val (contestMvrs, countyMvrs, mvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile)
+        val (countyMvrs, mvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile)
         // val (contestMvrs, countyMvrs, countyStyles) = readContestComparisonCsv(input.mvrComparisonFile) { contestNameCleanup(it) }
         println("read ${countyStyles.size} counties from ${input.mvrComparisonFile}; totalStyles=${countyStyles.sumOf { it.styles.size }} totalCards=${ countyStyles.sumOf{it.cardCount} }")
 
@@ -146,12 +144,6 @@ class TestReadAuditCenterFiles {
             countMvrs += it.countyMvr
         }
         println("total mvrs = $countMvrs")
-
-        println("\nNmvrs by Contest")
-        println("\n${trunc("contest", -51)}   county nmvrs, statewide nmvrs")
-        contestMvrs.sortedBy { it.contestName }.forEach {
-            println("${trunc(it.contestName, -60)} ${nfn(it.countMvr, 5)}, ${nfn(it.countStatewide, 5)}")
-        }
     }
 
     // data class MergedContestInfo(
@@ -186,44 +178,25 @@ class TestReadAuditCenterFiles {
     //)
     @Test
     fun showMergeContestInfo() {
-        val (mergedContestInfo, mergedCountyInfo, statewideContests) = mergeContestInfo(Statewide2020General())
+        val (mergedContestInfo, countyStrata) = makeMergedInfo(Statewide2020General())
 
         println("\nMerged Contest Info")
         println("\n${trunc("contest", -50)}    Npop,      Nc, voteMargin, countyMvrs, stateMvrs, Ncounties, auditReason")
         mergedContestInfo.forEach {
             print("${trunc(it.contestName, -50)} ")
-            print("${nfn(it.corlaPop, 7)}, ${nfn(it.nc, 7)}, ${nfn(it.marginInVotes, 7)},")
-            print("   ${nfn(it.countyMvrs, 7)},  ${nfn(it.statewideMvrs, 7)}, ")
+            print("${nfn(it.corlaPop, 7)}, ${nfn(it.corlaNc, 7)}, ${nfn(it.marginInVotes, 7)},")
+            print("   ${nfn(it.strata!!.countyMvrs, 7)},  ${nfn(it.strata!!.stateMvrs, 7)}, ")
             println("         ${nfn(it.counties.size, 3)},   ${it.auditReason}")
         }
         println()
 
         println("\nStrata Info")
-        println("\ncounty      nmvrs,  npop")
-        mergedCountyInfo.sortedBy { it.strataName }.forEach {
-            println("${sfn(it.strataName, -10)}  ${nfn(it.nmvrs, 5)}, ${nfn(it.ballotCardCount, 7)}")
+        println("\ncounty      countyMvrs, stateMvrs,  npop")
+        countyStrata.forEach {
+            println("${sfn(it.key, -10)}  ${nfn(it.value.countyMvrs, 5)}, ${nfn(it.value.stateMvrs, 5)}, ${nfn(it.value.population, 7)}")
         }
         println()
 
-        // data class CorlaContestRoundCsv(
-        //    val contestName: String,
-        //    val auditReason: AuditReason,
-        //    val nwinners: Int,
-        //    val ballotCardCount: Int,         // population size = eg county size when uniform audit
-        //    val contestBallotCardCount: Int,  // Nc = number of cards with this contest on it
-        //    val winners: String,
-        //    val minMargin: Int,
-        //    val riskLimit: Double,  // TODO use this?
-        //    val gamma: Double,      // and this ?? = 1.03905000
-        //    val optimisticSamplesToAudit: Int, // check if these ever differ
-        //    val estimatedSamplesToAudit: Int,
-        //)
-        println("\n${trunc("statewideContests", -50)}    Npop,    Nc, needSamples, auditReason")
-        statewideContests.forEach {
-            print("${trunc(it.contestName, -50)} ")
-            print("${nfn(it.ballotCardCount, 7)}, ${nfn(it.contestBallotCardCount, 7)},  ${nfn(it.optimisticSamplesToAudit, 7)},")
-            println(" ${it.auditReason}")
-        }
     }
 
 }

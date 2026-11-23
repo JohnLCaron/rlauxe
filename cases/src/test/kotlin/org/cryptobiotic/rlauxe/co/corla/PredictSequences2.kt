@@ -2,14 +2,13 @@ package org.cryptobiotic.rlauxe.co.corla
 
 import org.cryptobiotic.rlauxe.auditcenter.AuditReason
 import org.cryptobiotic.rlauxe.auditcenter.ComparisonMvr
+import org.cryptobiotic.rlauxe.co.input.ContestMergedInfo
 import org.cryptobiotic.rlauxe.corla.ManifestEntries
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.corlaCounty.StateManifest
-import org.cryptobiotic.rlauxe.corlaInput.MergedContestInfo
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026General
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import kotlin.collections.forEach
-import kotlin.compareTo
 import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertNotNull
@@ -100,7 +99,7 @@ class PredictSequences2 {
         //    val choices: List<String>
         //    val counties =  mutableSetOf<String>()
         var targets = 0
-        val mcontests: Map<String, MergedContestInfo> = input.mergedContestMap
+        val mcontests: Map<String, ContestMergedInfo> = input.mergedContestMap
         val countySamples = mutableMapOf<String, Int>()
         mcontests.values.forEach { mcontest ->
             if (mcontest.auditReason == AuditReason.county_wide_contest) {

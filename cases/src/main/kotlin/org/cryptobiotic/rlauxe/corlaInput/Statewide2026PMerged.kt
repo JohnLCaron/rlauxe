@@ -2,45 +2,33 @@ package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.CardComparisonResults
-import org.cryptobiotic.rlauxe.auditcenter.ContestMvrCount
+// import org.cryptobiotic.rlauxe.auditcenter.ContestMvrCount
 import org.cryptobiotic.rlauxe.auditcenter.ContestTabAllCounties
 import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundAccum
 import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.CountyContestVotes
 import org.cryptobiotic.rlauxe.auditcenter.CountyStylesFromMvrs
 import org.cryptobiotic.rlauxe.auditcenter.CountyTabAllContests
+import org.cryptobiotic.rlauxe.co.input.StrataInfo
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
 import kotlin.collections.forEach
 
 // merge the contests back together
 // could ignore mvrComparisonFile and contestRoundFile (maybe)
-//
 // the main issue is getting Nc and Npop
-//
 // we have La Plata, Morgan, Weld CVR_export files
-class Statewide2026PMerged(ac:String?=auditcenter): StatewideInput(
-    targetContestsFile = "$ac/2026/primary/files/targetContestSelections.xlsx", // convert to csv
-    generalCanonicalFile = "$ac/2026/primary/finalReports/CanonicalListOfContestsAndChoices.csv",
-    contestRoundFile = "$ac/2026/primary/finalReports/ContestsListRound1.csv",
-    tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",
-    mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv",
-) {
+open class Statewide2026PMerged(ac:String?=auditcenter): Statewide2026Primary(ac) {
     override val year = "2026pm"
 
     override fun skipCounties(countyName: String) = false
-    val parent = Statewide2026Primary(ac)
-    override val seed = parent.seed
 
-    override fun manifestFile(county: String) = parent.manifestFile(county)
-    override fun statewideManifest() = parent.statewideManifest
-
-    override fun corlaCountyInput(countyName: String): CountyInput? = null
+    // ?? override fun corlaCountyInput(countyName: String): CountyInput? = null
 
     override fun canonicalContests() = canonicalContests
     private val canonicalContests: Map<String, CanonicalContest> by lazy {
         val ccmap = mutableMapOf<String, CanonicalContest>()
-        parent.canonicalContests().values.forEach {
+        super.canonicalContests().values.forEach {
             val key = contestNameMerge(it.contestName)
             val cc = ccmap.getOrPut(key) { it }
             cc.counties.addAll( it.counties )
@@ -56,7 +44,7 @@ class Statewide2026PMerged(ac:String?=auditcenter): StatewideInput(
     override fun roundContests(): Map<String, CorlaContestRoundCsv> = roundContests
     private val roundContests: Map<String, CorlaContestRoundCsv> by lazy {
         val crmap = mutableMapOf<String, CorlaContestRoundAccum>()
-        parent.roundContests().values.forEach {
+        super.roundContests().values.forEach {
             val key = contestNameMerge(it.contestName)
             val cr = crmap.getOrPut(key) { CorlaContestRoundAccum(it) }
             cr.add( it )
@@ -67,7 +55,7 @@ class Statewide2026PMerged(ac:String?=auditcenter): StatewideInput(
     override fun countyTabsAllContests(): Map<String, CountyTabAllContests> = countyTabsAllContests
     private val countyTabsAllContests: Map<String, CountyTabAllContests> by lazy {
         val ctmap = mutableMapOf<String, CountyTabAllContests>()
-        parent.countyTabsAllContests().values.forEach { org ->
+        super.countyTabsAllContests().values.forEach { org ->
             val ct = ctmap.getOrPut(org.countyName ) { CountyTabAllContests(org.countyName) }
             org.contests.values.forEach { ccvOrg ->
                 val key = contestNameMerge(ccvOrg.contestName)
@@ -103,15 +91,15 @@ class Statewide2026PMerged(ac:String?=auditcenter): StatewideInput(
     //}
     override fun cardComparison(): CardComparisonResults = cardComparison
     private val cardComparison: CardComparisonResults by lazy {
-        val org = parent.cardComparison()
+        val org = super.cardComparison()
 
-        // accumulate mvr counts by Contest
+        /* accumulate mvr counts by Contest
         val mergedMvrs = mutableMapOf<String, ContestMvrCount>()
         org.contestMvrs.forEach { orgCount: ContestMvrCount ->
             val key = contestNameMerge(orgCount.contestName)
             val contestMvr = mergedMvrs.getOrPut(key) { ContestMvrCount(key) }
             contestMvr.countMvr += orgCount.countMvr
-        }
+        } */
 
         // convert contest names in countyStyles
         // data class CountyStylesFromMvrs(val countyName: String) {
@@ -132,22 +120,23 @@ class Statewide2026PMerged(ac:String?=auditcenter): StatewideInput(
             countyStyles.add(countyStyle)
         }
 
-        CardComparisonResults(mergedMvrs.values.toList(), org.countyMvrs, org.mvrs, countyStyles)
+        CardComparisonResults(org.countyMvrs, org.mvrs, countyStyles)
     }
 
-    override fun mergedInfo() = mergedInfo
+    /* override fun mergedInfo() = mergedInfo
     private val mergedInfo: MergedInfo by lazy {
         val orgInfo = mergeContestInfo(this)
         val orgStrataInfo = orgInfo.strataInfo
         //     val strataName: String,
         //    val nmvrs: Int, // countyMvr.countMvr
         //    val ballotCardCount: Int,  // round.ballot_card_count
-        val broomfield = StrataInfo("Broomfield", 0, 0,22906) // nmvrs ??
+        val broomfield = StrataInfo("Broomfield", 0, 0, 22906) // nmvrs ??
         orgInfo.copy(strataInfo = orgStrataInfo + listOf(broomfield))
-    } // mergedContestInfo, strataInfo, statewideContests
+    }
 
     override fun strataPopulation() = strataPopulation
-    private val strataPopulation: Map<String, Int> by lazy { mergedInfo.strataInfo.associate { it.strataName to it.ballotCardCount } } // county name to population
+    private val strataPopulation: Map<String, Int> by lazy { mergedInfo().strataInfo.associate { it.strataName to it.population } } // county name to population
+    */
 
     override fun contestNameCleanup(county: String, name: String): String {
         return contestNameMerge(name)
@@ -175,7 +164,4 @@ class Statewide2026PMerged(ac:String?=auditcenter): StatewideInput(
         return if (contest.startsWith(root)) root else contest
     }
 
-    override fun candidateNameCleanup(county: String, name: String): String {
-        return parent.candidateNameCleanup(county, name)
-    }
 }

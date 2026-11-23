@@ -46,16 +46,16 @@ class ShowStatewideInput {
     fun showMvrs() {
         val ccr = input.cardComparison()
         println("there are ${ccr.countyMvrs.size} countyMvrs")
-        println("there are ${ccr.contestMvrs.size} contestMvrs")
         println("there are ${ccr.mvrs.size} mvrs")
         println("there are ${ccr.stylesByCounty.size} stylesByCounty")
     }
 
+    /*
     @Test
     fun showContestsFromMvrs() {
         println("there are ${input.contestsFromMvrs.size} contestsFromMvrs")
         input.contestsFromMvrs.forEach { println( it )}
-    }
+    } */
 
     @Test
     fun showCountiesFromMvrs() {
@@ -78,30 +78,33 @@ class ShowStatewideInput {
     fun showCanonicalContestInfo() {
         val mergedInfo = input.mergedInfo()
         println("there are ${mergedInfo.mergedContestInfo.size} mergedContestInfo")
-        mergedInfo.mergedContestInfo.forEach { println("  ${it.contestName} == ${it.nc}") }
+        mergedInfo.mergedContestInfo.forEach { println("  ${it.contestName} == ${it.corlaNc}") }
     }
 
     @Test
     fun showStrataInfo() {
-        println("\nthere are ${input.mergedInfo().strataInfo.size} strataInfo")
-        input.mergedInfo().strataInfo.forEach { println("  $it") }
-    }
-
-    @Test
-    fun showStatewideContests() {
-        println("\nthere are ${input.mergedInfo().statewideContests.size} statewideContests")
-        input.mergedInfo().statewideContests.forEach { println( "  $it" )}
+        println("\nthere are ${input.mergedInfo().countyStrata.size} strataInfo")
+        input.mergedInfo().countyStrata.forEach { println("  $it") }
     }
 
     @Test
     fun showStrataPopulation() {
-        println("\nthere are ${input.strataPopulation().size} strataPopulation")
-        input.strataPopulation().forEach { println("  $it") }
+        println("\nthere are ${input.countyPopulation().size} strataPopulation")
+        input.countyPopulation().forEach { println("  $it") }
     }
 
     @Test
     fun checkCanonicalNames() {
         CheckCanonicalNames(Statewide2026General())
+    }
+
+    @Test
+    fun testAllNames() {
+        statewideInputs.forEach {
+            println("==================================================")
+            println(it.name())
+            CheckCanonicalNames(it)
+        }
     }
 
 }

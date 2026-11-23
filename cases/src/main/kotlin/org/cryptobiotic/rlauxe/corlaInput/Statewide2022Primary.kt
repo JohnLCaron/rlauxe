@@ -3,17 +3,19 @@ package org.cryptobiotic.rlauxe.corlaInput
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
-class Statewide2022Primary(ac:String?=auditcenter): StatewideInput(
-    targetContestsFile = null, // missing
-    generalCanonicalFile = "$ac/2022/primary/2022PrimaryRLACounty-CandidateList.csv",
-    contestRoundFile = "$ac/2022/primary/round_1/contest.csv",
-    tabulateCountyFile = "$ac/2022/primary/tabulate_county.csv",
-    mvrComparisonFile = "$ac/2022/primary/round_2/contest_comparison.csv"
-) {
+class Statewide2022Primary(ac:String?=auditcenter): StatewideInput() {
     override val seed = ""
     override val year = "2022p"
-    val manifestDir = "$ac/2022/primary/round_1"
 
+    override val targetContestsFile = null
+    override val generalCanonicalFile = "$ac/2022/primary/2022PrimaryRLACounty-CandidateList.csv"
+    override val contestRoundFile = "$ac/2022/primary/round_2/contest.csv"
+    override val tabulateCountyFile = "$ac/2022/primary/tabulate_county.csv"
+    override val mvrComparisonFile = "$ac/2022/primary/round_2/contest_comparison.csv"
+    override val contestSelectionFile = "$ac/2022/primary/round_2/contest_selection.csv"
+    override val resultsReportFile = "$ac/2022/primary/round_2/ResultsReport.xlsx"
+
+    val manifestDir = "$ac/2022/primary/round_1"
     override fun manifestFile(county: String): String {
         val noblanks = county.replace("\\s".toRegex(), "")
         return "$manifestDir/${noblanks}.csv"

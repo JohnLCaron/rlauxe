@@ -1,12 +1,17 @@
 package org.cryptobiotic.rlauxe.co.auditcenter
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
 import java.io.IOException
 
 import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import kotlin.String
+
+private val logger = KotlinLogging.logger("ActivityReport")
+private val show = false
+
+// one line for each target mvr ; ~5K
 
 // activityReport.xlsx
 // county, imprinted id, scanner id, batch id, record id, db id, round, audit board, record type, discrepancy, consensus, comment, revision, re-audit ballot comment, time of submission
@@ -30,47 +35,53 @@ data class ActivityReport(
 
     companion object {
 
-        fun readFromFile(filename: String): Map<String, List<ActivityReport>> { // contest name -> mvr
+        fun readFromFile(filename: String): Map<String, List<ActivityReport>> { // target contest name -> mvr
             val result = mutableMapOf<String, MutableList<ActivityReport>>()
 
             val excelFile = File(filename)
             val formatter = DataFormatter()
 
-            // Passing a File directly uses less memory than FileInputStream
             try {
                 WorkbookFactory.create(excelFile).use { workbook ->
-                    val contestsToSheets = mutableListOf<Pair<String, String>>()  // contest name, sheet name
-                    val sheet: Sheet = workbook.getSheetAt(0) // Contests to Sheets
-                    var rowCount = 0
-                    for (row in sheet) {
-                        val cellValues = row.toList().map{ it.getStringCellValue() }
-                        // println(cellValues)
-                        if (rowCount > 1 && cellValues.size > 1)
-                            contestsToSheets.add(Pair(cellValues[0], cellValues[1]))
-                        rowCount++
-                    }
-
                     var firstHeader = emptyList<String>()
-                    contestsToSheets.forEach { pair ->
-                        val sheetName = if (pair.second == "Governor / Lieutenant Governor") "Governor   Lieutenant Governor" else pair.second // 2026General, sheesh
-                        val sheet: Sheet? = workbook.getSheet(sheetName) //sheet name
-                        if (sheet != null) {
-                            var count = 0
-                            val header = sheet.getRow(1).toList().map { it.getStringCellValue() }
-                            // println("${pair.first}: $header")
-                            val activities = mutableListOf<ActivityReport>()
+                    val contestNames = mutableListOf<String>()
+                    var sheetno = 0
 
-                            if (firstHeader.isEmpty()) firstHeader = header
-                            else if (firstHeader != header) {
-                                println(header)
+                    for (sheet in workbook) {
+                        if (sheet.sheetName.startsWith("Contests to Sheets")) {
+                            val rows = sheet.iterator()
+                            rows.next() // skip first row - its the header
+                            while( rows.hasNext() ) {
+                                val row = rows.next()
+                                if (row.first().getStringCellValue().startsWith("Contest Name")) continue
+                                contestNames.add(row.first().getStringCellValue())
                             }
+                            continue
+                        }
+                        if (sheet.sheetName.startsWith("Summary")) continue
 
-                            for (row in sheet) {
-                                val cellValues = row.toList()
-                                // println(cellValues)
-                                if (count > 1  && cellValues.size > 1) {
-                                    var idx = 0
-                                    activities.add(
+                        var rowno = 0
+                        // find the header
+                        while (true) {
+                            val cellValues = sheet.getRow(rowno).toList().map { it.getStringCellValue() }
+                            if (cellValues.first().lowercase() == "county") break
+                            rowno++
+                        }
+                        val header = sheet.getRow(rowno).toList().map { it.getStringCellValue() }
+                        if (firstHeader.isEmpty()) firstHeader = header
+                        else if (firstHeader != header) {
+                            logger.warn { " changed = $header was ${firstHeader}" }
+                        }
+                        rowno++ // skip the header
+
+                        val results = mutableListOf<ActivityReport>()
+                        while (rowno < sheet.getLastRowNum()) {
+                            val cellValues = sheet.getRow(rowno).toList()
+                            // println(cellValues)
+                            if (cellValues.size >= 15) {
+                                var idx = 0
+                                try {
+                                    results.add(
                                         ActivityReport(
                                             county = cellValues[idx++].getStringCellValue(),
                                             imprintedId = cellValues[idx++].getStringCellValue(),
@@ -87,15 +98,16 @@ data class ActivityReport(
                                             revision = removeNoData(cellValues[idx++].getStringCellValue()),
                                             reauditComment = removeNoData(cellValues[idx++].getStringCellValue()),
                                             timeOfSubmission = cellValues[idx++].getStringCellValue(),
-                                        )
-                                    )
+                                        ))
+                                } catch (e: Exception) {
+                                    println(cellValues)
                                 }
-                                count++
                             }
-                            result[pair.first] = activities
-
-                        } else
-                            println("ActivityReport FAILED to find sheet '${sheetName}'")
+                            rowno++
+                        }
+                        result[contestNames[sheetno]] = results
+                        if (show) println("ActivityReport sheet '${sheet.sheetName}' with ${results.size} results for contest '${contestNames[sheetno]}'")
+                        sheetno++
                     }
                 }
 

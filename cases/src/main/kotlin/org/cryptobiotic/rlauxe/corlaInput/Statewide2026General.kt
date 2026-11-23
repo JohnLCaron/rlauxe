@@ -1,26 +1,30 @@
 package org.cryptobiotic.rlauxe.corlaInput
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
-import org.cryptobiotic.rlauxe.auditcenter.CardComparisonResults
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
-import org.cryptobiotic.rlauxe.corla.GarfieldManifestEntries
-import org.cryptobiotic.rlauxe.corla.ManifestEntries
 import org.cryptobiotic.rlauxe.corlaCounty.CountyManifest
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 
 // mostly TODO
-open class Statewide2026General(ac:String?=auditcenter): StatewideInput(
-    targetContestsFile = "$ac/2026/general/files/2026GeneralRLAContestList.xlsx",
-    // encoded in ISO-8859-1 for "CITY OF CÃNON CITY ISSUE 2A"; UTF-8 has C�NON
-    generalCanonicalFile = "$ac/2026/general/files//2026GeneralCanonicalList.csv",
-    contestRoundFile = "$ac/2026/general/files/round2/contest.csv",
-    tabulateCountyFile = "$ac/2026/general/files/tabulateCountyPlurality.csv",
-    mvrComparisonFile = "$ac/2026/general/files/round2/contestComparison.csv",
-) {
+open class Statewide2026General(ac:String?=auditcenter): StatewideInput() {
     override val seed = "38589646444703560910"
     override val year = "2026"
+
+    // encoded in ISO-8859-1 for "CITY OF CÃNON CITY ISSUE 2A"; UTF-8 has C�NON
+    override val generalCanonicalFile = "$ac/2026/general/files//2026GeneralCanonicalList.csv"
+    override val tabulateCountyFile = "$ac/2026/general/files/tabulateCountyPlurality.csv"
+    override val targetContestsFile = "$ac/2026/general/files/2026GeneralRLAContestList.xlsx"
+
+    // round specific
+    override val contestRoundFile = "$ac/2026/general/files/round2/contest.csv"
+    override val mvrComparisonFile = "$ac/2026/general/files/round2/contestComparison.csv"
+    override val contestSelectionFile = "$auditcenter/2026/general/files/round2/contestSelection.csv"
+    override val resultsReportFile = "$auditcenter/2026/general/files/round2/resultsReport.xlsx"
+
+    override fun activityReportFile(): String? = "$auditcenter/2026/general/files/round2/activityReport.xlsx"
+
     val cvrsPresent = listOf("La Plata", "Morgan", )
 
     val manifestDir = "$ac/2026/general/files"

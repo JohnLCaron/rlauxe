@@ -12,6 +12,7 @@ AuditCenter Input: ColoradoInputTable
     Canonical Contests - CanonicalContestBean
         StatewideInput.mergedContestMap()
         StatewideInput.contestTabsAllCounties()
+            CanonicalContestBean(val name: String, val mcontest: ContestMergedInfo, val contestTab: ContestTabAllCounties?)
 
 Counties: CiCounties
     "CorlaCountyData" - CountyTabBean

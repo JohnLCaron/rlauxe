@@ -7,6 +7,8 @@ import org.cryptobiotic.rlauxe.corlaInput.defaultCharset
 import org.cryptobiotic.rlauxe.corlacvr.reverseMungedDate
 import java.io.File
 
+// one line for each contest ~ 1K
+
 // contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
 // Adams County Assessor - DEM, opportunistic_benefits, not_auditable, 1,72075,37328,"""Ken Musso""",0,0.03000000,0,0,0,0,0,0,0,1.03905000,0,0,0
 data class ContestRound(

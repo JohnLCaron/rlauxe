@@ -9,16 +9,19 @@ import org.cryptobiotic.rlauxe.auditcenter.ContestIDsByCounty
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 
 
-open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput(
-    targetContestsFile = "$ac/2026/primary/files/targetContestSelections.xlsx", // convert to csv
-    generalCanonicalFile = "$ac/2026/primary/finalReports/CanonicalListOfContestsAndChoices.csv",
-    contestRoundFile = "$ac/2026/primary/finalReports/ContestsListRound1.csv",
-    tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv",
-    mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv",
-
-) {
+open class Statewide2026Primary(ac:String?=auditcenter): StatewideInput() {
     override val seed = ""
     override val year = "2026p"
+
+    override val targetContestsFile = "$ac/2026/primary/files/targetContestSelections.xlsx"
+    override val generalCanonicalFile = "$ac/2026/primary/finalReports/CanonicalListOfContestsAndChoices.csv"
+    override val contestRoundFile = "$ac/2026/primary/finalReports/ContestsListRound1.csv"
+    override val tabulateCountyFile = "$ac/2026/primary/finalReports/CandidateVoteTotalsByCounty.csv"
+    override val mvrComparisonFile = "$ac/2026/primary/finalReports/CVRtoAuditBoardInterpretationComparison.csv"
+
+    // round specific
+    override val contestSelectionFile = "$auditcenter/2026/primary/finalReports/ContestMarginAndContestCVR-IDs-Round1.csv"
+    override val resultsReportFile = null // "$auditcenter/2026/primary/files/round2/resultsReport.xlsx"
 
     val manifestDir = "$ac/2026/primary/files"
     val contestIDsByCountyFile = "$ac/2026/primary/finalReports/ContestIDsByCounty.csv" // only 2026 primary so far

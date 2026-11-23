@@ -70,12 +70,12 @@ data class ContestMvrCount(val contestName: String) {
 // for each county, over all contests
 // 2020 doesnt have "statewide" field in this file
 data class CountyMvrCount(val countyName: String) {
-    var countyMvr = 0
-    var stateMvr = 0
+    var countyMvr: Int = 0 // the number of mvrs drawn in the county sampling
+    var stateMvr: Int = 0 // the number of mvrs drawn from the state sampling that are in this county ??
 }
 
 data class CardComparisonResults(
-    val contestMvrs: List<ContestMvrCount>,
+    // val contestMvrs: List<ContestMvrCount>,
     val countyMvrs: List<CountyMvrCount>,
     val mvrs: List<ComparisonMvr>,
     val stylesByCounty: List<CountyStylesFromMvrs>
@@ -202,7 +202,7 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
             countyMvrs.countyMvr++
     }
 
-    // accumulate mvr counts by Contest
+    /* accumulate mvr counts by Contest
     val contestMvrs = mutableMapOf<String, ContestMvrCount>()
     cards.values.forEach { card: ComparisonMvr ->
         card.lines.forEach { line ->
@@ -210,14 +210,14 @@ fun readContestComparisonCsv(filename: String): CardComparisonResults {
             if (card.statewide()) contestMvr.countStatewide++
                                   else contestMvr.countMvr++
         }
-    }
+    } */
 
-    // create the CountyStyles
+    // create the CountyStyles; styles we can derive from the mvrs
     val stylesByCounty = mutableMapOf<String, CountyStylesFromMvrs>()
     cards.values.forEach { card: ComparisonMvr ->
         val countyStyles = stylesByCounty.getOrPut(card.county()) { CountyStylesFromMvrs(card.county()) }
         countyStyles.add(card.contests())
     }
 
-    return CardComparisonResults(contestMvrs.values.toList(), countyMvrs.values.toList(), cards.values.toList(), stylesByCounty.values.toList())
+    return CardComparisonResults(countyMvrs.values.toList(), cards.values.toList(), stylesByCounty.values.toList())
 }

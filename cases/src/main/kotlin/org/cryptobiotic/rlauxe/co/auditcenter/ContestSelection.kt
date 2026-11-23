@@ -7,6 +7,8 @@ import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
 import java.io.File
 
+// one line for each contest ~ 1K
+
 // roundX/contestSelection.csv
 // min_margin,contest_name,contest_cvr_ids
 data class ContestSelection(

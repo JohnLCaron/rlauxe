@@ -8,6 +8,8 @@ import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
 import java.io.File
 
+// one line for each contest and choice ~3K
+
 // CanonicalListOfContestsAndChoices
 // CountyName,ContestName,ContestChoices
 // El Paso,City of Colorado Springs Ballot Question 300,"Yes/For,No/Against"

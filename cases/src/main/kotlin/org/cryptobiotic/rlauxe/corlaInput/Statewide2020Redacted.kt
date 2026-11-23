@@ -5,28 +5,11 @@ import org.cryptobiotic.rlauxe.corla.GarfieldManifestEntries
 import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.util.Locations.cases
 
-open class Statewide2020Redacted(
+class Statewide2020Redacted(
         ac:String?=auditcenter,
-    ): StatewideInput (
-    targetContestsFile = "$ac/2020/general/targetContests.xlsx",
-    generalCanonicalFile = "$ac/2020/general/canonicalTitleCase.csv",
-    contestRoundFile = "$ac/2020/general/round_1/contest.csv",
-    tabulateCountyFile = "$ac/2020/general/tabulate_county.csv",
-    mvrComparisonFile = "$ac/2020/general/round_3/contestComparison.csv"
-) {
+    ): Statewide2020General() {
+
     override val year = "2020r"
-    val parent = Statewide2020General(ac) // TODO why dont we subclass ?
-    override val seed = parent.seed
-
-    val manifestDir = "$ac/2020/general/round_1"
-    val cvrsMissing = listOf("Baca", "Las Animas")
-
-    override fun manifestFile(county: String): String {
-        val noblanks = county.replace("\\s".toRegex(), "")
-        return "$manifestDir/manifest-${noblanks}.csv"
-    }
-
-    override fun statewideManifest() = parent.statewideManifest
 
     override fun corlaCountyInput(countyName: String): CountyInput? {
         if (cvrsMissing.contains(countyName)) return County2020InputNoCvrs(countyName)
@@ -35,21 +18,6 @@ open class Statewide2020Redacted(
             County2020Redacted(countyName,) else null
     }
 
-    override val countyStrataMap: Map<String, StrataInfo> by lazy {
-        (mergedInfo().strataInfo +listOf(
-            StrataInfo("Gunnison", 34, 0,11332),
-            StrataInfo("San Juan", 0, 0,571),
-        )).associateBy { it.strataName }
-    }
-
-    private val skipCounties = listOf("San Juan")
-    override fun skipCounties(countyName: String) = skipCounties.contains(countyName)
-
-    // add Gunnison cvr totals to countyTabsAllContests, since those are missing from the tabulateCountyFile file
-    override fun countyTabsAllContests() = parent.countyTabsAllContests()
-    override fun canonicalContests() = parent.canonicalContests()
-    override fun contestNameCleanup(county: String, name: String) = parent.contestNameCleanup(county, name)
-    override fun candidateNameCleanup(county: String, name: String) = parent.candidateNameCleanup(county, name)
 }
 
 class County2020Redacted(

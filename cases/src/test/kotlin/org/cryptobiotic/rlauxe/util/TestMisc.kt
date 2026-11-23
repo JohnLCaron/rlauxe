@@ -25,7 +25,7 @@ class TestMisc {
         val lastAuditRound = auditRecord.rounds.last()
 
         val contestRoundMap = mutableMapOf<Int, ContestRound>()
-        for (contestRound in lastAuditRound!!.contestRounds) {
+        for (contestRound in lastAuditRound.contestRounds) {
             contestRoundMap.put(contestRound.id, contestRound)
         }
         val cwa = auditRecord.contests.find { it.id == 285 }!!

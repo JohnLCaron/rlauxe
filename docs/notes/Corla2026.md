@@ -26,6 +26,7 @@ where:
 |           p1u |                                         0 |                                  one count understatement |
 |           p2u |                                         0 |                                  two count understatement |
 
+<div style="overflow-x: auto;">
 
 | target | NCounties   | name                                     | marginInVotes | corlaPop | recount               | margin                | estSamples | countyMvrs | statewideMvrs | extraMvrs | corlaRisk              | p2o | p1o | p1u | p2u | 
 |--------|-------------|------------------------------------------|---------------|----------|-----------------------|-----------------------|------------|------------|---------------|-----------|------------------------|-----|-----|-----|-----|
@@ -1029,6 +1030,8 @@ where:
 |        | Yuma        | Yuma County Coroner                      | 0             | 3826     | 0.0                   | 0.0                   | 0          | 58         | 0             | 58        | 1.0                    | 0   | 0   | 0   | 0   | 
 |        | Yuma        | Yuma County Sheriff                      | 0             | 3826     | 0.0                   | 0.0                   | 0          | 58         | 0             | 58        | 1.0                    | 0   | 0   | 0   | 0   | 
 |        | Yuma        | Yuma County Treasurer                    | 0             | 3826     | 0.0                   | 0.0                   | 0          | 58         | 0             | 58        | 1.0                    | 0   | 0   | 0   | 0   | 
+
+</div>
 
 ### Notes on observer app
 

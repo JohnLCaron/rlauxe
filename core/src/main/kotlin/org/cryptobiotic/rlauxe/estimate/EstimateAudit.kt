@@ -57,6 +57,7 @@ private val showBet = false
 //   useAssertionRound.estNewMvrs = newMvrs
 //   assertionRound.estimationResult = estimationResult
 
+// wont work whwen there are no CVRs
 // TODO fail if nsamples > contestSampleCutoff
 class EstimateAudit(
     val topdir: String,

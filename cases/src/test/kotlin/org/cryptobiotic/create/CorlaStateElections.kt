@@ -13,13 +13,29 @@ import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.util.Locations.cases
 import org.cryptobiotic.rlauxe.corlaCounty.ElectionVariantEnum
 import org.cryptobiotic.rlauxe.corla.createCorlaStateElection
+import org.cryptobiotic.rlauxe.corlaInput.Co2020G
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020Redacted
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026Primary
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
 import kotlin.test.Test
 
 class CorlaStateElections {
+
+    @Test
+    fun create2026() {
+        val stateInput = Statewide2026General()
+
+        createCorlaStateElection(
+            topdir = "$cases/corla/2026",
+            stateInput=stateInput,
+            creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .03),
+            roundConfig = corlaRoundSettings(),
+            variant = ElectionVariantEnum.OnePool,
+            alreadyMadeCounties = false,
+        )
+    }
 
     @Test
     fun create2026p() {
@@ -91,10 +107,11 @@ class CorlaStateElections {
     }
 
     @Test
-    fun startRound() {
+    fun startFirstRound() {
         StartAuditFirstRoundCli.main(
             arrayOf(
-                "-in", "$cases/corla/2020",
+                "-in", "$cases/corla/2026",
+                "--onlyTask", "172-test",
             )
         )
     }
@@ -190,5 +207,5 @@ fun testStartNewRound() {
 
 fun corlaRoundSettings() = AuditRoundConfig(
     SimulationControl(nsimTrials = 10, estPercentile = listOf(50, 80)),
-    ContestSampleControl(minRecountMargin = .005, minMargin = 0.005, minSize = 10, maxSamplePct = .25),
+    ContestSampleControl(minRecountMargin = .005, minMargin = 0.005, minSize = 10, maxSamplePct = .50),
     ClcaConfig(), null)

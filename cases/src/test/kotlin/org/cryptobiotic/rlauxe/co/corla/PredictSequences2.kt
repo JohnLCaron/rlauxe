@@ -102,15 +102,15 @@ class PredictSequences2 {
         val mcontests: Map<String, ContestMergedInfo> = input.mergedContestMap
         val countySamples = mutableMapOf<String, Int>()
         mcontests.values.forEach { mcontest ->
-            if (mcontest.auditReason == AuditReason.county_wide_contest) {
+            if (mcontest.corlaReason == AuditReason.county_wide_contest) {
                 val county = mcontest.counties.first()
                 val currentMax = countySamples.getOrDefault(county, 0)
-                countySamples[county] = max(currentMax, mcontest.estSamples)
+                countySamples[county] = max(currentMax, mcontest.corlaEstSamples)
                 targets++
             }
-            if (mcontest.auditReason == AuditReason.state_wide_contest) {
+            if (mcontest.corlaReason == AuditReason.state_wide_contest) {
                 val currentMax = countySamples.getOrDefault("Colorado", 0)
-                countySamples["Colorado"] = max(currentMax, mcontest.estSamples)
+                countySamples["Colorado"] = max(currentMax, mcontest.corlaEstSamples)
                 targets++
             }
         }

@@ -1,51 +1,53 @@
 package org.cryptobiotic.rlauxe.votedatabase
 
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
-import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
+import org.cryptobiotic.rlauxe.corlaInput.Co2020G
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlacvr.CorlaCountyCvrsIF
 import org.cryptobiotic.rlauxe.corlacvr.Garfield2020CountyCvrs
 import org.cryptobiotic.rlauxe.corlaCounty.makeContestInfo
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
 import org.cryptobiotic.rlauxe.corlacvr.readCountyCvrsFromFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.text.split
 
-// see Corla2020notes
-
 class CompareVoteDatabaseAndAuditCenter {
-
+    val testInput = Statewide2024General()
+    
     @Test
     fun testRedactionProblem() {
-        val errs = matchNames("Larimer", Statewide2020General())
+        val errs = matchNames("Larimer", testInput)
         assertEquals(0, errs)
     }
 
     @Test
     fun testGarfield() { // also Roosevelt
-        val errs = matchNames("Garfield", Statewide2020General())
+        val errs = matchNames("Garfield", testInput)
         assertEquals(0, errs)
     }
 
     @Test
     fun problem() { // redaction
-        matchNames("Douglas", Statewide2020General())
+        matchNames("Douglas", testInput)
     }
 
     @Test
     fun testSuggest() {
         val contest = "Candidates for Town Council"
-        val suggest = suggest("Eagle", contest, Statewide2020General())
+        val suggest = suggest("Eagle", contest, testInput)
         println("$contest -> $suggest")
     }
 
     @Test
-    fun allColorado2020Counties() {
-        val input = Statewide2020General()
-        val errCount = emptyMap<String, Int>()
+    fun allColoradoCounties() {
+        val input = testInput
+        var errs = 0
         input.counties().forEach { county ->
-            matchNames(county, input)
+            errs += matchNames(county, input)
         }
+        println("errs = $errs")
+        assertEquals(0, errs)
     }
 
     fun matchNames(county: String, input: StatewideInput): Int {
@@ -53,16 +55,15 @@ class CompareVoteDatabaseAndAuditCenter {
         if (countyInput == null) {
             println("\n-----------------------------------")
             println("$county countyInput is null")
-            return -1
+            return 0
         }
         if (!countyInput.hasCvrs()) {
             println("\n-----------------------------------")
             println("$county has no cvrs")
-            return -1
+            return 0
         }
         return matchNames(county, countyInput.readCorlaCvrs(), input)
     }
-
 
     fun matchNames(county: String, export: CorlaCountyCvrsIF, input: StatewideInput): Int {
         println("\n-----------------------------------")
@@ -80,14 +81,14 @@ class CompareVoteDatabaseAndAuditCenter {
                 errs++
             } else {
                 match[contest.contestName] = sinfo.name
-                // show the differences
+                /* show the differences
                 if (contest.contestName.startsWith("Pres") || contest.contestName.startsWith("United")) {
                     val candidateSet = contest.choices.toSet()
                     sinfo.candidateNames.keys.filter { it != "Write-In" }.forEach { cand ->
                         if (!candidateSet.contains(cand))
-                            println("   no matches for original candidate '$cand' for contest '${contest.contestName}' county '$county'")
+                            println("   no matches for cvr candidate '$cand' for contest '${contest.contestName}' county '$county'")
                     }
-                }
+                } */
 
                 sinfo.candidateNames.keys.filter { it != "Write-In"}.forEach { cand ->
                     val match = input.matchCanonicalCandidate(county, contest, cand)

@@ -65,7 +65,7 @@ class TestContestMvrComparison {
             }
         } */
 
-        val rounds: Map<String, ContestRound> = ContestRound.readFromFile(stateInput.contestRoundFile).associateBy { it.contest_name }
+        val rounds: Map<String, ContestRound> = ContestRound.readFromFile(stateInput.contestRoundFile, stateInput).associateBy { it.contest_name }
         println("  ContestRound")
         rounds.entries.forEach { entry ->
             if (null == stateInput.matchCanonicalContest(entry.key)) {

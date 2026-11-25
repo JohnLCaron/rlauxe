@@ -53,7 +53,7 @@ class CompareCorlaSampling {
         val title = "Corla24 Percentiles of contests' measured risk"
         val subtitle = "nmvrs: uniform=4897, consistent=15417; targeted and contests margin >.02"
 
-        plotCumul(
+        plotCumulRisk(
             writeFile = "$dirName/$name-AllGt02",
             title=title,
             subtitle=subtitle,
@@ -124,20 +124,7 @@ class CompareCorlaSampling {
 data class PercentileData(val x: Double, val y: Double, val cat: String)
 
 // data:  xvalue, yvalue, category name,
-fun plotCumul(writeFile: String, title: String, subtitle: String, data: List<PercentileData>, scaleType: ScaleType) {
-    genericPlotter(
-        titleS = title,
-        subtitleS = subtitle,
-        writeFile = writeFile,
-        scaleType=scaleType,
-        data = data,
-        xname = "percentile", xfld = { it.x },
-        yname = "measured risk %", yfld = { it.y },
-        catName = "sampling", catfld = { it.cat },
-        addPoints = false,
-        addHLineAt= .03,
-    )
-}
+
 
 data class PlotData(val contestId: Int, val margin: Double, val estRisk: Double, val cat: String)
 

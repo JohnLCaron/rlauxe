@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.co.auditcenter.ContestSelection
 import org.cryptobiotic.rlauxe.co.auditcenter.MvrComparison
 import org.cryptobiotic.rlauxe.co.auditcenter.ResultsReport
 import org.cryptobiotic.rlauxe.co.corla.CorlaPrng
+import org.cryptobiotic.rlauxe.corlaInput.Co2020G
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026General
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.statewideInputs
@@ -12,10 +13,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestContestMergedInfos {
-
+    val testInput = Co2020G()
     @Test
     fun testOneNames() {
-        testContestNames(Statewide2026General())
+        testContestNames(testInput)
     }
 
     @Test
@@ -45,7 +46,7 @@ class TestContestMergedInfos {
             }
         } */
 
-        val rounds: Map<String, ContestRound> = ContestRound.readFromFile(stateInput.contestRoundFile).associateBy { it.contest_name }
+        val rounds: Map<String, ContestRound> = ContestRound.readFromFile(stateInput.contestRoundFile, stateInput).associateBy { it.contest_name }
         println("  ContestRound")
         rounds.entries.forEach { entry ->
             if (null == stateInput.matchCanonicalContest(entry.key)) {
@@ -89,7 +90,7 @@ class TestContestMergedInfos {
 
     @Test
     fun testOneContestMergedInfos() {
-        testContestMergedInfos(Statewide2026General())
+        testContestMergedInfos(testInput)
     }
 
     @Test

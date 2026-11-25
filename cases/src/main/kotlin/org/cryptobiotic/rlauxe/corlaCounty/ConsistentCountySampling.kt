@@ -7,8 +7,10 @@ import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import kotlin.random.Random
 
-// Used by CvCountySampling in Colorado viewer.
+// TODO this only works when there are cvrs
+// Used by CvContests and CvCountySampling in Colorado viewer.
 // Sample within one county's CVRS, to estimate how many samples would be needed within that county.
+// return est samples for each trial
 fun sampleCountyCvrs(countyAudit: CountyAuditRecord, county: String, wantNmvrs: Map<Int, Int>, ntrials: Int): List<Int>? {
     val publisher = Publisher(countyAudit.topdir)
     val result = AuditRecord.readPartialResult(publisher.countyAuditRecordTopdir(county))

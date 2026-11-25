@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.co.auditcenter
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.cryptobiotic.rlauxe.auditcenter.AuditReason
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 import org.cryptobiotic.rlauxe.corlaInput.defaultCharset
 import org.cryptobiotic.rlauxe.corlacvr.reverseMungedDate
 import java.io.File
@@ -34,7 +35,7 @@ data class ContestRound(
 ) {
 
     companion object {
-        fun readFromFile(filename: String): List<ContestRound> {
+        fun readFromFile(filename: String, input: StatewideInput): List<ContestRound> {
             val results = mutableListOf<ContestRound>()
 
             val file = File(filename)
@@ -46,8 +47,11 @@ data class ContestRound(
 
             CSVParser.parse(file, defaultCharset, format).use { parser ->
                 for (record in parser) {
+                    val rcontestName = record.get("contest_name")
+                    val ccname = input.convertContestName("ContestRound", rcontestName) ?: rcontestName
+
                     val contest = ContestRound(
-                        contest_name = record.get("contest_name"),
+                        contest_name = ccname,
                         audit_reason = record.get("audit_reason"),
                         random_audit_status = record.get("random_audit_status"),
                         winners_allowed = record.get("winners_allowed").toInt(),

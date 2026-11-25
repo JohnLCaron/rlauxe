@@ -34,6 +34,33 @@ val statewideInputs = listOf(
     Statewide2026General(),
 )
 
+val statewideIndirections = listOf(
+    StatewideIndirection("Statewide2020General"),
+    StatewideIndirection("Co2020G"),
+    StatewideIndirection("Statewide2022Primary"),
+    StatewideIndirection("Statewide2023Coordinated"),
+    StatewideIndirection("Statewide2024General"),
+    StatewideIndirection("Statewide2025Coordinated"),
+    StatewideIndirection("Statewide2026Primary"),
+    StatewideIndirection("Statewide2026General"),
+)
+
+class StatewideIndirection(val name: String) {
+    fun fetch(): StatewideInput? {
+        return when (name) {
+            "Statewide2020General" -> Statewide2020General()
+            "Co2020G" -> Co2020G()
+            "Statewide2022Primary" -> Statewide2022Primary()
+            "Statewide2023Coordinated" -> Statewide2023Coordinated()
+            "Statewide2024General" -> Statewide2024General()
+            "Statewide2025Coordinated" -> Statewide2025Coordinated()
+            "Statewide2026Primary" -> Statewide2026Primary()
+            "Statewide2026General" -> Statewide2026General()
+            else -> null
+        }
+    }
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // see WriteCountyInputData
 

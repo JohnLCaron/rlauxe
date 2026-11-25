@@ -3,12 +3,11 @@ package org.cryptobiotic.rlauxe.corlaInput
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.CardComparisonResults
-import org.cryptobiotic.rlauxe.auditcenter.CorlaContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.CountyMvrCount
-import org.cryptobiotic.rlauxe.auditcenter.readColoradoContestRoundCsv
 import org.cryptobiotic.rlauxe.auditcenter.readContestComparisonCsv
 import org.cryptobiotic.rlauxe.auditcenter.readCountyManifestCsv
 import org.cryptobiotic.rlauxe.auditcenter.readGeneralCanonicalList
+import org.cryptobiotic.rlauxe.co.auditcenter.ContestRound
 import org.cryptobiotic.rlauxe.co.auditcenter.TabulateContest
 import org.cryptobiotic.rlauxe.co.auditcenter.TabulateCounty
 import org.cryptobiotic.rlauxe.co.input.ContestMergedInfo
@@ -115,6 +114,7 @@ abstract class StatewideInput {
         return result.associateBy { it.contestName }.toMutableMap()
     }
 
+    // called by subclasses inside canonicalContests()
     protected fun addCandidates(result: MutableMap<String, CanonicalContest>, contestName: String, addCandidates: List<String>) {
         val current = result[contestName]
         if (current == null) {
@@ -137,57 +137,27 @@ abstract class StatewideInput {
         TabulateContest.fromTabulateCounty(countyTabsAllContests()) // make sure you call the subttype function
     }
 
-    /*
+    open fun roundContests(): Map<String, ContestRound> = roundContests // contestName -> CorlaContestRoundCsv
+    private val roundContests: Map<String, ContestRound> by lazy {
+        ContestRound.readFromFile(contestRoundFile, this ).associateBy { it.contest_name }
+    }
 
-        val tabs = mutableMapOf<String, ContestTabAllCounties>()
-        countyTabsAllContests().values.forEach { countyTabAllContests ->
-            countyTabAllContests.contests.forEach { (contestName, countyContestVotes) ->
-                val tab = tabs.getOrPut(contestName) { ContestTabAllCounties(contestName) }
-                tab.add(countyTabAllContests.countyName, countyContestVotes)
-            }
-        }
-        tabs.toMap()
-     */
+    // TODO not converted yet
 
-    //////////
     // from the list of mvr, cvr comparisions, we derive the following:
     open fun cardComparison(): CardComparisonResults = cardComparison
     private val cardComparison: CardComparisonResults by lazy {
         readContestComparisonCsv(mvrComparisonFile)
     }
 
-    // for each contest, total mvrs over all counties
-    // data class ContestMvrCount(val contestName: String) {
-    //    var countMvr = 0
-    //    var countStatewide = 0
-    // TODO bogosity
-    // val contestsFromMvrs: List<ContestMvrCount> by lazy { cardComparison().contestMvrs }
-
     // for each county, over all contests
     // data class CountyMvrCount(val countyName: String) {
     //    var countMvr = 0
     val countiesFromMvrs: List<CountyMvrCount> by lazy { cardComparison().countyMvrs }
 
+
     ///////////////////
     // merge info from all the above, derive the following
-
-    // data class CorlaContestRoundCsv(
-    //    val contestName: String,
-    //    val auditReason: AuditReason,
-    //    val nwinners: Int,
-    //    val ballotCardCount: Int,         // population size = county size when uniform audit
-    //    val contestBallotCardCount: Int,  // Nc = number of cards with this contest on it
-    //    val winners: String,
-    //    val minMargin: Int,
-    //    val riskLimit: Double,
-    //    val gamma: Double,
-    //    val optimisticSamplesToAudit: Int,
-    //    val estimatedSamplesToAudit: Int,
-    // )
-    open fun roundContests(): Map<String, CorlaContestRoundCsv> = roundContests // contestName -> CorlaContestRoundCsv
-    private val roundContests: Map<String, CorlaContestRoundCsv> by lazy {
-        readColoradoContestRoundCsv(contestRoundFile)
-    }
 
     open fun mergedInfo() = mergedInfo
     private val mergedInfo: MergedInfo by lazy {

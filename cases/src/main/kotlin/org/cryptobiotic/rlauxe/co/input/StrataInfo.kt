@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.co.input
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.co.auditcenter.ContestSelection
 import org.cryptobiotic.rlauxe.co.corla.CorlaPrng
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
@@ -7,6 +8,8 @@ import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.math.max
+
+private val logger = KotlinLogging.logger("StrataInfo")
 
 data class StrataInfo(
     val strataName: String, // county or canonical contest name
@@ -50,16 +53,18 @@ fun computeStrataMinRate(strataName: String, contestCounties: Set<String>, state
 fun makeCountyStrata(input: StatewideInput, show: Boolean = false): List<StrataInfo> {
     val countySamples = mutableMapOf<String, Int>()
     var multi = 0
-    //ContestSelection have list of dbids
+    // ContestSelection have list of dbids
     val selected: Map<String, ContestSelection> = ContestSelection.readFromFile(input.contestSelectionFile)
     selected.values.filter { it.dbList.isNotEmpty() }.forEach { cs ->
         val cc = input.matchCanonicalContest(cs.contest_name)
-        if (cc == null) println("Cant find ${cs.contest_name}") else {
+        if (cc == null) logger.warn{ "Cant find ${cs.contest_name}"} else {
             // println("${cs.dbList.size} mvrs for ${cc.counties}")
             if (cc.counties.size == 1) {
                 val countyName = cc.counties.first()
-                val cc = countySamples.getOrDefault(countyName, 0)
-                countySamples[countyName] = max(cc, cs.dbList.size)
+                if (!input.skipCounties(countyName)) {
+                    val cc = countySamples.getOrDefault(countyName, 0)
+                    countySamples[countyName] = max(cc, cs.dbList.size)
+                }
             }
             else multi = max(multi, cs.dbList.size)
         }
@@ -82,9 +87,10 @@ fun makeCountyStrata(input: StatewideInput, show: Boolean = false): List<StrataI
         stateSamples[countyName] = cc + 1
     }
 
-    return countySamples.toSortedMap().map {
+    val result = mutableListOf<StrataInfo>()
+    countySamples.toSortedMap().forEach {
         val countyManifest = input.countyManifest(it.key)!!
-        StrataInfo(it.key, it.value, stateSamples[it.key] ?: 0, countyManifest.nballotCards)
+        result.add(StrataInfo(it.key, it.value, stateSamples[it.key] ?: 0, countyManifest.nballotCards))
     }
-
+    return result
 }

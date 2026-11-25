@@ -54,32 +54,38 @@ class Statewide2024General(ac:String?=auditcenter): StatewideInput () {
         result.toSortedMap()
     }
 
-    override fun contestNameCleanup(county: String, name: String): String {
+    override fun contestNameCleanup(county: String, exportContestName: String): String {
         when (county) {
             "Broomfield" -> {
-                if (name == "City and County of Broomfield Ballot Question 2G") return "Broomfield Ballot Question 2G"
+                if (exportContestName == "City and County of Broomfield Ballot Question 2G") return "Broomfield Ballot Question 2G"
             }
             else -> {}
         }
 
-        return when (name) {
+        return when (exportContestName) {
             "Justice of the Colorado Supreme Court - Berkenkotter" -> "Colorado Supreme Court Justice - Berkenkotter"
             "Justice of the Colorado Supreme Court - Boatright" -> "Colorado Supreme Court Justice - Boatright"
             "Justice of the Colorado Supreme Court - Marquez" -> "Colorado Supreme Court Justice - Marquez"
             "Colorado Court of Appeals Judge Román" -> "Colorado Court of Appeals Judge Roman"
-            else -> name
+            else -> exportContestName
         }
     }
 
-    override fun candidateNameCleanup(county: String, name: String): String {
-        return when (name) {
+    override fun candidateNameCleanup(county: String, exportCandidateName: String): String {
+        if (Garcia.matches(exportCandidateName)) return "Claudia De la Cruz / Karina Garcia"
+
+        return when (exportCandidateName) {
             "Randall Terry / Stephen E. Broden" -> "Randall Terry / Stephen E Broden"
             "Claudia De la Cruz / Karina García" -> "Claudia De la Cruz / Karina Garcia"
             "Colorado Supreme Court Justice Márquez" -> "Colorado Supreme Court Justice Marquez"
             "Colorado Court of Appeals Judge Román" -> "Colorado Court of Appeals Judge Roman"
             "Daniel Campaña" -> "Daniel Campana"
-            else -> name
+            else -> exportCandidateName
         }
+    }
+
+    companion object {
+        val Garcia = "Claudia De la Cruz / Karina Garc.{1,2}a".toRegex()
     }
 
 }

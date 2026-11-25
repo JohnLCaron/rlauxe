@@ -20,8 +20,8 @@ open class Statewide2026General(ac:String?=auditcenter): StatewideInput() {
     // round specific
     override val contestRoundFile = "$ac/2026/general/files/round2/contest.csv"
     override val mvrComparisonFile = "$ac/2026/general/files/round2/contestComparison.csv"
-    override val contestSelectionFile = "$auditcenter/2026/general/files/round2/contestSelection.csv"
-    override val resultsReportFile = "$auditcenter/2026/general/files/round2/resultsReport.xlsx"
+    override val contestSelectionFile = "$ac/2026/general/files/round2/contestSelection.csv"
+    override val resultsReportFile = "$ac/2026/general/files/round2/resultsReport.xlsx"
 
     override fun activityReportFile(): String? = "$auditcenter/2026/general/files/round2/activityReport.xlsx"
 
@@ -93,6 +93,8 @@ open class Statewide2026General(ac:String?=auditcenter): StatewideInput() {
     //no canon for target contest City of Montrose Ballot Question 2B
     //no canon for target contest City of Holyoke Ballot Measure 2B
 
+
+
     override fun contestNameCleanup(county: String, exportContestName: String): String {
         when (county) {
             "Denver" -> {
@@ -113,12 +115,14 @@ open class Statewide2026General(ac:String?=auditcenter): StatewideInput() {
             else -> {}
         }
 
-        when(exportContestName) {
+        when (exportContestName) {
             "Justice of the Colorado Supreme Court - Hood" -> return "Colorado Supreme Court Justice - Hood"
             else -> {}
         }
 
         return when {
+            // Round Contest probably UTF-8, reading in defailt gives CITY OF CÃNON CITY ISSUE 2A
+            exportContestName.contains("ON CITY ISSUE 2A") -> "CITY OF CÃNON CITY ISSUE 2A"
             exportContestName.contains("City of Alamosa Ballot Issue 2A") -> "City of Alamosa Ballot Issue 2A - Extension of Streets Trust Fund Sales Tax"
             exportContestName.contains("Crowley - Boyce") -> "Crowley County Court Judge - Boyce"
             exportContestName.contains("Robak") -> "Fremont County Court Judge - Robak"

@@ -139,7 +139,7 @@ class CorlaStateElection(
             }
             totalCvrCardCount += countyCardCount
 
-            // these are the ac tabs
+            // these are the auditcenter tabs
             val countyContestTabs = mutableMapOf<Int, ContestTabulation>()
             countyAuditRecord.contests.map { it.contest as Contest }.forEach { contest ->
                 val contestList = stateContests.getOrPut(contest.id) { mutableListOf() }
@@ -147,7 +147,7 @@ class CorlaStateElection(
                 countyContestTabs.sumContestTabulationsFromCandVotes(contest.info, contest.votes, contest.Ncast)
             }
 
-            // used in viewer
+            // used in viewer (maybe?)
             countyAcPools.add( CountyPools(
                 countyName = countyName,
                 countyPoolId = countyPoolId++,
@@ -173,9 +173,6 @@ class CorlaStateElection(
             var Ncast = 0
             val counties = mutableListOf<String>()
 
-            if (contestId == 641)
-                print("")
-
             // heres where we set the statewide contests to the sum of the county contests
             // may not be the reported vote; eg Baca is missing.
             // however, we used the reported vote to create a missing pool; I think those will be the same.
@@ -184,7 +181,7 @@ class CorlaStateElection(
             val info = countyList.first().second.info // all infos are identical
             val voteTabulation = ContestTabulation(info)
             countyList.forEach { (countyName, contest) ->
-                Ncast += contest.Ncast
+                Ncast += contest.Ncast // TODO I dont think this is believable for NoCvrs
                 counties.add(countyName)
                 contest.votes.forEach { (cand, vote) -> voteTabulation.addVote(cand, vote) }
             }
@@ -198,21 +195,21 @@ class CorlaStateElection(
                 info.metadata["PhantomPct"] = if (Nc == 0) "" else (100.0 * phantomsForContest / Nc).toInt().toString()
             } */
             // Nc should be from auditcenter, mcontest.nc = round.contestBallotCardCount
-            var Nc = stateInput.contestNc[info.name]!!
+            var Nc = stateInput.contestNc[info.name]!!  // YES! but Ncast is bogus
             if (Ncast > Nc) {
-                // why is Ncast > Nc ??
-                logger.warn{"${info.name} (${info.id}): Ncast $Ncast > $Nc Nc; set Nc = Ncast for now"}
+                // why is Ncast > Nc ?? Because fir NoCvrs at least, we are using Ncast = county population size.
+                // logger.warn{"${info.name} (${info.id}): Ncast $Ncast > $Nc Nc; set Nc = Ncast for now"}
                 // should actually be Ncast = Nc, but only if you exclude Gunnison
-                Nc = Ncast
+                Ncast = Nc
             }
             Contest(info, voteTabulation.votes, Nc, Ncast) // phantoms = Nc - Ncast
         }
 
         // sum over counties
         // TODO IRV need Irv tabs
-        val npopMap = tabulateNpops(countyPops)
+        // val npopMap = tabulateNpops(countyPops)
 
-        contestsUA = makeContestWAs(contests, npopMap, emptyMap(), statePools, variant)
+        contestsUA = makeContestWAs(contests, emptyMap(), emptyMap(), statePools, variant)
 
         // stick all the phantoms at the end? or put them by county ??
         // if (variant.phantoms) println("phantomsByContest = ${statePhantoms}")

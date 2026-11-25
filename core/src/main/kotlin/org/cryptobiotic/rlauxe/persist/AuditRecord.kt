@@ -63,7 +63,7 @@ open class AuditRecord(
     override fun readSamplingCards(styles: List<StyleIF>): CloseableIterable<SamplingCardIF>? {
         if (!Files.exists(Path(publisher.fastSamplingFile()))) return null
         return CloseableIterable {
-            logger.info{"readSamplingCards at ${publisher.fastSamplingFile()}"}
+            // logger.info{"readSamplingCards at ${publisher.fastSamplingFile()}"}
             FastSamplingCardIterator(publisher.fastSamplingFile(), styles, bufferSize = 100_000)
         }
     }

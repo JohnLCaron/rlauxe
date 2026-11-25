@@ -13,7 +13,6 @@ import org.cryptobiotic.rlauxe.util.Locations.auditcenter
 import org.cryptobiotic.rlauxe.util.Locations.cases
 import kotlin.collections.plus
 
-/// TODO we need the seed and the total manifest size
 open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
     override val seed = "92076602804272786701"
     override val year = "2020"
@@ -45,7 +44,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
 
     override fun statewideManifest() = statewideManifest
     val statewideManifest: StateManifest by lazy {
-        val countyManifests = counties().filter{ it != "Gunnison" }.map { county ->
+        val countyManifests = counties().filter { it != "Gunnison" }.map { county ->
             val mainfestList = readCountyManifestCsv(manifestFile(county))
             val correctedList = when (county) {
                 /*"Douglas" -> mainfestList + listOf( // last is Douglas,1,GEN-2723,55,288
@@ -84,16 +83,20 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
     private val countyTabsAllContests: Map<String, Map<String, TabulateCounty>> by lazy {
         // Gunnison not in round file; hack in from the cvrs and merge
         // resources/resources/data/cases/corla/augmentedData/GunnisonTabs.csv
-        val gunnisonTabs = TabulateCounty.readFromFile("resources/data/cases/corla/augmentedData/GunnisonTabs.csv", this)
+        // val gunnisonTabs = TabulateCounty.readFromFile("resources/data/cases/corla/augmentedData/GunnisonTabs.csv", this)
+        val gunnisonTabs = TabulateCounty.readFromFile(
+            "/home/joncifer/IdeaProjects/rlauxe/cases/src/main/resources/resources/data/cases/corla/augmentedData/GunnisonTabs.csv",
+            this
+        ) // TODO
         val otherTabs = super.countyTabsAllContests()
         otherTabs + gunnisonTabs
     }
 
     override val countyStrataMap: Map<String, StrataInfo> by lazy {
-        (mergedInfo().countyStrata.values +listOf(
+        (mergedInfo().countyStrata.values + listOf(
             StrataInfo("Gunnison", 34, 0, 11332), // TODO 0 state mvrs ??
             StrataInfo("San Juan", 0, 0, 571),
-            )).associateBy { it.strataName }
+        )).associateBy { it.strataName }
     }
 
     // canonical contests and choices
@@ -103,14 +106,30 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
 
         // add these missing contests:
         val extras = listOf(
-            CanonicalContest(this, "Adams County Ballot Issue 1A", listOf("Yes/For", "No/Against",)).addCounties(listOf("Adams"))
+            CanonicalContest(this, "Adams County Ballot Issue 1A", listOf("Yes/For", "No/Against",)).addCounties(
+                listOf(
+                    "Adams"
+                )
+            ),
+            CanonicalContest(
+                this,
+                "County Court Judge - Gunnison County - Burgemeister",
+                listOf("Yes", "No",)
+            ).addCounties(listOf("Gunnison",))
         )
         extras.forEach { result[it.contestName] = it }
 
         result.toSortedMap()
     }
 
-    override fun contestNameCleanup(county: String, exportContestName: String): String {
+    override fun contestNameCleanup(county: String, exportContestName: String): String =
+        Delegate.contestCleanup(county, exportContestName)
+
+    override fun candidateNameCleanup(county: String, exportCandidateName: String) =
+        Delegate.candidateCleanup(county, exportCandidateName)
+}
+
+/*    override fun contestNameCleanup(county: String, exportContestName: String): String {
         val transform = when (county) {
             "Adams" -> when (exportContestName) {
                 "Adams County Court - Flaum" -> "Adams County Court Judge - Flaum"
@@ -648,7 +667,7 @@ open class Statewide2020General(ac:String?=auditcenter): StatewideInput() {
             else -> exportCandidateName
         }
     }
-}
+} */
 
 class County2020Input(
     override val countyName: String,

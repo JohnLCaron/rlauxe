@@ -1,4 +1,4 @@
-## Colorado 2020 synthetic cvrs
+## Colorado 2020 simulated cvrs
 6/23/2026
 
 ## election summary

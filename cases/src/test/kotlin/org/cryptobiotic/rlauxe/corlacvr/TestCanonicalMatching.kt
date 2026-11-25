@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corlacvr
 
+import org.cryptobiotic.rlauxe.corlaInput.Co2020G
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2020Redacted
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026PwithCvrs
@@ -10,7 +11,7 @@ class TestCanonicalMatching {
 
     @Test
     fun testCanonicalMatching2020() {
-        val input = Statewide2020General()
+        val input = Co2020G()
         val county = "Garfield"
         val countyInput = input.corlaCountyInput(county)!!
         val corlaCvrs = countyInput.readCorlaCvrs()

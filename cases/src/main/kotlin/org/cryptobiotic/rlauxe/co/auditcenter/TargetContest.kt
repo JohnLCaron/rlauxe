@@ -1,9 +1,12 @@
 package org.cryptobiotic.rlauxe.co.auditcenter
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import java.io.File
 import java.io.IOException
+
+private val logger = KotlinLogging.logger("TargetContest")
 
 // one line for each targeted contest ~ 100
 // contest names are not final, avoild this file if possible
@@ -66,7 +69,7 @@ data class TargetContest(
                                 )
                             }
                         } catch (e: Exception) {
-                            println(cellValues)
+                            logger.error(e){cellValues}
                         }
                         rowno++
                     }

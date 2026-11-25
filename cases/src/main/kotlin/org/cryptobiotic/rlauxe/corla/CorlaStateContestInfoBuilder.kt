@@ -20,7 +20,6 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
         // val contestmSorted = statewideInput.mergedContestMap.toList().sortedByDescending { it.second.corlaPop }.toMap()
 
         // mergedContestInfo in canonical list order, which seems to be alphabetic; this determines contest id ordering.
-        // mergedContestMap include info from canonical, round and compare file. but not contestTabs.
         statewideInput.mergedContestMap.values.forEach { mcontest ->
             val candidateNames = mcontest.choices.mapIndexed { idx, choice -> Pair(choice, idx) }.toMap()
 
@@ -37,12 +36,13 @@ open class CorlaStateContestInfoBuilder(val statewideInput: StatewideInput) {
             info.metadata["CORLAstrataNcards"] = strata.population.toString()
             info.metadata["CORLAballotCardCount"] = mcontest.corlaPop.toString()
             info.metadata["CORLAcontestBallotCardCount"] = mcontest.corlaNc.toString()
-            info.metadata["CORLAauditReason"] = mcontest.auditReason.toString()
+            info.metadata["CORLAauditReason"] = mcontest.corlaReason.toString()
             info.metadata["CORLAmarginInVotes"] = mcontest.marginInVotes.toString()
             info.metadata["CanonicalCounties"] = mcontest.counties.toList().toString()
-            info.metadata["CORLAestMvrs"] = mcontest.estSamples.toString()
+            info.metadata["CORLAestMvrs"] = mcontest.corlaEstSamples.toString()
             info.metadata["CORLAcountyMvrs"] = strata.countyMvrs.toString()
             info.metadata["CORLAstatewideNmvrs"] = strata.stateMvrs.toString()
+            info.metadata["rlauxeEstMvrs"] = mcontest.rlauxeEstSamples.toString()
 
             contestInfos.add(info)
         }

@@ -8,11 +8,13 @@ class CheckCanonicalNames( val input: StatewideInput) {
     val canonicalContestNames = canonical.map { it.key }
 
     init {
+        // if contest not in round, then it wont be added to mergedInfo
+        checkContestRoundHasCanonical()
+
         checkCanonicalHasContestTabulate()
         // checkCanonicalHasCountyTabulate()
         checkContestTabulateHasCanonical()
         // checkCountyTabulateAndCanonicalContests()
-        checkContestRoundHasCanonical()
         // checkCanonicalHasMvrComparison()
 
         // reportCorrectedCanonicalContests()

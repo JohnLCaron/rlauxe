@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.co.corla.pValueApproximation
+import org.cryptobiotic.rlauxe.corlaInput.Co2020G
 import org.cryptobiotic.rlauxe.corlaInput.Statewide2026General
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
@@ -46,8 +47,49 @@ class CompareCorlaRisk {
             percentiles.add(PercentileData(pct.toDouble(), yval, "CoRLA"))
         }
 
-        val title = "Corla26 Percentiles of Corla measured risk (smaller is better)"
-        val subtitle = "Corla nsamples=5586 ncontests = 667 targeted =${71}"
+        val title = "Corla 2026 General Percentiles of Corla measured risk (smaller is better)"
+        val subtitle = "Corla nsamples=5586, ncontests = 678 targeted = 71"
+
+        plotCumulRisk(
+            writeFile = fileName,
+            title = title,
+            subtitle = subtitle,
+            percentiles,
+            ScaleType.Linear
+        )
+    }
+
+    @Test
+    fun corla20Risk() {
+        val name = "corla20Risk"
+        val fileName = "$root/$name"
+        validateOutputDir(Path(root))
+
+        val input = Co2020G()
+        val mcontests = input.mergedInfo().mergedContestInfo
+        val risks = mcontests.filter { it.choices.size > it.voteForN }.map { mcontest ->
+            var pe = mcontest.errors
+            if (pe.isEmpty()) pe = listOf(0, 0, 0, 0)
+            val margin = mcontest.marginInVotes / mcontest.corlaPop.toDouble()
+
+            pValueApproximation(
+                n = mcontest.strata!!.nmvrs, // n = auditedBallots the number of ballots audited for this strata
+                dilutedMargin = margin, // probably minimum margin of the contest's assertions,
+                gamma = 1.03905,  // “inflator” γ > 1; same purpose as MaxRisk I think. Corla uses 1.03905.
+                pe[0], pe[1], pe[2], pe[3],
+            )
+        }
+        println("ncontests = ${risks.size}")
+
+        val percentiles = mutableListOf<PercentileData>()
+        repeat(101) { pct ->
+            val yval: Double = percentiles().index(pct).compute(*risks.toDoubleArray())
+            // println("percent=$pct = $yval")
+            percentiles.add(PercentileData(pct.toDouble(), yval, "CoRLA"))
+        }
+
+        val title = "Corla 2020 General Percentiles of Corla measured risk (smaller is better)"
+        val subtitle = "Corla nsamples=8161, ncontests = 579 targeted = 66}"
 
         plotCumulRisk(
             writeFile = fileName,

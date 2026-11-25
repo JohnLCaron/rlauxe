@@ -51,7 +51,8 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
             auditRound.contestRounds,
             mvrManager().pools(),
             mvrManager().styles(),
-            mvrManager.sortedManifest()
+            mvrManager.sortedManifest(),
+            contestOnly = onlyTask?.contestId,
         )
         val need: Map<Int, List<Int>> = estimate.run()
 

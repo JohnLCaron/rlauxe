@@ -11,7 +11,7 @@ import kotlin.text.drop
 // for one county or a multicounty
 data class Strata(
     val strataName: String,// county name or a multicounty contest
-    val nmvrs: Int,  // may be wantMvrs or haveMvrs
+    val nmvrs: Int,  
     val population: Int,
 )
 

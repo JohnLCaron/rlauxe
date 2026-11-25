@@ -64,7 +64,6 @@ fun startFirstRound(topdir: String, onlyTask: OnlyTask? = null, auditorMaxNewMvr
         writeContestsJsonFile(auditRecord.contests, publisher.contestsFile())
         logger.info{"startFirstRound write ${auditRecord.contests.size} contests to ${publisher.contestsFile()}"}
 
-
         if (onlyContests != null) {
             auditRecord.contests.forEach { contest ->
                 if (!onlyContests.contains(contest.id)) {

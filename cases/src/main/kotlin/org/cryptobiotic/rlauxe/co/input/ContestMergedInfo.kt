@@ -4,8 +4,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.auditcenter.AuditReason
 import org.cryptobiotic.rlauxe.auditcenter.CanonicalContest
 import org.cryptobiotic.rlauxe.auditcenter.getAuditReason
+import org.cryptobiotic.rlauxe.betting.estSampleSizeStandardBet
 import org.cryptobiotic.rlauxe.co.auditcenter.ContestRound
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
+import org.cryptobiotic.rlauxe.util.noerror
 import kotlin.collections.forEach
 import kotlin.collections.set
 
@@ -21,22 +23,29 @@ data class ContestMergedInfo(
     val contestName: String,
     val choices: List<String>, // canonical choice names
     val counties: Set<String>,
-
-    /// contest round
-    val auditReason: AuditReason,
-    val corlaPop:Int,   // ballot_card_count = corla population
-    val corlaNc:Int,         // contest_ballot_card_count
     val voteForN: Int,  // winners_allowed
-    val estSamples: Int,  // estimated_samples_to_audit
     val marginInVotes: Int, // min_margin
     val riskLimit: Double, // risk_limit
+
+    /// CORLA
+    val corlaReason: AuditReason,
+    val corlaPop:Int,        // ballot_card_count = corla population
+    val corlaNc:Int,         // contest_ballot_card_count
+    val corlaEstSamples: Int,  // uses margin = marginInVotes / corlaPop
+
+    // rlauxe style based
+    val rlauxeEstSamples: Int,  // uses margin = marginInVotes / corlaNc
+
 ) {
     var strata: StrataInfo? = null
     var errors = emptyList<Int>()
 
     fun addStrata(statewideMvrCount: Map<String, Int>, countyStrata: Map<String, StrataInfo>) {
+        if (counties.size == 1) {
+            val county = counties.first()
+        }
         strata = when {
-            (counties.size == 1) -> countyStrata[counties.first()]!!
+            (counties.size == 1) -> countyStrata[counties.first()]
             // fun computeStrataMinRate(strataName: String, contestCounties: Set<String>, statewideMvrCount: Map<String, Int>, strataMap: Map<String, StrataInfo>): StrataInfo {
             else -> computeStrataMinRate(contestName, counties, statewideMvrCount, countyStrata)
         }
@@ -94,21 +103,35 @@ fun makeMergedInfo(input: StatewideInput): MergedInfo {
     val mergedContestInfos = mutableListOf<ContestMergedInfo>()
     canonical.values.forEach { cc: CanonicalContest ->
         val round = contestRoundsMap[cc.contestName]
-        if (round != null) {  // TODO no round, no contest ...
+        if (round != null) {  // TODO no round, no contest ... Note Gunnison 2020 exception .... could we create contest round for Gunnison ??
+
+            //         val minAssertion = contestUA.minClcaAssertion()
+            //        if (minAssertion == null) return 0
+            //        val noerror = minAssertion.noerror
+            //
+            //        return estSampleSizeStandardBet(contestUA.Npop, noerror, maxRisk)
+
+            val npop = round.contest_ballot_card_count
+            val rlauxeMargin = round.min_margin / npop.toDouble() // min_margin is from the min assertion
+            val noerror = noerror(rlauxeMargin, 1.0) // only works for Plurality
+            val rlauxeEstSamples = estSampleSizeStandardBet(npop, noerror, round.risk_limit)
+
             mergedContestInfos.add(
                 ContestMergedInfo(
                     cc,
                     cc.contestName,
                     cc.choices,
                     cc.counties,
-
-                    auditReason = getAuditReason(round.audit_reason),
-                    corlaPop = round.ballot_card_count,
-                    corlaNc = round.contest_ballot_card_count,
-                    round.winners_allowed ?: 1,
-                    round.optimistic_samples_to_audit ?: 0,
+                    round.winners_allowed,
                     round.min_margin,
                     round.risk_limit,
+
+                    corlaReason = getAuditReason(round.audit_reason),
+                    corlaPop = round.ballot_card_count,
+                    corlaNc = round.contest_ballot_card_count,
+                    corlaEstSamples = round.optimistic_samples_to_audit,
+
+                    rlauxeEstSamples = rlauxeEstSamples,
                 )
             )
         }

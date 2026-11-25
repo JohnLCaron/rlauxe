@@ -1,191 +1,122 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.util.Locations.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.util.ConcurrentTask
-import org.cryptobiotic.rlauxe.persist.validateOutputDir
-import org.cryptobiotic.rlauxe.rlaplots.*
-import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.workflow.*
-import org.jetbrains.kotlinx.kandy.util.color.Color
-import kotlin.io.path.Path
+import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.audit.ContestRound
+import org.cryptobiotic.rlauxe.betting.TestH0Status
+import org.cryptobiotic.rlauxe.co.input.ContestMergedInfo
+import org.cryptobiotic.rlauxe.corlaCounty.sampleStateCvrs
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2020General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2024General
+import org.cryptobiotic.rlauxe.corlaInput.Statewide2026General
+import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
+import org.cryptobiotic.rlauxe.persist.CountyAuditRecord
+import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.roundToClosest
+import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.test.Test
 
+// Uses the round's estimate samples from Estimate. Cant be used when there are no CVRs.
+
 class CompareCorlaAndRlauxe {
-    val nruns = 10
-    val N = 100000
-    val risk = .03
+
+    data class RlauxeData(val what: String, val welford: Welford)
+    data class Data(val what: String, val corlaMvrs: Int, val rlauxe: List<RlauxeData>)
 
     @Test
     fun compareCorlaAndRlauxe() {
-        val name = "compareCorlaAndRlauxe"
-        val dirName = "$testdataDir/plots/corla/$name"
+        val datas = mutableListOf<Data>()
 
-        val margins = listOf(.005, .0075, .01, .015, .02,)
-            // listOf(.005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .10)
+        // datas.add(compareCorlaAndRlauxe("/home/joncifer/rla/cases/corla/2020", Statewide2020General()))
+        datas.add(compareCorlaAndRlauxe("/home/joncifer/rla/cases/corla/2024", Statewide2024General()))
+        // datas.add(compareCorlaAndRlauxe("/home/joncifer/rla/cases/corla/2026", Statewide2026General()))
 
-        val fuzzPcts = listOf(.001, .0025, .005) // listOf(.00, .001, .0025, .005, .0075, .01)
+        val table = buildString {
+            appendLine("${trunc("Election", 20)}, CorlaMvrs, Rlauxe,    mean, stdev")
 
-        val config = Config.from(AuditType.CLCA, riskLimit = risk)
-
-        val stopwatch = Stopwatch()
-        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
-
-        for (margin in margins) {
-            fuzzPcts.forEach { fuzzPct ->
-                val corlaTask = CorlaSingleRoundAuditTaskGenerator(
-                    N, margin, 0.0, 0.0, fuzzPct,
-                    parameters = mapOf("nruns" to nruns, "cat" to "corla$fuzzPct"),
-                    auditConfig = config,
-                )
-                tasks.add(RepeatedWorkflowRunner(nruns, corlaTask))
-
-                val rlauxeTask = ClcaSingleRoundAuditTaskGenerator(
-                    N, margin, 0.0, 0.0, fuzzPct,
-                    parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "cat" to "rlauxe$fuzzPct"),
-                    config = config,
-                )
-                tasks.add(RepeatedWorkflowRunner(nruns, rlauxeTask))
+            datas.forEach { data ->
+                var first = true
+                append("${trunc(data.what, 20)},    ${nfn(data.corlaMvrs,5)}, ")
+                data.rlauxe.forEach { rlauxe ->
+                    if (!first) append("${trunc("", 20)}            ")
+                    val mean = roundToClosest(rlauxe.welford.mean)
+                    val stdev = roundToClosest(rlauxe.welford.stddev())
+                    appendLine("${rlauxe.what}, ${nfn(mean, 5)}, ${nfn(stdev, 3)}")
+                    first = false
+                }
+                appendLine()
             }
         }
-
-        // run tasks concurrently and average the results
-        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
-        println("that took ${stopwatch.took()}")
-
-        validateOutputDir(Path(dirName))
-        val writer = WorkflowResultsIO("$dirName/${name}.csv")
-        writer.writeResults(results)
-
-        val subtitle = "Nc=${N} nruns=${nruns} riskLimit=$risk"
-        showSampleSizes(name, dirName, subtitle, ScaleType.Linear)
-        showSampleSizes(name, dirName, subtitle, ScaleType.LogLinear)
-        showSampleSizes(name, dirName, subtitle, ScaleType.LogLog)
-        sampleSizesVsMarginStdDev(name=name, dirName=dirName, subtitle=subtitle)
-        sampleSizesVsMarginScatter(name=name, dirName=dirName, subtitle=subtitle)
+        println(table)
     }
 
-    @Test
-    fun genAuditWithPhantomsPlots() {
-        val name = "compareCorlaAndRlauxeWithPhantoms"
-        val dirName = "$testdataDir/plots/corla/$name"
+    fun compareCorlaAndRlauxe(topdir: String, input: StatewideInput): Data {
+        val auditRecord = AuditRecord.read(topdir)!! as CountyAuditRecord
+        val lastAuditRound = auditRecord.rounds.last()
+        val contests = lastAuditRound.contestRounds.filter{ it.status == TestH0Status.InProgress }
+        val auditRiskLimit = auditRecord.config.riskLimit
 
-        val fuzzPct = 0.0
-        val margin = .02
-        val config = Config.from(AuditType.CLCA, riskLimit = risk)
+        val corlaMvrs = input.countyStrataMap.values.sumOf{ it.nmvrs }
+        println("${input.name()} corlaMvrs = $corlaMvrs auditRiskLimit = $auditRiskLimit")
 
-        val phantoms = listOf(.00, .001, .002, .005, .01, .02)
-        val stopwatch = Stopwatch()
+        val mcontestMap = input.mergedContestMap
 
-        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
+        val rlauxe = mutableListOf<RlauxeData>()
 
-        phantoms.forEach { phantomPct ->
-            val corlaTask = CorlaSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, phantomPct, mvrsFuzzPct=fuzzPct,
-                parameters = mapOf("nruns" to nruns, "phantom" to phantomPct, "cat" to "corla"),
-                auditConfig = config,
-            )
-            tasks.add(RepeatedWorkflowRunner(nruns, corlaTask))
+        println("Important")
+        setImportant(contests)
+        rlauxe.add(sample("Important", auditRecord, contests, input.mergedContestMap))
 
-            val rlauxeTask = ClcaSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, phantomPct, mvrsFuzzPct=fuzzPct,
-                parameters=mapOf("nruns" to nruns.toDouble(), "phantom" to phantomPct, "cat" to "clca"),
-                config = config,
-            )
-            tasks.add(RepeatedWorkflowRunner(nruns, rlauxeTask))
+        println("Add Targets")
+        addTargets(contests)
+        rlauxe.add(sample("AddTarget", auditRecord, contests, input.mergedContestMap))
+
+        return Data(input.name(), corlaMvrs, rlauxe)
+    }
+
+    // I think when you dont have cvrs, the sampling is from the county pool. but margin assumes you have styles.
+    // so best you can do is to add up the contests, which doesnt take into account a card having multiple contests
+    fun sample(what: String, auditRecord: CountyAuditRecord, contests: List<ContestRound>, mcontestMap: Map<String, ContestMergedInfo>): RlauxeData {
+        val wantNmvrs =  contests.filter { it.included }.map {
+            val mcontest = mcontestMap[it.name]!!
+            Pair(it.id, mcontest.rlauxeEstSamples)
+        }.toMap()
+        //println("wantNmvrs = ${wantNmvrs.size}")
+        //wantNmvrs.toSortedMap().forEach { println(it) }
+
+        val qdist = sampleStateCvrs(auditRecord, wantNmvrs, 10)!!
+
+        val ddist = qdist.map { it.toDouble() }
+        val welford = Welford()
+        ddist.forEach { welford.update(it)}
+        //println("   $welford")
+        return RlauxeData(what, welford)
+    }
+
+    fun setImportant(contests: List<ContestRound>) {
+        for (contest in contests) {
+            val counties = contest.contestUA.contest.info().metadata["CanonicalCounties"]
+            val ncounties = if (counties == null) 0 else counties.drop(1).dropLast(1).split(",".toRegex())
+                .dropLastWhile { it.isEmpty() }.size
+
+            contest.included = false
+            if (ncounties > 55) contest.included = true // statewide
+            if (contest.name.contains("Judicial District")) contest.included = true
+            if (contest.name.contains("Passenger Rail")) contest.included = true
+            if (contest.name.startsWith("Regent")) contest.included = true
+            if (contest.name.startsWith("Regional")) contest.included = true
+            if (contest.name.startsWith("Representative to the")) contest.included = true
+            if (contest.name.startsWith("State")) contest.included = true
         }
-
-        // run tasks concurrently and average the results
-        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
-        println(stopwatch.took())
-
-        validateOutputDir(Path(dirName))
-        val writer = WorkflowResultsIO("$dirName/${name}.csv")
-        writer.writeResults(results)
-
-        val subtitle = "margin=${df(margin)} Nc=${N} nruns=${nruns} mvrFuzz=${fuzzPct}"
-        // showSampleSizesVsPhantomPct in AuditsWithPhantoms
-        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType")
-        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType")
-        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLog, catName="auditType")
     }
-}
 
-fun showSampleSizes(name:String, dirName: String, subtitle: String, scaleType: ScaleType) {
-    val io = WorkflowResultsIO("$dirName/${name}.csv")
-    val data = io.readResults()
-    wrsPlot(
-        titleS = "Corla vs Rlauxe",
-        subtitleS = subtitle,
-        writeFile = "$dirName/${name}${scaleType.name}",
-        wrs = data,
-        xname = "margin", xfld = { it.mvrMargin },
-        yname = "samplesNeeded", yfld = { it.samplesUsed },
-        catName = "type.fuzz", catfld = { category(it) },
-        scaleType = scaleType,
-        colorChoices = { colorChoices(it) },
-        )
-}
-
-fun sampleSizesVsMarginStdDev(
-    dirName: String, name: String, subtitle: String,
-) {
-    val io = WorkflowResultsIO("$dirName/${name}.csv")
-    val data = io.readResults()
-
-    wrsErrorBars(
-        titleS = "$name samples needed",
-        subtitleS = subtitle,
-        wrs = data,
-        xname = "margin", xfld = { it.mvrMargin },
-        yname = "samplesNeeded", yfld = { it.samplesUsed },
-        yupperFld = { it.samplesUsed + it.usedStddev },
-        ylowerFld = { it.samplesUsed - it.usedStddev },
-        // scaleType = ScaleType.LogLog, // only linear
-        catName = "type.fuzz", catFld = { category(it) },
-        writeFile = "$dirName/${name}Stddev",
-        colorChoices = { colorChoices(it) },
-        )
-}
-
-fun sampleSizesVsMarginScatter(
-    dirName: String, name: String, subtitle: String,
-) {
-    val io = WorkflowResultsIO("$dirName/${name}.csv")
-    val data = io.readResults()
-
-    // fun wrsScatterPlot(
-    //    titleS: String,
-    //    subtitleS: String,
-    //    wrs: List<WorkflowResult>,
-    //    writeFile: String, // no suffix
-    //    xname: String, yname: String, runName: String,
-    //    xfld: (WorkflowResult) -> Double,
-    //    yfld: (WorkflowResult) -> Double,
-    //    runFld: (WorkflowResult) -> String,
-    //    scaleType: ScaleType = ScaleType.Linear,
-    //    colorChoices: ((Set<String>) -> Array<Pair<String, Color>>)? = null
-    //)
-    wrsScatterPlot(
-        titleS = "$name samples needed",
-        subtitleS = subtitle,
-        wrs = data,
-        xname = "margin", xfld = { it.mvrMargin },
-        yname = "samplesNeeded", yfld = { it.samplesUsed },
-        // scaleType = ScaleType.LogLog, // only linear
-        runName = "type.fuzz", runFld = { category(it) },
-        colorChoices = { colorChoices(it) },
-        writeFile = "$dirName/${name}Scatter",
-        )
-}
-
-fun colorChoices(cats: Set<String>): Array<Pair<String, Color>> {
-    val result = mutableListOf<Pair<String, Color>>()
-    cats.forEach { cat ->
-        val color = if (cat.contains("corla")) Color.ORANGE else Color.LIGHT_GREEN
-        result.add( Pair(cat, color))
+    fun addTargets(contests: List<ContestRound>) {
+        for (contest in contests) {
+            val reason = contest.contestUA.contest.info().metadata["CORLAauditReason"]
+            val target = if (reason == null) false else reason.lowercase().startsWith("state") || reason.lowercase()
+                .startsWith("county")
+            if (target) contest.included = true
+        }
     }
-    return result.toTypedArray()
+
 }

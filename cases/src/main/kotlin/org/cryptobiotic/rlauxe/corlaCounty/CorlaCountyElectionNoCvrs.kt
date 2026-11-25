@@ -13,7 +13,7 @@ import kotlin.collections.forEach
 private val logger = KotlinLogging.logger("CorlaCountyElectionNoCvrs")
 
 // create election out of a single county. Creates AuditRecord, not CountyAuditRecord.
-// by writing to disk, we can redo individual counties if needed, befire we do the state
+// by writing to disk, we can redo individual counties if needed, before we do the state
 class CorlaCountyElectionNoCvrs(
     val countyInput: CountyInput,
     val stateInput: StatewideInput, // in order to do missing correctly, we need the countyTabs from stateInput,
@@ -67,7 +67,7 @@ class CorlaCountyElectionNoCvrs(
         }
 
         // val npops = mutableMapOf<Int, Int>() // count contests' population size TODO where do we get this ??
-        ncards = cards.size
+        ncards = cards.size // TODO using the total cards for the Contest Nc. When we have cvrs, we can get the contest card count from that. So dont use this for style based audits.
         cardStyle = CardStyle(county, "Style", 1,allContestIds.toIntArray(), hasExactContests=false).setNcards(ncards)
 
         cardPool = CardPool(county, "Pool", 2, hasExactContests=false, convertedCountyAcTabs, ncards)
@@ -99,7 +99,7 @@ class CorlaCountyElectionNoCvrs(
     fun makeContests(
         infos: Map<Int, ContestInfo>,
         countyTabs: Map<Int, ContestTabulation>,
-        ncards: Int
+        ncards: Int // TODO bogus
     ): List<ContestIF> {
 
         val contests = mutableListOf<ContestIF>()
@@ -111,7 +111,7 @@ class CorlaCountyElectionNoCvrs(
                 val contest = if (info.isIrv) // TODO IRV
                     IrvContest(info, winners = listOf(0), ncards, Ncast = ncards, undervotes = 0) // TODO IRV this is fake...
                 else
-                    Contest(info, candVotes, ncards, ncards)
+                    Contest(info, candVotes, ncards, ncards) // TODO bogus bogus
                 contests.add(contest)
             }
         }

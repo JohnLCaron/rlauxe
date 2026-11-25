@@ -52,7 +52,7 @@ data class AuditRound(
                 " ncontests=${contestRounds.size} ncontestsDone=${contestRounds.count { it.done }}"
 
     override fun createNextRound(): AuditRound {
-        val nextContests = contestRounds.filter { !it.status.complete }.map { contestRound ->
+        val nextContests = contestRounds.filter { !it.status.complete && it.included }.map { contestRound ->   // remove !included 1/24/26
             val prevContestRound = this.contestRounds.find { it.id == contestRound.id }
             contestRound.createNextRound(prevContestRound)
         }
@@ -82,7 +82,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     var estNewMvrs = 0 // Estimate of the new mvrs required to confirm the contest
 
     var done = false
-    var included = true
+    var included = true  // if !included, audit it but dont continue to next round
     var status = contestUA.preAuditStatus
 
     var haveSampleSize: Int = 0
@@ -101,7 +101,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
             this(contestUA, contestUA.assertions().map{ AssertionRound(it, roundIdx, null) }, roundIdx)
 
     fun createNextRound(prevContestRound: ContestRound?) : ContestRound {
-        val nextAssertions =  assertionRounds.filter { !it.status.complete }.map{ assertionRound ->
+        val nextAssertions =  assertionRounds.filter { !it.status.complete}.map{ assertionRound ->
             val assertion = assertionRound.assertion
             val prevAssertionRound = prevContestRound?.assertionRounds?.find { it.assertion.assorter.hashcodeDesc() == assertion.assorter.hashcodeDesc() }
             AssertionRound(assertion, roundIdx + 1, prevAssertionRound)

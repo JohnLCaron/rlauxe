@@ -186,7 +186,7 @@ class TestReadAuditCenterFiles {
             print("${trunc(it.contestName, -50)} ")
             print("${nfn(it.corlaPop, 7)}, ${nfn(it.corlaNc, 7)}, ${nfn(it.marginInVotes, 7)},")
             print("   ${nfn(it.strata!!.countyMvrs, 7)},  ${nfn(it.strata!!.stateMvrs, 7)}, ")
-            println("         ${nfn(it.counties.size, 3)},   ${it.auditReason}")
+            println("         ${nfn(it.counties.size, 3)},   ${it.corlaReason}")
         }
         println()
 

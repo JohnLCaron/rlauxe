@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.co.input
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.auditcenter.AuditReason
 import org.cryptobiotic.rlauxe.co.auditcenter.ActivityReport
-import org.cryptobiotic.rlauxe.co.auditcenter.ContestRound
 import org.cryptobiotic.rlauxe.co.auditcenter.MvrComparison
 import org.cryptobiotic.rlauxe.co.auditcenter.ResultsReport
 import org.cryptobiotic.rlauxe.co.auditcenter.TabulateContest
@@ -11,7 +10,9 @@ import org.cryptobiotic.rlauxe.co.auditcenter.TabulateCounty
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
 
 private val logger = KotlinLogging.logger("ContestMvrMergedInfo")
+private val show = false
 
+// obsolete i think
 // Originally to check that the sequence of Draws was correct. Go back to that purpose
 // Count things by contest - move to ContestMvrComparison ....
 // viewer using getMvrsForCounty, but getting duplicates
@@ -134,34 +135,6 @@ data class ContestMvrMergedInfo(
             return null
         }
     }
-
-    /*
-    fun check(): Boolean {
-        var failed = false
-        dbList.forEach {
-            val db2id = mvrMap[it]
-            if (db2id == null) {
-                println("$it not in mvrMap")
-                failed = true
-            }
-        }
-        mvrMap.keys.forEach {
-            if (!dbList.contains(it)) {
-                println("$it not in dbList")
-                failed = true
-            }
-         }
-        if (ballotCardCount == 0) {
-            println("ballotCardCount not set")
-            failed = true
-        }
-        if (counties.isEmpty()) {
-            println("county not set on $contestName")
-            failed = true
-        }
-
-        return failed
-    } */
 }
 
 enum class ErrorType {p2o, p1o, p1u, p2u }
@@ -194,7 +167,7 @@ class ContestMvrMergedInfos(val stateInput: StatewideInput, minfos: List<Contest
 
         // use stateInput.mergedContest in order to get the canonical names
         mcontests = minfos.map { minfo ->
-            ContestMvrMergedInfo(minfo.contestName, minfo.counties, minfo.auditReason, minfo.corlaPop)
+            ContestMvrMergedInfo(minfo.contestName, minfo.counties, minfo.corlaReason, minfo.corlaPop)
         }.associateBy { it.contestName }
 
         /* ContestSelection have list of dbids
@@ -210,7 +183,7 @@ class ContestMvrMergedInfos(val stateInput: StatewideInput, minfos: List<Contest
                 val mcontest = mcontests[contestName]!!
                 mcontest.addActivities(activityList)
             }
-            println("added ${activities.size} target contests")
+            if (show) println("added ${activities.size} target contests")
         }
 
         // Results add prn, seq, mult to the Mvrs
@@ -220,7 +193,7 @@ class ContestMvrMergedInfos(val stateInput: StatewideInput, minfos: List<Contest
                 val mcontest = mcontests[contestName]!!
                 mcontest.addResults(resultsList)
             }
-            println("added ${results.size} target contests")
+            if (show) println("added ${results.size} target contests")
         }
 
         // add contest tabs
@@ -289,37 +262,6 @@ class ContestMvrMergedInfos(val stateInput: StatewideInput, minfos: List<Contest
         }
         return counts
     }
-
-    /*
-    fun testSequences(): Boolean {
-        // test sequences for all targeted ballots
-        var failed = false
-        mcontests.values.forEach { mcontest ->
-            println("${mcontest.contestName} (${mcontest.mvrs.size})")
-            val prng = CorlaPrng(stateInput.seed, with_replacement = true, 1, mcontest.ballotCardCount)
-            val prns = mutableListOf<Int>()
-            repeat(mcontest.dbList.size) { prns.add(prng.next()) }
-
-            // val prns = prng.getRandomNumbers(0, mcontest.dbList.size-1)
-
-            val mvrMapPrn = mcontest.mvrs.associateBy { it.prn }
-
-            prns.forEachIndexed { idx, prn ->
-                val mvr = mvrMapPrn[prn]
-                if (mvr == null) {
-                    println("$idx: $prn mvr is null")
-                    failed = true
-                } else {
-                    if (prn != mvr.prn) {
-                        println("($idx):   $prn ${mvr.prn} $mvr NOT EQUAL")
-                        failed = true
-                    }
-                }
-            }
-
-        }
-        return failed
-    } */
 
     companion object {
         // to complete the merging

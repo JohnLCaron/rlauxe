@@ -12,7 +12,8 @@ class TestReadContestSelection {
     fun testContestSelection() {
         val round1 = testContestSelection(1, emptyMap())
         val round2 = testContestSelection(2, round1)
-        println("${round2.size} targeted contests")
+        println("round 1 ${round1.size} targeted contests")
+        println("round 2 ${round2.size} targeted contests")
     }
 
     fun testContestSelection(round:Int, prev: Map<String, ContestSelection>): Map<String, ContestSelection> {

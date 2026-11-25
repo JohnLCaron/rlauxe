@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.co.auditcenter.ResultsReport
 import org.cryptobiotic.rlauxe.co.auditcenter.TabulateContest
 import org.cryptobiotic.rlauxe.co.auditcenter.TabulateCounty
 import org.cryptobiotic.rlauxe.corlaInput.StatewideInput
-import kotlin.collections.get
 import kotlin.collections.set
 
 private val logger = KotlinLogging.logger("ContestMvrMergedInfo")
@@ -52,7 +51,7 @@ data class CountyMvrComparison(val county: String) {
         if (mvr != null) {
             mvr.lines.add(line)
         }  else
-            println("dont have line.cvr_id ${line.cvr_id}")
+            logger.warn {"dont have line.cvr_id ${line.cvr_id}"}
     }
 }
 
@@ -162,8 +161,10 @@ class ContestMvrComparisons(val stateInput: StatewideInput, minfos: List<Contest
                 if (ccname != null) {
                     val mcontest = mcontests[ccname]!!
                     activityList.forEach { activity ->
-                        val mcounty = mcounties.getOrPut(activity.county) { CountyMvrComparison(activity.county) }
-                        mcounty.addActivity(activity, mcontest.minfo.auditReason)
+                        if (!stateInput.skipCounties(activity.county)) {
+                            val mcounty = mcounties.getOrPut(activity.county) { CountyMvrComparison(activity.county) }
+                            mcounty.addActivity(activity, mcontest.minfo.corlaReason)
+                        }
                     }
                 }
             }
@@ -175,8 +176,10 @@ class ContestMvrComparisons(val stateInput: StatewideInput, minfos: List<Contest
             val results = ResultsReport.readFromFile(stateInput.resultsReportFile!!)
             results.forEach { (contestName, resultsList) ->
                 resultsList.forEach { result ->
-                    val mcounty = mcounties[result.county]!!
-                    mcounty.addResult(result)
+                    if (!stateInput.skipCounties(result.county)) {
+                        val mcounty = mcounties.getOrPut(result.county) { CountyMvrComparison(result.county) }
+                        mcounty.addResult(result)
+                    }
                 }
             }
             if (show) println("added ${results.size} target contests")

@@ -1,5 +1,99 @@
 # Notes on 2026 General Election
-11/22/2026
+11/25/2026
+
+## Proposed Rules (strawman) Draft 2
+
+"The guiding principle of Colorado’s elections and audits should be to ensure that the public has access to enough
+information to assess whether election outcomes are trustworthy."
+
+From Phillips Stark's letter to Legislative Audit Committee, 17 February 2026
+
+1. Selection of target contests to audit
+
+"The contests to audit should not be selected at the discretion of the Secretary of State or any other entity–the selection itself can be politicized or could be used to hide problems. Nor should contests be selected on the basis of expected workload, or small-margin contests will never be audited, even though they are most susceptible to outcome-changing errors or problems."
+
+1.1 These contests are automatically targeted:
+
+* Every statewide contest
+* Every legislative contest
+* Every regional contest
+* Every judicial district contest
+
+1.2 Sample limit
+
+1.2.1 The number of samples needed for the first audit round for the automatic targets is limited to the sample limit (= 10,000?). After the seed is generated, the number of samples needed for all the automatic targeted contests in the absence of discrepencies is calculated. If it exceeds the sample limit, the risk limits are adjusted to make the number of samples needed less than or equal to the sample limit, using the following algorithm:
+
+1.2.2 The contest margin is defined to be (winner - loser votes) / contest population. When there is more than one winner, then margin is (last winner - first loser votes) / contest population. If it is a IRV or STV then **figure this out and add**.
+
+1.2.3 Contests under a margin of .5% are excluded from the audit.
+
+1.2.4 Contests under a margin of 2% have their risk limits raised uniformly in proportion to the inverse of their margin. To do so, a factor F is used. The risk adjustment for each contest = .03 * F * (.02 / contest margin ). Using that risk limit, the number of cards needed is estimated for each contest and added together. The process is repeated by increasing F until the estimated samples is less than the sample limit.
+
+1.3 County added contests
+
+1.3.1 Counties can add any contests they want to the audit if the contest is contained in their county.
+1.3.2 Multi-county contests can be added if all the counties that the contest is present in agree.
+1.3.3 Counties can choose what risk limit they want to use based on the estimated sample size for their chosen contests.
+
+2. Trustworthy inputs
+
+2.1 Each county shall publish, for each contest, a reliable maximum number of valid cards that contain that contest.
+
+"It is far better to use physical inventories, SCORE, and other administrative records to get upper bounds on the number of cards cast in each contest without relying on the voting system."
+
+2.2 Unaccounted-for ballot cards
+
+"Colorado should also confirm that its RLA software properly accounts for unaccounted-for ballot cards (cards that are not in the ballot manifest)"
+
+3. Audit sampling method
+
+"The science and engineering of RLAs has advanced considerably in the 15 or so years since CORLA was written. Colorado should move from sampling all ballot cards using equal probabilities to style-based sampling, which generally reduces sample sizes and makes it practical to audit small contests."
+
+3.1 The state will use style-based consistent sampling as described in "Stylish Risk-Limiting Audits in Practice",
+Amanda K. Glazer, Jacob V. Spertus, Philip B. Stark, https://arxiv.org/abs/2309.09081v1, with consultation on the implementation from Philip Stark and other technical experts.
+
+4. Publication of public data 
+
+4.1 before the seed is drawn
+
+4.1.1 Each county shall publish a manifest listing every valid card identifier that allows matching to the CVR. 
+
+4.1.2 The state shall publish properly redacted CVRs for all counties, for use in public verification.
+4.1.2 The state shall publish properly redacted CVRs for all counties, for use in public verification.
+
+4.2 After the audit
+
+4.2.1 The state shall publish the measured risk levels for all contests.
+
+4.2.2 Each county shall publish, for each county card style, the number of valid cards that use that style. This may be added to the ballot manifest or published separately.
+
+5. MVR/CVR discrepencies
+
+5.1 After a county uploads their MVR comparisons, the state checks for discrepancies with the CVR. All discrepancies plus randomly chosen cards to make 10 cards in total are immediately sent back to the county. The county reaudits those ballots with a different team (if possible) and returns the results to the state. The discrepancy is confirmed if it also shows up on the re-audit, otherwise it is cured.
+
+5.2 When uncured discrepancies force additional rounds, the samples needed may become unfeasible or impossible. This may happen due to errors in the scanning and auditing, or to deliberate manipulation. The SOS must refer those contests to a recount.
+
+--------------------------------
+Preliminary results for 2020:
+
+Corla used 8340 samples, with about 60% of all contests reaching risk limit of 4%.
+
+Rlauxe uses 3912 for only the 59 Corla targeted contests (but far fewer opportunistic contests below risk level)
+
+If I just target the "important contests" (a bit more than the algorithm above), there are 173 contests and I need 3365 samples.
+
+            if ((bean.counties()?.size ?: 0) > 60) bean.setInclude(true) // statewide
+            if (bean.getName().contains("Judicial District")) bean.setInclude(true) // district court judges and district attorneys
+            if (bean.getName().startsWith("Regent")) bean.setInclude(true) // CU regents
+            if (bean.getName().startsWith("Regional")) bean.setInclude(true) // regional transportation directors
+            if (bean.getName().startsWith("Representative to the")) bean.setInclude(true) // us congress 
+            if (bean.getName().startsWith("State")) bean.setInclude(true) // board of education, representative, senator
+
+There are very few single county contests in this sample. If we also include all the Corla targeted contests, we have 224 contests and use 5472 samples.
+
+So we are using 2900 fewer samples, and audit all the Corla targeted contests, and all the "important" contests. There are also another ~70 opportunistic contests below risk limit, and ~325 contests that are above the risk limit.
+
+
 
 ## Corla estimated Risk Limit achieved
 
@@ -1035,7 +1129,7 @@ where:
 
 Observer/Coordinater app
 
-1/2/3. Coordinator: upload morgan 2020 manifest from auditcenter, cvrs from votedatabase. has 5 redacted ballots (empty votes). Recognized from not being in the manifest?
+1/2/3. Coordinator: upload morgan 2020 manifest from auditcenter, CVRs from votedatabase. has 5 redacted ballots (empty votes). Recognized from not being in the manifest?
 4.Targets: choose Morgan. Pattern: voted for Prohibition party candidates for Pres. (5 ballots) Copy to Clipboard:
 ````
 Targeted list 1 for Morgan County

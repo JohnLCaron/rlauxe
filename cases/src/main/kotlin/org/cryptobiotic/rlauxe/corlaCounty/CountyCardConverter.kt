@@ -56,40 +56,43 @@ class CountyCardConverter(val county: String,
                     //             "Gunnison County Court Judge - Burgemeister" -> null"
                     // but neither are in infosByName
                     logger.error { " infosByName doesnt have canonicalContest '${canonicalContest.contestName}'" }
+                } else {
+                    // require(info != null)
+                    if (canonIdToScontest.contains(info.id))
+                        logger.warn { "  *** ${info.id} has duplicate contest: '${schemaContestInfo.name}' and '${canonIdToScontest[info.id]}' " }
+                    canonIdToScontest[info.id] = schemaContestInfo.name
+
+                    schemaContestId[schemaContestInfo.name] = schemaContestInfo.id
+                    schemaContestCanonId[schemaContestInfo.name] = info.id
+                    schemaContestName[schemaContestInfo.id] = schemaContestInfo.name
+
+                    val candPairs = mutableListOf<Pair<Int, Int>>()
+
+                    schemaContestInfo.candidateNames.filter { !isWriteIn(it.key) }
+                        .forEach { (exportCandidate, schemaCandId) ->
+                            // TODO use a lookup instead of a map: worth the complexity ??
+                            val canonCandidateName =
+                                stateInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
+                            if (canonCandidateName == null) {
+                                logger.error { "no match on exportCandidateName '$exportCandidate' from county $county contest ${schemaContestInfo.name}" }
+                                stateInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
+                                throw Exception("no match on exportCandidateName '$exportCandidate' from county $county contest ${schemaContestInfo.name}")
+                            }
+                            val canonCandId = info.candidateNames[canonCandidateName] // what if this fails ??
+                            if (canonCandId == null) {
+                                logger.error { "no match on info.candidateNames: canonCandidateName=$canonCandidateName orgName=$exportCandidate" }
+                                throw Exception("no match on info.candidateNames: canonCandidateName=$canonCandidateName orgName=$exportCandidate")
+                            } else {
+                                candPairs.add(Pair(schemaCandId, canonCandId))
+                            }
+                        }
+                    val lookupSize = schemaContestInfo.candidateNames.map { it.value }.max()
+                    val candLookup = IntArray(lookupSize + 1) { -1 } // plus one because its one based
+                    candPairs.forEach { (schemaCandId, canonCandId) -> candLookup.set(schemaCandId, canonCandId) }
+                    val lookup = ExportToCanonLookup(info.id, candLookup)
+                    schemaToCanonLookup[schemaContestInfo.id] = lookup
+                    canonNameToLookup[info.name] = lookup
                 }
-                require(info != null)
-                if (canonIdToScontest.contains(info.id))
-                    logger.warn{"  *** ${info.id} has duplicate contest: '${schemaContestInfo.name}' and '${canonIdToScontest[info.id]}' "}
-                canonIdToScontest[info.id] = schemaContestInfo.name
-
-                schemaContestId[schemaContestInfo.name] = schemaContestInfo.id
-                schemaContestCanonId[schemaContestInfo.name] = info.id
-                schemaContestName[schemaContestInfo.id] = schemaContestInfo.name
-
-                val candPairs = mutableListOf<Pair<Int, Int>>()
-
-                schemaContestInfo.candidateNames.filter { !isWriteIn(it.key) }.forEach { (exportCandidate, schemaCandId) ->
-                    // TODO use a lookup instead of a map: worth the complexity ??
-                    val canonCandidateName = stateInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
-                    if (canonCandidateName == null) {
-                        logger.error{"no match on exportCandidateName '$exportCandidate' from county $county contest ${schemaContestInfo.name}"}
-                        stateInput.matchCanonicalCandidate(county, canonicalContest, exportCandidate)
-                        throw Exception("no match on exportCandidateName '$exportCandidate' from county $county contest ${schemaContestInfo.name}")
-                    }
-                    val canonCandId = info.candidateNames[canonCandidateName] // what if this fails ??
-                    if (canonCandId == null) {
-                        logger.error{"no match on info.candidateNames: canonCandidateName=$canonCandidateName orgName=$exportCandidate"}
-                        throw Exception("no match on info.candidateNames: canonCandidateName=$canonCandidateName orgName=$exportCandidate")
-                    } else {
-                        candPairs.add ( Pair(schemaCandId, canonCandId))
-                    }
-                }
-                val lookupSize = schemaContestInfo.candidateNames.map { it.value }.max()
-                val candLookup = IntArray(lookupSize+1) { -1 } // plus one because its one based
-                candPairs.forEach{ (schemaCandId, canonCandId) -> candLookup.set(schemaCandId, canonCandId) }
-                val lookup = ExportToCanonLookup(info.id, candLookup)
-                schemaToCanonLookup[schemaContestInfo.id] = lookup
-                canonNameToLookup[info.name] = lookup
             }
         }
     }
@@ -101,8 +104,8 @@ class CountyCardConverter(val county: String,
     fun convertCountyIdSet(countyIdSet: Set<Int>): Set<Int> {
         val convert = mutableSetOf<Int>()
         countyIdSet.forEach { countyId ->
-            val lookup = schemaToCanonLookup[countyId]!!
-            convert.add(lookup.canonContestId)
+            val lookup = schemaToCanonLookup[countyId]
+            if (lookup != null) convert.add(lookup.canonContestId)
         }
         return convert.toSet()
     }
@@ -129,15 +132,15 @@ class CountyCardConverter(val county: String,
         // contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>
         val canonTabs = mutableMapOf<Int, ContestTabulation>()
         tabs.forEach { (contestId: Int, contestTab: ContestTabulation) ->
-            val contestName = schemaContestName[contestId]!!
-            val canonicalContest = stateInput.matchCanonicalContest(county, contestName)!!
-            val info = infosByName[canonicalContest.contestName]!!
-
+            //            val contestName = schemaContestName[contestId]!!
+            //            val canonicalContest = stateInput.matchCanonicalContest(county, contestName)!!
+            //            val info = infosByName[canonicalContest.contestName]!!
             val nz = contestTab.votes.values.sum()  // skip contests with no votes
             val lookup = schemaToCanonLookup[contestId]
             if (nz > 0 && lookup != null) {
                 val canonCands: Map<Int, Int> = lookup.convertCands(contestTab.votes)
-                val contestTabulation = ContestTabulation(infos[lookup.canonContestId]!!, canonCands, contestTab.ncards())
+                val contestTabulation =
+                    ContestTabulation(infos[lookup.canonContestId]!!, canonCands, contestTab.ncards())
                 canonTabs[lookup.canonContestId] = contestTabulation
             }
         }
@@ -188,14 +191,15 @@ class CountyCardConverter(val county: String,
 
     fun convertToContestTabulation(contestTabs: Map<String, TabulateCounty>): Map<Int, ContestTabulation> {
         val canonTabs = mutableMapOf<Int, ContestTabulation>()
-        contestTabs.forEach{ (contestName, contestTab: TabulateCounty) ->
+        contestTabs.forEach { (contestName, contestTab: TabulateCounty) ->
             val canonicalContest = stateInput.matchCanonicalContest(county, contestName)!!
-            val info = infosByName[contestName]!!
-
-            val votes = contestTab.choices.mapKeys { info.candidateNames[it.key]!! }
-            // TODO where to get ncards ?????
-            val contestTabulation = ContestTabulation(info, votes, 0)
-            canonTabs[info.id] = contestTabulation
+            val info = infosByName[contestName]
+            if (info != null) {
+                val votes = contestTab.choices.mapKeys { info.candidateNames[it.key]!! }
+                // TODO where to get ncards ?????
+                val contestTabulation = ContestTabulation(info, votes, 0)
+                canonTabs[info.id] = contestTabulation
+            }
         }
         return canonTabs
     }

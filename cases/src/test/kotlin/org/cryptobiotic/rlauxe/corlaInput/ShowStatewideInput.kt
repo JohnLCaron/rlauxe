@@ -106,7 +106,7 @@ class ShowStatewideInput {
 
     @Test
     fun checkCanonicalNames() {
-        CheckCanonicalNames(Statewide2026General())
+        CheckCanonicalNames(Co2020G())
     }
 
     @Test

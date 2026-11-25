@@ -97,6 +97,16 @@ So we are using 2900 fewer samples, and audit all the Corla targeted contests, a
 
 ## Corla estimated Risk Limit achieved
 
+````
+2026-11-25T18:20:48.898831972Z main ERROR Log4j API could not find a logging provider.
+Statewide2020General corlaMvrs = 8161 auditRiskLimit = 0.04 success = 364
+Important
+Add Targets
+Election, CorlaMvrs, target, success, Rlauxe,    target, success, mean, stdev
+Statewide2020General,      8161,     66,     364, Important,    173,    253,  3372,  12
+AddTarget,    231,    348,  6042,  10
+````
+
 from ColoradoInput/AuditCenter Input/Canonical Contests / contest menu - Print Contests:
 
 where:

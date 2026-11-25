@@ -110,8 +110,8 @@ class CorlaStateElections {
     fun startFirstRound() {
         StartAuditFirstRoundCli.main(
             arrayOf(
-                "-in", "$cases/corla/2026",
-                "--onlyTask", "172-test",
+                "-in", "$cases/corla/2020",
+                // "--onlyTask", "172-test",
             )
         )
     }
